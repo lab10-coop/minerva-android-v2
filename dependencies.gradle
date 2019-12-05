@@ -1,0 +1,73 @@
+ext {
+    kotlinVersion = '1.3.41'
+
+    appCompatVersion = '1.1.0-alpha04'
+    constraintVersion = '2.0.0-beta2'
+    timberVersion = '4.7.1'
+    annotationVersion = '1.1.0'
+
+    androidxCoreVersion = '1.0.1'
+    androidxFragmentVersion = '1.0.0'
+    materialDesignVersion = '1.0.0'
+
+    rxAndroidVersion = '2.1.1'
+    rxJavaVersion = '2.2.7'
+    rxKotlinVersion = '2.3.0'
+    rxRelayVersion = '2.1.1'
+
+    ktxCoreVersion = '1.1.0-alpha04'
+    ktxFragmentVersion = '1.0.0'
+
+    koinVersion = '2.0.1'
+
+    junitVersion = '4.13-beta-3'
+    mockitoVersion = '2.1.0'
+    mockWebServerVersion = '2.7.5'
+    junitKotlinVersion = '1.3.21'
+    mockkVersion = '1.9'
+    androidxCoreTestingVersion = '2.0.1'
+    runnerVersion = '1.2.0-alpha03'
+    espressoVesrion = '3.2.0-alpha03'
+
+    coreDependencies = [
+            kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
+            appcompat : "androidx.appcompat:appcompat:$appCompatVersion",
+            constraint: "androidx.constraintlayout:constraintlayout:$constraintVersion",
+            timber    : "com.jakewharton.timber:timber:$timberVersion",
+            annotation: "androidx.annotation:annotation:$annotationVersion"
+    ]
+
+    koinDependencies = [
+            koinCore     : "org.koin:koin-android:$koinVersion",
+            koinViewModel: "org.koin:koin-androidx-viewmodel:$koinVersion"
+    ]
+
+    androidCoreDependencies = [
+            core    : "androidx.core:core-ktx:$androidxCoreVersion",
+            fragment: "androidx.fragment:fragment-ktx:$androidxFragmentVersion",
+            material: "com.google.android.material:material:$materialDesignVersion"
+    ]
+
+    rxDependencies = [
+            rxAndroid: "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion",
+            rxJava   : "io.reactivex.rxjava2:rxjava:$rxJavaVersion",
+            rxkotlin : "io.reactivex.rxjava2:rxkotlin:$rxKotlinVersion",
+            rxRelay  : "com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion"
+    ]
+
+    testDependencies = [
+            junit           : "junit:junit:$junitVersion",
+            mockito         : "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoVersion",
+            mockwebserver   : "com.squareup.okhttp:mockwebserver:$mockWebServerVersion",
+            kotlin          : "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+            kotlinTest      : "org.jetbrains.kotlin:kotlin-test-junit:$junitKotlinVersion",
+            koinTest        : "org.koin:koin-test:$koinVersion",
+            mockk           : "io.mockk:mockk:$mockkVersion",
+            androidxCore    : "androidx.arch.core:core-testing:$androidxCoreTestingVersion"
+    ]
+
+    androidTestDependencies = [
+            runner  : "androidx.test:runner:$runnerVersion",
+            espresso: "androidx.test.espresso:espresso-core:$espressoVesrion"
+    ]
+}
