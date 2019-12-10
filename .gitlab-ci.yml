@@ -5,6 +5,7 @@ variables:
   ANDROID_HOME: /android-sdk-linux
 
 before_script:
+  - cp ./gradle/wrapper/gradle-wrapper.properties.ci ./gradle/wrapper/gradle-wrapper.properties
   - yes | /android-sdk-linux/tools/bin/sdkmanager "platform-tools" >/dev/null 2>&1 || true
   - yes | /android-sdk-linux/tools/bin/sdkmanager "build-tools;$ANDROID_BUILD_TOOLS" >/dev/null 2>&1 || true
   - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
