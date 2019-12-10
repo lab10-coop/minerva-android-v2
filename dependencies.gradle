@@ -8,7 +8,8 @@ ext {
 
     androidxCoreVersion = '1.0.1'
     androidxFragmentVersion = '1.0.0'
-    materialDesignVersion = '1.0.0'
+    materialDesignVersion = '1.1.0-alpha09'
+    designVersion = '28.0.0'
 
     rxAndroidVersion = '2.1.1'
     rxJavaVersion = '2.2.7'
@@ -32,8 +33,6 @@ ext {
 
     coreDependencies = [
             kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
-            appcompat : "androidx.appcompat:appcompat:$appCompatVersion",
-            constraint: "androidx.constraintlayout:constraintlayout:$constraintVersion",
             timber    : "com.jakewharton.timber:timber:$timberVersion",
             annotation: "androidx.annotation:annotation:$annotationVersion"
     ]
@@ -46,6 +45,9 @@ ext {
     androidCoreDependencies = [
             core    : "androidx.core:core-ktx:$androidxCoreVersion",
             fragment: "androidx.fragment:fragment-ktx:$androidxFragmentVersion",
+            design    :   "com.android.support:design:$designVersion",
+            appcompat : "androidx.appcompat:appcompat:$appCompatVersion",
+            constraint: "androidx.constraintlayout:constraintlayout:$constraintVersion",
             material: "com.google.android.material:material:$materialDesignVersion"
     ]
 

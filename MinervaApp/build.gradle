@@ -27,6 +27,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':WalletManager')
 
+    implementation coreDependencies.values()
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
     implementation coreDependencies.values()
