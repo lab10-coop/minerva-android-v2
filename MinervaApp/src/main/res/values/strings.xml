@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">MinervaAndroid</string>
+    <string name="identities">Identities</string>
+    <string name="values">Values</string>
+    <string name="services">Services</string>
+    <string name="activity">Activity</string>
+    <string name="barcode">Barcode</string>
+    <string name="add">Add</string>
+    <string name="settings">Settings</string>
 </resources>
