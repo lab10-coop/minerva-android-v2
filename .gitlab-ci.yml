@@ -1,0 +1,45 @@
+image: code.lab10.io:4567/graz/10-minerva/minerva-android-v2:builder
+
+variables:
+  ANDROID_BUILD_TOOLS: 28.0.2
+  ANDROID_HOME: /android-sdk-linux
+
+before_script:
+  - yes | /android-sdk-linux/tools/bin/sdkmanager "platform-tools" >/dev/null 2>&1 || true
+  - yes | /android-sdk-linux/tools/bin/sdkmanager "build-tools;$ANDROID_BUILD_TOOLS" >/dev/null 2>&1 || true
+  - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
+
+stages:
+  - release
+  - debug
+  - validation
+
+validateBranch:
+  stage: validation
+  except:
+    refs:
+      - master
+  script:
+    - ./gradlew test
+
+releaseStaging:
+  stage: release 
+  only: 
+    refs:
+      - release
+  script:
+    - ./gradlew assembleRelease
+  artifacts:
+    paths:
+    - app/build/outputs/apk/release
+
+debugStaging:
+  stage: debug
+  only: 
+    refs:
+      - master
+  script:
+    - ./gradlew assembleDebug
+  artifacts:
+    paths:
+    - app/build/outputs/apk/debug
