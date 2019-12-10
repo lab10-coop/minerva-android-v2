@@ -14,8 +14,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val walletManager: WalletManager by inject()
-        val key = walletManager.masterKey()
 
-        Log.e("klop", "key: $key")
+
     }
 }

@@ -12,6 +12,6 @@ fun createAppModule() = mutableListOf<Module>().apply {
 }
 
 private val walletManagerModule = module {
-    single { KeystoreRepository() }
-    factory { WalletManagerImpl(get()) as WalletManager }
+    single { KeystoreRepository(get()) }
+    single { WalletManagerImpl(get(), get()) as WalletManager }
 }

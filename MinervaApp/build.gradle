@@ -26,10 +26,10 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':WalletManager')
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
+    implementation coreDependencies.values()
 
     testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
