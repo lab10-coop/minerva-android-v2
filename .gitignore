@@ -12,3 +12,6 @@
 /captures
 .externalNativeBuild
 .cxx
+android-sdk.tgz
+android-sdk-linux
+*.zip
