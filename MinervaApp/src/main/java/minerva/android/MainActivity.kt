@@ -12,7 +12,7 @@ import minerva.android.identities.IdentitiesFragment
 import minerva.android.services.ServicesFragment
 import minerva.android.settings.SettingsFragment
 import minerva.android.values.ValuesFragment
-import minerva.android.walletmanager.WalletManager
+import minerva.android.walletmanager.manager.WalletManager
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 

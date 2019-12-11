@@ -10,6 +10,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/CryptographyProvider" />
+            <option value="$PROJECT_DIR$/KotlinUtils" />
             <option value="$PROJECT_DIR$/MinervaApp" />
             <option value="$PROJECT_DIR$/WalletManager" />
           </set>

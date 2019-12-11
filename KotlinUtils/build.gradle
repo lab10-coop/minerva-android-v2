@@ -1,20 +1,23 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
+
+
     defaultConfig {
-        applicationId "minerva.android"
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,21 +25,11 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':WalletManager')
-
     implementation coreDependencies.values()
-    implementation androidCoreDependencies.values()
-    implementation koinDependencies.values()
-    implementation coreDependencies.values()
-
-    testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
+    implementation androidCoreDependencies.values()
 }

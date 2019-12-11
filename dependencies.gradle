@@ -31,6 +31,8 @@ ext {
     runnerVersion = '1.2.0-alpha03'
     espressoVesrion = '3.2.0-alpha03'
 
+    uPortSignerVersion = '0.5.1'
+
     coreDependencies = [
             kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
             timber    : "com.jakewharton.timber:timber:$timberVersion",
@@ -43,12 +45,12 @@ ext {
     ]
 
     androidCoreDependencies = [
-            core    : "androidx.core:core-ktx:$androidxCoreVersion",
-            fragment: "androidx.fragment:fragment-ktx:$androidxFragmentVersion",
-            design    :   "com.android.support:design:$designVersion",
+            core      : "androidx.core:core-ktx:$androidxCoreVersion",
+            fragment  : "androidx.fragment:fragment-ktx:$androidxFragmentVersion",
+            design    : "com.android.support:design:$designVersion",
             appcompat : "androidx.appcompat:appcompat:$appCompatVersion",
             constraint: "androidx.constraintlayout:constraintlayout:$constraintVersion",
-            material: "com.google.android.material:material:$materialDesignVersion"
+            material  : "com.google.android.material:material:$materialDesignVersion"
     ]
 
     rxDependencies = [
@@ -59,19 +61,23 @@ ext {
     ]
 
     testDependencies = [
-            junit           : "junit:junit:$junitVersion",
-            junitAndroidx   : "androidx.test.ext:junit:$junitAndroidx",
-            mockito         : "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoVersion",
-            mockwebserver   : "com.squareup.okhttp:mockwebserver:$mockWebServerVersion",
-            kotlin          : "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-            kotlinTest      : "org.jetbrains.kotlin:kotlin-test-junit:$junitKotlinVersion",
-            koinTest        : "org.koin:koin-test:$koinVersion",
-            mockk           : "io.mockk:mockk:$mockkVersion",
-            androidxCore    : "androidx.arch.core:core-testing:$androidxCoreTestingVersion"
+            junit        : "junit:junit:$junitVersion",
+            junitAndroidx: "androidx.test.ext:junit:$junitAndroidx",
+            mockito      : "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoVersion",
+            mockwebserver: "com.squareup.okhttp:mockwebserver:$mockWebServerVersion",
+            kotlin       : "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+            kotlinTest   : "org.jetbrains.kotlin:kotlin-test-junit:$junitKotlinVersion",
+            koinTest     : "org.koin:koin-test:$koinVersion",
+            mockk        : "io.mockk:mockk:$mockkVersion",
+            androidxCore : "androidx.arch.core:core-testing:$androidxCoreTestingVersion"
     ]
 
     androidTestDependencies = [
             runner  : "androidx.test:runner:$runnerVersion",
             espresso: "androidx.test.espresso:espresso-core:$espressoVesrion"
+    ]
+
+    cryptographyDependencies = [
+            uPortSigner: "com.github.uport-project.uport-android-sdk:sdk:$uPortSignerVersion"
     ]
 }
