@@ -42,8 +42,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.barcodeReader -> Timber.d("Barcode reader")        //TODO add action
-            R.id.addIdentities -> Timber.d("Add identities")        //TODO add action
+            R.id.barcodeReader -> Timber.d("Barcode reader") //TODO add action
+            R.id.addIdentities -> Timber.d("Add identities") //TODO add action
         }
         return super.onOptionsItemSelected(item)
     }
