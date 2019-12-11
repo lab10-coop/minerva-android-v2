@@ -1,7 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
@@ -30,6 +29,12 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':CryptographyProvider')
+    implementation project(':KotlinUtils')
+
+    implementation androidCoreDependencies.values()
+    implementation koinDependencies.values()
+    implementation coreDependencies.values()
 
     testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()

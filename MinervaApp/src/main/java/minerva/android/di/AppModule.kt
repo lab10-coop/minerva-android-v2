@@ -1,17 +1,15 @@
 package minerva.android.di
 
-import minerva.android.walletmanager.WalletManager
-import minerva.android.walletmanager.WalletManagerImpl
-import minerva.android.walletmanager.keystore.KeystoreRepository
+import minerva.android.walletmanager.createWalletManageModules
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
 
 fun createAppModule() = mutableListOf<Module>().apply {
-    add(walletManagerModule)
+    addAll(createWalletManageModules())
+    add(appModules)
 }
 
-private val walletManagerModule = module {
-    single { KeystoreRepository(get()) }
-    single { WalletManagerImpl(get(), get()) as WalletManager }
+private val appModules = module {
+    //    todo inject viewModels
 }
