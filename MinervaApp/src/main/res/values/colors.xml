@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimary">#5858ED</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#5a42eb</color>
     <color name="inactiveBottomBarColor">#7d7c8b</color>
@@ -8,6 +8,7 @@
     <color name="darkGray">#3a3944</color>
     <color name="titledTextViewTitleColor">#908F9D</color>
     <color name="titledTextViewBodyColor">#3F3F4B</color>
+    <color name="borderGray">#B5B5B5</color>
 
     <color name="colorSetOne">#FFF15161</color>
     <color name="colorSetOneOpacity">#29F15161</color>
@@ -29,4 +30,5 @@
     <color name="colorSetNineOpacity">#298031FB</color>
     <color name="colorSetTen">#FFFF63C5</color>
     <color name="colorSetTenOpacity">#29FF63C5</color>
+    <color name="gray">#3F3F4B</color>
 </resources>

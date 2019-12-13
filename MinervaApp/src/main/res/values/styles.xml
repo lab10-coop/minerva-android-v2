@@ -1,10 +1,11 @@
 <resources>
-    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
         <item name="android:statusBarColor">@color/lightGray</item>
+        <item name="android:fontFamily">@font/font_family</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
@@ -17,4 +18,5 @@
     <style name="AppTheme.ActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">@color/darkGray</item>
     </style>
+
 </resources>
