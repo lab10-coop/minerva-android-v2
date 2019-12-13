@@ -1,0 +1,34 @@
+package minerva.android.widget
+
+import android.content.Context
+import android.graphics.Typeface
+import android.util.AttributeSet
+import android.view.Gravity
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import minerva.android.R
+
+class LetterLogo(context: Context, attrs: AttributeSet?) : TextView(context, attrs) {
+
+    fun createLogo(value: String) {
+        if (value.isNotBlank()) {
+            text = value[FIRST_SIGN].toString()
+            setTextColor(ContextCompat.getColor(context, generateColor(value)))
+            backgroundTintList = ContextCompat.getColorStateList(context, generateColor(value, true))
+        }
+    }
+
+    init {
+        gravity = Gravity.CENTER
+        setTypeface(typeface, Typeface.BOLD)
+        setBackgroundResource(R.drawable.round_background)
+        val sidePadding = resources.getDimensionPixelOffset(R.dimen.margin_xsmall)
+        val bottomPadding = resources.getDimensionPixelOffset(R.dimen.margin_xxxsmall)
+        setPadding(sidePadding, NO_PADDING, sidePadding, bottomPadding)
+    }
+
+    companion object {
+        private const val NO_PADDING = 0
+        private const val FIRST_SIGN = 0
+    }
+}

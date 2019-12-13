@@ -1,2 +1,3 @@
-include ':MinervaApp', ':WalletManager', ':CryptographyProvider', ':KotlinUtils'
+include ':MinervaApp', ':WalletManager', ':CryptographyProvider', ':KotlinUtils', ':UiExtension'
+
 rootProject.name='MinervaAndroid'

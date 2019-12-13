@@ -2,7 +2,31 @@
 <resources>
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorAccent">#5a42eb</color>
+    <color name="inactiveBottomBarColor">#7d7c8b</color>
     <color name="lightGray">#f6f6f9</color>
     <color name="darkGray">#3a3944</color>
+    <color name="titledTextViewTitleColor">#908F9D</color>
+    <color name="titledTextViewBodyColor">#3F3F4B</color>
+
+    <color name="colorSetOne">#FFF15161</color>
+    <color name="colorSetOneOpacity">#29F15161</color>
+    <color name="colorSetTwo">#FFFF712E</color>
+    <color name="colorSetTwoOpacity">#29FF712E</color>
+    <color name="colorSetThree">#FFFFB300</color>
+    <color name="colorSetThreeOpacity">#29FFB300</color>
+    <color name="colorSetFour">#FFD3BC00</color>
+    <color name="colorSetFourOpacity">#29D3BC00</color>
+    <color name="colorSetFive">#FF7ABF00</color>
+    <color name="colorSetFiveOpacity">#297ABF00</color>
+    <color name="colorSetSix">#FF00B97B</color>
+    <color name="colorSetSixOpacity">#2900B97B</color>
+    <color name="colorSetSeven">#FF00B8FF</color>
+    <color name="colorSetSevenOpacity">#2900B8FF</color>
+    <color name="colorSetEight">#FF005FFF</color>
+    <color name="colorSetEightOpacity">#29005FFF</color>
+    <color name="colorSetNine">#FF8031FB</color>
+    <color name="colorSetNineOpacity">#298031FB</color>
+    <color name="colorSetTen">#FFFF63C5</color>
+    <color name="colorSetTenOpacity">#29FF63C5</color>
 </resources>
