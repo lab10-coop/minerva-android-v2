@@ -1,6 +1,6 @@
 package minerva.android.walletmanager.model
 
-import minerva.android.Empty
+import minerva.android.kotlinUtils.Empty
 
 open class MasterKey(
     private val _publicKey: String = String.Empty,

@@ -1,4 +1,4 @@
-package minerva.android
+package minerva.android.kotlinUtils
 
 val String.Companion.Empty: String
     get() = ""

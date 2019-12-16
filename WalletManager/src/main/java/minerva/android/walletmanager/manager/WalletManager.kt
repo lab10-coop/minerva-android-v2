@@ -1,8 +1,7 @@
 package minerva.android.walletmanager.manager
 
 import android.content.Context
-import android.util.Log
-import minerva.android.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.keystore.KeystoreRepository
 
 interface WalletManager {
