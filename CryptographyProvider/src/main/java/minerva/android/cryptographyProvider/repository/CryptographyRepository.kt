@@ -1,4 +1,4 @@
-package minerva.android.repository
+package minerva.android.cryptographyProvider.repository
 
 interface CryptographyRepository {
     fun createMasterKeys(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)

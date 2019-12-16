@@ -8,7 +8,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.transaction
-import minerva.android.Empty
+import minerva.android.kotlinUtils.Empty
 import minerva.android.MainActivity
 import minerva.android.R
 import minerva.android.extension.getCurrentFragment

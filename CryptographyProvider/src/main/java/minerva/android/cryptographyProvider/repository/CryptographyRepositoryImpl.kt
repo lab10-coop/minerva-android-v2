@@ -1,4 +1,4 @@
-package minerva.android.repository
+package minerva.android.cryptographyProvider.repository
 
 import android.content.Context
 import com.uport.sdk.signer.UportHDSigner

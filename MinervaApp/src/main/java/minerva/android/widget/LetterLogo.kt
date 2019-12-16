@@ -4,11 +4,11 @@ import android.content.Context
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.Gravity
-import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import minerva.android.R
 
-class LetterLogo(context: Context, attrs: AttributeSet?) : TextView(context, attrs) {
+class LetterLogo(context: Context, attrs: AttributeSet?) : AppCompatTextView(context, attrs) {
 
     fun createLogo(value: String) {
         if (value.isNotBlank()) {
