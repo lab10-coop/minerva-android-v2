@@ -11,9 +11,8 @@ before_script:
   - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
 
 stages:
-  - release
-  - debug
   - validation
+  - distribution
 
 validateBranch:
   stage: validation
@@ -23,24 +22,23 @@ validateBranch:
   script:
     - ./gradlew test
 
-releaseStaging:
-  stage: release 
-  only: 
-    refs:
-      - release
-  script:
-    - ./gradlew assembleRelease
-  artifacts:
-    paths:
-    - app/build/outputs/apk/release
-
-debugStaging:
-  stage: debug
-  only: 
+#Allow failure as long to fix lint's
+validateLint:
+  stage: validation
+  except:
     refs:
       - master
   script:
-    - ./gradlew assembleDebug
+    - ./gradlew lint
+  allow_failure: true
+
+distributeBuild:
+  stage: distribution
+  only: 
+    refs:
+      - develop
+  script:
+    - ./gradlew build
   artifacts:
     paths:
-    - app/build/outputs/apk/debug
+    - app/build/outputs/apk
