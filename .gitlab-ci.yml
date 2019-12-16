@@ -22,7 +22,6 @@ validateBranch:
   script:
     - ./gradlew test
 
-#Allow failure as long to fix lint's
 validateLint:
   stage: validation
   except:
@@ -30,15 +29,17 @@ validateLint:
       - master
   script:
     - ./gradlew lint
-  allow_failure: true
 
 distributeBuild:
   stage: distribution
-  only: 
+  only:
     refs:
       - develop
+      - debug
+      - master
   script:
     - ./gradlew build
   artifacts:
     paths:
-    - app/build/outputs/apk
+    - ./MinervaApp/build/outputs/apk/debug
+    - ./MinervaApp/build/outputs/apk/release
