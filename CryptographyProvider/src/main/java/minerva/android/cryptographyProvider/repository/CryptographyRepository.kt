@@ -10,4 +10,6 @@ interface CryptographyRepository {
         prompt: String,
         callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     )
+
+    fun validateMnemonic(mnemonic: String): List<String>
 }

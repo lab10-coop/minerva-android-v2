@@ -1,6 +1,8 @@
 package minerva.android.di
 
+import minerva.android.onBoarding.restore.RestoreWalletViewModel
 import minerva.android.walletmanager.createWalletManageModules
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -11,5 +13,5 @@ fun createAppModule() = mutableListOf<Module>().apply {
 }
 
 private val appModules = module {
-    //    todo inject viewModels
+    viewModel { RestoreWalletViewModel(get()) }
 }

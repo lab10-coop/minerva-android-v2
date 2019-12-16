@@ -38,6 +38,7 @@ dependencies {
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
     implementation coreDependencies.values()
+    implementation rxDependencies.values()
 
     testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()

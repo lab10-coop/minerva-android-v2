@@ -22,4 +22,6 @@
     <string name="edit">Edit</string>
     <string name="remove">Remove</string>
     <string name="no_data_available">No data available</string>
+    <string name="field_cannot_be_empty">Field cannot be empty</string>
+    <string name="check_incorrect_mnemonic_words">Unknown words entered, please check:</string>
 </resources>
