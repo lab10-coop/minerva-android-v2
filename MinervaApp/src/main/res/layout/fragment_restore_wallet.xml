@@ -12,7 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="40dp"
         android:layout_marginRight="@dimen/margin_normal"
         android:fontFamily="@font/rubik_regular"
         android:gravity="center"
@@ -47,14 +47,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xsmall"
         android:layout_marginRight="@dimen/margin_normal"
-        tools:text="@string/check_incorrect_mnemonic_words"
         android:textColor="@color/colorSetOne"
         android:visibility="invisible"
-        android:layout_marginTop="@dimen/margin_xsmall"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mnemonicEditText" />
+        app:layout_constraintTop_toBottomOf="@+id/mnemonicEditText"
+        tools:text="@string/check_incorrect_mnemonic_words" />
 
     <TextView
         android:id="@+id/restoreWalletButton"
@@ -70,8 +70,8 @@
         android:padding="@dimen/margin_small"
         android:text="@string/restore_wallet"
         android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintRight_toRightOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
