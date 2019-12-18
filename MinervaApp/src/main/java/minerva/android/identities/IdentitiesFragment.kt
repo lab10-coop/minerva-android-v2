@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.identities.adapter.IdentityAdapter
-import minerva.android.identities.model.Identity
+import minerva.android.walletmanager.model.Identity
 
 class IdentitiesFragment : Fragment() {
 
@@ -62,24 +62,22 @@ class IdentitiesFragment : Fragment() {
 
         val map5: LinkedHashMap<String, String> = linkedMapOf()
 
-
-
         val list = listOf(
-            Identity(0, "", "", "Citizen", map1, false),
-            Identity(1, "", "", "Work", map2),
-            Identity(2, "", "", "Judo", map3),
-            Identity(3, "", "", "Car", map4),
-            Identity(4, "", "", "Family", map5),
-            Identity(0, "", "", "Citizen", map1),
-            Identity(1, "", "", "Work", map2),
-            Identity(2, "", "", "Judo", map3),
-            Identity(3, "", "", "Car", map4),
-            Identity(4, "", "", "Family", map5),
-            Identity(0, "", "", "Citizen", map1),
-            Identity(1, "", "", "Work", map2),
-            Identity(2, "", "", "Judo", map3),
-            Identity(3, "", "", "Car", map4),
-            Identity(4, "", "", "Family", map5)
+            Identity("0", "", "", "Citizen", map1, false),
+            Identity("1", "", "", "Work", map2),
+            Identity("2", "", "", "Judo", map3),
+            Identity("3", "", "", "Car", map4),
+            Identity("4", "", "", "Family", map5),
+            Identity("0", "", "", "Citizen", map1),
+            Identity("1", "", "", "Work", map2),
+            Identity("2", "", "", "Judo", map3),
+            Identity("3", "", "", "Car", map4),
+            Identity("4", "", "", "Family", map5),
+            Identity("0", "", "", "Citizen", map1),
+            Identity("1", "", "", "Work", map2),
+            Identity("2", "", "", "Judo", map3),
+            Identity("3", "", "", "Car", map4),
+            Identity("4", "", "", "Family", map5)
         )
 
 

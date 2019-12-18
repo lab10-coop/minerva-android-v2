@@ -19,7 +19,11 @@ ext {
     ktxCoreVersion = '1.1.0-alpha04'
     ktxFragmentVersion = '1.0.0'
 
+    retrofitVersion = '2.6.0'
+    logginInterceptorVersion = '4.0.0'
+
     koinVersion = '2.0.1'
+    gsonVersion = '2.8.6'
 
     junitVersion = '4.13-beta-3'
     mockitoVersion = '2.1.0'
@@ -36,7 +40,8 @@ ext {
     coreDependencies = [
             kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
             timber    : "com.jakewharton.timber:timber:$timberVersion",
-            annotation: "androidx.annotation:annotation:$annotationVersion"
+            annotation: "androidx.annotation:annotation:$annotationVersion",
+            gson      : "com.google.code.gson:gson:$gsonVersion"
     ]
 
     koinDependencies = [
@@ -58,6 +63,13 @@ ext {
             rxJava   : "io.reactivex.rxjava2:rxjava:$rxJavaVersion",
             rxkotlin : "io.reactivex.rxjava2:rxkotlin:$rxKotlinVersion",
             rxRelay  : "com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion"
+    ]
+
+    retrofitDependencies = [
+            retrofit         : "com.squareup.retrofit2:retrofit:$retrofitVersion",
+            gsonConverter    : "com.squareup.retrofit2:converter-gson:$retrofitVersion",
+            rxRetrofit       : "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion",
+            logginInterceptor: "com.squareup.okhttp3:logging-interceptor:$logginInterceptorVersion"
     ]
 
     testDependencies = [
