@@ -1,4 +1,4 @@
-package minerva.android.onBoarding
+package minerva.android.onboarding
 
 import android.content.Intent
 import android.graphics.Color
@@ -9,21 +9,29 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.transaction
 import minerva.android.kotlinUtils.Empty
-import minerva.android.MainActivity
+import minerva.android.main.MainActivity
 import minerva.android.R
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivity
-import minerva.android.onBoarding.create.CreateWalletFragment
-import minerva.android.onBoarding.restore.RestoreWalletFragment
-import minerva.android.onBoarding.welcome.WelcomeFragment
+import minerva.android.onboarding.create.CreateWalletFragment
+import minerva.android.onboarding.restore.RestoreWalletFragment
+import minerva.android.onboarding.welcome.WelcomeFragment
+import minerva.android.walletmanager.model.MasterKey
+import org.koin.android.ext.android.inject
 
 class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
+
+    private val viewModel : OnBoardingViewModel by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
         setupActionBar()
         showWelcomeFragment()
+
+
+        //TODO MOVE IT AND USE TO SAVE MASTER KEY, WHEN GENERATED!!!!!!!
+        viewModel.saveMasterKey(MasterKey())
     }
 
     override fun onBackPressed() {
