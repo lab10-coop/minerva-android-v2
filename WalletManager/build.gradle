@@ -31,6 +31,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':CryptographyProvider')
     implementation project(':KotlinUtils')
+    implementation project(':WalletConfigProvider')
 
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()

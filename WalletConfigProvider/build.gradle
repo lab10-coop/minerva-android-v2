@@ -1,21 +1,23 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.2"
+
+
     defaultConfig {
-        applicationId "minerva.android"
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "REST_API_URL", '"https://minerva-api.dev.lab10.io/backups/"'
+        consumerProguardFiles 'consumer-rules.pro'
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -23,24 +25,15 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':WalletManager')
     implementation project(':KotlinUtils')
-    implementation project(':UiExtension')
 
     implementation coreDependencies.values()
-    implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
-    implementation coreDependencies.values()
-    implementation rxDependencies.values()
-
-    testImplementation androidTestDependencies.values()
+    api rxDependencies.values()
+    implementation retrofitDependencies.values()
     testImplementation testDependencies.values()
 }
