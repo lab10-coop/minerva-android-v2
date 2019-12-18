@@ -4,6 +4,9 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import com.google.gson.Gson
+import minerva.android.kotlinUtils.NO_DATA
+import minerva.android.walletmanager.model.MasterKey
 import java.lang.IllegalStateException
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -14,21 +17,23 @@ import javax.crypto.spec.GCMParameterSpec
 class KeystoreRepository(private val context: Context) {
 
     fun isMasterKeySaved(): Boolean =
-        getSharedPrefsData(context, INIT_VECTOR) != EMPTY_DATA && getSharedPrefsData(context, MASTER_KEY) != EMPTY_DATA
+        getSharedPrefsData(INIT_VECTOR) != String.NO_DATA && getSharedPrefsData(MASTER_KEY) != String.NO_DATA
 
-    fun encryptKey(masterKey: String) {
+    fun encryptKey(masterKey: MasterKey) {
+        val rawMasterKey = Gson().toJson(masterKey)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, generateSecretKey())
-        saveMasterKeyToSharedPrefs(context, cipher.doFinal(masterKey.toByteArray()), cipher.iv)
+        saveMasterKeyToSharedPrefs(cipher.doFinal(rawMasterKey.toByteArray()), cipher.iv)
     }
 
-    fun decryptKey(): String {
+    fun decryptKey(): MasterKey {
         if(!isMasterKeySaved()) throw IllegalStateException("Decrypt Error: No Master Key saved!")
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        val spec = GCMParameterSpec(AUTHENTICATION_TAG_LENGTH, getEncryptedData(context, INIT_VECTOR))
+        val spec = GCMParameterSpec(AUTHENTICATION_TAG_LENGTH, getEncryptedData(INIT_VECTOR))
         cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), spec)
-        val decoded = cipher.doFinal(getEncryptedData(context, MASTER_KEY))
-        return String(decoded, Charsets.UTF_8)
+        val decoded = cipher.doFinal(getEncryptedData(MASTER_KEY))
+        val rawMasterKey = String(decoded, Charsets.UTF_8)
+        return Gson().fromJson(rawMasterKey, MasterKey::class.java)
     }
 
     private fun getSecretKey(): SecretKey {
@@ -37,7 +42,7 @@ class KeystoreRepository(private val context: Context) {
         return secretKeyEntry.secretKey
     }
 
-    private fun saveMasterKeyToSharedPrefs(context: Context, encryptedMasterKey: ByteArray, initVector: ByteArray) {
+    private fun saveMasterKeyToSharedPrefs(encryptedMasterKey: ByteArray, initVector: ByteArray) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().apply {
             putString(MASTER_KEY, Base64.encodeToString(encryptedMasterKey, Base64.DEFAULT))
             putString(INIT_VECTOR, Base64.encodeToString(initVector, Base64.DEFAULT))
@@ -45,11 +50,11 @@ class KeystoreRepository(private val context: Context) {
         }
     }
 
-    private fun getEncryptedData(context: Context, value: String): ByteArray =
-        Base64.decode(getSharedPrefsData(context, value), Base64.DEFAULT)
+    private fun getEncryptedData(value: String): ByteArray =
+        Base64.decode(getSharedPrefsData(value), Base64.DEFAULT)
 
-    private fun getSharedPrefsData(context: Context, value: String): String =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(value, EMPTY_DATA) ?: EMPTY_DATA
+    private fun getSharedPrefsData(value: String): String =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(value, String.NO_DATA) ?: String.NO_DATA
 
     private fun generateSecretKey(): SecretKey {
         val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, DIR_PROVIDER)
@@ -71,6 +76,5 @@ class KeystoreRepository(private val context: Context) {
         private const val PREFS_NAME = "MinervaSharedPrefs"
         private const val MASTER_KEY = "MasterKey"
         private const val INIT_VECTOR = "InitializationVector"
-        private const val EMPTY_DATA = ""
     }
 }

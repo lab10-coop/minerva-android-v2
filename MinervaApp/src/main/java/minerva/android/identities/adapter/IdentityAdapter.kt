@@ -14,6 +14,7 @@ import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.widget.generateColor
 
 class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {

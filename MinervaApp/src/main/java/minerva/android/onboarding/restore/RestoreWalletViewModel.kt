@@ -1,4 +1,4 @@
-package minerva.android.onBoarding.restore
+package minerva.android.onboarding.restore
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

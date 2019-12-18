@@ -3,7 +3,7 @@ package minerva.android
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
-import minerva.android.onBoarding.restore.RestoreWalletViewModel
+import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import org.junit.Rule
 import org.junit.Test

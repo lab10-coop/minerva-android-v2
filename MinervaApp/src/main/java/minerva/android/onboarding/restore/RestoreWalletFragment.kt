@@ -1,4 +1,4 @@
-package minerva.android.onBoarding.restore
+package minerva.android.onboarding.restore
 
 
 import android.os.Bundle
@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.fragment_restore_wallet.*
 import minerva.android.R
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
-import minerva.android.onBoarding.base.BaseOnBoardingFragment
+import minerva.android.onboarding.base.BaseOnBoardingFragment
 import minerva.android.wrapper.TextWatcherWrapper
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

@@ -24,7 +24,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 
 dependencies {
@@ -36,6 +35,7 @@ dependencies {
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
     implementation coreDependencies.values()
+    implementation rxDependencies.values()
 
     testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()

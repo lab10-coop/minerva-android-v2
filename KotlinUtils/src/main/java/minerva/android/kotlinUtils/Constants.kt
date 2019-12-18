@@ -6,6 +6,9 @@ val String.Companion.Empty: String
 val String.Companion.Space: String
     get() = " "
 
+val String.Companion.NO_DATA: String
+    get() = ""
+
 val Long.Companion.InvalidValue: Long
     get() = -1
 

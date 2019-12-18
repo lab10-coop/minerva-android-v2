@@ -1,4 +1,4 @@
-package minerva.android.onBoarding.create
+package minerva.android.onboarding.create
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_create_wallet.*
 import minerva.android.R
-import minerva.android.onBoarding.base.BaseOnBoardingFragment
+import minerva.android.onboarding.base.BaseOnBoardingFragment
 
 class CreateWalletFragment : BaseOnBoardingFragment() {
 

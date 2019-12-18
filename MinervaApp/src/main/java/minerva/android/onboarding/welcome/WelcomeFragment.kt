@@ -1,4 +1,4 @@
-package minerva.android.onBoarding.welcome
+package minerva.android.onboarding.welcome
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_welcome.*
 import minerva.android.R
-import minerva.android.onBoarding.base.BaseOnBoardingFragment
+import minerva.android.onboarding.base.BaseOnBoardingFragment
 
 
 class WelcomeFragment : BaseOnBoardingFragment() {

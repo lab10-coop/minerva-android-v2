@@ -1,5 +1,6 @@
-package minerva.android
+package minerva.android.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -7,23 +8,30 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
+import minerva.android.R
+import minerva.android.extension.launchActivity
 import minerva.android.history.HistoryFragment
 import minerva.android.identities.IdentitiesFragment
+import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.ServicesFragment
 import minerva.android.settings.SettingsFragment
 import minerva.android.values.ValuesFragment
-import minerva.android.walletmanager.manager.WalletManager
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
+    private val viewModel: MainViewModel by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //TODO can we do it better? Maybe on SplashScreen?
+        checkWalletManagerConfig()
+
         setContentView(R.layout.activity_main)
         prepareBottomNavMenu()
 
-        val walletManager: WalletManager by inject()
         replaceFragment(IdentitiesFragment())
     }
 
@@ -55,6 +63,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
 
+    private fun checkWalletManagerConfig() {
+        if (!viewModel.initWalletConfig()) {
+            launchActivity<OnBoardingActivity> {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+        }
+    }
+
     private fun replaceFragment(fragment: Fragment, @StringRes title: Int = R.string.identities) {
         supportActionBar?.setTitle(title)
         invalidateOptionsMenu()
@@ -69,10 +85,22 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.identities -> replaceFragment(IdentitiesFragment())
-                R.id.values -> replaceFragment(ValuesFragment(), R.string.values)
-                R.id.services -> replaceFragment(ServicesFragment(), R.string.services)
-                R.id.activity -> replaceFragment(HistoryFragment(), R.string.activity)
-                R.id.settings -> replaceFragment(SettingsFragment(), R.string.settings)
+                R.id.values -> replaceFragment(
+                    ValuesFragment(),
+                    R.string.values
+                )
+                R.id.services -> replaceFragment(
+                    ServicesFragment(),
+                    R.string.services
+                )
+                R.id.activity -> replaceFragment(
+                    HistoryFragment(),
+                    R.string.activity
+                )
+                R.id.settings -> replaceFragment(
+                    SettingsFragment(),
+                    R.string.settings
+                )
             }
             true
         }

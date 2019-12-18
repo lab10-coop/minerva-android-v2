@@ -1,4 +1,4 @@
-package minerva.android.onBoarding
+package minerva.android.onboarding
 
 interface OnBoardingFragmentListener {
     fun showRestoreWalletFragment()

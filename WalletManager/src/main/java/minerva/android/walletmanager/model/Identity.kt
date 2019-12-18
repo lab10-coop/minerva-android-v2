@@ -1,11 +1,9 @@
 package minerva.android.walletmanager.model
 
-import minerva.android.kotlinUtils.Empty
-
 data class Identity(
-    val index: String,
-    val publicKey: String = String.Empty,
-    val privateKey: String = String.Empty,
+    val index: Int,
+    val publicKey: String,
+    val privateKey: String,
     val identityName: String,
     val data:LinkedHashMap<String, String> = linkedMapOf(),
     val removable: Boolean = true
