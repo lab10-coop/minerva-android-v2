@@ -39,6 +39,9 @@ distributeBuild:
       - master
   script:
     - ./gradlew build
+    - . /etc/profile.d/rvm.sh
+    - ./BuildScripts/build_fastlane.sh
+
   artifacts:
     paths:
     - ./MinervaApp/build/outputs/apk/debug
