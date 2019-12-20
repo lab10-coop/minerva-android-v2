@@ -43,17 +43,17 @@ class LocalWalletConfigProviderMock : LocalWalletConfigProvider {
 
     private fun prepareData(): String {
         val identities = listOf(
-            Identity(0, "", "", "Citizen", map1, false),
-            Identity(1, "", "", "Work", map2),
-            Identity(2, "", "", "Judo", map3),
-            Identity(3, "", "", "Car", map4),
-            Identity(4, "", "", "Family", map5)
+            Identity("0", "", "", "Citizen", map1, false),
+            Identity("1", "", "", "Work", map2),
+            Identity("2", "", "", "Judo", map3),
+            Identity("3", "", "", "Car", map4),
+            Identity("4", "", "", "Family", map5)
         )
         val values = listOf(
-            Value(0, "", "", "Value 1"),
-            Value(1, "", "", "Value 2")
+            Value("0", "", "", "Value 1"),
+            Value("1", "", "", "Value 2")
         )
-        val walletConfig = WalletConfig(identities, values)
+        val walletConfig = WalletConfig("0,0", identities, values)
         return Gson().toJson(walletConfig)
         //return String.NO_DATA
     }

@@ -5,6 +5,9 @@ import minerva.android.walletmanager.manager.WalletManager
 
 class MainViewModel(private val walletManager: WalletManager) : ViewModel() {
 
-    fun initWalletConfig() = walletManager.initWalletConfig()
+    fun isMaskerKeyAvailable() = walletManager.isMasterKeyAvailable()
 
+    fun initWalletConfig() {
+        walletManager.initWalletConfig()
+    }
 }

@@ -27,11 +27,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         //TODO can we do it better? Maybe on SplashScreen?
-        checkWalletManagerConfig()
-
+        checkMasterSeedAvailability()
         setContentView(R.layout.activity_main)
         prepareBottomNavMenu()
-
         replaceFragment(IdentitiesFragment())
     }
 
@@ -63,11 +61,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
 
-    private fun checkWalletManagerConfig() {
-        if (!viewModel.initWalletConfig()) {
-            launchActivity<OnBoardingActivity> {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
+    private fun checkMasterSeedAvailability() {
+        if (!viewModel.isMaskerKeyAvailable()) {
+            showOnBoardingActivity()
+        } else {
+            viewModel.initWalletConfig()
+        }
+    }
+
+    private fun showOnBoardingActivity() {
+        launchActivity<OnBoardingActivity> {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
     }
 

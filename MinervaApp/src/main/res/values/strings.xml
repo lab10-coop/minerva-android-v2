@@ -24,4 +24,5 @@
     <string name="no_data_available">No data available</string>
     <string name="field_cannot_be_empty">Field cannot be empty</string>
     <string name="check_incorrect_mnemonic_words">Unknown words entered, please check:</string>
+    <string name="creating_wallet_error_message">Creating your wallet failed. Please check your connection and/or retry later</string>
 </resources>

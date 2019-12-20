@@ -20,6 +20,6 @@ fun createWalletModules() = module {
     factory { KeystoreRepository(get()) }
     factory { LocalWalletConfigProviderMock() as LocalWalletConfigProvider }
     factory { OnlineWalletConfigProviderMock() as OnlineWalletConfigProvider }
-    factory { WalletConfigRepository(get(), get()) }
-    single { WalletManagerImpl(get(), get(), get(), get()) as WalletManager }
+    factory { WalletConfigRepository(get(), get(), get()) }
+    single { WalletManagerImpl(get(), get(), get()) as WalletManager }
 }

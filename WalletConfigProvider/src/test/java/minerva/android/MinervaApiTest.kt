@@ -12,8 +12,8 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.createWalletConfigProviderModule
-import minerva.android.configProvider.model.IdentityResponse
-import minerva.android.configProvider.model.WalletConfig
+import minerva.android.configProvider.model.IdentityPayload
+import minerva.android.configProvider.model.WalletConfigPayload
 import minerva.android.kotlinUtils.Empty
 import org.junit.After
 import org.junit.Before
@@ -103,10 +103,10 @@ class MinervaApiTest : KoinTest {
         )
 
         api.saveWalletConfig(
-            publicKey = "12345678", walletConfig = WalletConfig(
+            publicKey = "12345678", walletConfigPayload = WalletConfigPayload(
                 _version = "1", _identities = listOf(
-                    IdentityResponse(_index = "0", _name = "test0", _data = map1),
-                    IdentityResponse(_index = "1", _name = "test1", _data = map2)
+                    IdentityPayload(_index = "0", _name = "test0", _data = map1),
+                    IdentityPayload(_index = "1", _name = "test1", _data = map2)
                 )
             )
         ).test().await().assertComplete()
@@ -121,10 +121,10 @@ class MinervaApiTest : KoinTest {
         )
 
         api.saveWalletConfig(
-            publicKey = "12345678", walletConfig = WalletConfig(
+            publicKey = "12345678", walletConfigPayload = WalletConfigPayload(
                 _version = "1", _identities = listOf(
-                    IdentityResponse(_index = "0", _name = "test0", _data = map2),
-                    IdentityResponse(_index = "1", _name = "test1", _data = map2)
+                    IdentityPayload(_index = "0", _name = "test0", _data = map2),
+                    IdentityPayload(_index = "1", _name = "test1", _data = map2)
                 )
             )
         ).test().await().assertError(Throwable())

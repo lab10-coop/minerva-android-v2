@@ -1,4 +1,4 @@
-package minerva.android.wrapper
+package minerva.android.extension.wrapper
 
 import android.text.Editable
 import android.text.TextWatcher

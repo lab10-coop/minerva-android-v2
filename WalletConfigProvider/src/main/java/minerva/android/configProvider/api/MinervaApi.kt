@@ -2,7 +2,7 @@ package minerva.android.configProvider.api
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.configProvider.model.WalletConfig
+import minerva.android.configProvider.model.WalletConfigPayload
 import minerva.android.configProvider.model.WalletConfigResponse
 import retrofit2.http.*
 
@@ -16,7 +16,7 @@ interface MinervaApi {
     @PUT("{$PUBLIC_KEY}")
     fun saveWalletConfig(
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Path(PUBLIC_KEY) publicKey: String, @Body walletConfig: WalletConfig
+        @Path(PUBLIC_KEY) publicKey: String, @Body walletConfigPayload: WalletConfigPayload
     ): Completable
 
     companion object {

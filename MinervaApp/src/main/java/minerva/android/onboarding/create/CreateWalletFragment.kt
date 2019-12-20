@@ -4,11 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_create_wallet.*
 import minerva.android.R
+import minerva.android.extension.gone
+import minerva.android.extension.invisible
+import minerva.android.extension.visible
+import minerva.android.kotlinUtils.event.EventObserver
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import minerva.android.onboarding.base.BaseOnBoardingFragment
 
 class CreateWalletFragment : BaseOnBoardingFragment() {
+
+    private val viewModel: CreateWalletViewModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,10 +34,37 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
         handleCreateWalletButton()
     }
 
+    override fun onResume() {
+        super.onResume()
+        prepareObservers()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
+    }
+
+    private fun prepareObservers() {
+        viewModel.loadingLiveData.observe(this, EventObserver { if (it) showLoader() else hideLoader() })
+        viewModel.errorLiveData.observe(this, EventObserver {
+            Toast.makeText(context, getString(R.string.creating_wallet_error_message), Toast.LENGTH_LONG).show()
+        })
+        viewModel.createWalletLiveData.observe(this, EventObserver { listener.showMainActivity() })
+    }
+
+    private fun hideLoader() {
+        createWalletButton.visible()
+        createWalletProgressBar.gone()
+    }
+
+    private fun showLoader() {
+        createWalletButton.invisible()
+        createWalletProgressBar.visible()
+    }
+
     private fun handleCreateWalletButton() {
         createWalletButton.setOnClickListener {
-            //TODO add create wallet mechanism
-            listener.showMainActivity()
+            viewModel.createMasterSeed()
         }
     }
 
