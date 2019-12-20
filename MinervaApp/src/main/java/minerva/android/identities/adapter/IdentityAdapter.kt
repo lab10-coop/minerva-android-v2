@@ -54,7 +54,7 @@ class IdentityViewHolder(private val view: View, private val viewGroup: ViewGrou
             setOnClickListener {
                 TransitionManager.beginDelayedTransition(viewGroup)
                 if (isOpen) close()
-                else open(identity.removable)
+                else open(identity.isRemovable)
             }
 
             dataContainer.prepareData(identity.data)

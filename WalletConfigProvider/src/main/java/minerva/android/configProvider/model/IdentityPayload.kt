@@ -3,13 +3,15 @@ package minerva.android.configProvider.model
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
 
-data class IdentityResponse(
+data class IdentityPayload(
     @SerializedName("index")
     private val _index: String?,
     @SerializedName("name")
-    private val _name: String?,
+    private val _name: String? = String.Empty,
     @SerializedName("data")
-    private val _data: LinkedHashMap<String, String>?
+    private val _data: LinkedHashMap<String, String>? = linkedMapOf(),
+    @SerializedName("isDeleted")
+    private val _isDeleted: Boolean? = false
 ) {
     val index: String
         get() = _index ?: String.Empty
@@ -17,4 +19,6 @@ data class IdentityResponse(
         get() = _name ?: String.Empty
     val data: LinkedHashMap<String, String>
         get() = _data ?: linkedMapOf()
+    val isDeleted: Boolean
+        get() = _isDeleted ?: false
 }

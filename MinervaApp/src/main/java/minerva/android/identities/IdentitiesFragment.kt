@@ -25,16 +25,17 @@ class IdentitiesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.recycler_view_layout, container, false)
 
-
     //TODO BaseFragment?
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupRecycleView(view)
+        viewModel.walletConfigLiveData.observe(this, Observer { identityAdapter.updateList(it.identities) })
+    }
 
+    private fun setupRecycleView(view: View) {
         recyclerView.apply {
             layoutManager = LinearLayoutManager(view.context)
             adapter = identityAdapter
         }
-
-        viewModel.walletConfigLiveData().observe(this, Observer { identityAdapter.updateList(it.identities) })
     }
 }

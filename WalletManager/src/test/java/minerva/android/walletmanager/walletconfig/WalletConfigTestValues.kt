@@ -20,8 +20,8 @@ open class WalletConfigTestValues {
     )
 
     val values = listOf(
-        Value(0, "", "", "Value 1"),
-        Value(1, "", "", "Value 2")
+        Value("0", "", "", "Value 1"),
+        Value("1", "", "", "Value 2")
     )
 }
 
@@ -31,9 +31,9 @@ class LocalMock : LocalWalletConfigProvider, WalletConfigTestValues() {
 
     fun prepareData(): String {
         val identities = listOf(
-            Identity(0, "", "", "Citizen", map1, false)
+            Identity("0", "", "", "Citizen", map1, false)
         )
-        val walletConfig = WalletConfig(identities, values)
+        val walletConfig = WalletConfig("0.0", identities, values)
         return Gson().toJson(walletConfig)
     }
 }
@@ -43,9 +43,9 @@ class OnlineMock : OnlineWalletConfigProvider, WalletConfigTestValues() {
 
     fun prepareData(): String {
         val identities = listOf(
-            Identity(0, "", "", "Citizen2", map1, false)
+            Identity("0", "", "", "Citizen2", map1, false)
         )
-        val walletConfig = WalletConfig(identities, values)
+        val walletConfig = WalletConfig("0.0", identities, values)
         return Gson().toJson(walletConfig)
     }
 }
@@ -55,9 +55,9 @@ class OnlineLikeLocalMock : OnlineWalletConfigProvider, WalletConfigTestValues()
 
     private fun prepareData(): String {
         val identities = listOf(
-            Identity(0, "", "", "Citizen", map1, false)
+            Identity("0", "", "", "Citizen", map1, false)
         )
-        val walletConfig = WalletConfig(identities, values)
+        val walletConfig = WalletConfig("0.0",identities, values)
         return Gson().toJson(walletConfig)
     }
 }

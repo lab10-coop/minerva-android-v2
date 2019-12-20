@@ -1,6 +1,5 @@
 package minerva.android.onboarding.restore
 
-
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,7 @@ import minerva.android.R
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.onboarding.base.BaseOnBoardingFragment
-import minerva.android.wrapper.TextWatcherWrapper
+import minerva.android.extension.wrapper.TextWatcherWrapper
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class RestoreWalletFragment : BaseOnBoardingFragment() {
