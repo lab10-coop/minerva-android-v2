@@ -1,6 +1,9 @@
 package minerva.android.app
 
 import android.app.Application
+import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.core.CrashlyticsCore
+import io.fabric.sdk.android.Fabric
 import minerva.android.BuildConfig
 import minerva.android.di.createAppModule
 import org.koin.android.ext.koin.androidContext
@@ -15,6 +18,7 @@ class MinervaApp() : Application() {
             androidContext(this@MinervaApp)
             modules(createAppModule())
         }
+        initializeCrashlytics()
         initializeTimber()
     }
 
@@ -22,7 +26,14 @@ class MinervaApp() : Application() {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {
-            //TODO add Crash/Firebase logging when distribution staff will be approved
+            Timber.plant(CrashlyticsTree())
         }
+    }
+
+    private fun initializeCrashlytics() {
+        val crashlyticsCore = CrashlyticsCore.Builder()
+            .disabled(BuildConfig.DEBUG)
+            .build()
+        Fabric.with(this, Crashlytics.Builder().core(crashlyticsCore).build())
     }
 }
