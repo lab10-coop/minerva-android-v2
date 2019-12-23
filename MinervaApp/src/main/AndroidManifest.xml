@@ -7,7 +7,7 @@
 
     <application
         android:name=".app.MinervaApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_minerva"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_minerva"

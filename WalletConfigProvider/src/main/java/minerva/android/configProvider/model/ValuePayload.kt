@@ -2,10 +2,11 @@ package minerva.android.configProvider.model
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidId
 
 data class ValuePayload(
     @SerializedName("index")
-    private val _index: String?,
+    private val _index: Int?,
     @SerializedName("name")
     private val _name: String? = String.Empty,
     @SerializedName("network")
@@ -13,8 +14,8 @@ data class ValuePayload(
     @SerializedName("isDeleted")
     private val _isDeleted: Boolean? = false
 ) {
-    val index: String
-        get() = _index ?: String.Empty
+    val index: Int
+        get() = _index ?: Int.InvalidId
     val name: String
         get() = _name ?: String.Empty
     val network: String

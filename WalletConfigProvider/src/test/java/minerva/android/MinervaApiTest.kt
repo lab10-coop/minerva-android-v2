@@ -104,9 +104,9 @@ class MinervaApiTest : KoinTest {
 
         api.saveWalletConfig(
             publicKey = "12345678", walletConfigPayload = WalletConfigPayload(
-                _version = "1", _identities = listOf(
-                    IdentityPayload(_index = "0", _name = "test0", _data = map1),
-                    IdentityPayload(_index = "1", _name = "test1", _data = map2)
+                _version = 1, _identityPayloads = listOf(
+                    IdentityPayload(_index = 0, _name = "test0", _data = map1),
+                    IdentityPayload(_index = 1, _name = "test1", _data = map2)
                 )
             )
         ).test().await().assertComplete()
@@ -122,9 +122,9 @@ class MinervaApiTest : KoinTest {
 
         api.saveWalletConfig(
             publicKey = "12345678", walletConfigPayload = WalletConfigPayload(
-                _version = "1", _identities = listOf(
-                    IdentityPayload(_index = "0", _name = "test0", _data = map2),
-                    IdentityPayload(_index = "1", _name = "test1", _data = map2)
+                _version = 1, _identityPayloads = listOf(
+                    IdentityPayload(_index = 0, _name = "test0", _data = map2),
+                    IdentityPayload(_index = 1, _name = "test1", _data = map2)
                 )
             )
         ).test().await().assertError(Throwable())

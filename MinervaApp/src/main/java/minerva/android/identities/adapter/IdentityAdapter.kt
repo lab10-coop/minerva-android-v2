@@ -14,7 +14,6 @@ import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.widget.generateColor
 
 class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {
@@ -47,9 +46,9 @@ class IdentityViewHolder(private val view: View, private val viewGroup: ViewGrou
 
     fun setData(identity: Identity) {
         view.apply {
-            identityName.text = identity.identityName
-            card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(identity.identityName)))
-            profileImage.createLogo(identity.identityName)
+            identityName.text = identity.name
+            card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(identity.name)))
+            profileImage.createLogo(identity.name)
 
             setOnClickListener {
                 TransitionManager.beginDelayedTransition(viewGroup)

@@ -1,9 +1,9 @@
 package minerva.android.walletmanager.manager
 
-import io.reactivex.Completable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import io.reactivex.Completable
 import io.reactivex.rxkotlin.subscribeBy
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.keystore.KeystoreRepository
@@ -50,7 +50,7 @@ class WalletManagerImpl(
 
     @VisibleForTesting
     fun loadWalletConfig() {
-        walletConfigRepository.loadWalletConfig().subscribeBy(
+        walletConfigRepository.loadWalletConfig(masterKey.publicKey).subscribeBy(
             onNext = { _walletConfigMutableLiveData.value = it },
             onError = { Timber.e("Downloading WalletConfig error: $it") },
             onComplete = { }

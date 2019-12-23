@@ -1,7 +1,7 @@
 package minerva.android.configProvider.api
 
 import io.reactivex.Completable
-import io.reactivex.Single
+import io.reactivex.Observable
 import minerva.android.configProvider.model.WalletConfigPayload
 import minerva.android.configProvider.model.WalletConfigResponse
 import retrofit2.http.*
@@ -11,7 +11,7 @@ interface MinervaApi {
     fun getWalletConfig(
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
         @Path(PUBLIC_KEY) publicKey: String
-    ): Single<WalletConfigResponse>
+    ): Observable<WalletConfigResponse>
 
     @PUT("{$PUBLIC_KEY}")
     fun saveWalletConfig(
