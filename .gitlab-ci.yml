@@ -41,8 +41,9 @@ distributeBuild:
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
-
+    - fastlane firebaseStaging
+#TODO add version code incrementation within every build and add distribution with every merge to master
   artifacts:
     paths:
-    - ./MinervaApp/build/outputs/apk/debug
-    - ./MinervaApp/build/outputs/apk/release
+      - ./MinervaApp/build/outputs/apk/debug
+      - ./MinervaApp/build/outputs/apk/release

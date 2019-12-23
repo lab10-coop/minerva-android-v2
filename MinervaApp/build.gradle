@@ -7,25 +7,48 @@ apply from: "$rootProject.projectDir/dependencies.gradle"
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
+
     defaultConfig {
         applicationId "minerva.android"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "REST_API_URL", '"https://minerva-api.dev.lab10.io/backups/"'
     }
-    buildTypes {
+
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            keyAlias String.valueOf(System.env.KEY_ALIAS ?: localProperty('keyAlias'))
+            keyPassword String.valueOf(System.env.KEY_PASSWORD ?: localProperty('keyPassword'))
+            storePassword String.valueOf(System.env.KEY_STORE_PASSWORD ?: localProperty('storePassword'))
+            storeFile file("../keyStoreMinerva.jks")
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    flavorDimensions 'enviroment'
+    productFlavors {
+        flavorDimensions 'enviroment'
+        staging {
+            versionCode Integer.valueOf(System.env.VERSION_CODE_STAGING ?: 1)
+            dimension 'enviroment'
+            applicationIdSuffix ".staging"
+            versionNameSuffix '-staging'
+        }
+
+        production {
+            versionCode Integer.valueOf(System.env.VERSION_CODE_PROD ?: 1)
+            dimension 'enviroment'
+            versionNameSuffix '-release'
+        }
     }
 }
 
@@ -34,6 +57,7 @@ dependencies {
     implementation project(':WalletManager')
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     implementation coreDependencies.values()
     implementation androidCoreDependencies.values()
@@ -44,3 +68,6 @@ dependencies {
     testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
 }
+
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.fabric'

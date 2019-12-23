@@ -82,7 +82,7 @@ ext {
             kotlinTest   : "org.jetbrains.kotlin:kotlin-test-junit:$junitKotlinVersion",
             koinTest     : "org.koin:koin-test:$koinVersion",
             mockk        : "io.mockk:mockk:$mockkVersion",
-            kluent          : "org.amshove.kluent:kluent-android:$kluentVersion",
+            kluent       : "org.amshove.kluent:kluent-android:$kluentVersion",
             androidxCore : "androidx.arch.core:core-testing:$androidxCoreTestingVersion"
     ]
 

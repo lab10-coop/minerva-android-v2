@@ -53,8 +53,8 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
 
     private fun prepareMnemonicLengthValidator() {
         mnemonicEditText.addTextChangedListener(object : TextWatcherWrapper() {
-            override fun onTextChanged(content: CharSequence?) {
-                handleMnemonicLengthValidation(content)
+            override fun onTextChanged(s: CharSequence?) {
+                handleMnemonicLengthValidation(s)
             }
         })
     }

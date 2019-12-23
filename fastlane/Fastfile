@@ -1,0 +1,38 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+ desc "Submit a new Beta Build to Firebase app distribution"
+  lane :firebaseStaging do
+    gradle(task: "clean assembleStagingRelease")
+    firebase_app_distribution(
+               app: "1:927787980045:android:face23e164b9ba95d00c44",
+               apk_path: "./MinervaApp/build/outputs/apk/staging/release/MinervaApp-staging-release.apk",
+               release_notes: "New build in da house, yo!",
+               groups:  "minerva_testers")
+           slack(
+             message: "Fresh and funky staging build is in da house!",
+             channel: "#minerva_wallet_status",
+             slack_url: "https://hooks.slack.com/services/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",
+                )
+  end
+end
