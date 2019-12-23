@@ -9,10 +9,12 @@ data class WalletConfigResponse(
     @SerializedName("message")
     private val _message: String?,
     @SerializedName("data")
-    val walletConfigPayload: WalletConfigPayload? = null
+    private val _walletConfigPayload: WalletConfigPayload? = WalletConfigPayload()
 ) {
     val state: String
         get() = _state ?: String.Empty
     val message: String
         get() = _message ?: String.Empty
+    val walletPayload: WalletConfigPayload
+        get() = _walletConfigPayload ?: WalletConfigPayload()
 }

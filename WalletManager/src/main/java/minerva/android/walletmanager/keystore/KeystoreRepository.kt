@@ -4,10 +4,10 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import android.util.Log
 import com.google.gson.Gson
 import minerva.android.kotlinUtils.NO_DATA
 import minerva.android.walletmanager.model.MasterKey
-import java.lang.IllegalStateException
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -16,8 +16,13 @@ import javax.crypto.spec.GCMParameterSpec
 
 class KeystoreRepository(private val context: Context) {
 
-    fun isMasterKeySaved(): Boolean =
-        getSharedPrefsData(INIT_VECTOR) != String.NO_DATA && getSharedPrefsData(MASTER_KEY) != String.NO_DATA
+    fun isMasterKeySaved(): Boolean {
+        val keyStore = KeyStore.getInstance(DIR_PROVIDER).apply { load(null) }
+        val secretKeyEntry = keyStore.getEntry(MINERVA_ALIAS, null) as? KeyStore.SecretKeyEntry
+        return secretKeyEntry?.let {
+            true
+        } ?: false
+    }
 
     fun encryptKey(masterKey: MasterKey) {
         val rawMasterKey = Gson().toJson(masterKey)
@@ -27,7 +32,7 @@ class KeystoreRepository(private val context: Context) {
     }
 
     fun decryptKey(): MasterKey {
-        if(!isMasterKeySaved()) throw IllegalStateException("Decrypt Error: No Master Key saved!")
+        if (!isMasterKeySaved()) throw IllegalStateException("Decrypt Error: No Master Key saved!")
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val spec = GCMParameterSpec(AUTHENTICATION_TAG_LENGTH, getEncryptedData(INIT_VECTOR))
         cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), spec)

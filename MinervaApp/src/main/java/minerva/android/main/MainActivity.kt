@@ -2,6 +2,7 @@ package minerva.android.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.StringRes
@@ -62,11 +63,8 @@ class MainActivity : AppCompatActivity() {
     private fun isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
 
     private fun checkMasterSeedAvailability() {
-        if (!viewModel.isMaskerKeyAvailable()) {
-            showOnBoardingActivity()
-        } else {
-            viewModel.initWalletConfig()
-        }
+        if (!viewModel.isMaskerKeyAvailable()) showOnBoardingActivity()
+        else viewModel.initWalletConfig()
     }
 
     private fun showOnBoardingActivity() {

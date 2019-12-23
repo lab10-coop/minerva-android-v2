@@ -12,6 +12,7 @@ import io.reactivex.schedulers.TestScheduler
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.walletmanager.model.MasterKey
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.mapWalletConfigResponseToWalletConfig
 import org.amshove.kluent.mock
 import org.junit.After
 import org.junit.Before
@@ -24,11 +25,11 @@ class WalletConfigRepositoryTest {
     private val testScheduler = TestScheduler()
 
     private val local = LocalMock()
-    private val online = OnlineMock()
+    private val online: MinervaApi = OnlineMock()
     private val onlineLikeLocal = OnlineLikeLocalMock()
     private val api: MinervaApi = mock()
 
-    private val repository = WalletConfigRepository(local, onlineLikeLocal, api)
+    private val repository = WalletConfigRepository(local, onlineLikeLocal)
 
     @Before
     fun setupRxSchedulers() {
@@ -42,28 +43,31 @@ class WalletConfigRepositoryTest {
         RxAndroidPlugins.reset()
     }
 
-//    @Test
-//    fun `Check that WalletConfig will be updated when online version is different`() {
-//        val observable = repository.loadWalletConfig().delay(1, TimeUnit.SECONDS, testScheduler)
-//        val testObserver = TestObserver<WalletConfig>()
-//
-//        observable.subscribe(testObserver)
-//
-//        testScheduler.advanceTimeBy(950, TimeUnit.MILLISECONDS)
-//        testObserver.assertNotTerminated()
-//        testScheduler.advanceTimeBy(50, TimeUnit.MILLISECONDS)
-//        testObserver.assertValueSequence(
-//            listOf(
-//                Gson().fromJson(local.prepareData(), WalletConfig::class.java),
-//                Gson().fromJson(online.prepareData(), WalletConfig::class.java)
-//            )
-//        )
-//        testObserver.assertComplete()
-//    }
+    @Test
+    fun `Check that WalletConfig will be updated when online version is different`() {
+        val walletConfigRepository = WalletConfigRepository(local, online)
+        val observable = walletConfigRepository.loadWalletConfig("").delay(1, TimeUnit.SECONDS, testScheduler)
+        val testObserver = TestObserver<WalletConfig>()
+        val walletConfigResponse = (online as OnlineMock).prepareResponse()
+
+        observable.subscribe(testObserver)
+
+        testScheduler.advanceTimeBy(950, TimeUnit.MILLISECONDS)
+        testObserver.assertNotTerminated()
+        testScheduler.advanceTimeBy(50, TimeUnit.MILLISECONDS)
+        testObserver.assertValueSequence(
+            listOf(
+                local.prepareData(),
+                mapWalletConfigResponseToWalletConfig(walletConfigResponse)
+            )
+        )
+        testObserver.assertComplete()
+    }
 
     @Test
     fun `Check that WalletConfig will be updated when online version is the same`() {
-        val observable = repository.loadWalletConfig().delay(1, TimeUnit.SECONDS, testScheduler)
+        val walletConfigRepository = WalletConfigRepository(local, onlineLikeLocal)
+        val observable = walletConfigRepository.loadWalletConfig("").delay(1, TimeUnit.SECONDS, testScheduler)
         val testObserver = TestObserver<WalletConfig>()
 
         observable.subscribe(testObserver)
@@ -71,7 +75,7 @@ class WalletConfigRepositoryTest {
         testScheduler.advanceTimeBy(950, TimeUnit.MILLISECONDS)
         testObserver.assertNotTerminated()
         testScheduler.advanceTimeBy(50, TimeUnit.MILLISECONDS)
-        testObserver.assertValue(Gson().fromJson(local.prepareData(), WalletConfig::class.java))
+        testObserver.assertValue(local.prepareData())
         testObserver.assertComplete()
     }
 
@@ -84,10 +88,11 @@ class WalletConfigRepositoryTest {
 
     @Test
     fun `create default walletConfig should return error`() {
-        val error = Throwable()
-        whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.error(error))
+        val throwable = Throwable()
+        val repository = WalletConfigRepository(local, api)
+        whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.error(throwable))
         val test = repository.createDefaultWalletConfig(MasterKey("1234", "5678")).test()
-        test.assertError(error)
+        test.assertError(throwable)
     }
 
     @Test
