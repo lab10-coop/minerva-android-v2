@@ -3,12 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lightGray"
     tools:context=".settings.SettingsFragment">
 
     <TextView
+        android:id="@+id/backupItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Settings Fragment" />
-
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:drawableStart="@drawable/ic_backup_icon"
+        android:drawablePadding="@dimen/margin_small"
+        android:fontFamily="@font/rubik_regular"
+        android:padding="8dp"
+        android:text="@string/backup"
+        android:textColor="@color/gray"
+        android:textSize="@dimen/text_big" />
 </FrameLayout>

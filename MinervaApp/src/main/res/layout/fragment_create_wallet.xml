@@ -50,7 +50,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/welcomeTitle" />
 
-    <minerva.android.onboarding.view.InstructionItem
+    <minerva.android.widget.InstructionItem
         android:id="@+id/identityItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instructionMessage" />
 
-    <minerva.android.onboarding.view.InstructionItem
+    <minerva.android.widget.InstructionItem
         android:id="@+id/valuesItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -72,7 +72,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/identityItem" />
 
-    <minerva.android.onboarding.view.InstructionItem
+    <minerva.android.widget.InstructionItem
         android:id="@+id/servicesItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

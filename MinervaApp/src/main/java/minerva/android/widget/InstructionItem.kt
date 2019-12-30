@@ -1,4 +1,4 @@
-package minerva.android.onboarding.view
+package minerva.android.widget
 
 import android.content.Context
 import android.util.AttributeSet

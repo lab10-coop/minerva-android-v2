@@ -13,6 +13,7 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterKey
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -26,8 +27,9 @@ class WalletManagerTest {
     private val keyStoreRepository: KeystoreRepository = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
     private val walletConfigRepository: WalletConfigRepository = mock()
+    private val localStorage: LocalStorage = mock()
 
-    private val walletManager = WalletManagerImpl(keyStoreRepository, cryptographyRepository, walletConfigRepository)
+    private val walletManager = WalletManagerImpl(keyStoreRepository, cryptographyRepository, walletConfigRepository, localStorage)
 
     private val walletConfig = WalletConfig(0, listOf(Identity(0, "walletConfigName", "", "name")))
 

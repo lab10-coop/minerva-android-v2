@@ -44,6 +44,9 @@ class MainActivity : AppCompatActivity() {
         menu?.findItem(R.id.barcodeReader)?.apply {
             isVisible = isIdentitiesTabSelected()
         }
+        menu?.findItem(R.id.addIdentities)?.apply {
+            isVisible = !isSettingsTabSelected()
+        }
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -61,6 +64,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
+
+    private fun isSettingsTabSelected() = bottomNavigation.selectedItemId == R.id.settings
 
     private fun checkMasterSeedAvailability() {
         if (!viewModel.isMaskerKeyAvailable()) showOnBoardingActivity()
