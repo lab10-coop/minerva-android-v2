@@ -4,13 +4,11 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
+import io.reactivex.Single
 import io.reactivex.rxkotlin.subscribeBy
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.keystore.KeystoreRepository
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MasterKey
-import minerva.android.walletmanager.model.Value
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.DEFAULT_VERSION
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.FIRST_IDENTITY_INDEX
@@ -26,9 +24,11 @@ interface WalletManager {
     fun validateMnemonic(mnemonic: String): List<String>
     fun createMasterKeys(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
     fun createDefaultWalletConfig(masterKey: MasterKey): Completable
+    fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse>
+    fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
 }
 
-//TODO implement storing derivation path "m/99'/n" where n is index of identity and value
+//TODO derivation path for identities and values "m/99'/n" where n is index of identity and value
 class WalletManagerImpl(
     private val keystoreRepository: KeystoreRepository,
     private val cryptographyRepository: CryptographyRepository,
@@ -60,7 +60,7 @@ class WalletManagerImpl(
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
     override fun createMasterKeys(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
-        cryptographyRepository.createMasterKeys(callback)
+        cryptographyRepository.createMasterKey(callback)
     }
 
     override fun createDefaultWalletConfig(masterKey: MasterKey): Completable {
@@ -70,6 +70,20 @@ class WalletManagerImpl(
                 walletConfigRepository.saveWalletConfigLocally(createDefaultWalletConfig())
             }
     }
+
+    override fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
+        cryptographyRepository.restoreMasterKey(mnemonic, callback)
+    }
+
+    override fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse> =
+        walletConfigRepository.getWalletConfig(masterKey)
+            .map {
+                if (it.state != ResponseState.ERROR) {
+                    keystoreRepository.encryptKey(masterKey)
+                    walletConfigRepository.saveWalletConfigLocally(mapWalletConfigResponseToWalletConfig(it))
+                }
+                RestoreWalletResponse(it.state, it.message)
+            }
 
     private fun createDefaultWalletConfig() =
         WalletConfig(

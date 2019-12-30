@@ -77,7 +77,7 @@ class MinervaApiTest : KoinTest {
             responseCode = HttpsURLConnection.HTTP_OK,
             json = "{\"state\": \"success\", \"message\": \"The file has been loaded!\", \"data\": {\"version\": \"1\",\"identities\" : [{\"name\": \"test1\",\"index\": \"1\",\"data\": {\"name\": \"James\",\"email\": \"james@test.pl\" } }],\"values\" : [] } }"
         )
-        api.getWalletConfig(publicKey = "12345678").test().assertValue {
+        api.getWalletConfigObservable(publicKey = "12345678").test().assertValue {
             it.state == "success"
         }
     }
@@ -89,7 +89,7 @@ class MinervaApiTest : KoinTest {
             responseCode = HttpsURLConnection.HTTP_OK,
             json = "{}"
         )
-        api.getWalletConfig(publicKey = "12345678").test().assertValue {
+        api.getWalletConfigObservable(publicKey = "12345678").test().assertValue {
             it.state == String.Empty
         }
     }

@@ -25,4 +25,5 @@
     <string name="field_cannot_be_empty">Field cannot be empty</string>
     <string name="check_incorrect_mnemonic_words">Unknown words entered, please check:</string>
     <string name="creating_wallet_error_message">Creating your wallet failed. Please check your connection and/or retry later</string>
+    <string name="no_such_file_error_message">No Minerva Wallet found for the seed phrase you entered. Please make sure that you entered the words in the correct order and that you\'re using a seedphrase which was created by the Minerva App.</string>
 </resources>

@@ -1,7 +1,6 @@
-package minerva.android
+package minerva.android.create
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
@@ -9,10 +8,11 @@ import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.observeLiveDataEvent
+import minerva.android.observeWithPredicate
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import org.amshove.kluent.shouldBeInstanceOf
-import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldEqualTo
 import org.junit.After
 import org.junit.Before
@@ -66,16 +66,6 @@ class CreateWalletViewModelTest {
         }
     }
 
-    private inline fun <reified T : Any> LiveData<T>.observeWithPredicate(predicate: (T) -> Boolean) {
-        val observer: Observer<T> = mock()
-        val captor: KArgumentCaptor<T> = argumentCaptor()
-        observeForever(observer)
-        captor.run {
-            verify(observer).onChanged(capture())
-            predicate(lastValue) shouldEqualTo true
-        }
-    }
-
     private fun checkLoadingDialogLiveData() {
         loadingDialogCaptor.run {
             verify(loadingDialogObserver, times(2)).onChanged(capture())
@@ -85,17 +75,5 @@ class CreateWalletViewModelTest {
             secondValue.peekContent() shouldEqualTo false
         }
         verifyNoMoreInteractions(loadingDialogObserver)
-    }
-
-    private inline fun <reified T : Any?> LiveData<Event<T>>.observeLiveDataEvent(result: Event<T>) {
-        val observer: Observer<Event<T>> = mock()
-        val captor: KArgumentCaptor<Event<T>> = argumentCaptor()
-        observeForever(observer)
-        captor.run {
-            verify(observer).onChanged(capture())
-            firstValue shouldBeInstanceOf Event::class
-            firstValue.peekContent() shouldEqual result.peekContent()
-        }
-        verifyNoMoreInteractions(observer)
     }
 }
