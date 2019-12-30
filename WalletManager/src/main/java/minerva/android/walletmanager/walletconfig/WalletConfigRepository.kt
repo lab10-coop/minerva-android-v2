@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.walletconfig
 
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
@@ -14,7 +15,7 @@ import minerva.android.walletmanager.model.mapWalletConfigResponseToWalletConfig
 
 class WalletConfigRepository(
     private val localWalletProvider: LocalWalletConfigProvider,
-    private val minervaApiProvider: MinervaApi
+    private val minervaApi: MinervaApi
 ) {
 
     private var localWalletConfig: WalletConfig = WalletConfig()
@@ -25,7 +26,7 @@ class WalletConfigRepository(
                 .doOnNext {
                     localWalletConfig = it
                 },
-            minervaApiProvider.getWalletConfig(publicKey = publicKey)
+            minervaApi.getWalletConfigObservable(publicKey = encodePublicKey(publicKey))
                 .filter { it.walletPayload.version > localWalletConfig.version }
                 .map {
                     val walletConfig = mapWalletConfig(it)
@@ -43,10 +44,12 @@ class WalletConfigRepository(
     private fun mapWalletConfig(walletConfigResponse: WalletConfigResponse) = mapWalletConfigResponseToWalletConfig(walletConfigResponse)
 
     fun createDefaultWalletConfig(masterKey: MasterKey) =
-        minervaApiProvider.saveWalletConfig(publicKey = encodePublicKey(masterKey), walletConfigPayload = createDefaultWalletPayload())
+        minervaApi.saveWalletConfig(publicKey = encodePublicKey(masterKey.publicKey), walletConfigPayload = createDefaultWalletPayload())
 
+    fun getWalletConfig(masterKey: MasterKey): Single<WalletConfigResponse> =
+        minervaApi.getWalletConfig(publicKey = encodePublicKey(masterKey.publicKey))
 
-    fun encodePublicKey(masterKey: MasterKey) = masterKey.publicKey.replace(SLASH, ENCODED_SLASH)
+    fun encodePublicKey(publicKey: String) = publicKey.replace(SLASH, ENCODED_SLASH)
 
     private fun createDefaultWalletPayload() =
         WalletConfigPayload(

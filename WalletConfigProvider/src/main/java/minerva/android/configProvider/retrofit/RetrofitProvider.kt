@@ -50,5 +50,5 @@ object RetrofitProvider {
     private val gson: Gson = GsonBuilder().enableComplexMapKeySerialization().create()
     private val converterFactory = GsonConverterFactory.create(gson)
 
-    private const val TIMEOUT_TIME: Long = 1
+    private const val TIMEOUT_TIME: Long = 3
 }

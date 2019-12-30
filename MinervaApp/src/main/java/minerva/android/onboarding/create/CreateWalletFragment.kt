@@ -50,6 +50,12 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
             Toast.makeText(context, getString(R.string.creating_wallet_error_message), Toast.LENGTH_LONG).show()
         })
         viewModel.createWalletLiveData.observe(this, EventObserver { listener.showMainActivity() })
+        viewModel.masterKeyErrorLiveData.observe(this, EventObserver { handleMasterKeyError(it) })
+    }
+
+    private fun handleMasterKeyError(it: String) {
+        hideLoader()
+        Toast.makeText(context, it, Toast.LENGTH_LONG).show()
     }
 
     private fun hideLoader() {

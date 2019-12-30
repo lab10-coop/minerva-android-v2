@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_restore_wallet.*
 import minerva.android.R
+import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
-import minerva.android.onboarding.base.BaseOnBoardingFragment
 import minerva.android.extension.wrapper.TextWatcherWrapper
+import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.onboarding.base.BaseOnBoardingFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class RestoreWalletFragment : BaseOnBoardingFragment() {
@@ -36,19 +37,44 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
         prepareMnemonicLengthValidator()
     }
 
-    private fun prepareObservers() {
-        viewModel.validateMnemonicLiveData.observe(this, Observer { handleMnemonicValidation(it) })
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
     }
 
-    private fun handleMnemonicValidation(invalidMnemonicWords: List<String>) {
-        if (invalidMnemonicWords.isEmpty()) {
-            errorMessage.invisible()
-            listener.showMainActivity()
-        } else {
-            restoreWalletButton.isEnabled = false
-            errorMessage.visible()
-            errorMessage.text = "${getString(R.string.check_incorrect_mnemonic_words)} $invalidMnemonicWords"
-        }
+    private fun prepareObservers() {
+        viewModel.invalidMnemonicLiveData.observe(this, EventObserver { handleInvalidMnemonic(it) })
+        viewModel.errorLiveData.observe(this, EventObserver { handleError(R.string.creating_wallet_error_message) })
+        viewModel.restoreWalletLiveData.observe(this, EventObserver { listener.showMainActivity() })
+        viewModel.loadingLiveData.observe(this, EventObserver { if (it) showLoader() else hideLoader() })
+        viewModel.walletConfigNotFoundLiveData.observe(this, EventObserver { handleError(R.string.no_such_file_error_message) })
+        viewModel.mnemonicErrorLiveData.observe(this, EventObserver { handleInvalidMnemonic(it) })
+    }
+
+    private fun handleInvalidMnemonic(it: String) {
+        errorMessage.visible()
+        errorMessage.text = it
+    }
+
+    private fun hideLoader() {
+        restoreWalletButton.visible()
+        restoreWalletProgressBar.gone()
+    }
+
+    private fun showLoader() {
+        restoreWalletButton.invisible()
+        restoreWalletProgressBar.visible()
+    }
+
+    private fun handleError(messageId: Int) {
+        errorMessage.visible()
+        errorMessage.text = getString(messageId)
+    }
+
+    private fun handleInvalidMnemonic(invalidMnemonicWords: List<String>) {
+        restoreWalletButton.isEnabled = false
+        errorMessage.visible()
+        errorMessage.text = "${getString(R.string.check_incorrect_mnemonic_words)} $invalidMnemonicWords"
     }
 
     private fun prepareMnemonicLengthValidator() {
@@ -60,11 +86,11 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
     }
 
     private fun handleMnemonicLengthValidation(content: CharSequence?) {
+        errorMessage.invisible()
         restoreWalletButton.isEnabled = if (viewModel.isMnemonicLengthValid(content)) {
             mnemonic = content.toString()
             true
         } else {
-            errorMessage.invisible()
             false
         }
     }

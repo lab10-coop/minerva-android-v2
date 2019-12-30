@@ -8,25 +8,25 @@ import java.util.*
 
 class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
 
-    override fun createMasterKeys(callback: (error: Exception?, rootAddress: String, rootPublicKey: String) -> Unit) {
+    override fun createMasterKey(callback: (error: Exception?, rootAddress: String, rootPublicKey: String) -> Unit) {
         UportHDSigner().createHDSeed(contex, KeyProtection.Level.SIMPLE, callback)
     }
 
-    override fun showMnemonicForMasterKey(privateMasterKey: String, prompt: String, callback: (error: Exception?, seedPhase: String) -> Unit) {
-        UportHDSigner().showHDSeed(contex, privateMasterKey, prompt, callback)
+    override fun showMnemonicForMasterKey(privateKey: String, prompt: String, callback: (error: Exception?, seedPhase: String) -> Unit) {
+        UportHDSigner().showHDSeed(contex, privateKey, prompt, callback)
     }
 
-    override fun importMasterKeysFromMnemonic(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
+    override fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
         UportHDSigner().importHDSeed(contex, KeyProtection.Level.SIMPLE, mnemonic, callback)
     }
 
     override fun computeDeliveredKeys(
-        privateMasterKey: String,
+        privateKey: String,
         derivationPath: String,
         prompt: String,
         callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     ) {
-        UportHDSigner().computeAddressForPath(contex, privateMasterKey, derivationPath, prompt, callback)
+        UportHDSigner().computeAddressForPath(contex, privateKey, derivationPath, prompt, callback)
     }
 
     override fun validateMnemonic(mnemonic: String): List<String> {
