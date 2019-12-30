@@ -1,4 +1,5 @@
 <resources>
+
     <style name="AppTheme" parent="@style/Theme.AppCompat.Light">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -9,14 +10,17 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="AppTheme.ActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse" >
+    <style name="AppTheme.ActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="background">@color/lightGray</item>
         <item name="titleTextStyle">@style/AppTheme.ActionBarTitleText</item>
         <item name="elevation">0dp</item>
+        <item name="height">64dp</item>
     </style>
 
     <style name="AppTheme.ActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">@color/darkGray</item>
+        <item name="android:fontFamily">@font/rubik_medium</item>
+        <item name="android:textSize">24sp</item>
     </style>
 
 </resources>

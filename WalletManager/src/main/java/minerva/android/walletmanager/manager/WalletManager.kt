@@ -9,6 +9,11 @@ import io.reactivex.rxkotlin.subscribeBy
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.DEFAULT_VERSION
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.FIRST_IDENTITY_INDEX
@@ -23,7 +28,9 @@ interface WalletManager {
     fun initWalletConfig()
     fun validateMnemonic(mnemonic: String): List<String>
     fun createMasterKeys(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
+    fun showMnemonic(callback: (error: Exception?, mnemonic: String) -> Unit)
     fun createDefaultWalletConfig(masterKey: MasterKey): Completable
+    fun saveIsMnemonicRemembered()
     fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse>
     fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
 }
@@ -32,7 +39,8 @@ interface WalletManager {
 class WalletManagerImpl(
     private val keystoreRepository: KeystoreRepository,
     private val cryptographyRepository: CryptographyRepository,
-    private val walletConfigRepository: WalletConfigRepository
+    private val walletConfigRepository: WalletConfigRepository,
+    private val localStorage: LocalStorage
 ) : WalletManager {
 
     private lateinit var masterKey: MasterKey
@@ -63,6 +71,10 @@ class WalletManagerImpl(
         cryptographyRepository.createMasterKey(callback)
     }
 
+    override fun showMnemonic(callback: (error: Exception?, mnemonic: String) -> Unit) {
+        cryptographyRepository.showMnemonicForMasterKey(keystoreRepository.decryptKey().privateKey, "TEST", callback)
+    }
+
     override fun createDefaultWalletConfig(masterKey: MasterKey): Completable {
         return walletConfigRepository.createDefaultWalletConfig(masterKey)
             .doOnComplete {
@@ -84,6 +96,10 @@ class WalletManagerImpl(
                 }
                 RestoreWalletResponse(it.state, it.message)
             }
+
+    override fun saveIsMnemonicRemembered() {
+        localStorage.saveIsMnemonicRemembered(true)
+    }
 
     private fun createDefaultWalletConfig() =
         WalletConfig(
