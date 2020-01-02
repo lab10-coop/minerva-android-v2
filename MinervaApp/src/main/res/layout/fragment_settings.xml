@@ -1,22 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightGray"
     tools:context=".settings.SettingsFragment">
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/reminderCardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        android:padding="@dimen/margin_small"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/reminderIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|top"
+                android:layout_marginTop="@dimen/margin_small"
+                android:src="@drawable/ic_alert" />
+
+            <TextView
+                android:id="@+id/alertTitle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/margin_normal"
+                android:layout_marginTop="@dimen/margin_xsmall"
+                android:layout_marginRight="@dimen/margin_normal"
+                android:fontFamily="@font/rubik_medium"
+                android:padding="4dp"
+                android:text="@string/alert_title"
+                android:textColor="@color/alert_red"
+                android:textSize="@dimen/text_normal" />
+
+            <TextView
+                android:id="@+id/alertMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_normal"
+                android:layout_marginTop="@dimen/margin_xsmall"
+                android:layout_marginRight="@dimen/margin_normal"
+                android:layout_marginBottom="@dimen/margin_normal"
+                android:fontFamily="@font/rubik_regular"
+                android:padding="4dp"
+                android:text="@string/alert_message"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/text_normal" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
     <TextView
         android:id="@+id/backupItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_large"
         android:drawableStart="@drawable/ic_backup_icon"
         android:drawablePadding="@dimen/margin_small"
-        android:fontFamily="@font/rubik_regular"
-        android:padding="8dp"
+        android:fontFamily="@font/rubik_medium"
         android:text="@string/backup"
         android:textColor="@color/gray"
-        android:textSize="@dimen/text_big" />
-</FrameLayout>
+        android:textSize="@dimen/text_big"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reminderCardView" />
+
+    <ImageView
+        android:id="@+id/alertIcon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="@dimen/margin_xsmall"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:src="@drawable/ic_alert"
+        app:layout_constraintLeft_toRightOf="@+id/backupItem"
+        app:layout_constraintTop_toTopOf="@+id/backupItem" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_backup.*
 import minerva.android.R
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.settings.BackupViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class BackupActivity : AppCompatActivity() {

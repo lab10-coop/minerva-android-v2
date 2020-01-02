@@ -1,4 +1,4 @@
-package minerva.android.settings
+package minerva.android.settings.backup
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

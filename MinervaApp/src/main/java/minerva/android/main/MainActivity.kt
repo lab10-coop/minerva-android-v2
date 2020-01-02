@@ -12,6 +12,7 @@ import minerva.android.R
 import minerva.android.extension.launchActivity
 import minerva.android.history.HistoryFragment
 import minerva.android.identities.IdentitiesFragment
+import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.ServicesFragment
 import minerva.android.settings.SettingsFragment
@@ -19,7 +20,7 @@ import minerva.android.values.ValuesFragment
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
 
     private val viewModel: MainViewModel by inject()
 
@@ -31,6 +32,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         prepareBottomNavMenu()
         replaceFragment(IdentitiesFragment())
+        prepareSettingsIcon()
+    }
+
+    private fun prepareSettingsIcon() {
+        if (!viewModel.isMnemonicRemembered()) {
+            bottomNavigation.getOrCreateBadge(R.id.settings)
+        } else {
+            removeSettingsBadgeIcon()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -117,4 +127,7 @@ class MainActivity : AppCompatActivity() {
             true
         }
     }
+
+    override fun removeSettingsBadgeIcon() =
+        bottomNavigation.removeBadge(R.id.settings)
 }
