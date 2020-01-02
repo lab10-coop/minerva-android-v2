@@ -10,4 +10,6 @@ class MainViewModel(private val walletManager: WalletManager) : ViewModel() {
     fun initWalletConfig() {
         walletManager.initWalletConfig()
     }
+
+    fun isMnemonicRemembered(): Boolean = walletManager.isMnemonicRemembered()
 }

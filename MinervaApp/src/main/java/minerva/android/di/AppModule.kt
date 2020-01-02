@@ -6,7 +6,8 @@ import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.identities.IdentitiesViewModel
 import minerva.android.main.MainViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
-import minerva.android.settings.BackupViewModel
+import minerva.android.settings.SettingsViewModel
+import minerva.android.settings.backup.BackupViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -19,6 +20,7 @@ fun createAppModule() = mutableListOf<Module>().apply {
 private val appModules = module {
     viewModel { MainViewModel(get()) }
     viewModel { BackupViewModel(get()) }
+    viewModel { SettingsViewModel(get()) }
     viewModel { IdentitiesViewModel(get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }

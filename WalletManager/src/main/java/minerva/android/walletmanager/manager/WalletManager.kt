@@ -32,6 +32,7 @@ interface WalletManager {
     fun showMnemonic(callback: (error: Exception?, mnemonic: String) -> Unit)
     fun createDefaultWalletConfig(masterKey: MasterKey): Completable
     fun saveIsMnemonicRemembered()
+    fun isMnemonicRemembered(): Boolean
     fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse>
     fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
 }
@@ -101,6 +102,9 @@ class WalletManagerImpl(
     override fun saveIsMnemonicRemembered() {
         localStorage.saveIsMnemonicRemembered(true)
     }
+
+    override fun isMnemonicRemembered(): Boolean =
+        localStorage.isMenmonicRemembered()
 
     private fun createDefaultWalletConfig() =
         WalletConfig(

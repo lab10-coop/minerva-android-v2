@@ -31,4 +31,5 @@
     <color name="colorSetTen">#FFFF63C5</color>
     <color name="colorSetTenOpacity">#29FF63C5</color>
     <color name="gray">#3F3F4B</color>
+    <color name="alert_red">#CC2800</color>
 </resources>

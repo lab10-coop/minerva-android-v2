@@ -1,7 +1,7 @@
 package minerva.android
 
 import com.nhaarman.mockitokotlin2.mock
-import minerva.android.settings.BackupViewModel
+import minerva.android.settings.backup.BackupViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import org.junit.Test
 import kotlin.test.assertEquals

@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="AppTheme" parent="@style/Theme.AppCompat.Light">
+    <style name="AppTheme" parent="@style/Theme.MaterialComponents.Light">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -10,7 +10,7 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="AppTheme.ActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+    <style name="AppTheme.ActionBar" parent="@style/Widget.MaterialComponents.Light.ActionBar.Solid">
         <item name="background">@color/lightGray</item>
         <item name="titleTextStyle">@style/AppTheme.ActionBarTitleText</item>
         <item name="elevation">0dp</item>

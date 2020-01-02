@@ -5,15 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_create_wallet.*
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import minerva.android.onboarding.base.BaseOnBoardingFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CreateWalletFragment : BaseOnBoardingFragment() {
 
