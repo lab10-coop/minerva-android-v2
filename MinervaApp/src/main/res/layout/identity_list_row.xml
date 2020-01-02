@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="@dimen/margin_normal"
-    android:paddingRight="@dimen/margin_normal"
-    android:paddingTop="@dimen/margin_xsmall"
-    android:paddingBottom="@dimen/margin_xsmall"
     android:clipToPadding="false"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/margin_normal"
+    android:paddingTop="@dimen/margin_xsmall"
+    android:paddingRight="@dimen/margin_normal"
+    android:paddingBottom="@dimen/margin_xsmall">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card"
@@ -29,41 +29,42 @@
                 android:id="@+id/profileImage"
                 android:layout_width="@dimen/letter_logo_size"
                 android:layout_height="@dimen/letter_logo_size"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
                 android:backgroundTint="@color/colorSetOneOpacity"
                 android:textColor="@color/colorSetOne"
-                tools:text="M"/>
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="M" />
 
             <TextView
                 android:id="@+id/identityName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_normal"
+                android:fontFamily="@font/rubik_medium"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/text_normal"
+                app:layout_constraintBottom_toBottomOf="@id/profileImage"
                 app:layout_constraintLeft_toRightOf="@id/profileImage"
                 app:layout_constraintTop_toTopOf="@id/profileImage"
-                app:layout_constraintBottom_toBottomOf="@id/profileImage"
-                tools:text="@string/app_name"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:textSize="@dimen/text_normal"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                tools:text="@string/app_name" />
 
             <ImageView
                 android:id="@+id/arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="@id/profileImage"
+                android:src="@drawable/ic_down_arrow"
                 app:layout_constraintBottom_toBottomOf="@id/profileImage"
                 app:layout_constraintRight_toRightOf="parent"
-                android:src="@drawable/ic_down_arrow" />
+                app:layout_constraintTop_toTopOf="@id/profileImage" />
 
             <minerva.android.widget.IdentityDataContent
                 android:id="@+id/dataContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_normal"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/profileImage"
-                android:layout_marginTop="@dimen/margin_normal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                app:layout_constraintTop_toBottomOf="@id/profileImage" />
 
             <TextView
                 android:id="@+id/editButton"
@@ -71,32 +72,32 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_normal"
                 android:layout_marginBottom="@dimen/margin_xsmall"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/removeButton"
-                app:layout_constraintTop_toBottomOf="@id/dataContainer"
                 android:background="@drawable/border_light_button"
-                android:text="@string/edit"
                 android:gravity="center"
                 android:padding="@dimen/margin_small"
+                android:text="@string/edit"
                 android:textColor="@color/colorAccent"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/removeButton"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dataContainer" />
 
             <TextView
                 android:id="@+id/removeButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:background="@drawable/border_light_button"
-                android:text="@string/remove"
                 android:gravity="center"
                 android:padding="@dimen/margin_small"
+                android:text="@string/remove"
                 android:textColor="@color/colorAccent"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

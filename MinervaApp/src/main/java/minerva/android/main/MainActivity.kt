@@ -2,7 +2,6 @@ package minerva.android.main
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.StringRes
@@ -40,20 +39,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        //TODO change menu visibility according to current fragment
         menu?.findItem(R.id.barcodeReader)?.apply {
-            isVisible = isIdentitiesTabSelected()
+            isVisible = isServicesTabSelected()
         }
-        menu?.findItem(R.id.addIdentities)?.apply {
-            isVisible = !isSettingsTabSelected()
+        menu?.findItem(R.id.addIcon)?.apply {
+            isVisible = shouldShowAddIcon()
         }
         return super.onPrepareOptionsMenu(menu)
     }
 
+    private fun shouldShowAddIcon() = isIdentitiesTabSelected() || isValuesTabSelected()
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.barcodeReader -> Timber.d("Barcode reader") //TODO add action
-            R.id.addIdentities -> Timber.d("Add identities") //TODO add action
+            R.id.addIcon -> Timber.d("Add identities") //TODO add action
         }
         return super.onOptionsItemSelected(item)
     }
@@ -62,6 +61,12 @@ class MainActivity : AppCompatActivity() {
         if (isIdentitiesTabSelected()) super.onBackPressed()
         else bottomNavigation.selectedItemId = R.id.identities
     }
+
+    private fun isServicesTabSelected() = bottomNavigation.selectedItemId == R.id.services
+
+    private fun isValuesTabSelected() = bottomNavigation.selectedItemId == R.id.values
+
+    private fun isActivityTabSelected() = bottomNavigation.selectedItemId == R.id.activity
 
     private fun isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
 
