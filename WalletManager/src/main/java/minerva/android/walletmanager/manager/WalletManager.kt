@@ -15,6 +15,7 @@ import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
+import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.DEFAULT_IDENTITY_NAME
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.DEFAULT_VERSION
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.FIRST_IDENTITY_INDEX
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.FIRST_VALUES_INDEX
@@ -103,7 +104,7 @@ class WalletManagerImpl(
 
     private fun createDefaultWalletConfig() =
         WalletConfig(
-            DEFAULT_VERSION, listOf(Identity(FIRST_IDENTITY_INDEX)),
-            listOf(Value(FIRST_VALUES_INDEX), Value(SECOND_VALUES_INDEX))
+            DEFAULT_VERSION, listOf(Identity(index = FIRST_IDENTITY_INDEX, name = DEFAULT_IDENTITY_NAME)),
+            listOf(Value(index = FIRST_VALUES_INDEX), Value(index = SECOND_VALUES_INDEX))
         )
 }

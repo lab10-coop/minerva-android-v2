@@ -54,8 +54,8 @@ class WalletConfigRepository(
     private fun createDefaultWalletPayload() =
         WalletConfigPayload(
             DEFAULT_VERSION,
-            listOf(IdentityPayload(FIRST_IDENTITY_INDEX)),
-            listOf(ValuePayload(FIRST_VALUES_INDEX), ValuePayload(SECOND_VALUES_INDEX))
+            listOf(IdentityPayload(_index = FIRST_IDENTITY_INDEX, _name = DEFAULT_IDENTITY_NAME)),
+            listOf(ValuePayload(_index = FIRST_VALUES_INDEX), ValuePayload(_index = SECOND_VALUES_INDEX))
         )
 
 
@@ -66,5 +66,6 @@ class WalletConfigRepository(
         const val SECOND_VALUES_INDEX = 2
         const val SLASH = "/"
         const val ENCODED_SLASH = "%2F"
+        const val DEFAULT_IDENTITY_NAME = "Identity #1"
     }
 }

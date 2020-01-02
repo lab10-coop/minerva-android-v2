@@ -3,15 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/barcodeReader"
-        android:icon="@drawable/ic_values"
-        app:showAsAction="ifRoom"
-        android:title="@string/barcode">
-    </item>
+        android:icon="@drawable/ic_barcode_scanner"
+        android:title="@string/barcode"
+        app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/addIdentities"
-        android:icon="@drawable/ic_identities"
-        app:showAsAction="ifRoom"
-        android:title="@string/add">
-    </item>
+        android:id="@+id/addIcon"
+        android:icon="@drawable/ic_plus"
+        android:title="@string/add"
+        app:showAsAction="ifRoom" />
 </menu>
