@@ -15,6 +15,7 @@ import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.ServicesFragment
+import minerva.android.services.scanner.LiveScannerActivity
 import minerva.android.settings.SettingsFragment
 import minerva.android.values.ValuesFragment
 import org.koin.android.ext.android.inject
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        menu?.findItem(R.id.barcodeReader)?.apply {
+        menu?.findItem(R.id.barcodeScanner)?.apply {
             isVisible = isServicesTabSelected()
         }
         menu?.findItem(R.id.addIcon)?.apply {
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.addIcon -> Timber.d("Add identities") //TODO add action
+            R.id.barcodeScanner -> launchActivity<LiveScannerActivity>()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -76,11 +78,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
 
     private fun isValuesTabSelected() = bottomNavigation.selectedItemId == R.id.values
 
-    private fun isActivityTabSelected() = bottomNavigation.selectedItemId == R.id.activity
-
     private fun isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
-
-    private fun isSettingsTabSelected() = bottomNavigation.selectedItemId == R.id.settings
 
     private fun checkMasterSeedAvailability() {
         if (!viewModel.isMaskerKeyAvailable()) showOnBoardingActivity()
