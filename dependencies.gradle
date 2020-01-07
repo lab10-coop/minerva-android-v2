@@ -38,6 +38,8 @@ ext {
 
     uPortSignerVersion = '0.5.1'
 
+    scannerVersion = '2.1.0'
+
     coreDependencies = [
             kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
             timber    : "com.jakewharton.timber:timber:$timberVersion",
@@ -71,6 +73,10 @@ ext {
             gsonConverter    : "com.squareup.retrofit2:converter-gson:$retrofitVersion",
             rxRetrofit       : "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion",
             logginInterceptor: "com.squareup.okhttp3:logging-interceptor:$logginInterceptorVersion"
+    ]
+
+    scannerDependency = [
+            scanner: "com.budiyev.android:code-scanner:$scannerVersion"
     ]
 
     testDependencies = [

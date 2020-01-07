@@ -58,6 +58,7 @@ dependencies {
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    implementation scannerDependency.values()
 
     implementation coreDependencies.values()
     implementation androidCoreDependencies.values()

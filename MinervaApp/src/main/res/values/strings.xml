@@ -36,4 +36,6 @@
     <string name="no_such_file_error_message">No Minerva Wallet found for the seed phrase you entered. Please make sure that you entered the words in the correct order and that you\'re using a seedphrase which was created by the Minerva App.</string>
     <string name="alert_title">You haven\'t yet made a backup of your Minerva Wallet.</string>
     <string name="alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
+    <string name="close">Close</string>
+    <string name="camera_error">Camera initialization error:</string>
 </resources>

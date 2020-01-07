@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/barcodeReader"
+        android:id="@+id/barcodeScanner"
         android:icon="@drawable/ic_barcode_scanner"
         android:title="@string/barcode"
         app:showAsAction="ifRoom" />
