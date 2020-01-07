@@ -6,7 +6,7 @@
     android:background="@drawable/rounded_white_button"
     android:gravity="center"
     android:orientation="horizontal"
-    android:padding="8dp">
+    android:padding="@dimen/margin_small">
 
     <ImageView
         android:id="@+id/icon"

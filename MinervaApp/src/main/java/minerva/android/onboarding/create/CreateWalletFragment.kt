@@ -59,12 +59,12 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
 
     private fun hideLoader() {
         createWalletButton.visible()
-        createWalletProgressBar.gone()
+        createWalletProgressBar.invisible()
     }
 
     private fun showLoader() {
-        createWalletButton.invisible()
         createWalletProgressBar.visible()
+        createWalletButton.invisible()
     }
 
     private fun handleCreateWalletButton() {
