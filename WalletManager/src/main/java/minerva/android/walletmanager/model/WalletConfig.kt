@@ -9,4 +9,7 @@ data class WalletConfig(
 ) {
     val newIndex: Int
         get() = identities.size + values.size
+
+    val updateVersion: Int
+        get() = version + 1
 }

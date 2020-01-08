@@ -18,6 +18,9 @@ import minerva.android.services.ServicesFragment
 import minerva.android.services.scanner.LiveScannerActivity
 import minerva.android.settings.SettingsFragment
 import minerva.android.values.ValuesFragment
+import minerva.wrapped.WrappedActivity
+import minerva.wrapped.WrappedFragmentType
+import minerva.wrapped.startNewIdentityWrappedActivity
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 
@@ -53,7 +56,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
         menu?.findItem(R.id.barcodeScanner)?.apply {
             isVisible = isServicesTabSelected()
         }
-        menu?.findItem(R.id.addIcon)?.apply {
+        menu?.findItem(R.id.addIdentities)?.apply {
             isVisible = shouldShowAddIcon()
         }
         return super.onPrepareOptionsMenu(menu)
@@ -63,7 +66,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.addIcon -> Timber.d("Add identities") //TODO add action
+            R.id.addIdentities -> startNewIdentityWrappedActivity(this)
             R.id.barcodeScanner -> launchActivity<LiveScannerActivity>()
         }
         return super.onOptionsItemSelected(item)

@@ -8,6 +8,7 @@ import android.widget.TextView
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.visible
+import minerva.android.identities.data.getIdentityDataLabel
 
 class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
@@ -65,7 +66,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         val str = StringBuilder(PLUS_SIGN)
         keys.forEachIndexed { index, key ->
             if (index > FIRST_ELEMENT) {
-                str.append(key)
+                str.append(getIdentityDataLabel(context, key))
                 if (index < keys.size - 1) str.append(COMMA_SIGN)
             }
         }

@@ -27,12 +27,8 @@ class LocalMock : LocalWalletConfigProvider, WalletConfigTestValues() {
 class OnlineMock : MinervaApi, WalletConfigTestValues() {
     fun prepareResponse() = WalletConfigResponse("", "", prepareData())
 
-    override fun getWalletConfigObservable(content: String, publicKey: String): Observable<WalletConfigResponse> =
-        Observable.just(WalletConfigResponse("", "", prepareData()))
-
-    override fun getWalletConfig(content: String, publicKey: String): Single<WalletConfigResponse> {
-        TODO("No need for implementation")
-    }
+    override fun getWalletConfig(content: String, publicKey: String): Single<WalletConfigResponse> =
+        Single.just(WalletConfigResponse("", "", prepareData()))
 
     override fun saveWalletConfig(content: String, publicKey: String, walletPayload: WalletConfigPayload): Completable =
         Completable.complete()
@@ -46,12 +42,8 @@ class OnlineMock : MinervaApi, WalletConfigTestValues() {
 }
 
 class OnlineLikeLocalMock : MinervaApi, WalletConfigTestValues() {
-    override fun getWalletConfigObservable(content: String, publicKey: String): Observable<WalletConfigResponse> =
-        Observable.just(WalletConfigResponse("", "", prepareData()))
-
-    override fun getWalletConfig(content: String, publicKey: String): Single<WalletConfigResponse> {
-        TODO("No need for implementation")
-    }
+    override fun getWalletConfig(content: String, publicKey: String): Single<WalletConfigResponse> =
+        Single.just(WalletConfigResponse("", "", prepareData()))
 
     override fun saveWalletConfig(content: String, publicKey: String, walletPayload: WalletConfigPayload): Completable =
         Completable.complete()

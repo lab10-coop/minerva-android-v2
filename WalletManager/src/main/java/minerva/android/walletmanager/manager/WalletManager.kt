@@ -7,19 +7,11 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.subscribeBy
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MasterKey
-import minerva.android.walletmanager.model.Value
-import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
-import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.DEFAULT_IDENTITY_NAME
-import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.DEFAULT_VERSION
-import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.FIRST_IDENTITY_INDEX
-import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.FIRST_VALUES_INDEX
-import minerva.android.walletmanager.walletconfig.WalletConfigRepository.Companion.SECOND_VALUES_INDEX
 import timber.log.Timber
 
 interface WalletManager {
@@ -35,6 +27,9 @@ interface WalletManager {
     fun isMnemonicRemembered(): Boolean
     fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse>
     fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
+    fun loadIdentity(position: Int, defaultName: String): Identity
+    fun saveIdentity(identity: Identity): Completable
+    fun removeIdentity(identity: Identity): Completable
 }
 
 //TODO derivation path for identities and values "m/99'/n" where n is index of identity and value
@@ -47,7 +42,6 @@ class WalletManagerImpl(
 
     private lateinit var masterKey: MasterKey
 
-    //TODO refactor to Events
     private val _walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = _walletConfigMutableLiveData
 
@@ -67,6 +61,16 @@ class WalletManagerImpl(
         )
     }
 
+    override fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse> =
+        walletConfigRepository.getWalletConfig(masterKey)
+            .map {
+                if (it.state != ResponseState.ERROR) {
+                    keystoreRepository.encryptKey(masterKey)
+                    walletConfigRepository.saveWalletConfigLocally(mapWalletConfigResponseToWalletConfig(it))
+                }
+                RestoreWalletResponse(it.state, it.message)
+            }
+
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
     override fun createMasterKeys(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
@@ -81,23 +85,51 @@ class WalletManagerImpl(
         return walletConfigRepository.createDefaultWalletConfig(masterKey)
             .doOnComplete {
                 keystoreRepository.encryptKey(masterKey)
-                walletConfigRepository.saveWalletConfigLocally(createDefaultWalletConfig())
+                walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
             }
+    }
+
+    override fun saveIdentity(identity: Identity): Completable {
+        _walletConfigMutableLiveData.value?.let {
+            val walletConfig = WalletConfig(it.updateVersion, prepareNewIdentitiesSet(identity, it), it.values)
+            return walletConfigRepository.updateWalletConfig(masterKey, walletConfig)
+                .doOnComplete {
+                    walletConfigRepository.saveWalletConfigLocally(walletConfig)
+                    _walletConfigMutableLiveData.value = walletConfig
+                }
+                //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
+                .doOnError {
+                    //                    walletConfigRepository.saveWalletConfigLocally(walletConfig)
+                    //                    _walletConfigMutableLiveData.value = walletConfig
+                }
+        }
+        return Completable.error(Throwable("Wallet Config was not initialized"))
+    }
+
+    override fun loadIdentity(position: Int, defaultName: String): Identity {
+        _walletConfigMutableLiveData.value?.identities?.apply {
+            return if (inBounds(position)) this[position]
+            else Identity(walletConfigNewIndex(), prepareDefaultIdentityName(defaultName))
+        }
+        return Identity(walletConfigNewIndex(), prepareDefaultIdentityName(defaultName))
+    }
+
+    override fun removeIdentity(identity: Identity): Completable {
+        _walletConfigMutableLiveData.value?.let { walletConfig ->
+            val currentPosition = getPositionForIdentity(identity, walletConfig)
+            walletConfig.identities?.let { identities ->
+                //TODO handling error messages need to be designed and refactored
+                if (!identities.inBounds(currentPosition)) return Completable.error(Throwable("Missing identity to remove"))
+                if (isOnlyOneElement(identities)) return Completable.error(Throwable("You can not remove last identity"))
+                return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
+            }
+        }
+        return Completable.error(Throwable("Wallet config was not initialized"))
     }
 
     override fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
         cryptographyRepository.restoreMasterKey(mnemonic, callback)
     }
-
-    override fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse> =
-        walletConfigRepository.getWalletConfig(masterKey)
-            .map {
-                if (it.state != ResponseState.ERROR) {
-                    keystoreRepository.encryptKey(masterKey)
-                    walletConfigRepository.saveWalletConfigLocally(mapWalletConfigResponseToWalletConfig(it))
-                }
-                RestoreWalletResponse(it.state, it.message)
-            }
 
     override fun saveIsMnemonicRemembered() {
         localStorage.saveIsMnemonicRemembered(true)
@@ -106,9 +138,40 @@ class WalletManagerImpl(
     override fun isMnemonicRemembered(): Boolean =
         localStorage.isMenmonicRemembered()
 
-    private fun createDefaultWalletConfig() =
-        WalletConfig(
-            DEFAULT_VERSION, listOf(Identity(index = FIRST_IDENTITY_INDEX, name = DEFAULT_IDENTITY_NAME)),
-            listOf(Value(index = FIRST_VALUES_INDEX), Value(index = SECOND_VALUES_INDEX))
-        )
+
+    private fun walletConfigNewIndex(): Int {
+        _walletConfigMutableLiveData.value?.let {
+            return it.newIndex
+        }
+        throw Throwable("Wallet Config was not initialized")
+    }
+
+    private fun prepareNewIdentitiesSet(identity: Identity, walletConfig: WalletConfig): List<Identity> {
+        val newIdentities = walletConfig.identities.toMutableList()
+        val position = getPositionForIdentity(identity, walletConfig)
+        if (newIdentities.inBounds(position)) newIdentities[position] = identity
+        else newIdentities.add(identity)
+        return newIdentities
+    }
+
+    private fun prepareDefaultIdentityName(defaultName: String): String = String.format("%s #%d", defaultName, walletConfigNewIndex())
+
+    private fun isOnlyOneElement(identities: List<Identity>): Boolean {
+        var realIdentitiesCount = 0
+        identities.forEach {
+            if (!it.isDeleted) realIdentitiesCount++
+        }
+        return realIdentitiesCount <= ONE_ELEMENT
+    }
+
+    private fun getPositionForIdentity(newIdentity: Identity, walletConfig: WalletConfig): Int {
+        walletConfig.identities.forEachIndexed { position, identity ->
+            if (newIdentity.index == identity.index) return position
+        }
+        return walletConfig.identities.size
+    }
+
+    companion object {
+        private const val ONE_ELEMENT = 1
+    }
 }

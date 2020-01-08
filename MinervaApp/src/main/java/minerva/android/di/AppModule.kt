@@ -1,6 +1,8 @@
 package minerva.android.di
 
 import minerva.android.BuildConfig
+import minerva.android.identities.EditIdentityFragment
+import minerva.android.identities.EditIdentityViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.identities.IdentitiesViewModel
@@ -22,6 +24,7 @@ private val appModules = module {
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { IdentitiesViewModel(get()) }
+    viewModel { EditIdentityViewModel(get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
 }

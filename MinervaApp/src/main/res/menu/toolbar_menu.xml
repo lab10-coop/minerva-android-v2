@@ -8,8 +8,9 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/addIcon"
-        android:icon="@drawable/ic_plus"
-        android:title="@string/add"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/addIdentities"
+        android:icon="@drawable/ic_add"
+        app:showAsAction="ifRoom"
+        android:title="@string/add">
+    </item>
 </menu>

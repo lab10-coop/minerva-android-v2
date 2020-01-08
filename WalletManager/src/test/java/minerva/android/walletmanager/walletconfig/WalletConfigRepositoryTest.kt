@@ -45,7 +45,7 @@ class WalletConfigRepositoryTest {
     @Test
     fun `Check that WalletConfig will be updated when online version is different`() {
         val walletConfigRepository = WalletConfigRepository(local, online)
-        val observable = walletConfigRepository.loadWalletConfig("").delay(1, TimeUnit.SECONDS, testScheduler)
+        val observable = walletConfigRepository.loadWalletConfig("1234").delay(1, TimeUnit.SECONDS, testScheduler)
         val testObserver = TestObserver<WalletConfig>()
         val walletConfigResponse = (online as OnlineMock).prepareResponse()
 
@@ -66,7 +66,7 @@ class WalletConfigRepositoryTest {
     @Test
     fun `Check that WalletConfig will be updated when online version is the same`() {
         val walletConfigRepository = WalletConfigRepository(local, onlineLikeLocal)
-        val observable = walletConfigRepository.loadWalletConfig("").delay(1, TimeUnit.SECONDS, testScheduler)
+        val observable = walletConfigRepository.loadWalletConfig("1234").delay(1, TimeUnit.SECONDS, testScheduler)
         val testObserver = TestObserver<WalletConfig>()
 
         observable.subscribe(testObserver)

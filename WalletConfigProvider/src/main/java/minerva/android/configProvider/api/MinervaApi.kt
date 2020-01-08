@@ -9,12 +9,6 @@ import retrofit2.http.*
 
 interface MinervaApi {
     @GET("{$PUBLIC_KEY}")
-    fun getWalletConfigObservable(
-        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Path(PUBLIC_KEY) publicKey: String
-    ): Observable<WalletConfigResponse>
-
-    @GET("{$PUBLIC_KEY}")
     fun getWalletConfig(
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
         @Path(PUBLIC_KEY) publicKey: String

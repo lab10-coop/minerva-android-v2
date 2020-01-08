@@ -24,7 +24,6 @@ class MapperTest : WalletConfigTestValues() {
         identity.index shouldEqual identityResponse.index
         identity.name shouldEqual identityResponse.name
         identity.data shouldEqual identityResponse.data
-        identity.isRemovable shouldEqual identityResponse.isRemovable
     }
 
     @Test
@@ -40,7 +39,6 @@ class MapperTest : WalletConfigTestValues() {
         identity.index shouldEqual identityResponse.index
         identity.name shouldEqual identityResponse.name
         identity.data shouldEqual identityResponse.data
-        identity.isRemovable shouldEqual identityResponse.isRemovable
     }
 
     @Test
