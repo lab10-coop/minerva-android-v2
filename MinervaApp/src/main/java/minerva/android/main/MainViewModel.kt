@@ -7,9 +7,7 @@ class MainViewModel(private val walletManager: WalletManager) : ViewModel() {
 
     fun isMaskerKeyAvailable() = walletManager.isMasterKeyAvailable()
 
-    fun initWalletConfig() {
-        walletManager.initWalletConfig()
-    }
+    fun initWalletConfig() = walletManager.initWalletConfig()
 
     fun isMnemonicRemembered(): Boolean = walletManager.isMnemonicRemembered()
 }

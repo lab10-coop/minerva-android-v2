@@ -8,6 +8,14 @@ data class Identity(
     val publicKey: String = String.Empty,
     val privateKey: String = String.Empty,
     val data: LinkedHashMap<String, String> = linkedMapOf(),
-    val isRemovable: Boolean = true,
     val isDeleted: Boolean = false
-)
+) {
+    constructor(index: Int, identity: Identity) : this(
+        index,
+        identity.name,
+        identity.publicKey,
+        identity.privateKey,
+        identity.data,
+        identity.isDeleted
+    )
+}

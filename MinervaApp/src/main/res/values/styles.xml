@@ -1,5 +1,4 @@
 <resources>
-
     <style name="AppTheme" parent="@style/Theme.MaterialComponents.Light">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -21,6 +20,28 @@
         <item name="android:textColor">@color/darkGray</item>
         <item name="android:fontFamily">@font/rubik_medium</item>
         <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="FormTextInputLayoutStyle" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/text_input_layout_color</item>
+        <item name="boxStrokeWidth">@dimen/form_box_stroke_width</item>
+        <item name="errorTextAppearance">@style/ErrorTextStyle</item>
+        <item name="boxCornerRadiusTopStart">@dimen/rounded_button_radius</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/rounded_button_radius</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/rounded_button_radius</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/rounded_button_radius</item>
+        <item name="android:textColorHint">@color/titledTextViewTitleColor</item>
+        <item name="android:layout_marginBottom">@dimen/margin_xsmall</item>
+    </style>
+
+    <style name="ErrorTextStyle">
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
+    <style name="EditTextInputLayoutStyle" parent="AppTheme">
+        <item name="android:maxLines">1</item>
+        <item name="android:maxLength">255</item>
+        <item name="android:inputType">textCapSentences</item>
     </style>
 
 </resources>

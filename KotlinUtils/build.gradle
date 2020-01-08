@@ -32,4 +32,5 @@ dependencies {
     implementation coreDependencies.values()
     testImplementation testDependencies.values()
     implementation androidCoreDependencies.values()
+    implementation rxDependencies.values()
 }

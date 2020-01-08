@@ -6,10 +6,10 @@ import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.configProvider.model.WalletConfigPayload
 
 fun mapIdentityPayloadToIdentity(response: IdentityPayload): Identity =
-    Identity(response.index, response.name, data = response.data, isRemovable = response.isRemovable, isDeleted = response.isDeleted)
+    Identity(response.index, response.name, data = response.data, isDeleted = response.isDeleted)
 
 fun mapIdentityToIdentityResponse(identity: Identity): IdentityPayload =
-    IdentityPayload(identity.index, identity.name, identity.data, identity.isRemovable, identity.isDeleted)
+    IdentityPayload(identity.index, identity.name, identity.data, identity.isDeleted)
 
 fun mapValueResponseToValue(response: ValuePayload): Value = Value(response.index, name = response.name, network = response.network)
 

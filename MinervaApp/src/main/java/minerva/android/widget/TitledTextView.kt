@@ -6,12 +6,13 @@ import kotlinx.android.synthetic.main.titled_text_view.view.*
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.visible
+import minerva.android.identities.data.getIdentityDataLabel
 
 class TitledTextView(context: Context) : LinearLayout(context) {
 
-    fun setTitleAndBody(title: String, body: String) {
+    fun setTitleAndBody(titleKey: String, body: String) {
         visible()
-        this.title.text = title
+        this.title.text = getIdentityDataLabel(context, titleKey)
         this.body.text = body
     }
 

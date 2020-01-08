@@ -14,3 +14,10 @@ val Long.Companion.InvalidValue: Long
 
 val Int.Companion.InvalidId: Int
     get() = -1
+
+val Int.Companion.InvalidIndex: Int
+    get() = -1
+
+//xD
+val Int.Companion.InvalidVersion: Int
+    get() = -1

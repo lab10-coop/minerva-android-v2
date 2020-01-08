@@ -25,6 +25,28 @@
     <string name="field_cannot_be_empty">Field cannot be empty</string>
     <string name="check_incorrect_mnemonic_words">Unknown words entered, please check:</string>
     <string name="creating_wallet_error_message">Creating your wallet failed. Please check your connection and/or retry later</string>
+    <string name="new_identity">New Identity</string>
+    <string name="personal_data">Personal data</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="telephone_number">Telephone Number</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="address">Address</string>
+    <string name="address_line_1">Address Line 1</string>
+    <string name="address_line_2">Address Line 2</string>
+    <string name="city">City</string>
+    <string name="postcode">Postcode</string>
+    <string name="country">Country</string>
+    <string name="create_new_identity">Create new identity</string>
+    <string name="save_identity_changes">Save identity changes</string>
+    <string name="identity_name">Identity Name</string>
+    <string name="more_fields">More fields</string>
+    <string name="wrong_email">Wrong email</string>
+    <string name="can_not_be_empty">This field should not be empty</string>
+    <string name="can_not_be_cloud_save">Identity backup save failed. Please try again later</string>
+    <string name="unexpected_error">Unexpected error occurred. Please try again later</string>
+    <string name="update_identity">Update identity</string>
+    <string name="empty_identity_name">Identity name is empty</string>
     <string name="backup">Backup</string>
     <string name="account_backup">Account Backup</string>
     <string name="i_will_safety_remember">I will safety remember</string>
@@ -38,4 +60,8 @@
     <string name="alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
     <string name="close">Close</string>
     <string name="camera_error">Camera initialization error:</string>
+    <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+    <string name="identity">Identity</string>
 </resources>

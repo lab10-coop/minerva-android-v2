@@ -7,16 +7,19 @@ import android.view.Gravity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import minerva.android.R
+import minerva.android.kotlinUtils.Space
 
 class LetterLogo(context: Context, attrs: AttributeSet?) : AppCompatTextView(context, attrs) {
 
     fun createLogo(value: String) {
-        if (value.isNotBlank()) {
-            text = value[FIRST_SIGN].toString()
-            setTextColor(ContextCompat.getColor(context, generateColor(value)))
-            backgroundTintList = ContextCompat.getColorStateList(context, generateColor(value, true))
-        }
+        text = prepareLetter(value)[FIRST_SIGN].toString().capitalize()
+        setTextColor(ContextCompat.getColor(context, generateColor(value)))
+        backgroundTintList = ContextCompat.getColorStateList(context, generateColor(value, true))
     }
+
+    private fun prepareLetter(value: String): String =
+        if(value.isBlank()) String.Space
+        else value
 
     init {
         gravity = Gravity.CENTER
