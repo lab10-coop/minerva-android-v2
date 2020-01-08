@@ -28,6 +28,7 @@ platform :android do
                app: "1:927787980045:android:face23e164b9ba95d00c44",
                apk_path: "./MinervaApp/build/outputs/apk/staging/release/MinervaApp-staging-release.apk",
                release_notes: "New build in da house, yo!",
+               firebase_cli_token: "#{ENV['FIREBASE_TOKEN']}",
                groups:  "minerva_testers")
            slack(
              message: "Fresh and funky staging build is in da house!",

@@ -11,3 +11,5 @@ sed -i '3i . /etc/profile.d/rvm.sh\n' ~/.profile;
 /usr/local/rvm/bin/rvm cleanup all;
 gem install fastlane -qN;
 sed -i 's/mesg.*$/tty -s \&\& mesg n || true/' ~/.profile
+bundle install
+fastlane env
