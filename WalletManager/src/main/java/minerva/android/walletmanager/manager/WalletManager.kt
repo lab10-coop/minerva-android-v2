@@ -103,7 +103,7 @@ class WalletManagerImpl(
                 }
                 //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
                 .doOnError {
-                    //                   walletConfigRepository.saveWalletConfigLocally(walletConfig)
+                    //                  walletConfigRepository.saveWalletConfigLocally(walletConfig)
                     //                    _walletConfigMutableLiveData.value = walletConfig
                 }
         }
