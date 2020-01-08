@@ -28,8 +28,6 @@ class EditIdentityViewModel(private val walletManager: WalletManager) : BaseView
     fun saveIdentity(identity: Identity) {
         launchDisposable {
             walletManager.saveIdentity(identity)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = { _saveCompletedLiveData.value = Event(identity.index) },
                     onError = { _saveErrorLiveData.value = Event(Throwable(it.message)) }

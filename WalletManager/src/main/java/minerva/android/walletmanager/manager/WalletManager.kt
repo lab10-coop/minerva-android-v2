@@ -5,7 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.keystore.KeystoreRepository
@@ -93,6 +95,8 @@ class WalletManagerImpl(
         _walletConfigMutableLiveData.value?.let {
             val walletConfig = WalletConfig(it.updateVersion, prepareNewIdentitiesSet(identity, it), it.values)
             return walletConfigRepository.updateWalletConfig(masterKey, walletConfig)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
                     walletConfigRepository.saveWalletConfigLocally(walletConfig)
                     _walletConfigMutableLiveData.value = walletConfig

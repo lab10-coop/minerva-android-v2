@@ -21,8 +21,6 @@ class IdentitiesViewModel(private val walletManager: WalletManager) : BaseViewMo
     fun removeIdentity(identity: Identity) {
         launchDisposable {
             walletManager.removeIdentity(identity)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = { /* Result is handled by LiveData in WalletManager */ },
                     onError = { _errorLiveData.value = Event(it) }
