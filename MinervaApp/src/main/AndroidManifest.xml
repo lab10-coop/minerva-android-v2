@@ -23,6 +23,9 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".services.login.PainlessLoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".settings.backup.BackupActivity"
             android:screenOrientation="portrait" />
         <activity

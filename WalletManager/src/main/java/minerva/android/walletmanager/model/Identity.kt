@@ -4,11 +4,12 @@ import minerva.android.kotlinUtils.Empty
 
 data class Identity(
     val index: Int,
-    val name: String = String.Empty,
+    var name: String = String.Empty,
     val publicKey: String = String.Empty,
     val privateKey: String = String.Empty,
     val data: LinkedHashMap<String, String> = linkedMapOf(),
-    val isDeleted: Boolean = false
+    val isDeleted: Boolean = false,
+    var isSelected: Boolean = false
 ) {
     constructor(index: Int, identity: Identity) : this(
         index,
@@ -16,6 +17,7 @@ data class Identity(
         identity.publicKey,
         identity.privateKey,
         identity.data,
-        identity.isDeleted
+        identity.isDeleted,
+        identity.isSelected
     )
 }

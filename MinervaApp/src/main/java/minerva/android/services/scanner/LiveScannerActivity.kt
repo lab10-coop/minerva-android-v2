@@ -1,6 +1,7 @@
 package minerva.android.services.scanner
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.WindowManager
@@ -12,6 +13,10 @@ import com.budiyev.android.codescanner.*
 import com.google.zxing.BarcodeFormat
 import kotlinx.android.synthetic.main.activity_scanner.*
 import minerva.android.R
+import minerva.android.extension.launchActivity
+import minerva.android.services.login.PainlessLoginActivity
+import minerva.android.services.login.PainlessLoginActivity.Companion.SCAN_RESULT
+import minerva.wrapped.WrappedActivity
 
 class LiveScannerActivity : AppCompatActivity() {
 
@@ -56,8 +61,10 @@ class LiveScannerActivity : AppCompatActivity() {
             autoFocusMode = AutoFocusMode.SAFE
             decodeCallback = DecodeCallback {
                 runOnUiThread {
-                    //TODO go to choose identity activity
-                    Toast.makeText(this@LiveScannerActivity, "Scan result: ${it.text}", Toast.LENGTH_SHORT).show()
+                    launchActivity<PainlessLoginActivity> {
+                        addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        putExtra(SCAN_RESULT, it.text)
+                    }
                 }
             }
             errorCallback = ErrorCallback {

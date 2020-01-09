@@ -60,6 +60,10 @@
     <string name="alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
     <string name="close">Close</string>
     <string name="camera_error">Camera initialization error:</string>
+    <string name="login">Login</string>
+    <string name="painless_login">Painless Login</string>
+    <string name="requested_data">Requested data:</string>
+    <string name="choose_an_identity">Choose an identity</string>
     <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
