@@ -8,6 +8,7 @@ import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.identities.IdentitiesViewModel
 import minerva.android.main.MainViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
+import minerva.android.services.login.PainlessLoginViewModel
 import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -27,4 +28,5 @@ private val appModules = module {
     viewModel { EditIdentityViewModel(get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
+    viewModel { PainlessLoginViewModel(get()) }
 }

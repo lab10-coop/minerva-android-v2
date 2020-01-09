@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="vertical"
+    android:padding="@dimen/margin_normal">
+
+    <minerva.android.widget.LetterLogo
+        android:id="@+id/letterLogo"
+        android:layout_width="@dimen/letter_logo_size"
+        android:layout_height="@dimen/letter_logo_size"
+        android:backgroundTint="@color/colorSetOneOpacity"
+        android:textColor="@color/colorSetOne"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="M" />
+
+    <TextView
+        android:id="@+id/identityName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_medium"
+        android:textColor="@color/gray"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/letterLogo"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/app_name" />
+
+    <TextView
+        android:id="@+id/checkButton"
+        android:layout_width="@dimen/letter_logo_size"
+        android:layout_height="@dimen/letter_logo_size"
+        android:background="@drawable/check_button_selector"
+        android:enabled="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
