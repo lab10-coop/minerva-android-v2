@@ -8,6 +8,7 @@ import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.*
+import java.lang.IllegalStateException
 
 class WalletConfigRepository(
     private val localWalletProvider: LocalWalletConfigProvider,
@@ -48,7 +49,10 @@ class WalletConfigRepository(
     fun createDefaultWalletConfig() =
         WalletConfig(
             DEFAULT_VERSION, listOf(Identity(index = FIRST_IDENTITY_INDEX, name = DEFAULT_IDENTITY_NAME)),
-            listOf(Value(index = FIRST_VALUES_INDEX), Value(index = SECOND_VALUES_INDEX))
+            listOf(
+                Value(index = FIRST_VALUES_INDEX, name = DEFAULT_ARTIS_NAME, network = Network.ARTIS.value),
+                Value(index = SECOND_VALUES_INDEX, name = DEFAULT_ETHEREUM_NAME, network = Network.ETHEREUM.value)
+            )
         )
 
     private fun saveLocallyAndMapToWalletConfig(walletConfigResponse: WalletConfigResponse): WalletConfig {
@@ -66,5 +70,19 @@ class WalletConfigRepository(
         const val SLASH = "/"
         const val ENCODED_SLASH = "%2F"
         const val DEFAULT_IDENTITY_NAME = "Identity #1"
+        const val DEFAULT_ARTIS_NAME = "#1 ARTIS"
+        const val DEFAULT_ETHEREUM_NAME = "#2 Ethereum"
+    }
+}
+
+enum class Network(val value: String) {
+    ARTIS("ATS"),
+    ETHEREUM("ETH"),
+    POA("POA"),
+    XDAI("XDAI");
+
+    companion object {
+        private val map = values().associateBy(Network::value)
+        fun fromString(type: String) = map[type] ?: throw IllegalStateException("Not supported Network!")
     }
 }

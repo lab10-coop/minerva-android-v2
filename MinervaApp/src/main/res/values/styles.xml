@@ -7,6 +7,7 @@
         <item name="android:statusBarColor">@color/lightGray</item>
         <item name="android:fontFamily">@font/font_family</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="popupMenuStyle">@style/ValuePopupMenu</item>
     </style>
 
     <style name="AppTheme.ActionBar" parent="@style/Widget.MaterialComponents.Light.ActionBar.Solid">
@@ -42,6 +43,12 @@
         <item name="android:maxLines">1</item>
         <item name="android:maxLength">255</item>
         <item name="android:inputType">textCapSentences</item>
+    </style>
+
+    <style name="ValuePopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/rounded_popup_menu_background</item>
+        <item name="android:dropDownVerticalOffset">-40dp</item>
+        <item name="android:dropDownHorizontalOffset">3dp</item>
     </style>
 
 </resources>

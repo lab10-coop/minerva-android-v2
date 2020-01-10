@@ -98,7 +98,7 @@ class EditIdentityFragment : Fragment() {
         this.identity = identity
 
         identityName.setText(identity.name)
-        name.setText(identity.data[IDENTITY_DATA_LIST[0]])
+        valueName.setText(identity.data[IDENTITY_DATA_LIST[0]])
         email.setText(identity.data[IDENTITY_DATA_LIST[1]])
         phoneNumber.setText(identity.data[IDENTITY_DATA_LIST[2]])
         birthDate.setText(identity.data[IDENTITY_DATA_LIST[3]])
@@ -124,7 +124,7 @@ class EditIdentityFragment : Fragment() {
     //TODO Will be changed in phase 2 for dynamic labels
     private fun prepareFormData(): LinkedHashMap<String, String> {
         val map = mutableMapOf<String, String>()
-        name.text.toString().apply {
+        valueName.text.toString().apply {
             if (isNotEmpty()) map[IDENTITY_DATA_LIST[0]] = this
         }
         email.text.toString().apply {

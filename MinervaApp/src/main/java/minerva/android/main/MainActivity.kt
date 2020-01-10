@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -18,11 +19,8 @@ import minerva.android.services.ServicesFragment
 import minerva.android.services.scanner.LiveScannerActivity
 import minerva.android.settings.SettingsFragment
 import minerva.android.values.ValuesFragment
-import minerva.wrapped.WrappedActivity
-import minerva.wrapped.WrappedFragmentType
 import minerva.wrapped.startNewIdentityWrappedActivity
 import org.koin.android.ext.android.inject
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
 
@@ -56,17 +54,20 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
         menu?.findItem(R.id.barcodeScanner)?.apply {
             isVisible = isServicesTabSelected()
         }
-        menu?.findItem(R.id.addIdentities)?.apply {
-            isVisible = shouldShowAddIcon()
+        menu?.findItem(R.id.addIdentity)?.apply {
+            isVisible = shouldShowAddIdentityIcon()
+        }
+        menu?.findItem(R.id.addValue)?.apply {
+            isVisible = shouldShowAddValueIcon()
         }
         return super.onPrepareOptionsMenu(menu)
     }
 
-    private fun shouldShowAddIcon() = isIdentitiesTabSelected() || isValuesTabSelected()
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.addIdentities -> startNewIdentityWrappedActivity(this)
+            R.id.addIdentity -> startNewIdentityWrappedActivity(this)
+            //TODO implement adding new values
+            R.id.addValue -> Toast.makeText(this, "Add Value", Toast.LENGTH_SHORT).show()
             R.id.barcodeScanner -> launchActivity<LiveScannerActivity>()
         }
         return super.onOptionsItemSelected(item)
@@ -76,6 +77,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
         if (isIdentitiesTabSelected()) super.onBackPressed()
         else bottomNavigation.selectedItemId = R.id.identities
     }
+
+    private fun shouldShowAddIdentityIcon() = isIdentitiesTabSelected()
+
+    private fun shouldShowAddValueIcon() = isValuesTabSelected()
 
     private fun isServicesTabSelected() = bottomNavigation.selectedItemId == R.id.services
 

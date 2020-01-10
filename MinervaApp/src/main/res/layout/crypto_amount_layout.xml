@@ -6,18 +6,21 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/titledTextViewTitleColor"
-        android:textSize="@dimen/text_small"
-        tools:text="Name" />
-
-    <TextView
-        android:id="@+id/body"
+        android:id="@+id/cryptoAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/titledTextViewBodyColor"
         android:textSize="@dimen/text_normal"
+        android:gravity="end"
+        tools:text="Name" />
+
+    <TextView
+        android:id="@+id/currencyAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:textColor="@color/titledTextViewTitleColor"
+        android:textSize="@dimen/text_small"
+        android:gravity="end"
         tools:text="John Smith" />
 </merge>
