@@ -13,6 +13,7 @@ class ActionButton @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr) {
     init {
         LayoutInflater.from(context).inflate(R.layout.action_button, this, true)
+        orientation = HORIZONTAL
     }
 
     fun setIcon(drawable: Int) {

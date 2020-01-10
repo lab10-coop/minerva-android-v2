@@ -23,50 +23,72 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
             android:background="@drawable/identity_background"
-            android:padding="24dp">
+            android:padding="@dimen/margin_normal">
 
-            <minerva.android.widget.LetterLogo
-                android:id="@+id/profileImage"
-                android:layout_width="@dimen/letter_logo_size"
-                android:layout_height="@dimen/letter_logo_size"
-                android:backgroundTint="@color/colorSetOneOpacity"
-                android:textColor="@color/colorSetOne"
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="M" />
+                tools:src="@drawable/ic_artis" />
 
             <TextView
-                android:id="@+id/identityName"
+                android:id="@+id/valueName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/margin_normal"
-                android:textSize="@dimen/text_normal"
+                android:layout_marginLeft="@dimen/margin_xsmall"
                 android:fontFamily="@font/rubik_medium"
-                app:layout_constraintBottom_toBottomOf="@id/profileImage"
-                app:layout_constraintLeft_toRightOf="@id/profileImage"
-                app:layout_constraintTop_toTopOf="@id/profileImage"
-                tools:text="@string/app_name" />
+                android:textSize="@dimen/text_normal"
+                app:layout_constraintBottom_toBottomOf="@id/icon"
+                app:layout_constraintLeft_toRightOf="@id/icon"
+                app:layout_constraintTop_toTopOf="@id/icon"
+                tools:text="#1 ARTIS" />
+
+            <ImageView
+                android:id="@+id/menu"
+                android:layout_width="@dimen/clickable_area"
+                android:layout_height="@dimen/clickable_area"
+                android:src="@drawable/ic_three_dots"
+                android:scaleType="center"
+                app:layout_constraintBottom_toBottomOf="@id/icon"
+                app:layout_constraintLeft_toLeftOf="@id/arrow"
+                app:layout_constraintRight_toRightOf="@id/arrow"
+                app:layout_constraintTop_toTopOf="@id/icon" />
 
             <ImageView
                 android:id="@+id/arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_down_arrow"
-                app:layout_constraintBottom_toBottomOf="@id/profileImage"
+                app:layout_constraintTop_toTopOf="@id/amountView"
+                app:layout_constraintBottom_toBottomOf="@id/amountView"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@id/profileImage" />
+                />
 
-            <minerva.android.widget.IdentityDataContent
-                android:id="@+id/dataContainer"
-                android:layout_width="match_parent"
+            <minerva.android.widget.CryptoAmountView
+                android:id="@+id/amountView"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_normal"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/profileImage" />
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginRight="@dimen/margin_normal"
+                app:layout_constraintRight_toLeftOf="@id/arrow"
+                app:layout_constraintTop_toBottomOf="@id/icon" />
 
             <TextView
-                android:id="@+id/editButton"
+                android:id="@+id/cryptoShortName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_small"
+                android:textSize="@dimen/text_normal"
+                app:layout_constraintBottom_toBottomOf="@id/amountView"
+                app:layout_constraintLeft_toLeftOf="@id/valueName"
+                app:layout_constraintTop_toTopOf="@id/amountView"
+                tools:text="ATS"
+                tools:textColor="@color/artis" />
+
+            <TextView
+                android:id="@+id/sendButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_normal"
@@ -75,30 +97,15 @@
                 android:background="@drawable/border_light_button"
                 android:gravity="center"
                 android:padding="@dimen/margin_small"
-                android:text="@string/edit"
+                tools:text="Send ATS"
                 android:textColor="@color/colorAccent"
                 android:fontFamily="@font/rubik_medium"
                 android:visibility="gone"
-                app:layout_constraintBottom_toTopOf="@id/removeButton"
+                tools:visibility="visible"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/dataContainer" />
+                app:layout_constraintTop_toBottomOf="@id/amountView" />
 
-            <TextView
-                android:id="@+id/removeButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:foreground="@drawable/ripple"
-                android:background="@drawable/border_light_button"
-                android:gravity="center"
-                android:padding="@dimen/margin_small"
-                android:text="@string/remove"
-                android:textColor="@color/colorAccent"
-                android:fontFamily="@font/rubik_medium"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

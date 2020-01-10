@@ -68,4 +68,7 @@
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="identity">Identity</string>
+    <string name="send">Send</string>
+    <string name="show_address">Show address</string>
+    <string name="add_an_asset">Add an asset</string>
 </resources>
