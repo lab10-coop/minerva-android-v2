@@ -21,4 +21,5 @@
     <dimen name="form_box_stroke_width">2dp</dimen>
 
     <dimen name="clickable_area">32dp</dimen>
+    <dimen name="qr_code_size">256dp</dimen>
 </resources>

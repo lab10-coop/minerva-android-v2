@@ -21,8 +21,8 @@ class EditIdentityViewModel(private val walletManager: WalletManager) : BaseView
     private val _saveErrorLiveData = MutableLiveData<Event<Throwable>>()
     val saveErrorLiveData: LiveData<Event<Throwable>> get() = _saveErrorLiveData
 
-    fun loadIdentity(index: Int, defaultName: String) {
-        _editIdentityLiveData.value = Event(walletManager.loadIdentity(index, defaultName))
+    fun loadIdentity(position: Int, defaultName: String) {
+        _editIdentityLiveData.value = Event(walletManager.loadIdentity(position, defaultName))
     }
 
     fun saveIdentity(identity: Identity) {

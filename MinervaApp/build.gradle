@@ -58,7 +58,8 @@ dependencies {
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
     implementation crashlyticsDependencies.values()
-    implementation scannerDependency.values()
+    implementation qrDependency.values()
+    implementation glideDependencies.values()
 
     implementation coreDependencies.values()
     implementation androidCoreDependencies.values()

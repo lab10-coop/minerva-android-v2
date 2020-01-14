@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -16,17 +15,20 @@ import minerva.android.extension.gone
 import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visible
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.widget.getNetworkColor
 import minerva.android.widget.getNetworkIcon
+import minerva.wrapped.startValueAddressWrappedActivity
 
 
 class ValueAdapter : RecyclerView.Adapter<ValueViewHolder>() {
 
-    private var values = listOf<Value>()
+    private var activeValues = mutableListOf<Value>()
+    private var rawValues = listOf<Value>()
 
-    override fun getItemCount(): Int = values.size
+    override fun getItemCount(): Int = activeValues.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ValueViewHolder =
         ValueViewHolder(
@@ -37,11 +39,27 @@ class ValueAdapter : RecyclerView.Adapter<ValueViewHolder>() {
         )
 
     override fun onBindViewHolder(holder: ValueViewHolder, position: Int) {
-        holder.setData(values[position])
+        val rawPosition = getPositionInRaw(activeValues[position].index)
+        holder.setData(rawPosition, activeValues[position])
     }
 
-    fun updateList(values: List<Value>) {
-        this.values = values
+    private fun getPositionInRaw(index: Int): Int {
+        rawValues.forEachIndexed { position, identity ->
+            if (identity.index == index) {
+                return position
+            }
+        }
+        return Int.InvalidIndex
+    }
+
+    fun updateList(data: List<Value>) {
+        rawValues = data
+        activeValues.clear()
+        data.forEach {
+            if (!it.isDeleted) {
+                activeValues.add(it)
+            }
+        }
         notifyDataSetChanged()
     }
 }
@@ -50,7 +68,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
 
     private var isOpen = false
 
-    fun setData(value: Value) {
+    fun setData(rawPosition: Int, value: Value) {
         view.apply {
             card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
             icon.setImageResource(getNetworkIcon(Network.fromString(value.network)))
@@ -66,7 +84,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
                 Toast.makeText(view.context, "Sending ${value.network}", Toast.LENGTH_SHORT).show()
             }
 
-            menu.setOnClickListener { showMenu(menu)}
+            menu.setOnClickListener { showMenu(rawPosition, value.name, Network.fromString(value.network), menu) }
 
             setOnClickListener {
                 TransitionManager.beginDelayedTransition(viewGroup)
@@ -91,15 +109,16 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         }
     }
 
-    private fun showMenu(anchor: View): Boolean {
+    private fun showMenu(position: Int, title: String, network: Network, anchor: View): Boolean {
         PopupMenu(view.context, anchor).apply {
             menuInflater.inflate(R.menu.value_menu, menu)
             gravity = Gravity.RIGHT
             show()
 
+            //TODO add rest of the menu functionality
             setOnMenuItemClickListener {
                 when (it.itemId) {
-                    R.id.showAddress -> Toast.makeText(view.context, "Show address", Toast.LENGTH_SHORT).show()
+                    R.id.showAddress -> startValueAddressWrappedActivity(view.context, position, title, getNetworkIcon(network))
                     R.id.addAsset -> Toast.makeText(view.context, "Add an asset", Toast.LENGTH_SHORT).show()
                     R.id.remove -> Toast.makeText(view.context, "Remove", Toast.LENGTH_SHORT).show()
                     else -> {

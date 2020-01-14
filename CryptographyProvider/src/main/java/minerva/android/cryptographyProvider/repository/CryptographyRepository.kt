@@ -8,7 +8,6 @@ interface CryptographyRepository {
     fun computeDeliveredKeys(
         privateKey: String,
         derivationPath: String,
-        prompt: String,
         callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     )
 }
