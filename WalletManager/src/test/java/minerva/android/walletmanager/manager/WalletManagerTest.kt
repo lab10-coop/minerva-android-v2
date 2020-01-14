@@ -8,7 +8,7 @@ import io.reactivex.Observable
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.api.ServicesApi
+import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.Identity

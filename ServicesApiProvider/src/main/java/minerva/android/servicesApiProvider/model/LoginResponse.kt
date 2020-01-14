@@ -1,4 +1,4 @@
-package minerva.android.model
+package minerva.android.servicesApiProvider.model
 
 import com.google.gson.annotations.SerializedName
 

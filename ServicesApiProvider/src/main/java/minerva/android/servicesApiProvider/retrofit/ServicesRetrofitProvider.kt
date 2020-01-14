@@ -1,8 +1,8 @@
-package minerva.android.retrofit
+package minerva.android.servicesApiProvider.retrofit
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import minerva.android.api.ServicesApi
+import minerva.android.servicesApiProvider.api.ServicesApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

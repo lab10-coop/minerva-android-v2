@@ -1,7 +1,7 @@
 package minerva.android.walletmanager
 
 import minerva.android.configProvider.createWalletConfigProviderModule
-import minerva.android.createServicesApiProviderModule
+import minerva.android.servicesApiProvider.createServicesApiProviderModule
 import minerva.android.cryptographyProvider.createCryptographyModules
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.WalletManager

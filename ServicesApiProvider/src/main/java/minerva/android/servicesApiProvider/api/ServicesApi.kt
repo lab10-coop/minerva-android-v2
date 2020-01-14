@@ -1,8 +1,8 @@
-package minerva.android.api
+package minerva.android.servicesApiProvider.api
 
 import io.reactivex.Single
-import minerva.android.model.LoginResponse
-import minerva.android.model.TokenPayload
+import minerva.android.servicesApiProvider.model.LoginResponse
+import minerva.android.servicesApiProvider.model.TokenPayload
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST

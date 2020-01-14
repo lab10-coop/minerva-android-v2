@@ -8,11 +8,11 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.api.ServicesApi
+import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
-import minerva.android.model.TokenPayload
+import minerva.android.servicesApiProvider.model.TokenPayload
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.storage.LocalStorage
