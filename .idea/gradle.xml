@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/CryptographyProvider" />
             <option value="$PROJECT_DIR$/KotlinUtils" />
             <option value="$PROJECT_DIR$/MinervaApp" />
+            <option value="$PROJECT_DIR$/ServicesApiProvider" />
             <option value="$PROJECT_DIR$/UiExtension" />
             <option value="$PROJECT_DIR$/WalletConfigProvider" />
             <option value="$PROJECT_DIR$/WalletManager" />

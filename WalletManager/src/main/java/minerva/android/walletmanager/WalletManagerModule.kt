@@ -1,6 +1,7 @@
 package minerva.android.walletmanager
 
 import minerva.android.configProvider.createWalletConfigProviderModule
+import minerva.android.createServicesApiProviderModule
 import minerva.android.cryptographyProvider.createCryptographyModules
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.WalletManager
@@ -14,11 +15,12 @@ import org.koin.dsl.module
 fun createWalletManagerModules(isDebug: Boolean, baseUrl: String) = createWalletModules()
     .plus(createCryptographyModules())
     .plus(createWalletConfigProviderModule(isDebug, baseUrl))
+    .plus(createServicesApiProviderModule(isDebug, baseUrl))
 
 fun createWalletModules() = module {
     factory { KeystoreRepository(get()) }
     factory { LocalWalletConfigProviderImpl(get()) as LocalWalletConfigProvider }
     factory { WalletConfigRepository(get(), get()) }
     factory { LocalStorage(get()) }
-    single { WalletManagerImpl(get(), get(), get(), get()) as WalletManager }
+    single { WalletManagerImpl(get(), get(), get(), get(), get()) as WalletManager }
 }

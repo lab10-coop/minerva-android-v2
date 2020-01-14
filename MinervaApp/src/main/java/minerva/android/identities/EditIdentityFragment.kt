@@ -11,7 +11,15 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_edit_identity.*
 import minerva.android.R
 import minerva.android.extension.*
-import minerva.android.identities.data.IDENTITY_DATA_LIST
+import minerva.android.identities.data.IdentityField.Companion.ADDRESS_1
+import minerva.android.identities.data.IdentityField.Companion.ADDRESS_2
+import minerva.android.identities.data.IdentityField.Companion.BIRTH_DATE
+import minerva.android.identities.data.IdentityField.Companion.CITY
+import minerva.android.identities.data.IdentityField.Companion.COUNTRY
+import minerva.android.identities.data.IdentityField.Companion.EMAIL
+import minerva.android.identities.data.IdentityField.Companion.NAME
+import minerva.android.identities.data.IdentityField.Companion.PHONE_NUMBER
+import minerva.android.identities.data.IdentityField.Companion.POSTCODE
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Identity
@@ -96,20 +104,22 @@ class EditIdentityFragment : Fragment() {
 
     private fun initializeView(identity: Identity) {
         this.identity = identity
-
-        identityName.setText(identity.name)
-        valueName.setText(identity.data[IDENTITY_DATA_LIST[0]])
-        email.setText(identity.data[IDENTITY_DATA_LIST[1]])
-        phoneNumber.setText(identity.data[IDENTITY_DATA_LIST[2]])
-        birthDate.setText(identity.data[IDENTITY_DATA_LIST[3]])
-        addressLine1.setText(identity.data[IDENTITY_DATA_LIST[4]])
-        addressLine2.setText(identity.data[IDENTITY_DATA_LIST[5]])
-        city.setText(identity.data[IDENTITY_DATA_LIST[6]])
-        postcode.setText(identity.data[IDENTITY_DATA_LIST[7]])
-        country.setText(identity.data[IDENTITY_DATA_LIST[8]])
-
+        setIdentityData(identity)
         confirmButton.text = if (index == Int.InvalidIndex) getString(R.string.create_new_identity)
         else getString(R.string.update_identity)
+    }
+
+    private fun setIdentityData(identity: Identity) {
+        identityName.setText(identity.name)
+        valueName.setText(identity.data[NAME])
+        email.setText(identity.data[EMAIL])
+        phoneNumber.setText(identity.data[PHONE_NUMBER])
+        birthDate.setText(identity.data[BIRTH_DATE])
+        addressLine1.setText(identity.data[ADDRESS_1])
+        addressLine2.setText(identity.data[ADDRESS_2])
+        city.setText(identity.data[CITY])
+        postcode.setText(identity.data[POSTCODE])
+        country.setText(identity.data[COUNTRY])
     }
 
     private fun saveIdentity() {
@@ -125,31 +135,31 @@ class EditIdentityFragment : Fragment() {
     private fun prepareFormData(): LinkedHashMap<String, String> {
         val map = mutableMapOf<String, String>()
         valueName.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[0]] = this
+            if (isNotEmpty()) map[NAME] = this
         }
         email.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[1]] = this
+            if (isNotEmpty()) map[EMAIL] = this
         }
         phoneNumber.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[2]] = this
+            if (isNotEmpty()) map[PHONE_NUMBER] = this
         }
         birthDate.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[3]] = this
+            if (isNotEmpty()) map[BIRTH_DATE] = this
         }
         addressLine1.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[4]] = this
+            if (isNotEmpty()) map[ADDRESS_1] = this
         }
         addressLine2.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[5]] = this
+            if (isNotEmpty()) map[ADDRESS_2] = this
         }
         city.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[6]] = this
+            if (isNotEmpty()) map[CITY] = this
         }
         postcode.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[7]] = this
+            if (isNotEmpty()) map[POSTCODE] = this
         }
         country.text.toString().apply {
-            if (isNotEmpty()) map[IDENTITY_DATA_LIST[8]] = this
+            if (isNotEmpty()) map[COUNTRY] = this
         }
         return map as LinkedHashMap<String, String>
     }

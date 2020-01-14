@@ -1,18 +1,18 @@
 package minerva.android.di
 
 import minerva.android.BuildConfig
-import minerva.android.identities.EditIdentityFragment
 import minerva.android.identities.EditIdentityViewModel
-import minerva.android.onboarding.create.CreateWalletViewModel
-import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.identities.IdentitiesViewModel
 import minerva.android.main.MainViewModel
+import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.services.login.PainlessLoginViewModel
+import minerva.android.services.scanner.LiveScannerViewModel
 import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.values.ValueAddressViewModel
 import minerva.android.values.ValuesViewModel
+import minerva.android.walletmanager.createWalletManagerModules
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -32,5 +32,6 @@ private val appModules = module {
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
     viewModel { PainlessLoginViewModel(get()) }
+    viewModel { LiveScannerViewModel(get()) }
     viewModel { ValueAddressViewModel(get()) }
 }

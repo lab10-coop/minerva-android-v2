@@ -1,7 +1,6 @@
 package minerva.android.identities.data
 
-import android.content.Context
-import minerva.android.R
+import androidx.annotation.StringDef
 import minerva.android.identities.data.IdentityField.Companion.ADDRESS_1
 import minerva.android.identities.data.IdentityField.Companion.ADDRESS_2
 import minerva.android.identities.data.IdentityField.Companion.BIRTH_DATE
@@ -11,24 +10,19 @@ import minerva.android.identities.data.IdentityField.Companion.EMAIL
 import minerva.android.identities.data.IdentityField.Companion.NAME
 import minerva.android.identities.data.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.identities.data.IdentityField.Companion.POSTCODE
-import minerva.android.kotlinUtils.Empty
 
-
-//TODO labels will be changed to dynamic in phase 2.
-
-fun getIdentityDataLabel(context: Context, key: String): String {
-    context.resources.getStringArray(R.array.identities_data_labels).apply {
-        return when (key) {
-            NAME -> this[0]
-            EMAIL -> this[1]
-            PHONE_NUMBER -> this[2]
-            BIRTH_DATE -> this[3]
-            ADDRESS_1 -> this[4]
-            ADDRESS_2 -> this[5]
-            CITY -> this[6]
-            POSTCODE -> this[7]
-            COUNTRY -> this[8]
-            else -> String.Empty
-        }
+@Retention(AnnotationRetention.SOURCE)
+@StringDef(NAME, EMAIL, PHONE_NUMBER, BIRTH_DATE, ADDRESS_1, ADDRESS_2, CITY, POSTCODE, COUNTRY)
+annotation class IdentityField {
+    companion object {
+        const val NAME = "name"
+        const val EMAIL = "email"
+        const val PHONE_NUMBER = "phone_number"
+        const val BIRTH_DATE = "birth_date"
+        const val ADDRESS_1 = "address_1"
+        const val ADDRESS_2 = "address_2"
+        const val CITY = "city"
+        const val POSTCODE = "postcode"
+        const val COUNTRY = "country"
     }
 }

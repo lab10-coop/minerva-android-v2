@@ -57,6 +57,8 @@ dependencies {
     implementation project(':WalletManager')
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
+    
+    implementation coroutinesDependencies.values()
     implementation crashlyticsDependencies.values()
     implementation qrDependency.values()
     implementation glideDependencies.values()
