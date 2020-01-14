@@ -8,9 +8,11 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.api.ServicesApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
+import minerva.android.model.TokenPayload
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.storage.LocalStorage
@@ -33,10 +35,15 @@ interface WalletManager {
     fun loadIdentity(position: Int, defaultName: String): Identity
     fun saveIdentity(identity: Identity): Completable
     fun removeIdentity(identity: Identity): Completable
-    fun loadValue(position: Int): Value
+    fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
     fun computeDerivedKey(
-        index: Int, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
+        index: Int,
+        callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     )
+
+    suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
+    fun painlessLogin(url: String, jwtToken: String): Single<String>
+    fun loadValue(position: Int): Value
 }
 
 //Derivation path for identities and values "m/99'/n" where n is index of identity and value
@@ -44,7 +51,8 @@ class WalletManagerImpl(
     private val keystoreRepository: KeystoreRepository,
     private val cryptographyRepository: CryptographyRepository,
     private val walletConfigRepository: WalletConfigRepository,
-    private val localStorage: LocalStorage
+    private val localStorage: LocalStorage,
+    private val servicesApi: ServicesApi
 ) : WalletManager {
 
     private lateinit var masterKey: MasterKey
@@ -136,6 +144,33 @@ class WalletManagerImpl(
         return Completable.error(Throwable("Wallet config was not initialized"))
     }
 
+    override fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse> =
+        cryptographyRepository.decodeJwtToken(jwtToken)
+            .map {
+                if (it.isNotEmpty()) {
+                    mapHashMapToQrCodeResponse(it)
+                } else {
+                    QrCodeResponse(isQrCodeValid = false)
+                }
+            }
+
+    override fun computeDerivedKey(
+        index: Int,
+        callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
+    ) {
+        cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, getDerivedPath(index), callback)
+    }
+
+    private fun getDerivedPath(index: Int) = "$DERIVED_PATH_PREFIX$index"
+
+    override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
+        cryptographyRepository.createJwtToken(payload, privateKey)
+
+    override fun painlessLogin(url: String, jwtToken: String): Single<String> {
+        return servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
+            .map { it.profile.did }
+    }
+
     override fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
         cryptographyRepository.restoreMasterKey(mnemonic, callback)
     }
@@ -154,13 +189,6 @@ class WalletManagerImpl(
         }
         Timber.e("Wallet Manager is not initialized!")
         return Value(Int.InvalidIndex)
-    }
-
-    override fun computeDerivedKey(
-        index: Int,
-        callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
-    ) {
-        cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, getDerivedPath(index), callback)
     }
 
     private fun walletConfigNewIndex(): Int {
@@ -195,10 +223,8 @@ class WalletManagerImpl(
         return walletConfig.identities.size
     }
 
-    private fun getDerivedPath(index: Int) = "$DERIVED_PATH_PREFFIX$index"
-
     companion object {
         private const val ONE_ELEMENT = 1
-        private const val DERIVED_PATH_PREFFIX = "m/99'/"
+        private const val DERIVED_PATH_PREFIX = "m/99'/"
     }
 }

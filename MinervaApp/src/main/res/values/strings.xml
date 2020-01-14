@@ -63,12 +63,15 @@
     <string name="camera_error">Camera initialization error:</string>
     <string name="login">Login</string>
     <string name="painless_login">Painless Login</string>
-    <string name="requested_data">Requested data:</string>
+    <string name="requested_data">Requested data: </string>
     <string name="choose_an_identity">Choose an identity</string>
     <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="identity">Identity</string>
+    <string name="select_identity_message">Please select identity</string>
+    <string name="invalid_qr_code_message">Invalid Qr code, please try again</string>
+    <string name="requested_data_message">Please, use identity with requested data</string>
     <string name="send">Send</string>
     <string name="show_address">Show address</string>
     <string name="add_an_asset">Add an asset</string>

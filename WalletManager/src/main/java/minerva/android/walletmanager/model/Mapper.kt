@@ -5,6 +5,21 @@ import minerva.android.configProvider.model.ValuePayload
 import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.configProvider.model.WalletConfigPayload
 
+const val CALLBACK = "callback"
+const val ISS = "iss"
+const val REQUESTED = "requested"
+
+fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCodeResponse = QrCodeResponse(
+    callback = responseMap[CALLBACK] as String?,
+    issuer = responseMap[ISS] as String?,
+    requestedData = getRequestedData(responseMap),
+    isQrCodeValid = true
+)
+
+private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> {
+    return if (responseMap[REQUESTED] is ArrayList<*>?) responseMap[REQUESTED] as ArrayList<String> else arrayListOf()
+}
+
 fun mapIdentityPayloadToIdentity(response: IdentityPayload): Identity =
     Identity(response.index, response.name, data = response.data, isDeleted = response.isDeleted)
 
@@ -26,7 +41,7 @@ fun mapWalletConfigResponseToWalletConfig(response: WalletConfigResponse): Walle
     response.walletPayload.valueResponses.forEach {
         values.add(mapValueResponseToValue(it))
     }
-  return WalletConfig(response.walletPayload.version, identities, values)
+    return WalletConfig(response.walletPayload.version, identities, values)
 }
 
 fun mapWalletConfigToWalletPayload(config: WalletConfig): WalletConfigPayload {

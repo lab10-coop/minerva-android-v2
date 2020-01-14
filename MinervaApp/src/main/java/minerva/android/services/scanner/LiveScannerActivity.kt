@@ -13,12 +13,18 @@ import com.budiyev.android.codescanner.*
 import com.google.zxing.BarcodeFormat
 import kotlinx.android.synthetic.main.activity_scanner.*
 import minerva.android.R
+import minerva.android.extension.gone
 import minerva.android.extension.launchActivity
+import minerva.android.extension.visible
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.PainlessLoginActivity
 import minerva.android.services.login.PainlessLoginActivity.Companion.SCAN_RESULT
-import minerva.wrapped.WrappedActivity
+import minerva.android.walletmanager.model.QrCodeResponse
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LiveScannerActivity : AppCompatActivity() {
+
+    private val viewModel: LiveScannerViewModel by viewModel()
 
     private lateinit var codeScanner: CodeScanner
     private var isPermissionGranted = false
@@ -34,13 +40,34 @@ class LiveScannerActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        prepareObserver()
         if (isPermissionGranted) {
             codeScanner.startPreview()
         }
     }
 
+    private fun prepareObserver() {
+        viewModel.scannerResultLiveData.observe(this, EventObserver { goToPainlessLoginActivity(it) })
+        viewModel.scannerErrorLiveData.observe(this, EventObserver { handleError() })
+    }
+
+    private fun goToPainlessLoginActivity(it: QrCodeResponse) {
+        scannerProgressBar.gone()
+        launchActivity<PainlessLoginActivity> {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra(SCAN_RESULT, it)
+        }
+        finish()
+    }
+
+    private fun handleError() {
+        scannerProgressBar.gone()
+        Toast.makeText(this@LiveScannerActivity, getString(R.string.invalid_qr_code_message), Toast.LENGTH_SHORT).show()
+    }
+
     override fun onPause() {
         codeScanner.releaseResources()
+        viewModel.onPause()
         super.onPause()
     }
 
@@ -59,18 +86,17 @@ class LiveScannerActivity : AppCompatActivity() {
             scanMode = ScanMode.CONTINUOUS
             formats = listOf(BarcodeFormat.QR_CODE)
             autoFocusMode = AutoFocusMode.SAFE
+
             decodeCallback = DecodeCallback {
                 runOnUiThread {
-                    launchActivity<PainlessLoginActivity> {
-                        addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        putExtra(SCAN_RESULT, it.text)
-                    }
+                    scannerProgressBar.visible()
+                    viewModel.validateResult(it.text)
                 }
             }
+
             errorCallback = ErrorCallback {
                 runOnUiThread {
                     Toast.makeText(this@LiveScannerActivity, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
-                    onBackPressed()
                 }
             }
         }

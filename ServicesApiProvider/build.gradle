@@ -5,7 +5,7 @@ apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.2"
 
 
     defaultConfig {
@@ -24,20 +24,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':CryptographyProvider')
+    implementation  'com.squareup.retrofit2:converter-scalars:2.1.0'
     implementation project(':KotlinUtils')
-    implementation project(':WalletConfigProvider')
-    implementation project(':ServicesApiProvider')
-
-    implementation androidCoreDependencies.values()
-    implementation koinDependencies.values()
     implementation coreDependencies.values()
-    implementation rxDependencies.values()
-
-    testImplementation androidTestDependencies.values()
+    implementation koinDependencies.values()
+    api rxDependencies.values()
+    implementation retrofitDependencies.values()
     testImplementation testDependencies.values()
 }

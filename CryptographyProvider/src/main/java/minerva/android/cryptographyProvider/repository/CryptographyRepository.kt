@@ -1,5 +1,7 @@
 package minerva.android.cryptographyProvider.repository
 
+import io.reactivex.Single
+
 interface CryptographyRepository {
     fun createMasterKey(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
     fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
@@ -10,4 +12,7 @@ interface CryptographyRepository {
         derivationPath: String,
         callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     )
+
+    fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>>
+    suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
 }
