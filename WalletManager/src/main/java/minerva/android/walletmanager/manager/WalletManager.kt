@@ -9,6 +9,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
@@ -32,9 +33,13 @@ interface WalletManager {
     fun loadIdentity(position: Int, defaultName: String): Identity
     fun saveIdentity(identity: Identity): Completable
     fun removeIdentity(identity: Identity): Completable
+    fun loadValue(position: Int): Value
+    fun computeDerivedKey(
+        index: Int, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
+    )
 }
 
-//TODO derivation path for identities and values "m/99'/n" where n is index of identity and value
+//Derivation path for identities and values "m/99'/n" where n is index of identity and value
 class WalletManagerImpl(
     private val keystoreRepository: KeystoreRepository,
     private val cryptographyRepository: CryptographyRepository,
@@ -142,6 +147,21 @@ class WalletManagerImpl(
     override fun isMnemonicRemembered(): Boolean =
         localStorage.isMenmonicRemembered()
 
+    override fun loadValue(position: Int): Value {
+        _walletConfigMutableLiveData.value?.values?.apply {
+            return if (inBounds(position)) this[position]
+            else Value(Int.InvalidIndex)
+        }
+        Timber.e("Wallet Manager is not initialized!")
+        return Value(Int.InvalidIndex)
+    }
+
+    override fun computeDerivedKey(
+        index: Int,
+        callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
+    ) {
+        cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, getDerivedPath(index), callback)
+    }
 
     private fun walletConfigNewIndex(): Int {
         _walletConfigMutableLiveData.value?.let {
@@ -175,7 +195,10 @@ class WalletManagerImpl(
         return walletConfig.identities.size
     }
 
+    private fun getDerivedPath(index: Int) = "$DERIVED_PATH_PREFFIX$index"
+
     companion object {
         private const val ONE_ELEMENT = 1
+        private const val DERIVED_PATH_PREFFIX = "m/99'/"
     }
 }

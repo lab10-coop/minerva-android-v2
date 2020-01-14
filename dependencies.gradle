@@ -42,6 +42,9 @@ ext {
     crashlyticsVersion = '2.10.1'
 
     scannerVersion = '2.1.0'
+    qrGeneratorVersion = '2.6.0'
+
+    glideVersion = '4.11.0'
 
     coreDependencies = [
             kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
@@ -100,11 +103,16 @@ ext {
             uPortSigner: "com.github.uport-project.uport-android-sdk:sdk:$uPortSignerVersion"
     ]
 
-    scannerDependency = [
-            scanner: "com.budiyev.android:code-scanner:$scannerVersion"
+    qrDependency = [
+            scanner     : "com.budiyev.android:code-scanner:$scannerVersion",
+            qrGenerator : "com.github.kenglxn.QRGen:android:$qrGeneratorVersion"
     ]
 
     crashlyticsDependencies = [
             crashlytics: "com.crashlytics.sdk.android:crashlytics:$crashlyticsVersion"
+    ]
+
+    glideDependencies = [
+            glide: "com.github.bumptech.glide:glide:$glideVersion"
     ]
 }

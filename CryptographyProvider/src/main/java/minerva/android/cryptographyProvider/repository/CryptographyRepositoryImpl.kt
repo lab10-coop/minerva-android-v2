@@ -3,6 +3,7 @@ package minerva.android.cryptographyProvider.repository
 import android.content.Context
 import com.uport.sdk.signer.UportHDSigner
 import com.uport.sdk.signer.encryption.KeyProtection
+import minerva.android.kotlinUtils.Empty
 import org.kethereum.bip39.wordlists.WORDLIST_ENGLISH
 import java.util.*
 
@@ -23,10 +24,9 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
     override fun computeDeliveredKeys(
         privateKey: String,
         derivationPath: String,
-        prompt: String,
         callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     ) {
-        UportHDSigner().computeAddressForPath(contex, privateKey, derivationPath, prompt, callback)
+        UportHDSigner().computeAddressForPath(contex, privateKey, derivationPath, String.Empty, callback)
     }
 
     override fun validateMnemonic(mnemonic: String): List<String> {

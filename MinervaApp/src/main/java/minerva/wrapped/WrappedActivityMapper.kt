@@ -9,10 +9,19 @@ fun startNewIdentityWrappedActivity(context: Context) {
     }
 }
 
-fun startEditIdentityWrappedActivity(context: Context, index: Int, title: String) {
+fun startEditIdentityWrappedActivity(context: Context, position: Int, title: String) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.IDENTITY)
-        putExtra(WrappedActivity.INDEX, index)
+        putExtra(WrappedActivity.INDEX, position)
         putExtra(WrappedActivity.TITLE, title)
+    }
+}
+
+fun startValueAddressWrappedActivity(context: Context, position: Int, title: String, logoRes: Int) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE_ADDRESS)
+        putExtra(WrappedActivity.INDEX, position)
+        putExtra(WrappedActivity.TITLE, title)
+        putExtra(WrappedActivity.LOGO, logoRes)
     }
 }

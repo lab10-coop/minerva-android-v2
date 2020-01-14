@@ -5,7 +5,10 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
 import minerva.android.identities.EditIdentityFragment
+import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.values.ValueAddressFragment
 import java.util.*
 
 class WrappedActivity : AppCompatActivity() {
@@ -20,8 +23,9 @@ class WrappedActivity : AppCompatActivity() {
     }
 
     private fun prepareFragment(fragmentType: WrappedFragmentType) {
-        val fragment = when(fragmentType) {
+        val fragment = when (fragmentType) {
             WrappedFragmentType.IDENTITY -> EditIdentityFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.VALUE_ADDRESS -> ValueAddressFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             //else fragments
         }
 
@@ -43,25 +47,36 @@ class WrappedActivity : AppCompatActivity() {
     private fun getDefaultTitle(fragmentType: WrappedFragmentType) =
         when (fragmentType) {
             WrappedFragmentType.IDENTITY -> getString(R.string.new_identity)
+            WrappedFragmentType.VALUE_ADDRESS -> String.Empty
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
         supportActionBar?.apply {
-            title = intent.getStringExtra(TITLE) ?: getDefaultTitle(fragmentType)
+            val actionBarTitle = intent.getStringExtra(TITLE) ?: getDefaultTitle(fragmentType)
+            val logoRes = intent.getIntExtra(LOGO, Int.InvalidId)
+            title = "  $actionBarTitle"  //hacks for padding between logo and title
+
             setDisplayHomeAsUpEnabled(true)
+            if (logoRes != Int.InvalidId) {
+                setDisplayShowHomeEnabled(true)
+                setDisplayUseLogoEnabled(true)
+                setLogo(getDrawable(logoRes))
+            }
         }
     }
 
     private fun getFragmentType() = intent.getSerializableExtra(FRAGMENT) as WrappedFragmentType?
-            ?: throw MissingFormatArgumentException("No fragment was passed to Activity")
+        ?: throw MissingFormatArgumentException("No fragment was passed to Activity")
 
     companion object {
         const val TITLE = "title"
         const val INDEX = "index"
         const val FRAGMENT = "fragment"
+        const val LOGO = "logo"
     }
 }
 
 enum class WrappedFragmentType {
-    IDENTITY
+    IDENTITY,
+    VALUE_ADDRESS
 }
