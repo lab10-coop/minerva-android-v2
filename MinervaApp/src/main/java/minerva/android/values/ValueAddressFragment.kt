@@ -45,7 +45,6 @@ class ValueAddressFragment : Fragment() {
     private fun prepareQR(publicKey: String) {
         resources.getDimensionPixelSize(R.dimen.qr_code_size).let { qrCodeSize ->
             if(publicKey == String.Empty) {
-                Timber.e("Public key is empty. QR Code can not be generated")
                 Toast.makeText(context, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
                 return@let
             }

@@ -158,6 +158,7 @@ class WalletManagerImpl(
         index: Int,
         callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     ) {
+
         cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, getDerivedPath(index), callback)
     }
 
