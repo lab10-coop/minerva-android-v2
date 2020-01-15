@@ -4,11 +4,13 @@ import android.content.Context
 import com.uport.sdk.signer.UportHDSigner
 import com.uport.sdk.signer.encryption.KeyProtection
 import io.reactivex.Single
+import me.uport.sdk.core.decodeBase64
 import me.uport.sdk.jwt.InvalidJWTException
 import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
 import minerva.android.kotlinUtils.Empty
 import org.kethereum.bip39.wordlists.WORDLIST_ENGLISH
+import org.walleth.khex.toHexString
 import timber.log.Timber
 import java.util.*
 
@@ -32,7 +34,9 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
         derivationPath: String,
         callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     ) {
-        UportHDSigner().computeAddressForPath(contex, privateKey, derivationPath, String.Empty, callback)
+        UportHDSigner().computeAddressForPath(contex, privateKey, derivationPath, String.Empty, callback = { error, privateKey, publicKey ->
+            return@computeAddressForPath callback(error, privateKey, publicKey.decodeBase64().toHexString())
+        })
     }
 
     override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> {
