@@ -78,10 +78,10 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
             walletManager.painlessLogin(callback, jwtToken)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onSuccess = {
-                        _loginMutableLiveData.value = Event(it)
+                    onComplete = {
+                        _loginMutableLiveData.value = Event(Any())
                     },
                     onError = {
                         Timber.d(it)

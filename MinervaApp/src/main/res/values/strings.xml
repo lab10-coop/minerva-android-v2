@@ -79,5 +79,7 @@
     <string name="login_success_message">You successfully logged into Service</string>
     <string name="login_failure_title">Painless Login Failure</string>
     <string name="login_failure_message">Login to service failed</string>
-    <string name="dissmiss">Dissmis</string>
+    <string name="dissmiss">Dismiss</string>
+    <string name="no_data_message">No data available</string>
+    <string name="last_used">Last used:</string>
 </resources>

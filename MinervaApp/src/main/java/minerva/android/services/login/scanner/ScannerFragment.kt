@@ -109,7 +109,9 @@ class ScannerFragment : Fragment() {
     }
 
     private fun goToChooseIdentityFragment(qrCodeResponse: QrCodeResponse) {
-        listener.showChooseIdentityFragment(qrCodeResponse)
+        Handler().postDelayed({
+            listener.showChooseIdentityFragment(qrCodeResponse)
+        }, DELAY)
     }
 
     private fun handleError() {

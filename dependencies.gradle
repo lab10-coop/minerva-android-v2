@@ -48,12 +48,14 @@ ext {
 
     glideVersion = '4.11.0'
     flashVersion = '1.0.3'
+    jodaVersion = '2.10.1'
 
     coreDependencies = [
             kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
             timber    : "com.jakewharton.timber:timber:$timberVersion",
             annotation: "androidx.annotation:annotation:$annotationVersion",
-            gson      : "com.google.code.gson:gson:$gsonVersion"
+            gson      : "com.google.code.gson:gson:$gsonVersion",
+            jodatime  : "joda-time:joda-time:$jodaVersion"
     ]
 
     koinDependencies = [

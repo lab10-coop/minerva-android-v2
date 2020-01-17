@@ -25,8 +25,8 @@ class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(),
         holder.bindView(identities[position])
     }
 
-    fun updateList(identities: List<Identity>) {
-        this.identities = identities
+    fun updateList(identities: MutableList<Identity>) {
+        this.identities = identities.filter { !it.isDeleted }
         notifyDataSetChanged()
     }
 

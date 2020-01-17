@@ -29,7 +29,7 @@ class IdentitiesFragment : Fragment() {
     //TODO BaseFragment?
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupRecycleView(view)
+        setupRecycleView()
         setupLiveData()
     }
 
@@ -38,9 +38,9 @@ class IdentitiesFragment : Fragment() {
         viewModel.onPause()
     }
 
-    private fun setupRecycleView(view: View) {
+    private fun setupRecycleView() {
         recyclerView.apply {
-            layoutManager = LinearLayoutManager(view.context)
+            layoutManager = LinearLayoutManager(context)
             adapter = identityAdapter
         }
         identityAdapter.removeIdentityLiveData.observe(this, EventObserver { showRemoveDialog(it) })
@@ -51,12 +51,12 @@ class IdentitiesFragment : Fragment() {
     }
 
     private fun setupLiveData() {
-        viewModel.walletConfigLiveData.observe(this, Observer { identityAdapter.updateList(it.identities) })
+        viewModel.walletConfigLiveData.observe(this, Observer { identityAdapter.updateList(it.identities.toMutableList()) })
         viewModel.errorLiveData.observe(this, EventObserver { showError(it) })
     }
 
     private fun showRemoveDialog(identity: Identity) {
-        this.context?.let {context ->
+        this.context?.let { context ->
             val dialog = AlertDialog.Builder(context)
                 .setTitle(identity.name)
                 .setMessage(R.string.remove_identity_dialog_message)

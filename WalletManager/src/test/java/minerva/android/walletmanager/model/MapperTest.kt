@@ -19,7 +19,7 @@ class MapperTest : WalletConfigTestValues() {
             identityData,
             true
         )
-        val identityResponse = mapIdentityToIdentityResponse(identity)
+        val identityResponse = mapIdentityToIdentityPayload(identity)
 
         identity.index shouldEqual identityResponse.index
         identity.name shouldEqual identityResponse.name
@@ -51,7 +51,7 @@ class MapperTest : WalletConfigTestValues() {
             "ValueNetworkTest"
         )
 
-        val valueResponse = mapValueToValueResponse(value)
+        val valueResponse = mapValueToValuePayload(value)
 
         value.index shouldEqual valueResponse.index
         value.name shouldEqual valueResponse.name
@@ -83,8 +83,8 @@ class MapperTest : WalletConfigTestValues() {
         val walletPayload = mapWalletConfigToWalletPayload(walletConfig)
 
         walletConfig.version shouldEqual walletPayload.version
-        walletConfig.identities[0].name shouldEqual walletPayload.identityResponses[0].name
-        walletConfig.values[0].name shouldEqual walletPayload.valueResponses[0].name
+        walletConfig.identities[0].name shouldEqual walletPayload.identityResponse[0].name
+        walletConfig.values[0].name shouldEqual walletPayload.valueResponse[0].name
     }
 
     @Test
@@ -103,8 +103,8 @@ class MapperTest : WalletConfigTestValues() {
         val walletConfig = mapWalletConfigResponseToWalletConfig(walletConfigResponse)
 
         walletConfig.version shouldEqual walletConfigPayload.version
-        walletConfig.identities[0].name shouldEqual walletConfigPayload.identityResponses[0].name
-        walletConfig.values[0].name shouldEqual walletConfigPayload.valueResponses[0].name
+        walletConfig.identities[0].name shouldEqual walletConfigPayload.identityResponse[0].name
+        walletConfig.values[0].name shouldEqual walletConfigPayload.valueResponse[0].name
     }
 
 }

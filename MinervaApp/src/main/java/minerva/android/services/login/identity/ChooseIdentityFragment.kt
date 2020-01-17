@@ -75,7 +75,7 @@ class ChooseIdentityFragment : Fragment() {
 
     private fun setupIdentitiesList() {
         viewModel.getIdentities()?.let {
-            identitiesAdapter.updateList(it)
+            identitiesAdapter.updateList(it.toMutableList())
         }
     }
 

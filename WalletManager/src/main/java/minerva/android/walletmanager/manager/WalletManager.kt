@@ -16,8 +16,13 @@ import minerva.android.servicesApiProvider.model.TokenPayload
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.storage.ServiceType
+import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
+import org.joda.time.DateTimeConstants
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
@@ -36,13 +41,9 @@ interface WalletManager {
     fun saveIdentity(identity: Identity): Completable
     fun removeIdentity(identity: Identity): Completable
     fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
-    fun computeDerivedKey(
-        index: Int,
-        callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
-    )
-
+    fun computeDerivedKey(index: Int, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
-    fun painlessLogin(url: String, jwtToken: String): Single<String>
+    fun painlessLogin(url: String, jwtToken: String): Completable
     fun loadValue(position: Int): Value
 }
 
@@ -106,19 +107,7 @@ class WalletManagerImpl(
 
     override fun saveIdentity(identity: Identity): Completable {
         _walletConfigMutableLiveData.value?.let {
-            val walletConfig = WalletConfig(it.updateVersion, prepareNewIdentitiesSet(identity, it), it.values)
-            return walletConfigRepository.updateWalletConfig(masterKey, walletConfig)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnComplete {
-                    walletConfigRepository.saveWalletConfigLocally(walletConfig)
-                    _walletConfigMutableLiveData.value = walletConfig
-                }
-                //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
-                .doOnError {
-                    //                  walletConfigRepository.saveWalletConfigLocally(walletConfig)
-                    //                    _walletConfigMutableLiveData.value = walletConfig
-                }
+            return updateWalletConfig(WalletConfig(it.updateVersion, prepareNewIdentitiesSet(identity, it), it.values, it.services))
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
@@ -134,7 +123,7 @@ class WalletManagerImpl(
     override fun removeIdentity(identity: Identity): Completable {
         _walletConfigMutableLiveData.value?.let { walletConfig ->
             val currentPosition = getPositionForIdentity(identity, walletConfig)
-            walletConfig.identities?.let { identities ->
+            walletConfig.identities.let { identities ->
                 //TODO handling error messages need to be designed and refactored
                 if (!identities.inBounds(currentPosition)) return Completable.error(Throwable("Missing identity to remove"))
                 if (isOnlyOneElement(identities)) return Completable.error(Throwable("You can not remove last identity"))
@@ -158,7 +147,6 @@ class WalletManagerImpl(
         index: Int,
         callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
     ) {
-
         cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, getDerivedPath(index), callback)
     }
 
@@ -167,9 +155,38 @@ class WalletManagerImpl(
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
 
-    override fun painlessLogin(url: String, jwtToken: String): Single<String> {
-        return servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
-            .map { it.profile.did }
+    override fun painlessLogin(url: String, jwtToken: String): Completable =
+        servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
+            .flatMapCompletable { saveService() }
+
+    //    TODO chane for generic service creation, proper API is needed
+    private fun saveService(): Completable {
+        _walletConfigMutableLiveData.value?.let {
+            return updateWalletConfig(
+                WalletConfig(
+                    it.updateVersion,
+                    it.identities,
+                    it.values,
+                    listOf(Service(ServiceType.MINERVA, MINERVA_SERVICE, DateUtils.getLastUsed()))
+                )
+            )
+        }
+        return Completable.error(Throwable("Wallet Config was not initialized"))
+    }
+
+    private fun updateWalletConfig(walletConfig: WalletConfig): Completable {
+        return walletConfigRepository.updateWalletConfig(masterKey, walletConfig)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnComplete {
+                walletConfigRepository.saveWalletConfigLocally(walletConfig)
+                _walletConfigMutableLiveData.value = walletConfig
+            }
+            //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
+            .doOnError {
+                //walletConfigRepository.saveWalletConfigLocally(walletConfig)
+                //_walletConfigMutableLiveData.value = walletConfig
+            }
     }
 
     override fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
@@ -188,7 +205,6 @@ class WalletManagerImpl(
             return if (inBounds(position)) this[position]
             else Value(Int.InvalidIndex)
         }
-        Timber.e("Wallet Manager is not initialized!")
         return Value(Int.InvalidIndex)
     }
 
@@ -227,5 +243,7 @@ class WalletManagerImpl(
     companion object {
         private const val ONE_ELEMENT = 1
         private const val DERIVED_PATH_PREFIX = "m/99'/"
+        private const val MINERVA_SERVICE = "Minerva Service"
+//        TODO should be dynamically handled form qr code
     }
 }

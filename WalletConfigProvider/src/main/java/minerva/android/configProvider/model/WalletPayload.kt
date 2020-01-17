@@ -9,12 +9,16 @@ data class WalletConfigPayload(
     @SerializedName("identities")
     private var _identityPayloads: List<IdentityPayload>? = listOf(),
     @SerializedName("values")
-    private var _valuePayloads: List<ValuePayload>? = listOf()
+    private var _valuePayloads: List<ValuePayload>? = listOf(),
+    @SerializedName("services")
+    private var _servicesPayloads: List<ServicePayload>? = listOf()
 ) {
     val version: Int
         get() = _version ?: Int.InvalidId
-    val identityResponses: List<IdentityPayload>
+    val identityResponse: List<IdentityPayload>
         get() = _identityPayloads ?: listOf()
-    val valueResponses: List<ValuePayload>
+    val valueResponse: List<ValuePayload>
         get() = _valuePayloads ?: listOf()
+    val serviceResponse: List<ServicePayload>
+        get() = _servicesPayloads ?: listOf()
 }
