@@ -1,115 +1,53 @@
 package minerva.android.services.login
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.drawable.ColorDrawable
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.activity_painless_login.*
-import kotlinx.android.synthetic.main.fragment_create_wallet.*
 import minerva.android.R
-import minerva.android.extension.invisible
-import minerva.android.extension.visible
+import minerva.android.extension.getCurrentFragment
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.kotlinUtils.function.orElse
+import minerva.android.services.login.identity.ChooseIdentityFragment
+import minerva.android.services.login.scanner.ScannerFragment
 import minerva.android.walletmanager.model.QrCodeResponse
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class PainlessLoginActivity : AppCompatActivity() {
-
-    private val viewModel: PainlessLoginViewModel by viewModel()
-    private val identitiesAdapter = IdentitiesAdapter()
-    private lateinit var qrCodeResponse: QrCodeResponse
+class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_painless_login)
-        setupActionBar()
-        intent.getSerializableExtra(SCAN_RESULT)?.let { qrCodeResponse = it as QrCodeResponse }
-        prepareObservers()
-    }
-
-    private fun prepareObservers() {
-        viewModel.loadingLiveData.observe(this, EventObserver { if (it) showLoader() else hideLoader() })
-        viewModel.errorLiveData.observe(this, EventObserver {
-            //            todo handle login error
-            Toast.makeText(this, "Ups, sth wen wrong", Toast.LENGTH_LONG).show()
-            finish()
-        })
-        viewModel.loginLiveData.observe(this, EventObserver {
-            //            todo handle login success
-            Toast.makeText(this, "Login successful!", Toast.LENGTH_LONG).show()
-            finish()
-        })
-        viewModel.requestedFieldsLiveData.observe(this, EventObserver {
-            Toast.makeText(this, getString(R.string.requested_data_message), Toast.LENGTH_LONG).show()
-        })
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setupServiceData()
-        setupRecycleView()
-        setupIdentitiesList()
-        setLoginButtonOnClickListener()
-    }
-
-    private fun hideLoader() {
-        loginButton.visible()
-        loginProgressBar.invisible()
-    }
-
-    private fun showLoader() {
-        loginProgressBar.visible()
-        loginButton.invisible()
-    }
-
-    private fun setupServiceData() {
-        serviceName.text = qrCodeResponse.serviceName
-        requestedFields.text = qrCodeResponse.identityFields
-    }
-
-    private fun setupIdentitiesList() {
-        viewModel.getIdentities()?.let {
-            identitiesAdapter.updateList(it)
-        }
-    }
-
-    private fun setLoginButtonOnClickListener() {
-        loginButton.setOnClickListener {
-            handleLoginButton()
-        }
-    }
-
-    private fun handleLoginButton() {
-        identitiesAdapter.getSelectedIdentity()?.let {
-            viewModel.handleLoginButton(it, qrCodeResponse)
-        }.orElse {
-            Toast.makeText(this, getString(R.string.select_identity_message), Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun setupActionBar() {
-        supportActionBar?.apply {
-            title = String.Empty
-            setBackgroundDrawable(ColorDrawable(getColor(R.color.lightGray)))
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowHomeEnabled(true)
-        }
+        hideToolbar()
+        showScannerFragment()
         window.statusBarColor = getColor(R.color.lightGray)
     }
 
-    private fun setupRecycleView() {
-        identities.apply {
-            layoutManager = LinearLayoutManager(this@PainlessLoginActivity)
-            adapter = identitiesAdapter
+    private fun showScannerFragment() {
+        supportFragmentManager.beginTransaction().apply {
+            add(R.id.loginFragmentsContainer, ScannerFragment.newInstance())
+            commit()
         }
     }
 
+    override fun onBackPressed() {
+        hideToolbar()
+        super.onBackPressed()
+    }
+
+    private fun hideToolbar() {
+        supportActionBar?.hide()
+    }
+
+    override fun onLoginResult(isLoginSucceed: Boolean) {
+        setResult(Activity.RESULT_OK, Intent().putExtra(IS_LOGIN_SUCCESS, isLoginSucceed))
+        finish()
+    }
+
+    private fun isChooseIdentityFragment() = getCurrentFragment() is ChooseIdentityFragment
+
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
-        if (isBackButtonPressed(menuItem)) {
+        if (isChooseIdentityFragment() && isBackButtonPressed(menuItem)) {
             onBackPressed()
         }
         return super.onOptionsItemSelected(menuItem)
@@ -117,7 +55,31 @@ class PainlessLoginActivity : AppCompatActivity() {
 
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
+    override fun showChooseIdentityFragment(qrCodeResponse: QrCodeResponse) {
+        showFragment(qrCodeResponse)
+        setupActionBar()
+    }
+
+    private fun showFragment(qrCodeResponse: QrCodeResponse) {
+        supportFragmentManager.beginTransaction().apply {
+            setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right)
+            replace(R.id.loginFragmentsContainer, ChooseIdentityFragment.newInstance(qrCodeResponse))
+            addToBackStack(null)
+            commit()
+        }
+    }
+
+    private fun setupActionBar() {
+        supportActionBar?.apply {
+            show()
+            title = String.Empty
+            setBackgroundDrawable(ColorDrawable(getColor(R.color.lightGray)))
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowHomeEnabled(true)
+        }
+    }
+
     companion object {
-        const val SCAN_RESULT = "scanResult"
+        const val IS_LOGIN_SUCCESS = "is_login_succeed"
     }
 }

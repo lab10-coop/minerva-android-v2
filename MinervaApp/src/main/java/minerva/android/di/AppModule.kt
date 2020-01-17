@@ -6,8 +6,8 @@ import minerva.android.identities.IdentitiesViewModel
 import minerva.android.main.MainViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
-import minerva.android.services.login.PainlessLoginViewModel
-import minerva.android.services.scanner.LiveScannerViewModel
+import minerva.android.services.login.identity.ChooseIdentityViewModel
+import minerva.android.services.login.scanner.ScannerViewModel
 import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.values.ValueAddressViewModel
@@ -31,7 +31,7 @@ private val appModules = module {
     viewModel { EditIdentityViewModel(get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
-    viewModel { PainlessLoginViewModel(get()) }
-    viewModel { LiveScannerViewModel(get()) }
+    viewModel { ChooseIdentityViewModel(get()) }
+    viewModel { ScannerViewModel(get()) }
     viewModel { ValueAddressViewModel(get()) }
 }

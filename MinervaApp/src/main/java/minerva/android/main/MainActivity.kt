@@ -1,29 +1,31 @@
 package minerva.android.main
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
 import minerva.android.extension.launchActivity
+import minerva.android.extension.launchActivityForResult
 import minerva.android.history.HistoryFragment
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.ServicesFragment
-import minerva.android.services.scanner.LiveScannerActivity
+import minerva.android.services.login.PainlessLoginActivity
+import minerva.android.services.login.PainlessLoginActivity.Companion.IS_LOGIN_SUCCESS
 import minerva.android.settings.SettingsFragment
 import minerva.android.values.ValuesFragment
+import minerva.android.widget.MinervaFlashbar
 import minerva.wrapped.startNewIdentityWrappedActivity
 import org.koin.android.ext.android.inject
+
 
 class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
 
@@ -71,9 +73,29 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
             R.id.addIdentity -> startNewIdentityWrappedActivity(this)
             //TODO implement adding new values
             R.id.addValue -> Toast.makeText(this, "Add Value", Toast.LENGTH_SHORT).show()
-            R.id.barcodeScanner -> launchActivity<LiveScannerActivity>()
+            R.id.barcodeScanner -> launchActivityForResult<PainlessLoginActivity>(LOGIN_RESULT_REQUEST_CODE)
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == LOGIN_RESULT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            data?.getBooleanExtra(IS_LOGIN_SUCCESS, false)?.let { isLoginSuccess ->
+                when {
+                    isLoginSuccess -> MinervaFlashbar.show(
+                        this,
+                        getString(R.string.login_success_title),
+                        getString(R.string.login_success_message)
+                    )
+                    !isLoginSuccess -> MinervaFlashbar.show(
+                        this,
+                        getString(R.string.login_failure_title),
+                        getString(R.string.login_failure_message)
+                    )
+                }
+            }
+        }
     }
 
     override fun onBackPressed() {
@@ -139,4 +161,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
 
     override fun removeSettingsBadgeIcon() =
         bottomNavigation.removeBadge(R.id.settings)
+
+    companion object {
+        const val LOGIN_RESULT_REQUEST_CODE = 3
+    }
 }

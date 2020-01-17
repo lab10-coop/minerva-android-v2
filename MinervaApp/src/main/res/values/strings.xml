@@ -75,4 +75,9 @@
     <string name="send">Send</string>
     <string name="show_address">Show address</string>
     <string name="add_an_asset">Add an asset</string>
+    <string name="login_success_title">Painless Login Successful</string>
+    <string name="login_success_message">You successfully logged into Service</string>
+    <string name="login_failure_title">Painless Login Failure</string>
+    <string name="login_failure_message">Login to service failed</string>
+    <string name="dissmiss">Dissmis</string>
 </resources>
