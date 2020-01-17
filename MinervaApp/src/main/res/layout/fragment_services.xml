@@ -6,9 +6,16 @@
     tools:context=".services.ServicesFragment">
 
     <TextView
+        android:id="@+id/noDataMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Services Fragment" />
+        android:visibility="invisible"
+        android:fontFamily="@font/rubik_medium"
+        android:text="@string/no_data_available"/>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </FrameLayout>
