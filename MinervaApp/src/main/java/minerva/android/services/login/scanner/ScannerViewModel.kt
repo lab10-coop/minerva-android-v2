@@ -1,4 +1,4 @@
-package minerva.android.services.scanner
+package minerva.android.services.login.scanner
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,7 +12,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.QrCodeResponse
 
-class LiveScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
+class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
 
     private var disposable: Disposable? = null
 

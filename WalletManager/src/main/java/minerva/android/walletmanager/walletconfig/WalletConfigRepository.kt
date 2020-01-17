@@ -8,6 +8,13 @@ import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_ARTIS_NAME
+import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_ETHEREUM_NAME
+import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
+import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
+import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
+import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.FIRST_VALUES_INDEX
+import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.SECOND_VALUES_INDEX
 import java.lang.IllegalStateException
 
 class WalletConfigRepository(
@@ -63,23 +70,16 @@ class WalletConfigRepository(
     }
 
     companion object {
-        const val DEFAULT_VERSION = 0
-        const val FIRST_IDENTITY_INDEX = 0
-        const val FIRST_VALUES_INDEX = 1
-        const val SECOND_VALUES_INDEX = 2
         const val SLASH = "/"
         const val ENCODED_SLASH = "%2F"
-        const val DEFAULT_IDENTITY_NAME = "Identity #1"
-        const val DEFAULT_ARTIS_NAME = "#1 ARTIS"
-        const val DEFAULT_ETHEREUM_NAME = "#2 Ethereum"
     }
 }
 
 enum class Network(val value: String) {
-    ARTIS("ATS"),
-    ETHEREUM("ETH"),
-    POA("POA"),
-    XDAI("XDAI");
+    ARTIS(Networks.ATS),
+    ETHEREUM(Networks.ETH),
+    POA(Networks.POA),
+    XDAI(Networks.XDAI);
 
     companion object {
         private val map = values().associateBy(Network::value)

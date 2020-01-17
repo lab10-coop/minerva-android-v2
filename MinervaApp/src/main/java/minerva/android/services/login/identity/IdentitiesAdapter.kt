@@ -1,4 +1,4 @@
-package minerva.android.services.login
+package minerva.android.services.login.identity
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,13 +8,15 @@ import kotlinx.android.synthetic.main.painless_login_item.view.*
 import minerva.android.R
 import minerva.android.walletmanager.model.Identity
 
-class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(), ItemViewHolder.IdentitiesAdapterListener {
+class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(),
+    ItemViewHolder.IdentitiesAdapterListener {
 
     private var identities = listOf<Identity>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder = ItemViewHolder(
-        LayoutInflater.from(parent.context).inflate(R.layout.painless_login_item, parent, false)
-    )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder =
+        ItemViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.painless_login_item, parent, false)
+        )
 
     override fun getItemCount(): Int = identities.size
 

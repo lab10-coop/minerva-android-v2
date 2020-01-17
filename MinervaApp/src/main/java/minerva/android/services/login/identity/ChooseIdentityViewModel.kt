@@ -1,4 +1,4 @@
-package minerva.android.services.login
+package minerva.android.services.login.identity
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,9 +10,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import minerva.android.identities.data.IdentityField
 import minerva.android.identities.data.IdentityField.Companion.PHONE_NUMBER
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.WalletManager
@@ -20,7 +18,7 @@ import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
 import timber.log.Timber
 
-class PainlessLoginViewModel(private val walletManager: WalletManager) : ViewModel() {
+class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewModel() {
 
     private val _loginMutableLiveData = MutableLiveData<Event<Any>>()
     val loginLiveData: LiveData<Event<Any>> get() = _loginMutableLiveData

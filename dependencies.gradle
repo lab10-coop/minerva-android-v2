@@ -47,6 +47,7 @@ ext {
     qrGeneratorVersion = '2.6.0'
 
     glideVersion = '4.11.0'
+    flashVersion = '1.0.3'
 
     coreDependencies = [
             kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
@@ -77,11 +78,11 @@ ext {
     ]
 
     coroutinesDependencies =
-    [
-            core     : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion",
-            android  : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion",
-            viewModel: "androidx.lifecycle:lifecycle-viewmodel-ktx:$viewModelScopeVersion"
-    ]
+            [
+                    core     : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion",
+                    android  : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion",
+                    viewModel: "androidx.lifecycle:lifecycle-viewmodel-ktx:$viewModelScopeVersion"
+            ]
 
     retrofitDependencies = [
             retrofit         : "com.squareup.retrofit2:retrofit:$retrofitVersion",
@@ -113,15 +114,16 @@ ext {
     ]
 
     qrDependency = [
-            scanner     : "com.budiyev.android:code-scanner:$scannerVersion",
-            qrGenerator : "com.github.kenglxn.QRGen:android:$qrGeneratorVersion"
+            scanner    : "com.budiyev.android:code-scanner:$scannerVersion",
+            qrGenerator: "com.github.kenglxn.QRGen:android:$qrGeneratorVersion"
     ]
 
     crashlyticsDependencies = [
             crashlytics: "com.crashlytics.sdk.android:crashlytics:$crashlyticsVersion"
     ]
 
-    glideDependencies = [
-            glide: "com.github.bumptech.glide:glide:$glideVersion"
+    uiDependencies = [
+            glide   : "com.github.bumptech.glide:glide:$glideVersion",
+            flashbar: "com.andrognito.flashbar:flashbar:$flashVersion"
     ]
 }

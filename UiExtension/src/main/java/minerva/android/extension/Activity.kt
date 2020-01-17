@@ -20,21 +20,25 @@ inline fun <reified T : Any> Context.launchActivity(
     startActivity(intent, options)
 }
 
+inline fun <reified T : Any> Activity.launchActivityForResult(
+    requestCode: Int,
+    options: Bundle? = null,
+    noinline init: Intent.() -> Unit = {}
+) {
+    val intent = newIntent<T>(this)
+    intent.init()
+    startActivityForResult(intent, requestCode, options)
+}
+
 inline fun <reified T : Any> newIntent(context: Context): Intent =
     Intent(context, T::class.java)
 
 fun AppCompatActivity.getCurrentFragment(): Fragment? =
     supportFragmentManager.fragments.firstOrNull { it.isVisible }
 
-fun Activity.hideKeyboard() {
-    hideKeyboard(currentFocus ?: View(this))
-}
-
 fun Fragment.hideKeyboard() {
     view?.let { activity?.hideKeyboard(it) }
 }
-
-fun Window.getSoftInputMode(): Int = attributes.softInputMode
 
 fun Context.hideKeyboard(view: View) {
     val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
