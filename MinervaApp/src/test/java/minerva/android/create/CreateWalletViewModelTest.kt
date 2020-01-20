@@ -46,7 +46,7 @@ class CreateWalletViewModelTest {
     @Test
     fun `create master seed should return success`() {
         walletManager.createMasterKeys { _, _, _ ->
-            whenever(walletManager.createDefaultWalletConfig(any())).doReturn(Completable.complete())
+            whenever(walletManager.createWalletConfig(any())).doReturn(Completable.complete())
             viewModel.loadingLiveData.observeForever(loadingDialogObserver)
             viewModel.createMasterSeed()
             checkLoadingDialogLiveData()
@@ -58,7 +58,7 @@ class CreateWalletViewModelTest {
     fun `create master seed should return error`() {
         val error = Throwable()
         walletManager.createMasterKeys { _, _, _ ->
-            whenever(walletManager.createDefaultWalletConfig(any())).doReturn(Completable.error(error))
+            whenever(walletManager.createWalletConfig(any())).doReturn(Completable.error(error))
             viewModel.loadingLiveData.observeForever(loadingDialogObserver)
             viewModel.createMasterSeed()
             checkLoadingDialogLiveData()

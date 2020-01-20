@@ -31,7 +31,7 @@ class CreateWalletViewModel(private val walletManager: WalletManager) : ViewMode
         _loadingLiveData.value = Event(true)
         walletManager.createMasterKeys { error, privateKey, publicKey ->
             if (error == null) {
-                disposable = walletManager.createDefaultWalletConfig(MasterKey(publicKey, privateKey))
+                disposable = walletManager.createWalletConfig(MasterKey(publicKey, privateKey))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnEvent { _loadingLiveData.value = Event(false) }

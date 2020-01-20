@@ -82,16 +82,16 @@ class WalletManagerTest {
 
     @Test
     fun `Create default walletConfig should return success`() {
-        whenever(walletConfigRepository.createDefaultWalletConfig(any())).thenReturn(Completable.complete())
-        val test = walletManager.createDefaultWalletConfig(MasterKey("1234", "5678")).test()
+        whenever(walletConfigRepository.createWalletConfig(any())).thenReturn(Completable.complete())
+        val test = walletManager.createWalletConfig(MasterKey("1234", "5678")).test()
         test.assertNoErrors()
     }
 
     @Test
     fun `Create default walletConfig should return error`() {
         val throwable = Throwable()
-        whenever(walletConfigRepository.createDefaultWalletConfig(any())).thenReturn(Completable.error(throwable))
-        val test = walletManager.createDefaultWalletConfig(MasterKey("1234", "5678")).test()
+        whenever(walletConfigRepository.createWalletConfig(any())).thenReturn(Completable.error(throwable))
+        val test = walletManager.createWalletConfig(MasterKey("1234", "5678")).test()
         test.assertError(throwable)
     }
 

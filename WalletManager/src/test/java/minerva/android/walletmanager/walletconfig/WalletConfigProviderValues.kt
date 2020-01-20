@@ -13,14 +13,21 @@ import minerva.android.walletmanager.model.WalletConfigTestValues
 
 class LocalMock : LocalWalletConfigProvider, WalletConfigTestValues() {
     override fun loadWalletConfig(): Observable<WalletConfig> = Observable.just(prepareData())
-    override fun saveWalletConfig(walletConfig: WalletConfig) {
-    }
-
+    override fun saveWalletConfig(walletConfig: WalletConfig) {}
     fun prepareData(): WalletConfig {
-        val identities = listOf(
-            Identity(0, "", "", "CitizenLocal", identityData, false)
-        )
-        return WalletConfig(0, identities, values)
+        return WalletConfig(0, identities, values, services)
+    }
+}
+
+class OnlineLikeLocalMock : MinervaApi, WalletConfigTestValues() {
+    override fun getWalletConfig(content: String, publicKey: String): Single<WalletConfigResponse> =
+        Single.just(WalletConfigResponse("", "", prepareData()))
+
+    override fun saveWalletConfig(content: String, publicKey: String, walletConfigPayload: WalletConfigPayload): Completable =
+        Completable.complete()
+
+    private fun prepareData(): WalletConfigPayload {
+        return WalletConfigPayload(0, identityResponses, valuesResponse, serviceResponse)
     }
 }
 
@@ -34,24 +41,14 @@ class OnlineMock : MinervaApi, WalletConfigTestValues() {
         Completable.complete()
 
     private fun prepareData(): WalletConfigPayload {
-        val identities = listOf(
-            IdentityPayload(0, "Citizen2", identityData, false)
-        )
-        return WalletConfigPayload(1, identities, valuesResponse)
+        return WalletConfigPayload(1, identityResponses, valuesResponse, serviceResponse)
     }
 }
 
-class OnlineLikeLocalMock : MinervaApi, WalletConfigTestValues() {
-    override fun getWalletConfig(content: String, publicKey: String): Single<WalletConfigResponse> =
-        Single.just(WalletConfigResponse("", "", prepareData()))
-
-    override fun saveWalletConfig(content: String, publicKey: String, walletPayload: WalletConfigPayload): Completable =
-        Completable.complete()
-
-    private fun prepareData(): WalletConfigPayload {
-        val identities = listOf(
-            IdentityPayload(0, "Citizen2", identityData, false)
-        )
-        return WalletConfigPayload(0, identities, valuesResponse)
+class LocalLikeOnlineMock : LocalWalletConfigProvider, WalletConfigTestValues() {
+    override fun loadWalletConfig(): Observable<WalletConfig> = Observable.just(prepareData())
+    override fun saveWalletConfig(walletConfig: WalletConfig) {}
+    fun prepareData(): WalletConfig {
+        return WalletConfig(0, identities, values, services)
     }
 }

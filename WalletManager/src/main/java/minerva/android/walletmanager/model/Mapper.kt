@@ -31,12 +31,12 @@ fun mapWalletConfigResponseToWalletConfig(response: WalletConfigResponse): Walle
     }
 
     response.walletPayload.serviceResponse.forEach {
-        services.add(mapServiceResponseToValue(it))
+        services.add(mapServiceResponseToService(it))
     }
     return WalletConfig(response.walletPayload.version, identities, values, services)
 }
 
-fun mapServiceResponseToValue(response: ServicePayload): Service =
+fun mapServiceResponseToService(response: ServicePayload): Service =
     Service(response.type, response.name, response.lastUsed)
 
 fun mapValueResponseToValue(response: ValuePayload): Value =
@@ -70,6 +70,5 @@ fun mapServiceToServicePayload(service: Service): ServicePayload =
 
 fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =
     IdentityPayload(identity.index, identity.name, identity.data, identity.isDeleted)
-
 
 fun mapValueToValuePayload(value: Value): ValuePayload = ValuePayload(value.index, value.name, value.network)
