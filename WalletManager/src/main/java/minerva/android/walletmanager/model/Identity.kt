@@ -1,13 +1,17 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.INCOGNITO_EMAIL
+import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.INCOGNITO_IDENTITY
+import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.INCOGNITO_PHONE
 
-data class Identity(
-    val index: Int,
-    var name: String = String.Empty,
+open class Identity(
+    open val index: Int,
+    open var name: String = String.Empty,
     val publicKey: String = String.Empty,
     val privateKey: String = String.Empty,
-    val data: LinkedHashMap<String, String> = linkedMapOf(),
+    open val data: LinkedHashMap<String, String> = linkedMapOf(),
     val isDeleted: Boolean = false,
     var isSelected: Boolean = false
 ) {
@@ -21,3 +25,11 @@ data class Identity(
         identity.isSelected
     )
 }
+
+data class IncognitoIdentity(
+    override var name: String = INCOGNITO_IDENTITY,
+    override val data: LinkedHashMap<String, String> = linkedMapOf(
+        Pair(IdentityField.EMAIL, INCOGNITO_EMAIL),
+        Pair(IdentityField.PHONE_NUMBER, INCOGNITO_PHONE)
+    )
+) : Identity(index = Int.InvalidIndex)

@@ -8,10 +8,10 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
+import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.TokenPayload
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
@@ -19,10 +19,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
-import org.joda.time.DateTimeConstants
 import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.util.*
 
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
@@ -32,7 +29,7 @@ interface WalletManager {
     fun validateMnemonic(mnemonic: String): List<String>
     fun createMasterKeys(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
     fun showMnemonic(callback: (error: Exception?, mnemonic: String) -> Unit)
-    fun createDefaultWalletConfig(masterKey: MasterKey): Completable
+    fun createWalletConfig(masterKey: MasterKey): Completable
     fun saveIsMnemonicRemembered()
     fun isMnemonicRemembered(): Boolean
     fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse>
@@ -43,7 +40,7 @@ interface WalletManager {
     fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
     fun computeDerivedKey(index: Int, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
-    fun painlessLogin(url: String, jwtToken: String): Completable
+    fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
     fun loadValue(position: Int): Value
 }
 
@@ -97,8 +94,8 @@ class WalletManagerImpl(
         cryptographyRepository.showMnemonicForMasterKey(keystoreRepository.decryptKey().privateKey, "TEST", callback)
     }
 
-    override fun createDefaultWalletConfig(masterKey: MasterKey): Completable {
-        return walletConfigRepository.createDefaultWalletConfig(masterKey)
+    override fun createWalletConfig(masterKey: MasterKey): Completable {
+        return walletConfigRepository.createWalletConfig(masterKey)
             .doOnComplete {
                 keystoreRepository.encryptKey(masterKey)
                 walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
@@ -115,9 +112,9 @@ class WalletManagerImpl(
     override fun loadIdentity(position: Int, defaultName: String): Identity {
         _walletConfigMutableLiveData.value?.identities?.apply {
             return if (inBounds(position)) this[position]
-            else Identity(walletConfigNewIndex(), prepareDefaultIdentityName(defaultName))
+            else Identity(getNewIndex(), prepareDefaultIdentityName(defaultName))
         }
-        return Identity(walletConfigNewIndex(), prepareDefaultIdentityName(defaultName))
+        return Identity(getNewIndex(), prepareDefaultIdentityName(defaultName))
     }
 
     override fun removeIdentity(identity: Identity): Completable {
@@ -155,9 +152,14 @@ class WalletManagerImpl(
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
 
-    override fun painlessLogin(url: String, jwtToken: String): Completable =
+    override fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
-            .flatMapCompletable { saveService() }
+            .flatMapCompletable {
+                if (identity !is IncognitoIdentity) {
+                    saveService()
+                }
+                Completable.complete()
+            }
 
     //    TODO chane for generic service creation, proper API is needed
     private fun saveService(): Completable {
@@ -208,7 +210,7 @@ class WalletManagerImpl(
         return Value(Int.InvalidIndex)
     }
 
-    private fun walletConfigNewIndex(): Int {
+    private fun getNewIndex(): Int {
         _walletConfigMutableLiveData.value?.let {
             return it.newIndex
         }
@@ -223,7 +225,7 @@ class WalletManagerImpl(
         return newIdentities
     }
 
-    private fun prepareDefaultIdentityName(defaultName: String): String = String.format("%s #%d", defaultName, walletConfigNewIndex())
+    private fun prepareDefaultIdentityName(defaultName: String): String = String.format("%s #%d", defaultName, getNewIndex())
 
     private fun isOnlyOneElement(identities: List<Identity>): Boolean {
         var realIdentitiesCount = 0

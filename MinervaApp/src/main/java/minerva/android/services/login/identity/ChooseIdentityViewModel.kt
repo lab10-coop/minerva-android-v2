@@ -10,7 +10,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import minerva.android.identities.data.IdentityField.Companion.PHONE_NUMBER
+import minerva.android.walletmanager.model.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.WalletManager
@@ -38,10 +38,10 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
     fun handleLoginButton(identity: Identity, qrCodeResponse: QrCodeResponse) {
         _loadingLiveData.value = Event(true)
         if (isIdentityValid(identity)) {
+            computeDerivedKeys(identity, qrCodeResponse)
+        } else {
             _loadingLiveData.value = Event(false)
             _requestedFieldsMutableLiveData.value = Event(Any())
-        } else {
-            computeDerivedKeys(identity, qrCodeResponse)
         }
     }
 
@@ -68,14 +68,18 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
         viewModelScope.launch(Dispatchers.IO) {
             val jwtToken = walletManager.createJwtToken(createLoginPayload(identity, publicKey), privateKey)
             withContext(Dispatchers.Main) {
-                handleLogin(qrCodeResponse, jwtToken)
+                handleLogin(qrCodeResponse, jwtToken, identity)
             }
         }
     }
 
-    private fun handleLogin(qrCodeResponse: QrCodeResponse, jwtToken: String) {
+    private fun handleLogin(
+        qrCodeResponse: QrCodeResponse,
+        jwtToken: String,
+        identity: Identity
+    ) {
         qrCodeResponse.callback?.let { callback ->
-            walletManager.painlessLogin(callback, jwtToken)
+            walletManager.painlessLogin(callback, jwtToken, identity)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnEvent { _loadingLiveData.value = Event(false) }
@@ -93,7 +97,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
 
     //todo change it to dynamic requested fields creation
     private fun isIdentityValid(identity: Identity) =
-        identity.data[PHONE_NUMBER] == null || identity.data[NAME] == null
+        identity.data[PHONE_NUMBER] != null || identity.data[NAME] != null
 
     //todo change it to dynamic payload creation
     private fun createLoginPayload(

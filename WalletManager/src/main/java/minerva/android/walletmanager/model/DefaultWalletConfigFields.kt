@@ -12,5 +12,8 @@ annotation class DefaultWalletConfigFields {
         const val DEFAULT_IDENTITY_NAME = "Identity #1"
         const val DEFAULT_ARTIS_NAME = "#1 ARTIS"
         const val DEFAULT_ETHEREUM_NAME = "#2 Ethereum"
+        const val INCOGNITO_IDENTITY = "Incognito Identity"
+        const val INCOGNITO_EMAIL = "incognito@email.com"
+        const val INCOGNITO_PHONE = "000000000"
     }
 }

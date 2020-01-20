@@ -2,15 +2,15 @@ package minerva.android.identities.data
 
 import android.content.Context
 import minerva.android.R
-import minerva.android.identities.data.IdentityField.Companion.ADDRESS_1
-import minerva.android.identities.data.IdentityField.Companion.ADDRESS_2
-import minerva.android.identities.data.IdentityField.Companion.BIRTH_DATE
-import minerva.android.identities.data.IdentityField.Companion.CITY
-import minerva.android.identities.data.IdentityField.Companion.COUNTRY
-import minerva.android.identities.data.IdentityField.Companion.EMAIL
-import minerva.android.identities.data.IdentityField.Companion.NAME
-import minerva.android.identities.data.IdentityField.Companion.PHONE_NUMBER
-import minerva.android.identities.data.IdentityField.Companion.POSTCODE
+import minerva.android.walletmanager.model.IdentityField.Companion.ADDRESS_1
+import minerva.android.walletmanager.model.IdentityField.Companion.ADDRESS_2
+import minerva.android.walletmanager.model.IdentityField.Companion.BIRTH_DATE
+import minerva.android.walletmanager.model.IdentityField.Companion.CITY
+import minerva.android.walletmanager.model.IdentityField.Companion.COUNTRY
+import minerva.android.walletmanager.model.IdentityField.Companion.EMAIL
+import minerva.android.walletmanager.model.IdentityField.Companion.NAME
+import minerva.android.walletmanager.model.IdentityField.Companion.PHONE_NUMBER
+import minerva.android.walletmanager.model.IdentityField.Companion.POSTCODE
 import minerva.android.kotlinUtils.Empty
 
 

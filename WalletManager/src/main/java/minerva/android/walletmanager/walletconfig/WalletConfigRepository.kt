@@ -49,7 +49,7 @@ class WalletConfigRepository(
             walletConfigPayload = mapWalletConfigToWalletPayload(walletConfig)
         )
 
-    fun createDefaultWalletConfig(masterKey: MasterKey) = updateWalletConfig(masterKey, createDefaultWalletConfig())
+    fun createWalletConfig(masterKey: MasterKey) = updateWalletConfig(masterKey, createDefaultWalletConfig())
 
     fun encodePublicKey(publicKey: String) = publicKey.replace(SLASH, ENCODED_SLASH)
 

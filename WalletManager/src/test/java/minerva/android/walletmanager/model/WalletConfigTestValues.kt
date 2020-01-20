@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.configProvider.model.IdentityPayload
+import minerva.android.configProvider.model.ServicePayload
 import minerva.android.configProvider.model.ValuePayload
 
 
@@ -34,5 +35,15 @@ open class WalletConfigTestValues {
     val valuesResponse = listOf(
         ValuePayload(0, "Value 1", ""),
         ValuePayload(1, "Value 2", "")
+    )
+
+    val services = listOf(
+        Service(0, "Service1", "123"),
+        Service(1, "Service2", "123")
+    )
+
+    val serviceResponse = listOf(
+        ServicePayload(0, "Service1", "123"),
+        ServicePayload(1, "Service2", "123")
     )
 }
