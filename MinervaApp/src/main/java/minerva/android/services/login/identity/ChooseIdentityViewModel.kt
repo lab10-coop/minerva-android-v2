@@ -97,7 +97,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
 
     //todo change it to dynamic requested fields creation
     private fun isIdentityValid(identity: Identity) =
-        identity.data[PHONE_NUMBER] != null || identity.data[NAME] != null
+        identity.data[PHONE_NUMBER] != null && identity.data[NAME] != null
 
     //todo change it to dynamic payload creation
     private fun createLoginPayload(
