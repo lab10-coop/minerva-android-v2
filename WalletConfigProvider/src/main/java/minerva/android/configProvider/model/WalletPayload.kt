@@ -21,4 +21,22 @@ data class WalletConfigPayload(
         get() = _valuePayloads ?: listOf()
     val serviceResponse: List<ServicePayload>
         get() = _servicesPayloads ?: listOf()
+
+    fun getIdentityPayload(index: Int): IdentityPayload {
+        identityResponse.forEach {
+            if(index == it.index) {
+                return it
+            }
+        }
+        return IdentityPayload(index)
+    }
+
+    fun getValuePayload(index: Int): ValuePayload {
+        valueResponse.forEach {
+            if(index == it.index) {
+                return it
+            }
+        }
+        return ValuePayload(index)
+    }
 }

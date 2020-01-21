@@ -8,6 +8,11 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
 
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
     defaultConfig {
         applicationId "minerva.android"
         minSdkVersion 23
@@ -15,6 +20,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "REST_API_URL", '"https://minerva-api.dev.lab10.io/backups/"'
+        buildConfigField "String", "BLOCKCHAIN_URL", '"https://rinkeby.infura.io/v3/6cc6c77b133647eb980c5e3cdad348fc"'
     }
 
     signingConfigs {
@@ -57,7 +63,7 @@ dependencies {
     implementation project(':WalletManager')
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
-
+    
     implementation coroutinesDependencies.values()
     implementation crashlyticsDependencies.values()
     implementation qrDependency.values()

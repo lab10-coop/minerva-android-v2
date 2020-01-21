@@ -1,9 +1,10 @@
 package minerva.android.walletmanager.walletconfig
 
 import io.reactivex.Observable
-import minerva.android.walletmanager.model.WalletConfig
+import io.reactivex.Single
+import minerva.android.configProvider.model.WalletConfigPayload
 
 interface LocalWalletConfigProvider {
-    fun loadWalletConfig(): Observable<WalletConfig>
-    fun saveWalletConfig(walletConfig: WalletConfig)
+    fun loadWalletConfig(): Single<WalletConfigPayload>
+    fun saveWalletConfig(walletConfig: WalletConfigPayload)
 }

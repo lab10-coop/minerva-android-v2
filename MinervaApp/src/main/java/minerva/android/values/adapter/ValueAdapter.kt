@@ -15,17 +15,20 @@ import minerva.android.extension.gone
 import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visible
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.walletconfig.Network
+import minerva.android.widget.CryptoAmountView.Companion.WRONG_CURRENCY_VALUE
 import minerva.android.widget.getNetworkColor
 import minerva.android.widget.getNetworkIcon
 import minerva.wrapped.startValueAddressWrappedActivity
+import java.math.BigInteger
 
 
 class ValueAdapter : RecyclerView.Adapter<ValueViewHolder>() {
 
-    private var activeValues = mutableListOf<Value>()
+    private var activeValues = listOf<Value>()
     private var rawValues = listOf<Value>()
 
     override fun getItemCount(): Int = activeValues.size
@@ -39,8 +42,10 @@ class ValueAdapter : RecyclerView.Adapter<ValueViewHolder>() {
         )
 
     override fun onBindViewHolder(holder: ValueViewHolder, position: Int) {
-        val rawPosition = getPositionInRaw(activeValues[position].index)
-        holder.setData(rawPosition, activeValues[position])
+        activeValues[position].let {
+            val rawPosition = getPositionInRaw(it.index)
+            holder.setData(rawPosition, it)
+        }
     }
 
     private fun getPositionInRaw(index: Int): Int {
@@ -54,12 +59,12 @@ class ValueAdapter : RecyclerView.Adapter<ValueViewHolder>() {
 
     fun updateList(data: List<Value>) {
         rawValues = data
-        activeValues.clear()
-        data.forEach {
-            if (!it.isDeleted) {
-                activeValues.add(it)
-            }
-        }
+        activeValues = data.filter { !it.isDeleted }
+        notifyDataSetChanged()
+    }
+
+    fun updateBalances(balances: HashMap<String, BigInteger>) {
+        activeValues.forEach { it.balance = balances[it.publicKey] ?: Int.InvalidId.toBigInteger() }
         notifyDataSetChanged()
     }
 }
@@ -75,8 +80,8 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
             valueName.text = value.name
             cryptoShortName.text = value.network
             cryptoShortName.setTextColor(ContextCompat.getColor(view.context, getNetworkColor(Network.fromString(value.network))))
-            //TODO add data from block chain!
-            amountView.setAmounts(12.53400f, 35.3f)
+            //TODO add data for normal currency!
+            amountView.setAmounts(value.balance, WRONG_CURRENCY_VALUE)
             sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
 
             sendButton.setOnClickListener {

@@ -19,19 +19,21 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.Identity
 import minerva.android.widget.generateColor
 import minerva.wrapped.startEditIdentityWrappedActivity
+import java.text.FieldPosition
 
 class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {
 
-    private var identities = listOf<Identity>()
+    private var activeIdentities = listOf<Identity>()
+    private var rawIdentities = listOf<Identity>()
 
     private val _removeIdentityLiveData = MutableLiveData<Event<Identity>>()
     val removeIdentityLiveData: LiveData<Event<Identity>> get() = _removeIdentityLiveData
 
-    override fun getItemCount(): Int = identities.size
+    override fun getItemCount(): Int = activeIdentities.size
 
     override fun onBindViewHolder(holder: IdentityViewHolder, position: Int) {
-        val rawPosition = getPosition(identities[position].index)
-        holder.setData(rawPosition, identities[position], _removeIdentityLiveData)
+        val rawPosition = getPositionInRaw(activeIdentities[position].index)
+        holder.setData(rawPosition, activeIdentities[position], _removeIdentityLiveData)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IdentityViewHolder =
@@ -42,13 +44,14 @@ class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {
             ), parent
         )
 
-    fun updateList(identities: MutableList<Identity>) {
-        this.identities = identities.filter { !it.isDeleted }
+    fun updateList(data: List<Identity>) {
+        rawIdentities = data
+        activeIdentities = data.filter { !it.isDeleted }
         notifyDataSetChanged()
     }
 
-    private fun getPosition(index: Int): Int {
-        identities.forEachIndexed { position, identity ->
+    private fun getPositionInRaw(index: Int): Int {
+        rawIdentities.forEachIndexed { position, identity ->
             if(identity.index == index) {
                 return position
             }
