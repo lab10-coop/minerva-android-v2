@@ -3,6 +3,7 @@ package minerva.android.walletmanager.model
 import minerva.android.configProvider.model.IdentityPayload
 import minerva.android.configProvider.model.ServicePayload
 import minerva.android.configProvider.model.ValuePayload
+import minerva.android.walletmanager.walletconfig.Network
 
 
 open class WalletConfigTestValues {
@@ -17,6 +18,22 @@ open class WalletConfigTestValues {
         "Some Key 4" to "Some value"
     )
 
+    val identity = listOf(
+        Identity(0, "IdentityName1", "publicKey", "privateKey", identityData, false)
+    )
+
+    val onlineIdentity = listOf(
+        Identity(0, "OnlineIdentityName1", "publicKey", "privateKey", identityData, false)
+    )
+
+    val identityResponse = listOf(
+        IdentityPayload(0, "IdentityName1", identityData, false)
+    )
+
+    val onlineIdentityResponse = listOf(
+        IdentityPayload(0, "OnlineIdentityName1", identityData, false)
+    )
+
     val identities = listOf(
         Identity(2, "pubicKey", "privateKey", "IdentityName1", identityData, false),
         Identity(3, "pubicKey", "privateKey", "IdentityName2", identityData, true)
@@ -28,13 +45,13 @@ open class WalletConfigTestValues {
     )
 
     val values = listOf(
-        Value(0, "", "", "Value 1", "Network 1"),
-        Value(1, "", "", "Value 2", "Network 2")
+        Value(1, "publicKey", "privateKey", "ValuePayload1", Network.ARTIS.value),
+        Value(2, "publicKey", "privateKey", "ValuePayload2", Network.ETHEREUM.value)
     )
 
     val valuesResponse = listOf(
-        ValuePayload(0, "Value 1", ""),
-        ValuePayload(1, "Value 2", "")
+        ValuePayload(1, "ValuePayload1", Network.ARTIS.value, false),
+        ValuePayload(2, "ValuePayload2", Network.ETHEREUM.value, false)
     )
 
     val services = listOf(

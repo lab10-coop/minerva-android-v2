@@ -28,6 +28,11 @@ class ValuesFragment : Fragment() {
         setupLiveData()
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshBalances()
+    }
+
     override fun onPause() {
         super.onPause()
         viewModel.onPause()
@@ -42,5 +47,6 @@ class ValuesFragment : Fragment() {
 
     private fun setupLiveData() {
         viewModel.walletConfigLiveData.observe(this, Observer { valueAdapter.updateList(it.values) })
+        viewModel.balanceLiveData.observe(this, Observer { valueAdapter.updateBalances(it) })
     }
 }

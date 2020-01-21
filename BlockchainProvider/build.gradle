@@ -1,12 +1,20 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.2"
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    lintOptions {
+        lintConfig file("lint.xml")
+    }
 
     defaultConfig {
         minSdkVersion 23
@@ -28,17 +36,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':CryptographyProvider')
-    implementation project(':KotlinUtils')
-    implementation project(':WalletConfigProvider')
-    implementation project(':ServicesApiProvider')
-    implementation project(':BlockchainProvider')
-
-    implementation androidCoreDependencies.values()
-    implementation koinDependencies.values()
     implementation coreDependencies.values()
+    implementation blockChainDependencies.values()
     implementation rxDependencies.values()
+    implementation koinDependencies.values()
 
-    testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
 }

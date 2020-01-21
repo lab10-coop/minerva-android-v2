@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.configProvider.model.*
+import minerva.android.kotlinUtils.Empty
 
 const val CALLBACK = "callback"
 const val ISS = "iss"
@@ -16,6 +17,17 @@ fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCodeResponse =
 private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> {
     return if (responseMap[REQUESTED] is ArrayList<*>?) responseMap[REQUESTED] as ArrayList<String> else arrayListOf()
 }
+
+fun mapIdentityPayloadToIdentity(response: IdentityPayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Identity =
+    Identity(response.index, response.name, publicKey, privateKey, response.data, response.isDeleted)
+
+fun mapIdentityToIdentityResponse(identity: Identity): IdentityPayload =
+    IdentityPayload(identity.index, identity.name, identity.data, identity.isDeleted)
+
+fun mapValueResponseToValue(response: ValuePayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Value =
+    Value(response.index, publicKey, privateKey, response.name, response.network, response.isDeleted)
+
+fun mapValueToValueResponse(value: Value): ValuePayload = ValuePayload(value.index, value.name, value.network)
 
 fun mapWalletConfigResponseToWalletConfig(response: WalletConfigResponse): WalletConfig {
     val identities = mutableListOf<Identity>()

@@ -9,6 +9,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.blockchainprovider.BlockchainProvider
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
@@ -21,9 +22,11 @@ import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import timber.log.Timber
+import java.math.BigInteger
 
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
+    val balanceLiveData: LiveData<HashMap<String, BigInteger>>
 
     fun isMasterKeyAvailable(): Boolean
     fun initWalletConfig()
@@ -39,10 +42,11 @@ interface WalletManager {
     fun saveIdentity(identity: Identity): Completable
     fun removeIdentity(identity: Identity): Completable
     fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
-    fun computeDerivedKey(index: Int, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
+
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
     fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
     fun loadValue(position: Int): Value
+    fun refreshBalances()
 }
 
 //Derivation path for identities and values "m/99'/n" where n is index of identity and value
@@ -50,6 +54,7 @@ class WalletManagerImpl(
     private val keystoreRepository: KeystoreRepository,
     private val cryptographyRepository: CryptographyRepository,
     private val walletConfigRepository: WalletConfigRepository,
+    private val blockchainProvider: BlockchainProvider,
     private val localStorage: LocalStorage,
     private val servicesApi: ServicesApi
 ) : WalletManager {
@@ -58,6 +63,9 @@ class WalletManagerImpl(
 
     private val _walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = _walletConfigMutableLiveData
+
+    private val _balanceLiveData = MutableLiveData<HashMap<String, BigInteger>>()
+    override val balanceLiveData: LiveData<HashMap<String, BigInteger>> get() = _balanceLiveData
 
     override fun isMasterKeyAvailable(): Boolean = keystoreRepository.isMasterKeySaved()
 
@@ -68,11 +76,23 @@ class WalletManagerImpl(
 
     @VisibleForTesting
     fun loadWalletConfig() {
-        walletConfigRepository.loadWalletConfig(masterKey.publicKey).subscribeBy(
+        walletConfigRepository.loadWalletConfig(masterKey).subscribeBy(
             onNext = { _walletConfigMutableLiveData.value = it },
             onError = { Timber.e("Downloading WalletConfig error: $it") },
             onComplete = { }
         )
+    }
+
+    override fun refreshBalances() {
+        _walletConfigMutableLiveData.value?.values?.let { values ->
+            val publicKeys = mutableListOf<String>()
+            values.forEach { publicKeys.add(it.publicKey) }
+            blockchainProvider.refreshBalances(publicKeys)
+                .subscribeBy(
+                    onSuccess = { onRefreshBalanceSuccess(it) },
+                    onError = { Timber.e("Refresh balance error: ${it.message}") }
+                )
+        }
     }
 
     override fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse> =
@@ -80,7 +100,7 @@ class WalletManagerImpl(
             .map {
                 if (it.state != ResponseState.ERROR) {
                     keystoreRepository.encryptKey(masterKey)
-                    walletConfigRepository.saveWalletConfigLocally(mapWalletConfigResponseToWalletConfig(it))
+                    walletConfigRepository.saveWalletConfigLocally(it.walletPayload)
                 }
                 RestoreWalletResponse(it.state, it.message)
             }
@@ -103,9 +123,23 @@ class WalletManagerImpl(
             }
     }
 
+    //TODO missing keys for new identity
     override fun saveIdentity(identity: Identity): Completable {
         _walletConfigMutableLiveData.value?.let {
-            return updateWalletConfig(WalletConfig(it.updateVersion, prepareNewIdentitiesSet(identity, it), it.values, it.services))
+            val walletConfig = WalletConfig(it.updateVersion, prepareNewIdentitiesSet(identity, it), it.values)
+            val walletConfigPayload = mapWalletConfigToWalletPayload(walletConfig)
+            return walletConfigRepository.updateWalletConfig(masterKey, walletConfigPayload)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete {
+                    walletConfigRepository.saveWalletConfigLocally(walletConfigPayload)
+                    _walletConfigMutableLiveData.value = walletConfig
+                }
+                //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
+                .doOnError {
+                    //                  walletConfigRepository.saveWalletConfigLocally(walletConfig)
+                    //                    _walletConfigMutableLiveData.value = walletConfig
+                }
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
@@ -141,15 +175,6 @@ class WalletManagerImpl(
                 }
             }
 
-    override fun computeDerivedKey(
-        index: Int,
-        callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
-    ) {
-        cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, getDerivedPath(index), callback)
-    }
-
-    private fun getDerivedPath(index: Int) = "$DERIVED_PATH_PREFIX$index"
-
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
 
@@ -183,11 +208,12 @@ class WalletManagerImpl(
     }
 
     private fun updateWalletConfig(walletConfig: WalletConfig): Completable {
-        return walletConfigRepository.updateWalletConfig(masterKey, walletConfig)
+        val walletConfigPayload = mapWalletConfigToWalletPayload(walletConfig)
+        return walletConfigRepository.updateWalletConfig(masterKey, walletConfigPayload)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnComplete {
-                walletConfigRepository.saveWalletConfigLocally(walletConfig)
+                walletConfigRepository.saveWalletConfigLocally(walletConfigPayload)
                 _walletConfigMutableLiveData.value = walletConfig
             }
             //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
@@ -213,7 +239,16 @@ class WalletManagerImpl(
             return if (inBounds(position)) this[position]
             else Value(Int.InvalidIndex)
         }
+        Timber.e("Wallet Manager is not initialized!")
         return Value(Int.InvalidIndex)
+    }
+
+    private fun onRefreshBalanceSuccess(list: List<Pair<String, BigInteger>>) {
+        val currentBalance = hashMapOf<String, BigInteger>()
+        list.forEach { balance ->
+            currentBalance[balance.first] = balance.second
+        }
+        _balanceLiveData.value = currentBalance
     }
 
     private fun getNewIndex(): Int {

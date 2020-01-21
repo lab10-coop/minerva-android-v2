@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
     private fun isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
 
     private fun checkMasterSeedAvailability() {
-        if (!viewModel.isMaskerKeyAvailable()) showOnBoardingActivity()
+        if (!viewModel.isMasterKeyAvailable()) showOnBoardingActivity()
         else viewModel.initWalletConfig()
     }
 

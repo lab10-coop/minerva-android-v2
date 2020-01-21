@@ -9,8 +9,8 @@ import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.I
 open class Identity(
     open val index: Int,
     open var name: String = String.Empty,
-    val publicKey: String = String.Empty,
-    val privateKey: String = String.Empty,
+    var publicKey: String = String.Empty,
+    var privateKey: String = String.Empty,
     open val data: LinkedHashMap<String, String> = linkedMapOf(),
     val isDeleted: Boolean = false,
     var isSelected: Boolean = false
@@ -24,6 +24,15 @@ open class Identity(
         identity.isDeleted,
         identity.isSelected
     )
+
+    override fun equals(other: Any?): Boolean = (other is Identity)
+            && index == other.index
+            && name == other.name
+            && publicKey == other.publicKey
+            && privateKey == other.privateKey
+            && data == other.data
+            && isDeleted == other.isDeleted
+            && isSelected == other.isSelected
 }
 
 data class IncognitoIdentity(

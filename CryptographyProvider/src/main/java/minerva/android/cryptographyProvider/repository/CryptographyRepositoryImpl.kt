@@ -4,13 +4,17 @@ import android.content.Context
 import com.uport.sdk.signer.UportHDSigner
 import com.uport.sdk.signer.encryption.KeyProtection
 import io.reactivex.Single
+import io.reactivex.subjects.SingleSubject
 import me.uport.sdk.core.decodeBase64
 import me.uport.sdk.jwt.InvalidJWTException
 import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
+import me.uport.sdk.signer.normalize
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.function.orElse
 import org.kethereum.bip39.wordlists.WORDLIST_ENGLISH
-import org.walleth.khex.toHexString
+import org.kethereum.crypto.toAddress
+import org.kethereum.model.PublicKey
 import timber.log.Timber
 import java.util.*
 
@@ -31,13 +35,27 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
 
     override fun computeDeliveredKeys(
         privateKey: String,
-        derivationPath: String,
-        callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit
-    ) {
-        UportHDSigner().computeAddressForPath(contex, privateKey, derivationPath, String.Empty, callback = { error, privateKey, publicKey ->
-            return@computeAddressForPath callback(error, privateKey, publicKey.decodeBase64().toHexString())
-        })
+        index: Int
+    ): Single<Triple<Int, String, String>> {
+        val keysSubject: SingleSubject<Triple<Int, String, String>> = SingleSubject.create()
+        UportHDSigner().computeAddressForPath(
+            contex,
+            privateKey,
+            getDerivedPath(index),
+            String.Empty,
+            callback = { error, privateKey, publicKey ->
+                error?.let {
+                    keysSubject.onError(Throwable(error))
+                }.orElse {
+                    keysSubject.onSuccess(Triple(index, prepareCorrectPublicKeyFormatt(publicKey), privateKey))
+                }
+            })
+        return keysSubject
     }
+
+    private fun getDerivedPath(index: Int) = "${DERIVED_PATH_PREFIX}$index"
+
+    private fun prepareCorrectPublicKeyFormatt(publicKey: String) = PublicKey(publicKey.decodeBase64()).normalize().toAddress().hex
 
     override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> {
         return try {
@@ -91,5 +109,6 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
         private const val TIME_SKEW = 300L
         private const val IAT = "iat"
         private const val EXP = "exp"
+        private const val DERIVED_PATH_PREFIX = "m/99'/"
     }
 }

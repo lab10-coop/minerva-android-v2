@@ -8,8 +8,9 @@ import io.reactivex.Observable
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.servicesApiProvider.api.ServicesApi
+import minerva.android.blockchainprovider.BlockchainProvider
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterKey
@@ -30,10 +31,12 @@ class WalletManagerTest {
     private val keyStoreRepository: KeystoreRepository = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
     private val walletConfigRepository: WalletConfigRepository = mock()
+    private val blockchainProvider: BlockchainProvider = mock()
     private val localStorage: LocalStorage = mock()
     private val servicesApi: ServicesApi = mock()
 
-    private val walletManager = WalletManagerImpl(keyStoreRepository, cryptographyRepository, walletConfigRepository, localStorage, servicesApi)
+    private val walletManager =
+        WalletManagerImpl(keyStoreRepository, cryptographyRepository, walletConfigRepository, blockchainProvider, localStorage, servicesApi)
 
     private val data = linkedMapOf(
         "key1" to "value1",

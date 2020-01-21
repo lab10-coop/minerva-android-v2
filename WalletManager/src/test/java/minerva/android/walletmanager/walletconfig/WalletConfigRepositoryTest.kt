@@ -1,32 +1,31 @@
 package minerva.android.walletmanager.walletconfig
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
+import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.observers.TestObserver
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.schedulers.TestScheduler
 import minerva.android.configProvider.api.MinervaApi
+import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.model.MasterKey
-import minerva.android.walletmanager.model.WalletConfig
 import org.amshove.kluent.mock
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 
 class WalletConfigRepositoryTest {
 
-    private val testScheduler = TestScheduler()
-
     private val local = LocalMock()
-    private val online: MinervaApi = OnlineMock()
+    private val online = OnlineMock()
+    private val onlineLikeLocal = OnlineLikeLocalMock()
+    private val cryptographyRepository: CryptographyRepository = mock()
     private val api: MinervaApi = mock()
 
-    private val repository = WalletConfigRepository(local, online)
+    private val repository = WalletConfigRepository(cryptographyRepository, local, onlineLikeLocal)
 
     @Before
     fun setupRxSchedulers() {
@@ -40,39 +39,47 @@ class WalletConfigRepositoryTest {
         RxAndroidPlugins.reset()
     }
 
-//    @Test
-//    fun `Check that WalletConfig will be updated when online version is different`() {
-//        val walletConfigRepository = WalletConfigRepository(local, online)
-//        val observable = walletConfigRepository.loadWalletConfig("1234").delay(1, TimeUnit.SECONDS, testScheduler)
-//        val testObserver = TestObserver<WalletConfig>()
-//        val walletConfigResponse = (online as OnlineMock).prepareResponse()
-//
-//        observable.subscribe(testObserver)
-//        testScheduler.advanceTimeBy(950, TimeUnit.MILLISECONDS)
-//        testObserver.assertNotTerminated()
-//        testScheduler.advanceTimeBy(50, TimeUnit.MILLISECONDS)
-//        testObserver.assertValueSequence(
-//            listOf(
-//                local.prepareData(),
-//                local.prepareData()
-//            )
-//        )
-//        testObserver.assertComplete()
-//    }
+    @Test
+    fun `Check that WalletConfig will be updated when online version is different`() {
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(0)))
+            .thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
+
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(1)))
+            .thenReturn(Single.just(Triple(1, "publicKey", "privateKey")))
+
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(2)))
+            .thenReturn(Single.just(Triple(2, "publicKey", "privateKey")))
+
+        val walletConfigRepository = WalletConfigRepository(cryptographyRepository, local, online)
+        val observable = walletConfigRepository.loadWalletConfig(MasterKey())
+
+        observable.test().assertValueSequence(
+            listOf(
+                local.prepareWalletConfig(),
+                online.prepareWalletConfig()
+            )
+        )
+    }
 
     @Test
     fun `Check that WalletConfig will be updated when online version is the same`() {
-        val walletConfigRepository = WalletConfigRepository(local, OnlineLikeLocalMock())
-        val observable = walletConfigRepository.loadWalletConfig("1234").delay(1, TimeUnit.SECONDS, testScheduler)
-        val testObserver = TestObserver<WalletConfig>()
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(0)))
+            .thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
 
-        observable.subscribe(testObserver)
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(1)))
+            .thenReturn(Single.just(Triple(1, "publicKey", "privateKey")))
 
-        testScheduler.advanceTimeBy(950, TimeUnit.MILLISECONDS)
-        testObserver.assertNotTerminated()
-        testScheduler.advanceTimeBy(50, TimeUnit.MILLISECONDS)
-        testObserver.assertValue(local.prepareData())
-        testObserver.assertComplete()
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(2)))
+            .thenReturn(Single.just(Triple(2, "publicKey", "privateKey")))
+
+        val walletConfigRepository = WalletConfigRepository(cryptographyRepository, local, onlineLikeLocal)
+        val observable = walletConfigRepository.loadWalletConfig(MasterKey())
+
+        observable.test().assertValueSequence(
+            listOf(
+                local.prepareWalletConfig()
+            )
+        )
     }
 
     @Test
@@ -85,7 +92,7 @@ class WalletConfigRepositoryTest {
     @Test
     fun `create default walletConfig should return error`() {
         val throwable = Throwable()
-        val repository = WalletConfigRepository(local, api)
+        val repository = WalletConfigRepository(cryptographyRepository, local, api)
         whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.error(throwable))
         val test = repository.createWalletConfig(MasterKey("1234", "5678")).test()
         test.assertError(throwable)

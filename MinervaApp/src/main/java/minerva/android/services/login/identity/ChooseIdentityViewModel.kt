@@ -1,5 +1,6 @@
 package minerva.android.services.login.identity
 
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,11 +11,11 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import minerva.android.walletmanager.model.IdentityField.Companion.PHONE_NUMBER
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.walletmanager.model.QrCodeResponse
 import timber.log.Timber
 
@@ -38,35 +39,24 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
     fun handleLoginButton(identity: Identity, qrCodeResponse: QrCodeResponse) {
         _loadingLiveData.value = Event(true)
         if (isIdentityValid(identity)) {
-            computeDerivedKeys(identity, qrCodeResponse)
+            minervaLogin(identity, qrCodeResponse)
         } else {
             _loadingLiveData.value = Event(false)
             _requestedFieldsMutableLiveData.value = Event(Any())
         }
     }
 
-    private fun computeDerivedKeys(
-        identity: Identity,
-        qrCodeResponse: QrCodeResponse
-    ) {
-        walletManager.computeDerivedKey(identity.index) { error, privateKey, publicKey ->
-            error?.let {
-                _loadingLiveData.value = Event(false)
-                _errorMutableLiveData.value = Event(it)
-            }.orElse {
-                minervaLogin(identity, publicKey, privateKey, qrCodeResponse)
-            }
-        }
-    }
-
     private fun minervaLogin(
         identity: Identity,
-        publicKey: String,
-        privateKey: String,
         qrCodeResponse: QrCodeResponse
     ) {
+        if(identity.publicKey == String.Empty || identity.privateKey == String.Empty) {
+            _errorMutableLiveData.value = Event(Throwable("Missing calculated keys"))
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
-            val jwtToken = walletManager.createJwtToken(createLoginPayload(identity, publicKey), privateKey)
+            val jwtToken = walletManager.createJwtToken(createLoginPayload(identity, identity.publicKey), identity.privateKey)
             withContext(Dispatchers.Main) {
                 handleLogin(qrCodeResponse, jwtToken, identity)
             }
