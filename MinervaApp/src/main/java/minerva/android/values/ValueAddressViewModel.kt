@@ -10,14 +10,11 @@ import timber.log.Timber
 
 class ValueAddressViewModel(private val walletManager: WalletManager) : BaseViewModel() {
 
-    lateinit var value: Value
-
     private val _loadValueLiveData = MutableLiveData<Event<Value>>()
     val loadValueLiveData: LiveData<Event<Value>> get() = _loadValueLiveData
 
     fun loadValue(position: Int) {
         computeKeys(walletManager.loadValue(position))
-        _loadValueLiveData.value = Event(value)
     }
 
     private fun computeKeys(loadedValue: Value) {
@@ -27,7 +24,7 @@ class ValueAddressViewModel(private val walletManager: WalletManager) : BaseView
                     Timber.e("Computing keys error: $error")
                     return@computeDerivedKey
                 }
-                value = Value(it.index, publicKey, privateKey, it.name, it.network, it.isDeleted)
+                _loadValueLiveData.value = Event(Value(it.index, publicKey, privateKey, it.name, it.network, it.isDeleted))
             })
         }
     }

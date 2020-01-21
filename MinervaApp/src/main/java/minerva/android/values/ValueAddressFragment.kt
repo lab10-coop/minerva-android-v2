@@ -35,7 +35,6 @@ class ValueAddressFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_value_address, container, false)
 
     private fun initializeView(value: Value) {
-        viewModel.value = value
         prepareQR(value.publicKey)
         address.text = value.publicKey
         setupShareButton(shareButton, value.publicKey)
