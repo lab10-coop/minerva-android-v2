@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
+import io.reactivex.CompletableSource
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
@@ -155,11 +156,16 @@ class WalletManagerImpl(
     override fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
             .flatMapCompletable {
-                if (identity !is IncognitoIdentity) {
-                    saveService()
-                }
-                Completable.complete()
+                handleSavingServiceLogin(identity)
             }
+
+    private fun handleSavingServiceLogin(identity: Identity): CompletableSource? {
+        return if (identity !is IncognitoIdentity) {
+            saveService()
+        } else {
+            Completable.complete()
+        }
+    }
 
     //    TODO chane for generic service creation, proper API is needed
     private fun saveService(): Completable {
