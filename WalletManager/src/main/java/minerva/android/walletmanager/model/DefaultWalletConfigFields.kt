@@ -15,5 +15,7 @@ annotation class DefaultWalletConfigFields {
         const val INCOGNITO_IDENTITY = "Incognito Identity"
         const val INCOGNITO_NAME = "Incognito mode"
         const val INCOGNITO_PHONE = "000000000"
+        const val INCOGNITO_PRIVATE_KEY = "000000000"
+        const val INCOGNITO_PUBLIC_KEY = "000000000"
     }
 }

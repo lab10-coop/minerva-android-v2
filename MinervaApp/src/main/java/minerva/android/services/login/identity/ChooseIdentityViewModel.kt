@@ -1,6 +1,5 @@
 package minerva.android.services.login.identity
 
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +15,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IdentityField.Companion.PHONE_NUMBER
+import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.QrCodeResponse
 import timber.log.Timber
 
@@ -50,11 +50,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
         identity: Identity,
         qrCodeResponse: QrCodeResponse
     ) {
-        if(identity.publicKey == String.Empty || identity.privateKey == String.Empty) {
-            _errorMutableLiveData.value = Event(Throwable("Missing calculated keys"))
-            return
-        }
-
+        if (handleNoKeysError(identity)) return
         viewModelScope.launch(Dispatchers.IO) {
             val jwtToken = walletManager.createJwtToken(createLoginPayload(identity, identity.publicKey), identity.privateKey)
             withContext(Dispatchers.Main) {
@@ -62,6 +58,17 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
             }
         }
     }
+
+    private fun handleNoKeysError(identity: Identity): Boolean {
+        if (doesIdentityHaveKeys(identity)) {
+            _errorMutableLiveData.value = Event(Throwable("Missing calculated keys"))
+            return true
+        }
+        return false
+    }
+
+    private fun doesIdentityHaveKeys(identity: Identity) =
+        identity != IncognitoIdentity() && (identity.publicKey == String.Empty || identity.privateKey == String.Empty)
 
     private fun handleLogin(
         qrCodeResponse: QrCodeResponse,
