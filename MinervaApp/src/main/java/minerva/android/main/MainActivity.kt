@@ -1,6 +1,5 @@
 package minerva.android.main
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -9,25 +8,33 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import io.fabric.sdk.android.services.network.HttpRequest.put
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
 import minerva.android.extension.launchActivity
 import minerva.android.extension.launchActivityForResult
 import minerva.android.history.HistoryFragment
 import minerva.android.identities.IdentitiesFragment
+import minerva.android.main.handler.*
+import minerva.android.main.handler.handleLoginResult
+import minerva.android.main.handler.handleTransactionResult
+import minerva.android.main.handler.isLoginResult
+import minerva.android.main.handler.isTransactionResult
 import minerva.android.main.listener.BottomNavigationMenuListener
+import minerva.android.main.listener.FramgentInteractorListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.ServicesFragment
 import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.services.login.PainlessLoginActivity.Companion.IS_LOGIN_SUCCESS
 import minerva.android.settings.SettingsFragment
 import minerva.android.values.ValuesFragment
-import minerva.android.widget.MinervaFlashbar
+import minerva.android.values.transaction.TransactionActivity
+import minerva.android.values.transaction.TransactionActivity.Companion.VALUE
+import minerva.android.walletmanager.model.Value
 import minerva.wrapped.startNewIdentityWrappedActivity
 import org.koin.android.ext.android.inject
 
 
-class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
+class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, FramgentInteractorListener {
 
     private val viewModel: MainViewModel by inject()
 
@@ -80,21 +87,16 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == LOGIN_RESULT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            data?.getBooleanExtra(IS_LOGIN_SUCCESS, false)?.let { isLoginSuccess ->
-                when {
-                    isLoginSuccess -> MinervaFlashbar.show(
-                        this,
-                        getString(R.string.login_success_title),
-                        getString(R.string.login_success_message)
-                    )
-                    !isLoginSuccess -> MinervaFlashbar.show(
-                        this,
-                        getString(R.string.login_failure_title),
-                        getString(R.string.login_failure_message)
-                    )
-                }
-            }
+        if (isLoginResult(requestCode, resultCode)) {
+            handleLoginResult(data)
+        } else if (isTransactionResult(requestCode, resultCode)) {
+            handleTransactionResult(data)
+        }
+    }
+
+    override fun showSendTransactonScreen(value: Value) {
+        launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
+            putExtra(VALUE, value)
         }
     }
 
@@ -102,16 +104,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
         if (isIdentitiesTabSelected()) super.onBackPressed()
         else bottomNavigation.selectedItemId = R.id.identities
     }
-
-    private fun shouldShowAddIdentityIcon() = isIdentitiesTabSelected()
-
-    private fun shouldShowAddValueIcon() = isValuesTabSelected()
-
-    private fun isServicesTabSelected() = bottomNavigation.selectedItemId == R.id.services
-
-    private fun isValuesTabSelected() = bottomNavigation.selectedItemId == R.id.values
-
-    private fun isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
 
     private fun checkMasterSeedAvailability() {
         if (!viewModel.isMasterKeyAvailable()) showOnBoardingActivity()
@@ -124,45 +116,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener {
         }
     }
 
-    private fun replaceFragment(fragment: Fragment, @StringRes title: Int = R.string.identities) {
-        supportActionBar?.setTitle(title)
-        invalidateOptionsMenu()
-
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragmentContainer, fragment)
-            commit()
-        }
-    }
-
-    private fun prepareBottomNavMenu() {
-        bottomNavigation.setOnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.identities -> replaceFragment(IdentitiesFragment())
-                R.id.values -> replaceFragment(
-                    ValuesFragment(),
-                    R.string.values
-                )
-                R.id.services -> replaceFragment(
-                    ServicesFragment(),
-                    R.string.services
-                )
-                R.id.activity -> replaceFragment(
-                    HistoryFragment(),
-                    R.string.activity
-                )
-                R.id.settings -> replaceFragment(
-                    SettingsFragment(),
-                    R.string.settings
-                )
-            }
-            true
-        }
-    }
-
     override fun removeSettingsBadgeIcon() =
         bottomNavigation.removeBadge(R.id.settings)
 
     companion object {
         const val LOGIN_RESULT_REQUEST_CODE = 3
+        const val TRANSACTION_RESULT_REQUEST_CODE = 4
     }
 }

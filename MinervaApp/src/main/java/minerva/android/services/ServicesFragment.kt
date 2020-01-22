@@ -9,12 +9,10 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_services.*
 import kotlinx.android.synthetic.main.fragment_services.recyclerView
-import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.visible
-import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.walletmanager.model.Service
+import minerva.android.services.adapter.ServicesAdapter
 import minerva.android.walletmanager.model.WalletConfig
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -37,13 +35,15 @@ class ServicesFragment : Fragment() {
     }
 
     private fun prepareWalletConfigObserver() {
-        viewModel.walletConfigLiveData.observe(this, Observer {
-            if (it.services.isEmpty()) {
-                hideServices()
-            } else {
-                showServices(it)
-            }
-        })
+        viewModel.walletConfigLiveData.observe(this, Observer { handleServicesList(it) })
+    }
+
+    private fun handleServicesList(it: WalletConfig) {
+        if (it.services.isEmpty()) {
+            hideServices()
+        } else {
+            showServices(it)
+        }
     }
 
     private fun hideServices() {

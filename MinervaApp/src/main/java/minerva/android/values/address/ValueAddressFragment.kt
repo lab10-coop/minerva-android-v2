@@ -1,4 +1,4 @@
-package minerva.android.values
+package minerva.android.values.address
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,7 +17,6 @@ import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton
 import net.glxn.qrgen.android.QRCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class ValueAddressFragment : Fragment() {
 

@@ -1,4 +1,4 @@
-package minerva.android.services
+package minerva.android.services.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +15,13 @@ class ServicesAdapter : RecyclerView.Adapter<ServiceViewHolder>() {
     private var services = listOf<Service>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ServiceViewHolder =
-        ServiceViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.service_list_row, parent, false), parent)
+        ServiceViewHolder(
+            LayoutInflater.from(parent.context).inflate(
+                R.layout.service_list_row,
+                parent,
+                false
+            ), parent
+        )
 
     override fun getItemCount(): Int = services.size
 

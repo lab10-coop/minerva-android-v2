@@ -17,6 +17,7 @@ import minerva.android.extension.rotate180back
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.values.listener.ValuesFragmentToAdapterListener
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.widget.CryptoAmountView.Companion.WRONG_CURRENCY_VALUE
@@ -26,7 +27,9 @@ import minerva.wrapped.startValueAddressWrappedActivity
 import java.math.BigInteger
 
 
-class ValueAdapter : RecyclerView.Adapter<ValueViewHolder>() {
+class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
+    RecyclerView.Adapter<ValueViewHolder>(),
+    ValueViewHolder.ValuesAdapterListener {
 
     private var activeValues = listOf<Value>()
     private var rawValues = listOf<Value>()
@@ -44,7 +47,10 @@ class ValueAdapter : RecyclerView.Adapter<ValueViewHolder>() {
     override fun onBindViewHolder(holder: ValueViewHolder, position: Int) {
         activeValues[position].let {
             val rawPosition = getPositionInRaw(it.index)
-            holder.setData(rawPosition, it)
+            holder.apply {
+                setData(rawPosition, it)
+                setListener(this@ValueAdapter)
+            }
         }
     }
 
@@ -67,34 +73,55 @@ class ValueAdapter : RecyclerView.Adapter<ValueViewHolder>() {
         activeValues.forEach { it.balance = balances[it.publicKey] ?: Int.InvalidId.toBigInteger() }
         notifyDataSetChanged()
     }
+
+    override fun onSendValueClicked(value: Value) {
+        listener.onSendTransaction(value)
+    }
 }
 
 class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) : RecyclerView.ViewHolder(view) {
 
     private var isOpen = false
+    private lateinit var listener: ValuesAdapterListener
+
+    fun setListener(listener: ValuesAdapterListener) {
+        this.listener = listener
+    }
 
     fun setData(rawPosition: Int, value: Value) {
         view.apply {
-            card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
-            icon.setImageResource(getNetworkIcon(Network.fromString(value.network)))
-            valueName.text = value.name
-            cryptoShortName.text = value.network
-            cryptoShortName.setTextColor(ContextCompat.getColor(view.context, getNetworkColor(Network.fromString(value.network))))
-            //TODO add data for normal currency!
-            amountView.setAmounts(value.balance, WRONG_CURRENCY_VALUE)
-            sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
+            bindData(value)
+            setOnSendButtonClickListener(value)
+            setOnMenuClickListener(rawPosition, value)
+            setOnItemClickListener()
+        }
+    }
 
-            sendButton.setOnClickListener {
-                //TODO implement sending crypto
-                Toast.makeText(view.context, "Sending ${value.network}", Toast.LENGTH_SHORT).show()
-            }
+    private fun View.bindData(value: Value) {
+        card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
+        icon.setImageResource(getNetworkIcon(Network.fromString(value.network)))
+        valueName.text = value.name
+        cryptoShortName.text = value.network
+        cryptoShortName.setTextColor(ContextCompat.getColor(view.context, getNetworkColor(Network.fromString(value.network))))
+        //TODO add data for normal currency!
+        amountView.setAmounts(value.balance, WRONG_CURRENCY_VALUE)
+        sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
+    }
 
-            menu.setOnClickListener { showMenu(rawPosition, value.name, Network.fromString(value.network), menu) }
+    private fun View.setOnSendButtonClickListener(value: Value) {
+        sendButton.setOnClickListener {
+            listener.onSendValueClicked(value)
+        }
+    }
 
-            setOnClickListener {
-                TransitionManager.beginDelayedTransition(viewGroup)
-                if (isOpen) close() else open()
-            }
+    private fun View.setOnMenuClickListener(rawPosition: Int, value: Value) {
+        menu.setOnClickListener { showMenu(rawPosition, value.name, Network.fromString(value.network), menu) }
+    }
+
+    private fun View.setOnItemClickListener() {
+        setOnClickListener {
+            TransitionManager.beginDelayedTransition(viewGroup)
+            if (isOpen) close() else open()
         }
     }
 
@@ -119,23 +146,32 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
             menuInflater.inflate(R.menu.value_menu, menu)
             gravity = Gravity.RIGHT
             show()
-
-            //TODO add rest of the menu functionality
-            setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.showAddress -> startValueAddressWrappedActivity(view.context, position, title, getNetworkIcon(network))
-                    R.id.addAsset -> Toast.makeText(view.context, "Add an asset", Toast.LENGTH_SHORT).show()
-                    R.id.remove -> Toast.makeText(view.context, "Remove", Toast.LENGTH_SHORT).show()
-                    else -> {
-                    }
-                }
-                true
-            }
+            setOnItemMenuClickListener(position, title, network)
         }
         return true
     }
 
+    private fun PopupMenu.setOnItemMenuClickListener(
+        position: Int,
+        title: String,
+        network: Network
+    ) {
+        //TODO add rest of the menu functionality
+        setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.showAddress -> startValueAddressWrappedActivity(view.context, position, title, getNetworkIcon(network))
+                R.id.addAsset -> Toast.makeText(view.context, "Add an asset", Toast.LENGTH_SHORT).show()
+                R.id.remove -> Toast.makeText(view.context, "Remove", Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
+    }
+
     companion object {
         private const val SEND_BUTTON_FORMAT = "%s %s"
+    }
+
+    interface ValuesAdapterListener {
+        fun onSendValueClicked(value: Value)
     }
 }

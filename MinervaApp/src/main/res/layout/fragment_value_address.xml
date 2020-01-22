@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:clipToPadding="false"
     android:padding="@dimen/margin_normal"
-    tools:context=".values.ValueAddressFragment">
+    tools:context=".values.address.ValueAddressFragment">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

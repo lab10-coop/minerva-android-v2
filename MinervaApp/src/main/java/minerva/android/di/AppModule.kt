@@ -1,7 +1,7 @@
 package minerva.android.di
 
 import minerva.android.BuildConfig
-import minerva.android.identities.EditIdentityViewModel
+import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.identities.IdentitiesViewModel
 import minerva.android.main.MainViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
@@ -11,7 +11,7 @@ import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.ScannerViewModel
 import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
-import minerva.android.values.ValueAddressViewModel
+import minerva.android.values.address.ValueAddressViewModel
 import minerva.android.values.ValuesViewModel
 import minerva.android.walletmanager.createWalletManagerModules
 import org.koin.androidx.viewmodel.dsl.viewModel

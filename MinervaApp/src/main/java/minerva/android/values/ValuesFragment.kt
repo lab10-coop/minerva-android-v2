@@ -1,21 +1,27 @@
 package minerva.android.values
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
+import minerva.android.main.listener.FramgentInteractorListener
 import minerva.android.values.adapter.ValueAdapter
+import minerva.android.values.listener.ValuesFragmentToAdapterListener
+import minerva.android.walletmanager.model.Value
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ValuesFragment : Fragment() {
+class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
 
     private val viewModel: ValuesViewModel by viewModel()
-    private val valueAdapter = ValueAdapter()
+    private val valueAdapter = ValueAdapter(this)
+    private lateinit var listener: FramgentInteractorListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,6 +37,11 @@ class ValuesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.refreshBalances()
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = context as FramgentInteractorListener
     }
 
     override fun onPause() {
@@ -50,5 +61,9 @@ class ValuesFragment : Fragment() {
             valueAdapter.updateList(it.values)
         })
         viewModel.balanceLiveData.observe(this, Observer { valueAdapter.updateBalances(it) })
+    }
+
+    override fun onSendTransaction(value: Value) {
+        listener.showSendTransactonScreen(value)
     }
 }

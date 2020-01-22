@@ -137,20 +137,6 @@ class WalletManagerImpl(
                     }
                     WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values)
                 }.flatMapCompletable { updateWalletConfig(it) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnComplete {
-                    WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values).let {
-                        _walletConfigMutableLiveData.value = it
-                        walletConfigRepository.saveWalletConfigLocally(mapWalletConfigToWalletPayload(it))
-                    }
-                }
-                //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
-                .doOnError {
-                    //WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values).let {
-                    //_walletConfigMutableLiveData.value = it
-                    //walletConfigRepository.saveWalletConfigLocally(mapWalletConfigToWalletPayload(it))
-                }
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
@@ -293,5 +279,6 @@ class WalletManagerImpl(
     companion object {
         private const val ONE_ELEMENT = 1
         private const val MINERVA_SERVICE = "Minerva Service"
+//        TODO should be dynamically handled form qr code
     }
 }
