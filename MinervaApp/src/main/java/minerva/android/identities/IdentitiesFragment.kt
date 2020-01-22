@@ -51,7 +51,8 @@ class IdentitiesFragment : Fragment() {
     }
 
     private fun setupLiveData() {
-        viewModel.walletConfigLiveData.observe(this, Observer { identityAdapter.updateList(it.identities.toMutableList()) })
+        viewModel.walletConfigLiveData.observe(this, Observer {
+            identityAdapter.updateList(it.identities.toMutableList()) })
         viewModel.errorLiveData.observe(this, EventObserver { showError(it) })
     }
 

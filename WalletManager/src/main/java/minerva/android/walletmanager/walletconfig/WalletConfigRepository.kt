@@ -75,17 +75,21 @@ class WalletConfigRepository(
     private fun completeKeys(masterKey: MasterKey, walletConfigPayload: WalletConfigPayload): Observable<WalletConfig> =
         walletConfigPayload.identityResponse.let { identitiesResponse ->
             walletConfigPayload.valueResponse.let { valuesResponse ->
-                Observable.range(0, identitiesResponse.size)
-                    .flatMapSingle { position ->
-                        cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, identitiesResponse[position].index)
-                    }.toList()
+                Observable.range(START, identitiesResponse.size)
+                    .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, identitiesResponse[it].index) }
+                    .toList()
                     .map { completeIdentitiesKeys(walletConfigPayload, it) }
-                    .zipWith(Observable.range(0, valuesResponse.size)
-                        .flatMapSingle { position ->
-                            cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, valuesResponse[position].index)
-                        }.toList()
+                    .zipWith(Observable.range(START, valuesResponse.size)
+                        .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, valuesResponse[it].index) }
+                        .toList()
                         .map { completeValuesKeys(walletConfigPayload, it) },
-                        BiFunction { i: List<Identity>, v: List<Value> -> WalletConfig(walletConfigPayload.version, i, v) }
+                        BiFunction { identity: List<Identity>, value: List<Value> ->
+                            WalletConfig(
+                                walletConfigPayload.version,
+                                identity,
+                                value
+                            )
+                        }
                     ).toObservable()
             }
         }
@@ -111,6 +115,7 @@ class WalletConfigRepository(
     }
 
     companion object {
+        private const val START = 0
         const val SLASH = "/"
         const val ENCODED_SLASH = "%2F"
     }

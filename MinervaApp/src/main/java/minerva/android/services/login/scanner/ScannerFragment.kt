@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +22,6 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.services.login.PainlessLoginFragmentListener
 import minerva.android.walletmanager.model.QrCodeResponse
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class ScannerFragment : Fragment() {
 

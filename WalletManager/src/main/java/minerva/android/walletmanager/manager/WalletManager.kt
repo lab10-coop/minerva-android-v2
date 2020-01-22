@@ -42,6 +42,7 @@ interface WalletManager {
     fun saveIdentity(identity: Identity): Completable
     fun removeIdentity(identity: Identity): Completable
     fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
+    fun computeDeliveredKeys(index: Int): Single<Triple<Int, String, String>>
 
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
     fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
@@ -95,6 +96,9 @@ class WalletManagerImpl(
         }
     }
 
+    override fun computeDeliveredKeys(index: Int): Single<Triple<Int, String, String>> =
+        cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, index)
+
     override fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse> =
         walletConfigRepository.getWalletConfig(masterKey)
             .map {
@@ -123,22 +127,29 @@ class WalletManagerImpl(
             }
     }
 
-    //TODO missing keys for new identity
     override fun saveIdentity(identity: Identity): Completable {
-        _walletConfigMutableLiveData.value?.let {
-            val walletConfig = WalletConfig(it.updateVersion, prepareNewIdentitiesSet(identity, it), it.values)
-            val walletConfigPayload = mapWalletConfigToWalletPayload(walletConfig)
-            return walletConfigRepository.updateWalletConfig(masterKey, walletConfigPayload)
+        _walletConfigMutableLiveData.value?.let { config ->
+            return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, identity.index)
+                .map {
+                    identity.apply {
+                        publicKey = it.second
+                        privateKey = it.third
+                    }
+                    WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values)
+                }.flatMapCompletable { updateWalletConfig(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
-                    walletConfigRepository.saveWalletConfigLocally(walletConfigPayload)
-                    _walletConfigMutableLiveData.value = walletConfig
+                    WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values).let {
+                        _walletConfigMutableLiveData.value = it
+                        walletConfigRepository.saveWalletConfigLocally(mapWalletConfigToWalletPayload(it))
+                    }
                 }
                 //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
                 .doOnError {
-                    //                  walletConfigRepository.saveWalletConfigLocally(walletConfig)
-                    //                    _walletConfigMutableLiveData.value = walletConfig
+                    //WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values).let {
+                    //_walletConfigMutableLiveData.value = it
+                    //walletConfigRepository.saveWalletConfigLocally(mapWalletConfigToWalletPayload(it))
                 }
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
@@ -184,13 +195,9 @@ class WalletManagerImpl(
                 handleSavingServiceLogin(identity)
             }
 
-    private fun handleSavingServiceLogin(identity: Identity): CompletableSource? {
-        return if (identity !is IncognitoIdentity) {
-            saveService()
-        } else {
-            Completable.complete()
-        }
-    }
+    private fun handleSavingServiceLogin(identity: Identity): CompletableSource? =
+        if (identity !is IncognitoIdentity) saveService()
+        else Completable.complete()
 
     //    TODO chane for generic service creation, proper API is needed
     private fun saveService(): Completable {
@@ -285,8 +292,6 @@ class WalletManagerImpl(
 
     companion object {
         private const val ONE_ELEMENT = 1
-        private const val DERIVED_PATH_PREFIX = "m/99'/"
         private const val MINERVA_SERVICE = "Minerva Service"
-//        TODO should be dynamically handled form qr code
     }
 }
