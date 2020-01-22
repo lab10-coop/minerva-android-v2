@@ -46,7 +46,9 @@ class ValuesFragment : Fragment() {
     }
 
     private fun setupLiveData() {
-        viewModel.walletConfigLiveData.observe(this, Observer { valueAdapter.updateList(it.values) })
+        viewModel.walletConfigLiveData.observe(this, Observer {
+            valueAdapter.updateList(it.values)
+        })
         viewModel.balanceLiveData.observe(this, Observer { valueAdapter.updateBalances(it) })
     }
 }

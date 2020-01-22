@@ -5,6 +5,7 @@ import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
@@ -119,6 +120,7 @@ class WalletManagerTest {
     fun `Check that wallet manager saves new identity`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
@@ -127,12 +129,15 @@ class WalletManagerTest {
         val loadedIdentity = walletManager.loadIdentity(0, "Identity")
         test.assertNoErrors()
         loadedIdentity.name shouldBeEqualTo newIdentity.name
+        loadedIdentity.publicKey shouldBeEqualTo "publicKey"
+        loadedIdentity.privateKey shouldBeEqualTo "privateKey"
     }
 
     @Test
     fun `Check that wallet manager doesn't save when server error`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(Throwable()))
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
@@ -147,6 +152,7 @@ class WalletManagerTest {
         val identityToRemove = Identity(1)
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
@@ -162,6 +168,7 @@ class WalletManagerTest {
         val identityToRemove = Identity(1)
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(Throwable()))
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
