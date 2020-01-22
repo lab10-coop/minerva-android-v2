@@ -16,6 +16,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".values.transaction.TransactionActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".services.login.PainlessLoginActivity"
             android:screenOrientation="portrait" />
         <activity

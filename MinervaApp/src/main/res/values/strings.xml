@@ -73,6 +73,7 @@
     <string name="invalid_qr_code_message">Invalid Qr code, please try again</string>
     <string name="requested_data_message">Please, use identity with requested data</string>
     <string name="send">Send</string>
+    <string name="amount">Amount</string>
     <string name="show_address">Show address</string>
     <string name="add_an_asset">Add an asset</string>
     <string name="login_success_title">Painless Login Successful</string>
@@ -82,4 +83,12 @@
     <string name="dissmiss">Dismiss</string>
     <string name="no_data_message">No data available</string>
     <string name="last_used">Last used:</string>
+    <string name="transaction_success_title">Transaction Successful</string>
+    <string name="transaction_success_message">You successfully transferred…</string>
+    <string name="transaction_error_title">Error: Transaction failed</string>
+    <string name="transaction_error_message">There was an error while executing the transaction</string>
+    <string name="receiver">Receiver</string>
+    <string name="gas_price_gwei">Gas Price (Gwei)</string>
+    <string name="gas_limit">Gas Limit</string>
+    <string name="transaction_cost">Transaction cost:</string>
 </resources>

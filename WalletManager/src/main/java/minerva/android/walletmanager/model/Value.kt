@@ -3,6 +3,7 @@ package minerva.android.walletmanager.model
 import minerva.android.kotlinUtils.Empty
 import java.math.BigInteger
 import minerva.android.kotlinUtils.InvalidId
+import java.io.Serializable
 
 data class Value(
     val index: Int,
@@ -12,4 +13,4 @@ data class Value(
     val network: String = String.Empty,
     val isDeleted: Boolean = false,
     var balance: BigInteger = Int.InvalidId.toBigInteger()
-)
+): Serializable

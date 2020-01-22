@@ -1,4 +1,4 @@
-package minerva.android.identities
+package minerva.android.identities.edit
 
 import android.app.DatePickerDialog
 import android.os.Bundle

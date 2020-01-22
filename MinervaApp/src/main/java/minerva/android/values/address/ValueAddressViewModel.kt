@@ -1,4 +1,4 @@
-package minerva.android.values
+package minerva.android.values.address
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

@@ -1,4 +1,4 @@
-package minerva.android.identities
+package minerva.android.identities.edit
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

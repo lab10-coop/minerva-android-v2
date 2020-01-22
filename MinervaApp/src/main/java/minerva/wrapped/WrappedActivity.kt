@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
-import minerva.android.identities.EditIdentityFragment
+import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.values.ValueAddressFragment
+import minerva.android.values.address.ValueAddressFragment
 import java.util.*
 
 class WrappedActivity : AppCompatActivity() {
