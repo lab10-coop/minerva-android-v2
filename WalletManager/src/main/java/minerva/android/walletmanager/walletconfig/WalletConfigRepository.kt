@@ -6,10 +6,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
-import minerva.android.configProvider.model.IdentityPayload
-import minerva.android.configProvider.model.ValuePayload
-import minerva.android.configProvider.model.WalletConfigPayload
-import minerva.android.configProvider.model.WalletConfigResponse
+import minerva.android.configProvider.model.*
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.*
@@ -87,7 +84,8 @@ class WalletConfigRepository(
                             WalletConfig(
                                 walletConfigPayload.version,
                                 identity,
-                                value
+                                value,
+                                mapServicesResponseToServices(walletConfigPayload.serviceResponse)
                             )
                         }
                     ).toObservable()

@@ -18,17 +18,6 @@ private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> 
     return if (responseMap[REQUESTED] is ArrayList<*>?) responseMap[REQUESTED] as ArrayList<String> else arrayListOf()
 }
 
-fun mapIdentityPayloadToIdentity(response: IdentityPayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Identity =
-    Identity(response.index, response.name, publicKey, privateKey, response.data, response.isDeleted)
-
-fun mapIdentityToIdentityResponse(identity: Identity): IdentityPayload =
-    IdentityPayload(identity.index, identity.name, identity.data, identity.isDeleted)
-
-fun mapValueResponseToValue(response: ValuePayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Value =
-    Value(response.index, publicKey, privateKey, response.name, response.network, response.isDeleted)
-
-fun mapValueToValueResponse(value: Value): ValuePayload = ValuePayload(value.index, value.name, value.network)
-
 fun mapWalletConfigResponseToWalletConfig(response: WalletConfigResponse): WalletConfig {
     val identities = mutableListOf<Identity>()
     val values = mutableListOf<Value>()
@@ -48,14 +37,20 @@ fun mapWalletConfigResponseToWalletConfig(response: WalletConfigResponse): Walle
     return WalletConfig(response.walletPayload.version, identities, values, services)
 }
 
+fun mapIdentityPayloadToIdentity(response: IdentityPayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Identity =
+    Identity(response.index, response.name, publicKey, privateKey, response.data, response.isDeleted)
+
+fun mapValueResponseToValue(response: ValuePayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Value =
+    Value(response.index, publicKey, privateKey, response.name, response.network, response.isDeleted)
+
 fun mapServiceResponseToService(response: ServicePayload): Service =
     Service(response.type, response.name, response.lastUsed)
 
-fun mapValueResponseToValue(response: ValuePayload): Value =
-    Value(response.index, name = response.name, network = response.network)
-
-fun mapIdentityPayloadToIdentity(response: IdentityPayload): Identity =
-    Identity(response.index, response.name, data = response.data, isDeleted = response.isDeleted)
+fun mapServicesResponseToServices(responses: List<ServicePayload>): List<Service> {
+    val services = mutableListOf<Service>()
+    responses.forEach { services.add(mapServiceResponseToService(it)) }
+    return services
+}
 
 fun mapWalletConfigToWalletPayload(config: WalletConfig): WalletConfigPayload {
     val idResponses = mutableListOf<IdentityPayload>()
