@@ -9,6 +9,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.values.address.ValueAddressFragment
+import minerva.android.values.create.NewValueFragment
 import java.util.*
 
 class WrappedActivity : AppCompatActivity() {
@@ -25,6 +26,7 @@ class WrappedActivity : AppCompatActivity() {
     private fun prepareFragment(fragmentType: WrappedFragmentType) {
         val fragment = when (fragmentType) {
             WrappedFragmentType.IDENTITY -> EditIdentityFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.VALUE -> NewValueFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
             WrappedFragmentType.VALUE_ADDRESS -> ValueAddressFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             //else fragments
         }
@@ -47,6 +49,7 @@ class WrappedActivity : AppCompatActivity() {
     private fun getDefaultTitle(fragmentType: WrappedFragmentType) =
         when (fragmentType) {
             WrappedFragmentType.IDENTITY -> getString(R.string.new_identity)
+            WrappedFragmentType.VALUE -> getString(R.string.new_account)
             WrappedFragmentType.VALUE_ADDRESS -> String.Empty
         }
 
@@ -71,6 +74,7 @@ class WrappedActivity : AppCompatActivity() {
     companion object {
         const val TITLE = "title"
         const val INDEX = "index"
+        const val POSITION = "position"
         const val FRAGMENT = "fragment"
         const val LOGO = "logo"
     }
@@ -78,5 +82,6 @@ class WrappedActivity : AppCompatActivity() {
 
 enum class WrappedFragmentType {
     IDENTITY,
+    VALUE,
     VALUE_ADDRESS
 }

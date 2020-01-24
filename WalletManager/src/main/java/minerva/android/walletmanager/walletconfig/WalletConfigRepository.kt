@@ -6,7 +6,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
-import minerva.android.configProvider.model.*
+import minerva.android.configProvider.model.IdentityPayload
+import minerva.android.configProvider.model.ValuePayload
+import minerva.android.configProvider.model.WalletConfigPayload
+import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.*
@@ -64,8 +67,8 @@ class WalletConfigRepository(
         WalletConfigPayload(
             DEFAULT_VERSION, listOf(IdentityPayload(FIRST_IDENTITY_INDEX, DEFAULT_IDENTITY_NAME)),
             listOf(
-                ValuePayload(FIRST_VALUES_INDEX, DEFAULT_ARTIS_NAME, Network.ARTIS.value),
-                ValuePayload(SECOND_VALUES_INDEX, DEFAULT_ETHEREUM_NAME, Network.ETHEREUM.value)
+                ValuePayload(FIRST_VALUES_INDEX, DEFAULT_ARTIS_NAME, Network.ARTIS.short),
+                ValuePayload(SECOND_VALUES_INDEX, DEFAULT_ETHEREUM_NAME, Network.ETHEREUM.short)
             )
         )
 
@@ -119,14 +122,14 @@ class WalletConfigRepository(
     }
 }
 
-enum class Network(val value: String) {
-    ARTIS(Networks.ATS),
-    ETHEREUM(Networks.ETH),
-    POA(Networks.POA),
-    XDAI(Networks.XDAI);
+enum class Network(val full: String, val short: String) {
+    ARTIS(NetworkNameFull.ATS, NetworkNameShort.ATS),
+    ETHEREUM(NetworkNameFull.ETH, NetworkNameShort.ETH),
+    POA(NetworkNameFull.POA, NetworkNameShort.POA),
+    XDAI(NetworkNameFull.XDAI, NetworkNameShort.XDAI);
 
     companion object {
-        private val map = values().associateBy(Network::value)
+        private val map = values().associateBy(Network::short)
         fun fromString(type: String) = map[type] ?: throw IllegalStateException("Not supported Network!")
     }
 }

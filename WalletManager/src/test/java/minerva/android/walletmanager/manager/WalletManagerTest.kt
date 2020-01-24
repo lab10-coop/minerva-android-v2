@@ -17,6 +17,7 @@ import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterKey
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -50,7 +51,8 @@ class WalletManagerTest {
             Identity(0, "identityName1", "", "privateKey", data),
             Identity(1, "identityName2", "", "privateKey", data),
             Identity(3, "identityName3", "", "privateKey", data)
-        )
+        ),
+        listOf()
     )
 
     private val walletConfigObserver: Observer<WalletConfig> = mock()
@@ -64,6 +66,7 @@ class WalletManagerTest {
     fun setupRxSchedulers() {
         RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
+        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
     }
 
     @After
@@ -74,7 +77,6 @@ class WalletManagerTest {
 
     @Test
     fun `Check that loading wallet config returns success`() {
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()
         walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
@@ -101,7 +103,6 @@ class WalletManagerTest {
 
     @Test
     fun `Check that wallet manager returns correct value`() {
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()
         val identity = walletManager.loadIdentity(0, "Identity")
@@ -118,7 +119,6 @@ class WalletManagerTest {
 
     @Test
     fun `Check that wallet manager saves new identity`() {
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
@@ -135,7 +135,6 @@ class WalletManagerTest {
 
     @Test
     fun `Check that wallet manager doesn't save when server error`() {
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(Throwable()))
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
@@ -148,9 +147,38 @@ class WalletManagerTest {
     }
 
     @Test
+    fun `Check that wallet manager saves new Value`() {
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        val test = walletManager.createValue(Network.ETHEREUM, "#3 Ethereum").test()
+        test.assertNoErrors()
+        val loadedValue = walletManager.loadValue(0)
+        loadedValue.index shouldEqualTo 3
+        loadedValue.name shouldBeEqualTo "#3 Ethereum"
+        loadedValue.publicKey shouldBeEqualTo "publicKey"
+        loadedValue.privateKey shouldBeEqualTo "privateKey"
+    }
+
+    @Test
+    fun `Check that wallet manager don't save new value when server error` () {
+        val error = Throwable()
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(error))
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        val test = walletManager.createValue(Network.ETHEREUM, "#3 Ethereum").test()
+        test.assertError(error)
+        val loadedValue = walletManager.loadValue(0)
+        loadedValue.index shouldEqualTo -1
+    }
+
+    @Test
     fun `Check that wallet manager removes correct element`() {
         val identityToRemove = Identity(1)
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
@@ -166,7 +194,6 @@ class WalletManagerTest {
     @Test
     fun `Check that wallet manager doesn't remove identity when server error`() {
         val identityToRemove = Identity(1)
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(Throwable()))
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
@@ -204,7 +231,6 @@ class WalletManagerTest {
     @Test
     fun `Check that wallet manager will not remove, when try to remove identity with wrong index`() {
         val identityToRemove = Identity(22)
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()

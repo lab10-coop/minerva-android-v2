@@ -21,8 +21,8 @@ import minerva.android.values.listener.ValuesFragmentToAdapterListener
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.widget.CryptoAmountView.Companion.WRONG_CURRENCY_VALUE
-import minerva.android.widget.getNetworkColor
-import minerva.android.widget.getNetworkIcon
+import minerva.android.widget.repository.getNetworkColor
+import minerva.android.widget.repository.getNetworkIcon
 import minerva.wrapped.startValueAddressWrappedActivity
 import java.math.BigInteger
 
@@ -98,11 +98,15 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     }
 
     private fun View.bindData(value: Value) {
-        card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
+        card.setCardBackgroundColor(ContextCompat.getColor(context,
+            getNetworkColor(Network.fromString(value.network))
+        ))
         icon.setImageResource(getNetworkIcon(Network.fromString(value.network)))
         valueName.text = value.name
         cryptoShortName.text = value.network
-        cryptoShortName.setTextColor(ContextCompat.getColor(view.context, getNetworkColor(Network.fromString(value.network))))
+        cryptoShortName.setTextColor(ContextCompat.getColor(view.context,
+            getNetworkColor(Network.fromString(value.network))
+        ))
         //TODO add data for normal currency!
         amountView.setAmounts(value.balance, WRONG_CURRENCY_VALUE)
         sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
@@ -159,7 +163,9 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         //TODO add rest of the menu functionality
         setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.showAddress -> startValueAddressWrappedActivity(view.context, position, title, getNetworkIcon(network))
+                R.id.showAddress -> startValueAddressWrappedActivity(view.context, position, title,
+                    getNetworkIcon(network)
+                )
                 R.id.addAsset -> Toast.makeText(view.context, "Add an asset", Toast.LENGTH_SHORT).show()
                 R.id.remove -> Toast.makeText(view.context, "Remove", Toast.LENGTH_SHORT).show()
             }

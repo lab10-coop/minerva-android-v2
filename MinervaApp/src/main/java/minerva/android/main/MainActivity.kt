@@ -4,33 +4,22 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import io.fabric.sdk.android.services.network.HttpRequest.put
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
 import minerva.android.extension.launchActivity
 import minerva.android.extension.launchActivityForResult
-import minerva.android.history.HistoryFragment
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.handler.*
-import minerva.android.main.handler.handleLoginResult
-import minerva.android.main.handler.handleTransactionResult
-import minerva.android.main.handler.isLoginResult
-import minerva.android.main.handler.isTransactionResult
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FramgentInteractorListener
 import minerva.android.onboarding.OnBoardingActivity
-import minerva.android.services.ServicesFragment
 import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.settings.SettingsFragment
-import minerva.android.values.ValuesFragment
 import minerva.android.values.transaction.TransactionActivity
 import minerva.android.values.transaction.TransactionActivity.Companion.VALUE
 import minerva.android.walletmanager.model.Value
 import minerva.wrapped.startNewIdentityWrappedActivity
+import minerva.wrapped.startNewValueWrappedActivity
 import org.koin.android.ext.android.inject
 
 
@@ -78,8 +67,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Framgent
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.addIdentity -> startNewIdentityWrappedActivity(this)
-            //TODO implement adding new values
-            R.id.addValue -> Toast.makeText(this, "Add Value", Toast.LENGTH_SHORT).show()
+            R.id.addValue -> startNewValueActivity()
             R.id.barcodeScanner -> launchActivityForResult<PainlessLoginActivity>(LOGIN_RESULT_REQUEST_CODE)
         }
         return super.onOptionsItemSelected(item)
@@ -105,6 +93,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Framgent
         else bottomNavigation.selectedItemId = R.id.identities
     }
 
+    override fun removeSettingsBadgeIcon() =
+        bottomNavigation.removeBadge(R.id.settings)
+
     private fun checkMasterSeedAvailability() {
         if (!viewModel.isMasterKeyAvailable()) showOnBoardingActivity()
         else viewModel.initWalletConfig()
@@ -116,11 +107,17 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Framgent
         }
     }
 
-    override fun removeSettingsBadgeIcon() =
-        bottomNavigation.removeBadge(R.id.settings)
+    private fun startNewValueActivity() {
+        startNewValueWrappedActivity(
+            this,
+            String.format(NEW_VALUE_TITLE_PATTERN, getString(R.string.new_account), viewModel.getValueIterator()),
+            viewModel.getValueIterator()
+        )
+    }
 
     companion object {
         const val LOGIN_RESULT_REQUEST_CODE = 3
+        private const val NEW_VALUE_TITLE_PATTERN = "%s #%d"
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
     }
 }
