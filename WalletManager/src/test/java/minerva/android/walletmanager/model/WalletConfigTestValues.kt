@@ -45,13 +45,13 @@ open class WalletConfigTestValues {
     )
 
     val values = listOf(
-        Value(1, "publicKey", "privateKey", "ValuePayload1", Network.ARTIS.value),
-        Value(2, "publicKey", "privateKey", "ValuePayload2", Network.ETHEREUM.value)
+        Value(1, "publicKey", "privateKey", "ValuePayload1", Network.ARTIS.short),
+        Value(2, "publicKey", "privateKey", "ValuePayload2", Network.ETHEREUM.short)
     )
 
     val valuesResponse = listOf(
-        ValuePayload(1, "ValuePayload1", Network.ARTIS.value, false),
-        ValuePayload(2, "ValuePayload2", Network.ETHEREUM.value, false)
+        ValuePayload(1, "ValuePayload1", Network.ARTIS.short, false),
+        ValuePayload(2, "ValuePayload2", Network.ETHEREUM.short, false)
     )
 
     val services = listOf(

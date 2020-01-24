@@ -2,9 +2,7 @@ package minerva.android.identities.edit
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.WalletManager

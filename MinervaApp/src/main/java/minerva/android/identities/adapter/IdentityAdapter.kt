@@ -17,9 +17,8 @@ import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.Identity
-import minerva.android.widget.generateColor
+import minerva.android.widget.repository.generateColor
 import minerva.wrapped.startEditIdentityWrappedActivity
-import java.text.FieldPosition
 
 class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {
 
@@ -52,7 +51,7 @@ class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {
 
     private fun getPositionInRaw(index: Int): Int {
         rawIdentities.forEachIndexed { position, identity ->
-            if(identity.index == index) {
+            if (identity.index == index) {
                 return position
             }
         }

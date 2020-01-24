@@ -8,6 +8,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import minerva.android.R
 import minerva.android.kotlinUtils.Space
+import minerva.android.widget.repository.generateColor
 
 class LetterLogo(context: Context, attrs: AttributeSet?) : AppCompatTextView(context, attrs) {
 
@@ -18,7 +19,7 @@ class LetterLogo(context: Context, attrs: AttributeSet?) : AppCompatTextView(con
     }
 
     private fun prepareLetter(value: String): String =
-        if(value.isBlank()) String.Space
+        if (value.isBlank()) String.Space
         else value
 
     init {

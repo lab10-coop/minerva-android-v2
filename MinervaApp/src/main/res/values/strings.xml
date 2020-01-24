@@ -83,6 +83,10 @@
     <string name="dissmiss">Dismiss</string>
     <string name="no_data_message">No data available</string>
     <string name="last_used">Last used:</string>
+    <string name="new_account">New account</string>
+    <string name="add_new_account">Add new account</string>
+    <string name="networks">Networks</string>
+    <string name="creating_value_error">Creating new value failed</string>
     <string name="transaction_success_title">Transaction Successful</string>
     <string name="transaction_success_message">You successfully transferred…</string>
     <string name="transaction_error_title">Error: Transaction failed</string>

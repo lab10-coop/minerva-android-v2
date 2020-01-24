@@ -11,6 +11,9 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_edit_identity.*
 import minerva.android.R
 import minerva.android.extension.*
+import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IdentityField.Companion.ADDRESS_1
 import minerva.android.walletmanager.model.IdentityField.Companion.ADDRESS_2
 import minerva.android.walletmanager.model.IdentityField.Companion.BIRTH_DATE
@@ -20,9 +23,6 @@ import minerva.android.walletmanager.model.IdentityField.Companion.EMAIL
 import minerva.android.walletmanager.model.IdentityField.Companion.NAME
 import minerva.android.walletmanager.model.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.walletmanager.model.IdentityField.Companion.POSTCODE
-import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.walletmanager.model.Identity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import java.util.*

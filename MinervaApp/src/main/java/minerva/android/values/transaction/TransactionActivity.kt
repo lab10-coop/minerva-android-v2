@@ -12,7 +12,7 @@ import minerva.android.R
 import minerva.android.extension.*
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.walletconfig.Network
-import minerva.android.widget.getNetworkIcon
+import minerva.android.widget.repository.getNetworkIcon
 
 class TransactionActivity : AppCompatActivity() {
 

@@ -20,6 +20,7 @@ import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import timber.log.Timber
 import java.math.BigInteger
@@ -40,6 +41,7 @@ interface WalletManager {
     fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
     fun loadIdentity(position: Int, defaultName: String): Identity
     fun saveIdentity(identity: Identity): Completable
+    fun createValue(network: Network, valueName: String): Completable
     fun removeIdentity(identity: Identity): Completable
     fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
     fun computeDeliveredKeys(index: Int): Single<Triple<Int, String, String>>
@@ -48,6 +50,7 @@ interface WalletManager {
     fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
     fun loadValue(position: Int): Value
     fun refreshBalances()
+    fun getValueIterator(): Int
 }
 
 //Derivation path for identities and values "m/99'/n" where n is index of identity and value
@@ -127,6 +130,21 @@ class WalletManagerImpl(
             }
     }
 
+    override fun createValue(network: Network, valueName: String): Completable {
+        _walletConfigMutableLiveData.value?.let { config ->
+            val newValue = Value(config.newIndex, name = valueName, network = network.short)
+            return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, newValue.index)
+                .map {
+                    newValue.apply {
+                        publicKey = it.second
+                        privateKey = it.third
+                    }
+                    WalletConfig(config.updateVersion, config.identities, config.values + newValue)
+                }.flatMapCompletable { updateWalletConfig(it) }
+        }
+        return Completable.error(Throwable("Wallet Config was not initialized"))
+    }
+
     override fun saveIdentity(identity: Identity): Completable {
         _walletConfigMutableLiveData.value?.let { config ->
             return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, identity.index)
@@ -184,6 +202,13 @@ class WalletManagerImpl(
     private fun handleSavingServiceLogin(identity: Identity): CompletableSource? =
         if (identity !is IncognitoIdentity) saveService()
         else Completable.complete()
+
+    override fun getValueIterator(): Int {
+        _walletConfigMutableLiveData.value?.values?.size?.let {
+            return it + 1
+        }
+        throw Throwable("Wallet Config was not initialized")
+    }
 
     //    TODO chane for generic service creation, proper API is needed
     private fun saveService(): Completable {
@@ -259,7 +284,7 @@ class WalletManagerImpl(
         return newIdentities
     }
 
-    private fun prepareDefaultIdentityName(defaultName: String): String = String.format("%s #%d", defaultName, getNewIndex())
+    private fun prepareDefaultIdentityName(defaultName: String): String = String.format(NEW_IDENTITY_TITLE_PATTERN, defaultName, getNewIndex())
 
     private fun isOnlyOneElement(identities: List<Identity>): Boolean {
         var realIdentitiesCount = 0
@@ -279,6 +304,6 @@ class WalletManagerImpl(
     companion object {
         private const val ONE_ELEMENT = 1
         private const val MINERVA_SERVICE = "Minerva Service"
-//        TODO should be dynamically handled form qr code
+        private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"
     }
 }

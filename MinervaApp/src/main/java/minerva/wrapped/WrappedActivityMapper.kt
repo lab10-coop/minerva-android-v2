@@ -25,3 +25,11 @@ fun startValueAddressWrappedActivity(context: Context, position: Int, title: Str
         putExtra(WrappedActivity.LOGO, logoRes)
     }
 }
+
+fun startNewValueWrappedActivity(context: Context, title: String, position: Int) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE)
+        putExtra(WrappedActivity.TITLE, title)
+        putExtra(WrappedActivity.POSITION, position)
+    }
+}

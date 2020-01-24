@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_services.*
-import kotlinx.android.synthetic.main.fragment_services.recyclerView
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.visible
