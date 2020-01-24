@@ -38,11 +38,7 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
         index: Int
     ): Single<Triple<Int, String, String>> {
         val keysSubject: SingleSubject<Triple<Int, String, String>> = SingleSubject.create()
-        UportHDSigner().computeAddressForPath(
-            contex,
-            privateKey,
-            getDerivedPath(index),
-            String.Empty,
+        UportHDSigner().computeAddressForPath(contex, privateKey, getDerivedPath(index), String.Empty,
             callback = { error, privateKey, publicKey ->
                 error?.let {
                     keysSubject.onError(Throwable(error))

@@ -103,10 +103,10 @@ class ChooseIdentityFragment : Fragment() {
     private fun prepareObservers() {
         viewModel.loadingLiveData.observe(this, EventObserver { if (it) showLoader() else hideLoader() })
         viewModel.errorLiveData.observe(this, EventObserver {
-            listener.onLoginResult(false)
+            listener.onResult(false)
         })
         viewModel.loginLiveData.observe(this, EventObserver {
-            listener.onLoginResult(true)
+            listener.onResult(true)
         })
         viewModel.requestedFieldsLiveData.observe(this, EventObserver {
             Toast.makeText(context, getString(R.string.requested_data_message), Toast.LENGTH_LONG).show()

@@ -4,6 +4,4 @@
     android:id="@+id/loginFragmentsContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".services.login.PainlessLoginActivity">
-
-</FrameLayout>
+    tools:context=".services.login.PainlessLoginActivity"/>
