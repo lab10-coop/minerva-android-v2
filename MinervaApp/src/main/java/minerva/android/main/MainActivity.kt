@@ -12,18 +12,18 @@ import minerva.android.extension.launchActivityForResult
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
-import minerva.android.main.listener.FramgentInteractorListener
+import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.values.transaction.TransactionActivity
-import minerva.android.values.transaction.TransactionActivity.Companion.VALUE
+import minerva.android.values.transaction.activity.TransactionActivity
+import minerva.android.values.transaction.activity.TransactionActivity.Companion.VALUE_INDEX
 import minerva.android.walletmanager.model.Value
 import minerva.wrapped.startNewIdentityWrappedActivity
 import minerva.wrapped.startNewValueWrappedActivity
 import org.koin.android.ext.android.inject
 
 
-class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, FramgentInteractorListener {
+class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, FragmentInteractorListener {
 
     private val viewModel: MainViewModel by inject()
 
@@ -82,9 +82,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Framgent
         }
     }
 
-    override fun showSendTransactonScreen(value: Value) {
+    override fun showSendTransactionScreen(value: Value) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
-            putExtra(VALUE, value)
+            putExtra(VALUE_INDEX, value.index)
         }
     }
 

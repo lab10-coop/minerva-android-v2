@@ -88,11 +88,13 @@
     <string name="networks">Networks</string>
     <string name="creating_value_error">Creating new value failed</string>
     <string name="transaction_success_title">Transaction Successful</string>
-    <string name="transaction_success_message">You successfully transferred…</string>
+    <string name="transaction_success_message">You successfully transferred %s</string>
     <string name="transaction_error_title">Error: Transaction failed</string>
-    <string name="transaction_error_message">There was an error while executing the transaction</string>
+    <string name="transaction_error_message">There was an error while executing\n the transaction</string>
     <string name="receiver">Receiver</string>
     <string name="gas_price_gwei">Gas Price (Gwei)</string>
     <string name="gas_limit">Gas Limit</string>
-    <string name="transaction_cost">Transaction cost:</string>
+    <string name="transaction_cost">Transaction cost: %1$s %2$s</string>
+    <string name="transactions_cost_error_title">Transaction costs error</string>
+    <string name="transactions_cost_error_message">An error occurred while setting transaction costs</string>
 </resources>

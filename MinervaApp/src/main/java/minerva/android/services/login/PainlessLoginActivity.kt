@@ -39,7 +39,7 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
         supportActionBar?.hide()
     }
 
-    override fun onResult(isResultSucceed: Boolean) {
+    override fun onResult(isResultSucceed: Boolean, message: String) {
         setResult(Activity.RESULT_OK, Intent().putExtra(IS_LOGIN_SUCCESS, isResultSucceed))
         finish()
     }

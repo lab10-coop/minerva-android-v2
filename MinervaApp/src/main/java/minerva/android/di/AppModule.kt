@@ -14,6 +14,7 @@ import minerva.android.settings.backup.BackupViewModel
 import minerva.android.values.ValuesViewModel
 import minerva.android.values.address.ValueAddressViewModel
 import minerva.android.values.create.NewValueViewModel
+import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.walletmanager.createWalletManagerModules
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
@@ -38,4 +39,5 @@ private val appModules = module {
     viewModel { ValueAddressViewModel(get()) }
     viewModel { NewValueViewModel(get()) }
     viewModel { ServicesViewModel(get()) }
+    viewModel { TransactionsViewModel(get()) }
 }

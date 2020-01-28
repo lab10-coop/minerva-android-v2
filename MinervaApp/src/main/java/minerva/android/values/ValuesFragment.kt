@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
-import minerva.android.main.listener.FramgentInteractorListener
+import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.values.adapter.ValueAdapter
 import minerva.android.values.listener.ValuesFragmentToAdapterListener
 import minerva.android.walletmanager.model.Value
@@ -20,7 +20,7 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
 
     private val viewModel: ValuesViewModel by viewModel()
     private val valueAdapter = ValueAdapter(this)
-    private lateinit var listener: FramgentInteractorListener
+    private lateinit var listener: FragmentInteractorListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,7 +41,7 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as FramgentInteractorListener
+        listener = context as FragmentInteractorListener
     }
 
     override fun onPause() {
@@ -64,6 +64,6 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
     }
 
     override fun onSendTransaction(value: Value) {
-        listener.showSendTransactonScreen(value)
+        listener.showSendTransactionScreen(value)
     }
 }

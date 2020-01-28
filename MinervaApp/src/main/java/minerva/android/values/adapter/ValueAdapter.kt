@@ -24,6 +24,7 @@ import minerva.android.widget.CryptoAmountView.Companion.WRONG_CURRENCY_VALUE
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.wrapped.startValueAddressWrappedActivity
+import java.math.BigDecimal
 import java.math.BigInteger
 
 
@@ -69,8 +70,8 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
         notifyDataSetChanged()
     }
 
-    fun updateBalances(balances: HashMap<String, BigInteger>) {
-        activeValues.forEach { it.balance = balances[it.publicKey] ?: Int.InvalidId.toBigInteger() }
+    fun updateBalances(balances: HashMap<String, BigDecimal>) {
+        activeValues.forEach { it.balance = balances[it.publicKey] ?: Int.InvalidId.toBigDecimal() }
         notifyDataSetChanged()
     }
 

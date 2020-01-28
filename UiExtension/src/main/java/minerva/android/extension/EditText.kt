@@ -5,6 +5,43 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.MotionEvent
 import android.widget.EditText
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import com.jakewharton.rxbinding3.widget.textChangeEvents
+import io.reactivex.Observable
+import io.reactivex.Observable.merge
+import io.reactivex.android.schedulers.AndroidSchedulers
+import minerva.android.extension.validator.ValidationResult
+import java.util.concurrent.TimeUnit
+
+fun TextInputEditText.getValidationObservable(
+    inputLayout: TextInputLayout? = null,
+    checkFunction: (String) -> ValidationResult
+): Observable<Boolean> =
+    textChangeEvents()
+        .publish { observable ->
+            merge(
+                observable.take(FIRST).filter { it.text.isNotBlank() },
+                observable.skip(FIRST)
+            )
+        }
+        .debounce(TEXT_WATCHER_DEBOUNCE, TimeUnit.MILLISECONDS)
+        .observeOn(AndroidSchedulers.mainThread())
+        .map { checkFunction(it.text.toString()) }
+        .doOnNext {
+            inputLayout?.apply {
+                error = if (it.hasError) {
+                    context.getString(it.errorMessageId)
+                } else {
+                    isErrorEnabled = false
+                    null
+                }
+            }
+        }
+        .map { it.isSuccessful }
+
+private const val TEXT_WATCHER_DEBOUNCE = 500L
+private const val FIRST = 1L
 
 fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
     this.addTextChangedListener(object : TextWatcher {

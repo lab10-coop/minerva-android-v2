@@ -34,4 +34,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation coreDependencies.values()
     implementation androidCoreDependencies.values()
+    implementation rxDependencies.values()
+    implementation rxbinding.values()
 }

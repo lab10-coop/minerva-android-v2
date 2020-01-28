@@ -51,6 +51,12 @@ ext {
     jodaVersion = '2.10.1'
 
     w3jVersion = '4.2.0-android'
+    rxbindingVersion = '3.0.0-alpha2'
+
+    rxbinding = [
+            rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
+            rxbindingCore: "com.jakewharton.rxbinding3:rxbinding-core:$rxbindingVersion"
+    ]
 
     coreDependencies = [
             kotlin    : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
