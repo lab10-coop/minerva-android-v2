@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightGray"
-    tools:context=".values.transaction.TransactionActivity">
+    tools:context=".values.transaction.activity.TransactionActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -36,10 +36,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_all_icon"
-                    android:inputType="text" />
+                    android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/receiverInputLayout"
                 style="@style/FormTextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -128,9 +129,18 @@
         android:layout_marginBottom="@dimen/margin_normal"
         android:background="@drawable/purple_button_selector"
         android:clickable="true"
+        android:enabled="false"
         android:fontFamily="@font/rubik_medium"
         android:foreground="@drawable/ripple"
         android:gravity="center"
         android:padding="@dimen/margin_small"
         android:textColor="@android:color/white" />
+
+    <ProgressBar
+        android:id="@+id/sendTransactionProgressBar"
+        android:layout_width="wrap_content"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="@dimen/margin_normal" />
 </FrameLayout>

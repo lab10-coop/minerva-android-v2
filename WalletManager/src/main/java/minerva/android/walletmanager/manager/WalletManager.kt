@@ -23,11 +23,12 @@ import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import timber.log.Timber
+import java.math.BigDecimal
 import java.math.BigInteger
 
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
-    val balanceLiveData: LiveData<HashMap<String, BigInteger>>
+    val balanceLiveData: LiveData<HashMap<String, BigDecimal>>
 
     fun isMasterKeyAvailable(): Boolean
     fun initWalletConfig()
@@ -51,6 +52,9 @@ interface WalletManager {
     fun loadValue(position: Int): Value
     fun refreshBalances()
     fun getValueIterator(): Int
+    fun sendTransaction(privateKey: String, receiverKey: String, amount: String, gasPrice: BigDecimal, gasLimit: BigInteger): Single<String>
+    fun getTransactionCosts(): Single<Triple<BigDecimal, BigInteger, BigDecimal>>
+    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
 }
 
 //Derivation path for identities and values "m/99'/n" where n is index of identity and value
@@ -68,8 +72,8 @@ class WalletManagerImpl(
     private val _walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = _walletConfigMutableLiveData
 
-    private val _balanceLiveData = MutableLiveData<HashMap<String, BigInteger>>()
-    override val balanceLiveData: LiveData<HashMap<String, BigInteger>> get() = _balanceLiveData
+    private val _balanceLiveData = MutableLiveData<HashMap<String, BigDecimal>>()
+    override val balanceLiveData: LiveData<HashMap<String, BigDecimal>> get() = _balanceLiveData
 
     override fun isMasterKeyAvailable(): Boolean = keystoreRepository.isMasterKeySaved()
 
@@ -98,6 +102,15 @@ class WalletManagerImpl(
                 )
         }
     }
+
+    override fun sendTransaction(privateKey: String, receiverKey: String, amount: String, gasPrice: BigDecimal, gasLimit: BigInteger): Single<String> {
+        return blockchainProvider.sendTransaction(privateKey, receiverKey, BigDecimal(amount), gasPrice, gasLimit)
+    }
+
+    override fun getTransactionCosts(): Single<Triple<BigDecimal, BigInteger, BigDecimal>> = blockchainProvider.getTransactionCosts()
+
+    override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
+        blockchainProvider.calculateTransactionCost(gasPrice, gasLimit)
 
     override fun computeDeliveredKeys(index: Int): Single<Triple<Int, String, String>> =
         cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, index)
@@ -261,8 +274,8 @@ class WalletManagerImpl(
         return Value(Int.InvalidIndex)
     }
 
-    private fun onRefreshBalanceSuccess(list: List<Pair<String, BigInteger>>) {
-        val currentBalance = hashMapOf<String, BigInteger>()
+    private fun onRefreshBalanceSuccess(list: List<Pair<String, BigDecimal>>) {
+        val currentBalance = hashMapOf<String, BigDecimal>()
         list.forEach { balance ->
             currentBalance[balance.first] = balance.second
         }
@@ -304,6 +317,7 @@ class WalletManagerImpl(
     companion object {
         private const val ONE_ELEMENT = 1
         private const val MINERVA_SERVICE = "Minerva Service"
+        //        TODO should be dynamically handled form qr code
         private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"
     }
 }

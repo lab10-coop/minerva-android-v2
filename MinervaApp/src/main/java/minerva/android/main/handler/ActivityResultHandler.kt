@@ -5,21 +5,23 @@ import android.content.Intent
 import minerva.android.R
 import minerva.android.main.MainActivity
 import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.values.transaction.TransactionActivity
+import minerva.android.values.transaction.activity.TransactionActivity
 import minerva.android.widget.MinervaFlashbar
 
 internal fun MainActivity.handleTransactionResult(data: Intent?) {
-    data?.getBooleanExtra(TransactionActivity.IS_TRANSACTION_SUCCESS, false)?.let { isTransactionSuccess ->
+    data?.apply {
+        val isTransactionSuccess = getBooleanExtra(TransactionActivity.IS_TRANSACTION_SUCCESS, false)
+        val transactionMessage = getStringExtra(TransactionActivity.TRANSACTION_MESSASGE)
+
         if (isTransactionSuccess) {
-//            todo show amount transferred in flashbar
             MinervaFlashbar.show(
-                this,
+                this@handleTransactionResult,
                 getString(R.string.transaction_success_title),
-                getString(R.string.transaction_success_message)
+                getString(R.string.transaction_success_message, transactionMessage)
             )
         } else {
             MinervaFlashbar.show(
-                this,
+                this@handleTransactionResult,
                 getString(R.string.transaction_error_title),
                 getString(R.string.transaction_error_message)
             )

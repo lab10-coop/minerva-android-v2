@@ -6,12 +6,13 @@ import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.crypto_amount_layout.view.*
 import minerva.android.R
 import minerva.android.kotlinUtils.InvalidId
+import java.math.BigDecimal
 import java.math.BigInteger
 
 class CryptoAmountView(context: Context, attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
 
-    fun setAmounts(crypto: BigInteger, currency: Float = WRONG_CURRENCY_VALUE) {
-        cryptoAmount.text = if(crypto == Int.InvalidId.toBigInteger()) WRONG_CRYPTO_STRING else crypto.toString()
+    fun setAmounts(crypto: BigDecimal, currency: Float = WRONG_CURRENCY_VALUE) {
+        cryptoAmount.text = if(crypto == Int.InvalidId.toBigDecimal()) WRONG_CRYPTO_STRING else crypto.toPlainString()
         currencyAmount.text = if(currency != WRONG_CURRENCY_VALUE) String.format(CURRENCY_FORMAT, currency)
         else String.format(WRONG_CURRENCY_STRING, currency)
     }

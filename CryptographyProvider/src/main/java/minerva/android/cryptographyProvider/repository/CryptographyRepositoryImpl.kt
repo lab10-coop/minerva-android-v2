@@ -34,16 +34,16 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
     }
 
     override fun computeDeliveredKeys(
-        privateKey: String,
+        masterPrivateKey: String,
         index: Int
     ): Single<Triple<Int, String, String>> {
         val keysSubject: SingleSubject<Triple<Int, String, String>> = SingleSubject.create()
-        UportHDSigner().computeAddressForPath(contex, privateKey, getDerivedPath(index), String.Empty,
+        UportHDSigner().computeAddressForPath(contex, masterPrivateKey, getDerivedPath(index), String.Empty,
             callback = { error, privateKey, publicKey ->
                 error?.let {
                     keysSubject.onError(Throwable(error))
                 }.orElse {
-                    keysSubject.onSuccess(Triple(index, prepareCorrectPublicKeyFormatt(publicKey), privateKey))
+                    keysSubject.onSuccess(Triple(index, prepareCorrectPublicKeyFormat(publicKey), privateKey))
                 }
             })
         return keysSubject
@@ -51,7 +51,7 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
 
     private fun getDerivedPath(index: Int) = "${DERIVED_PATH_PREFIX}$index"
 
-    private fun prepareCorrectPublicKeyFormatt(publicKey: String) = PublicKey(publicKey.decodeBase64()).normalize().toAddress().hex
+    private fun prepareCorrectPublicKeyFormat(publicKey: String) = PublicKey(publicKey.decodeBase64()).normalize().toAddress().hex
 
     override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> {
         return try {

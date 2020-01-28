@@ -12,7 +12,6 @@ import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.PainlessLoginFragmentListener
-import minerva.android.values.listener.BaseScannerListener
 import minerva.android.walletmanager.model.QrCodeResponse
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
