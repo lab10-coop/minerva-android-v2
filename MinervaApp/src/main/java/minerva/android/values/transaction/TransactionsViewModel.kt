@@ -64,7 +64,7 @@ class TransactionsViewModel(private val walletManager: WalletManager) : ViewMode
 
     fun sendTransaction(receiverKey: String, amount: String, gasPrice: BigDecimal, gasLimit: BigInteger) {
         _loadingLiveData.value = Event(true)
-        disposable = walletManager.sendTransaction(value.publicKey, value.privateKey, receiverKey, amount, gasPrice, gasLimit)
+        disposable = walletManager.sendTransaction(value.address, value.privateKey, receiverKey, amount, gasPrice, gasLimit)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnEvent { _loadingLiveData.value = Event(false) }
