@@ -52,7 +52,15 @@ interface WalletManager {
     fun loadValue(position: Int): Value
     fun refreshBalances()
     fun getValueIterator(): Int
-    fun sendTransaction(privateKey: String, receiverKey: String, amount: String, gasPrice: BigDecimal, gasLimit: BigInteger): Single<String>
+    fun sendTransaction(
+        address: String,
+        privateKey: String,
+        receiverKey: String,
+        amount: String,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ): Completable
+
     fun getTransactionCosts(): Single<Triple<BigDecimal, BigInteger, BigDecimal>>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
 }
@@ -82,6 +90,7 @@ class WalletManagerImpl(
         loadWalletConfig()
     }
 
+    //todo assign to disposable and release resources in main ctivity viewmodel
     @VisibleForTesting
     fun loadWalletConfig() {
         walletConfigRepository.loadWalletConfig(masterKey).subscribeBy(
@@ -93,19 +102,24 @@ class WalletManagerImpl(
 
     override fun refreshBalances() {
         _walletConfigMutableLiveData.value?.values?.let { values ->
-            val publicKeys = mutableListOf<String>()
-            values.forEach { publicKeys.add(it.publicKey) }
-            blockchainProvider.refreshBalances(publicKeys)
+            val addresses = mutableListOf<String>()
+            values.forEach { addresses.add(it.address) }
+            blockchainProvider.refreshBalances(addresses)
                 .subscribeBy(
                     onSuccess = { onRefreshBalanceSuccess(it) },
-                    onError = { Timber.e("Refresh balance error: ${it.message}") }
+                    onError = { Timber.d("Refresh balance error: ${it.message}") }
                 )
         }
     }
 
-    override fun sendTransaction(privateKey: String, receiverKey: String, amount: String, gasPrice: BigDecimal, gasLimit: BigInteger): Single<String> {
-        return blockchainProvider.sendTransaction(privateKey, receiverKey, BigDecimal(amount), gasPrice, gasLimit)
-    }
+    override fun sendTransaction(
+        address: String,
+        privateKey: String,
+        receiverKey: String,
+        amount: String,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ): Completable = blockchainProvider.sendTransaction(address, privateKey, receiverKey, BigDecimal(amount), gasPrice, gasLimit)
 
     override fun getTransactionCosts(): Single<Triple<BigDecimal, BigInteger, BigDecimal>> = blockchainProvider.getTransactionCosts()
 
@@ -151,6 +165,7 @@ class WalletManagerImpl(
                     newValue.apply {
                         publicKey = it.second
                         privateKey = it.third
+                        address = blockchainProvider.completeAddress(it.third)
                     }
                     WalletConfig(config.updateVersion, config.identities, config.values + newValue)
                 }.flatMapCompletable { updateWalletConfig(it) }

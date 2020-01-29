@@ -11,8 +11,8 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.listener.TransactionFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
-import minerva.android.values.transaction.fragment.scanner.TransactionScannerFragment
 import minerva.android.values.transaction.fragment.TransactionsFragment
+import minerva.android.values.transaction.fragment.scanner.TransactionScannerFragment
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.widget.repository.getNetworkIcon
@@ -66,10 +66,10 @@ class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
         }
     }
 
-    override fun onResult(isResultSucceed: Boolean, message: String) {
+    override fun onResult(isResultSucceed: Boolean, message: String?) {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(IS_TRANSACTION_SUCCESS, isResultSucceed)
-            putExtra(TRANSACTION_MESSASGE, message)
+            putExtra(TRANSACTION_MESSAGE, message)
         })
         finish()
     }
@@ -100,7 +100,7 @@ class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
 
     companion object {
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
-        const val TRANSACTION_MESSASGE = "transaction_message"
+        const val TRANSACTION_MESSAGE = "transaction_message"
         const val VALUE_INDEX = "value_index"
     }
 }

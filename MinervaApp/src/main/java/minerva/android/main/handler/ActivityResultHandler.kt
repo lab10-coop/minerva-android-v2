@@ -11,7 +11,7 @@ import minerva.android.widget.MinervaFlashbar
 internal fun MainActivity.handleTransactionResult(data: Intent?) {
     data?.apply {
         val isTransactionSuccess = getBooleanExtra(TransactionActivity.IS_TRANSACTION_SUCCESS, false)
-        val transactionMessage = getStringExtra(TransactionActivity.TRANSACTION_MESSASGE)
+        val transactionMessage = getStringExtra(TransactionActivity.TRANSACTION_MESSAGE)
 
         if (isTransactionSuccess) {
             MinervaFlashbar.show(
@@ -23,7 +23,7 @@ internal fun MainActivity.handleTransactionResult(data: Intent?) {
             MinervaFlashbar.show(
                 this@handleTransactionResult,
                 getString(R.string.transaction_error_title),
-                getString(R.string.transaction_error_message)
+                getString(R.string.transaction_error_message, transactionMessage)
             )
         }
     }

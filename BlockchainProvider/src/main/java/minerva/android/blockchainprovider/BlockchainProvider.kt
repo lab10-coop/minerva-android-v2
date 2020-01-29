@@ -1,9 +1,11 @@
 package minerva.android.blockchainprovider
 
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import minerva.android.kotlinUtils.extension.toHexString
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
@@ -15,7 +17,6 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
 import org.web3j.utils.Numeric
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -25,17 +26,17 @@ class BlockchainProvider(blockchainURL: String) {
 
     private val web3j = Web3j.build(HttpService(blockchainURL))
 
-    fun refreshBalances(publicKeys: List<String>): Single<List<Pair<String, BigDecimal>>> {
-        return Observable.range(START, publicKeys.size)
+    fun refreshBalances(addresses: List<String>): Single<List<Pair<String, BigDecimal>>> {
+        return Observable.range(START, addresses.size)
             .flatMapSingle { position ->
-                getBalance(publicKeys[position])
+                getBalance(addresses[position])
             }.toList()
     }
 
-    private fun getBalance(publicKey: String): Single<Pair<String, BigDecimal>> {
-        return web3j.ethGetBalance(publicKey, DefaultBlockParameterName.LATEST)
+    private fun getBalance(address: String): Single<Pair<String, BigDecimal>> {
+        return web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
             .flowable()
-            .map { Pair(publicKey, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
+            .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
             .firstOrError()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -61,25 +62,27 @@ class BlockchainProvider(blockchainURL: String) {
     }
 
     fun sendTransaction(
+        address: String,
         privateKey: String,
         receiverKey: String,
         amount: BigDecimal,
         gasPrice: BigDecimal,
         gasLimit: BigInteger
-    ): Single<String> {
-        return web3j.ethGetTransactionCount(receiverKey, DefaultBlockParameterName.LATEST)
+    ): Completable {
+        return web3j.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
             .flowable()
-            .flatMapSingle {
+            .flatMapCompletable {
                 val signedTransaction = getSignedTransaction(it.transactionCount, gasPrice, gasLimit, receiverKey, amount, privateKey)
                 web3j.ethSendRawTransaction(Numeric.toHexString(signedTransaction))
                     .flowable()
-                    .map { response ->
-                        Timber.e(response.error.message)
-                        response.rawResponse
+                    .flatMapCompletable { response ->
+                        if (response.error == null) Completable.complete()
+                        else Completable.error(Throwable(response.error.message))
                     }
-                    .singleOrError()
-            }.singleOrError()
+            }
     }
+
+    fun completeAddress(privateKey: String): String = Credentials.create(privateKey).ecKeyPair.privateKey.toHexString()
 
     private fun getSignedTransaction(
         transactionCount: BigInteger,
@@ -103,7 +106,7 @@ class BlockchainProvider(blockchainURL: String) {
         return RawTransaction.createEtherTransaction(
             transactionCosts.first,
             toWei(transactionCosts.second, Convert.Unit.GWEI).toBigInteger(),
-            toWei(BigDecimal(transactionCosts.third), Convert.Unit.GWEI).toBigInteger(),
+            transactionCosts.third,
             receiverKey,
             toWei(amount, Convert.Unit.ETHER).toBigInteger()
         )

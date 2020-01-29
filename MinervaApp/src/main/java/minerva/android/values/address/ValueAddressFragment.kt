@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_value_address.*
 import minerva.android.R
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Value
@@ -34,19 +33,19 @@ class ValueAddressFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_value_address, container, false)
 
     private fun initializeView(value: Value) {
-        prepareQR(value.publicKey)
-        address.text = value.publicKey
-        setupShareButton(shareButton, value.publicKey)
-        setupCopyButton(copyButton, value.publicKey)
+        prepareQR(value.address)
+        address.text = value.address
+        setupShareButton(shareButton, value.address)
+        setupCopyButton(copyButton, value.address)
     }
 
-    private fun prepareQR(publicKey: String) {
+    private fun prepareQR(address: String) {
         resources.getDimensionPixelSize(R.dimen.qr_code_size).let { qrCodeSize ->
-            if(publicKey == String.Empty) {
+            if(address.isEmpty()) {
                 Toast.makeText(context, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
                 return@let
             }
-            val qr = QRCode.from(publicKey).withSize(qrCodeSize, qrCodeSize).file()
+            val qr = QRCode.from(address).withSize(qrCodeSize, qrCodeSize).file()
             context?.let {
                 Glide.with(it).load(qr).into(qrCode)
             }
