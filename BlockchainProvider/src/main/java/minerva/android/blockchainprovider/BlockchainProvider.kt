@@ -5,7 +5,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import minerva.android.kotlinUtils.extension.toHexString
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
@@ -82,7 +81,7 @@ class BlockchainProvider(blockchainURL: String) {
             }
     }
 
-    fun completeAddress(privateKey: String): String = Credentials.create(privateKey).ecKeyPair.privateKey.toHexString()
+    fun completeAddress(privateKey: String): String = Credentials.create(privateKey).address
 
     private fun getSignedTransaction(
         transactionCount: BigInteger,
