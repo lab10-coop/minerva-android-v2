@@ -3,9 +3,9 @@ package minerva.android.services.login
 import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
 import minerva.android.extension.getCurrentFragment
 import minerva.android.kotlinUtils.Empty
@@ -39,7 +39,7 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
         supportActionBar?.hide()
     }
 
-    override fun onResult(isResultSucceed: Boolean, message: String) {
+    override fun onResult(isResultSucceed: Boolean, message: String?) {
         setResult(Activity.RESULT_OK, Intent().putExtra(IS_LOGIN_SUCCESS, isResultSucceed))
         finish()
     }

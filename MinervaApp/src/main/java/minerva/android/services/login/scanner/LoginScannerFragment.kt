@@ -5,7 +5,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.widget.Toast
-import com.budiyev.android.codescanner.*
+import com.budiyev.android.codescanner.DecodeCallback
+import com.budiyev.android.codescanner.ErrorCallback
 import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
 import minerva.android.extension.gone

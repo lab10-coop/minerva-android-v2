@@ -36,6 +36,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':KotlinUtils')
+
     implementation coreDependencies.values()
     implementation blockChainDependencies.values()
     implementation rxDependencies.values()

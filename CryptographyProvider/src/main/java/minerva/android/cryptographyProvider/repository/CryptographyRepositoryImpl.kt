@@ -5,16 +5,13 @@ import com.uport.sdk.signer.UportHDSigner
 import com.uport.sdk.signer.encryption.KeyProtection
 import io.reactivex.Single
 import io.reactivex.subjects.SingleSubject
-import me.uport.sdk.core.decodeBase64
 import me.uport.sdk.jwt.InvalidJWTException
 import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
-import me.uport.sdk.signer.normalize
+import me.uport.sdk.signer.hexToBytes32
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
 import org.kethereum.bip39.wordlists.WORDLIST_ENGLISH
-import org.kethereum.crypto.toAddress
-import org.kethereum.model.PublicKey
 import timber.log.Timber
 import java.util.*
 
@@ -43,15 +40,13 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
                 error?.let {
                     keysSubject.onError(Throwable(error))
                 }.orElse {
-                    keysSubject.onSuccess(Triple(index, prepareCorrectPublicKeyFormat(publicKey), privateKey))
+                    keysSubject.onSuccess(Triple(index, publicKey.hexToBytes32(), privateKey))
                 }
             })
         return keysSubject
     }
 
     private fun getDerivedPath(index: Int) = "${DERIVED_PATH_PREFIX}$index"
-
-    private fun prepareCorrectPublicKeyFormat(publicKey: String) = PublicKey(publicKey.decodeBase64()).normalize().toAddress().hex
 
     override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> {
         return try {
@@ -64,9 +59,9 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
         }
     }
 
-    override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String {
-        return JWTTools().createJWT(payload, getDIDKey(privateKey), KPSigner(privateKey))
-    }
+    override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
+        JWTTools().createJWT(payload, getDIDKey(privateKey), KPSigner(privateKey))
+
 
     private fun getDIDKey(key: String) = "did:ethr:${KPSigner(key).getAddress()}"
 

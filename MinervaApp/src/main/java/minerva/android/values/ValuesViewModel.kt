@@ -5,7 +5,6 @@ import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.WalletConfig
 import java.math.BigDecimal
-import java.math.BigInteger
 
 class ValuesViewModel(private val walletManager: WalletManager) : BaseViewModel() {
 

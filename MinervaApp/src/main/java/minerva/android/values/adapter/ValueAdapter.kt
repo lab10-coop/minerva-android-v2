@@ -25,7 +25,6 @@ import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.wrapped.startValueAddressWrappedActivity
 import java.math.BigDecimal
-import java.math.BigInteger
 
 
 class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
@@ -71,7 +70,8 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
     }
 
     fun updateBalances(balances: HashMap<String, BigDecimal>) {
-        activeValues.forEach { it.balance = balances[it.publicKey] ?: Int.InvalidId.toBigDecimal() }
+        activeValues.forEach {
+            it.balance = balances[it.address] ?: Int.InvalidId.toBigDecimal() }
         notifyDataSetChanged()
     }
 
@@ -99,15 +99,21 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     }
 
     private fun View.bindData(value: Value) {
-        card.setCardBackgroundColor(ContextCompat.getColor(context,
-            getNetworkColor(Network.fromString(value.network))
-        ))
+        card.setCardBackgroundColor(
+            ContextCompat.getColor(
+                context,
+                getNetworkColor(Network.fromString(value.network))
+            )
+        )
         icon.setImageResource(getNetworkIcon(Network.fromString(value.network)))
         valueName.text = value.name
         cryptoShortName.text = value.network
-        cryptoShortName.setTextColor(ContextCompat.getColor(view.context,
-            getNetworkColor(Network.fromString(value.network))
-        ))
+        cryptoShortName.setTextColor(
+            ContextCompat.getColor(
+                view.context,
+                getNetworkColor(Network.fromString(value.network))
+            )
+        )
         //TODO add data for normal currency!
         amountView.setAmounts(value.balance, WRONG_CURRENCY_VALUE)
         sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
@@ -164,7 +170,8 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         //TODO add rest of the menu functionality
         setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.showAddress -> startValueAddressWrappedActivity(view.context, position, title,
+                R.id.showAddress -> startValueAddressWrappedActivity(
+                    view.context, position, title,
                     getNetworkIcon(network)
                 )
                 R.id.addAsset -> Toast.makeText(view.context, "Add an asset", Toast.LENGTH_SHORT).show()

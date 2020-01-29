@@ -23,7 +23,7 @@ fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, blockchainUrl:
 fun createWalletModules() = module {
     factory { KeystoreRepository(get()) }
     factory { LocalWalletConfigProviderImpl(get()) as LocalWalletConfigProvider }
-    factory { WalletConfigRepository(get(), get(), get()) }
+    factory { WalletConfigRepository(get(), get(), get(), get()) }
     factory { LocalStorage(get()) }
     single { WalletManagerImpl(get(), get(), get(), get(), get(), get()) as WalletManager }
 }

@@ -1,7 +1,6 @@
 package minerva.android.cryptographyProvider.repository
 
 import io.reactivex.Single
-import io.reactivex.subjects.SingleSubject
 
 interface CryptographyRepository {
     fun createMasterKey(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)

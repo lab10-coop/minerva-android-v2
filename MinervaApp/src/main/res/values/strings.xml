@@ -90,7 +90,7 @@
     <string name="transaction_success_title">Transaction Successful</string>
     <string name="transaction_success_message">You successfully transferred %s</string>
     <string name="transaction_error_title">Error: Transaction failed</string>
-    <string name="transaction_error_message">There was an error while executing\n the transaction</string>
+    <string name="transaction_error_message"><b>Error cause:</b> %s</string>
     <string name="receiver">Receiver</string>
     <string name="gas_price_gwei">Gas Price (Gwei)</string>
     <string name="gas_limit">Gas Limit</string>

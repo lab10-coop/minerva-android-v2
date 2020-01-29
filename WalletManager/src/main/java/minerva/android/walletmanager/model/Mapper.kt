@@ -40,8 +40,13 @@ fun mapWalletConfigResponseToWalletConfig(response: WalletConfigResponse): Walle
 fun mapIdentityPayloadToIdentity(response: IdentityPayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Identity =
     Identity(response.index, response.name, publicKey, privateKey, response.data, response.isDeleted)
 
-fun mapValueResponseToValue(response: ValuePayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Value =
-    Value(response.index, publicKey, privateKey, response.name, response.network, response.isDeleted)
+fun mapValueResponseToValue(
+    response: ValuePayload,
+    publicKey: String = String.Empty,
+    privateKey: String = String.Empty,
+    address: String = String.Empty
+): Value =
+    Value(response.index, publicKey, privateKey, address, response.name, response.network, response.isDeleted)
 
 fun mapServiceResponseToService(response: ServicePayload): Service =
     Service(response.type, response.name, response.lastUsed)

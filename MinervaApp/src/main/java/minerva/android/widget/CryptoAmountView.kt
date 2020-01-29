@@ -7,7 +7,6 @@ import kotlinx.android.synthetic.main.crypto_amount_layout.view.*
 import minerva.android.R
 import minerva.android.kotlinUtils.InvalidId
 import java.math.BigDecimal
-import java.math.BigInteger
 
 class CryptoAmountView(context: Context, attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
 

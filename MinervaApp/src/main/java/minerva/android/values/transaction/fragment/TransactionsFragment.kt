@@ -9,21 +9,21 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Function4
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_transactions.*
 import minerva.android.R
+import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.listener.TransactionFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.math.BigDecimal
 import java.math.BigInteger
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.subscribeBy
-import minerva.android.extension.*
-import minerva.android.kotlinUtils.event.EventObserver
 
 class TransactionsFragment : Fragment() {
 
@@ -55,13 +55,14 @@ class TransactionsFragment : Fragment() {
     private fun prepareObservers() {
         viewModel.apply {
             sendTransactionLiveData.observe(this@TransactionsFragment, EventObserver { listener.onResult(true, it) })
-            errorTransactionLiveData.observe(this@TransactionsFragment, EventObserver { listener.onResult(false) })
+            errorTransactionLiveData.observe(this@TransactionsFragment, EventObserver { listener.onResult(false, it) })
             transactionCostLiveData.observe(this@TransactionsFragment, EventObserver { setTransactionsCosts(it) })
-            errorTransactionCostLiveData.observe(this@TransactionsFragment, Observer { showErrorFlashBar() })
+            errorLiveData.observe(this@TransactionsFragment, Observer { showErrorFlashBar() })
             loadingLiveData.observe(this@TransactionsFragment, EventObserver { if (it) showLoader() else hideLoader() })
         }
     }
 
+    //TODO subscribe should be in ViewModel and connected with Fragment by LiveData
     private fun prepareTextListeners() {
         validationDisposable = Observable.combineLatest(
             amount.getValidationObservable(amountInputLayout) { Validator.validateIsFilled(it) },

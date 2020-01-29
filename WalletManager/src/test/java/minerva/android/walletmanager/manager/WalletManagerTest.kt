@@ -11,6 +11,7 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.BlockchainProvider
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.kotlinUtils.Empty
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.Identity
@@ -67,6 +68,7 @@ class WalletManagerTest {
         RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(blockchainProvider.completeAddress(any())).thenReturn("address")
     }
 
     @After
@@ -160,6 +162,7 @@ class WalletManagerTest {
         loadedValue.name shouldBeEqualTo "#3 Ethereum"
         loadedValue.publicKey shouldBeEqualTo "publicKey"
         loadedValue.privateKey shouldBeEqualTo "privateKey"
+        loadedValue.address shouldBeEqualTo "address"
     }
 
     @Test
@@ -174,6 +177,9 @@ class WalletManagerTest {
         test.assertError(error)
         val loadedValue = walletManager.loadValue(0)
         loadedValue.index shouldEqualTo -1
+        loadedValue.privateKey shouldBeEqualTo String.Empty
+        loadedValue.publicKey shouldBeEqualTo String.Empty
+        loadedValue.address shouldBeEqualTo String.Empty
     }
 
     @Test

@@ -8,6 +8,7 @@ data class Value(
     val index: Int,
     var publicKey: String = String.Empty,
     var privateKey: String = String.Empty,
+    var address: String = String.Empty,
     val name: String = String.Empty,
     val network: String = String.Empty,
     val isDeleted: Boolean = false,
