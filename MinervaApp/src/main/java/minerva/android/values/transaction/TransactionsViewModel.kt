@@ -7,9 +7,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.model.TransactionCost
 import minerva.android.walletmanager.model.Value
 import timber.log.Timber
 import java.math.BigDecimal
@@ -19,6 +22,7 @@ class TransactionsViewModel(private val walletManager: WalletManager) : ViewMode
 
     private var disposable: Disposable? = null
     var value: Value = Value(Int.InvalidIndex)
+    var transactionCost: BigDecimal = BigDecimal.ZERO
 
     private val _getValueLiveData = MutableLiveData<Event<Value>>()
     val getValueLiveData: LiveData<Event<Value>> get() = _getValueLiveData
@@ -32,8 +36,8 @@ class TransactionsViewModel(private val walletManager: WalletManager) : ViewMode
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
-    private val _transactionCostLiveData = MutableLiveData<Event<Triple<BigDecimal, BigInteger, BigDecimal>>>()
-    val transactionCostLiveData: MutableLiveData<Event<Triple<BigDecimal, BigInteger, BigDecimal>>> get() = _transactionCostLiveData
+    private val _transactionCostLiveData = MutableLiveData<Event<TransactionCost>>()
+    val transactionCostLiveData: MutableLiveData<Event<TransactionCost>> get() = _transactionCostLiveData
 
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
@@ -53,6 +57,7 @@ class TransactionsViewModel(private val walletManager: WalletManager) : ViewMode
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onSuccess = {
+                    transactionCost = it.cost
                     _transactionCostLiveData.value = Event(it)
                 },
                 onError = {
@@ -62,9 +67,9 @@ class TransactionsViewModel(private val walletManager: WalletManager) : ViewMode
             )
     }
 
-    fun sendTransaction(receiverKey: String, amount: String, gasPrice: BigDecimal, gasLimit: BigInteger) {
+    fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         _loadingLiveData.value = Event(true)
-        disposable = walletManager.sendTransaction(value.address, value.privateKey, receiverKey, amount, gasPrice, gasLimit)
+        disposable = walletManager.sendTransaction(prepareTransaction(receiverKey, amount, gasPrice, gasLimit))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnEvent { _loadingLiveData.value = Event(false) }
@@ -79,8 +84,36 @@ class TransactionsViewModel(private val walletManager: WalletManager) : ViewMode
             )
     }
 
+    private fun prepareTransaction(
+        receiverKey: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ): Transaction {
+        return Transaction(
+            value.address,
+            value.privateKey,
+            receiverKey,
+            amount,
+            gasPrice,
+            gasLimit
+        )
+    }
+
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String =
         walletManager.calculateTransactionCost(gasPrice, gasLimit).toPlainString()
+
+    fun getBalance(): BigDecimal = value.balance
+
+    fun getAllAvailableFunds(): String {
+        value.balance.minus(transactionCost).apply {
+            return if (this < BigDecimal.ZERO) {
+                String.EmptyBalance
+            } else {
+                this.toPlainString()
+            }
+        }
+    }
 
     val network
         get() = value.network

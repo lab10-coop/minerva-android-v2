@@ -20,6 +20,7 @@ import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.listener.TransactionFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
+import minerva.android.walletmanager.model.TransactionCost
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.math.BigDecimal
@@ -65,10 +66,10 @@ class TransactionsFragment : Fragment() {
     //TODO subscribe should be in ViewModel and connected with Fragment by LiveData
     private fun prepareTextListeners() {
         validationDisposable = Observable.combineLatest(
-            amount.getValidationObservable(amountInputLayout) { Validator.validateIsFilled(it) },
-            receiver.getValidationObservable(receiverInputLayout) { Validator.validateIsFilled(it) },
-            gasLimit.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },
-            gasPrice.getValidationObservable(gasPriceInputLayout) { Validator.validateIsFilled(it) },
+            amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
+            receiver.getValidationObservable(receiverInputLayout) { Validator.validateReceiverAddress(it) },
+            gasLimitEditText.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },
+            gasPriceEditText.getValidationObservable(gasPriceInputLayout) { Validator.validateIsFilled(it) },
             Function4<Boolean, Boolean, Boolean, Boolean, Boolean> { isAmountValid, isReceiverValid, isGasLimitValid, isGasPriceValid ->
                 isAmountValid && isReceiverValid && isGasLimitValid && isGasPriceValid
             }
@@ -100,10 +101,12 @@ class TransactionsFragment : Fragment() {
         )
     }
 
-    private fun setTransactionsCosts(costs: Triple<BigDecimal, BigInteger, BigDecimal>) {
-        gasPrice.setText(costs.first.toPlainString())
-        gasLimit.setText(costs.second.toString())
-        transactionCost.text = getString(R.string.transaction_cost, costs.third.toPlainString(), viewModel.network)
+    private fun setTransactionsCosts(transactionCost: TransactionCost) {
+        transactionCost.apply {
+            gasPriceEditText.setText(gasPrice.toPlainString())
+            gasLimitEditText.setText(gasLimit.toString())
+            transactionCostLabel.text = getString(R.string.transaction_cost, cost.toPlainString(), viewModel.network)
+        }
     }
 
     private fun calculateTransactionCost() {
@@ -112,8 +115,8 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setGasLimitOnTextChangedListener() {
-        gasLimit.afterTextChanged { gasLimit ->
-            if (canCalculateTransactionCost(gasLimit, gasPrice)) {
+        gasLimitEditText.afterTextChanged { gasLimit ->
+            if (canCalculateTransactionCost(gasLimit, gasPriceEditText)) {
                 setTransactionCost(getGasPrice(), gasLimit.toBigInteger())
             } else {
                 clearTransactionCost()
@@ -125,8 +128,8 @@ class TransactionsFragment : Fragment() {
         input.isNotEmpty() && editText.text?.isNotEmpty() == true
 
     private fun setGasPriceOnTextChangedListener() {
-        gasPrice.afterTextChanged { gasPrice ->
-            if (canCalculateTransactionCost(gasPrice, gasLimit)) {
+        gasPriceEditText.afterTextChanged { gasPrice ->
+            if (canCalculateTransactionCost(gasPrice, gasLimitEditText)) {
                 setTransactionCost(gasPrice.toBigDecimal(), getGasLimit())
             } else {
                 clearTransactionCost()
@@ -135,11 +138,11 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun clearTransactionCost() {
-        transactionCost.text = getString(R.string.transaction_cost, ZER0, viewModel.network)
+        transactionCostLabel.text = getString(R.string.transaction_cost, ZER0, viewModel.network)
     }
 
     private fun setTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger) {
-        transactionCost.text = getString(
+        transactionCostLabel.text = getString(
             R.string.transaction_cost,
             viewModel.calculateTransactionCost(gasPrice, gasLimit),
             viewModel.network
@@ -159,9 +162,8 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setAddressScannerListener() {
-//        TODO include transaction cost, balance should be lower
         amount.onRightDrawableClicked {
-            it.setText(viewModel.value.balance.toString())
+            it.setText(viewModel.getAllAvailableFunds())
         }
     }
 
@@ -198,13 +200,15 @@ class TransactionsFragment : Fragment() {
 
     private fun setSendButtonOnClickListener() {
         sendButton.setOnClickListener {
-            viewModel.sendTransaction(receiver.text.toString(), amount.text.toString(), getGasPrice(), getGasLimit())
+            viewModel.sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
         }
     }
 
-    private fun getGasLimit() = BigInteger(gasLimit.text.toString())
+    private fun getAmount() = BigDecimal(amount.text.toString())
 
-    private fun getGasPrice() = BigDecimal(gasPrice.text.toString())
+    private fun getGasLimit() = BigInteger(gasLimitEditText.text.toString())
+
+    private fun getGasPrice() = BigDecimal(gasPriceEditText.text.toString())
 
     private fun setupTexts() {
         viewModel.network.apply {
@@ -223,6 +227,6 @@ class TransactionsFragment : Fragment() {
         @JvmStatic
         fun newInstance() = TransactionsFragment()
 
-        private val ZER0 = "0"
+        private const val ZER0 = "0"
     }
 }
