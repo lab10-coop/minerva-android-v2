@@ -12,5 +12,5 @@ data class Value(
     val name: String = String.Empty,
     val network: String = String.Empty,
     val isDeleted: Boolean = false,
-    var balance: BigDecimal = Int.InvalidId.toBigDecimal()
+    var balance: BigDecimal = BigDecimal.ZERO
 )

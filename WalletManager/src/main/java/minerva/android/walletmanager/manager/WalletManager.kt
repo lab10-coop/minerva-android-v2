@@ -10,6 +10,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.BlockchainProvider
+import minerva.android.blockchainprovider.model.TransactionCostPayload
+import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
@@ -52,16 +54,8 @@ interface WalletManager {
     fun loadValue(position: Int): Value
     fun refreshBalances()
     fun getValueIterator(): Int
-    fun sendTransaction(
-        address: String,
-        privateKey: String,
-        receiverKey: String,
-        amount: String,
-        gasPrice: BigDecimal,
-        gasLimit: BigInteger
-    ): Completable
-
-    fun getTransactionCosts(): Single<Triple<BigDecimal, BigInteger, BigDecimal>>
+    fun sendTransaction(transaction: Transaction): Completable
+    fun getTransactionCosts(): Single<TransactionCost>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
 }
 
@@ -102,9 +96,7 @@ class WalletManagerImpl(
 
     override fun refreshBalances() {
         _walletConfigMutableLiveData.value?.values?.let { values ->
-            val addresses = mutableListOf<String>()
-            values.forEach { addresses.add(it.address) }
-            blockchainProvider.refreshBalances(addresses)
+            blockchainProvider.refreshBalances(getAddresses(values))
                 .subscribeBy(
                     onSuccess = { onRefreshBalanceSuccess(it) },
                     onError = { Timber.d("Refresh balance error: ${it.message}") }
@@ -112,16 +104,15 @@ class WalletManagerImpl(
         }
     }
 
-    override fun sendTransaction(
-        address: String,
-        privateKey: String,
-        receiverKey: String,
-        amount: String,
-        gasPrice: BigDecimal,
-        gasLimit: BigInteger
-    ): Completable = blockchainProvider.sendTransaction(address, privateKey, receiverKey, BigDecimal(amount), gasPrice, gasLimit)
+    private fun getAddresses(values: List<Value>): MutableList<String> =
+        mutableListOf<String>().apply { values.forEach { add(it.address) } }
 
-    override fun getTransactionCosts(): Single<Triple<BigDecimal, BigInteger, BigDecimal>> = blockchainProvider.getTransactionCosts()
+    override fun sendTransaction(transaction: Transaction): Completable =
+        blockchainProvider.sendTransaction(mapTransactionToTransactionPayload(transaction))
+
+    override fun getTransactionCosts(): Single<TransactionCost> =
+        blockchainProvider.getTransactionCosts()
+            .map { mapTransactionCostPayloadToTransactionCost(it) }
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainProvider.calculateTransactionCost(gasPrice, gasLimit)
@@ -132,12 +123,16 @@ class WalletManagerImpl(
     override fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse> =
         walletConfigRepository.getWalletConfig(masterKey)
             .map {
-                if (it.state != ResponseState.ERROR) {
-                    keystoreRepository.encryptKey(masterKey)
-                    walletConfigRepository.saveWalletConfigLocally(it.walletPayload)
-                }
+                handleWalletConfigResponse(it, masterKey)
                 RestoreWalletResponse(it.state, it.message)
             }
+
+    private fun handleWalletConfigResponse(it: WalletConfigResponse, masterKey: MasterKey) {
+        if (it.state != ResponseState.ERROR) {
+            keystoreRepository.encryptKey(masterKey)
+            walletConfigRepository.saveWalletConfigLocally(it.walletPayload)
+        }
+    }
 
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
@@ -197,35 +192,32 @@ class WalletManagerImpl(
 
     override fun removeIdentity(identity: Identity): Completable {
         _walletConfigMutableLiveData.value?.let { walletConfig ->
-            val currentPosition = getPositionForIdentity(identity, walletConfig)
             walletConfig.identities.let { identities ->
-                //TODO handling error messages need to be designed and refactored
-                if (!identities.inBounds(currentPosition)) return Completable.error(Throwable("Missing identity to remove"))
-                if (isOnlyOneElement(identities)) return Completable.error(Throwable("You can not remove last identity"))
-                return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
+                return handleRemovingIdentity(identities, getPositionForIdentity(identity, walletConfig), identity)
             }
         }
         return Completable.error(Throwable("Wallet config was not initialized"))
     }
 
+    private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {
+        if (!identities.inBounds(currentPosition)) return Completable.error(Throwable("Missing identity to remove"))
+        if (isOnlyOneElement(identities)) return Completable.error(Throwable("You can not remove last identity"))
+        return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
+    }
+
     override fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse> =
         cryptographyRepository.decodeJwtToken(jwtToken)
-            .map {
-                if (it.isNotEmpty()) {
-                    mapHashMapToQrCodeResponse(it)
-                } else {
-                    QrCodeResponse(isQrCodeValid = false)
-                }
-            }
+            .map { handleQrCodeResponse(it) }
+
+    private fun handleQrCodeResponse(it: Map<String, Any?>): QrCodeResponse =
+        if (it.isNotEmpty()) mapHashMapToQrCodeResponse(it) else QrCodeResponse(isQrCodeValid = false)
 
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
 
     override fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
-            .flatMapCompletable {
-                handleSavingServiceLogin(identity)
-            }
+            .flatMapCompletable { handleSavingServiceLogin(identity) }
 
     private fun handleSavingServiceLogin(identity: Identity): CompletableSource? =
         if (identity !is IncognitoIdentity) saveService()
@@ -240,18 +232,14 @@ class WalletManagerImpl(
 
     //    TODO chane for generic service creation, proper API is needed
     private fun saveService(): Completable {
-        _walletConfigMutableLiveData.value?.let {
-            return updateWalletConfig(
-                WalletConfig(
-                    it.updateVersion,
-                    it.identities,
-                    it.values,
-                    listOf(Service(ServiceType.MINERVA, MINERVA_SERVICE, DateUtils.getLastUsed()))
-                )
-            )
+        _walletConfigMutableLiveData.value?.run {
+            return updateWalletConfig(WalletConfig(updateVersion, identities, values, getMinervaService()))
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
+
+    private fun getMinervaService() =
+        listOf(Service(ServiceType.MINERVA, MINERVA_SERVICE, DateUtils.getLastUsed()))
 
     private fun updateWalletConfig(walletConfig: WalletConfig): Completable {
         val walletConfigPayload = mapWalletConfigToWalletPayload(walletConfig)
@@ -312,7 +300,8 @@ class WalletManagerImpl(
         return newIdentities
     }
 
-    private fun prepareDefaultIdentityName(defaultName: String): String = String.format(NEW_IDENTITY_TITLE_PATTERN, defaultName, getNewIndex())
+    private fun prepareDefaultIdentityName(defaultName: String): String =
+        String.format(NEW_IDENTITY_TITLE_PATTERN, defaultName, getNewIndex())
 
     private fun isOnlyOneElement(identities: List<Identity>): Boolean {
         var realIdentitiesCount = 0

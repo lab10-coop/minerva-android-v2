@@ -1,5 +1,7 @@
 package minerva.android.walletmanager.model
 
+import minerva.android.blockchainprovider.model.TransactionCostPayload
+import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.configProvider.model.*
 import minerva.android.kotlinUtils.Empty
 
@@ -84,3 +86,20 @@ fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =
     IdentityPayload(identity.index, identity.name, identity.data, identity.isDeleted)
 
 fun mapValueToValuePayload(value: Value): ValuePayload = ValuePayload(value.index, value.name, value.network)
+
+fun mapTransactionToTransactionPayload(transaction: Transaction): TransactionPayload =
+    transaction.run {
+        TransactionPayload(
+            address,
+            privateKey,
+            receiverKey,
+            amount,
+            gasPrice,
+            gasLimit
+        )
+    }
+
+fun mapTransactionCostPayloadToTransactionCost(payload: TransactionCostPayload): TransactionCost =
+    payload.run {
+        TransactionCost(gasPrice, gasLimit, cost)
+    }
