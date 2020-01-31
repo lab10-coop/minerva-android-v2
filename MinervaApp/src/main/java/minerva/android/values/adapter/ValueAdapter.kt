@@ -75,9 +75,9 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
         notifyDataSetChanged()
     }
 
-    override fun onSendValueClicked(value: Value) {
-        listener.onSendTransaction(value)
-    }
+    override fun onSendValueClicked(value: Value) = listener.onSendTransaction(value)
+
+    override fun onValueRemoved(position: Int) = listener.onValueRemove(rawValues[position])
 }
 
 class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) : RecyclerView.ViewHolder(view) {
@@ -175,7 +175,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
                     getNetworkIcon(network)
                 )
                 R.id.addAsset -> Toast.makeText(view.context, "Add an asset", Toast.LENGTH_SHORT).show()
-                R.id.remove -> Toast.makeText(view.context, "Remove", Toast.LENGTH_SHORT).show()
+                R.id.remove -> listener.onValueRemoved(position)
             }
             true
         }
@@ -187,5 +187,6 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
 
     interface ValuesAdapterListener {
         fun onSendValueClicked(value: Value)
+        fun onValueRemoved(position: Int)
     }
 }

@@ -32,26 +32,10 @@ class BlockchainProvider(blockchainURL: String) {
             .flatMapSingle { position -> getBalance(addresses[position]) }
             .toList()
 
-    private fun getBalance(address: String): Single<Pair<String, BigDecimal>> =
-        web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
-            .firstOrError()
-
     fun getTransactionCosts(): Single<TransactionCostPayload> =
         web3j.ethGasPrice().flowable()
             .map { prepareTransactionCosts(it) }
             .singleOrError()
-
-    private fun prepareTransactionCosts(it: EthGasPrice): TransactionCostPayload =
-        TransactionCostPayload(
-            fromWei(BigDecimal(it.gasPrice), Convert.Unit.GWEI),
-            Transfer.GAS_LIMIT,
-            getTransactionCostInEth(BigDecimal(it.gasPrice), BigDecimal(Transfer.GAS_LIMIT))
-        )
-
-    private fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal) =
-        fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         getTransactionCostInEth(toWei(gasPrice, Convert.Unit.GWEI), BigDecimal(gasLimit))
@@ -65,11 +49,29 @@ class BlockchainProvider(blockchainURL: String) {
                     .flatMapCompletable { response -> handleTransactionResponse(response) }
             }
 
+    fun completeAddress(privateKey: String): String = Credentials.create(privateKey).address
+
+    fun toGwei(balance: BigDecimal): BigInteger = toWei(balance, Convert.Unit.GWEI).toBigInteger()
+
+    private fun getBalance(address: String): Single<Pair<String, BigDecimal>> =
+        web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
+            .firstOrError()
+
+    private fun prepareTransactionCosts(it: EthGasPrice): TransactionCostPayload =
+        TransactionCostPayload(
+            fromWei(BigDecimal(it.gasPrice), Convert.Unit.GWEI),
+            Transfer.GAS_LIMIT,
+            getTransactionCostInEth(BigDecimal(it.gasPrice), BigDecimal(Transfer.GAS_LIMIT))
+        )
+
+    private fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal) =
+        fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)
+
     private fun handleTransactionResponse(response: EthSendTransaction) =
         if (response.error == null) Completable.complete()
         else Completable.error(Throwable(response.error.message))
-
-    fun completeAddress(privateKey: String): String = Credentials.create(privateKey).address
 
     private fun getSignedTransaction(count: BigInteger, transactionPayload: TransactionPayload): String? =
         Numeric.toHexString(

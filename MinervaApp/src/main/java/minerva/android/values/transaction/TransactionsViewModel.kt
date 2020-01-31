@@ -10,8 +10,8 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.model.TransactionCost
 import minerva.android.walletmanager.model.Value
 import timber.log.Timber

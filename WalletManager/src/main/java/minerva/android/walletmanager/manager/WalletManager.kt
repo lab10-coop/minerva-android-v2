@@ -10,7 +10,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.BlockchainProvider
-import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
@@ -45,6 +44,7 @@ interface WalletManager {
     fun loadIdentity(position: Int, defaultName: String): Identity
     fun saveIdentity(identity: Identity): Completable
     fun createValue(network: Network, valueName: String): Completable
+    fun removeValue(index: Int): Completable
     fun removeIdentity(identity: Identity): Completable
     fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
     fun computeDeliveredKeys(index: Int): Single<Triple<Int, String, String>>
@@ -77,13 +77,6 @@ class WalletManagerImpl(
     private val _balanceLiveData = MutableLiveData<HashMap<String, BigDecimal>>()
     override val balanceLiveData: LiveData<HashMap<String, BigDecimal>> get() = _balanceLiveData
 
-    override fun isMasterKeyAvailable(): Boolean = keystoreRepository.isMasterKeySaved()
-
-    override fun initWalletConfig() {
-        masterKey = keystoreRepository.decryptKey()
-        loadWalletConfig()
-    }
-
     //todo assign to disposable and release resources in main ctivity viewmodel
     @VisibleForTesting
     fun loadWalletConfig() {
@@ -92,6 +85,13 @@ class WalletManagerImpl(
             onError = { Timber.e("Downloading WalletConfig error: $it") },
             onComplete = { }
         )
+    }
+
+    override fun isMasterKeyAvailable(): Boolean = keystoreRepository.isMasterKeySaved()
+
+    override fun initWalletConfig() {
+        masterKey = keystoreRepository.decryptKey()
+        loadWalletConfig()
     }
 
     override fun refreshBalances() {
@@ -105,9 +105,6 @@ class WalletManagerImpl(
                 )
         }
     }
-
-    private fun getAddresses(values: List<Value>): MutableList<String> =
-        mutableListOf<String>().apply { values.forEach { add(it.address) } }
 
     override fun sendTransaction(transaction: Transaction): Completable =
         blockchainProvider.sendTransaction(mapTransactionToTransactionPayload(transaction))
@@ -128,13 +125,6 @@ class WalletManagerImpl(
                 handleWalletConfigResponse(it, masterKey)
                 RestoreWalletResponse(it.state, it.message)
             }
-
-    private fun handleWalletConfigResponse(it: WalletConfigResponse, masterKey: MasterKey) {
-        if (it.state != ResponseState.ERROR) {
-            keystoreRepository.encryptKey(masterKey)
-            walletConfigRepository.saveWalletConfigLocally(it.walletPayload)
-        }
-    }
 
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
@@ -170,6 +160,24 @@ class WalletManagerImpl(
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
+    override fun removeValue(index: Int): Completable {
+        _walletConfigMutableLiveData.value?.let { config ->
+            val newValues = config.values.toMutableList()
+            config.values.forEachIndexed { position, value ->
+                if (value.index == index) {
+                    if(isValueRemovable(value.balance)) {
+                        //TODO need to be handled better (Own Throwable implementation?)
+                        return Completable.error(Throwable("This address is not empty and can't be removed."))
+                    }
+                    newValues[position] = Value(value, true)
+                    return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, newValues))
+                }
+            }
+            return Completable.error(Throwable("Missing value with this index"))
+        }
+        return Completable.error(Throwable("Wallet Config was not initialized"))
+    }
+
     override fun saveIdentity(identity: Identity): Completable {
         _walletConfigMutableLiveData.value?.let { config ->
             return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, identity.index)
@@ -201,18 +209,9 @@ class WalletManagerImpl(
         return Completable.error(Throwable("Wallet config was not initialized"))
     }
 
-    private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {
-        if (!identities.inBounds(currentPosition)) return Completable.error(Throwable("Missing identity to remove"))
-        if (isOnlyOneElement(identities)) return Completable.error(Throwable("You can not remove last identity"))
-        return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
-    }
-
     override fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse> =
         cryptographyRepository.decodeJwtToken(jwtToken)
             .map { handleQrCodeResponse(it) }
-
-    private fun handleQrCodeResponse(it: Map<String, Any?>): QrCodeResponse =
-        if (it.isNotEmpty()) mapHashMapToQrCodeResponse(it) else QrCodeResponse(isQrCodeValid = false)
 
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
@@ -221,16 +220,37 @@ class WalletManagerImpl(
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
             .flatMapCompletable { handleSavingServiceLogin(identity) }
 
-    private fun handleSavingServiceLogin(identity: Identity): CompletableSource? =
-        if (identity !is IncognitoIdentity) saveService()
-        else Completable.complete()
-
     override fun getValueIterator(): Int {
         _walletConfigMutableLiveData.value?.values?.size?.let {
             return it + 1
         }
         throw Throwable("Wallet Config was not initialized")
     }
+
+    private fun getAddresses(values: List<Value>): MutableList<String> =
+        mutableListOf<String>().apply { values.forEach { add(it.address) } }
+
+    private fun handleWalletConfigResponse(it: WalletConfigResponse, masterKey: MasterKey) {
+        if (it.state != ResponseState.ERROR) {
+            keystoreRepository.encryptKey(masterKey)
+            walletConfigRepository.saveWalletConfigLocally(it.walletPayload)
+        }
+    }
+
+    private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {
+        if (!identities.inBounds(currentPosition)) return Completable.error(Throwable("Missing identity to remove"))
+        if (isOnlyOneElement(identities)) return Completable.error(Throwable("You can not remove last identity"))
+        return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
+    }
+
+    private fun handleSavingServiceLogin(identity: Identity): CompletableSource? =
+        if (identity !is IncognitoIdentity) saveService()
+        else Completable.complete()
+
+    private fun handleQrCodeResponse(it: Map<String, Any?>): QrCodeResponse =
+        if (it.isNotEmpty()) mapHashMapToQrCodeResponse(it) else QrCodeResponse(isQrCodeValid = false)
+
+    private fun isValueRemovable(balance: BigDecimal) = blockchainProvider.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
 
     //    TODO chane for generic service creation, proper API is needed
     private fun saveService(): Completable {
@@ -325,5 +345,6 @@ class WalletManagerImpl(
         private const val MINERVA_SERVICE = "Minerva Service"
         //        TODO should be dynamically handled form qr code
         private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"
+        private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
     }
 }
