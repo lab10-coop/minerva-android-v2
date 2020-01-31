@@ -97,6 +97,8 @@ class WalletManagerImpl(
     override fun refreshBalances() {
         _walletConfigMutableLiveData.value?.values?.let { values ->
             blockchainProvider.refreshBalances(getAddresses(values))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = { onRefreshBalanceSuccess(it) },
                     onError = { Timber.d("Refresh balance error: ${it.message}") }
