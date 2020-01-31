@@ -3,8 +3,6 @@ package minerva.android.blockchainprovider
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
 import org.web3j.crypto.Credentials
@@ -39,8 +37,6 @@ class BlockchainProvider(blockchainURL: String) {
             .flowable()
             .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
             .firstOrError()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
 
     fun getTransactionCosts(): Single<TransactionCostPayload> =
         web3j.ethGasPrice().flowable()

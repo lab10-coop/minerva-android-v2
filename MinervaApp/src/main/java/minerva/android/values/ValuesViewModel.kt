@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.WalletConfig
+import timber.log.Timber
 import java.math.BigDecimal
 
 class ValuesViewModel(private val walletManager: WalletManager) : BaseViewModel() {
@@ -15,5 +16,4 @@ class ValuesViewModel(private val walletManager: WalletManager) : BaseViewModel(
     fun refreshBalances() {
         walletManager.refreshBalances()
     }
-
 }
