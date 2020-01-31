@@ -14,7 +14,6 @@ import minerva.android.observeWithPredicate
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.TransactionCost
-import minerva.android.walletmanager.model.Value
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.After
 import org.junit.Before
@@ -23,7 +22,7 @@ import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class TransactionViewModelTest {
+class TransactionsViewModelTest {
 
     private val walletManager: WalletManager = mock()
     private val viewModel = TransactionsViewModel(walletManager)

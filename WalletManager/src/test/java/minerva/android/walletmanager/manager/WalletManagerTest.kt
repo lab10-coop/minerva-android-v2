@@ -16,6 +16,7 @@ import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletconfig.Network
@@ -28,6 +29,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.math.BigInteger
 
 class WalletManagerTest {
 
@@ -53,7 +55,10 @@ class WalletManagerTest {
             Identity(1, "identityName2", "", "privateKey", data),
             Identity(3, "identityName3", "", "privateKey", data)
         ),
-        listOf()
+        listOf(
+            Value(2, "publicKey", "privateKey", "address"),
+            Value(4, "publicKey", "privateKey", "address")
+        )
     )
 
     private val walletConfigObserver: Observer<WalletConfig> = mock()
@@ -113,10 +118,10 @@ class WalletManagerTest {
         identity.privateKey shouldBeEqualTo "privateKey"
         val identity3 = walletManager.loadIdentity(3, "Identity")
         identity3.index shouldEqualTo walletConfig.newIndex
-        identity3.name shouldBeEqualTo "Identity #3"
+        identity3.name shouldBeEqualTo "Identity #5"
         val identityMinusOne = walletManager.loadIdentity(-1, "Identity")
         identityMinusOne.index shouldEqualTo walletConfig.newIndex
-        identityMinusOne.name shouldBeEqualTo "Identity #3"
+        identityMinusOne.name shouldBeEqualTo "Identity #5"
     }
 
     @Test
@@ -157,8 +162,8 @@ class WalletManagerTest {
         walletManager.loadWalletConfig()
         val test = walletManager.createValue(Network.ETHEREUM, "#3 Ethereum").test()
         test.assertNoErrors()
-        val loadedValue = walletManager.loadValue(0)
-        loadedValue.index shouldEqualTo 3
+        val loadedValue = walletManager.loadValue(2)
+        loadedValue.index shouldEqualTo 5
         loadedValue.name shouldBeEqualTo "#3 Ethereum"
         loadedValue.publicKey shouldBeEqualTo "publicKey"
         loadedValue.privateKey shouldBeEqualTo "privateKey"
@@ -166,7 +171,7 @@ class WalletManagerTest {
     }
 
     @Test
-    fun `Check that wallet manager don't save new value when server error` () {
+    fun `Check that wallet manager don't save new value when server error`() {
         val error = Throwable()
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(error))
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
@@ -175,7 +180,7 @@ class WalletManagerTest {
         walletManager.loadWalletConfig()
         val test = walletManager.createValue(Network.ETHEREUM, "#3 Ethereum").test()
         test.assertError(error)
-        val loadedValue = walletManager.loadValue(0)
+        val loadedValue = walletManager.loadValue(2)
         loadedValue.index shouldEqualTo -1
         loadedValue.privateKey shouldBeEqualTo String.Empty
         loadedValue.publicKey shouldBeEqualTo String.Empty
@@ -183,7 +188,7 @@ class WalletManagerTest {
     }
 
     @Test
-    fun `Check that wallet manager removes correct element`() {
+    fun `Check that wallet manager removes correct identity`() {
         val identityToRemove = Identity(1)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
@@ -195,6 +200,40 @@ class WalletManagerTest {
         loadedIdentity.name shouldBeEqualTo identityToRemove.name
         loadedIdentity.isDeleted shouldEqualTo true
         loadedIdentity.data.size shouldEqualTo identityToRemove.data.size
+    }
+
+    @Test
+    fun `Check that wallet manager removes correct empty value`() {
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        whenever(blockchainProvider.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        walletManager.removeValue(2).test()
+        val removedValue = walletManager.loadValue(0)
+        val notRemovedValue = walletManager.loadValue(1)
+        removedValue.index shouldEqualTo 2
+        removedValue.isDeleted shouldEqualTo true
+        notRemovedValue.index shouldEqualTo 4
+        notRemovedValue.isDeleted shouldEqualTo false
+    }
+
+    @Test
+    fun `Check that wallet manager removes correct not empty value`() {
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        whenever(blockchainProvider.toGwei(any())).thenReturn(BigInteger.valueOf(300))
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        walletManager.removeValue(2).test()
+        val removedValue = walletManager.loadValue(0)
+        val notRemovedValue = walletManager.loadValue(1)
+        removedValue.index shouldEqualTo 2
+        removedValue.isDeleted shouldEqualTo false
+        notRemovedValue.index shouldEqualTo 4
+        notRemovedValue.isDeleted shouldEqualTo false
     }
 
     @Test

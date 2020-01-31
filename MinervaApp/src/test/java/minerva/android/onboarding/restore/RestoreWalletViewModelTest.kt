@@ -1,4 +1,4 @@
-package minerva.android.restore
+package minerva.android.onboarding.restore
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
@@ -6,13 +6,9 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.observeWithPredicate
-import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.RestoreWalletResponse
 import org.amshove.kluent.shouldBe
-import org.amshove.kluent.shouldBeInstanceOf
-import org.amshove.kluent.shouldEqualTo
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertFalse

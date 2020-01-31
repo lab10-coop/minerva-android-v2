@@ -85,7 +85,7 @@ fun mapServiceToServicePayload(service: Service): ServicePayload =
 fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =
     IdentityPayload(identity.index, identity.name, identity.data, identity.isDeleted)
 
-fun mapValueToValuePayload(value: Value): ValuePayload = ValuePayload(value.index, value.name, value.network)
+fun mapValueToValuePayload(value: Value): ValuePayload = ValuePayload(value.index, value.name, value.network, value.isDeleted)
 
 fun mapTransactionToTransactionPayload(transaction: Transaction): TransactionPayload =
     transaction.run {

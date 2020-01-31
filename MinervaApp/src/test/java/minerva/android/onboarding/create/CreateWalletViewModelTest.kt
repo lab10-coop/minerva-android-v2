@@ -1,4 +1,4 @@
-package minerva.android.create
+package minerva.android.onboarding.create
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
@@ -10,7 +10,6 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.observeWithPredicate
-import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import org.amshove.kluent.shouldBeInstanceOf
 import org.amshove.kluent.shouldEqualTo
