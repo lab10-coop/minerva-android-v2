@@ -154,7 +154,7 @@ class WalletManagerImpl(
                         privateKey = it.third
                         address = blockchainProvider.completeAddress(it.third)
                     }
-                    WalletConfig(config.updateVersion, config.identities, config.values + newValue)
+                    WalletConfig(config.updateVersion, config.identities, config.values + newValue, config.services)
                 }.flatMapCompletable { updateWalletConfig(it) }
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
@@ -170,7 +170,7 @@ class WalletManagerImpl(
                         return Completable.error(Throwable("This address is not empty and can't be removed."))
                     }
                     newValues[position] = Value(value, true)
-                    return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, newValues))
+                    return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, newValues, config.services))
                 }
             }
             return Completable.error(Throwable("Missing value with this index"))
@@ -186,7 +186,7 @@ class WalletManagerImpl(
                         publicKey = it.second
                         privateKey = it.third
                     }
-                    WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values)
+                    WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values, config.services)
                 }.flatMapCompletable { updateWalletConfig(it) }
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
