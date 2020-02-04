@@ -6,6 +6,7 @@
     <color name="inactiveBottomBarColor">#7d7c8b</color>
     <color name="lightGray">#f6f6f9</color>
     <color name="darkGray">#3a3944</color>
+    <color name="dividerGray">#C9C8D3</color>
     <color name="titledTextViewTitleColor">#908F9D</color>
     <color name="titledTextViewBodyColor">#3F3F4B</color>
     <color name="borderGray">#B5B5B5</color>

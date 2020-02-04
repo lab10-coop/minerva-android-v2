@@ -12,7 +12,7 @@
         android:textColor="@color/titledTextViewBodyColor"
         android:textSize="@dimen/text_normal"
         android:gravity="end"
-        tools:text="Name" />
+        tools:text="51.351" />
 
     <TextView
         android:id="@+id/currencyAmount"
@@ -22,5 +22,5 @@
         android:textColor="@color/titledTextViewTitleColor"
         android:textSize="@dimen/text_small"
         android:gravity="end"
-        tools:text="John Smith" />
+        tools:text="€ 3.14159" />
 </merge>

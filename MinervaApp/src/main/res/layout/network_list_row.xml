@@ -7,8 +7,8 @@
 
     <ImageView
         android:id="@+id/networkIcon"
-        android:layout_width="@dimen/letter_logo_size"
-        android:layout_height="@dimen/letter_logo_size"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
         android:layout_weight="1"
         android:src="@drawable/ic_artis" />
 
@@ -29,8 +29,8 @@
 
     <ImageView
         android:id="@+id/checkButton"
-        android:layout_width="@dimen/letter_logo_size"
-        android:layout_height="@dimen/letter_logo_size"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
         android:layout_alignParentRight="true"
         android:background="@drawable/check_button_selector"
         />

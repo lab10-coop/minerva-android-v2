@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/incognitoLogo"
-        android:layout_width="@dimen/letter_logo_size"
-        android:layout_height="@dimen/letter_logo_size"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
         android:src="@drawable/ic_incognito"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -20,8 +20,8 @@
 
     <minerva.android.widget.LetterLogo
         android:id="@+id/letterLogo"
-        android:layout_width="@dimen/letter_logo_size"
-        android:layout_height="@dimen/letter_logo_size"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
         android:backgroundTint="@color/colorSetOneOpacity"
         android:textColor="@color/colorSetOne"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -44,8 +44,8 @@
 
     <TextView
         android:id="@+id/checkButton"
-        android:layout_width="@dimen/letter_logo_size"
-        android:layout_height="@dimen/letter_logo_size"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
         android:background="@drawable/check_button_selector"
         android:enabled="false"
         app:layout_constraintBottom_toBottomOf="parent"

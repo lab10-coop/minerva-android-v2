@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
@@ -86,6 +87,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
             putExtra(VALUE_INDEX, value.index)
         }
+    }
+
+    override fun showSendAssetTransactionScreen() {
+        //TODO implement sending assets
+        Toast.makeText(this, "Showing send asset transaction screen", Toast.LENGTH_SHORT).show()
     }
 
     override fun onBackPressed() {

@@ -13,4 +13,7 @@ data class WalletConfig(
 
     val updateVersion: Int
         get() = version + 1
+
+    val hasActiveValue: Boolean
+            get() = values.none { !it.isDeleted }
 }

@@ -17,7 +17,7 @@ fun View.gone() {
     this.visibility = View.GONE
 }
 
-fun View.setVisible(isVisible: Boolean) {
+fun View.visibleOrGone(isVisible: Boolean) {
     if (isVisible) visible()
     else gone()
 }
