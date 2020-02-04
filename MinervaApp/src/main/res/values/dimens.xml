@@ -16,7 +16,7 @@
     <dimen name="icon_size">40dp</dimen>
     <dimen name="rounded_button_radius">8dp</dimen>
     <dimen name="rounded_background">16dp</dimen>
-    <dimen name="letter_logo_size">32dp</dimen>
+    <dimen name="small_logo_size">32dp</dimen>
     <dimen name="form_margins">16dp</dimen>
     <dimen name="form_box_stroke_width">2dp</dimen>
 

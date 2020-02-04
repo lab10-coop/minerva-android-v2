@@ -1,5 +1,6 @@
 package minerva.android.values.adapter
 
+import android.content.Context
 import android.transition.TransitionManager
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.value_list_row.view.*
 import minerva.android.R
@@ -20,6 +22,7 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.values.listener.ValuesFragmentToAdapterListener
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.walletconfig.Network
+import minerva.android.widget.AssetView
 import minerva.android.widget.CryptoAmountView.Companion.WRONG_CURRENCY_VALUE
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
@@ -70,20 +73,31 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
     }
 
     fun updateBalances(balances: HashMap<String, BigDecimal>) {
-        activeValues.forEach {
-            it.balance = balances[it.address] ?: Int.InvalidId.toBigDecimal() }
-        notifyDataSetChanged()
+        activeValues.forEachIndexed { index, value ->
+            if (value.balance != balances[value.address]) {
+                value.balance = balances[value.address] ?: Int.InvalidId.toBigDecimal()
+                notifyItemChanged(index)
+            }
+        }
     }
 
     override fun onSendValueClicked(value: Value) = listener.onSendTransaction(value)
 
+    override fun onSendAssetClicked() = listener.onSendAssetTransaction()
+
     override fun onValueRemoved(position: Int) = listener.onValueRemove(rawValues[position])
 }
 
-class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) : RecyclerView.ViewHolder(view) {
+class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) : AssetView.AssertViewCallback, RecyclerView.ViewHolder(view) {
 
-    private var isOpen = false
     private lateinit var listener: ValuesAdapterListener
+    private val isOpen get() = view.sendButton.isVisible
+
+    override fun onSendAssetClicked() = listener.onSendAssetClicked()
+
+    override fun getViewGroup() = viewGroup
+
+    override fun getContext(): Context = view.context
 
     fun setListener(listener: ValuesAdapterListener) {
         this.listener = listener
@@ -95,6 +109,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
             setOnSendButtonClickListener(value)
             setOnMenuClickListener(rawPosition, value)
             setOnItemClickListener()
+            prepareAssets()
         }
     }
 
@@ -136,8 +151,18 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         }
     }
 
+    private fun View.prepareAssets() {
+        //TODO keeping assets in Value?
+        container.removeAllViews()
+        val asset = AssetView(this@ValueViewHolder, "sDai", R.drawable.ic_asset_sdai)
+        asset.setAmounts(BigDecimal.valueOf(2.34), 1.35f)
+        container.addView(asset)
+        val asset2 = AssetView(this@ValueViewHolder, "schilling", R.drawable.ic_asset_schilling)
+        asset2.setAmounts(BigDecimal.valueOf(2.34), 1.35f)
+        container.addView(asset2)
+    }
+
     private fun open() {
-        isOpen = true
         view.apply {
             arrow.rotate180()
             sendButton.visible()
@@ -145,7 +170,6 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     }
 
     private fun close() {
-        isOpen = false
         view.apply {
             arrow.rotate180back()
             sendButton.gone()
@@ -187,6 +211,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
 
     interface ValuesAdapterListener {
         fun onSendValueClicked(value: Value)
+        fun onSendAssetClicked()
         fun onValueRemoved(position: Int)
     }
 }

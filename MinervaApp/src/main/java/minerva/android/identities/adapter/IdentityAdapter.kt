@@ -5,15 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.identity_list_row.view.*
 import minerva.android.R
-import minerva.android.extension.gone
-import minerva.android.extension.rotate180
-import minerva.android.extension.rotate180back
-import minerva.android.extension.visible
+import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.Identity
@@ -32,7 +30,7 @@ class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {
 
     override fun onBindViewHolder(holder: IdentityViewHolder, position: Int) {
         val rawPosition = getPositionInRaw(activeIdentities[position].index)
-        holder.setData(rawPosition, activeIdentities[position], _removeIdentityLiveData)
+        holder.setData(rawPosition, activeIdentities[position], _removeIdentityLiveData, activeIdentities.size > LAST_ELEMENT)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IdentityViewHolder =
@@ -57,13 +55,19 @@ class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {
         }
         return Int.InvalidIndex
     }
+
+    companion object {
+        private const val LAST_ELEMENT = 1
+    }
 }
 
 class IdentityViewHolder(private val view: View, private val viewGroup: ViewGroup) : RecyclerView.ViewHolder(view) {
 
-    private var isOpen = false
+    private val isOpen get() = view.editButton.isVisible
+    private var removable = true
 
-    fun setData(rawPosition: Int, identity: Identity, removeIdentityLiveData: MutableLiveData<Event<Identity>>) {
+    fun setData(rawPosition: Int, identity: Identity, removeIdentityLiveData: MutableLiveData<Event<Identity>>, removable: Boolean) {
+        updateRemoveButton(removable)
         view.apply {
             identityName.text = identity.name
             card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(identity.name)))
@@ -80,22 +84,29 @@ class IdentityViewHolder(private val view: View, private val viewGroup: ViewGrou
     }
 
     private fun open() {
-        isOpen = true
         view.apply {
             arrow.rotate180()
             dataContainer.open()
             editButton.visible()
-            removeButton.visible()
+            removeButton.visibleOrGone(removable)
         }
     }
 
     private fun close() {
-        isOpen = false
         view.apply {
             arrow.rotate180back()
             dataContainer.close()
             editButton.gone()
             removeButton.gone()
+        }
+    }
+
+    private fun updateRemoveButton(removable: Boolean) {
+        this.removable = removable
+        view.apply {
+            dataContainer.close()
+            editButton.gone()
+            removeButton.visibleOrGone(removable && isOpen)
         }
     }
 }

@@ -18,7 +18,7 @@
         app:cardCornerRadius="@dimen/card_corner_radius">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/container"
+            android:id="@+id/mainContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
@@ -27,8 +27,8 @@
 
             <minerva.android.widget.LetterLogo
                 android:id="@+id/profileImage"
-                android:layout_width="@dimen/letter_logo_size"
-                android:layout_height="@dimen/letter_logo_size"
+                android:layout_width="@dimen/small_logo_size"
+                android:layout_height="@dimen/small_logo_size"
                 android:backgroundTint="@color/colorSetOneOpacity"
                 android:textColor="@color/colorSetOne"
                 app:layout_constraintLeft_toLeftOf="parent"

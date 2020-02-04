@@ -35,7 +35,7 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
 
     private fun showWelcomeFragment() {
         supportFragmentManager.beginTransaction().apply {
-            replace(R.id.container, WelcomeFragment())
+            replace(R.id.mainContent, WelcomeFragment())
             commit()
         }
     }
@@ -69,7 +69,7 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
 
     private fun showFragment(fragment: Fragment, tag: String) {
         supportFragmentManager.transaction {
-            replace(R.id.container, fragment)
+            replace(R.id.mainContent, fragment)
             addToBackStack(tag)
         }
     }

@@ -17,96 +17,102 @@
         android:layout_height="wrap_content"
         app:cardCornerRadius="@dimen/card_corner_radius">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:background="@drawable/identity_background"
-            android:padding="@dimen/margin_normal">
-
-            <ImageView
-                android:id="@+id/icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:src="@drawable/ic_artis" />
-
-            <TextView
-                android:id="@+id/valueName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/margin_xsmall"
-                android:fontFamily="@font/rubik_medium"
-                android:textSize="@dimen/text_normal"
-                app:layout_constraintBottom_toBottomOf="@id/icon"
-                app:layout_constraintLeft_toRightOf="@id/icon"
-                app:layout_constraintTop_toTopOf="@id/icon"
-                tools:text="#1 ARTIS" />
-
-            <ImageView
-                android:id="@+id/menu"
-                android:layout_width="@dimen/clickable_area"
-                android:layout_height="@dimen/clickable_area"
-                android:src="@drawable/ic_three_dots"
-                android:scaleType="center"
-                app:layout_constraintBottom_toBottomOf="@id/icon"
-                app:layout_constraintLeft_toLeftOf="@id/arrow"
-                app:layout_constraintRight_toRightOf="@id/arrow"
-                app:layout_constraintTop_toTopOf="@id/icon" />
-
-            <ImageView
-                android:id="@+id/arrow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_down_arrow"
-                app:layout_constraintTop_toTopOf="@id/amountView"
-                app:layout_constraintBottom_toBottomOf="@id/amountView"
-                app:layout_constraintRight_toRightOf="parent"
-                />
-
-            <minerva.android.widget.CryptoAmountView
-                android:id="@+id/amountView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_small"
-                android:layout_marginRight="@dimen/margin_normal"
-                app:layout_constraintRight_toLeftOf="@id/arrow"
-                app:layout_constraintTop_toBottomOf="@id/icon" />
-
-            <TextView
-                android:id="@+id/cryptoShortName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_small"
-                android:textSize="@dimen/text_normal"
-                app:layout_constraintBottom_toBottomOf="@id/amountView"
-                app:layout_constraintLeft_toLeftOf="@id/valueName"
-                app:layout_constraintTop_toTopOf="@id/amountView"
-                tools:text="ATS"
-                tools:textColor="@color/artis" />
-
-            <TextView
-                android:id="@+id/sendButton"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/mainContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_normal"
-                android:layout_marginBottom="@dimen/margin_xsmall"
-                android:foreground="@drawable/ripple"
-                android:background="@drawable/border_light_button"
-                android:gravity="center"
-                android:padding="@dimen/margin_small"
-                tools:text="Send ATS"
-                android:textColor="@color/colorAccent"
-                android:fontFamily="@font/rubik_medium"
-                android:visibility="gone"
-                tools:visibility="visible"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/amountView" />
+                android:layout_marginTop="3dp"
+                android:background="@drawable/identity_background"
+                android:padding="@dimen/margin_normal">
 
+                <ImageView
+                    android:id="@+id/icon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:src="@drawable/ic_artis" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/valueName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margin_xsmall"
+                    android:fontFamily="@font/rubik_medium"
+                    android:textSize="@dimen/text_normal"
+                    app:layout_constraintBottom_toBottomOf="@id/icon"
+                    app:layout_constraintLeft_toRightOf="@id/icon"
+                    app:layout_constraintTop_toTopOf="@id/icon"
+                    tools:text="#1 ARTIS" />
+
+                <ImageView
+                    android:id="@+id/menu"
+                    android:layout_width="@dimen/clickable_area"
+                    android:layout_height="@dimen/clickable_area"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_three_dots"
+                    app:layout_constraintBottom_toBottomOf="@id/icon"
+                    app:layout_constraintLeft_toLeftOf="@id/arrow"
+                    app:layout_constraintRight_toRightOf="@id/arrow"
+                    app:layout_constraintTop_toTopOf="@id/icon" />
+
+                <ImageView
+                    android:id="@+id/arrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_down_arrow"
+                    app:layout_constraintBottom_toBottomOf="@id/amountView"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/amountView" />
+
+                <minerva.android.widget.CryptoAmountView
+                    android:id="@+id/amountView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:layout_marginRight="@dimen/margin_normal"
+                    app:layout_constraintRight_toLeftOf="@id/arrow"
+                    app:layout_constraintTop_toBottomOf="@id/icon" />
+
+                <TextView
+                    android:id="@+id/cryptoShortName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_small"
+                    android:textSize="@dimen/text_normal"
+                    app:layout_constraintBottom_toBottomOf="@id/amountView"
+                    app:layout_constraintLeft_toLeftOf="@id/valueName"
+                    app:layout_constraintTop_toTopOf="@id/amountView"
+                    tools:text="ATS"
+                    tools:textColor="@color/artis" />
+
+                <TextView
+                    android:id="@+id/sendButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_normal"
+                    android:layout_marginBottom="@dimen/margin_xsmall"
+                    android:background="@drawable/border_light_button"
+                    android:fontFamily="@font/rubik_medium"
+                    android:foreground="@drawable/ripple"
+                    android:gravity="center"
+                    android:padding="@dimen/margin_small"
+                    android:textColor="@color/colorAccent"
+                    android:visibility="gone"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/amountView"
+                    tools:text="Send ATS"
+                    tools:visibility="visible" />
+
+                <LinearLayout
+                    android:id="@+id/container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/sendButton"
+                    android:orientation="vertical" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </FrameLayout>

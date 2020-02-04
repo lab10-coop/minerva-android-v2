@@ -34,8 +34,8 @@
 
                     <minerva.android.widget.LetterLogo
                         android:id="@+id/profileLogo"
-                        android:layout_width="@dimen/letter_logo_size"
-                        android:layout_height="@dimen/letter_logo_size"
+                        android:layout_width="@dimen/small_logo_size"
+                        android:layout_height="@dimen/small_logo_size"
                         android:layout_gravity="center_vertical"
                         android:layout_marginRight="@dimen/margin_small"
                         android:backgroundTint="@color/colorSetOneOpacity"
