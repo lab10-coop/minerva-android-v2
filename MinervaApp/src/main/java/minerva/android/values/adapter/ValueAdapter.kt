@@ -27,7 +27,6 @@ import minerva.android.widget.AssetView
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.wrapped.startValueAddressWrappedActivity
-import java.math.BigDecimal
 
 
 class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
@@ -112,7 +111,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
             setOnSendButtonClickListener(value)
             setOnMenuClickListener(rawPosition, value)
             setOnItemClickListener()
-            prepareAssets()
+            prepareAssets(value.network)
         }
     }
 
@@ -144,15 +143,13 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         }
     }
 
-    private fun View.prepareAssets() {
-        //TODO keeping assets in Value?
+    private fun View.prepareAssets(network: String) {
+        //TODO keeping assets in Value? only for demo purposes - Assets need to be reimplemented
         container.removeAllViews()
-        val asset = AssetView(this@ValueViewHolder, "sDai", R.drawable.ic_asset_sdai)
-        asset.setAmounts(BigDecimal.valueOf(2.34), BigDecimal.valueOf(1.35))
-        container.addView(asset)
-        val asset2 = AssetView(this@ValueViewHolder, "schilling", R.drawable.ic_asset_schilling)
-        asset2.setAmounts(BigDecimal.valueOf(2.34), BigDecimal.valueOf(1.35))
-        container.addView(asset2)
+        if(Network.fromString(network) == Network.ARTIS) {
+            val asset = AssetView(this@ValueViewHolder, "Crypto-Schilling", R.drawable.ic_asset_schilling)
+            container.addView(asset)
+        }
     }
 
     private fun open() {
