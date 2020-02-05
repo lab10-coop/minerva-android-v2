@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.values.adapter.ValueAdapter
@@ -67,17 +68,22 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
     }
 
     private fun setupLiveData() {
-        viewModel.walletConfigLiveData.observe(this, Observer {
-            noDataMessage.visibleOrGone(it.hasActiveValue)
-            valueAdapter.updateList(it.values)
-        })
-        viewModel.balanceLiveData.observe(this, Observer { valueAdapter.updateBalances(it) })
-        viewModel.errorLiveData.observe(this, Observer {
-            showErrorFlashbar(getString(R.string.remove_value_error), it.peekContent().message)
-        })
+        viewModel.apply {
+            walletConfigLiveData.observe(this@ValuesFragment, Observer {
+                noDataMessage.visibleOrGone(it.hasActiveValue)
+                valueAdapter.updateList(it.values)
+            })
+            balanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateBalances(it) })
+            errorLiveData.observe(this@ValuesFragment, Observer {
+                showErrorFlashbar(getString(R.string.remove_value_error), it.peekContent().message)
+            })
+            refreshBalancesErrorLiveData.observe(this@ValuesFragment, Observer {
+                showErrorFlashbar(getString(R.string.fetch_balances_error))
+            })
+        }
     }
 
-    private fun showErrorFlashbar(title: String, message: String?) =
+    private fun showErrorFlashbar(title: String, message: String? = String.Empty) =
         message?.let {
             MinervaFlashbar.show(requireActivity(), title, it)
         }.orElse {

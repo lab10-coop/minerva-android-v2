@@ -86,25 +86,4 @@ class MapperTest : WalletConfigTestValues() {
         walletConfig.identities[0].name shouldEqual walletPayload.identityResponse[0].name
         walletConfig.values[0].name shouldEqual walletPayload.valueResponse[0].name
     }
-
-    @Test
-    fun `Mapping WalletPayload to WalletConfig`() {
-        val walletConfigPayload = WalletConfigPayload(
-            0,
-            identityResponses,
-            valuesResponse
-        )
-        val walletConfigResponse = WalletConfigResponse(
-            "testState",
-            "testMessage",
-            walletConfigPayload
-        )
-
-        val walletConfig = mapWalletConfigResponseToWalletConfig(walletConfigResponse)
-
-        walletConfig.version shouldEqual walletConfigPayload.version
-        walletConfig.identities[0].name shouldEqual walletConfigPayload.identityResponse[0].name
-        walletConfig.values[0].name shouldEqual walletConfigPayload.valueResponse[0].name
-    }
-
 }

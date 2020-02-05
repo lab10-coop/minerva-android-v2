@@ -84,7 +84,7 @@ class WalletConfigRepository(
                     .zipWith(Observable.range(START, valuesResponse.size)
                         .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, valuesResponse[it].index) }
                         .toList()
-                        .map { completeValuesKeys(walletConfigPayload, it) },
+                        .map { completeValues(walletConfigPayload, it) },
                         BiFunction { identity: List<Identity>, value: List<Value> ->
                             WalletConfig(
                                 walletConfigPayload.version,
@@ -107,12 +107,11 @@ class WalletConfigRepository(
         return identities
     }
 
-    private fun completeValuesKeys(walletConfigPayload: WalletConfigPayload, list: List<Triple<Int, String, String>>): List<Value> {
+    private fun completeValues(walletConfigPayload: WalletConfigPayload, list: List<Triple<Int, String, String>>): List<Value> {
         val values = mutableListOf<Value>()
         list.forEach {
             walletConfigPayload.getValuePayload(it.first).apply {
-                val address = blockchainProvider.completeAddress(it.third)
-                values.add(mapValueResponseToValue(this, it.second, it.third, address))
+                values.add(mapValueResponseToValue(this, it.second, it.third, blockchainProvider.completeAddress(it.third)))
             }
         }
         return values

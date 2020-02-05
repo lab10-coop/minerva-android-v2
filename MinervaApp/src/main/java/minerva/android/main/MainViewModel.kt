@@ -12,4 +12,6 @@ class MainViewModel(private val walletManager: WalletManager) : ViewModel() {
     fun isMnemonicRemembered(): Boolean = walletManager.isMnemonicRemembered()
 
     fun getValueIterator(): Int = walletManager.getValueIterator()
+
+    fun dispose() = walletManager.dispose()
 }

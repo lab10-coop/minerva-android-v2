@@ -11,7 +11,7 @@ class LocalStorage(private val context: Context) {
         }
     }
 
-    fun isMenmonicRemembered(): Boolean =
+    fun isMnemonicRemembered(): Boolean =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(IS_MNEMONIC_REMEMBERED, false)
 
     companion object {
