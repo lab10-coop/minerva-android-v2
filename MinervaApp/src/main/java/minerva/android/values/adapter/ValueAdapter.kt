@@ -20,10 +20,10 @@ import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.values.listener.ValuesFragmentToAdapterListener
+import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.widget.AssetView
-import minerva.android.widget.CryptoAmountView.Companion.WRONG_CURRENCY_VALUE
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.wrapped.startValueAddressWrappedActivity
@@ -72,11 +72,14 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
         notifyDataSetChanged()
     }
 
-    fun updateBalances(balances: HashMap<String, BigDecimal>) {
+    fun updateBalances(balances: HashMap<String, Balance>) {
         activeValues.forEachIndexed { index, value ->
-            if (value.balance != balances[value.address]) {
-                value.balance = balances[value.address] ?: Int.InvalidId.toBigDecimal()
-                notifyItemChanged(index)
+            value.apply {
+                if (balance != balances[address]?.cryptoBalance) {
+                    balance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
+                    fiatBalance = balances[address]?.fiatBalance ?: Int.InvalidId.toBigDecimal()
+                    notifyItemChanged(index)
+                }
             }
         }
     }
@@ -114,23 +117,13 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     }
 
     private fun View.bindData(value: Value) {
-        card.setCardBackgroundColor(
-            ContextCompat.getColor(
-                context,
-                getNetworkColor(Network.fromString(value.network))
-            )
-        )
+        card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
         icon.setImageResource(getNetworkIcon(Network.fromString(value.network)))
         valueName.text = value.name
         cryptoShortName.text = value.network
-        cryptoShortName.setTextColor(
-            ContextCompat.getColor(
-                view.context,
-                getNetworkColor(Network.fromString(value.network))
-            )
-        )
+        cryptoShortName.setTextColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
         //TODO add data for normal currency!
-        amountView.setAmounts(value.balance, WRONG_CURRENCY_VALUE)
+        amountView.setAmounts(value.balance, value.fiatBalance)
         sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
     }
 
@@ -155,10 +148,10 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         //TODO keeping assets in Value?
         container.removeAllViews()
         val asset = AssetView(this@ValueViewHolder, "sDai", R.drawable.ic_asset_sdai)
-        asset.setAmounts(BigDecimal.valueOf(2.34), 1.35f)
+        asset.setAmounts(BigDecimal.valueOf(2.34), BigDecimal.valueOf(1.35))
         container.addView(asset)
         val asset2 = AssetView(this@ValueViewHolder, "schilling", R.drawable.ic_asset_schilling)
-        asset2.setAmounts(BigDecimal.valueOf(2.34), 1.35f)
+        asset2.setAmounts(BigDecimal.valueOf(2.34), BigDecimal.valueOf(1.35))
         container.addView(asset2)
     }
 

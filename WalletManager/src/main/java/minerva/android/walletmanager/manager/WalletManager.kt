@@ -7,6 +7,7 @@ import io.reactivex.Completable
 import io.reactivex.CompletableSource
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.BlockchainProvider
@@ -26,10 +27,11 @@ import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.RoundingMode
 
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
-    val balanceLiveData: LiveData<HashMap<String, BigDecimal>>
+    val balanceLiveData: LiveData<HashMap<String, Balance>>
 
     fun isMasterKeyAvailable(): Boolean
     fun initWalletConfig()
@@ -52,11 +54,12 @@ interface WalletManager {
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
     fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
     fun loadValue(position: Int): Value
-    fun refreshBalances()
+    fun refreshBalances()//: Single<HashMap<String, BigDecimal>>
     fun getValueIterator(): Int
     fun sendTransaction(transaction: Transaction): Completable
     fun getTransactionCosts(): Single<TransactionCost>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
+    fun dispose()
 }
 
 //Derivation path for identities and values "m/99'/n" where n is index of identity and value
@@ -70,21 +73,24 @@ class WalletManagerImpl(
 ) : WalletManager {
 
     private lateinit var masterKey: MasterKey
-
     private val _walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = _walletConfigMutableLiveData
+    private var disposable: Disposable? = null
 
-    private val _balanceLiveData = MutableLiveData<HashMap<String, BigDecimal>>()
-    override val balanceLiveData: LiveData<HashMap<String, BigDecimal>> get() = _balanceLiveData
+    private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
+    override val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
-    //todo assign to disposable and release resources in main ctivity viewmodel
     @VisibleForTesting
     fun loadWalletConfig() {
-        walletConfigRepository.loadWalletConfig(masterKey).subscribeBy(
-            onNext = { _walletConfigMutableLiveData.value = it },
-            onError = { Timber.e("Downloading WalletConfig error: $it") },
-            onComplete = { }
-        )
+        disposable = walletConfigRepository.loadWalletConfig(masterKey)
+            .subscribeBy(
+                onNext = { _walletConfigMutableLiveData.value = it },
+                onError = { Timber.e("Downloading WalletConfig error: $it") }
+            )
+    }
+
+    override fun dispose() {
+        disposable?.dispose()
     }
 
     override fun isMasterKeyAvailable(): Boolean = keystoreRepository.isMasterKeySaved()
@@ -100,11 +106,36 @@ class WalletManagerImpl(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { onRefreshBalanceSuccess(it) },
+                    onSuccess = { onRefreshBalanceSuccess(it, values) },
                     onError = { Timber.d("Refresh balance error: ${it.message}") }
                 )
         }
     }
+
+    private fun onRefreshBalanceSuccess(cryptoBalances: List<Pair<String, BigDecimal>>, values: List<Value>) {
+        val balances = hashMapOf<String, Balance>()
+        cryptoBalances.forEachIndexed { index, cryptoBalance ->
+            if (cryptoBalance.first == values[index].address) {
+                when (values[index].network) {
+                    NetworkNameShort.ATS -> getBalance(balances, cryptoBalance, ExchangeRate.ATS_EURO)
+                    NetworkNameShort.ETH -> getBalance(balances, cryptoBalance, ExchangeRate.ETH_EURO)
+                    NetworkNameShort.POA -> getBalance(balances, cryptoBalance, ExchangeRate.POA_EURO)
+                    NetworkNameShort.XDAI -> getBalance(balances, cryptoBalance, ExchangeRate.XDAI_EURO)
+                }
+            }
+        }
+        _balanceLiveData.value = balances
+    }
+
+    private fun getBalance(balances: HashMap<String, Balance>, cryptoBalance: Pair<String, BigDecimal>, rate: Double) {
+        balances[cryptoBalance.first] =
+            Balance(cryptoBalance.second, fiatBalance = (cryptoBalance.second.multiply(BigDecimal(rate))).setScale(SCALE, RoundingMode.HALF_DOWN))
+    }
+
+    private fun getAddresses(values: List<Value>?): MutableList<String> =
+        mutableListOf<String>().apply {
+            values?.forEach { add(it.address) }
+        }
 
     override fun sendTransaction(transaction: Transaction): Completable =
         blockchainProvider.sendTransaction(mapTransactionToTransactionPayload(transaction))
@@ -165,7 +196,7 @@ class WalletManagerImpl(
             val newValues = config.values.toMutableList()
             config.values.forEachIndexed { position, value ->
                 if (value.index == index) {
-                    if(isValueRemovable(value.balance)) {
+                    if (isValueRemovable(value.balance)) {
                         //TODO need to be handled better (Own Throwable implementation?)
                         return Completable.error(Throwable("This address is not empty and can't be removed."))
                     }
@@ -227,9 +258,6 @@ class WalletManagerImpl(
         throw Throwable("Wallet Config was not initialized")
     }
 
-    private fun getAddresses(values: List<Value>): MutableList<String> =
-        mutableListOf<String>().apply { values.forEach { add(it.address) } }
-
     private fun handleWalletConfigResponse(it: WalletConfigResponse, masterKey: MasterKey) {
         if (it.state != ResponseState.ERROR) {
             keystoreRepository.encryptKey(masterKey)
@@ -285,7 +313,7 @@ class WalletManagerImpl(
     }
 
     override fun isMnemonicRemembered(): Boolean =
-        localStorage.isMenmonicRemembered()
+        localStorage.isMnemonicRemembered()
 
     override fun loadValue(position: Int): Value {
         _walletConfigMutableLiveData.value?.values?.apply {
@@ -294,14 +322,6 @@ class WalletManagerImpl(
         }
         Timber.e("Wallet Manager is not initialized!")
         return Value(Int.InvalidIndex)
-    }
-
-    private fun onRefreshBalanceSuccess(list: List<Pair<String, BigDecimal>>) {
-        val currentBalance = hashMapOf<String, BigDecimal>()
-        list.forEach { balance ->
-            currentBalance[balance.first] = balance.second
-        }
-        _balanceLiveData.value = currentBalance
     }
 
     private fun getNewIndex(): Int {
@@ -339,6 +359,7 @@ class WalletManagerImpl(
 
     companion object {
         private const val ONE_ELEMENT = 1
+        private const val SCALE = 2
         private const val MINERVA_SERVICE = "Minerva Service"
         //        TODO should be dynamically handled form qr code
         private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"

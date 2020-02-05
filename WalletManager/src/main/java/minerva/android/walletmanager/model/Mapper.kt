@@ -19,25 +19,6 @@ private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> 
     return if (responseMap[REQUESTED] is ArrayList<*>?) responseMap[REQUESTED] as ArrayList<String> else arrayListOf()
 }
 
-fun mapWalletConfigResponseToWalletConfig(response: WalletConfigResponse): WalletConfig {
-    val identities = mutableListOf<Identity>()
-    val values = mutableListOf<Value>()
-    val services = mutableListOf<Service>()
-
-    response.walletPayload.identityResponse.forEach {
-        identities.add(mapIdentityPayloadToIdentity(it))
-    }
-
-    response.walletPayload.valueResponse.forEach {
-        values.add(mapValueResponseToValue(it))
-    }
-
-    response.walletPayload.serviceResponse.forEach {
-        services.add(mapServiceResponseToService(it))
-    }
-    return WalletConfig(response.walletPayload.version, identities, values, services)
-}
-
 fun mapIdentityPayloadToIdentity(response: IdentityPayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Identity =
     Identity(response.index, response.name, publicKey, privateKey, response.data, response.isDeleted)
 

@@ -39,6 +39,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         prepareSettingsIcon()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.dispose()
+    }
+
     private fun prepareSettingsIcon() {
         if (!viewModel.isMnemonicRemembered()) {
             bottomNavigation.getOrCreateBadge(R.id.settings)

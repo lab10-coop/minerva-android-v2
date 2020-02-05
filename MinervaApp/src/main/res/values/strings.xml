@@ -99,4 +99,5 @@
     <string name="transactions_cost_error_title">Transaction costs error</string>
     <string name="transactions_cost_error_message">An error occurred while setting transaction costs</string>
     <string name="remove_value_error">Remove value failure</string>
+    <string name="fetch_balances_error">Fetch balances failure</string>
 </resources>

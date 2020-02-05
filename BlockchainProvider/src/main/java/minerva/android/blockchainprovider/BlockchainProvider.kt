@@ -5,6 +5,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.kotlinUtils.function.orElse
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
@@ -28,9 +29,15 @@ class BlockchainProvider(blockchainURL: String) {
     private val web3j = Web3j.build(HttpService(blockchainURL))
 
     fun refreshBalances(addresses: List<String>): Single<List<Pair<String, BigDecimal>>> =
-        Observable.range(START, addresses.size)
-            .flatMapSingle { position -> getBalance(addresses[position]) }
-            .toList()
+            Observable.range(START, addresses.size)
+                .flatMapSingle { position -> getBalance(addresses[position]) }
+                .toList()
+
+    private fun getBalance(address: String): Single<Pair<String, BigDecimal>> =
+        web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
+            .firstOrError()
 
     fun getTransactionCosts(): Single<TransactionCostPayload> =
         web3j.ethGasPrice().flowable()
@@ -52,12 +59,6 @@ class BlockchainProvider(blockchainURL: String) {
     fun completeAddress(privateKey: String): String = Credentials.create(privateKey).address
 
     fun toGwei(balance: BigDecimal): BigInteger = toWei(balance, Convert.Unit.GWEI).toBigInteger()
-
-    private fun getBalance(address: String): Single<Pair<String, BigDecimal>> =
-        web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
-            .firstOrError()
 
     private fun prepareTransactionCosts(it: EthGasPrice): TransactionCostPayload =
         TransactionCostPayload(

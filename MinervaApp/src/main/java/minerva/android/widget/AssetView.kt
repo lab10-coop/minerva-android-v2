@@ -33,7 +33,7 @@ class AssetView(callback: AssertViewCallback, name: String, @DrawableRes logoRes
         }
     }
 
-    fun setAmounts(crypto: BigDecimal, currency: Float) {
+    fun setAmounts(crypto: BigDecimal, currency: BigDecimal) {
         amountView.setAmounts(crypto, currency)
     }
 

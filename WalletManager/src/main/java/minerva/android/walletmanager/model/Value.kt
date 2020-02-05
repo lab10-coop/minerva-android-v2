@@ -11,7 +11,8 @@ data class Value(
     val name: String = String.Empty,
     val network: String = String.Empty,
     var isDeleted: Boolean = false,
-    var balance: BigDecimal = BigDecimal.ZERO
+    var balance: BigDecimal = BigDecimal.ZERO,
+    var fiatBalance: BigDecimal = BigDecimal.ZERO
 ) {
     constructor(value: Value, isDeleted: Boolean) : this(
         value.index,
