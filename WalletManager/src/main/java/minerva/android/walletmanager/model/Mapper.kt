@@ -12,8 +12,7 @@ const val REQUESTED = "requested"
 fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCodeResponse = QrCodeResponse(
     callback = responseMap[CALLBACK] as String?,
     issuer = responseMap[ISS] as String?,
-    requestedData = getRequestedData(responseMap),
-    isQrCodeValid = true
+    requestedData = getRequestedData(responseMap)
 )
 
 private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> {

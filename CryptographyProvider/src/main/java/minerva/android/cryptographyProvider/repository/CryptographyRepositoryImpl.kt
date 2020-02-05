@@ -49,13 +49,14 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
     private fun getDerivedPath(index: Int) = "${DERIVED_PATH_PREFIX}$index"
 
     override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> {
+        val keysSubject: SingleSubject<Map<String, Any?>> = SingleSubject.create()
         return try {
             val payload = JWTTools().decodeRaw(jwtToken).second
             handleTokenExpired(payload)
-            Single.just(payload)
+            keysSubject.apply { onSuccess(payload) }
         } catch (exception: IllegalArgumentException) {
             Timber.e(exception)
-            Single.just(mapOf())
+            keysSubject.apply { onError(Throwable()) }
         }
     }
 

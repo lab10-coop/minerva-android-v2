@@ -27,19 +27,17 @@ class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onSuccess = {
-                    if (it.isQrCodeValid) {
-                        it.serviceName = getServiceName(token)
-                        it.identityFields = getRequestedData(it.requestedData)
-                        _scannerResultMutableLiveData.value = Event(it)
-                    } else {
-                        _scannerErrorMutableLiveData.value = Event(Throwable())
-                    }
-                },
-                onError = {
-                    _scannerErrorMutableLiveData.value = Event(it)
-                }
+                onSuccess = { handleQrCodeResponse(it, token) },
+                onError = { _scannerErrorMutableLiveData.value = Event(it) }
             )
+    }
+
+    private fun handleQrCodeResponse(response: QrCodeResponse, token: String) {
+        response.run {
+            serviceName = getServiceName(token)
+            identityFields = getRequestedData(requestedData)
+            _scannerResultMutableLiveData.value = Event(this)
+        }
     }
 
     private fun getRequestedData(requestedData: ArrayList<String>): String {
@@ -50,20 +48,10 @@ class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
         return identityFields
     }
 
-//    TODO implement getting service name for QR code, leave it for demo purposes
+    //    TODO implement getting service name for QR code, leave it for demo purposes
     private fun getServiceName(scanResult: String) = "Minerva Service"
-//    scanResult.substring(
-//        FIRST_CHAR, scanResult.indexOf(
-//            SEPARATOR
-//        )
-//    )
 
     fun onPause() {
         disposable?.dispose()
-    }
-
-    companion object {
-        const val FIRST_CHAR = 0
-        const val SEPARATOR = ":"
     }
 }

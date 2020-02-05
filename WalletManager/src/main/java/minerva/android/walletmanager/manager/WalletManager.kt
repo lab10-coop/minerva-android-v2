@@ -211,7 +211,7 @@ class WalletManagerImpl(
 
     override fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse> =
         cryptographyRepository.decodeJwtToken(jwtToken)
-            .map { handleQrCodeResponse(it) }
+            .map { mapHashMapToQrCodeResponse(it) }
 
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
@@ -246,9 +246,6 @@ class WalletManagerImpl(
     private fun handleSavingServiceLogin(identity: Identity): CompletableSource? =
         if (identity !is IncognitoIdentity) saveService()
         else Completable.complete()
-
-    private fun handleQrCodeResponse(it: Map<String, Any?>): QrCodeResponse =
-        if (it.isNotEmpty()) mapHashMapToQrCodeResponse(it) else QrCodeResponse(isQrCodeValid = false)
 
     private fun isValueRemovable(balance: BigDecimal) = blockchainProvider.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
 
