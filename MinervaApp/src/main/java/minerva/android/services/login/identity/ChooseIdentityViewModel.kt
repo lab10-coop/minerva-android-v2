@@ -21,8 +21,8 @@ import timber.log.Timber
 
 class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewModel() {
 
-    private val _loginMutableLiveData = MutableLiveData<Event<Any>>()
-    val loginLiveData: LiveData<Event<Any>> get() = _loginMutableLiveData
+    private val _loginMutableLiveData = MutableLiveData<Event<Unit>>()
+    val loginLiveData: LiveData<Event<Unit>> get() = _loginMutableLiveData
 
     private val _errorMutableLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorMutableLiveData
@@ -59,7 +59,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
         }
     }
 
-    private fun handleNoKeysError(identity: Identity): Boolean {
+    fun handleNoKeysError(identity: Identity): Boolean {
         if (doesIdentityHaveKeys(identity)) {
             _errorMutableLiveData.value = Event(Throwable("Missing calculated keys"))
             return true
@@ -70,7 +70,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
     private fun doesIdentityHaveKeys(identity: Identity) =
         identity != IncognitoIdentity() && (identity.publicKey == String.Empty || identity.privateKey == String.Empty)
 
-    private fun handleLogin(
+    fun handleLogin(
         qrCodeResponse: QrCodeResponse,
         jwtToken: String,
         identity: Identity
@@ -82,7 +82,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewMo
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = {
-                        _loginMutableLiveData.value = Event(Any())
+                        _loginMutableLiveData.value = Event(Unit)
                     },
                     onError = {
                         Timber.d(it)

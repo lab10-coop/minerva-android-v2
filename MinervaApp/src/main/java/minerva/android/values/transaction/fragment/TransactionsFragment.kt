@@ -63,7 +63,6 @@ class TransactionsFragment : Fragment() {
         }
     }
 
-    //TODO subscribe should be in ViewModel and connected with Fragment by LiveData
     private fun prepareTextListeners() {
         validationDisposable = Observable.combineLatest(
             amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },

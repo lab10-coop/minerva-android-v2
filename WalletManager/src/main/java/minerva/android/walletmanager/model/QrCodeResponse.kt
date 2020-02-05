@@ -8,6 +8,5 @@ data class QrCodeResponse(
     var callback: String? = String.Empty,
     var issuer: String? = String.Empty,
     var requestedData: ArrayList<String> = arrayListOf(),
-    var identityFields: String = String.Empty,
-    var isQrCodeValid: Boolean = false
+    var identityFields: String = String.Empty
 ) : Serializable

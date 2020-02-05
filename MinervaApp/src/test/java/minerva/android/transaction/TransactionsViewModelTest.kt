@@ -1,13 +1,10 @@
 package minerva.android.transaction
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.schedulers.Schedulers
+import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.observeWithPredicate
@@ -15,14 +12,11 @@ import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.TransactionCost
 import org.amshove.kluent.shouldBeEqualTo
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class TransactionsViewModelTest {
+class TransactionViewModelTest: BaseViewModelTest() {
 
     private val walletManager: WalletManager = mock()
     private val viewModel = TransactionsViewModel(walletManager)
@@ -32,22 +26,6 @@ class TransactionsViewModelTest {
 
     private val sendTransactionObserver: Observer<Event<String>> = mock()
     private val sendTransactionCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
-
-    @get:Rule
-    val rule
-        get() = InstantTaskExecutorRule()
-
-    @Before
-    fun setupRxSchedulers() {
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
-    }
-
-    @After
-    fun destroyRxSchedulers() {
-        RxJavaPlugins.reset()
-        RxAndroidPlugins.reset()
-    }
 
     @Test
     fun `get transaction cost test success`() {

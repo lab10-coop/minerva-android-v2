@@ -23,11 +23,13 @@ class FormValidatorTest {
     @Test
     fun `test receiver address validator`() {
         checkExpectedEmptyResult(Validator.validateReceiverAddress(""))
-        val incorrectEmailValidationResult = Validator.validateReceiverAddress("123456789")
-        incorrectEmailValidationResult.hasError shouldEqualTo true
-        incorrectEmailValidationResult.errorMessageId shouldEqualTo R.string.invalid_account_address
-        val correctEmailValidationResult = Validator.validateReceiverAddress("0x324324")
-        correctEmailValidationResult.hasError shouldEqualTo false
+        val incorrectReceiverValidationResult = Validator.validateReceiverAddress("123456789")
+        incorrectReceiverValidationResult.hasError shouldEqualTo true
+        incorrectReceiverValidationResult.errorMessageId shouldEqualTo R.string.invalid_account_address
+        val correctReceiverValidationResult = Validator.validateReceiverAddress("0x324324")
+        correctReceiverValidationResult.hasError shouldEqualTo false
+        val correctEnsValidationResult = Validator.validateReceiverAddress("aaa.sfsada")
+        correctEnsValidationResult.hasError shouldEqualTo false
     }
 
     private fun checkExpectedEmptyResult(result: ValidationResult) {

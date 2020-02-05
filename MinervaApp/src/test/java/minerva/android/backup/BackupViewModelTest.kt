@@ -1,4 +1,4 @@
-package minerva.android
+package minerva.android.backup
 
 import com.nhaarman.mockitokotlin2.mock
 import minerva.android.settings.backup.BackupViewModel
