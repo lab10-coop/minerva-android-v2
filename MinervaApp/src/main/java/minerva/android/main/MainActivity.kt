@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
+import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivity
 import minerva.android.extension.launchActivityForResult
 import minerva.android.identities.IdentitiesFragment
@@ -16,6 +17,7 @@ import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.login.PainlessLoginActivity
+import minerva.android.values.ValuesFragment
 import minerva.android.values.transaction.activity.TransactionActivity
 import minerva.android.values.transaction.activity.TransactionActivity.Companion.VALUE_INDEX
 import minerva.android.walletmanager.model.Value
@@ -30,7 +32,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         //TODO can we do it better? Maybe on SplashScreen?
         checkMasterSeedAvailability()
         setContentView(R.layout.activity_main)
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onDestroy() {
         super.onDestroy()
+        (getCurrentFragment() as ValuesFragment).dispose()
         viewModel.dispose()
     }
 

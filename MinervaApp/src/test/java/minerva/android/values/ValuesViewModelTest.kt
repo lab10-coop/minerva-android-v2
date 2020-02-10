@@ -1,42 +1,43 @@
 package minerva.android.values
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.schedulers.Schedulers
+import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.WalletManager
-import minerva.android.walletmanager.model.WalletConfig
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
+import minerva.android.walletmanager.model.Balance
 import org.junit.Test
 import java.math.BigDecimal
 
-class ValuesViewModelTest {
+class ValuesViewModelTest : BaseViewModelTest() {
 
     private val walletManager: WalletManager = mock()
     private val viewModel = ValuesViewModel(walletManager)
 
-    @get:Rule
-    val rule
-        get() = InstantTaskExecutorRule()
+    private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
+    private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
 
-    @Before
-    fun setupRxSchedulers() {
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
+    @Test
+    fun `refresh balances success`() {
+        whenever(walletManager.refreshBalances()).thenReturn(Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN)))))
+        viewModel.balanceLiveData.observeForever(balanceObserver)
+        viewModel.refreshBalances()
+        balanceCaptor.run {
+            verify(balanceObserver).onChanged(capture())
+            firstValue["123"]!!.cryptoBalance == BigDecimal.ONE
+        }
     }
 
-    @After
-    fun destroyRxSchedulers() {
-        RxJavaPlugins.reset()
-        RxAndroidPlugins.reset()
+    @Test
+    fun `refresh balances error`() {
+        val error = Throwable()
+        whenever(walletManager.refreshBalances()).thenReturn(Single.error(error))
+        viewModel.balanceLiveData.observeForever(balanceObserver)
+        viewModel.refreshBalances()
+        viewModel.refreshBalancesErrorLiveData.observeLiveDataEvent(Event(error))
     }
 
     @Test

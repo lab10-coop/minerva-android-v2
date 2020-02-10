@@ -5,7 +5,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
-import minerva.android.kotlinUtils.function.orElse
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
@@ -13,7 +12,6 @@ import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.response.EthGasPrice
 import org.web3j.protocol.core.methods.response.EthSendTransaction
-import org.web3j.protocol.http.HttpService
 import org.web3j.tx.Transfer
 import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
@@ -24,14 +22,12 @@ import java.math.BigInteger
 import java.math.RoundingMode
 
 
-class BlockchainProvider(blockchainURL: String) {
-
-    private val web3j = Web3j.build(HttpService(blockchainURL))
+class BlockchainRepository(private var web3j: Web3j) {
 
     fun refreshBalances(addresses: List<String>): Single<List<Pair<String, BigDecimal>>> =
-            Observable.range(START, addresses.size)
-                .flatMapSingle { position -> getBalance(addresses[position]) }
-                .toList()
+        Observable.range(START, addresses.size)
+            .flatMapSingle { position -> getBalance(addresses[position]) }
+            .toList()
 
     private fun getBalance(address: String): Single<Pair<String, BigDecimal>> =
         web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
@@ -43,6 +39,13 @@ class BlockchainProvider(blockchainURL: String) {
         web3j.ethGasPrice().flowable()
             .map { prepareTransactionCosts(it) }
             .singleOrError()
+
+    private fun prepareTransactionCosts(it: EthGasPrice): TransactionCostPayload =
+        TransactionCostPayload(
+            fromWei(BigDecimal(it.gasPrice), Convert.Unit.GWEI),
+            Transfer.GAS_LIMIT,
+            getTransactionCostInEth(BigDecimal(it.gasPrice), BigDecimal(Transfer.GAS_LIMIT))
+        )
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         getTransactionCostInEth(toWei(gasPrice, Convert.Unit.GWEI), BigDecimal(gasLimit))
@@ -59,13 +62,6 @@ class BlockchainProvider(blockchainURL: String) {
     fun completeAddress(privateKey: String): String = Credentials.create(privateKey).address
 
     fun toGwei(balance: BigDecimal): BigInteger = toWei(balance, Convert.Unit.GWEI).toBigInteger()
-
-    private fun prepareTransactionCosts(it: EthGasPrice): TransactionCostPayload =
-        TransactionCostPayload(
-            fromWei(BigDecimal(it.gasPrice), Convert.Unit.GWEI),
-            Transfer.GAS_LIMIT,
-            getTransactionCostInEth(BigDecimal(it.gasPrice), BigDecimal(Transfer.GAS_LIMIT))
-        )
 
     private fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal) =
         fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)

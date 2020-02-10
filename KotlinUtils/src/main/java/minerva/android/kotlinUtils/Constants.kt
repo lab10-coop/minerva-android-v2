@@ -23,3 +23,6 @@ val Int.Companion.InvalidVersion: Int
 
 val Int.Companion.InvalidValue: Int
     get() = -1
+
+val Double.Companion.InvalidValue: Double
+    get() = -1.0

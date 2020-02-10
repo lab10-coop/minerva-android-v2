@@ -5,9 +5,9 @@ import minerva.android.kotlinUtils.Empty
 
 data class WalletConfigResponse(
     @SerializedName("state")
-    private val _state: String?,
+    private val _state: String? = String.Empty,
     @SerializedName("message")
-    private val _message: String?,
+    private val _message: String? = String.Empty,
     @SerializedName("data")
     private val _walletConfigPayload: WalletConfigPayload? = WalletConfigPayload()
 ) {
