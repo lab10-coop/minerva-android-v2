@@ -54,7 +54,7 @@ interface WalletManager {
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
     fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
     fun loadValue(position: Int): Value
-    fun refreshBalances()//: Single<HashMap<String, BigDecimal>>
+    fun refreshBalances()
     fun getValueIterator(): Int
     fun sendTransaction(transaction: Transaction): Completable
     fun getTransactionCosts(): Single<TransactionCost>

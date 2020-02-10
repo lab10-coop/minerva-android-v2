@@ -36,7 +36,7 @@ class ValueAddressFragment : Fragment() {
         prepareQR(value.address)
         address.text = value.address
         setupShareButton(shareButton, value.address)
-        setupCopyButton(copyButton, value.address)
+        setupCopyButton(copyButton, value.address, getString(R.string.address_saved_to_clip_board))
     }
 
     private fun prepareQR(address: String) {
