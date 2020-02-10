@@ -55,7 +55,7 @@
     <string name="backup_instruction">A bip39 seed phrase is an alternative way to backup or remember your private key:</string>
     <string name="retrieving_mnemonic_error">An error occurred while retrieving mnemonic</string>
     <string name="mnemonic_saved_to_clip_board">Mnemonic saved to clip board</string>
-    <string name="address_saved_to_clipboard">Address saved to clip board</string>
+    <string name="address_saved_to_clipboard">Address saved to clipboard</string>
     <string name="no_such_file_error_message">No Minerva Wallet found for the seed phrase you entered. Please make sure that you entered the words in the correct order and that you\'re using a seedphrase which was created by the Minerva App.</string>
     <string name="alert_title">You haven\'t yet made a backup of your Minerva Wallet.</string>
     <string name="alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
@@ -100,4 +100,5 @@
     <string name="transactions_cost_error_message">An error occurred while setting transaction costs</string>
     <string name="remove_value_error">Remove value failure</string>
     <string name="fetch_balances_error">Fetch balances failure</string>
+    <string name="address_saved_to_clip_board">Address saved to clipboard</string>
 </resources>

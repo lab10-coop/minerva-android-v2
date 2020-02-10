@@ -22,7 +22,7 @@ class BackupActivity : AppCompatActivity() {
         setContentView(R.layout.activity_backup)
         prepareMnemonic()
         setupActionBar()
-        setupCopyButton(copyButton, viewModel.mnemonic)
+        setupCopyButton(copyButton, viewModel.mnemonic, getString(R.string.mnemonic_saved_to_clip_board))
         setupShareButton(shareButton, viewModel.mnemonic)
         setupRememberButton()
     }
