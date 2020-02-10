@@ -54,10 +54,6 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
         viewModel.onPause()
     }
 
-    fun dispose(){
-        viewModel.disposeRefreshBalance()
-    }
-
     override fun onSendTransaction(value: Value) = listener.showSendTransactionScreen(value)
 
     override fun onSendAssetTransaction() = listener.showSendAssetTransactionScreen()

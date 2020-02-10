@@ -4,6 +4,7 @@ import android.app.Application
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
 import io.fabric.sdk.android.Fabric
+import io.reactivex.plugins.RxJavaPlugins
 import minerva.android.BuildConfig
 import minerva.android.di.createAppModule
 import org.koin.android.ext.koin.androidContext
@@ -20,6 +21,7 @@ class MinervaApp() : Application() {
         }
         initializeCrashlytics()
         initializeTimber()
+        RxJavaPlugins.setErrorHandler { Timber.e(it) }
     }
 
     private fun initializeTimber() {
