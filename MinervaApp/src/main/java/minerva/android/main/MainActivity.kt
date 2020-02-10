@@ -42,7 +42,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onDestroy() {
         super.onDestroy()
-        (getCurrentFragment() as ValuesFragment).dispose()
         viewModel.dispose()
     }
 

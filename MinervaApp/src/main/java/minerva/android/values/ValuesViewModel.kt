@@ -3,7 +3,6 @@ package minerva.android.values
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.event.Event
@@ -14,8 +13,6 @@ import minerva.android.walletmanager.model.WalletConfig
 import timber.log.Timber
 
 class ValuesViewModel(private val walletManager: WalletManager) : BaseViewModel() {
-
-    var refreshBalanceDisposable: Disposable? = null
 
     val walletConfigLiveData: LiveData<WalletConfig> = walletManager.walletConfigLiveData
 
@@ -29,20 +26,18 @@ class ValuesViewModel(private val walletManager: WalletManager) : BaseViewModel(
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
     fun refreshBalances() {
-        refreshBalanceDisposable = walletManager.refreshBalances()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onSuccess = { _balanceLiveData.value = it },
-                onError = {
-                    Timber.d("Refresh balance error: ${it.message}")
-                    _refreshBalancesErrorLiveData.value = Event(it)
-                }
-            )
-    }
-
-    fun disposeRefreshBalance() {
-        refreshBalanceDisposable?.dispose()
+        launchDisposable {
+            walletManager.refreshBalances()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { _balanceLiveData.value = it },
+                    onError = {
+                        Timber.d("Refresh balance error: ${it.message}")
+                        _refreshBalancesErrorLiveData.value = Event(it)
+                    }
+                )
+        }
     }
 
     fun removeValue(index: Int) {
