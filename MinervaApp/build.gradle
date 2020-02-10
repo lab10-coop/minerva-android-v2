@@ -21,6 +21,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "REST_API_URL", '"https://minerva-api.dev.lab10.io/backups/"'
         buildConfigField "String", "BLOCKCHAIN_URL", '"https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
+        buildConfigField "String", "BINANCE_URL", '"https://api.binance.com"'
     }
 
     signingConfigs {

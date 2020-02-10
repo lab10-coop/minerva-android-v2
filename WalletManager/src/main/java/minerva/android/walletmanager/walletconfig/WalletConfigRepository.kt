@@ -5,7 +5,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.BlockchainProvider
+import minerva.android.blockchainprovider.BlockchainRepository
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.IdentityPayload
 import minerva.android.configProvider.model.ValuePayload
@@ -24,7 +24,7 @@ import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.
 
 class WalletConfigRepository(
     private val cryptographyRepository: CryptographyRepository,
-    private val blockchainProvider: BlockchainProvider,
+    private val blockchainRepository: BlockchainRepository,
     private val localWalletProvider: LocalWalletConfigProvider,
     private val minervaApi: MinervaApi
 ) {
@@ -111,7 +111,7 @@ class WalletConfigRepository(
         val values = mutableListOf<Value>()
         list.forEach {
             walletConfigPayload.getValuePayload(it.first).apply {
-                values.add(mapValueResponseToValue(this, it.second, it.third, blockchainProvider.completeAddress(it.third)))
+                values.add(mapValueResponseToValue(this, it.second, it.third, blockchainRepository.completeAddress(it.third)))
             }
         }
         return values

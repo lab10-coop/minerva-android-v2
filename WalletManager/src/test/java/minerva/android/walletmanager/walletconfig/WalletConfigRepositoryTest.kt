@@ -8,7 +8,7 @@ import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.BlockchainProvider
+import minerva.android.blockchainprovider.BlockchainRepository
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.model.MasterKey
@@ -24,16 +24,16 @@ class WalletConfigRepositoryTest {
     private val online = OnlineMock()
     private val onlineLikeLocal = OnlineLikeLocalMock()
     private val cryptographyRepository: CryptographyRepository = mock()
-    private val blockchainProvider: BlockchainProvider = mock()
+    private val blockchainRepository: BlockchainRepository = mock()
     private val api: MinervaApi = mock()
 
-    private val repository = WalletConfigRepository(cryptographyRepository, blockchainProvider, local, onlineLikeLocal)
+    private val repository = WalletConfigRepository(cryptographyRepository, blockchainRepository, local, onlineLikeLocal)
 
     @Before
     fun setupRxSchedulers() {
         RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
-        whenever(blockchainProvider.completeAddress(any())).thenReturn("address")
+        whenever(blockchainRepository.completeAddress(any())).thenReturn("address")
     }
 
     @After
@@ -53,7 +53,7 @@ class WalletConfigRepositoryTest {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(2)))
             .thenReturn(Single.just(Triple(2, "publicKey", "privateKey")))
 
-        val walletConfigRepository = WalletConfigRepository(cryptographyRepository, blockchainProvider, local, online)
+        val walletConfigRepository = WalletConfigRepository(cryptographyRepository, blockchainRepository, local, online)
         val observable = walletConfigRepository.loadWalletConfig(MasterKey())
 
         observable.test().assertValueSequence(
@@ -75,7 +75,7 @@ class WalletConfigRepositoryTest {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(2)))
             .thenReturn(Single.just(Triple(2, "publicKey", "privateKey")))
 
-        val walletConfigRepository = WalletConfigRepository(cryptographyRepository, blockchainProvider, local, onlineLikeLocal)
+        val walletConfigRepository = WalletConfigRepository(cryptographyRepository, blockchainRepository, local, onlineLikeLocal)
         val observable = walletConfigRepository.loadWalletConfig(MasterKey())
 
         observable.test().assertValueSequence(
@@ -95,7 +95,7 @@ class WalletConfigRepositoryTest {
     @Test
     fun `create default walletConfig should return error`() {
         val throwable = Throwable()
-        val repository = WalletConfigRepository(cryptographyRepository, blockchainProvider, local, api)
+        val repository = WalletConfigRepository(cryptographyRepository, blockchainRepository, local, api)
         whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.error(throwable))
         val test = repository.createWalletConfig(MasterKey("1234", "5678")).test()
         test.assertError(throwable)

@@ -3,14 +3,17 @@ package minerva.android.walletmanager.manager
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.exchangemarketprovider.api.BinanceApi
 import io.reactivex.Completable
 import io.reactivex.CompletableSource
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.BlockchainProvider
+import minerva.android.blockchainprovider.BlockchainRepository
 import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
@@ -22,16 +25,16 @@ import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.utils.MarketUtils.calculateFiatBalances
+import minerva.android.walletmanager.utils.MarketUtils.getAddresses
 import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.math.RoundingMode
 
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
-    val balanceLiveData: LiveData<HashMap<String, Balance>>
 
     fun isMasterKeyAvailable(): Boolean
     fun initWalletConfig()
@@ -49,12 +52,11 @@ interface WalletManager {
     fun removeValue(index: Int): Completable
     fun removeIdentity(identity: Identity): Completable
     fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
-    fun computeDeliveredKeys(index: Int): Single<Triple<Int, String, String>>
 
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
     fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
     fun loadValue(position: Int): Value
-    fun refreshBalances()
+    fun refreshBalances(): Single<HashMap<String, Balance>>
     fun getValueIterator(): Int
     fun sendTransaction(transaction: Transaction): Completable
     fun getTransactionCosts(): Single<TransactionCost>
@@ -67,18 +69,16 @@ class WalletManagerImpl(
     private val keystoreRepository: KeystoreRepository,
     private val cryptographyRepository: CryptographyRepository,
     private val walletConfigRepository: WalletConfigRepository,
-    private val blockchainProvider: BlockchainProvider,
+    private val blockchainRepository: BlockchainRepository,
     private val localStorage: LocalStorage,
-    private val servicesApi: ServicesApi
+    private val servicesApi: ServicesApi,
+    private val binanceApi: BinanceApi
 ) : WalletManager {
 
     private lateinit var masterKey: MasterKey
     private val _walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = _walletConfigMutableLiveData
     private var disposable: Disposable? = null
-
-    private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
-    override val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
     @VisibleForTesting
     fun loadWalletConfig() {
@@ -100,55 +100,26 @@ class WalletManagerImpl(
         loadWalletConfig()
     }
 
-    override fun refreshBalances() {
-        _walletConfigMutableLiveData.value?.values?.let { values ->
-            blockchainProvider.refreshBalances(getAddresses(values))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = { onRefreshBalanceSuccess(it, values) },
-                    onError = { Timber.d("Refresh balance error: ${it.message}") }
-                )
+    override fun refreshBalances(): Single<HashMap<String, Balance>> {
+        listOf(Markets.ETH_EUR, Markets.POA_ETH).run {
+            val values = _walletConfigMutableLiveData.value?.values
+            return blockchainRepository.refreshBalances(getAddresses(values))
+                .zipWith(Observable.range(START, this.size)
+                    .flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }
+                    .toList())
+                .map { calculateFiatBalances(it.first, values, it.second) }
         }
     }
-
-    private fun onRefreshBalanceSuccess(cryptoBalances: List<Pair<String, BigDecimal>>, values: List<Value>) {
-        val balances = hashMapOf<String, Balance>()
-        cryptoBalances.forEachIndexed { index, cryptoBalance ->
-            if (cryptoBalance.first == values[index].address) {
-                when (values[index].network) {
-                    NetworkNameShort.ATS -> getBalance(balances, cryptoBalance, ExchangeRate.ATS_EURO)
-                    NetworkNameShort.ETH -> getBalance(balances, cryptoBalance, ExchangeRate.ETH_EURO)
-                    NetworkNameShort.POA -> getBalance(balances, cryptoBalance, ExchangeRate.POA_EURO)
-                    NetworkNameShort.XDAI -> getBalance(balances, cryptoBalance, ExchangeRate.XDAI_EURO)
-                }
-            }
-        }
-        _balanceLiveData.value = balances
-    }
-
-    private fun getBalance(balances: HashMap<String, Balance>, cryptoBalance: Pair<String, BigDecimal>, rate: Double) {
-        balances[cryptoBalance.first] =
-            Balance(cryptoBalance.second, fiatBalance = (cryptoBalance.second.multiply(BigDecimal(rate))).setScale(SCALE, RoundingMode.HALF_DOWN))
-    }
-
-    private fun getAddresses(values: List<Value>?): MutableList<String> =
-        mutableListOf<String>().apply {
-            values?.forEach { add(it.address) }
-        }
 
     override fun sendTransaction(transaction: Transaction): Completable =
-        blockchainProvider.sendTransaction(mapTransactionToTransactionPayload(transaction))
+        blockchainRepository.sendTransaction(mapTransactionToTransactionPayload(transaction))
 
     override fun getTransactionCosts(): Single<TransactionCost> =
-        blockchainProvider.getTransactionCosts()
+        blockchainRepository.getTransactionCosts()
             .map { mapTransactionCostPayloadToTransactionCost(it) }
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
-        blockchainProvider.calculateTransactionCost(gasPrice, gasLimit)
-
-    override fun computeDeliveredKeys(index: Int): Single<Triple<Int, String, String>> =
-        cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, index)
+        blockchainRepository.calculateTransactionCost(gasPrice, gasLimit)
 
     override fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse> =
         walletConfigRepository.getWalletConfig(masterKey)
@@ -183,7 +154,7 @@ class WalletManagerImpl(
                     newValue.apply {
                         publicKey = it.second
                         privateKey = it.third
-                        address = blockchainProvider.completeAddress(it.third)
+                        address = blockchainRepository.completeAddress(it.third)
                     }
                     WalletConfig(config.updateVersion, config.identities, config.values + newValue, config.services)
                 }.flatMapCompletable { updateWalletConfig(it) }
@@ -251,6 +222,18 @@ class WalletManagerImpl(
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
             .flatMapCompletable { handleSavingServiceLogin(identity) }
 
+    private fun handleSavingServiceLogin(identity: Identity): CompletableSource? =
+        if (identity !is IncognitoIdentity) saveService()
+        else Completable.complete()
+
+    //    TODO chane for generic service creation, proper API is needed
+    private fun saveService(): Completable {
+        _walletConfigMutableLiveData.value?.run {
+            return updateWalletConfig(WalletConfig(updateVersion, identities, values, getMinervaService()))
+        }
+        return Completable.error(Throwable("Wallet Config was not initialized"))
+    }
+
     override fun getValueIterator(): Int {
         _walletConfigMutableLiveData.value?.values?.size?.let {
             return it + 1
@@ -271,19 +254,7 @@ class WalletManagerImpl(
         return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
     }
 
-    private fun handleSavingServiceLogin(identity: Identity): CompletableSource? =
-        if (identity !is IncognitoIdentity) saveService()
-        else Completable.complete()
-
-    private fun isValueRemovable(balance: BigDecimal) = blockchainProvider.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
-
-    //    TODO chane for generic service creation, proper API is needed
-    private fun saveService(): Completable {
-        _walletConfigMutableLiveData.value?.run {
-            return updateWalletConfig(WalletConfig(updateVersion, identities, values, getMinervaService()))
-        }
-        return Completable.error(Throwable("Wallet Config was not initialized"))
-    }
+    private fun isValueRemovable(balance: BigDecimal) = blockchainRepository.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
 
     private fun getMinervaService() =
         listOf(Service(ServiceType.MINERVA, MINERVA_SERVICE, DateUtils.getLastUsed()))
@@ -358,8 +329,8 @@ class WalletManagerImpl(
     }
 
     companion object {
+        private const val START = 0
         private const val ONE_ELEMENT = 1
-        private const val SCALE = 2
         private const val MINERVA_SERVICE = "Minerva Service"
         //        TODO should be dynamically handled form qr code
         private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"
