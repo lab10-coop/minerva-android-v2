@@ -22,12 +22,12 @@ import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.TokenPayload
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.ResponseState
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.utils.MarketUtils.calculateFiatBalances
 import minerva.android.walletmanager.utils.MarketUtils.getAddresses
-import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -52,6 +52,7 @@ interface WalletManager {
     fun removeValue(index: Int): Completable
     fun removeIdentity(identity: Identity): Completable
     fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
+    fun refreshAssetBalance(): Single<Map<String, List<Asset>>>
 
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
     fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
@@ -239,6 +240,22 @@ class WalletManagerImpl(
             return it + 1
         }
         throw Throwable("Wallet Config was not initialized")
+    }
+
+    override fun refreshAssetBalance(): Single<Map<String, List<Asset>>> {
+        _walletConfigMutableLiveData.value?.values?.let { values ->
+            return Observable.range(START, values.size)
+                .filter { position -> !values[position].isDeleted }
+                //TODO remove when all testnet will be implemented
+                .filter { position -> Network.fromString(values[position].network) == Network.ETHEREUM }
+                .flatMapSingle { position ->
+                    val addresses = AssetManager.getAssetAddresses(Network.fromString(values[position].network))
+                    blockchainRepository.refreshAssetsBalance(values[position].privateKey, addresses)
+                }
+                .toList()
+                .map { list -> list.map { it.first to AssetManager.getAssetsFromPairList(it.second) }.toMap() }
+        }
+        return Single.error(Throwable("Wallet Config was not initialized"))
     }
 
     private fun handleWalletConfigResponse(it: WalletConfigResponse, masterKey: MasterKey) {

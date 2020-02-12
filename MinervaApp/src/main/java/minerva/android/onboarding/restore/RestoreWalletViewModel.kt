@@ -11,8 +11,8 @@ import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.MasterKey
-import minerva.android.walletmanager.model.ResponseState
 import minerva.android.walletmanager.model.RestoreWalletResponse
+import minerva.android.walletmanager.model.defs.ResponseState
 import java.util.*
 
 class RestoreWalletViewModel(private val walletManager: WalletManager) : ViewModel() {

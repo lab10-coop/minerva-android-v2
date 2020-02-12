@@ -3,8 +3,6 @@ package minerva.android.walletmanager.model
 import minerva.android.configProvider.model.IdentityPayload
 import minerva.android.configProvider.model.ServicePayload
 import minerva.android.configProvider.model.ValuePayload
-import minerva.android.walletmanager.walletconfig.Network
-
 
 open class WalletConfigTestValues {
 

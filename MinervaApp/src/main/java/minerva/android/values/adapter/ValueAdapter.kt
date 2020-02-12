@@ -6,7 +6,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -20,13 +19,14 @@ import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.values.listener.ValuesFragmentToAdapterListener
+import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Balance
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.Value
-import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.widget.AssetView
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
-import minerva.wrapped.startValueAddressWrappedActivity
+import minerva.android.wrapped.startValueAddressWrappedActivity
 
 
 class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
@@ -83,6 +83,15 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
         }
     }
 
+    fun updateAssetBalances(assetBalances: Map<String, List<Asset>>) {
+        activeValues.forEachIndexed { index, value ->
+            assetBalances[value.privateKey]?.let {
+                value.assets = it
+                notifyItemChanged(index)
+            }
+        }
+    }
+
     override fun onSendValueClicked(value: Value) = listener.onSendTransaction(value)
 
     override fun onSendAssetClicked() = listener.onSendAssetTransaction()
@@ -111,7 +120,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
             setOnSendButtonClickListener(value)
             setOnMenuClickListener(rawPosition, value)
             setOnItemClickListener()
-            prepareAssets(value.network)
+            prepareAssets(value.assets)
         }
     }
 
@@ -121,7 +130,6 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         valueName.text = value.name
         cryptoShortName.text = value.network
         cryptoShortName.setTextColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
-        //TODO add data for normal currency!
         amountView.setAmounts(value.balance, value.fiatBalance)
         sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
     }
@@ -133,7 +141,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     }
 
     private fun View.setOnMenuClickListener(rawPosition: Int, value: Value) {
-        menu.setOnClickListener { showMenu(rawPosition, value.name, Network.fromString(value.network), menu) }
+        menu.setOnClickListener { showMenu(rawPosition, value, menu) }
     }
 
     private fun View.setOnItemClickListener() {
@@ -143,12 +151,14 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         }
     }
 
-    private fun View.prepareAssets(network: String) {
-        //TODO keeping assets in Value? only for demo purposes - Assets need to be reimplemented
+    private fun View.prepareAssets(assets: List<Asset>) {
         container.removeAllViews()
-        if(Network.fromString(network) == Network.ARTIS) {
-            val asset = AssetView(this@ValueViewHolder, "Crypto-Schilling", R.drawable.ic_asset_schilling)
-            container.addView(asset)
+        assets.forEach {
+            //TODO add correct icon!
+            AssetView(this@ValueViewHolder, it.name, R.drawable.ic_asset_sdai).apply {
+                setAmounts(it.balance)
+                container.addView(this)
+            }
         }
     }
 
@@ -166,29 +176,27 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         }
     }
 
-    private fun showMenu(position: Int, title: String, network: Network, anchor: View): Boolean {
+    private fun showMenu(position: Int, value: Value, anchor: View): Boolean {
         PopupMenu(view.context, anchor).apply {
             menuInflater.inflate(R.menu.value_menu, menu)
             gravity = Gravity.RIGHT
             show()
-            setOnItemMenuClickListener(position, title, network)
+            setOnItemMenuClickListener(position, value)
         }
         return true
     }
 
     private fun PopupMenu.setOnItemMenuClickListener(
         position: Int,
-        title: String,
-        network: Network
+        value: Value
     ) {
         //TODO add rest of the menu functionality
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.showAddress -> startValueAddressWrappedActivity(
-                    view.context, position, title,
-                    getNetworkIcon(network)
+                    view.context, position, value.name,
+                    getNetworkIcon(Network.fromString(value.network))
                 )
-                R.id.addAsset -> Toast.makeText(view.context, "Add an asset", Toast.LENGTH_SHORT).show()
                 R.id.remove -> listener.onValueRemoved(position)
             }
             true

@@ -22,8 +22,8 @@ import minerva.android.servicesApiProvider.model.LoginResponse
 import minerva.android.servicesApiProvider.model.Profile
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.NetworkNameShort
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import org.amshove.kluent.*
 import org.junit.After
@@ -67,10 +67,8 @@ class WalletManagerTest {
             Identity(3, "identityName3", "", "privateKey", data)
         ),
         listOf(
-            Value(2, "publicKey", "privateKey", "address", network = NetworkNameShort.ETH),
-            Value(
-                4, "publicKey", "privateKey", "address", network = NetworkNameShort.ETH
-            )
+            Value(2, "publicKey1", "privateKey1", "address", network = NetworkNameShort.ETH),
+            Value(4, "publicKey2", "privateKey2", "address", network = NetworkNameShort.ETH)
         )
     )
 
@@ -451,5 +449,31 @@ class WalletManagerTest {
         walletManager.getWalletConfig(MasterKey("123", "567"))
             .test()
             .assertError(error)
+    }
+
+    @Test
+    fun `get assets balances complete test`() {
+        val list = listOf(Pair("some1", 10.toBigDecimal()), Pair("some1", 20.toBigDecimal()), Pair("some3", 30.toBigDecimal()))
+        val addresses = AssetManager.getAssetAddresses(Network.fromString("ETH"))
+        whenever(blockchainRepository.refreshAssetsBalance("privateKey1", addresses)).thenReturn(Single.just(Pair("some1", list)))
+        whenever(blockchainRepository.refreshAssetsBalance("privateKey2", addresses)).thenReturn(Single.just(Pair("some2", list)))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        walletManager.initWalletConfig()
+        walletManager.refreshAssetBalance().test().assertComplete()
+            .assertValue {
+                it.size == 2
+            }.assertValue {
+                val list = it["some1"] ?: listOf()
+                list.size == 3
+            }
+    }
+
+    @Test
+    fun `get asset balances error test`() {
+        val error = Throwable()
+        whenever(blockchainRepository.refreshAssetsBalance(any(), any())).thenReturn(Single.error(error))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        walletManager.initWalletConfig()
+        walletManager.refreshAssetBalance().test().assertError(error)
     }
 }

@@ -14,13 +14,13 @@ import minerva.android.configProvider.model.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_ARTIS_NAME
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_ETHEREUM_NAME
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
-import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
-import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
-import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.FIRST_VALUES_INDEX
-import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.SECOND_VALUES_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_ARTIS_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_ETHEREUM_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_VALUES_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_VALUES_INDEX
 
 class WalletConfigRepository(
     private val cryptographyRepository: CryptographyRepository,
@@ -121,17 +121,5 @@ class WalletConfigRepository(
         private const val START = 0
         const val SLASH = "/"
         const val ENCODED_SLASH = "%2F"
-    }
-}
-
-enum class Network(val full: String, val short: String) {
-    ARTIS(NetworkNameFull.ATS, NetworkNameShort.ATS),
-    ETHEREUM(NetworkNameFull.ETH, NetworkNameShort.ETH),
-    POA(NetworkNameFull.POA, NetworkNameShort.POA),
-    XDAI(NetworkNameFull.XDAI, NetworkNameShort.XDAI);
-
-    companion object {
-        private val map = values().associateBy(Network::short)
-        fun fromString(type: String) = map[type] ?: throw IllegalStateException("Not supported Network!")
     }
 }

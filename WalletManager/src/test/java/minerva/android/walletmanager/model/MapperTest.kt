@@ -2,8 +2,6 @@ package minerva.android.walletmanager.model
 
 import minerva.android.configProvider.model.IdentityPayload
 import minerva.android.configProvider.model.ValuePayload
-import minerva.android.configProvider.model.WalletConfigPayload
-import minerva.android.configProvider.model.WalletConfigResponse
 import org.amshove.kluent.shouldEqual
 import org.junit.Test
 

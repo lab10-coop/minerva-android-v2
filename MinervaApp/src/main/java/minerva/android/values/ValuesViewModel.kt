@@ -8,6 +8,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.WalletConfig
 import timber.log.Timber
@@ -19,26 +20,39 @@ class ValuesViewModel(private val walletManager: WalletManager) : BaseViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
-    private val _refreshBalancesErrorLiveData = MutableLiveData<Event<Throwable>>()
-    val refreshBalancesErrorLiveData: LiveData<Event<Throwable>> get() = _refreshBalancesErrorLiveData
-
     private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
-    fun refreshBalances() {
+    private val _assetBalanceLiveData = MutableLiveData<Map<String, List<Asset>>>()
+    val assetBalanceLiveData: LiveData<Map<String, List<Asset>>> get() = _assetBalanceLiveData
+
+    fun refreshBalances() =
         launchDisposable {
             walletManager.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _balanceLiveData.value = it },
+                    onSuccess = {
+                        _balanceLiveData.value = it
+                    },
                     onError = {
-                        Timber.d("Refresh balance error: ${it.message}")
-                        _refreshBalancesErrorLiveData.value = Event(it)
-                    }
+                        _errorLiveData.value = Event(it)
+                        Timber.d("Refresh balance error: ${it.message}") }
                 )
         }
-    }
+
+    fun getAssetBalance() =
+        launchDisposable {
+            walletManager.refreshAssetBalance()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { _assetBalanceLiveData.value = it },
+                    onError = {
+                        _errorLiveData.value = Event(it)
+                        Timber.e("Refresh asset balance error: ${it.message}") }
+                )
+        }
 
     fun removeValue(index: Int) {
         launchDisposable {

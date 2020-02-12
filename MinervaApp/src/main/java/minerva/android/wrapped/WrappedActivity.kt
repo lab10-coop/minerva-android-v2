@@ -1,4 +1,4 @@
-package minerva.wrapped
+package minerva.android.wrapped
 
 import android.os.Bundle
 import android.view.MenuItem

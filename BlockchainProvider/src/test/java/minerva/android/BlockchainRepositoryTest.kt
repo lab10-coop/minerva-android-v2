@@ -14,7 +14,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.methods.response.*
+import org.web3j.protocol.core.methods.response.EthGasPrice
+import org.web3j.protocol.core.methods.response.EthGetBalance
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount
+import org.web3j.protocol.core.methods.response.EthSendTransaction
 import java.math.BigInteger
 
 

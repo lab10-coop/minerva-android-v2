@@ -1,11 +1,11 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.defs
 
 import android.annotation.SuppressLint
 import androidx.annotation.IntDef
-import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
-import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
-import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.FIRST_VALUES_INDEX
-import minerva.android.walletmanager.model.DefaultWalletConfigIndexes.Companion.SECOND_VALUES_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_VALUES_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_VALUES_INDEX
 
 @SuppressLint("UniqueConstants")
 @Retention(AnnotationRetention.SOURCE)

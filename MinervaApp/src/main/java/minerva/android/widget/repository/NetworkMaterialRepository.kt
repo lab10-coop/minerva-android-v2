@@ -1,7 +1,10 @@
 package minerva.android.widget.repository
 
 import minerva.android.R
-import minerva.android.walletmanager.walletconfig.Network
+import minerva.android.kotlinUtils.InvalidId
+import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.AssetName
 
 fun getNetworkColor(network: Network, opacity: Boolean = false): Int {
     val position = when (network) {
@@ -20,6 +23,18 @@ fun getNetworkIcon(network: Network): Int =
         Network.ETHEREUM -> R.drawable.ic_ethereum
         Network.POA -> R.drawable.ic_poa
         Network.XDAI -> R.drawable.ic_xdai
+    }
+
+//TODO add missing asset Icons
+fun getAssetIcon(asset: Asset): Int =
+    when (asset.name) {
+        AssetName.SSAI -> Int.InvalidId
+        AssetName.SAI -> R.drawable.ic_dai_sai
+        AssetName.DAI -> R.drawable.ic_dai_sai
+        AssetName.ATS20 -> Int.InvalidId
+        AssetName.SATS -> Int.InvalidId
+        AssetName.FAU -> Int.InvalidId
+        else -> Int.InvalidId
     }
 
 private val networkColor = listOf(

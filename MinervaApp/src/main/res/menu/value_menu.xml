@@ -9,12 +9,6 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/addAsset"
-        android:enabled="true"
-        android:title="@string/add_an_asset"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/remove"
         android:enabled="true"
         android:title="@string/remove"

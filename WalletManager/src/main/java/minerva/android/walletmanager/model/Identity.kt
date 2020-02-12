@@ -2,11 +2,12 @@ package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.INCOGNITO_IDENTITY
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.INCOGNITO_NAME
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.INCOGNITO_PHONE
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.INCOGNITO_PRIVATE_KEY
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.INCOGNITO_PUBLIC_KEY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_IDENTITY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PHONE
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PRIVATE_KEY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PUBLIC_KEY
+import minerva.android.walletmanager.model.defs.IdentityField
 
 open class Identity(
     open val index: Int,

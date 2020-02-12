@@ -1,9 +1,9 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.defs
 
 import androidx.annotation.StringDef
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_ARTIS_NAME
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_ETHEREUM_NAME
-import minerva.android.walletmanager.model.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_ARTIS_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_ETHEREUM_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
 
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(DEFAULT_IDENTITY_NAME, DEFAULT_ARTIS_NAME, DEFAULT_ETHEREUM_NAME)

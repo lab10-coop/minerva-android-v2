@@ -2,7 +2,10 @@ package minerva.android.walletmanager.model
 
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
-import minerva.android.configProvider.model.*
+import minerva.android.configProvider.model.IdentityPayload
+import minerva.android.configProvider.model.ServicePayload
+import minerva.android.configProvider.model.ValuePayload
+import minerva.android.configProvider.model.WalletConfigPayload
 import minerva.android.kotlinUtils.Empty
 
 const val CALLBACK = "callback"

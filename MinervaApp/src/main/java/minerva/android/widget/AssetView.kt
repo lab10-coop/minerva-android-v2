@@ -33,7 +33,7 @@ class AssetView(callback: AssertViewCallback, name: String, @DrawableRes logoRes
         }
     }
 
-    fun setAmounts(crypto: BigDecimal, currency: BigDecimal) {
+    fun setAmounts(crypto: BigDecimal, currency: BigDecimal = WRONG_CURRENCY_VALUE) {
         amountView.setAmounts(crypto, currency)
     }
 
@@ -49,6 +49,7 @@ class AssetView(callback: AssertViewCallback, name: String, @DrawableRes logoRes
 
     companion object {
         private const val SEND_BUTTON_FORMAT = "%s %s"
+        private val WRONG_CURRENCY_VALUE = (-1).toBigDecimal()
     }
 
     interface AssertViewCallback {

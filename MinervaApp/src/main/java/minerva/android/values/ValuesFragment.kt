@@ -42,6 +42,7 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
         super.onResume()
         viewModel.onResume()
         viewModel.refreshBalances()
+        viewModel.getAssetBalance()
     }
 
     override fun onAttach(context: Context) {
@@ -74,11 +75,9 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
                 valueAdapter.updateList(it.values)
             })
             balanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateBalances(it) })
+            assetBalanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateAssetBalances(it) })
             errorLiveData.observe(this@ValuesFragment, Observer {
                 showErrorFlashbar(getString(R.string.remove_value_error), it.peekContent().message)
-            })
-            refreshBalancesErrorLiveData.observe(this@ValuesFragment, Observer {
-                showErrorFlashbar(getString(R.string.fetch_balances_error))
             })
         }
     }
