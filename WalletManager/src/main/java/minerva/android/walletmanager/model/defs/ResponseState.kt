@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.defs
 
 import androidx.annotation.StringDef
 

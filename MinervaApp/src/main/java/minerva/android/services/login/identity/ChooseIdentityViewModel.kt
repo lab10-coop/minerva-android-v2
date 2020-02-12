@@ -14,9 +14,9 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.defs.IdentityField.Companion.PHONE_NUMBER
 import timber.log.Timber
 
 class ChooseIdentityViewModel(private val walletManager: WalletManager) : ViewModel() {

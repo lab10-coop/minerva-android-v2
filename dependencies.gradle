@@ -138,6 +138,7 @@ ext {
     ]
 
     blockChainDependencies = [
-            w3j: ("org.web3j:core:$w3jVersion"),
+            w3jCore:    "org.web3j:core:$w3jVersion",
+            w3jContract:"org.web3j:contracts:$w3jVersion"
     ]
 }

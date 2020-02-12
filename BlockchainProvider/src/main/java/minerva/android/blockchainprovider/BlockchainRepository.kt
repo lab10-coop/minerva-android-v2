@@ -5,6 +5,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
+import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
@@ -34,6 +35,21 @@ class BlockchainRepository(private var web3j: Web3j) {
             .flowable()
             .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
             .firstOrError()
+
+    fun refreshAssetsBalance(privateKey: String, addresses: List<String>): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
+        Observable.range(START, addresses.size).flatMap { position -> refreshAssetBalance(privateKey, addresses[position]) }
+            //.filter { it.second > 0.toBigInteger() } //it can work, but not tested - I will in next task
+            .toList()
+            .map { Pair(privateKey, it) }
+
+
+    fun refreshAssetBalance(privateKey: String, contractAddress: String): Observable<Pair<String, BigDecimal>> {
+        val credentials = Credentials.create(privateKey)
+        return ERC20.load(contractAddress, web3j, credentials, DefaultContractGasProvider())
+            .balanceOf(credentials.address).flowable()
+            .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
+            .toObservable()
+    }
 
     fun getTransactionCosts(): Single<TransactionCostPayload> =
         web3j.ethGasPrice().flowable()

@@ -1,7 +1,9 @@
 package minerva.android.login
 
 import androidx.lifecycle.Observer
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event

@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
-import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivity
 import minerva.android.extension.launchActivityForResult
 import minerva.android.identities.IdentitiesFragment
@@ -17,12 +16,11 @@ import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.values.ValuesFragment
 import minerva.android.values.transaction.activity.TransactionActivity
 import minerva.android.values.transaction.activity.TransactionActivity.Companion.VALUE_INDEX
 import minerva.android.walletmanager.model.Value
-import minerva.wrapped.startNewIdentityWrappedActivity
-import minerva.wrapped.startNewValueWrappedActivity
+import minerva.android.wrapped.startNewIdentityWrappedActivity
+import minerva.android.wrapped.startNewValueWrappedActivity
 import org.koin.android.ext.android.inject
 
 

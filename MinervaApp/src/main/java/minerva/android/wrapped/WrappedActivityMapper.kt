@@ -1,4 +1,4 @@
-package minerva.wrapped
+package minerva.android.wrapped
 
 import android.content.Context
 import minerva.android.extension.launchActivity

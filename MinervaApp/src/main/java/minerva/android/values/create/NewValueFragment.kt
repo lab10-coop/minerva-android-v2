@@ -12,7 +12,7 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.adapter.NetworkAdapter
 import minerva.android.widget.MinervaFlashbar
-import minerva.wrapped.WrappedActivity.Companion.POSITION
+import minerva.android.wrapped.WrappedActivity.Companion.POSITION
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 

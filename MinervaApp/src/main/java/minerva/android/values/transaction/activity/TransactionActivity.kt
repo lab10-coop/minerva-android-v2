@@ -13,8 +13,8 @@ import minerva.android.values.listener.TransactionFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.values.transaction.fragment.TransactionsFragment
 import minerva.android.values.transaction.fragment.scanner.TransactionScannerFragment
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.Value
-import minerva.android.walletmanager.walletconfig.Network
 import minerva.android.widget.repository.getNetworkIcon
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

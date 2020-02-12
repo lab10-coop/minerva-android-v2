@@ -6,7 +6,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.WalletManager
-import minerva.android.walletmanager.walletconfig.Network
+import minerva.android.walletmanager.model.Network
 
 class NewValueViewModel(private val walletManager: WalletManager) : BaseViewModel() {
 

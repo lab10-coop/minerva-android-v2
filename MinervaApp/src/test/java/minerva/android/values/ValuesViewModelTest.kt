@@ -37,7 +37,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
         whenever(walletManager.refreshBalances()).thenReturn(Single.error(error))
         viewModel.balanceLiveData.observeForever(balanceObserver)
         viewModel.refreshBalances()
-        viewModel.refreshBalancesErrorLiveData.observeLiveDataEvent(Event(error))
+        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }
 
     @Test

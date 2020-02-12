@@ -22,7 +22,7 @@
             android:name=".services.login.PainlessLoginActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="minerva.wrapped.WrappedActivity"
+            android:name="minerva.android.wrapped.WrappedActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity

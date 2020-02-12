@@ -16,7 +16,7 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.Identity
 import minerva.android.widget.repository.generateColor
-import minerva.wrapped.startEditIdentityWrappedActivity
+import minerva.android.wrapped.startEditIdentityWrappedActivity
 
 class IdentityAdapter : RecyclerView.Adapter<IdentityViewHolder>() {
 
