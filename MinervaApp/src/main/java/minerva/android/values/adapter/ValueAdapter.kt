@@ -155,10 +155,9 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         container.removeAllViews()
         assets.forEach {
             //TODO add correct icon!
-            AssetView(this@ValueViewHolder, it.name, R.drawable.ic_asset_sdai).apply {
+            container.addView(AssetView(this@ValueViewHolder, it.name, R.drawable.ic_asset_sdai).apply {
                 setAmounts(it.balance)
-                container.addView(this)
-            }
+            })
         }
     }
 
