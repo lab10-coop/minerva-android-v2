@@ -8,7 +8,7 @@ import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.BlockchainRepository
+import minerva.android.blockchainprovider.BlockchainRepositoryImpl
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.model.MasterKey
@@ -24,7 +24,7 @@ class WalletConfigRepositoryTest {
     private val online = OnlineMock()
     private val onlineLikeLocal = OnlineLikeLocalMock()
     private val cryptographyRepository: CryptographyRepository = mock()
-    private val blockchainRepository: BlockchainRepository = mock()
+    private val blockchainRepository: BlockchainRepositoryImpl = mock()
     private val api: MinervaApi = mock()
 
     private val repository = WalletConfigRepository(cryptographyRepository, blockchainRepository, local, onlineLikeLocal)

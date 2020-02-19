@@ -8,17 +8,18 @@ import minerva.android.servicesApiProvider.createServicesApiProviderModule
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.WalletManager
 import minerva.android.walletmanager.manager.WalletManagerImpl
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletconfig.LocalWalletConfigProvider
 import minerva.android.walletmanager.walletconfig.LocalWalletConfigProviderImpl
 import minerva.android.walletmanager.walletconfig.WalletConfigRepository
 import org.koin.dsl.module
 
-fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, blockchainUrl: String, binanceUrl: String) = createWalletModules()
+fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, binanceUrl: String) = createWalletModules()
     .plus(createCryptographyModules())
     .plus(createWalletConfigProviderModule(isDebug, baseUrl))
     .plus(createServicesApiProviderModule(isDebug, baseUrl))
-    .plus(createBlockchainProviderModule(blockchainUrl))
+    .plus(createBlockchainProviderModule(Network.urlMap))
     .plus(createExchangeRateProviderModule(isDebug, binanceUrl))
 
 fun createWalletModules() = module {

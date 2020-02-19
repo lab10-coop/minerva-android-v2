@@ -32,7 +32,7 @@ fun getAssetIcon(asset: Asset): Int =
         AssetName.SAI -> R.drawable.ic_dai_sai
         AssetName.DAI -> R.drawable.ic_dai_sai
         AssetName.ATS20 -> Int.InvalidId
-        AssetName.SATS -> Int.InvalidId
+        AssetName.SFAU -> Int.InvalidId
         AssetName.FAU -> Int.InvalidId
         else -> Int.InvalidId
     }

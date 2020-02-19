@@ -29,7 +29,7 @@ class TransactionViewModelTest: BaseViewModelTest() {
 
     @Test
     fun `get transaction cost test success`() {
-        whenever(walletManager.getTransactionCosts()).thenReturn(Single.just(TransactionCost(BigDecimal(1), BigInteger.ONE, BigDecimal(10))))
+        whenever(walletManager.getTransactionCosts(any())).thenReturn(Single.just(TransactionCost(BigDecimal(1), BigInteger.ONE, BigDecimal(10))))
         viewModel.transactionCostLiveData.observeForever(transactionCostObserver)
         viewModel.getTransactionCosts()
         transactionCostCaptor.run {
@@ -41,7 +41,7 @@ class TransactionViewModelTest: BaseViewModelTest() {
     @Test
     fun `get transaction cost test error`() {
         val error = Throwable()
-        whenever(walletManager.getTransactionCosts()).thenReturn(Single.error(error))
+        whenever(walletManager.getTransactionCosts(any())).thenReturn(Single.error(error))
         viewModel.transactionCostLiveData.observeForever(transactionCostObserver)
         viewModel.getTransactionCosts()
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))
@@ -49,7 +49,7 @@ class TransactionViewModelTest: BaseViewModelTest() {
 
     @Test
     fun `send transaction test success`() {
-        whenever(walletManager.sendTransaction(any())).thenReturn(Completable.complete())
+        whenever(walletManager.sendTransaction(any(), any())).thenReturn(Completable.complete())
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -61,7 +61,7 @@ class TransactionViewModelTest: BaseViewModelTest() {
     @Test
     fun `send transaction test error`() {
         val error = Throwable()
-        whenever(walletManager.sendTransaction(any())).thenReturn(Completable.error(error))
+        whenever(walletManager.sendTransaction(any(), any())).thenReturn(Completable.error(error))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         viewModel.errorTransactionLiveData.observeLiveDataEvent(Event(error.message))

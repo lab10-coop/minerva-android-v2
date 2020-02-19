@@ -59,8 +59,8 @@ interface WalletManager {
     fun loadValue(position: Int): Value
     fun refreshBalances(): Single<HashMap<String, Balance>>
     fun getValueIterator(): Int
-    fun sendTransaction(transaction: Transaction): Completable
-    fun getTransactionCosts(): Single<TransactionCost>
+    fun sendTransaction(network: String, transaction: Transaction): Completable
+    fun getTransactionCosts(network: String): Single<TransactionCost>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun dispose()
 }
@@ -103,20 +103,22 @@ class WalletManagerImpl(
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
         listOf(Markets.ETH_EUR, Markets.POA_ETH).run {
-            val values = _walletConfigMutableLiveData.value?.values
-            return blockchainRepository.refreshBalances(getAddresses(values))
-                .zipWith(Observable.range(START, this.size)
-                    .flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }
-                    .toList())
-                .map { calculateFiatBalances(it.first, values, it.second) }
+            _walletConfigMutableLiveData.value?.values?.let { values ->
+                return blockchainRepository.refreshBalances(getAddresses(values))
+                    .zipWith(Observable.range(START, this.size)
+                        .flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }
+                        .toList())
+                    .map { calculateFiatBalances(it.first, values, it.second) }
+            }
         }
+        return Single.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun sendTransaction(transaction: Transaction): Completable =
-        blockchainRepository.sendTransaction(mapTransactionToTransactionPayload(transaction))
+    override fun sendTransaction(network: String, transaction: Transaction): Completable =
+        blockchainRepository.sendTransaction(network, mapTransactionToTransactionPayload(transaction))
 
-    override fun getTransactionCosts(): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts()
+    override fun getTransactionCosts(network: String): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(network)
             .map { mapTransactionCostPayloadToTransactionCost(it) }
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
@@ -246,17 +248,30 @@ class WalletManagerImpl(
         _walletConfigMutableLiveData.value?.values?.let { values ->
             return Observable.range(START, values.size)
                 .filter { position -> !values[position].isDeleted }
-                //TODO remove when all testnet will be implemented
-                .filter { position -> Network.fromString(values[position].network) == Network.ETHEREUM }
+                //TODO filter should be removed when all testnet will be implemented
+                .filter { position ->
+                    Network.fromString(values[position].network).run { this == Network.ETHEREUM || this == Network.ARTIS }
+                }
                 .flatMapSingle { position ->
                     val addresses = AssetManager.getAssetAddresses(Network.fromString(values[position].network))
-                    blockchainRepository.refreshAssetsBalance(values[position].privateKey, addresses)
+                    refreshAssetsBalance(values[position].privateKey, addresses)
                 }
                 .toList()
-                .map { list -> list.map { it.first to AssetManager.getAssetsFromPairList(it.second) }.toMap() }
+                .map { list -> list.map { it.first to AssetManager.mapToAssets(it.second) }.toMap() }
         }
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
+
+    private fun refreshAssetsBalance(
+        privateKey: String, addresses: Pair<String, List<String>>
+    ): Single<Pair<String, List<Pair<String, BigDecimal>>>> = Observable.range(START, addresses.second.size).flatMap { position ->
+        blockchainRepository.refreshAssetBalance(privateKey, addresses.first, addresses.second[position])
+    }
+        .filter {
+            it.second > NO_FUNDS
+        }
+        .toList()
+        .map { Pair(privateKey, it) }
 
     private fun handleWalletConfigResponse(it: WalletConfigResponse, masterKey: MasterKey) {
         if (it.state != ResponseState.ERROR) {
@@ -352,5 +367,6 @@ class WalletManagerImpl(
         //        TODO should be dynamically handled form qr code
         private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
+        private val NO_FUNDS = BigDecimal.valueOf(0)
     }
 }

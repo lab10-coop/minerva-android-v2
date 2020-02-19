@@ -7,7 +7,7 @@ import io.reactivex.Flowable
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.BlockchainRepository
+import minerva.android.blockchainprovider.BlockchainRepositoryImpl
 import minerva.android.blockchainprovider.model.TransactionPayload
 import org.junit.After
 import org.junit.Before
@@ -21,10 +21,12 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction
 import java.math.BigInteger
 
 
-class BlockchainRepositoryTest {
+class BlockchainRepositoryImplTest {
 
+    private val ETH = "ETH"
     private val web3J = mockk<Web3j>()
-    private val blockchainRepository: BlockchainRepository = BlockchainRepository(web3J)
+    private val web3Js: Map<String, Web3j> = mapOf(Pair(ETH, web3J))
+    private val blockchainRepository: BlockchainRepositoryImpl = BlockchainRepositoryImpl(web3Js)
 
     @get:Rule
 
@@ -48,7 +50,7 @@ class BlockchainRepositoryTest {
         val ethBalance = EthGetBalance()
         ethBalance.result = "0x1"
         every { web3J.ethGetBalance(any(), any()).flowable() } returns Flowable.just(ethBalance)
-        blockchainRepository.refreshBalances(listOf("0x9866208bea68b10f04697c00b891541a305df851"))
+        blockchainRepository.refreshBalances(listOf(Pair(ETH, "0x9866208bea68b10f04697c00b891541a305df851")))
             .test()
             .await()
             .assertValue {
@@ -62,7 +64,7 @@ class BlockchainRepositoryTest {
         val ethBalance = EthGetBalance()
         ethBalance.result = "0x1"
         every { web3J.ethGetBalance(any(), any()).flowable() } returns Flowable.error(error)
-        blockchainRepository.refreshBalances(listOf("0x9866208bea68b10f04697c00b891541a305df851"))
+        blockchainRepository.refreshBalances(listOf(Pair(ETH, "0x9866208bea68b10f04697c00b891541a305df851")))
             .test()
             .await()
             .assertError(error)
@@ -73,7 +75,7 @@ class BlockchainRepositoryTest {
         val gasPrice = EthGasPrice()
         gasPrice.result = "0x1"
         every { web3J.ethGasPrice().flowable() } returns Flowable.just(gasPrice)
-        blockchainRepository.getTransactionCosts()
+        blockchainRepository.getTransactionCosts(ETH)
             .test()
             .await()
             .assertComplete()
@@ -88,7 +90,7 @@ class BlockchainRepositoryTest {
         val gasPrice = EthGasPrice()
         gasPrice.result = "0x1"
         every { web3J.ethGasPrice().flowable() } returns Flowable.error(error)
-        blockchainRepository.getTransactionCosts()
+        blockchainRepository.getTransactionCosts(ETH)
             .test()
             .await()
             .assertError(error)
@@ -102,7 +104,7 @@ class BlockchainRepositoryTest {
         sendTransaction.result = "0x2"
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.just(sendTransaction)
-        blockchainRepository.sendTransaction(TransactionPayload("address", "0x2313"))
+        blockchainRepository.sendTransaction(ETH, TransactionPayload("address", "0x2313"))
             .test()
             .assertComplete()
     }
@@ -116,7 +118,7 @@ class BlockchainRepositoryTest {
         sendTransaction.result = "0x2"
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.error(error)
-        blockchainRepository.sendTransaction(TransactionPayload("address", "0x2313"))
+        blockchainRepository.sendTransaction(ETH, TransactionPayload("address", "0x2313"))
             .test()
             .assertError(error)
     }
