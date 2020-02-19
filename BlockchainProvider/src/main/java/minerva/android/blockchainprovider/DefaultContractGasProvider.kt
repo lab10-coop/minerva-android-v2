@@ -15,6 +15,6 @@ class DefaultContractGasProvider : ContractGasProvider {
     override fun getGasPrice(): BigInteger = DEFAULT_GAS_PRICE
 
     companion object {
-        private val DEFAULT_GAS_PRICE = 1000000000.toBigInteger()
+        private val DEFAULT_GAS_PRICE = BigInteger.valueOf(1000000000)
     }
 }

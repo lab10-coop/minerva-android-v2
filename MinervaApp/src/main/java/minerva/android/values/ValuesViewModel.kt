@@ -37,7 +37,8 @@ class ValuesViewModel(private val walletManager: WalletManager) : BaseViewModel(
                     },
                     onError = {
                         _errorLiveData.value = Event(it)
-                        Timber.d("Refresh balance error: ${it.message}") }
+                        Timber.d("Refresh balance error: ${it.message}")
+                    }
                 )
         }
 
@@ -50,7 +51,8 @@ class ValuesViewModel(private val walletManager: WalletManager) : BaseViewModel(
                     onSuccess = { _assetBalanceLiveData.value = it },
                     onError = {
                         _errorLiveData.value = Event(it)
-                        Timber.e("Refresh asset balance error: ${it.message}") }
+                        Timber.e("Refresh asset balance error: ${it.message}")
+                    }
                 )
         }
 

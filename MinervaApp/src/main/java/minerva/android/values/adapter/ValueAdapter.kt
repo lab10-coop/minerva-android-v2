@@ -87,7 +87,6 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
         activeValues.forEachIndexed { index, value ->
             assetBalances[value.privateKey]?.let {
                 value.assets = it
-                notifyItemChanged(index)
             }
         }
     }
@@ -97,11 +96,15 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
     override fun onSendAssetClicked() = listener.onSendAssetTransaction()
 
     override fun onValueRemoved(position: Int) = listener.onValueRemove(rawValues[position])
+
+    override fun refreshAssets(rawPosition: Int): List<Asset> = rawValues[rawPosition].assets
 }
 
 class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) : AssetView.AssertViewCallback, RecyclerView.ViewHolder(view) {
 
     private lateinit var listener: ValuesAdapterListener
+    private var rawPosition: Int = WRONG_POSITION
+
     private val isOpen get() = view.sendButton.isVisible
 
     override fun onSendAssetClicked() = listener.onSendAssetClicked()
@@ -115,12 +118,12 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     }
 
     fun setData(rawPosition: Int, value: Value) {
+        this.rawPosition = rawPosition
         view.apply {
             bindData(value)
             setOnSendButtonClickListener(value)
             setOnMenuClickListener(rawPosition, value)
             setOnItemClickListener()
-            prepareAssets(value.assets)
         }
     }
 
@@ -146,13 +149,11 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
 
     private fun View.setOnItemClickListener() {
         setOnClickListener {
-            TransitionManager.beginDelayedTransition(viewGroup)
             if (isOpen) close() else open()
         }
     }
 
     private fun View.prepareAssets(assets: List<Asset>) {
-        container.removeAllViews()
         assets.forEach {
             //TODO add correct icon!
             container.addView(AssetView(this@ValueViewHolder, it.name, R.drawable.ic_asset_sdai).apply {
@@ -162,16 +163,23 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     }
 
     private fun open() {
+        TransitionManager.beginDelayedTransition(viewGroup)
         view.apply {
             arrow.rotate180()
             sendButton.visible()
+            container.visible()
+            prepareAssets(listener.refreshAssets(rawPosition))
         }
     }
 
     private fun close() {
+        TransitionManager.endTransitions(viewGroup)
+        TransitionManager.beginDelayedTransition(viewGroup)
         view.apply {
             arrow.rotate180back()
             sendButton.gone()
+            container.gone()
+            container.removeAllViews()
         }
     }
 
@@ -204,11 +212,13 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
 
     companion object {
         private const val SEND_BUTTON_FORMAT = "%s %s"
+        private const val WRONG_POSITION = -1
     }
 
     interface ValuesAdapterListener {
         fun onSendValueClicked(value: Value)
         fun onSendAssetClicked()
         fun onValueRemoved(position: Int)
+        fun refreshAssets(rawPosition: Int): List<Asset>
     }
 }

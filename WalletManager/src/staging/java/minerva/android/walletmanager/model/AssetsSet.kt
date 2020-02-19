@@ -7,10 +7,10 @@ import minerva.android.walletmanager.model.defs.AssetNameShort
 object AssetsSet {
 
     private val FAU = Asset(AssetName.FAU, AssetNameShort.FAU, AssetAddress.FAU)
-    private val SATS = Asset(AssetName.SATS, AssetNameShort.SATS, AssetAddress.SATS)
+    private val SFAU = Asset(AssetName.SFAU, AssetNameShort.SFAU, AssetAddress.SFAU)
 
     val ethereumAssets = listOf(FAU)
-    val artisAssets: List<Asset> = listOf(SATS)
+    val artisAssets: List<Asset> = listOf(SFAU)
 
     //TODO need to be implemented for the rest of blockchains
     val poaAssets: List<Asset> = listOf()

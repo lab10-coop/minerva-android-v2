@@ -5,18 +5,18 @@ import minerva.android.walletmanager.model.defs.AssetAddress.Companion.ATS20
 import minerva.android.walletmanager.model.defs.AssetAddress.Companion.DAI
 import minerva.android.walletmanager.model.defs.AssetAddress.Companion.FAU
 import minerva.android.walletmanager.model.defs.AssetAddress.Companion.SAI
-import minerva.android.walletmanager.model.defs.AssetAddress.Companion.SATS
+import minerva.android.walletmanager.model.defs.AssetAddress.Companion.SFAU
 import minerva.android.walletmanager.model.defs.AssetAddress.Companion.SSAI
 
 @Retention(AnnotationRetention.SOURCE)
-@StringDef(SSAI, SATS, SAI, DAI, ATS20, FAU)
+@StringDef(SSAI, SFAU, SAI, DAI, ATS20, FAU)
 annotation class AssetAddress {
     companion object {
         //ARTIS
         //main
         const val SSAI = "0x85c0935ea385e2d540f23187fd78c8a215f2e28c"
         //test
-        const val SATS = "0xae9142261db90c35cd0df253abc4f53136bc80d5"
+        const val SFAU = "0xf6ef10e21166cf2e33db070affe262f90365e8d4"
         //ETHEREUM
         //main
         const val SAI = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359"

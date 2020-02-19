@@ -49,10 +49,7 @@ object MarketUtils {
         return hashMapOf(Pair(Markets.ETH_EUR, ethEuroRate), Pair(Markets.POA_EUR, poaEuroRate))
     }
 
-    fun getAddresses(values: List<Value>?): MutableList<String> =
-        mutableListOf<String>().apply {
-            values?.forEach { add(it.address) }
-        }
+    fun getAddresses(values: List<Value>): List<Pair<String, String>> = values.map { it.network to it.address }
 
     private const val SCALE = 2
 }

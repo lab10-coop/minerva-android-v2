@@ -21,7 +21,7 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 fun createAppModule() = mutableListOf<Module>().apply {
-    addAll(createWalletManagerModules(BuildConfig.DEBUG, BuildConfig.REST_API_URL, BuildConfig.BLOCKCHAIN_URL, BuildConfig.BINANCE_URL))
+    addAll(createWalletManagerModules(BuildConfig.DEBUG, BuildConfig.REST_API_URL, BuildConfig.BINANCE_URL))
     add(appModules)
 }
 

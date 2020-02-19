@@ -52,7 +52,7 @@ class TransactionsViewModel(private val walletManager: WalletManager) : ViewMode
     }
 
     fun getTransactionCosts() {
-        disposable = walletManager.getTransactionCosts()
+        disposable = walletManager.getTransactionCosts(network)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
@@ -69,7 +69,7 @@ class TransactionsViewModel(private val walletManager: WalletManager) : ViewMode
 
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         _loadingLiveData.value = Event(true)
-        disposable = walletManager.sendTransaction(prepareTransaction(receiverKey, amount, gasPrice, gasLimit))
+        disposable = walletManager.sendTransaction(network, prepareTransaction(receiverKey, amount, gasPrice, gasLimit))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnEvent { _loadingLiveData.value = Event(false) }
