@@ -8,7 +8,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.model.MasterKey
 
 class CreateWalletViewModel(private val walletManager: WalletManager) : ViewModel() {

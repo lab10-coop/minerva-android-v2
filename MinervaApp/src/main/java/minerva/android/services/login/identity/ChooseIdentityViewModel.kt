@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.QrCodeResponse

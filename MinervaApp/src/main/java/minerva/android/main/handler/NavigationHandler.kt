@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
-import minerva.android.history.HistoryFragment
+import minerva.android.walletActions.WalletActionsFragment
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.MainActivity
 import minerva.android.services.ServicesFragment
@@ -34,7 +34,7 @@ internal fun MainActivity.prepareBottomNavMenu() {
                 R.string.services
             )
             R.id.activity -> replaceFragment(
-                HistoryFragment(),
+                WalletActionsFragment(),
                 R.string.activity
             )
             R.id.settings -> replaceFragment(

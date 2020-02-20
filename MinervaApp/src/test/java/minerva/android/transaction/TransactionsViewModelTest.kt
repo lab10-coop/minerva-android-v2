@@ -9,7 +9,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.observeWithPredicate
 import minerva.android.values.transaction.TransactionsViewModel
-import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.model.TransactionCost
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test

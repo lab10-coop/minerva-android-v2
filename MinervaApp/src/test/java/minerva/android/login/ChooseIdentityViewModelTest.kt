@@ -10,7 +10,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.observeWithPredicate
 import minerva.android.services.login.identity.ChooseIdentityViewModel
-import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
 import org.amshove.kluent.shouldEqualTo

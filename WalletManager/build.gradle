@@ -53,7 +53,7 @@ dependencies {
     implementation project(':WalletConfigProvider')
     implementation project(':ServicesApiProvider')
     implementation project(':BlockchainProvider')
-    implementation project(':ExchangeMarketProvider')
+    implementation project(':ExchangeMarketsProvider')
 
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()

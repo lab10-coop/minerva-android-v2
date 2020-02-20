@@ -1,7 +1,7 @@
 package minerva.android.main
 
 import androidx.lifecycle.ViewModel
-import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManager
 
 class MainViewModel(private val walletManager: WalletManager) : ViewModel() {
 

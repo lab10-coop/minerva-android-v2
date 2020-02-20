@@ -1,10 +1,10 @@
 package minerva.android.walletmanager.utils
 
-import com.exchangemarketprovider.model.Market
+import com.exchangemarketsprovider.model.Market
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.Balance
-import minerva.android.walletmanager.model.ExchangeRate
-import minerva.android.walletmanager.model.Markets
+import minerva.android.walletmanager.model.defs.ExchangeRate
+import minerva.android.walletmanager.model.defs.Markets
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.model.defs.NetworkNameShort
 import java.math.BigDecimal

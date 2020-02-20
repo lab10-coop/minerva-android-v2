@@ -46,7 +46,7 @@
                         style="@style/FormTextInputLayoutStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/identity_name">
+                        android:hint="@string/identity_name_label">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/identityName"
@@ -87,9 +87,9 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/email"
                         style="@style/EditTextInputLayoutStyle"
-                        android:inputType="text"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -101,10 +101,10 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/phoneNumber"
                         style="@style/EditTextInputLayoutStyle"
-                        android:inputType="phone"
-                        android:digits="0123456789+"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:digits="0123456789+"
+                        android:inputType="phone" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -116,9 +116,9 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/birthDate"
                         style="@style/EditTextInputLayoutStyle"
-                        android:focusable="false"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:focusable="false" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -128,8 +128,8 @@
                     android:layout_marginTop="@dimen/margin_normal"
                     android:layout_marginBottom="@dimen/margin_xsmall"
                     android:background="@drawable/border_light_button"
-                    android:foreground="@drawable/ripple"
                     android:clickable="true"
+                    android:foreground="@drawable/ripple"
                     android:gravity="center"
                     android:padding="@dimen/margin_small"
                     android:text="@string/more_fields"
@@ -207,8 +207,8 @@
                         style="@style/EditTextInputLayoutStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="phone"
-                        android:digits="0123456789-"/>
+                        android:digits="0123456789-"
+                        android:inputType="phone" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -228,6 +228,17 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
     </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/saveIdentityProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:gravity="center"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/confirmButton"

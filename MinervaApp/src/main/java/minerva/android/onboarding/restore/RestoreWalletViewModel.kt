@@ -9,7 +9,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.model.MasterKey
 import minerva.android.walletmanager.model.RestoreWalletResponse
 import minerva.android.walletmanager.model.defs.ResponseState

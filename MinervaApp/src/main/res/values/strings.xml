@@ -39,7 +39,7 @@
     <string name="country">Country</string>
     <string name="create_new_identity">Create new identity</string>
     <string name="save_identity_changes">Save identity changes</string>
-    <string name="identity_name">Identity Name</string>
+    <string name="identity_name_label">Identity Name</string>
     <string name="more_fields">More fields</string>
     <string name="wrong_email">Wrong email</string>
     <string name="can_not_be_empty">This field should not be empty</string>
@@ -101,4 +101,18 @@
     <string name="remove_value_error">Remove value failure</string>
     <string name="fetch_balances_error">Fetch balances failure</string>
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>
+    <string name="error_header">An error occurred</string>
+    <string name="activities_error">Error while fetching activities</string>
+    <string name="removed">Removed</string>
+    <string name="changed">Changed</string>
+    <string name="added">Added</string>
+    <string name="received">Received</string>
+    <string name="sent">Sent</string>
+    <string name="failed">Failed</string>
+    <string name="logIn">Log in</string>
+    <string name="value">Value</string>
+    <string name="service">Service</string>
+    <string name="identity_name">Identity %s</string>
+    <string name="today">TODAY</string>
+    <string name="yesterady">YESTERDAY</string>
 </resources>

@@ -12,8 +12,8 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.createWalletConfigProviderModule
-import minerva.android.configProvider.model.IdentityPayload
-import minerva.android.configProvider.model.WalletConfigPayload
+import minerva.android.configProvider.model.walletConfig.IdentityPayload
+import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.kotlinUtils.Empty
 import org.junit.After
 import org.junit.Before

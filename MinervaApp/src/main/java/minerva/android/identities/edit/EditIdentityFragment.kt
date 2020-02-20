@@ -23,6 +23,7 @@ import minerva.android.walletmanager.model.defs.IdentityField.Companion.EMAIL
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.NAME
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.POSTCODE
+import minerva.android.walletmanager.model.defs.WalletActionStatus
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import java.util.*
@@ -165,12 +166,30 @@ class EditIdentityFragment : Fragment() {
     }
 
     private fun initializeFragment() {
-        viewModel.editIdentityLiveData.observe(this, EventObserver { initializeView(it) })
-        viewModel.saveCompletedLiveData.observe(this, EventObserver { activity?.finish() })
-        viewModel.saveErrorLiveData.observe(this, EventObserver { showErrorMessage(it.message) })
+        viewModel.apply {
+            editIdentityLiveData.observe(this@EditIdentityFragment, EventObserver { initializeView(it) })
+            saveCompletedLiveData.observe(this@EditIdentityFragment, EventObserver { saveWalletAction(getActionStatus()) })
+            saveErrorLiveData.observe(this@EditIdentityFragment, EventObserver { showErrorMessage(it.message) })
+            saveWalletActionLiveData.observe(this@EditIdentityFragment, EventObserver { activity?.onBackPressed() })
+            loadingLiveData.observe(this@EditIdentityFragment, EventObserver { handleLoader(it) })
+        }
         arguments?.let {
             index = it.getInt(INDEX)
             viewModel.loadIdentity(index, getString(R.string.identity))
+        }
+    }
+
+    private fun getActionStatus(): Int =
+        if (index == Int.InvalidIndex) WalletActionStatus.ADDED
+        else WalletActionStatus.CHANGED
+
+    private fun handleLoader(isLoading: Boolean) {
+        if (isLoading) {
+            saveIdentityProgressBar.visible()
+            confirmButton.gone()
+        } else {
+            saveIdentityProgressBar.gone()
+            confirmButton.visible()
         }
     }
 
