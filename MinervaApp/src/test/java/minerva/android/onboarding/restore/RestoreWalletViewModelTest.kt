@@ -6,7 +6,7 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.walletmanager.manager.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.model.RestoreWalletResponse
 import org.amshove.kluent.shouldBe
 import org.junit.Rule

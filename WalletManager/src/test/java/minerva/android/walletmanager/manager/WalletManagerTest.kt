@@ -2,8 +2,8 @@ package minerva.android.walletmanager.manager
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
-import com.exchangemarketprovider.api.BinanceApi
-import com.exchangemarketprovider.model.Market
+import com.exchangemarketsprovider.api.BinanceApi
+import com.exchangemarketsprovider.model.Market
 import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.any
 import io.reactivex.Completable
@@ -14,17 +14,19 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.BlockchainRepositoryImpl
 import minerva.android.blockchainprovider.model.TransactionCostPayload
-import minerva.android.configProvider.model.WalletConfigResponse
+import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.LoginResponse
 import minerva.android.servicesApiProvider.model.Profile
 import minerva.android.walletmanager.keystore.KeystoreRepository
+import minerva.android.walletmanager.manager.assets.AssetManager
+import minerva.android.walletmanager.manager.wallet.WalletManagerImpl
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.NetworkNameShort
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.walletconfig.WalletConfigRepository
+import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
 import org.amshove.kluent.*
 import org.junit.After
 import org.junit.Before
@@ -429,7 +431,11 @@ class WalletManagerTest {
     fun `get wallet config success test`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
-        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Single.just(WalletConfigResponse(_message = "success")))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Single.just(
+            WalletConfigResponse(
+                _message = "success"
+            )
+        ))
         walletManager.initWalletConfig()
         walletManager.getWalletConfig(MasterKey("123", "567"))
             .test()
