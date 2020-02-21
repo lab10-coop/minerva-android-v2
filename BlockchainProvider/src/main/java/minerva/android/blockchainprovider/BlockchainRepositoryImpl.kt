@@ -5,15 +5,14 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.kotlinUtils.InvalidIndex
 import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.methods.response.EthGasPrice
 import org.web3j.protocol.core.methods.response.EthSendTransaction
-import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.Transfer
 import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
@@ -24,7 +23,7 @@ import java.math.BigInteger
 import java.math.RoundingMode
 
 
-class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>): BlockchainRepository {
+class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : BlockchainRepository {
 
     /**
      * List arguments: first - network short name, second - wallet address (public)
@@ -35,23 +34,38 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>): Blockchai
             .toList()
 
     override fun refreshAssetBalance(privateKey: String, network: String, contractAddress: String): Observable<Pair<String, BigDecimal>> {
-        val credentials = Credentials.create(privateKey)
-        return ERC20.load(contractAddress, web3j[network], credentials, DefaultContractGasProvider())
-            .balanceOf(credentials.address).flowable()
-            .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
-            .toObservable()
+        Credentials.create(privateKey).run {
+            return ERC20.load(contractAddress, web3j[network], this, DefaultContractGasProvider())
+                .balanceOf(this.address).flowable()
+                .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
+                .toObservable()
+        }
     }
 
-    override fun transferERC20Token(privateKey: String, network: String, toAddress: String, contractAddress: String): Observable<TransactionReceipt> {
-        val credentials = Credentials.create(privateKey)
-        return ERC20.load(contractAddress, web3j[network], credentials, DefaultContractGasProvider())
-            .transfer(toAddress, BigInteger.valueOf(1)).flowable().toObservable()
+    override fun transferERC20Token(
+        network: String,
+        payload: TransactionPayload
+    ): Completable {
+        Credentials.create(payload.privateKey).run {
+            return ERC20.load(
+                payload.contractAddress,
+                web3j[network],
+                this,
+                AssetContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit)
+            )
+                .transfer(payload.receiverKey, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger()).flowable().toObservable()
+                .ignoreElements()
+        }
     }
 
-    override fun getTransactionCosts(network: String): Single<TransactionCostPayload> =
-        (web3j[network] ?: error("Not supported Network!")).ethGasPrice().flowable()
-            .map { prepareTransactionCosts(it) }
+    //TODO DefaultContractGasProvider is MVP hack. Needs to be refactored
+    override fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCostPayload> =
+        if (assetIndex == Int.InvalidIndex) (web3j[network] ?: error("Not supported Network!"))
+            .ethGasPrice()
+            .flowable()
+            .map { prepareTransactionCosts(it.gasPrice) }
             .singleOrError()
+        else Single.just(DefaultContractGasProvider()).map { prepareTransactionCosts(it.gasPrice, it.gasLimit) }
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         getTransactionCostInEth(toWei(gasPrice, Convert.Unit.GWEI), BigDecimal(gasLimit))
@@ -97,11 +111,11 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>): Blockchai
             )
         }
 
-    private fun prepareTransactionCosts(it: EthGasPrice): TransactionCostPayload =
+    private fun prepareTransactionCosts(gasPrice: BigInteger, gasLimit: BigInteger = Transfer.GAS_LIMIT): TransactionCostPayload =
         TransactionCostPayload(
-            fromWei(BigDecimal(it.gasPrice), Convert.Unit.GWEI),
-            Transfer.GAS_LIMIT,
-            getTransactionCostInEth(BigDecimal(it.gasPrice), BigDecimal(Transfer.GAS_LIMIT))
+            fromWei(BigDecimal(gasPrice), Convert.Unit.GWEI),
+            gasLimit,
+            getTransactionCostInEth(BigDecimal(gasPrice), BigDecimal(gasLimit))
         )
 
     private fun getBalance(network: String, address: String): Single<Pair<String, BigDecimal>> =

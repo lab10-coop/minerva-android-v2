@@ -29,7 +29,7 @@ class TransactionViewModelTest: BaseViewModelTest() {
 
     @Test
     fun `get transaction cost test success`() {
-        whenever(walletManager.getTransactionCosts(any())).thenReturn(Single.just(TransactionCost(BigDecimal(1), BigInteger.ONE, BigDecimal(10))))
+        whenever(walletManager.getTransactionCosts(any(), any())).thenReturn(Single.just(TransactionCost(BigDecimal(1), BigInteger.ONE, BigDecimal(10))))
         viewModel.transactionCostLiveData.observeForever(transactionCostObserver)
         viewModel.getTransactionCosts()
         transactionCostCaptor.run {
@@ -41,7 +41,7 @@ class TransactionViewModelTest: BaseViewModelTest() {
     @Test
     fun `get transaction cost test error`() {
         val error = Throwable()
-        whenever(walletManager.getTransactionCosts(any())).thenReturn(Single.error(error))
+        whenever(walletManager.getTransactionCosts(any(), any())).thenReturn(Single.error(error))
         viewModel.transactionCostLiveData.observeForever(transactionCostObserver)
         viewModel.getTransactionCosts()
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))

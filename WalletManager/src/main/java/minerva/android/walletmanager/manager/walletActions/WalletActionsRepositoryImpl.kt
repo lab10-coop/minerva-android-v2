@@ -4,7 +4,6 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
-import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.walletActions.localProvider.LocalWalletActionsConfigProvider

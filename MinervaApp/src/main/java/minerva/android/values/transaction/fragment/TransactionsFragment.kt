@@ -50,6 +50,7 @@ class TransactionsFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        viewModel.onPause()
         validationDisposable?.dispose()
     }
 

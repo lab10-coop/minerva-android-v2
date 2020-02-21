@@ -28,7 +28,6 @@ import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.wrapped.startValueAddressWrappedActivity
 
-
 class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
     RecyclerView.Adapter<ValueViewHolder>(),
     ValueViewHolder.ValuesAdapterListener {
@@ -93,7 +92,7 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
 
     override fun onSendValueClicked(value: Value) = listener.onSendTransaction(value)
 
-    override fun onSendAssetClicked() = listener.onSendAssetTransaction()
+    override fun onSendAssetClicked(valueIndex: Int, assetIndex: Int) = listener.onSendAssetTransaction(valueIndex, assetIndex)
 
     override fun onValueRemoved(position: Int) = listener.onValueRemove(rawValues[position])
 
@@ -103,11 +102,11 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
 class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) : AssetView.AssertViewCallback, RecyclerView.ViewHolder(view) {
 
     private lateinit var listener: ValuesAdapterListener
-    private var rawPosition: Int = WRONG_POSITION
+    private var rawPosition: Int = Int.InvalidIndex
 
     private val isOpen get() = view.sendButton.isVisible
 
-    override fun onSendAssetClicked() = listener.onSendAssetClicked()
+    override fun onSendAssetClicked(valueIndex: Int, assetIndex: Int) = listener.onSendAssetClicked(valueIndex, assetIndex)
 
     override fun getViewGroup() = viewGroup
 
@@ -123,7 +122,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
             bindData(value)
             setOnSendButtonClickListener(value)
             setOnMenuClickListener(rawPosition, value)
-            setOnItemClickListener()
+            setOnItemClickListener(value)
         }
     }
 
@@ -147,28 +146,28 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         menu.setOnClickListener { showMenu(rawPosition, value, menu) }
     }
 
-    private fun View.setOnItemClickListener() {
+    private fun View.setOnItemClickListener(value: Value) {
         setOnClickListener {
-            if (isOpen) close() else open()
+            if (isOpen) close() else open(value)
         }
     }
 
-    private fun View.prepareAssets(assets: List<Asset>) {
-        assets.forEach {
+    private fun View.prepareAssets(value: Value) {
+        value.assets.forEachIndexed { index, asset ->
             //TODO add correct icon!
-            container.addView(AssetView(this@ValueViewHolder, it.name, R.drawable.ic_asset_sdai).apply {
-                setAmounts(it.balance)
+            container.addView(AssetView(this@ValueViewHolder, value, index, R.drawable.ic_asset_sdai).apply {
+                setAmounts(asset.balance)
             })
         }
     }
 
-    private fun open() {
+    private fun open(value: Value) {
         TransitionManager.beginDelayedTransition(viewGroup)
         view.apply {
             arrow.rotate180()
             sendButton.visible()
             container.visible()
-            prepareAssets(listener.refreshAssets(rawPosition))
+            prepareAssets(value)
         }
     }
 
@@ -212,12 +211,11 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
 
     companion object {
         private const val SEND_BUTTON_FORMAT = "%s %s"
-        private const val WRONG_POSITION = -1
     }
 
     interface ValuesAdapterListener {
         fun onSendValueClicked(value: Value)
-        fun onSendAssetClicked()
+        fun onSendAssetClicked(valueIndex: Int, assetIndex: Int)
         fun onValueRemoved(position: Int)
         fun refreshAssets(rawPosition: Int): List<Asset>
     }

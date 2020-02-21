@@ -1,7 +1,6 @@
 package minerva.android.configProvider.model.walletActions
 
 import com.google.gson.annotations.SerializedName
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 
 data class WalletActionPayload(

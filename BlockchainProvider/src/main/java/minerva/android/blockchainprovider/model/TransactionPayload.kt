@@ -10,5 +10,6 @@ data class TransactionPayload(
     val receiverKey: String = String.Empty,
     val amount: BigDecimal = BigDecimal.ONE,
     val gasPrice: BigDecimal = BigDecimal.ONE,
-    val gasLimit: BigInteger = BigInteger.ZERO
+    val gasLimit: BigInteger = BigInteger.ZERO,
+    val contractAddress: String = String.Empty
 )

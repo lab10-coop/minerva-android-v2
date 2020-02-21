@@ -9,6 +9,7 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.BlockchainRepositoryImpl
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.kotlinUtils.InvalidIndex
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -75,7 +76,7 @@ class BlockchainRepositoryImplTest {
         val gasPrice = EthGasPrice()
         gasPrice.result = "0x1"
         every { web3J.ethGasPrice().flowable() } returns Flowable.just(gasPrice)
-        blockchainRepository.getTransactionCosts(ETH)
+        blockchainRepository.getTransactionCosts(ETH, Int.InvalidIndex)
             .test()
             .await()
             .assertComplete()
@@ -90,7 +91,7 @@ class BlockchainRepositoryImplTest {
         val gasPrice = EthGasPrice()
         gasPrice.result = "0x1"
         every { web3J.ethGasPrice().flowable() } returns Flowable.error(error)
-        blockchainRepository.getTransactionCosts(ETH)
+        blockchainRepository.getTransactionCosts(ETH, Int.InvalidIndex)
             .test()
             .await()
             .assertError(error)

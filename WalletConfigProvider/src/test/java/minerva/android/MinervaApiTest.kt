@@ -23,7 +23,7 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.koinApplication
 import org.koin.test.KoinTest
 import org.koin.test.inject
-import java.util.LinkedHashMap
+import java.util.*
 import javax.net.ssl.HttpsURLConnection
 
 class MinervaApiTest : KoinTest {
