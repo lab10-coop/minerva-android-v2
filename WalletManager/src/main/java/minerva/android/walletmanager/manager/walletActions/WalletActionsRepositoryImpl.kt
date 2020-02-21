@@ -28,7 +28,7 @@ class WalletActionsRepositoryImpl(
             Observable.just(localWalletActionsConfigProvider.loadWalletActionsConfig())
                 .doOnNext { currentWalletActionsConfigVersion = it.version }
                 .flatMap {
-                    Observable.just(WalletActionsMapper.map(it.actions))
+                    Observable.just(WalletActionsMapper.map(it.actions).sortedByDescending { action -> action.lastUsed })
                 },
             minervaApi.getWalletActions(publicKey = encodePublicKey(masterKey.publicKey))
                 .filter { it.walletActionsConfigPayload.version > currentWalletActionsConfigVersion }
@@ -36,7 +36,7 @@ class WalletActionsRepositoryImpl(
                     currentWalletActionsConfigVersion = it.walletActionsConfigPayload.version
                     localWalletActionsConfigProvider.saveWalletActionsConfig(it.walletActionsConfigPayload)
                 }
-                .flatMap { Observable.just(WalletActionsMapper.map(it.walletActionsConfigPayload.actions)) }
+                .flatMap { Observable.just(WalletActionsMapper.map(it.walletActionsConfigPayload.actions).sortedByDescending { action -> action.lastUsed }) }
         )
 
     override fun saveWalletActions(walletAction: WalletAction, masterKey: MasterKey): Completable {

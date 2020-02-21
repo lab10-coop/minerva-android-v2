@@ -20,7 +20,7 @@ fun setupShareButton(shareButton: ActionButton, stringToShare: String) {
             Intent(Intent.ACTION_SEND).run {
                 type = INTENT_TYPE
                 putExtra(Intent.EXTRA_TEXT, stringToShare)
-                shareButton.context.startActivity(Intent.createChooser(this, TITLE))
+                context.startActivity(Intent.createChooser(this, TITLE))
             }
         }
     }
@@ -32,7 +32,7 @@ fun setupCopyButton(copyButton: ActionButton, stringToCopy: String, message: Str
         setLabel(context.getString(R.string.copy))
         setOnClickListener {
             copyStringToClipBoard(context, stringToCopy)
-            Toast.makeText(this.context, message, Toast.LENGTH_LONG).show()
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
 }

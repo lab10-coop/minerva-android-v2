@@ -63,6 +63,6 @@ class IdentitiesViewModel(
             WalletActionType.IDENTITY,
             WalletActionStatus.REMOVED,
             DateUtils.timestamp,
-            hashMapOf(Pair(WalletActionFields.INDENTITY_NAME, identityName))
+            hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, identityName))
         )
 }

@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_new_value.*
 import minerva.android.R
+import minerva.android.extension.gone
+import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.adapter.NetworkAdapter
@@ -44,10 +46,24 @@ class NewValueFragment : Fragment() {
     }
 
     private fun initializeFragment() {
-        viewModel.saveCompletedLiveData.observe(this, EventObserver { activity?.finish() })
-        viewModel.saveErrorLiveData.observe(this, EventObserver { showError(it) })
+        viewModel.apply {
+            saveCompletedLiveData.observe(this@NewValueFragment, EventObserver { saveWalletAction() })
+            loadingLiveData.observe(this@NewValueFragment, EventObserver { handleLoader(it) })
+            saveWalletActionLiveData.observe(this@NewValueFragment, EventObserver { activity?.finish() })
+            saveErrorLiveData.observe(this@NewValueFragment, EventObserver { showError(it) })
+        }
         arguments?.let {
             position = it.getInt(POSITION)
+        }
+    }
+
+    private fun handleLoader(isShowing: Boolean) {
+        if (isShowing) {
+            addValueProgressBar.visible()
+            createButton.gone()
+        } else {
+            addValueProgressBar.gone()
+            createButton.visible()
         }
     }
 
