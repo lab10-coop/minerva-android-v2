@@ -106,7 +106,8 @@ fun mapTransactionToTransactionPayload(transaction: Transaction): TransactionPay
             receiverKey,
             amount,
             gasPrice,
-            gasLimit
+            gasLimit,
+            contractAddress
         )
     }
 

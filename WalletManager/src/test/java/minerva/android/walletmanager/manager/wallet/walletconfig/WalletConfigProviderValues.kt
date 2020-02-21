@@ -8,9 +8,9 @@ import minerva.android.configProvider.model.walletActions.WalletActionsConfigPay
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.walletmanager.manager.wallet.walletconfig.localProvider.LocalWalletConfigProvider
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.WalletConfigTestValues
-import minerva.android.walletmanager.manager.wallet.walletconfig.localProvider.LocalWalletConfigProvider
 
 class LocalMock : LocalWalletConfigProvider, WalletConfigTestValues() {
     override fun loadWalletConfig(): Single<WalletConfigPayload> = Single.just(prepareWalletConfigPayload())

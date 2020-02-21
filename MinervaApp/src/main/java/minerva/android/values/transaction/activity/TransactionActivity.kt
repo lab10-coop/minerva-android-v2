@@ -22,6 +22,7 @@ class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
 
     private val viewModel: TransactionsViewModel by viewModel()
     private lateinit var value: Value
+    private var assetIndex: Int = Int.InvalidIndex
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,13 +52,14 @@ class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
     }
 
     private fun getValue() {
-        viewModel.getValue(intent.getIntExtra(VALUE_INDEX, Int.InvalidIndex))
+        assetIndex = intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex)
+        viewModel.getValue(intent.getIntExtra(VALUE_INDEX, Int.InvalidIndex), assetIndex)
     }
 
     private fun prepareActionBar() {
         supportActionBar?.apply {
             show()
-            title = " ${getString(R.string.send)} ${value.network}"
+            title = " ${getString(R.string.send)} ${prepareTitle()}"
             subtitle = " ${value.name}"
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
@@ -98,9 +100,12 @@ class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
 
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
+    private fun prepareTitle() = if(assetIndex != Int.InvalidIndex) value.assets[assetIndex].name else value.network
+
     companion object {
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val VALUE_INDEX = "value_index"
+        const val ASSET_INDEX = "asset_index"
     }
 }

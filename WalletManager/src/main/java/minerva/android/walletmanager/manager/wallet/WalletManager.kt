@@ -40,8 +40,10 @@ interface WalletManager {
     fun refreshBalances(): Single<HashMap<String, Balance>>
     fun refreshAssetBalance(): Single<Map<String, List<Asset>>>
     fun sendTransaction(network: String, transaction: Transaction): Completable
-    fun getTransactionCosts(network: String): Single<TransactionCost>
+    fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCost>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
+
+    fun transferERC20Token(network: String, transaction: Transaction): Completable
 
     fun getValueIterator(): Int
     fun dispose()

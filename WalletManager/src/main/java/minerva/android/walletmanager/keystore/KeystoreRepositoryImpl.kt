@@ -4,7 +4,6 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
-import android.util.Log
 import com.google.gson.Gson
 import minerva.android.kotlinUtils.NO_DATA
 import minerva.android.walletmanager.model.MasterKey

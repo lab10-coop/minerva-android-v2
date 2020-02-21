@@ -57,8 +57,8 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
 
     override fun onSendTransaction(value: Value) = listener.showSendTransactionScreen(value)
 
-    override fun onSendAssetTransaction() {
-        listener.showSendAssetTransactionScreen()
+    override fun onSendAssetTransaction(valueIndex: Int, assetIndex: Int) {
+        listener.showSendAssetTransactionScreen(valueIndex, assetIndex)
     }
 
     override fun onValueRemove(value: Value) = showRemoveDialog(value)

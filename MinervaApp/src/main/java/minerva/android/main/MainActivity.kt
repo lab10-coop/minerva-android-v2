@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
@@ -17,6 +16,7 @@ import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.login.PainlessLoginActivity
 import minerva.android.values.transaction.activity.TransactionActivity
+import minerva.android.values.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
 import minerva.android.values.transaction.activity.TransactionActivity.Companion.VALUE_INDEX
 import minerva.android.walletmanager.model.Value
 import minerva.android.wrapped.startNewIdentityWrappedActivity
@@ -93,9 +93,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         }
     }
 
-    override fun showSendAssetTransactionScreen() {
-        //TODO implement sending assets
-        Toast.makeText(this, "Showing send asset transaction screen", Toast.LENGTH_SHORT).show()
+    override fun showSendAssetTransactionScreen(valueIndex: Int, assetIndex: Int) {
+        launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
+            putExtra(VALUE_INDEX, valueIndex)
+            putExtra(ASSET_INDEX, assetIndex)
+        }
     }
 
     override fun onBackPressed() {

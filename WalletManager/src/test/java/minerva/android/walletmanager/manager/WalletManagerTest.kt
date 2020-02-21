@@ -17,16 +17,16 @@ import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.LoginResponse
 import minerva.android.servicesApiProvider.model.Profile
 import minerva.android.walletmanager.keystore.KeystoreRepository
-import minerva.android.walletmanager.manager.assets.AssetManager
 import minerva.android.walletmanager.manager.wallet.WalletManagerImpl
+import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.NetworkNameShort
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
 import org.amshove.kluent.*
 import org.junit.After
 import org.junit.Before
@@ -393,7 +393,7 @@ class WalletManagerTest {
 
     @Test
     fun `send transaction cost success test`() {
-        whenever(blockchainRepository.getTransactionCosts(any())).thenReturn(
+        whenever(blockchainRepository.getTransactionCosts(any(), any())).thenReturn(
             Single.just(
                 TransactionCostPayload(
                     BigDecimal.ONE,
@@ -402,7 +402,7 @@ class WalletManagerTest {
                 )
             )
         )
-        walletManager.getTransactionCosts("")
+        walletManager.getTransactionCosts("", Int.InvalidIndex)
             .test()
             .assertComplete()
             .assertValue {
@@ -414,8 +414,8 @@ class WalletManagerTest {
     @Test
     fun `send transaction cost error test`() {
         val error = Throwable()
-        whenever(blockchainRepository.getTransactionCosts(any())).thenReturn(Single.error(error))
-        walletManager.getTransactionCosts("")
+        whenever(blockchainRepository.getTransactionCosts(any(), any())).thenReturn(Single.error(error))
+        walletManager.getTransactionCosts("", Int.InvalidIndex)
             .test()
             .assertError(error)
     }
@@ -484,4 +484,30 @@ class WalletManagerTest {
 //        walletManager.initWalletConfig()
 //        walletManager.refreshAssetBalance().test().assertError(error)
 //    }
+
+
+//    override fun transferERC20Token(network: String, transaction: Transaction): Completable =
+//        blockchainRepository.transferERC20Token(
+//            network,
+//            mapTransactionToTransactionPayload(transaction)
+//        ).ignoreElements()
+
+    @Test
+    fun `make ERC20 transfer success test`() {
+        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
+        walletManager.initWalletConfig()
+        walletManager.transferERC20Token("", Transaction()).test().assertComplete()
+    }
+
+    @Test
+    fun `make ERC20 transfer error test`() {
+        val error = Throwable()
+        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
+        walletManager.initWalletConfig()
+        walletManager.transferERC20Token("", Transaction()).test().assertError(error)
+    }
 }

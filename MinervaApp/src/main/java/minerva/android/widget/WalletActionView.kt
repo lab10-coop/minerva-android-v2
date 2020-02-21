@@ -1,7 +1,6 @@
 package minerva.android.widget
 
 import android.content.Context
-import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.wallet_action_item_list_row.view.*

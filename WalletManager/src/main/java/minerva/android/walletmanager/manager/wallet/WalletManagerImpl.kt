@@ -32,7 +32,6 @@ import minerva.android.walletmanager.model.mappers.mapTransactionToTransactionPa
 import minerva.android.walletmanager.model.mappers.mapWalletConfigToWalletPayload
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.ServiceType
-import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.utils.DateUtils.getLastUsedFormatted
 import minerva.android.walletmanager.utils.MarketUtils.calculateFiatBalances
 import minerva.android.walletmanager.utils.MarketUtils.getAddresses
@@ -92,8 +91,14 @@ class WalletManagerImpl(
     override fun sendTransaction(network: String, transaction: Transaction): Completable =
         blockchainRepository.sendTransaction(network, mapTransactionToTransactionPayload(transaction))
 
-    override fun getTransactionCosts(network: String): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(network)
+    override fun transferERC20Token(network: String, transaction: Transaction): Completable =
+        blockchainRepository.transferERC20Token(
+            network,
+            mapTransactionToTransactionPayload(transaction)
+        )
+
+    override fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(network, assetIndex)
             .map { mapTransactionCostPayloadToTransactionCost(it) }
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
@@ -145,7 +150,7 @@ class WalletManagerImpl(
             val newValues = config.values.toMutableList()
             config.values.forEachIndexed { position, value ->
                 if (value.index == index) {
-                    if (isValueRemovable(value.balance)) {
+                    if (isValueRemovable(value.balance, value.assets)) {
                         //TODO need to be handled better (Own Throwable implementation?)
                         return Completable.error(Throwable("This address is not empty and can't be removed."))
                     }
@@ -224,25 +229,34 @@ class WalletManagerImpl(
             return Observable.range(START, values.size)
                 .filter { position -> !values[position].isDeleted }
                 //TODO filter should be removed when all testnet will be implemented
-                .filter { position -> Network.fromString(values[position].network).run { this == Network.ETHEREUM || this == Network.ARTIS } }
+                .filter { position ->
+                    Network.fromString(values[position].network).run { this == Network.ETHEREUM || this == Network.ARTIS }
+                }
                 .flatMapSingle { position ->
-                    refreshAssetsBalance(
-                        values[position].privateKey,
-                        AssetManager.getAssetAddresses(Network.fromString(values[position].network))
-                    )
+                    AssetManager.getAssetAddresses(Network.fromString(values[position].network)).run {
+                        refreshAssetsBalance(values[position].privateKey, this)
+                    }
                 }
                 .toList()
                 .map { list -> list.map { it.first to AssetManager.mapToAssets(it.second) }.toMap() }
         }
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
-
+    
+    /**
+     *
+     * return statement: Single<Pair<String, List<Pair<String, BigDecimal>>>>
+     *                   Single<Pair<ValuePrivateKey, List<ContractAddress, BalanceOnContract>>>>
+     *
+     */
     private fun refreshAssetsBalance(
         privateKey: String,
         addresses: Pair<String, List<String>>
     ): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
         Observable.range(START, addresses.second.size)
-            .flatMap { position -> blockchainRepository.refreshAssetBalance(privateKey, addresses.first, addresses.second[position]) }
+            .flatMap { position ->
+                blockchainRepository.refreshAssetBalance(privateKey, addresses.first, addresses.second[position])
+            }
             .filter { it.second > NO_FUNDS }
             .toList()
             .map { Pair(privateKey, it) }
@@ -260,7 +274,13 @@ class WalletManagerImpl(
         return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
     }
 
-    private fun isValueRemovable(balance: BigDecimal) = blockchainRepository.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
+    private fun isValueRemovable(balance: BigDecimal, assets: List<Asset>): Boolean {
+        assets.forEach {
+            if (blockchainRepository.toGwei(it.balance) >= MAX_GWEI_TO_REMOVE_VALUE) return true
+        }
+        return blockchainRepository.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
+    }
+
 
     private fun getMinervaService() =
         listOf(Service(ServiceType.MINERVA, MINERVA_SERVICE, getLastUsedFormatted()))

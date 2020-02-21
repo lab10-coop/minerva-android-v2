@@ -4,12 +4,12 @@ import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
-import minerva.android.walletActions.WalletActionsFragment
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.MainActivity
 import minerva.android.services.ServicesFragment
 import minerva.android.settings.SettingsFragment
 import minerva.android.values.ValuesFragment
+import minerva.android.walletActions.WalletActionsFragment
 
 internal fun MainActivity.shouldShowAddIdentityIcon() = isIdentitiesTabSelected()
 
