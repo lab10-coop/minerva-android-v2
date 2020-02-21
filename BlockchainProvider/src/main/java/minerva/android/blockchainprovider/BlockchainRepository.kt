@@ -9,7 +9,6 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 interface BlockchainRepository {
-
     fun refreshBalances(networkAddress: List<Pair<String, String>>): Single<List<Pair<String, BigDecimal>>>
     fun refreshAssetBalance(privateKey: String, network: String, contractAddress: String): Observable<Pair<String, BigDecimal>>
     fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCostPayload>

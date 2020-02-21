@@ -101,16 +101,15 @@ class ChooseIdentityFragment : Fragment() {
     }
 
     private fun prepareObservers() {
-        viewModel.loadingLiveData.observe(this, EventObserver { if (it) showLoader() else hideLoader() })
-        viewModel.errorLiveData.observe(this, EventObserver {
-            listener.onResult(false)
-        })
-        viewModel.loginLiveData.observe(this, EventObserver {
-            listener.onResult(true)
-        })
-        viewModel.requestedFieldsLiveData.observe(this, EventObserver {
-            Toast.makeText(context, getString(R.string.requested_data_message), Toast.LENGTH_LONG).show()
-        })
+        viewModel.apply {
+            loadingLiveData.observe(this@ChooseIdentityFragment, EventObserver { if (it) showLoader() else hideLoader() })
+            errorLiveData.observe(this@ChooseIdentityFragment, EventObserver { listener.onResult(false) })
+            loginLiveData.observe(this@ChooseIdentityFragment, EventObserver { saveLoginWalletAction() })
+            saveWalletActionLiveData.observe(this@ChooseIdentityFragment, EventObserver { listener.onResult(true) })
+            requestedFieldsLiveData.observe(this@ChooseIdentityFragment, EventObserver {
+                Toast.makeText(context, getString(R.string.requested_data_message), Toast.LENGTH_LONG).show()
+            })
+        }
     }
 
     companion object {

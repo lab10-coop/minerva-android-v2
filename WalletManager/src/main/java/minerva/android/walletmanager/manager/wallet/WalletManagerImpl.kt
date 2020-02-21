@@ -23,9 +23,12 @@ import minerva.android.servicesApiProvider.model.TokenPayload
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.assets.AssetManager
 import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
+import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.Markets
-import minerva.android.walletmanager.model.defs.ResponseState
+import minerva.android.walletmanager.model.defs.*
+import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
+import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.NETWORK
+import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.RECEIVER
 import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
 import minerva.android.walletmanager.model.mappers.mapTransactionCostPayloadToTransactionCost
 import minerva.android.walletmanager.model.mappers.mapTransactionToTransactionPayload

@@ -66,12 +66,12 @@ class EditIdentityViewModel(private val walletManager: WalletManager, private va
                     onComplete = {
                         _saveWalletActionLiveData.value = Event(Unit)
                     }, onError = {
-                        _saveErrorLiveData.value = Event(Throwable(it.message))
+                        _saveErrorLiveData.value = Event(it)
                     }
                 )
         }
     }
 
     private fun getWalletAction(status: Int) =
-        WalletAction(WalletActionType.IDENTITY, status, DateUtils.timestamp, hashMapOf(Pair(WalletActionFields.INDENTITY_NAME, identityName)))
+        WalletAction(WalletActionType.IDENTITY, status, DateUtils.timestamp, hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, identityName)))
 }

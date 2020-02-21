@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.values.adapter.ValueAdapter
@@ -40,9 +41,11 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
 
     override fun onResume() {
         super.onResume()
-        viewModel.onResume()
-        viewModel.refreshBalances()
-        viewModel.getAssetBalance()
+        viewModel.apply {
+            onResume()
+            refreshBalances()
+            getAssetBalance()
+        }
     }
 
     override fun onAttach(context: Context) {
@@ -76,6 +79,7 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
                 noDataMessage.visibleOrGone(it.hasActiveValue)
                 valueAdapter.updateList(it.values)
             })
+            removeValueLiveData.observe(this@ValuesFragment, EventObserver{ saveRemoveValueWalletAction() })
             balanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateBalances(it) })
             assetBalanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateAssetBalances(it) })
             errorLiveData.observe(this@ValuesFragment, Observer {
@@ -97,7 +101,7 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
                 .setTitle(value.name)
                 .setMessage(R.string.remove_value_dialog_message)
                 .setPositiveButton(R.string.yes) { dialog, _ ->
-                    viewModel.removeValue(value.index)
+                    viewModel.removeValue(value.index, value.name)
                     dialog.dismiss()
                 }
                 .setNegativeButton(R.string.no) { dialog, _ ->

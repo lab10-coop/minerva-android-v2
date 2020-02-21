@@ -31,15 +31,15 @@ private val appModules = module {
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { IdentitiesViewModel(get(), get()) }
-    viewModel { ValuesViewModel(get()) }
+    viewModel { ValuesViewModel(get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
-    viewModel { ChooseIdentityViewModel(get()) }
+    viewModel { ChooseIdentityViewModel(get(), get()) }
     viewModel { ScannerViewModel(get()) }
     viewModel { ValueAddressViewModel(get()) }
-    viewModel { NewValueViewModel(get()) }
+    viewModel { NewValueViewModel(get(), get()) }
     viewModel { ServicesViewModel(get()) }
-    viewModel { TransactionsViewModel(get()) }
+    viewModel { TransactionsViewModel(get(), get()) }
     viewModel { WalletActionsViewModel(get(), get()) }
 }

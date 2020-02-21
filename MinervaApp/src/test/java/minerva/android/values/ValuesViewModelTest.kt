@@ -8,6 +8,7 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Balance
 import org.junit.Test
 import java.math.BigDecimal
@@ -15,7 +16,8 @@ import java.math.BigDecimal
 class ValuesViewModelTest : BaseViewModelTest() {
 
     private val walletManager: WalletManager = mock()
-    private val viewModel = ValuesViewModel(walletManager)
+    private val walletActionsRepository: WalletActionsRepository = mock()
+    private val viewModel = ValuesViewModel(walletManager, walletActionsRepository)
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()

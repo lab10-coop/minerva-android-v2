@@ -53,7 +53,6 @@ class WalletActionsViewHolder(private val view: View) : RecyclerView.ViewHolder(
             walletActivities.addView(WalletActionView(context).apply {
                 setActionStatus(it)
                 setActionType(it)
-                setTime(it.lastUsed)
             })
         }
     }
@@ -61,7 +60,7 @@ class WalletActionsViewHolder(private val view: View) : RecyclerView.ViewHolder(
     private fun View.showDay(lastUsed: Long): CharSequence? {
         return when {
             isTheSameDay(timestamp, lastUsed) -> context.getString(R.string.today)
-            isTheDayAfterTomorrow(lastUsed) -> context.getString(R.string.yesterady)
+            isTheDayAfterTomorrow(lastUsed) -> context.getString(R.string.yesterday)
             else -> getDateFromTimestamp(lastUsed)
         }
     }

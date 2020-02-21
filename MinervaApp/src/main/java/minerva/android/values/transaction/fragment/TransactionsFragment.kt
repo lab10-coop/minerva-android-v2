@@ -21,6 +21,7 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.listener.TransactionFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.walletmanager.model.TransactionCost
+import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.math.BigDecimal
@@ -56,11 +57,21 @@ class TransactionsFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
-            sendTransactionLiveData.observe(this@TransactionsFragment, EventObserver { listener.onResult(true, it) })
-            errorTransactionLiveData.observe(this@TransactionsFragment, EventObserver { listener.onResult(false, it) })
+            sendTransactionLiveData.observe(this@TransactionsFragment, EventObserver { saveWalletAction(WalletActionStatus.SENT) })
+            errorTransactionLiveData.observe(this@TransactionsFragment, EventObserver { saveWalletAction(WalletActionStatus.FAILED) })
             transactionCostLiveData.observe(this@TransactionsFragment, EventObserver { setTransactionsCosts(it) })
             errorLiveData.observe(this@TransactionsFragment, Observer { showErrorFlashBar() })
             loadingLiveData.observe(this@TransactionsFragment, EventObserver { if (it) showLoader() else hideLoader() })
+            saveWalletActionLiveData.observe(this@TransactionsFragment, EventObserver { handleTransactionStatus(it) }
+            )
+        }
+    }
+
+    private fun handleTransactionStatus(status: Pair<String, Int>) {
+        if (status.second == WalletActionStatus.SENT) {
+            listener.onResult(true, status.first)
+        } else if (status.second == WalletActionStatus.FAILED) {
+            listener.onResult(false, status.first)
         }
     }
 

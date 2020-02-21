@@ -17,7 +17,7 @@ object WalletActionsMapper : Mapper<List<WalletActionClusteredPayload>, List<Wal
             it.clusteredActions.forEach { actionPayload ->
                 walletActionsList.add(WalletActionMapper.map(actionPayload))
             }
-            actions.add(WalletActionClustered(it.lastUsed, walletActionsList))
+            actions.add(WalletActionClustered(it.lastUsed, walletActionsList.sortedByDescending { action -> action.lastUsed }))
         }
         return actions
     }
