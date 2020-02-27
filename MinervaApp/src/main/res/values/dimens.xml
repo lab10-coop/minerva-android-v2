@@ -14,7 +14,7 @@
     <dimen name="card_corner_radius">16dp</dimen>
     <dimen name="logo_size">64dp</dimen>
     <dimen name="icon_size">40dp</dimen>
-    <dimen name="rounded_button_radius">8dp</dimen>
+    <dimen name="rounded_background_small">8dp</dimen>
     <dimen name="rounded_background">16dp</dimen>
     <dimen name="small_logo_size">32dp</dimen>
     <dimen name="form_margins">16dp</dimen>
@@ -24,4 +24,5 @@
     <dimen name="qr_code_size">256dp</dimen>
     <dimen name="fingerprint_view_elevation">8dp</dimen>
     <dimen name="circle_icon_size">60dp</dimen>
+    <dimen name="recipient_list_address_width">128dp</dimen>
 </resources>

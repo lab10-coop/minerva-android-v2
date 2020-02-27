@@ -13,8 +13,10 @@ interface BlockchainRepository {
     fun refreshAssetBalance(privateKey: String, network: String, contractAddress: String): Observable<Pair<String, BigDecimal>>
     fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCostPayload>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
-    fun sendTransaction(network: String, transactionPayload: TransactionPayload): Completable
+    fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable
     fun completeAddress(privateKey: String): String
     fun toGwei(balance: BigDecimal): BigInteger
     fun transferERC20Token(network: String, transactionPayload: TransactionPayload): Completable
+    fun reverseResolveENS(ensAddress: String): Single<String>
+    fun resolveENS(ensName: String): Single<String>
 }

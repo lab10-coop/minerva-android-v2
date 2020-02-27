@@ -48,7 +48,7 @@
                 android:layout_marginRight="@dimen/margin_normal"
                 android:hint="@string/receiver">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <AutoCompleteTextView
                     android:id="@+id/receiver"
                     style="@style/EditTextInputLayoutStyle"
                     android:layout_width="match_parent"

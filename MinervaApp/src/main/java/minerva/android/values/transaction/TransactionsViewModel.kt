@@ -2,6 +2,7 @@ package minerva.android.values.transaction
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -12,10 +13,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
-import minerva.android.walletmanager.model.Transaction
-import minerva.android.walletmanager.model.TransactionCost
-import minerva.android.walletmanager.model.Value
-import minerva.android.walletmanager.model.WalletAction
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.NETWORK
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.RECEIVER
@@ -34,6 +32,7 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
     var value: Value = Value(Int.InvalidIndex)
     var assetIndex: Int = Int.InvalidIndex
     var transactionCost: BigDecimal = BigDecimal.ZERO
+    lateinit var recipients: List<Recipient>
 
     private val _getValueLiveData = MutableLiveData<Event<Value>>()
     val getValueLiveData: LiveData<Event<Value>> get() = _getValueLiveData
@@ -66,6 +65,10 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
         }
     }
 
+    fun loadRecipients() {
+        recipients = walletManager.loadRecipients()
+    }
+
     fun getTransactionCosts() {
         launchDisposable {
             walletManager.getTransactionCosts(network, assetIndex)
@@ -89,39 +92,6 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
         else sendAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
     }
 
-    private fun sendMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
-        transaction = prepareTransaction(receiverKey, amount, gasPrice, gasLimit)
-        launchDisposable {
-            walletManager.sendTransaction(network, transaction)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Unit) },
-                    onError = {
-                        Timber.e("Send transaction error: ${it.message}")
-                        _errorTransactionLiveData.value = Event(it.message)
-                    }
-                )
-        }
-    }
-
-    private fun sendAssetTransaction(toAddress: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
-        transaction = prepareTransaction(toAddress, amount, gasPrice, gasLimit, value.assets[assetIndex].address)
-        launchDisposable {
-            walletManager.transferERC20Token(value.network, transaction)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = { _saveWalletActionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
-                    onError = { _errorTransactionLiveData.value = Event(it.message) }
-                )
-        }
-    }
-
     fun saveWalletAction(status: Int) {
         launchDisposable {
             walletActionsRepository.saveWalletActions(getValuesWalletAction(transaction, network, status), walletManager.masterKey)
@@ -135,6 +105,21 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
                         _errorTransactionLiveData.value = Event(it.message)
                     }
                 )
+        }
+    }
+
+    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String =
+        walletManager.calculateTransactionCost(gasPrice, gasLimit).toPlainString()
+
+    fun getBalance(): BigDecimal = if (assetIndex == Int.InvalidIndex) value.balance else value.assets[assetIndex].balance
+
+    fun getAllAvailableFunds(): String {
+        value.balance.minus(transactionCost).apply {
+            return if (this < BigDecimal.ZERO) {
+                String.EmptyBalance
+            } else {
+                this.toPlainString()
+            }
         }
     }
 
@@ -160,7 +145,7 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
         amount: BigDecimal,
         gasPrice: BigDecimal,
         gasLimit: BigInteger,
-        contractAddress: String = String.Empty
+        contractAddress: String
     ): Transaction {
         return Transaction(
             value.address,
@@ -173,18 +158,51 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
         )
     }
 
-    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String =
-        walletManager.calculateTransactionCost(gasPrice, gasLimit).toPlainString()
-
-    fun getBalance(): BigDecimal = if (assetIndex == Int.InvalidIndex) value.balance else value.assets[assetIndex].balance
-
-    fun getAllAvailableFunds(): String {
-        value.balance.minus(transactionCost).apply {
-            return if (this < BigDecimal.ZERO) {
-                String.EmptyBalance
-            } else {
-                this.toPlainString()
+    private fun resolveENS(
+        receiverKey: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger,
+        contractAddress: String = String.Empty
+    ): Single<Transaction> =
+        walletManager.resolveENS(receiverKey).map {
+            prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply {
+                transaction = this
             }
+        }
+
+    private fun sendMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+        launchDisposable {
+            resolveENS(receiverKey, amount, gasPrice, gasLimit).flatMapCompletable {
+                walletManager.transferNativeCoin(network, transaction)
+            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onComplete = { _sendTransactionLiveData.value = Event(Unit) },
+                    onError = {
+                        Timber.e("Send transaction error: ${it.message}")
+                        _errorTransactionLiveData.value = Event(it.message)
+                    }
+                )
+        }
+    }
+
+    private fun sendAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+        launchDisposable {
+            resolveENS(receiverKey, amount, gasPrice, gasLimit, value.assets[assetIndex].address).flatMapCompletable {
+                walletManager.transferERC20Token(value.network, transaction)
+            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onComplete = { _saveWalletActionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
+                    onError = { _errorTransactionLiveData.value = Event(it.message) }
+                )
         }
     }
 

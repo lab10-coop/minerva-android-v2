@@ -24,7 +24,7 @@
         android:fontFamily="@font/rubik_regular"
         android:gravity="center"
         android:text="@string/fingerPrintInstruction"
-        android:textColor="@color/titledTextViewTitleColor"
+        android:textColor="@color/titleColor"
         android:textSize="@dimen/margin_normal" />
 
     <TextView

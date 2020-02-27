@@ -5,11 +5,13 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.blockchainprovider.model.defs.BlockchainDef.Companion.ENS
 import minerva.android.kotlinUtils.InvalidIndex
 import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
+import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.response.EthSendTransaction
@@ -42,6 +44,14 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : Blockcha
         }
     }
 
+    override fun reverseResolveENS(address: String): Single<String> = Single.just(address).map {
+        EnsResolver(web3j[ENS]).reverseResolve(it)
+    }
+
+    override fun resolveENS(ensName: String): Single<String> =
+        if(ensName.contains(DOT)) Single.just(ensName).map { EnsResolver(web3j[ENS]).resolve(it) }
+        else Single.just(ensName)
+
     override fun transferERC20Token(
         network: String,
         payload: TransactionPayload
@@ -58,6 +68,17 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : Blockcha
         }
     }
 
+    override fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable =
+        (web3j[network] ?: error("Not supported Network!"))
+            .ethGetTransactionCount(transactionPayload.address, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .flatMapCompletable {
+                (web3j[network] ?: error("Not supported Network!"))
+                    .ethSendRawTransaction(getSignedTransaction(it.transactionCount, transactionPayload))
+                    .flowable()
+                    .flatMapCompletable { response -> handleTransactionResponse(response) }
+            }
+
     //TODO DefaultContractGasProvider is MVP hack. Needs to be refactored
     override fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCostPayload> =
         if (assetIndex == Int.InvalidIndex) (web3j[network] ?: error("Not supported Network!"))
@@ -69,17 +90,6 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : Blockcha
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         getTransactionCostInEth(toWei(gasPrice, Convert.Unit.GWEI), BigDecimal(gasLimit))
-
-    override fun sendTransaction(network: String, transactionPayload: TransactionPayload): Completable =
-        (web3j[network] ?: error("Not supported Network!"))
-            .ethGetTransactionCount(transactionPayload.address, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .flatMapCompletable {
-                (web3j[network] ?: error("Not supported Network!"))
-                    .ethSendRawTransaction(getSignedTransaction(it.transactionCount, transactionPayload))
-                    .flowable()
-                    .flatMapCompletable { response -> handleTransactionResponse(response) }
-            }
 
     override fun completeAddress(privateKey: String): String = Credentials.create(privateKey).address
 
@@ -127,5 +137,6 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : Blockcha
     companion object {
         private const val START = 0
         private const val SCALE = 8
+        private const val DOT = "."
     }
 }

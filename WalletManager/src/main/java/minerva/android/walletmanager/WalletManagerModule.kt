@@ -26,7 +26,7 @@ fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, binanceUrl: St
     .plus(createCryptographyModules())
     .plus(createWalletConfigProviderModule(isDebug, baseUrl))
     .plus(createServicesApiProviderModule(isDebug, baseUrl))
-    .plus(createBlockchainProviderModule(Network.urlMap))
+    .plus(createBlockchainProviderModule(Network.urlMap, BuildConfig.ENS_ADDRESS))
     .plus(createExchangeRateProviderModule(isDebug, binanceUrl))
 
 fun createWalletModules() = module {
