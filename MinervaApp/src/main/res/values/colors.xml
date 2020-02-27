@@ -43,4 +43,5 @@
     <color name="xDai">#FFFDAC42</color>
     <color name="xDaiOpacity">#29FDAC42</color>
     <color name="black">#000000</color>
+    <color name="separatorColor">#EAEAEE</color>
 </resources>

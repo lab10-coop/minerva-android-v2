@@ -21,7 +21,7 @@ class ScannerViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `test validate qr code result success`() {
-        whenever(walletManager.decodeJwtToken(any())).thenReturn(Single.just(QrCodeResponse("Minerva App")))
+        whenever(walletManager.decodeQrCodeResponse(any())).thenReturn(Single.just(QrCodeResponse("Minerva App")))
         viewModel.scannerResultLiveData.observeForever(scannerResultObserver)
         viewModel.validateResult("token")
         scannerResultCaptor.run {
@@ -33,7 +33,7 @@ class ScannerViewModelTest : BaseViewModelTest() {
     @Test
     fun `validate qr code result failed`() {
         val error = Throwable()
-        whenever(walletManager.decodeJwtToken(any())).thenReturn(Single.error(error))
+        whenever(walletManager.decodeQrCodeResponse(any())).thenReturn(Single.error(error))
         viewModel.scannerResultLiveData.observeForever(scannerResultObserver)
         viewModel.validateResult("token")
         viewModel.scannerErrorLiveData.observeLiveDataEvent(Event(error))

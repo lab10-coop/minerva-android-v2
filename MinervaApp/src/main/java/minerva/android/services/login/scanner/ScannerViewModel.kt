@@ -23,7 +23,7 @@ class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
     val scannerErrorLiveData: LiveData<Event<Throwable>> get() = _scannerErrorMutableLiveData
 
     fun validateResult(token: String) {
-        disposable = walletManager.decodeJwtToken(token)
+        disposable = walletManager.decodeQrCodeResponse(token)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(

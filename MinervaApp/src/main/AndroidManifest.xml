@@ -16,13 +16,32 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name="minerva.android.payment.PaymentRequestActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="minerva.android.CONFIRM_ACTION" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="wallet"
+                    android:scheme="minerva" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".values.transaction.activity.TransactionActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".services.login.PainlessLoginActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="minerva.android.wrapped.WrappedActivity"
+            android:name=".wrapped.WrappedActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity
