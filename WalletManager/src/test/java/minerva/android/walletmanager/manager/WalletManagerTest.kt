@@ -375,9 +375,19 @@ class WalletManagerTest {
     }
 
     @Test
-    fun `send transaction success test`() {
-        whenever(blockchainRepository.sendTransaction(any(), any())).thenReturn(Completable.complete())
-        walletManager.sendTransaction("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+    fun `send transaction success with resolved ENS test`() {
+        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
+        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
+        walletManager.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+            .test()
+            .assertComplete()
+    }
+
+    @Test
+    fun `send transaction success with not resolved ENS test`() {
+        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
+        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable("No ENS")))
+        walletManager.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
             .test()
             .assertComplete()
     }
@@ -385,8 +395,9 @@ class WalletManagerTest {
     @Test
     fun `send transaction error test`() {
         val error = Throwable()
-        whenever(blockchainRepository.sendTransaction(any(), any())).thenReturn(Completable.error(error))
-        walletManager.sendTransaction("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Completable.error(error))
+        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
+        walletManager.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
             .test()
             .assertError(error)
     }
@@ -493,10 +504,21 @@ class WalletManagerTest {
 //        ).ignoreElements()
 
     @Test
-    fun `make ERC20 transfer success test`() {
+    fun `make ERC20 transfer with ENS resolved success test`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
+        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
+        walletManager.initWalletConfig()
+        walletManager.transferERC20Token("", Transaction()).test().assertComplete()
+    }
+
+    @Test
+    fun `make ERC20 transfer with not ENS resolved success test`() {
+        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
+        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
         walletManager.initWalletConfig()
         walletManager.transferERC20Token("", Transaction()).test().assertComplete()
     }
@@ -507,6 +529,7 @@ class WalletManagerTest {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
+        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
         walletManager.initWalletConfig()
         walletManager.transferERC20Token("", Transaction()).test().assertError(error)
     }

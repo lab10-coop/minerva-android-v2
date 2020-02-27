@@ -65,7 +65,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `send transaction test success`() {
-        whenever(walletManager.sendTransaction(any(), any())).thenReturn(Completable.complete())
+        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
+        whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -76,7 +77,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `send transaction test error`() {
         val error = Throwable()
-        whenever(walletManager.sendTransaction(any(), any())).thenReturn(Completable.error(error))
+        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.error(error))
+        whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         viewModel.errorTransactionLiveData.observeLiveDataEvent(Event(error.message))

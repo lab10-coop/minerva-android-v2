@@ -6,6 +6,7 @@ import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -20,6 +21,8 @@ import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.listener.TransactionFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
+import minerva.android.values.transaction.fragment.adapter.RecipientAdapter
+import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.model.TransactionCost
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.widget.MinervaFlashbar
@@ -44,6 +47,7 @@ class TransactionsFragment : Fragment() {
         setupTexts()
         setupListeners()
         viewModel.getTransactionCosts()
+        prepareRecipients()
         prepareObservers()
         calculateTransactionCost()
         prepareTextListeners()
@@ -57,11 +61,14 @@ class TransactionsFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
+            //TODO should be refactored as a part of sending transaction stream (not needed to send it through Fragment)
             sendTransactionLiveData.observe(this@TransactionsFragment, EventObserver { saveWalletAction(WalletActionStatus.SENT) })
+            //TODO the same
             errorTransactionLiveData.observe(this@TransactionsFragment, EventObserver { saveWalletAction(WalletActionStatus.FAILED) })
             transactionCostLiveData.observe(this@TransactionsFragment, EventObserver { setTransactionsCosts(it) })
             errorLiveData.observe(this@TransactionsFragment, Observer { showErrorFlashBar() })
             loadingLiveData.observe(this@TransactionsFragment, EventObserver { if (it) showLoader() else hideLoader() })
+            //TODO can be removed when after stream refactor
             saveWalletActionLiveData.observe(this@TransactionsFragment, EventObserver { handleTransactionStatus(it) }
             )
         }
@@ -92,6 +99,20 @@ class TransactionsFragment : Fragment() {
                 sendButton.isEnabled = false
             }
         )
+    }
+
+    private fun prepareRecipients() {
+        viewModel.loadRecipients()
+        receiver.apply {
+            onItemClickListener = AdapterView.OnItemClickListener { parent, _, position, _ ->
+                (parent.getItemAtPosition(position) as Recipient).let { recipient -> receiver.setText(recipient.getData()) }
+            }
+            onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus -> if (hasFocus) receiver.showDropDown() }
+            setAdapter(RecipientAdapter(context, R.layout.recipient_list_row, viewModel.recipients))
+            setDropDownBackgroundResource(R.drawable.drop_down_menu_background)
+            dropDownVerticalOffset = DROP_DOWN_VERTICAL_OFFSET
+            threshold = MIN_SIGN_TO_FILTER
+        }
     }
 
     private fun hideLoader() {
@@ -239,5 +260,7 @@ class TransactionsFragment : Fragment() {
         fun newInstance() = TransactionsFragment()
 
         private const val ZER0 = "0"
+        private const val DROP_DOWN_VERTICAL_OFFSET = 8
+        private const val MIN_SIGN_TO_FILTER = 3
     }
 }

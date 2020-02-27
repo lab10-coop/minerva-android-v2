@@ -5,10 +5,10 @@ import minerva.android.walletmanager.model.defs.NetworkNameFull
 import minerva.android.walletmanager.model.defs.NetworkNameShort
 
 enum class Network(val full: String, val short: String, val url: String) {
-    ARTIS(NetworkNameFull.ATS, NetworkNameShort.ATS, BuildConfig.ATS_ERC20_ADDRESS),
-    ETHEREUM(NetworkNameFull.ETH, NetworkNameShort.ETH, BuildConfig.ETH_ERC20_ADDRESS),
-    POA(NetworkNameFull.POA, NetworkNameShort.POA, BuildConfig.POA_ERC20_ADDRESS),
-    XDAI(NetworkNameFull.XDAI, NetworkNameShort.XDAI, BuildConfig.XDAI_ERC20_ADDRESS);
+    ARTIS(NetworkNameFull.ATS, NetworkNameShort.ATS, BuildConfig.ATS_ADDRESS),
+    ETHEREUM(NetworkNameFull.ETH, NetworkNameShort.ETH, BuildConfig.ETH_ADDRESS),
+    POA(NetworkNameFull.POA, NetworkNameShort.POA, BuildConfig.POA_ADDRESS),
+    XDAI(NetworkNameFull.XDAI, NetworkNameShort.XDAI, BuildConfig.XDAI_ADDRESS);
 
     companion object {
         private val map = values().associateBy(Network::short)

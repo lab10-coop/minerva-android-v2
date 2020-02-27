@@ -27,11 +27,11 @@
         <item name="boxStrokeColor">@color/text_input_layout_color</item>
         <item name="boxStrokeWidth">@dimen/form_box_stroke_width</item>
         <item name="errorTextAppearance">@style/ErrorTextStyle</item>
-        <item name="boxCornerRadiusTopStart">@dimen/rounded_button_radius</item>
-        <item name="boxCornerRadiusTopEnd">@dimen/rounded_button_radius</item>
-        <item name="boxCornerRadiusBottomStart">@dimen/rounded_button_radius</item>
-        <item name="boxCornerRadiusBottomEnd">@dimen/rounded_button_radius</item>
-        <item name="android:textColorHint">@color/titledTextViewTitleColor</item>
+        <item name="boxCornerRadiusTopStart">@dimen/rounded_background_small</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/rounded_background_small</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/rounded_background_small</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/rounded_background_small</item>
+        <item name="android:textColorHint">@color/titleColor</item>
         <item name="android:layout_marginBottom">@dimen/margin_xsmall</item>
     </style>
 
@@ -43,6 +43,10 @@
         <item name="android:maxLines">1</item>
         <item name="android:maxLength">255</item>
         <item name="android:inputType">textCapSentences</item>
+        <item name="android:paddingRight">@dimen/margin_small</item>
+        <item name="android:paddingLeft">@dimen/margin_small</item>
+        <item name="android:paddingTop">@dimen/margin_normal</item>
+        <item name="android:paddingBottom">@dimen/margin_normal</item>
     </style>
 
     <style name="ValuePopupMenu" parent="Widget.MaterialComponents.PopupMenu">

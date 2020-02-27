@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_xsmall"
         android:fontFamily="@font/rubik_regular"
-        android:textColor="@color/titledTextViewTitleColor"
+        android:textColor="@color/titleColor"
         android:textSize="@dimen/text_small"
         app:layout_constraintBottom_toTopOf="@+id/type"
         app:layout_constraintLeft_toRightOf="@id/icon"

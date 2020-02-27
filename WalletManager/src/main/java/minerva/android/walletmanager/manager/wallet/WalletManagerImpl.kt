@@ -16,6 +16,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.BlockchainRepository
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.servicesApiProvider.api.ServicesApi
@@ -24,6 +25,12 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.assets.AssetManager
 import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.Markets
+import minerva.android.walletmanager.model.defs.ResponseState
+import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
+import minerva.android.walletmanager.model.mappers.mapTransactionCostPayloadToTransactionCost
+import minerva.android.walletmanager.model.mappers.mapTransactionToTransactionPayload
+import minerva.android.walletmanager.model.mappers.mapWalletConfigToWalletPayload
 import minerva.android.walletmanager.model.defs.*
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.storage.LocalStorage
@@ -84,14 +91,25 @@ class WalletManagerImpl(
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun sendTransaction(network: String, transaction: Transaction): Completable =
-        blockchainRepository.sendTransaction(network, mapTransactionToTransactionPayload(transaction))
+    override fun transferNativeCoin(network: String, transaction: Transaction): Completable =
+        blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
+            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
+                .onErrorReturn { String.Empty })
+            .map { saveRecipient(it, transaction.receiverKey) }
+            .ignoreElement()
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
-        blockchainRepository.transferERC20Token(
-            network,
-            mapTransactionToTransactionPayload(transaction)
-        )
+        blockchainRepository.transferERC20Token(network, mapTransactionToTransactionPayload(transaction))
+            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
+                .onErrorReturn { String.Empty })
+            .map { saveRecipient(it, transaction.receiverKey) }
+            .ignoreElement()
+
+    override fun loadRecipients(): List<Recipient> = localStorage.loadRecipients()
+
+    override fun resolveENS(ensName: String): Single<String> = blockchainRepository.resolveENS(ensName)
+
+    private fun saveRecipient(ensName: String, address: String) = localStorage.saveRecipient(Recipient(ensName, address))
 
     override fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCost> =
         blockchainRepository.getTransactionCosts(network, assetIndex)

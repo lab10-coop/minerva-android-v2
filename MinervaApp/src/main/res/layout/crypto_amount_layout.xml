@@ -9,7 +9,7 @@
         android:id="@+id/cryptoAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/titledTextViewBodyColor"
+        android:textColor="@color/bodyColor"
         android:textSize="@dimen/text_normal"
         android:gravity="end"
         tools:text="51.351" />
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_xxsmall"
-        android:textColor="@color/titledTextViewTitleColor"
+        android:textColor="@color/titleColor"
         android:textSize="@dimen/text_small"
         android:gravity="end"
         tools:text="€ 3.14159" />

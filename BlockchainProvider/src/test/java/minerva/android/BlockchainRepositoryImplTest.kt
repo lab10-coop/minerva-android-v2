@@ -105,7 +105,7 @@ class BlockchainRepositoryImplTest {
         sendTransaction.result = "0x2"
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.just(sendTransaction)
-        blockchainRepository.sendTransaction(ETH, TransactionPayload("address", "0x2313"))
+        blockchainRepository.transferNativeCoin(ETH, TransactionPayload("address", "0x2313"))
             .test()
             .assertComplete()
     }
@@ -119,7 +119,7 @@ class BlockchainRepositoryImplTest {
         sendTransaction.result = "0x2"
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.error(error)
-        blockchainRepository.sendTransaction(ETH, TransactionPayload("address", "0x2313"))
+        blockchainRepository.transferNativeCoin(ETH, TransactionPayload("address", "0x2313"))
             .test()
             .assertError(error)
     }

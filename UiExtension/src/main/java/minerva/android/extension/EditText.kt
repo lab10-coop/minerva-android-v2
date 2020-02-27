@@ -5,7 +5,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.MotionEvent
 import android.widget.EditText
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxbinding3.widget.textChangeEvents
 import io.reactivex.Observable
@@ -14,7 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import minerva.android.extension.validator.ValidationResult
 import java.util.concurrent.TimeUnit
 
-fun TextInputEditText.getValidationObservable(
+fun EditText.getValidationObservable(
     inputLayout: TextInputLayout? = null,
     checkFunction: (String) -> ValidationResult
 ): Observable<Boolean> =

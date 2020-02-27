@@ -7,8 +7,8 @@
     <color name="lightGray">#f6f6f9</color>
     <color name="darkGray">#3a3944</color>
     <color name="dividerGray">#C9C8D3</color>
-    <color name="titledTextViewTitleColor">#908F9D</color>
-    <color name="titledTextViewBodyColor">#3F3F4B</color>
+    <color name="titleColor">#908F9D</color>
+    <color name="bodyColor">#3F3F4B</color>
     <color name="borderGray">#B5B5B5</color>
     <color name="gray">#3F3F4B</color>
     <color name="alert_red">#CC2800</color>
