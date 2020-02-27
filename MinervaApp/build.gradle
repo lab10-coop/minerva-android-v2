@@ -73,7 +73,6 @@ dependencies {
     implementation koinDependencies.values()
     implementation rxDependencies.values()
 
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
 }

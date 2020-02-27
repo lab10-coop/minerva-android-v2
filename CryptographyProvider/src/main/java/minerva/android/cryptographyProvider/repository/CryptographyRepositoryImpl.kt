@@ -63,7 +63,6 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         JWTTools().createJWT(payload, getDIDKey(privateKey), KPSigner(privateKey))
 
-
     private fun getDIDKey(key: String) = "did:ethr:${KPSigner(key).getAddress()}"
 
     override fun validateMnemonic(mnemonic: String): List<String> {

@@ -366,7 +366,7 @@ class WalletManagerTest {
                 )
             )
         )
-        walletManager.decodeJwtToken("token").test()
+        walletManager.decodeQrCodeResponse("token").test()
             .assertComplete()
             .assertValue {
                 it.callback == "test" &&

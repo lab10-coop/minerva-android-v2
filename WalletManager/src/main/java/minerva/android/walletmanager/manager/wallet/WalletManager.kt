@@ -33,7 +33,8 @@ interface WalletManager {
     fun createValue(network: Network, valueName: String): Completable
     fun removeValue(index: Int): Completable
 
-    fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse>
+    fun decodeQrCodeResponse(token: String): Single<QrCodeResponse>
+    fun decodePaymentRequestToken(token: String): Single<Payment>
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
     fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
 

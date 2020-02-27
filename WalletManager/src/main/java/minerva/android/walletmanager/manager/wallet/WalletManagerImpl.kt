@@ -23,16 +23,9 @@ import minerva.android.servicesApiProvider.model.TokenPayload
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.assets.AssetManager
 import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.*
-import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
-import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.NETWORK
-import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.RECEIVER
-import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
-import minerva.android.walletmanager.model.mappers.mapTransactionCostPayloadToTransactionCost
-import minerva.android.walletmanager.model.mappers.mapTransactionToTransactionPayload
-import minerva.android.walletmanager.model.mappers.mapWalletConfigToWalletPayload
+import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils.getLastUsedFormatted
@@ -197,9 +190,13 @@ class WalletManagerImpl(
         return Completable.error(Throwable("Wallet config was not initialized"))
     }
 
-    override fun decodeJwtToken(jwtToken: String): Single<QrCodeResponse> =
-        cryptographyRepository.decodeJwtToken(jwtToken)
+    override fun decodeQrCodeResponse(token: String): Single<QrCodeResponse> =
+        cryptographyRepository.decodeJwtToken(token)
             .map { mapHashMapToQrCodeResponse(it) }
+
+    override fun decodePaymentRequestToken(token: String): Single<Payment> =
+        cryptographyRepository.decodeJwtToken(token)
+            .map { PaymentMapper.map(it) }
 
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
@@ -245,7 +242,7 @@ class WalletManagerImpl(
         }
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
-    
+
     /**
      *
      * return statement: Single<Pair<String, List<Pair<String, BigDecimal>>>>

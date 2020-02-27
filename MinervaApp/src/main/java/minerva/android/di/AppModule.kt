@@ -6,6 +6,7 @@ import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.main.MainViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
+import minerva.android.payment.PaymentRequestViewModel
 import minerva.android.services.ServicesViewModel
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.ScannerViewModel
@@ -42,4 +43,5 @@ private val appModules = module {
     viewModel { ServicesViewModel(get()) }
     viewModel { TransactionsViewModel(get(), get()) }
     viewModel { WalletActionsViewModel(get(), get()) }
+    viewModel { PaymentRequestViewModel(get()) }
 }

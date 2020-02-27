@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/top_corners_rounded_background"
+    android:elevation="@dimen/fingerprint_view_elevation"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/fingerPrintIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:src="@drawable/ic_fingerprint" />
+
+    <TextView
+        android:id="@+id/fingerPrintInstruction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_large"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_large"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center"
+        android:text="@string/fingerPrintInstruction"
+        android:textColor="@color/titledTextViewTitleColor"
+        android:textSize="@dimen/margin_normal" />
+
+    <TextView
+        android:id="@+id/cancelButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_normal"
+        android:background="@drawable/rounded_white_button"
+        android:fontFamily="@font/rubik_medium"
+        android:foreground="@drawable/ripple"
+        android:gravity="center"
+        android:padding="@dimen/margin_small"
+        android:text="@string/cancel"
+        android:textColor="@color/colorPrimary" />
+</LinearLayout>
