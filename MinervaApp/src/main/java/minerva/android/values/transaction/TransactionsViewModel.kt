@@ -123,6 +123,8 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
         }
     }
 
+    fun prepareCurrency() = if (assetIndex != Int.InvalidIndex) value.assets[assetIndex].nameShort else value.network
+
     private fun getValuesWalletAction(
         transaction: Transaction,
         network: String,
