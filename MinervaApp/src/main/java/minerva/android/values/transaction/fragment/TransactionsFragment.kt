@@ -59,6 +59,12 @@ class TransactionsFragment : Fragment() {
         validationDisposable?.dispose()
     }
 
+    fun setReceiver(result: String?) {
+        result?.let {
+            receiver.setText(result)
+        }
+    }
+
     private fun prepareObservers() {
         viewModel.apply {
             //TODO should be refactored as a part of sending transaction stream (not needed to send it through Fragment)
@@ -243,15 +249,9 @@ class TransactionsFragment : Fragment() {
     private fun getGasPrice() = BigDecimal(gasPriceEditText.text.toString())
 
     private fun setupTexts() {
-        viewModel.network.apply {
+        viewModel.prepareCurrency().apply {
             amountInputLayout.hint = "${getString(R.string.amount)}($this)"
             sendButton.text = "${getString(R.string.send)} $this"
-        }
-    }
-
-    fun setReceiver(result: String?) {
-        result?.let {
-            receiver.setText(result)
         }
     }
 

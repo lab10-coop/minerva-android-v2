@@ -43,9 +43,9 @@ class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @Dr
 
     private fun prepareView(value: Value, assetIndex: Int, @DrawableRes logoRes: Int) {
         assetLogo.setImageResource(logoRes)
-        value.assets[assetIndex].name.let {
-            assetName.text = it
-            sendButton.text = String.format(SEND_BUTTON_FORMAT, context.getString(R.string.send), it)
+        value.assets[assetIndex].let {
+            assetName.text = it.name
+            sendButton.text = String.format(SEND_BUTTON_FORMAT, context.getString(R.string.send), it.nameShort)
         }
     }
 

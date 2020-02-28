@@ -7,6 +7,8 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
 import minerva.android.extension.getCurrentFragment
+import minerva.android.extension.validator.Validator.HEX_PREFIX
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.listener.TransactionFragmentsListener
@@ -88,7 +90,14 @@ class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
 
     override fun setScanResult(text: String?) {
         onBackPressed()
-        (getCurrentFragment() as TransactionsFragment).setReceiver(text)
+        text?.let {
+            (getCurrentFragment() as TransactionsFragment).let { transactionFragment ->
+                text.replace(META_ADDRESS_SEPARATOR, String.Empty).substringBefore(HEX_PREFIX).apply {
+                    if (isCorrectNetwork(this)) transactionFragment.setReceiver(preparePrefixAddress(it, this))
+                    else transactionFragment.setReceiver(it)
+                }
+            }
+        }
     }
 
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
@@ -98,14 +107,20 @@ class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
         return super.onOptionsItemSelected(menuItem)
     }
 
+    private fun isCorrectNetwork(prefixAddress: String) = value.name.contains(prefixAddress, true)
+
+    private fun preparePrefixAddress(prefixAddress: String, prefix: String): String =
+        prefixAddress.removePrefix(prefix).replace(META_ADDRESS_SEPARATOR, String.Empty)
+
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
-    private fun prepareTitle() = if(assetIndex != Int.InvalidIndex) value.assets[assetIndex].name else value.network
+    private fun prepareTitle() = if (assetIndex != Int.InvalidIndex) value.assets[assetIndex].name else value.network
 
     companion object {
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val VALUE_INDEX = "value_index"
         const val ASSET_INDEX = "asset_index"
+        const val META_ADDRESS_SEPARATOR = ":"
     }
 }
