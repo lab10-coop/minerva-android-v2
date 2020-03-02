@@ -2,5 +2,5 @@ package minerva.android.payment.listener
 
 interface PaymentCommunicationListener {
     fun showConfirmTransactionScreen()
-    fun onResultOk()
+    fun onResultOk(signedData: String)
 }

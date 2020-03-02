@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_confirm_transaction.*
 import minerva.android.R
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.payment.PaymentRequestViewModel
 import minerva.android.payment.listener.FingerPrintListener
 import minerva.android.payment.listener.PaymentCommunicationListener
@@ -28,6 +29,7 @@ class ConfirmTransactionFragment : Fragment(), FingerPrintListener {
         super.onViewCreated(view, savedInstanceState)
         setPayment()
         setFingerPrintView()
+        viewModel.confirmPaymentLiveData.observe(this, EventObserver { listener.onResultOk(it) })
     }
 
     private fun setFingerPrintView() {
@@ -60,6 +62,6 @@ class ConfirmTransactionFragment : Fragment(), FingerPrintListener {
     }
 
     override fun onFingerPrintClicked() {
-        listener.onResultOk()
+        viewModel.confirmTransaction()
     }
 }

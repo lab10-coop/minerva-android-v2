@@ -7,5 +7,6 @@ data class Payment(
     val iban: String? = String.Empty,
     val recipient: String? = String.Empty,
     val serviceName: String? = String.Empty,
+    val shortName: String = String.Empty,
     val url: String? = String.Empty
 )

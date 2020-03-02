@@ -24,11 +24,22 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_request)
-//        TODO check if wallet is created, handle that case
-        //TODO check is bank service already exist and handle that
-        setupActionBar()
-        prepareObservers()
-        decodeToken()
+        checkIfWalletExists()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
+    }
+
+    private fun checkIfWalletExists() {
+        if (viewModel.isMasterKeyAvailable()) {
+            setupActionBar()
+            prepareObservers()
+            decodeToken()
+        } else {
+            finish()
+        }
     }
 
     private fun decodeToken() {
@@ -39,10 +50,11 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
 
     private fun prepareObservers() {
         viewModel.apply {
-            decodeTokenLiveData.observe(this@PaymentRequestActivity, EventObserver {
+            showConnectionRequestLiveData.observe(this@PaymentRequestActivity, EventObserver {
                 serviceName.text = it
                 showConnectionRequestFragment()
             })
+            showPaymentConfirmationLiveData.observe(this@PaymentRequestActivity, EventObserver { showConfirmTransactionScreen() })
             errorLiveData.observe(this@PaymentRequestActivity, EventObserver { finish() })
         }
     }
@@ -57,6 +69,7 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
 
     private fun showConnectionRequestFragment() {
         supportFragmentManager.beginTransaction().apply {
+            setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right)
             add(R.id.fragmentContainer, ConnectionRequestFragment.newInstance())
             commit()
         }
@@ -70,8 +83,7 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
         }
     }
 
-    override fun onResultOk() {
-        var signedData = "0x232425" //todo change to signed data mnr-144
+    override fun onResultOk(signedData: String) {
         setResult(Activity.RESULT_OK, Intent().putExtra(SIGNED_PAYLOAD, signedData))
         finish()
     }

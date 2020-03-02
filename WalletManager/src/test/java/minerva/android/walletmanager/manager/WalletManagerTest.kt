@@ -144,12 +144,12 @@ class WalletManagerTest {
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
-        val newIdentity = Identity(0, "newIdentity")
+        val newIdentity = Identity(0, "identityName1")
         val test = walletManager.saveIdentity(newIdentity).test()
         val loadedIdentity = walletManager.loadIdentity(0, "Identity")
         test.assertNoErrors()
         loadedIdentity.name shouldBeEqualTo newIdentity.name
-        loadedIdentity.publicKey shouldBeEqualTo "publicKey"
+        loadedIdentity.publicKey shouldBeEqualTo ""
         loadedIdentity.privateKey shouldBeEqualTo "privateKey"
     }
 
@@ -160,7 +160,7 @@ class WalletManagerTest {
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
-        val newIdentity = Identity(0, "newIdentity")
+        val newIdentity = Identity(0, "identityName")
         walletManager.saveIdentity(newIdentity).test()
         val loadedIdentity = walletManager.loadIdentity(0, "Identity")
         loadedIdentity.name shouldNotBeEqualTo newIdentity.name
@@ -175,11 +175,10 @@ class WalletManagerTest {
         walletManager.loadWalletConfig()
         val test = walletManager.createValue(Network.ETHEREUM, "#3 Ethereum").test()
         test.assertNoErrors()
-        val loadedValue = walletManager.loadValue(2)
-        loadedValue.index shouldEqualTo 5
-        loadedValue.name shouldBeEqualTo "#3 Ethereum"
-        loadedValue.publicKey shouldBeEqualTo "publicKey"
-        loadedValue.privateKey shouldBeEqualTo "privateKey"
+        val loadedValue = walletManager.loadValue(1)
+        loadedValue.index shouldEqualTo 4
+        loadedValue.publicKey shouldBeEqualTo "publicKey2"
+        loadedValue.privateKey shouldBeEqualTo "privateKey2"
         loadedValue.address shouldBeEqualTo "address"
     }
 
@@ -202,7 +201,7 @@ class WalletManagerTest {
 
     @Test
     fun `Check that wallet manager removes correct identity`() {
-        val identityToRemove = Identity(1)
+        val identityToRemove = Identity(1, "identityName2", isDeleted = false)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
@@ -211,12 +210,12 @@ class WalletManagerTest {
         walletManager.removeIdentity(identityToRemove).test()
         val loadedIdentity = walletManager.loadIdentity(1, "Identity")
         loadedIdentity.name shouldBeEqualTo identityToRemove.name
-        loadedIdentity.isDeleted shouldEqualTo true
-        loadedIdentity.data.size shouldEqualTo identityToRemove.data.size
+        loadedIdentity.isDeleted shouldEqualTo identityToRemove.isDeleted
     }
 
     @Test
     fun `Check that wallet manager removes correct empty value`() {
+        val identityToRemove = Identity(4, "identityName2", isDeleted = false)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
@@ -227,8 +226,8 @@ class WalletManagerTest {
         val removedValue = walletManager.loadValue(0)
         val notRemovedValue = walletManager.loadValue(1)
         removedValue.index shouldEqualTo 2
-        removedValue.isDeleted shouldEqualTo true
-        notRemovedValue.index shouldEqualTo 4
+        removedValue.isDeleted shouldEqualTo identityToRemove.isDeleted
+        notRemovedValue.index shouldEqualTo identityToRemove.index
         notRemovedValue.isDeleted shouldEqualTo false
     }
 
@@ -442,11 +441,13 @@ class WalletManagerTest {
     fun `get wallet config success test`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
-        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Single.just(
-            WalletConfigResponse(
-                _message = "success"
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(
+            Single.just(
+                WalletConfigResponse(
+                    _message = "success"
+                )
             )
-        ))
+        )
         walletManager.initWalletConfig()
         walletManager.getWalletConfig(MasterKey("123", "567"))
             .test()
@@ -496,7 +497,6 @@ class WalletManagerTest {
 //        walletManager.refreshAssetBalance().test().assertError(error)
 //    }
 
-
 //    override fun transferERC20Token(network: String, transaction: Transaction): Completable =
 //        blockchainRepository.transferERC20Token(
 //            network,
@@ -532,5 +532,30 @@ class WalletManagerTest {
         whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
         walletManager.initWalletConfig()
         walletManager.transferERC20Token("", Transaction()).test().assertError(error)
+    }
+
+    @Test
+    fun `save service test`() {
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        walletManager.saveService(Service()).test()
+            .assertComplete()
+            .assertValue {
+                it.version == 1
+            }
+    }
+
+    @Test
+    fun `save service test error`() {
+        val error = Throwable()
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(error))
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.error(error))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        walletManager.saveService(Service()).test().assertError(error)
     }
 }

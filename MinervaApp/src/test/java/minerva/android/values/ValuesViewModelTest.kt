@@ -10,6 +10,7 @@ import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Balance
+import minerva.android.walletmanager.model.WalletConfig
 import org.junit.Test
 import java.math.BigDecimal
 
@@ -44,7 +45,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `Remove value success`() {
-        whenever(walletManager.removeValue(any())).thenReturn(Completable.complete())
+        whenever(walletManager.removeValue(any())).thenReturn(Single.just(WalletConfig(1)))
         val test = walletManager.removeValue(any()).test()
         test.assertNoErrors()
     }
@@ -52,7 +53,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
     @Test
     fun `Remove value error`() {
         val error = Throwable("error")
-        whenever(walletManager.removeValue(any())).thenReturn(Completable.error(error))
+        whenever(walletManager.removeValue(any())).thenReturn(Single.error(error))
         val test = walletManager.removeValue(any()).test()
         test.assertError(error)
     }

@@ -35,12 +35,15 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
     fun createNewValue(network: Network, position: Int) {
-        _loadingLiveData.value = Event(true)
         valueName = prepareName(network, position)
         launchDisposable {
             walletManager.createValue(network, valueName)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { walletConfig, _ -> walletManager.walletConfigMutableLiveData.value = walletConfig }
                 .subscribeBy(
-                    onComplete = { _saveCompletedLiveData.value = Event(position) },
+                    onSuccess = { _saveCompletedLiveData.value = Event(position) },
                     onError = { _saveErrorLiveData.value = Event(Throwable("Unexpected creating value error: ${it.message}")) }
                 )
         }

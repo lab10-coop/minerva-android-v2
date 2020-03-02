@@ -13,6 +13,6 @@ annotation class WalletActionFields {
         const val AMOUNT = "amount"
         const val NETWORK = "network"
         const val RECEIVER = "receiver"
-        const val SERVICE = "service"
+        const val SERVICE_NAME = "service"
     }
 }

@@ -5,15 +5,19 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.wallet_action_item_list_row.view.*
 import minerva.android.R
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.WalletAction
+import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.UNDEFINED
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.AUTHORISED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.CHANGED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.LOG_IN
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.RECEIVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.utils.DateUtils
 
@@ -36,7 +40,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     }
 
     private fun showAction(name: String?, message: Int, actionIcon: Int) {
-        type.text = context.getString(message, "<$name>")
+        type.text = context.getString(message, "$name")
         showIcon(actionIcon)
     }
 
@@ -53,20 +57,26 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     }
 
     private fun showServices(walletAction: WalletAction) {
-        type.text = context.getString(
-            R.string.services_login_label,
-            "<${walletAction.fields[WalletActionFields.IDENTITY_NAME]}>",
-            "<${walletAction.fields[WalletActionFields.SERVICE]}>"
-        )
+        type.text = when (walletAction.status) {
+            AUTHORISED, SIGNED ->
+                context.getString(R.string.service_action_label, "${walletAction.fields[WalletActionFields.SERVICE_NAME]}")
+            LOG_IN ->
+                context.getString(
+                    R.string.services_login_label,
+                    "${walletAction.fields[WalletActionFields.IDENTITY_NAME]}",
+                    "${walletAction.fields[WalletActionFields.SERVICE_NAME]}"
+                )
+            else -> UNDEFINED
+        }
         showIcon(R.drawable.ic_services)
     }
 
     private fun showSentAction(walletAction: WalletAction, text: Int) {
         type.text = context.getString(
             text,
-            "<${walletAction.fields[WalletActionFields.AMOUNT]}",
-            "${walletAction.fields[WalletActionFields.NETWORK]}>",
-            "<${walletAction.fields[WalletActionFields.RECEIVER]}>"
+            "${walletAction.fields[WalletActionFields.AMOUNT]}",
+            "${walletAction.fields[WalletActionFields.NETWORK]}",
+            "${walletAction.fields[WalletActionFields.RECEIVER]}"
         )
         showIcon(R.drawable.ic_values)
     }
@@ -78,14 +88,17 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     fun setActionStatus(walletAction: WalletAction) {
         val lastUsed = DateUtils.getTimeFromTimeStamp(walletAction.lastUsed)
         context.run {
-            when (walletAction.status) {
-                REMOVED -> header.text = getString(R.string.wallet_action_header, getString(R.string.removed), lastUsed)
-                CHANGED -> header.text = getString(R.string.wallet_action_header, getString(R.string.changed), lastUsed)
-                ADDED -> header.text = getString(R.string.wallet_action_header, getString(R.string.added), lastUsed)
-                RECEIVED -> header.text = getString(R.string.wallet_action_header, getString(R.string.received), lastUsed)
-                SENT -> header.text = getString(R.string.wallet_action_header, getString(R.string.sent), lastUsed)
-                FAILED -> header.text = getString(R.string.wallet_action_header, getString(R.string.failed), lastUsed)
-                LOG_IN -> header.text = getString(R.string.wallet_action_header, getString(R.string.logIn), lastUsed)
+            header.text = when (walletAction.status) {
+                REMOVED -> getString(R.string.wallet_action_header, getString(R.string.removed), lastUsed)
+                CHANGED -> getString(R.string.wallet_action_header, getString(R.string.changed), lastUsed)
+                ADDED -> getString(R.string.wallet_action_header, getString(R.string.added), lastUsed)
+                RECEIVED -> getString(R.string.wallet_action_header, getString(R.string.received), lastUsed)
+                SENT -> getString(R.string.wallet_action_header, getString(R.string.sent), lastUsed)
+                FAILED -> getString(R.string.wallet_action_header, getString(R.string.failed), lastUsed)
+                LOG_IN -> getString(R.string.wallet_action_header, getString(R.string.logIn), lastUsed)
+                AUTHORISED -> getString(R.string.wallet_action_header, getString(R.string.authorised), lastUsed)
+                SIGNED -> getString(R.string.wallet_action_header, getString(R.string.signed), lastUsed)
+                else -> UNDEFINED
             }
         }
     }

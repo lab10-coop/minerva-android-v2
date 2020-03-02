@@ -37,9 +37,16 @@ class IdentitiesViewModel(
         identityName = identity.name
         launchDisposable {
             walletManager.removeIdentity(identity)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onComplete = { _removeIdentityLiveData.value = Event(Unit) },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onSuccess = {
+                        walletManager.walletConfigMutableLiveData.value = it
+                        _removeIdentityLiveData.value = Event(Unit)
+                    },
+                    onError = {
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }

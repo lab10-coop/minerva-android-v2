@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment
 import com.hitanshudhawan.spannablestringparser.spannify
 import kotlinx.android.synthetic.main.fragment_connection_request.*
 import minerva.android.R
+import minerva.android.extension.visibleOrGone
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.payment.PaymentRequestViewModel
 import minerva.android.payment.listener.PaymentCommunicationListener
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -29,6 +31,19 @@ class ConnectionRequestFragment : Fragment() {
         setConnectionLabel()
         setOnAllowButtonOnClickListener()
         setOnDenyButtonOnClickListener()
+        prepareObservers()
+    }
+
+    private fun prepareObservers() {
+        viewModel.apply {
+            newServiceMutableLiveData.observe(this@ConnectionRequestFragment, EventObserver { listener.showConfirmTransactionScreen() })
+            loadingLiveData.observe(this@ConnectionRequestFragment, EventObserver { handleLoader(it) })
+        }
+    }
+
+    private fun handleLoader(shouldShow: Boolean) {
+        requestProgressBar.visibleOrGone(shouldShow)
+        progressBarGroup.visibleOrGone(!shouldShow)
     }
 
     override fun onAttach(context: Context) {
@@ -38,7 +53,7 @@ class ConnectionRequestFragment : Fragment() {
 
     private fun setOnAllowButtonOnClickListener() {
         allowButton.setOnClickListener {
-            listener.showConfirmTransactionScreen()
+            viewModel.connectToService()
         }
     }
 
@@ -54,7 +69,7 @@ class ConnectionRequestFragment : Fragment() {
         connectionLabel.text = label
     }
 
-    companion  object {
+    companion object {
         @JvmStatic
         fun newInstance() = ConnectionRequestFragment()
     }

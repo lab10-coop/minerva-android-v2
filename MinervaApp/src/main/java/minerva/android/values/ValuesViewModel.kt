@@ -75,8 +75,9 @@ class ValuesViewModel(private val walletManager: WalletManager, private val wall
             walletManager.removeValue(index)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnEvent { walletConfig, _ -> walletManager.walletConfigMutableLiveData.value = walletConfig }
                 .subscribeBy(
-                    onComplete = { _removeValueLiveData.value = Event(Unit) },
+                    onSuccess = { _removeValueLiveData.value = Event(Unit) },
                     onError = {
                         Timber.e("Removing value with index $index failure")
                         _errorLiveData.value = Event(Throwable(it.message))

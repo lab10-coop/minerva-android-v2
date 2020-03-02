@@ -38,11 +38,16 @@ class ServicesAdapter : RecyclerView.Adapter<ServiceViewHolder>() {
 class ServiceViewHolder(private val view: View, private val viewGroup: ViewGroup) : RecyclerView.ViewHolder(view) {
     fun bindData(service: Service) {
         view.apply {
-            if (service.type == ServiceType.MINERVA) {
-                Glide.with(viewGroup.context).load(R.drawable.ic_minerva_icon).into(serviceLogo)
+            when (service.type) {
+                ServiceType.DEMO_LOGIN -> showIcon(R.mipmap.ic_unicorn)
+                ServiceType.M27 -> showIcon(R.mipmap.ic_m27)
             }
             serviceName.text = service.name
             lastUsed.text = "${context.getString(R.string.last_used)} ${service.lastUsed}"
         }
+    }
+
+    private fun View.showIcon(icon: Int) {
+        Glide.with(viewGroup.context).load(icon).into(serviceLogo)
     }
 }
