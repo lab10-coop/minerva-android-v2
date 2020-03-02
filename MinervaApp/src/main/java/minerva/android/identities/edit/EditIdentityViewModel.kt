@@ -45,13 +45,12 @@ class EditIdentityViewModel(private val walletManager: WalletManager, private va
         identityName = identity.name
         launchDisposable {
             walletManager.saveIdentity(identity)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnEvent { walletConfig, _ -> walletManager.walletConfigMutableLiveData.value = walletConfig }
                 .subscribeBy(
-                    onComplete = {
-                        _saveCompletedLiveData.value = Event(identity.index)
-                    },
-                    onError = {
-                        _saveErrorLiveData.value = Event(Throwable(it.message))
-                    }
+                    onSuccess = { _saveCompletedLiveData.value = Event(identity.index) },
+                    onError = { _saveErrorLiveData.value = Event(Throwable(it.message)) }
                 )
         }
     }

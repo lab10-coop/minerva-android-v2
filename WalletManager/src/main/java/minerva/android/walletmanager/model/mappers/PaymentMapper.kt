@@ -11,6 +11,7 @@ object PaymentMapper : Mapper<Map<String, Any?>, Payment> {
             input[PaymentRequest.IBAN] as String,
             input[PaymentRequest.RECIPIENT] as String,
             input[PaymentRequest.SERVICE_NAME] as String,
+            input[PaymentRequest.SERVICE_SHORT_NAME] as String,
             input[PaymentRequest.URL] as String
         )
 }

@@ -28,20 +28,18 @@ class CreateWalletViewModel(private val walletManager: WalletManager) : ViewMode
     val masterKeyErrorLiveData: LiveData<Event<String>> get() = _masterKeyErrorLiveData
 
     fun createMasterSeed() {
-        _loadingLiveData.value = Event(true)
         walletManager.createMasterKeys { error, privateKey, publicKey ->
             if (error == null) {
                 disposable = walletManager.createWalletConfig(MasterKey(publicKey, privateKey))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSubscribe { _loadingLiveData.value = Event(true) }
                     .doOnEvent { _loadingLiveData.value = Event(false) }
                     .subscribeBy(
-                        onComplete = {
-                            _createWalletMutableLiveData.value = Event(Unit)
-                        },
+                        onComplete = { _createWalletMutableLiveData.value = Event(Unit) },
                         onError = {
                             _errorLiveData.value = Event(it)
-//                            _createWalletMutableLiveData.value = Event(Unit) uncomment when offline app is needed, test that
+//                            _createWalletMutableLiveData.value = Event(Unit) uncomment when offline app is needed
                         }
                     )
             } else {

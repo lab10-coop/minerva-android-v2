@@ -2,7 +2,6 @@ package minerva.android.services.login.identity
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
@@ -11,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidVersion
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
@@ -92,14 +92,23 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
             walletManager.painlessLogin(callback, jwtToken, identity)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .doOnEvent { walletConfig, _ ->
+                    updateWalletConfig(walletConfig)
+                    _loadingLiveData.value = Event(false)
+                }
                 .subscribeBy(
-                    onComplete = { _loginMutableLiveData.value = Event(Unit) },
+                    onSuccess = { _loginMutableLiveData.value = Event(Unit) },
                     onError = {
                         Timber.d(it)
                         _errorMutableLiveData.value = Event(it)
                     }
                 )
+        }
+    }
+
+    private fun updateWalletConfig(walletConfig: WalletConfig) {
+        if (walletConfig.version != Int.InvalidVersion) {
+            walletManager.walletConfigMutableLiveData.value = walletConfig
         }
     }
 
@@ -126,7 +135,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
             DateUtils.timestamp,
             hashMapOf(
                 Pair(WalletActionFields.IDENTITY_NAME, identityName),
-                Pair(WalletActionFields.SERVICE, serviceName)
+                Pair(WalletActionFields.SERVICE_NAME, serviceName)
             )
         )
     }

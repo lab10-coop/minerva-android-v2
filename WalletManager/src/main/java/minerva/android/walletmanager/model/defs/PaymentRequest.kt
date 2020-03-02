@@ -8,7 +8,9 @@ annotation class PaymentRequest {
         const val RECIPIENT = "minerva.android.CP_RECIPIENT"
         const val IBAN = "minerva.android.CP_IBAN"
         const val SERVICE_NAME = "minerva.android.CP_SERVICE_NAME"
+        const val SERVICE_SHORT_NAME = "minerva.android.CP_SERVICE_SHORT_NAME"
         const val URL = "minerva.android.CP_SERVICE_URL"
         const val SIGNED_PAYLOAD = "signedPayload"
+        const val UNDEFINED = ""
     }
 }
