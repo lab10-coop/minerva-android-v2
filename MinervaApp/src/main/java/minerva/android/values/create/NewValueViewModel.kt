@@ -6,12 +6,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidVersion
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletAction
+import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -22,11 +24,8 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
 
     private var valueName: String = String.Empty
 
-    private val _saveCompletedLiveData = MutableLiveData<Event<Int>>()
-    val saveCompletedLiveData: LiveData<Event<Int>> get() = _saveCompletedLiveData
-
-    private val _saveWalletActionLiveData = MutableLiveData<Event<Unit>>()
-    val saveWalletActionLiveData: LiveData<Event<Unit>> get() = _saveWalletActionLiveData
+    private val _createValueLiveData = MutableLiveData<Event<Unit>>()
+    val createValueLiveData: LiveData<Event<Unit>> get() = _createValueLiveData
 
     private val _saveErrorLiveData = MutableLiveData<Event<Throwable>>()
     val saveErrorLiveData: LiveData<Event<Throwable>> get() = _saveErrorLiveData
@@ -38,30 +37,27 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
         valueName = prepareName(network, position)
         launchDisposable {
             walletManager.createValue(network, valueName)
+                .flatMap {
+                    walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey)
+                        .toSingleDefault(it)
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { walletConfig, _ -> walletManager.walletConfigMutableLiveData.value = walletConfig }
+                .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onSuccess = { _saveCompletedLiveData.value = Event(position) },
-                    onError = { _saveErrorLiveData.value = Event(Throwable("Unexpected creating value error: ${it.message}")) }
+                    onSuccess = {
+                        _createValueLiveData.value = Event(Unit)
+                        updateWalletConfig(it)
+                    },
+                    onError = { _saveErrorLiveData.value = Event(it) }
                 )
         }
     }
 
-    fun saveWalletAction() {
-        launchDisposable {
-            walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = {
-                        _saveWalletActionLiveData.value = Event(Unit)
-                    }, onError = {
-                        _saveErrorLiveData.value = Event(it)
-                    }
-                )
+    private fun updateWalletConfig(walletConfig: WalletConfig) {
+        if (walletConfig.version != Int.InvalidVersion) {
+            walletManager.walletConfigMutableLiveData.value = walletConfig
         }
     }
 

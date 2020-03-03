@@ -54,6 +54,7 @@ ext {
     rxbindingVersion = '3.0.0-alpha2'
 
     spannableStringVersion = '1.1.0'
+    biometricVersion = '1.0.1'
 
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
@@ -89,12 +90,11 @@ ext {
             rxRelay  : "com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion"
     ]
 
-    coroutinesDependencies =
-            [
-                    core     : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion",
-                    android  : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion",
-                    viewModel: "androidx.lifecycle:lifecycle-viewmodel-ktx:$viewModelScopeVersion"
-            ]
+    coroutinesDependencies = [
+            core     : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion",
+            android  : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion",
+            viewModel: "androidx.lifecycle:lifecycle-viewmodel-ktx:$viewModelScopeVersion"
+    ]
 
     retrofitDependencies = [
             retrofit         : "com.squareup.retrofit2:retrofit:$retrofitVersion",
@@ -135,13 +135,15 @@ ext {
     ]
 
     uiDependencies = [
-            glide   : "com.github.bumptech.glide:glide:$glideVersion",
-            flashbar: "com.andrognito.flashbar:flashbar:$flashVersion",
-            spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion"
+            glide          : "com.github.bumptech.glide:glide:$glideVersion",
+            flashbar       : "com.andrognito.flashbar:flashbar:$flashVersion",
+            spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion",
+            biometric      : "androidx.biometric:biometric:$biometricVersion"
+
     ]
 
     blockChainDependencies = [
-            w3jCore:    "org.web3j:core:$w3jVersion",
-            w3jContract:"org.web3j:contracts:$w3jVersion"
+            w3jCore    : "org.web3j:core:$w3jVersion",
+            w3jContract: "org.web3j:contracts:$w3jVersion"
     ]
 }

@@ -6,6 +6,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.InvalidVersion
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
@@ -30,38 +32,25 @@ class IdentitiesViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
-    private val _removeIdentityLiveData = MutableLiveData<Event<Unit>>()
-    val removeIdentityLiveData: LiveData<Event<Unit>> get() = _removeIdentityLiveData
-
     fun removeIdentity(identity: Identity) {
         identityName = identity.name
         launchDisposable {
             walletManager.removeIdentity(identity)
+                .flatMap {
+                    walletActionsRepository.saveWalletActions(getRemovedIdentityWalletAction(), walletManager.masterKey).toSingleDefault(it)
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        walletManager.walletConfigMutableLiveData.value = it
-                        _removeIdentityLiveData.value = Event(Unit)
-                    },
-                    onError = {
-                        _errorLiveData.value = Event(it)
-                    }
+                    onSuccess = { updateValidWalletConfig(it) },
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
 
-    fun saveRemoveIdentityWallet() {
-        launchDisposable {
-            walletActionsRepository.saveWalletActions(getRemovedIdentityWalletAction(), walletManager.masterKey)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { /*Handled in wallet manager */ },
-                    onError = {
-                        _errorLiveData.value = Event(Throwable(it))
-                    }
-                )
+    private fun updateValidWalletConfig(walletConfig: WalletConfig) {
+        if (walletConfig.version != Int.InvalidVersion) {
+            walletManager.walletConfigMutableLiveData.value = walletConfig
         }
     }
 

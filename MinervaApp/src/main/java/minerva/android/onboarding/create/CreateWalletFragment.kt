@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_create_wallet.*
 import minerva.android.R
-import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
@@ -85,7 +84,7 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
         valuesItem.apply {
             setIcon(R.drawable.ic_values)
             setTitle(getString(R.string.values))
-            setContent(getString(R.string.values_onstruction))
+            setContent(getString(R.string.values_instruction))
         }
     }
 

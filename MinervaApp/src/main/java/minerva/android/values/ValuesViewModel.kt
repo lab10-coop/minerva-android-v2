@@ -6,6 +6,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidVersion
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
@@ -36,18 +37,13 @@ class ValuesViewModel(private val walletManager: WalletManager, private val wall
     private val _assetBalanceLiveData = MutableLiveData<Map<String, List<Asset>>>()
     val assetBalanceLiveData: LiveData<Map<String, List<Asset>>> get() = _assetBalanceLiveData
 
-    private val _removeValueLiveData = MutableLiveData<Event<Unit>>()
-    val removeValueLiveData: LiveData<Event<Unit>> get() = _removeValueLiveData
-
     fun refreshBalances() =
         launchDisposable {
             walletManager.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        _balanceLiveData.value = it
-                    },
+                    onSuccess = { _balanceLiveData.value = it },
                     onError = {
                         _errorLiveData.value = Event(it)
                         Timber.d("Refresh balance error: ${it.message}")
@@ -73,11 +69,14 @@ class ValuesViewModel(private val walletManager: WalletManager, private val wall
         valueName = name
         launchDisposable {
             walletManager.removeValue(index)
+                .flatMap {
+                    walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey)
+                        .toSingleDefault(it)
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { walletConfig, _ -> walletManager.walletConfigMutableLiveData.value = walletConfig }
                 .subscribeBy(
-                    onSuccess = { _removeValueLiveData.value = Event(Unit) },
+                    onSuccess = { updateWalletConfig(it) },
                     onError = {
                         Timber.e("Removing value with index $index failure")
                         _errorLiveData.value = Event(Throwable(it.message))
@@ -86,17 +85,9 @@ class ValuesViewModel(private val walletManager: WalletManager, private val wall
         }
     }
 
-    fun saveRemoveValueWalletAction() {
-        launchDisposable {
-            walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { /*Handled in wallet manager */ },
-                    onError = {
-                        _errorLiveData.value = Event(Throwable(it.message))
-                    }
-                )
+    private fun updateWalletConfig(walletConfig: WalletConfig) {
+        if (walletConfig.version != Int.InvalidVersion) {
+            walletManager.walletConfigMutableLiveData.value = walletConfig
         }
     }
 

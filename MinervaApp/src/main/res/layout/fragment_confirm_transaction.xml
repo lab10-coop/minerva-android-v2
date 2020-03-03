@@ -142,12 +142,4 @@
         app:layout_constraintBottom_toTopOf="@+id/connectionRequestView"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <minerva.android.widget.FingerPrintView
-        android:id="@+id/fingerPrint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/top_corners_rounded_background"
-        android:elevation="@dimen/fingerprint_view_elevation"
-        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
