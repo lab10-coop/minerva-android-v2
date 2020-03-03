@@ -47,9 +47,8 @@ class NewValueFragment : Fragment() {
 
     private fun initializeFragment() {
         viewModel.apply {
-            saveCompletedLiveData.observe(this@NewValueFragment, EventObserver { saveWalletAction() })
+            createValueLiveData.observe(this@NewValueFragment, EventObserver { activity?.finish() })
             loadingLiveData.observe(this@NewValueFragment, EventObserver { handleLoader(it) })
-            saveWalletActionLiveData.observe(this@NewValueFragment, EventObserver { activity?.finish() })
             saveErrorLiveData.observe(this@NewValueFragment, EventObserver { showError(it) })
         }
         arguments?.let {
@@ -81,7 +80,7 @@ class NewValueFragment : Fragment() {
     }
 
     private fun showError(throwable: Throwable) {
-        Timber.e(throwable.message)
+        Timber.e(throwable)
         MinervaFlashbar.show(requireActivity(), getString(R.string.creating_value_error), getString(R.string.unexpected_error))
     }
 

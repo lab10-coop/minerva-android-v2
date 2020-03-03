@@ -1,7 +1,11 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.mappers
 
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ValuePayload
+import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.WalletConfigTestValues
 import minerva.android.walletmanager.model.mappers.*
 import org.amshove.kluent.shouldEqual
 import org.junit.Test

@@ -16,7 +16,7 @@
     <string name="restore_wallet">Restore your wallet</string>
     <string name="instruction">What you can do with your new Minerva digital wallet:</string>
     <string name="identity_instruction">Create new identities and use them to log in to different services.</string>
-    <string name="values_onstruction">Own digital assets and use them for  transactions and trading.</string>
+    <string name="values_instruction">Own digital assets and use them for  transactions and trading.</string>
     <string name="services_instruction">Have a control over all the services you are sharing your data with.</string>
     <string name="enter_your_backup_words">Enter your backup words.</string>
     <string name="edit">Edit</string>
@@ -130,6 +130,7 @@
     <string name="confirm_transaction">Confirm transaction</string>
     <string name="recipient">Recipient</string>
     <string name="iban">IBAN</string>
-    <string name="fingerPrintInstruction">Confirm this operation with your fingerprint</string>
+    <string name="finger_print_instruction">Confirm this operation with your fingerprint</string>
     <string name="cancel">Cancel</string>
+    <string name="confirm_payment">Confirm payment</string>
 </resources>

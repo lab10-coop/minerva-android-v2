@@ -23,7 +23,7 @@
         android:layout_marginEnd="@dimen/margin_large"
         android:fontFamily="@font/rubik_regular"
         android:gravity="center"
-        android:text="@string/fingerPrintInstruction"
+        android:text="@string/finger_print_instruction"
         android:textColor="@color/titleColor"
         android:textSize="@dimen/margin_normal" />
 

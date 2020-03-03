@@ -79,7 +79,6 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
                 noDataMessage.visibleOrGone(it.hasActiveValue)
                 valueAdapter.updateList(it.values)
             })
-            removeValueLiveData.observe(this@ValuesFragment, EventObserver{ saveRemoveValueWalletAction() })
             balanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateBalances(it) })
             assetBalanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateAssetBalances(it) })
             errorLiveData.observe(this@ValuesFragment, Observer {

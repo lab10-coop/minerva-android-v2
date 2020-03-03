@@ -54,7 +54,6 @@ class IdentitiesFragment : Fragment() {
         viewModel.apply {
             walletConfigLiveData.observe(this@IdentitiesFragment, Observer { identityAdapter.updateList(it.identities.toMutableList()) })
             errorLiveData.observe(this@IdentitiesFragment, EventObserver { showError(it) })
-            removeIdentityLiveData.observe(this@IdentitiesFragment, EventObserver { saveRemoveIdentityWallet() })
         }
     }
 
