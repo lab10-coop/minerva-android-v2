@@ -1,17 +1,18 @@
 package minerva.android.walletmanager.model.defs
 
 import androidx.annotation.StringDef
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_ARTIS_NAME
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_ETHEREUM_NAME
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_IDENTITY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_NAME
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PHONE
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PRIVATE_KEY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PUBLIC_KEY
 
 @Retention(AnnotationRetention.SOURCE)
-@StringDef(DEFAULT_IDENTITY_NAME, DEFAULT_ARTIS_NAME, DEFAULT_ETHEREUM_NAME)
+@StringDef(DEFAULT_IDENTITY_NAME, INCOGNITO_IDENTITY, INCOGNITO_NAME, INCOGNITO_PHONE, INCOGNITO_PRIVATE_KEY, INCOGNITO_PUBLIC_KEY)
 annotation class DefaultWalletConfigFields {
     companion object {
         const val DEFAULT_IDENTITY_NAME = "Identity #1"
-        const val DEFAULT_ARTIS_NAME = "#1 ARTIS"
-        const val DEFAULT_ETHEREUM_NAME = "#2 Ethereum"
         const val INCOGNITO_IDENTITY = "Incognito Identity"
         const val INCOGNITO_NAME = "Incognito mode"
         const val INCOGNITO_PHONE = "000000000"

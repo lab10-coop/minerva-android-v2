@@ -25,7 +25,7 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.wallet.WalletManagerImpl
 import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.NetworkNameShort
+import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.*
 import org.junit.After
@@ -69,8 +69,8 @@ class WalletManagerTest {
             Identity(3, "identityName3", "", "privateKey", data)
         ),
         listOf(
-            Value(2, "publicKey1", "privateKey1", "address", network = NetworkNameShort.ETH),
-            Value(4, "publicKey2", "privateKey2", "address", network = NetworkNameShort.ETH)
+            Value(2, "publicKey1", "privateKey1", "address", network = NetworkShortName.ETH),
+            Value(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ETH)
         )
     )
 

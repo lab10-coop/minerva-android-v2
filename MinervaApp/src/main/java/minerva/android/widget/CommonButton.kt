@@ -10,7 +10,6 @@ import minerva.android.R
 
 private const val INTENT_TYPE = "text/plain"
 private const val FORMAT = "text label"
-private const val TITLE = "Share via"
 
 fun setupShareButton(shareButton: ActionButton, stringToShare: String) {
     shareButton.apply {
@@ -20,7 +19,7 @@ fun setupShareButton(shareButton: ActionButton, stringToShare: String) {
             Intent(Intent.ACTION_SEND).run {
                 type = INTENT_TYPE
                 putExtra(Intent.EXTRA_TEXT, stringToShare)
-                context.startActivity(Intent.createChooser(this, TITLE))
+                context.startActivity(Intent.createChooser(this, context.getString(R.string.share_via)))
             }
         }
     }

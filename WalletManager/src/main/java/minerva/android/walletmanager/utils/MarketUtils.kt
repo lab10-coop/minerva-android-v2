@@ -6,7 +6,7 @@ import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.Value
 import minerva.android.walletmanager.model.defs.ExchangeRate
 import minerva.android.walletmanager.model.defs.Markets
-import minerva.android.walletmanager.model.defs.NetworkNameShort
+import minerva.android.walletmanager.model.defs.NetworkShortName
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -21,10 +21,9 @@ object MarketUtils {
             cryptoBalances.forEachIndexed { index, cryptoBalance ->
                 if (cryptoBalance.first == values?.get(index)?.address) {
                     when (values[index].network) {
-                        NetworkNameShort.ATS -> getBalance(this, cryptoBalance, ExchangeRate.ATS_EURO)
-                        NetworkNameShort.ETH -> getBalance(this, cryptoBalance, getRate(markets)[Markets.ETH_EUR])
-                        NetworkNameShort.POA -> getBalance(this, cryptoBalance, getRate(markets)[Markets.POA_EUR])
-                        NetworkNameShort.XDAI -> getBalance(this, cryptoBalance, ExchangeRate.XDAI_EURO)
+                        NetworkShortName.ATS -> getBalance(this, cryptoBalance, ExchangeRate.ATS_EURO)
+                        NetworkShortName.ETH -> getBalance(this, cryptoBalance, getRate(markets)[Markets.ETH_EUR])
+                        NetworkShortName.POA -> getBalance(this, cryptoBalance, getRate(markets)[Markets.POA_EUR])
                     }
                 }
             }

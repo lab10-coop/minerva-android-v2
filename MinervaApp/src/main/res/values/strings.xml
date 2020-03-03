@@ -133,4 +133,6 @@
     <string name="finger_print_instruction">Confirm this operation with your fingerprint</string>
     <string name="cancel">Cancel</string>
     <string name="confirm_payment">Confirm payment</string>
+    <string name="share_via">Share via</string>
+    <string name="soon">Soon</string>
 </resources>

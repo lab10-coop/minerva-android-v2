@@ -130,8 +130,10 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
         icon.setImageResource(getNetworkIcon(Network.fromString(value.network)))
         valueName.text = value.name
-        cryptoShortName.text = value.network
-        cryptoShortName.setTextColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
+        cryptoShortName.run {
+            text = value.network
+            setTextColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
+        }
         amountView.setAmounts(value.balance, value.fiatBalance)
         sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
     }

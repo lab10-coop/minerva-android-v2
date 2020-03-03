@@ -13,7 +13,7 @@ import minerva.android.configProvider.api.MinervaApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepositoryImpl
 import minerva.android.walletmanager.model.MasterKey
-import minerva.android.walletmanager.utils.PublicKeyUtils.encodePublicKey
+import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import org.amshove.kluent.mock
 import org.junit.After
 import org.junit.Before

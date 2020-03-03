@@ -7,12 +7,12 @@ import java.math.BigDecimal
 
 object AssetManager {
 
-    fun getAssets(network: Network): List<Asset> =
+    private fun getAssets(network: Network): List<Asset> =
         when (network) {
             Network.ARTIS -> AssetsSet.artisAssets
             Network.ETHEREUM -> AssetsSet.ethereumAssets
             Network.POA -> AssetsSet.poaAssets
-            Network.XDAI -> AssetsSet.xDaiAssets
+            else -> TODO("Implement the rest of assets for networks")
         }
 
     fun getAssetAddresses(network: Network): Pair<String, List<String>> =

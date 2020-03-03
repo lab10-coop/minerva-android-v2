@@ -19,11 +19,11 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         views.clear()
         removeAllViews()
         map.forEach { (key, value) ->
-            val ttv = TitledTextView(context)
-            ttv.setTitleAndBody(key, value)
-            setDefaultTopPadding(ttv)
-            views.add(ttv)
-            addView(ttv)
+            val titledTextView = TitledTextView(context)
+            titledTextView.setTitleAndBody(key, value)
+            setDefaultTopPadding(titledTextView)
+            views.add(titledTextView)
+            addView(titledTextView)
         }
         prepareDescription(map)
         close()

@@ -17,6 +17,7 @@ import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.utils.CryptoUtils
 import minerva.android.walletmanager.utils.DateUtils
 
 class NewValueViewModel(private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository) :
@@ -34,7 +35,7 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
     fun createNewValue(network: Network, position: Int) {
-        valueName = prepareName(network, position)
+        valueName = CryptoUtils.prepareName(network, position)
         launchDisposable {
             walletManager.createValue(network, valueName)
                 .flatMap {
@@ -68,10 +69,4 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.VALUE_NAME, valueName))
         )
-
-    private fun prepareName(network: Network, position: Int) = String.format(VALUE_NAME_PATTERN, position, network.full)
-
-    companion object {
-        private const val VALUE_NAME_PATTERN = "#%d %s"
-    }
 }
