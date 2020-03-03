@@ -14,7 +14,7 @@ import minerva.android.walletmanager.model.mappers.configs.WalletActionsMapper
 import minerva.android.walletmanager.model.mappers.payloads.WalletActionPayloadMapper
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.utils.DateUtils.isTheSameDay
-import minerva.android.walletmanager.utils.PublicKeyUtils.encodePublicKey
+import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 
 class WalletActionsRepositoryImpl(
     private val minervaApi: MinervaApi,

@@ -11,7 +11,7 @@ fun getNetworkColor(network: Network, opacity: Boolean = false): Int {
         Network.ARTIS -> ARTIS_ARRAY_POSITION
         Network.ETHEREUM -> ETHEREUM_ARRAY_POSITION
         Network.POA -> POA_ARRAY_POSITION
-        Network.XDAI -> XDAI_ARRAY_POSITION
+        else -> TODO("Implement the rest of colors for networks")
     }
     return if (opacity) networkOpacityColor[position]
     else networkColor[position]
@@ -22,7 +22,10 @@ fun getNetworkIcon(network: Network): Int =
         Network.ARTIS -> R.drawable.ic_artis
         Network.ETHEREUM -> R.drawable.ic_ethereum
         Network.POA -> R.drawable.ic_poa
-        Network.XDAI -> R.drawable.ic_xdai
+        Network.LUKSO -> R.drawable.ic_lukso
+        Network.RSK -> R.drawable.ic_rsk
+        Network.ETHEREUM_CLASSIC -> R.drawable.ic_ethereum_classic
+
     }
 
 //TODO add missing asset Icons
@@ -40,18 +43,15 @@ fun getAssetIcon(asset: Asset): Int =
 private val networkColor = listOf(
     R.color.artis,
     R.color.ethereum,
-    R.color.poa,
-    R.color.xDai
+    R.color.poa
 )
 
 private val networkOpacityColor = listOf(
     R.color.artisOpacity,
     R.color.ethereumOpacity,
-    R.color.poaOpacity,
-    R.color.xDaiOpacity
+    R.color.poaOpacity
 )
 
 private const val ARTIS_ARRAY_POSITION = 0
 private const val ETHEREUM_ARRAY_POSITION = 1
 private const val POA_ARRAY_POSITION = 2
-private const val XDAI_ARRAY_POSITION = 3

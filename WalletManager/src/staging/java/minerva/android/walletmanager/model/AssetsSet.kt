@@ -15,8 +15,6 @@ object AssetsSet {
     //TODO need to be implemented for the rest of blockchains
     val poaAssets: List<Asset> = listOf()
 
-    val xDaiAssets: List<Asset> = listOf()
-
     val allAssets: List<Asset>
-            get() = artisAssets.union(ethereumAssets).union(poaAssets).union(xDaiAssets).toList()
+            get() = artisAssets.union(ethereumAssets).union(poaAssets).toList()
 }

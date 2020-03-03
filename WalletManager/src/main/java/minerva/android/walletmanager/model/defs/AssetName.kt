@@ -11,7 +11,6 @@ import minerva.android.walletmanager.model.defs.AssetName.Companion.SSAI
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(SSAI, SFAU, SAI, DAI, ATS20, FAU)
 annotation class AssetName {
-    //TODO get full names for all assets
     companion object {
         //ARTIS
         //main

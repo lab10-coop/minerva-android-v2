@@ -1,14 +1,18 @@
 package minerva.android.walletmanager.model
 
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.BuildConfig
-import minerva.android.walletmanager.model.defs.NetworkNameFull
-import minerva.android.walletmanager.model.defs.NetworkNameShort
+import minerva.android.walletmanager.model.defs.NetworkFullName
+import minerva.android.walletmanager.model.defs.NetworkShortName
 
 enum class Network(val full: String, val short: String, val url: String) {
-    ARTIS(NetworkNameFull.ATS, NetworkNameShort.ATS, BuildConfig.ATS_ADDRESS),
-    ETHEREUM(NetworkNameFull.ETH, NetworkNameShort.ETH, BuildConfig.ETH_ADDRESS),
-    POA(NetworkNameFull.POA, NetworkNameShort.POA, BuildConfig.POA_ADDRESS),
-    XDAI(NetworkNameFull.XDAI, NetworkNameShort.XDAI, BuildConfig.XDAI_ADDRESS);
+    ARTIS(NetworkFullName.ATS, NetworkShortName.ATS, BuildConfig.ATS_ADDRESS),
+    ETHEREUM(NetworkFullName.ETH, NetworkShortName.ETH, BuildConfig.ETH_ADDRESS),
+    POA(NetworkFullName.POA, NetworkShortName.POA, BuildConfig.POA_ADDRESS),
+    // Not available yet
+    LUKSO(NetworkFullName.LUKSO, NetworkShortName.LUKSO, String.Empty),
+    RSK(NetworkFullName.RSK, NetworkShortName.RSK, String.Empty),
+    ETHEREUM_CLASSIC(NetworkFullName.ETH_CLASSIC, NetworkShortName.ETH_CLASSIC, String.Empty);
 
     companion object {
         private val map = values().associateBy(Network::short)

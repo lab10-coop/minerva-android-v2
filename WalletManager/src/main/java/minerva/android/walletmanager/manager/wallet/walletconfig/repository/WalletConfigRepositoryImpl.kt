@@ -16,17 +16,17 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.wallet.walletconfig.localProvider.LocalWalletConfigProvider
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_ARTIS_NAME
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_ETHEREUM_NAME
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_VALUES_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_VALUES_INDEX
+import minerva.android.walletmanager.model.defs.NetworkFullName
 import minerva.android.walletmanager.model.mappers.mapIdentityPayloadToIdentity
 import minerva.android.walletmanager.model.mappers.mapServicesResponseToServices
 import minerva.android.walletmanager.model.mappers.mapValueResponseToValue
-import minerva.android.walletmanager.utils.PublicKeyUtils.encodePublicKey
+import minerva.android.walletmanager.utils.CryptoUtils
+import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 
 class WalletConfigRepositoryImpl(
     private val cryptographyRepository: CryptographyRepository,
@@ -80,12 +80,12 @@ class WalletConfigRepositoryImpl(
             listOf(
                 ValuePayload(
                     FIRST_VALUES_INDEX,
-                    DEFAULT_ARTIS_NAME,
+                    CryptoUtils.prepareName(Network.ARTIS, 1),
                     Network.ARTIS.short
                 ),
                 ValuePayload(
                     SECOND_VALUES_INDEX,
-                    DEFAULT_ETHEREUM_NAME,
+                    CryptoUtils.prepareName(Network.ETHEREUM, 2),
                     Network.ETHEREUM.short
                 )
             )
