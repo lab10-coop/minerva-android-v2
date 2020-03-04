@@ -84,30 +84,19 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
         services?.find { service -> service.name == M27 } != null
 
     fun connectToService() {
-        var walletConfig = WalletConfig(Int.InvalidVersion)
         launchDisposable {
             walletManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.getLastUsedFormatted()))
-                .map { walletConfig = it }
-                .flatMapCompletable { walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED), walletManager.masterKey) }
+                .observeOn(Schedulers.io())
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED), walletManager.masterKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = {
-                        _newServiceMutableLiveData.value = Event(Unit)
-                        updateValidWalletConfig(walletConfig)
-                    },
-                    onError = {
-                        _errorMutableLiveData.value = Event(it)
-                    }
+                    onComplete = { _newServiceMutableLiveData.value = Event(Unit) },
+                    onError = { _errorMutableLiveData.value = Event(it) }
                 )
         }
-    }
-
-    private fun updateValidWalletConfig(walletConfig: WalletConfig) {
-        if (walletConfig.version != Int.InvalidVersion)
-            walletManager.walletConfigMutableLiveData.value = walletConfig
     }
 
     fun confirmTransaction() {

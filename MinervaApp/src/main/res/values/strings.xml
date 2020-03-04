@@ -96,8 +96,8 @@
     <string name="gas_price_gwei">Gas Price (Gwei)</string>
     <string name="gas_limit">Gas Limit</string>
     <string name="transaction_cost">Transaction cost: %1$s %2$s</string>
-    <string name="transactions_cost_error_title">Transaction costs error</string>
-    <string name="transactions_cost_error_message">An error occurred while setting transaction costs</string>
+    <string name="transactions_error_title">Transaction error occurs</string>
+    <string name="transactions_error_message">Unexpected error occurred while making transaction actions</string>
     <string name="remove_value_error">Remove value failure</string>
     <string name="fetch_balances_error">Fetch balances failure</string>
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>

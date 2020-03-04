@@ -41,9 +41,6 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
     private val _requestedFieldsMutableLiveData = MutableLiveData<Event<Any>>()
     val requestedFieldsLiveData: LiveData<Event<Any>> get() = _requestedFieldsMutableLiveData
 
-    private val _saveWalletActionLiveData = MutableLiveData<Event<Unit>>()
-    val saveWalletActionLiveData: LiveData<Event<Unit>> get() = _saveWalletActionLiveData
-
     fun getIdentities() = walletManager.walletConfigLiveData.value?.identities
 
     //    TODO implement dynamic login concerning different services
@@ -90,39 +87,17 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
         serviceName = qrCodeResponse.serviceName
         qrCodeResponse.callback?.let { callback ->
             walletManager.painlessLogin(callback, jwtToken, identity)
+                .observeOn(Schedulers.io())
+                .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(), walletManager.masterKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { walletConfig, _ ->
-                    updateWalletConfig(walletConfig)
-                    _loadingLiveData.value = Event(false)
-                }
-                .subscribeBy(
-                    onSuccess = { _loginMutableLiveData.value = Event(Unit) },
-                    onError = {
-                        Timber.d(it)
-                        _errorMutableLiveData.value = Event(it)
-                    }
-                )
-        }
-    }
-
-    private fun updateWalletConfig(walletConfig: WalletConfig) {
-        if (walletConfig.version != Int.InvalidVersion) {
-            walletManager.walletConfigMutableLiveData.value = walletConfig
-        }
-    }
-
-    fun saveLoginWalletAction() {
-        launchDisposable {
-            walletActionsRepository.saveWalletActions(getValuesWalletAction(), walletManager.masterKey)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _saveWalletActionLiveData.value = Event(Unit) },
+                    onComplete = { _loginMutableLiveData.value = Event(Unit) },
                     onError = {
-                        Timber.e(it.message)
-                        _errorMutableLiveData.value = Event(it)
+                        Timber.e("Error while login $it")
+                        _errorMutableLiveData.value = Event(Throwable(it.message))
                     }
                 )
         }

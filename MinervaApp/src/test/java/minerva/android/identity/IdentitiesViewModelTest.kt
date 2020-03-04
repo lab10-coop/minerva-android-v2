@@ -12,6 +12,7 @@ import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.MasterKey
 import org.junit.Test
 
 class IdentitiesViewModelTest : BaseViewModelTest() {
@@ -23,8 +24,9 @@ class IdentitiesViewModelTest : BaseViewModelTest() {
     @Test
     fun `remove identity success error`(){
         val error = Throwable()
-        whenever(walletManager.removeIdentity(any())).thenReturn(Single.error(error))
+        whenever(walletManager.removeIdentity(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
+        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.removeIdentity(Identity(1))
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }

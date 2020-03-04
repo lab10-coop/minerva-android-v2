@@ -11,9 +11,7 @@ import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.MasterKey
-import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.model.TransactionCost
-import minerva.android.walletmanager.model.Value
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigDecimal
@@ -28,11 +26,11 @@ class TransactionViewModelTest : BaseViewModelTest() {
     private val transactionCostObserver: Observer<Event<TransactionCost>> = mock()
     private val transactionCostCaptor: KArgumentCaptor<Event<TransactionCost>> = argumentCaptor()
 
-    private val sendTransactionObserver: Observer<Event<Unit>> = mock()
-    private val sendTransactionCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+    private val sendTransactionObserver: Observer<Event<Pair<String, Int>>> = mock()
+    private val sendTransactionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
 
-    private val saveWalletActionObserver: Observer<Event<Pair<String, Int>>> = mock()
-    private val saveWalletActionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
+    private val saveActionFailedObserver: Observer<Event<Pair<String, Int>>> = mock()
+    private val saveActionFailedCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
 
     @Test
     fun `get transaction cost test success`() {
@@ -45,7 +43,15 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 )
             )
         )
-        whenever(walletManager.getTransactionCosts(any(), any())).thenReturn(Single.just(TransactionCost(BigDecimal(1), BigInteger.ONE, BigDecimal(10))))
+        whenever(walletManager.getTransactionCosts(any(), any())).thenReturn(
+            Single.just(
+                TransactionCost(
+                    BigDecimal(1),
+                    BigInteger.ONE,
+                    BigDecimal(10)
+                )
+            )
+        )
         viewModel.transactionCostLiveData.observeForever(transactionCostObserver)
         viewModel.getTransactionCosts()
         transactionCostCaptor.run {
@@ -64,9 +70,11 @@ class TransactionViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `send transaction test success`() {
+    fun `send transaction test success and wallet action succeed`() {
         whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
         whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
+        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
+        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -75,43 +83,43 @@ class TransactionViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `send transaction test error`() {
+    fun `send transaction test success and wallet action failed`() {
+        val error = Throwable()
+        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
+        whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
+        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
+        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        viewModel.saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
+        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        saveActionFailedCaptor.run {
+            verify(sendTransactionObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `send transaction test error and send wallet action succeed`() {
         val error = Throwable()
         whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.error(error))
         whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
+        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
+        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
-        viewModel.errorTransactionLiveData.observeLiveDataEvent(Event(error.message))
-    }
-
-    @Test
-    fun `save wallet action success`() {
-        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterKey).thenReturn(MasterKey("12", "34"))
-        viewModel.apply {
-            transaction = Transaction(amount = BigDecimal.ONE)
-            value = Value(1, network = "eth")
-            saveWalletActionLiveData.observeForever(saveWalletActionObserver)
-            saveWalletAction(1)
-            saveWalletActionCaptor.run {
-                verify(saveWalletActionObserver).onChanged(capture())
-                firstValue.peekContent().first == "eth"
-            }
+        sendTransactionCaptor.run {
+            verify(sendTransactionObserver).onChanged(capture())
         }
     }
 
     @Test
-    fun `save wallet action error`() {
+    fun `send transaction test error and send wallet action failed`() {
         val error = Throwable()
+        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.error(error))
+        whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("12", "34"))
-        viewModel.apply {
-            transaction = Transaction(amount = BigDecimal.ONE)
-            value = Value(1, network = "eth")
-            saveWalletActionLiveData.observeForever(saveWalletActionObserver)
-            saveWalletAction(1)
-            errorTransactionLiveData.observeLiveDataEvent(Event(error.message))
-        }
+        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
+        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }
 
     @Test

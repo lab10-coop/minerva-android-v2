@@ -38,27 +38,16 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
         valueName = CryptoUtils.prepareName(network, position)
         launchDisposable {
             walletManager.createValue(network, valueName)
-                .flatMap {
-                    walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey)
-                        .toSingleDefault(it)
-                }
+                .observeOn(Schedulers.io())
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onSuccess = {
-                        _createValueLiveData.value = Event(Unit)
-                        updateWalletConfig(it)
-                    },
+                    onComplete = { _createValueLiveData.value = Event(Unit) },
                     onError = { _saveErrorLiveData.value = Event(it) }
                 )
-        }
-    }
-
-    private fun updateWalletConfig(walletConfig: WalletConfig) {
-        if (walletConfig.version != Int.InvalidVersion) {
-            walletManager.walletConfigMutableLiveData.value = walletConfig
         }
     }
 

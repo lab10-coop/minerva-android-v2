@@ -149,7 +149,7 @@ class WalletManagerTest {
         val loadedIdentity = walletManager.loadIdentity(0, "Identity")
         test.assertNoErrors()
         loadedIdentity.name shouldBeEqualTo newIdentity.name
-        loadedIdentity.publicKey shouldBeEqualTo ""
+        loadedIdentity.publicKey shouldBeEqualTo "publicKey"
         loadedIdentity.privateKey shouldBeEqualTo "privateKey"
     }
 
@@ -201,7 +201,7 @@ class WalletManagerTest {
 
     @Test
     fun `Check that wallet manager removes correct identity`() {
-        val identityToRemove = Identity(1, "identityName2", isDeleted = false)
+        val identityToRemove = Identity(1, "identityName2", isDeleted = true)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
@@ -215,7 +215,7 @@ class WalletManagerTest {
 
     @Test
     fun `Check that wallet manager removes correct empty value`() {
-        val identityToRemove = Identity(4, "identityName2", isDeleted = false)
+        val identityToRemove = Identity(4, "identityName2", isDeleted = true)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
@@ -543,9 +543,7 @@ class WalletManagerTest {
         walletManager.loadWalletConfig()
         walletManager.saveService(Service()).test()
             .assertComplete()
-            .assertValue {
-                it.version == 1
-            }
+            .assertNoErrors()
     }
 
     @Test

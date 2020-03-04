@@ -78,7 +78,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `connect to services success`() {
-        whenever(walletManager.saveService(any())).thenReturn(Single.just(WalletConfig(Int.InvalidVersion)))
+        whenever(walletManager.saveService(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
         whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.newServiceMutableLiveData.observeForever(newServiceObserver)
@@ -92,7 +92,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
     @Test
     fun `connect to services error`() {
         val error = Throwable()
-        whenever(walletManager.saveService(any())).thenReturn(Single.error(error))
+        whenever(walletManager.saveService(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
         whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.apply {

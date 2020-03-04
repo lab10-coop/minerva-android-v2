@@ -11,7 +11,7 @@ import java.math.BigInteger
 //TODO divide WalletManager to: Service, Identity, Value, Transaction, Cryptography managers and add interfaces to providers and repositories
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
-    val walletConfigMutableLiveData: MutableLiveData<WalletConfig>
+//    val walletConfigMutableLiveData: MutableLiveData<WalletConfig>
     val masterKey: MasterKey
 
     fun initWalletConfig()
@@ -28,19 +28,19 @@ interface WalletManager {
     fun isMnemonicRemembered(): Boolean
 
     fun loadIdentity(position: Int, defaultName: String): Identity
-    fun saveIdentity(identity: Identity): Single<WalletConfig>
-    fun removeIdentity(identity: Identity): Single<WalletConfig>
+    fun saveIdentity(identity: Identity): Completable
+    fun removeIdentity(identity: Identity): Completable
 
     fun loadValue(position: Int): Value
-    fun createValue(network: Network, valueName: String): Single<WalletConfig>
-    fun removeValue(index: Int): Single<WalletConfig>
+    fun createValue(network: Network, valueName: String): Completable
+    fun removeValue(index: Int): Completable
 
-    fun saveService(service: Service): Single<WalletConfig>
+    fun saveService(service: Service): Completable
 
     fun decodeQrCodeResponse(token: String): Single<QrCodeResponse>
     fun decodePaymentRequestToken(token: String): Single<Pair<Payment, List<Service>?>>
     suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
-    fun painlessLogin(url: String, jwtToken: String, identity: Identity): Single<WalletConfig>
+    fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable
 
     fun refreshBalances(): Single<HashMap<String, Balance>>
     fun refreshAssetBalance(): Single<Map<String, List<Asset>>>

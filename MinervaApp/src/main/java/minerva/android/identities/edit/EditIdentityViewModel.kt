@@ -19,16 +19,11 @@ import minerva.android.walletmanager.utils.DateUtils
 class EditIdentityViewModel(private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository) :
     BaseViewModel() {
 
-    private var identityName: String = String.Empty
-
     private val _editIdentityLiveData = MutableLiveData<Event<Identity>>()
     val editIdentityLiveData: LiveData<Event<Identity>> get() = _editIdentityLiveData
 
-    private val _saveCompletedLiveData = MutableLiveData<Event<Int>>()
-    val saveCompletedLiveData: LiveData<Event<Int>> get() = _saveCompletedLiveData
-
-    private val _saveWalletActionLiveData = MutableLiveData<Event<Unit>>()
-    val saveWalletActionLiveData: LiveData<Event<Unit>> get() = _saveWalletActionLiveData
+    private val _saveCompletedLiveData = MutableLiveData<Event<Unit>>()
+    val saveCompletedLiveData: LiveData<Event<Unit>> get() = _saveCompletedLiveData
 
     private val _saveErrorLiveData = MutableLiveData<Event<Throwable>>()
     val saveErrorLiveData: LiveData<Event<Throwable>> get() = _saveErrorLiveData
@@ -40,37 +35,22 @@ class EditIdentityViewModel(private val walletManager: WalletManager, private va
         _editIdentityLiveData.value = Event(walletManager.loadIdentity(position, defaultName))
     }
 
-    fun saveIdentity(identity: Identity) {
-        _loadingLiveData.value = Event(true)
-        identityName = identity.name
+    fun saveIdentity(identity: Identity, status: Int) {
         launchDisposable {
             walletManager.saveIdentity(identity)
+                .observeOn(Schedulers.io())
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(status, identity.name), walletManager.masterKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { walletConfig, _ -> walletManager.walletConfigMutableLiveData.value = walletConfig }
-                .subscribeBy(
-                    onSuccess = { _saveCompletedLiveData.value = Event(identity.index) },
-                    onError = { _saveErrorLiveData.value = Event(Throwable(it.message)) }
-                )
-        }
-    }
-
-    fun saveWalletAction(status: Int) {
-        launchDisposable {
-            walletActionsRepository.saveWalletActions(getWalletAction(status), walletManager.masterKey)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = {
-                        _saveWalletActionLiveData.value = Event(Unit)
-                    }, onError = {
-                        _saveErrorLiveData.value = Event(it)
-                    }
+                    onComplete = { _saveCompletedLiveData.value = Event(Unit) },
+                    onError = { _saveErrorLiveData.value = Event(it) }
                 )
         }
     }
 
-    private fun getWalletAction(status: Int) =
-        WalletAction(WalletActionType.IDENTITY, status, DateUtils.timestamp, hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, identityName)))
+    private fun getWalletAction(status: Int, name: String) =
+        WalletAction(WalletActionType.IDENTITY, status, DateUtils.timestamp, hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, name)))
 }

@@ -25,40 +25,27 @@ class IdentitiesViewModel(
     private val walletActionsRepository: WalletActionsRepository
 ) : BaseViewModel() {
 
-    private var identityName: String = String.Empty
-
     val walletConfigLiveData: LiveData<WalletConfig> = walletManager.walletConfigLiveData
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
     fun removeIdentity(identity: Identity) {
-        identityName = identity.name
         launchDisposable {
             walletManager.removeIdentity(identity)
-                .flatMap {
-                    walletActionsRepository.saveWalletActions(getRemovedIdentityWalletAction(), walletManager.masterKey).toSingleDefault(it)
-                }
+                .observeOn(Schedulers.io())
+                .andThen(walletActionsRepository.saveWalletActions(getRemovedIdentityWalletAction(identity.name), walletManager.masterKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = { updateValidWalletConfig(it) },
-                    onError = { _errorLiveData.value = Event(it) }
-                )
+                .subscribeBy(onError = { _errorLiveData.value = Event(it) })
         }
     }
 
-    private fun updateValidWalletConfig(walletConfig: WalletConfig) {
-        if (walletConfig.version != Int.InvalidVersion) {
-            walletManager.walletConfigMutableLiveData.value = walletConfig
-        }
-    }
-
-    private fun getRemovedIdentityWalletAction() =
+    private fun getRemovedIdentityWalletAction(name: String) =
         WalletAction(
             WalletActionType.IDENTITY,
             WalletActionStatus.REMOVED,
             DateUtils.timestamp,
-            hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, identityName))
+            hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, name))
         )
 }
