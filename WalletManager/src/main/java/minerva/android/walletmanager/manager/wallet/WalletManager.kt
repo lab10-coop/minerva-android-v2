@@ -11,7 +11,6 @@ import java.math.BigInteger
 //TODO divide WalletManager to: Service, Identity, Value, Transaction, Cryptography managers and add interfaces to providers and repositories
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
-//    val walletConfigMutableLiveData: MutableLiveData<WalletConfig>
     val masterKey: MasterKey
 
     fun initWalletConfig()
