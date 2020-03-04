@@ -8,7 +8,7 @@ import minerva.android.walletmanager.model.*
 import java.math.BigDecimal
 import java.math.BigInteger
 
-//TODO divide WalletManager to: Service, Identity, Value, Transaction, Cryptography managers and add interfaces to providers and repositories
+//TODO divide WalletManager to: Service, Identity, Value, Transaction, Cryptography managers
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
     val masterKey: MasterKey
