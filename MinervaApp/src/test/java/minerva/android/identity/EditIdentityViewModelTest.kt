@@ -9,7 +9,9 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import org.junit.Test
 
 class EditIdentityViewModelTest : BaseViewModelTest() {
@@ -18,30 +20,31 @@ class EditIdentityViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val viewModel = EditIdentityViewModel(walletManager, walletActionsRepository)
 
-    private val saveWalletActionObserver: Observer<Event<Unit>> = mock()
-    private val saveWalletActionCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+    private val saveIdentityObserver: Observer<Event<Unit>> = mock()
+    private val saveIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
     @Test
-    fun `save wallet action success`() {
+    fun `save identity success`() {
+        whenever(walletManager.saveIdentity(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
         whenever(walletManager.masterKey).thenReturn(MasterKey("12", "34"))
         viewModel.apply {
-            saveWalletActionLiveData.observeForever(saveWalletActionObserver)
-            saveWalletAction(1)
-            saveWalletActionCaptor.run {
-                verify(saveWalletActionObserver).onChanged(capture())
+            saveCompletedLiveData.observeForever(saveIdentityObserver)
+            saveIdentity(Identity(1), ADDED)
+            saveIdentityCaptor.run {
+                verify(saveIdentityObserver).onChanged(capture())
             }
         }
     }
 
     @Test
-    fun `save wallet action error`() {
+    fun `save identity error`() {
         val error = Throwable()
+        whenever(walletManager.saveIdentity(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
         whenever(walletManager.masterKey).thenReturn(MasterKey("12", "34"))
         viewModel.apply {
-            saveWalletActionLiveData.observeForever(saveWalletActionObserver)
-            saveWalletAction(1)
+            saveIdentity(Identity(1), ADDED)
             saveErrorLiveData.observeLiveDataEvent(Event(error))
         }
     }

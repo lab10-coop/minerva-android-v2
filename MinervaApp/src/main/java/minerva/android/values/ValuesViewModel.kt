@@ -69,25 +69,16 @@ class ValuesViewModel(private val walletManager: WalletManager, private val wall
         valueName = name
         launchDisposable {
             walletManager.removeValue(index)
-                .flatMap {
-                    walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey)
-                        .toSingleDefault(it)
-                }
+                .observeOn(Schedulers.io())
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { updateWalletConfig(it) },
                     onError = {
                         Timber.e("Removing value with index $index failure")
                         _errorLiveData.value = Event(Throwable(it.message))
                     }
                 )
-        }
-    }
-
-    private fun updateWalletConfig(walletConfig: WalletConfig) {
-        if (walletConfig.version != Int.InvalidVersion) {
-            walletManager.walletConfigMutableLiveData.value = walletConfig
         }
     }
 

@@ -2,6 +2,7 @@ package minerva.android.values
 
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
+import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
@@ -10,6 +11,7 @@ import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Balance
+import minerva.android.walletmanager.model.MasterKey
 import org.amshove.kluent.shouldBe
 import org.junit.Test
 import java.math.BigDecimal
@@ -80,7 +82,9 @@ class ValuesViewModelTest : BaseViewModelTest() {
     @Test
     fun `Remove value error`() {
         val error = Throwable("error")
-        whenever(walletManager.removeValue(any())).thenReturn(Single.error(error))
+        whenever(walletManager.removeValue(any())).thenReturn(Completable.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
+        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.removeValue(1, "test")
         errorCaptor.run {

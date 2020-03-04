@@ -67,16 +67,13 @@ class TransactionsFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
-            //TODO should be refactored as a part of sending transaction stream (not needed to send it through Fragment)
-            sendTransactionLiveData.observe(this@TransactionsFragment, EventObserver { saveWalletAction(WalletActionStatus.SENT) })
-            //TODO the same
-            errorTransactionLiveData.observe(this@TransactionsFragment, EventObserver { saveWalletAction(WalletActionStatus.FAILED) })
+            sendTransactionLiveData.observe(this@TransactionsFragment, EventObserver { handleTransactionStatus(it) })
             transactionCostLiveData.observe(this@TransactionsFragment, EventObserver { setTransactionsCosts(it) })
             errorLiveData.observe(this@TransactionsFragment, Observer { showErrorFlashBar() })
             loadingLiveData.observe(this@TransactionsFragment, EventObserver { if (it) showLoader() else hideLoader() })
-            //TODO can be removed when after stream refactor
-            saveWalletActionLiveData.observe(this@TransactionsFragment, EventObserver { handleTransactionStatus(it) }
-            )
+            saveWalletActionFailedLiveData.observe(this@TransactionsFragment, EventObserver {
+                listener.onResult(true, it.first)
+            })
         }
     }
 
@@ -134,8 +131,8 @@ class TransactionsFragment : Fragment() {
     private fun showErrorFlashBar() {
         MinervaFlashbar.show(
             requireActivity(),
-            getString(R.string.transactions_cost_error_title),
-            getString(R.string.transactions_cost_error_message)
+            getString(R.string.transactions_error_title),
+            getString(R.string.transactions_error_message)
         )
     }
 

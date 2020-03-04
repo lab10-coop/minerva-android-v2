@@ -129,7 +129,7 @@ class EditIdentityFragment : Fragment() {
             identityName.text.toString(),
             data = prepareFormData()
         )
-        viewModel.saveIdentity(newIdentity)
+        viewModel.saveIdentity(newIdentity, getActionStatus())
     }
 
     //TODO Will be changed in phase 2 for dynamic labels
@@ -168,9 +168,8 @@ class EditIdentityFragment : Fragment() {
     private fun initializeFragment() {
         viewModel.apply {
             editIdentityLiveData.observe(this@EditIdentityFragment, EventObserver { initializeView(it) })
-            saveCompletedLiveData.observe(this@EditIdentityFragment, EventObserver { saveWalletAction(getActionStatus()) })
+            saveCompletedLiveData.observe(this@EditIdentityFragment, EventObserver { activity?.onBackPressed() })
             saveErrorLiveData.observe(this@EditIdentityFragment, EventObserver { showErrorMessage(it.message) })
-            saveWalletActionLiveData.observe(this@EditIdentityFragment, EventObserver { activity?.onBackPressed() })
             loadingLiveData.observe(this@EditIdentityFragment, EventObserver { handleLoader(it) })
         }
         arguments?.let {

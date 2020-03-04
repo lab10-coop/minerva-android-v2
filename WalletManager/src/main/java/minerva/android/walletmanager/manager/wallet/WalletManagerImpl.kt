@@ -50,7 +50,7 @@ class WalletManagerImpl(
 ) : WalletManager {
 
     override lateinit var masterKey: MasterKey
-    override val walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
+    private val walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = walletConfigMutableLiveData
 
     private var disposable: Disposable? = null
@@ -140,7 +140,7 @@ class WalletManagerImpl(
             }
     }
 
-    override fun createValue(network: Network, valueName: String): Single<WalletConfig> {
+    override fun createValue(network: Network, valueName: String): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             val newValue = Value(config.newIndex, name = valueName, network = network.short)
             return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, newValue.index)
@@ -151,30 +151,30 @@ class WalletManagerImpl(
                         address = blockchainRepository.completeAddress(it.third)
                     }
                     WalletConfig(config.updateVersion, config.identities, config.values + newValue, config.services)
-                }.flatMap { updateWalletConfig(it) }
+                }.flatMapCompletable { updateWalletConfig(it) }
         }
-        return Single.error(Throwable("Wallet Config was not initialized"))
+        return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun removeValue(index: Int): Single<WalletConfig> {
+    override fun removeValue(index: Int): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             val newValues = config.values.toMutableList()
             config.values.forEachIndexed { position, value ->
                 if (value.index == index) {
                     if (isValueRemovable(value.balance, value.assets)) {
                         //TODO need to be handled better (Own Throwable implementation?)
-                        return Single.error(Throwable("This address is not empty and can't be removed."))
+                        return Completable.error(Throwable("This address is not empty and can't be removed."))
                     }
                     newValues[position] = Value(value, true)
                     return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, newValues, config.services))
                 }
             }
-            return Single.error(Throwable("Missing value with this index"))
+            return Completable.error(Throwable("Missing value with this index"))
         }
-        return Single.error(Throwable("Wallet Config was not initialized"))
+        return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun saveIdentity(identity: Identity): Single<WalletConfig> {
+    override fun saveIdentity(identity: Identity): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, identity.index)
                 .map {
@@ -183,9 +183,9 @@ class WalletManagerImpl(
                         privateKey = it.third
                     }
                     WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values, config.services)
-                }.flatMap { updateWalletConfig(it) }
+                }.flatMapCompletable { updateWalletConfig(it) }
         }
-        return Single.error(Throwable("Wallet Config was not initialized"))
+        return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
     override fun loadIdentity(position: Int, defaultName: String): Identity {
@@ -196,13 +196,13 @@ class WalletManagerImpl(
         return Identity(getNewIndex(), prepareDefaultIdentityName(defaultName))
     }
 
-    override fun removeIdentity(identity: Identity): Single<WalletConfig> {
+    override fun removeIdentity(identity: Identity): Completable {
         walletConfigMutableLiveData.value?.let { walletConfig ->
             walletConfig.identities.let { identities ->
                 return handleRemovingIdentity(identities, getPositionForIdentity(identity, walletConfig), identity)
             }
         }
-        return Single.error(Throwable("Wallet config was not initialized"))
+        return Completable.error(Throwable("Wallet config was not initialized"))
     }
 
     private fun getPositionForIdentity(newIdentity: Identity, walletConfig: WalletConfig): Int {
@@ -212,9 +212,9 @@ class WalletManagerImpl(
         return walletConfig.identities.size
     }
 
-    private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Single<WalletConfig> {
-        if (!identities.inBounds(currentPosition)) return Single.error(Throwable("Missing identity to remove"))
-        if (isOnlyOneElement(identities)) return Single.error(Throwable("You can not remove last identity"))
+    private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {
+        if (!identities.inBounds(currentPosition)) return Completable.error(Throwable("Missing identity to remove"))
+        if (isOnlyOneElement(identities)) return Completable.error(Throwable("You can not remove last identity"))
         return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
     }
 
@@ -230,22 +230,22 @@ class WalletManagerImpl(
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
 
-    override fun painlessLogin(url: String, jwtToken: String, identity: Identity): Single<WalletConfig> =
+    override fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
-            .flatMap { handleSavingServiceLogin(identity) }
+            .flatMapCompletable { handleSavingServiceLogin(identity) }
 
-    private fun handleSavingServiceLogin(identity: Identity): Single<WalletConfig> =
+    private fun handleSavingServiceLogin(identity: Identity): Completable =
         if (identity !is IncognitoIdentity) saveService(Service(ServiceType.DEMO_LOGIN, DEMO_LOGIN, getLastUsedFormatted()))
-        else Single.just(WalletConfig(Int.InvalidValue))
+        else Completable.complete()
 
-    override fun saveService(newService: Service): Single<WalletConfig> {
+    override fun saveService(newService: Service): Completable {
         walletConfigMutableLiveData.value?.run {
             if (services.isEmpty()) {
                 return updateWalletConfig(WalletConfig(updateVersion, identities, values, listOf(newService)))
             }
             return updateWalletConfig(getWalletConfigWithUpdatedService(newService))
         }
-        return Single.error(Throwable("Wallet Config was not initialized"))
+        return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
     private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {
@@ -322,11 +322,15 @@ class WalletManagerImpl(
         return blockchainRepository.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
     }
 
-    private fun updateWalletConfig(walletConfig: WalletConfig): Single<WalletConfig> {
+    private fun updateWalletConfig(walletConfig: WalletConfig): Completable {
         mapWalletConfigToWalletPayload(walletConfig).run {
             return walletConfigRepository.updateWalletConfig(masterKey, this)
-                .toSingle { walletConfig }
-                .doOnSuccess { walletConfigRepository.saveWalletConfigLocally(this) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete {
+                    walletConfigMutableLiveData.value = walletConfig
+                    walletConfigRepository.saveWalletConfigLocally(this)
+                }
                 .doOnError {
                     //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
                     //walletConfigRepository.saveWalletConfigLocally(walletConfig)
