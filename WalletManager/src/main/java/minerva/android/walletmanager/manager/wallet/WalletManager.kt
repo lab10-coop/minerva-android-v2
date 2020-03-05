@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
 import io.reactivex.Single
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.*
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -31,7 +32,7 @@ interface WalletManager {
     fun removeIdentity(identity: Identity): Completable
 
     fun loadValue(position: Int): Value
-    fun createValue(network: Network, valueName: String): Completable
+    fun createValue(network: Network, valueName: String, owner: String = String.Empty): Completable
     fun removeValue(index: Int): Completable
 
     fun saveService(service: Service): Completable
@@ -50,6 +51,8 @@ interface WalletManager {
     fun transferERC20Token(network: String, transaction: Transaction): Completable
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
+
+    fun getSafeAccountNumber(ownerPublicKey: String): Int
 
     fun getValueIterator(): Int
     fun dispose()

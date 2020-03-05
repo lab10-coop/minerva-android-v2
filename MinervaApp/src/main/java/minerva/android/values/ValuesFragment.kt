@@ -64,6 +64,8 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
         listener.showSendAssetTransactionScreen(valueIndex, assetIndex)
     }
 
+    override fun onCreateSafeAccount(value: Value) = viewModel.createSafeAccount(value)
+
     override fun onValueRemove(value: Value) = showRemoveDialog(value)
 
     private fun setupRecycleView(view: View) {

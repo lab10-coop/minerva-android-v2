@@ -49,7 +49,7 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : Blockcha
     }
 
     override fun resolveENS(ensName: String): Single<String> =
-        if(ensName.contains(DOT)) Single.just(ensName).map { EnsResolver(web3j[ENS]).resolve(it) }
+        if (ensName.contains(DOT)) Single.just(ensName).map { EnsResolver(web3j[ENS]).resolve(it) }
         else Single.just(ensName)
 
     override fun transferERC20Token(
@@ -129,7 +129,7 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : Blockcha
         )
 
     private fun getBalance(network: String, address: String): Single<Pair<String, BigDecimal>> =
-        (web3j[network] ?: error("Not supported Network!")).ethGetBalance(address, DefaultBlockParameterName.LATEST)
+        (web3j[network] ?: error("Not supported Network! ($network)")).ethGetBalance(address, DefaultBlockParameterName.LATEST)
             .flowable()
             .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
             .firstOrError()

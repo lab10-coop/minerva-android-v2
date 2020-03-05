@@ -27,11 +27,21 @@
 
                 <ImageView
                     android:id="@+id/icon"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="@dimen/small_logo_size"
+                    android:layout_height="@dimen/small_logo_size"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:src="@drawable/ic_artis" />
+
+                <ImageView
+                    android:id="@+id/safeAccountBadge"
+                    android:layout_width="@dimen/badge_logo_size"
+                    android:layout_height="@dimen/badge_logo_size"
+                    app:layout_constraintTop_toTopOf="@id/icon"
+                    app:layout_constraintRight_toRightOf="@id/icon"
+                    android:src="@drawable/ic_safe_account"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
                 <TextView
                     android:id="@+id/valueName"

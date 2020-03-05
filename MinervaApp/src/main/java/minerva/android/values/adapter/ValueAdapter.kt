@@ -6,16 +6,14 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.value_list_row.view.*
 import minerva.android.R
-import minerva.android.extension.gone
-import minerva.android.extension.rotate180
-import minerva.android.extension.rotate180back
-import minerva.android.extension.visible
+import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.values.listener.ValuesFragmentToAdapterListener
@@ -83,11 +81,7 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
     }
 
     fun updateAssetBalances(assetBalances: Map<String, List<Asset>>) {
-        activeValues.forEachIndexed { index, value ->
-            assetBalances[value.privateKey]?.let {
-                value.assets = it
-            }
-        }
+        activeValues.forEach { value -> assetBalances[value.privateKey]?.let { value.assets = it } }
     }
 
     override fun onSendValueClicked(value: Value) = listener.onSendTransaction(value)
@@ -97,6 +91,8 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
     override fun onValueRemoved(position: Int) = listener.onValueRemove(rawValues[position])
 
     override fun refreshAssets(rawPosition: Int): List<Asset> = rawValues[rawPosition].assets
+
+    override fun onCreateSafeAccountClicked(value: Value) = listener.onCreateSafeAccount(value)
 }
 
 class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) : AssetView.AssertViewCallback, RecyclerView.ViewHolder(view) {
@@ -120,6 +116,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         this.rawPosition = rawPosition
         view.apply {
             bindData(value)
+            prepareView(value)
             setOnSendButtonClickListener(value)
             setOnMenuClickListener(rawPosition, value)
             setOnItemClickListener(value)
@@ -136,6 +133,16 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         }
         amountView.setAmounts(value.balance, value.fiatBalance)
         sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
+    }
+
+    private fun View.prepareView(value: Value) {
+        if (!value.isSafeAccount) {
+            mainContent.margin(NO_FRAME, FRAME_TOP_WIDTH, NO_FRAME, NO_FRAME)
+            safeAccountBadge.gone()
+        } else {
+            mainContent.margin(FRAME_WIDTH, FRAME_TOP_WIDTH, FRAME_WIDTH, FRAME_WIDTH)
+            safeAccountBadge.visible()
+        }
     }
 
     private fun View.setOnSendButtonClickListener(value: Value) {
@@ -187,6 +194,8 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     private fun showMenu(position: Int, value: Value, anchor: View): Boolean {
         PopupMenu(view.context, anchor).apply {
             menuInflater.inflate(R.menu.value_menu, menu)
+            menu.findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(value)
+            menu.findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(value)
             gravity = Gravity.RIGHT
             show()
             setOnItemMenuClickListener(position, value)
@@ -198,21 +207,30 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         position: Int,
         value: Value
     ) {
-        //TODO add rest of the menu functionality
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.showAddress -> startValueAddressWrappedActivity(
                     view.context, position, value.name,
                     getNetworkIcon(Network.fromString(value.network))
                 )
+                //TODO add Setting action
+                R.id.safeAccountSettings -> Toast.makeText(getContext(), "mock", Toast.LENGTH_SHORT).show()
+                R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(value)
                 R.id.remove -> listener.onValueRemoved(position)
             }
             true
         }
     }
 
+    private fun isCreatingSafeAccountAvailable(value: Value) = value.network == Network.ARTIS.short && !value.isSafeAccount
+
+    private fun isSafeAccount(value: Value) = value.network == Network.ARTIS.short && value.isSafeAccount
+
     companion object {
         private const val SEND_BUTTON_FORMAT = "%s %s"
+        private const val FRAME_TOP_WIDTH = 3f
+        private const val NO_FRAME = 0f
+        private const val FRAME_WIDTH = 1.5f
     }
 
     interface ValuesAdapterListener {
@@ -220,5 +238,6 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         fun onSendAssetClicked(valueIndex: Int, assetIndex: Int)
         fun onValueRemoved(position: Int)
         fun refreshAssets(rawPosition: Int): List<Asset>
+        fun onCreateSafeAccountClicked(value: Value)
     }
 }

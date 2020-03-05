@@ -6,15 +6,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidVersion
+import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
-import minerva.android.walletmanager.model.Asset
-import minerva.android.walletmanager.model.Balance
-import minerva.android.walletmanager.model.WalletAction
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -82,11 +79,26 @@ class ValuesViewModel(private val walletManager: WalletManager, private val wall
         }
     }
 
-    private fun getWalletAction() =
-        WalletAction(
-            WalletActionType.VALUE,
-            WalletActionStatus.REMOVED,
-            DateUtils.timestamp,
-            hashMapOf(Pair(WalletActionFields.VALUE_NAME, valueName))
-        )
+    fun createSafeAccount(value: Value) {
+        //TODO add condition for creating account only on wallets which have funds
+        launchDisposable {
+            walletManager.createValue(Network.fromString(value.network), createSafeAccountName(value), value.publicKey)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = { /*Handled in wallet manager */ },
+                    onError = { Timber.e("Creating safe account error: ${it.message}") }
+                )
+        }
+    }
+
+    private fun createSafeAccountName(value: Value): String =
+        value.name.replaceFirst(String.Space, " | ${walletManager.getSafeAccountNumber(value.publicKey)} ")
+
+    private fun getWalletAction() = WalletAction(
+        WalletActionType.VALUE,
+        WalletActionStatus.REMOVED,
+        DateUtils.timestamp,
+        hashMapOf(Pair(WalletActionFields.VALUE_NAME, valueName))
+    )
 }
