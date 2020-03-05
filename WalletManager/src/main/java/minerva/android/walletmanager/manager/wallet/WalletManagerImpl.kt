@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.exchangemarketsprovider.api.BinanceApi
 import io.reactivex.Completable
-import io.reactivex.CompletableSource
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -18,7 +17,6 @@ import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.servicesApiProvider.api.ServicesApi
@@ -27,7 +25,8 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.assets.AssetManager
 import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.*
+import minerva.android.walletmanager.model.defs.Markets
+import minerva.android.walletmanager.model.defs.ResponseState
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.ServiceType
@@ -77,10 +76,12 @@ class WalletManagerImpl(
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
         listOf(Markets.ETH_EUR, Markets.POA_ETH).run {
-            walletConfigMutableLiveData.value?.values?.let { values ->
+            walletConfigMutableLiveData.value?.values?.filter { !it.isDeleted }?.let { values ->
                 return blockchainRepository.refreshBalances(getAddresses(values))
                     .zipWith(Observable.range(START, this.size)
-                        .flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }
+                        .flatMapSingle {
+                            binanceApi.fetchExchangeRate(this[it])
+                        }
                         .toList())
                     .map { calculateFiatBalances(it.first, values, it.second) }
             }
@@ -140,18 +141,12 @@ class WalletManagerImpl(
             }
     }
 
-    override fun createValue(network: Network, valueName: String): Completable {
+    override fun createValue(network: Network, valueName: String, owner: String): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             val newValue = Value(config.newIndex, name = valueName, network = network.short)
             return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, newValue.index)
-                .map {
-                    newValue.apply {
-                        publicKey = it.second
-                        privateKey = it.third
-                        address = blockchainRepository.completeAddress(it.third)
-                    }
-                    WalletConfig(config.updateVersion, config.identities, config.values + newValue, config.services)
-                }.flatMapCompletable { updateWalletConfig(it) }
+                .map { createUpdatedWalletConfig(config, newValue, it, owner) }
+                .flatMapCompletable { updateWalletConfig(it) }
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
@@ -203,13 +198,6 @@ class WalletManagerImpl(
             }
         }
         return Completable.error(Throwable("Wallet config was not initialized"))
-    }
-
-    private fun getPositionForIdentity(newIdentity: Identity, walletConfig: WalletConfig): Int {
-        walletConfig.identities.forEachIndexed { position, identity ->
-            if (newIdentity.index == identity.index) return position
-        }
-        return walletConfig.identities.size
     }
 
     private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {
@@ -290,6 +278,16 @@ class WalletManagerImpl(
                 .map { list -> list.map { it.first to AssetManager.mapToAssets(it.second) }.toMap() }
         }
         return Single.error(Throwable("Wallet Config was not initialized"))
+    }
+
+    override fun getSafeAccountNumber(ownerPublicKey: String): Int {
+        var safeAccountNumber = 1
+        walletConfigLiveData.value?.values?.let {
+            it.forEach { savedValue ->
+                if (savedValue.owners?.get(OWNER_INDEX) == ownerPublicKey) safeAccountNumber++
+            }
+        }
+        return safeAccountNumber
     }
 
     /**
@@ -385,8 +383,39 @@ class WalletManagerImpl(
         return realIdentitiesCount <= ONE_ELEMENT
     }
 
+    private fun getPositionForIdentity(newIdentity: Identity, walletConfig: WalletConfig): Int {
+        walletConfig.identities.forEachIndexed { position, identity ->
+            if (newIdentity.index == identity.index) return position
+        }
+        return walletConfig.identities.size
+    }
+
+    private fun createUpdatedWalletConfig(
+        config: WalletConfig,
+        newValue: Value,
+        keys: Triple<Int, String, String>,
+        ownerPublicKey: String
+    ): WalletConfig {
+        newValue.apply {
+            publicKey = keys.second
+            privateKey = keys.third
+            address = blockchainRepository.completeAddress(keys.third)
+            if (ownerPublicKey.isNotEmpty()) owners = listOf(ownerPublicKey)
+        }
+        config.run {
+            val newValues = values.toMutableList()
+            var newValuePosition = values.size
+            values.forEachIndexed { position, value ->
+                if (value.publicKey == ownerPublicKey) newValuePosition = position + getSafeAccountNumber(ownerPublicKey)
+            }
+            newValues.add(newValuePosition, newValue)
+            return WalletConfig(updateVersion, identities, newValues, services)
+        }
+    }
+
     companion object {
         private const val START = 0
+        private const val OWNER_INDEX = 0
         private const val ONE_ELEMENT = 1
         private const val DEMO_LOGIN = "Demo Web Page Login"
         //        TODO should be dynamically handled form qr code

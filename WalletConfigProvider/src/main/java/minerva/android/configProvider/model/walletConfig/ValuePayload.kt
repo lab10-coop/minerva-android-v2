@@ -12,7 +12,9 @@ data class ValuePayload(
     @SerializedName("network")
     private val _network: String? = String.Empty,
     @SerializedName("isDeleted")
-    private val _isDeleted: Boolean? = false
+    private val _isDeleted: Boolean? = false,
+    @SerializedName("owners")
+    private val _owners: List<String>? = null
 ) {
     val index: Int
         get() = _index ?: Int.InvalidId
@@ -22,4 +24,6 @@ data class ValuePayload(
         get() = _network ?: String.Empty
     val isDeleted: Boolean
         get() = _isDeleted ?: false
+    val owners: List<String>?
+        get() = _owners
 }
