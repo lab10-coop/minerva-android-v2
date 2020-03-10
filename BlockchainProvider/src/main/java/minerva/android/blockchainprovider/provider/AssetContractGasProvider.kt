@@ -1,4 +1,4 @@
-package minerva.android.blockchainprovider
+package minerva.android.blockchainprovider.provider
 
 import org.web3j.tx.gas.ContractGasProvider
 import java.math.BigInteger

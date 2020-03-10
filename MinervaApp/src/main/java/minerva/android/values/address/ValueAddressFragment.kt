@@ -33,15 +33,24 @@ class ValueAddressFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_value_address, container, false)
 
     private fun initializeView(value: Value) {
-        prepareQR(value.address)
-        address.text = value.address
-        setupShareButton(shareButton, value.address)
-        setupCopyButton(copyButton, value.address, getString(R.string.address_saved_to_clip_board))
+        getAddress(value).run {
+            prepareQR(this)
+            valueAddress.text = this
+            setupShareButton(shareButton, this)
+            setupCopyButton(copyButton, this, getString(R.string.address_saved_to_clip_board))
+        }
+    }
+
+    private fun getAddress(value: Value): String {
+        value.run {
+            return if (isSafeAccount) smartContractAddress
+            else address
+        }
     }
 
     private fun prepareQR(address: String) {
         resources.getDimensionPixelSize(R.dimen.qr_code_size).let { qrCodeSize ->
-            if(address.isEmpty()) {
+            if (address.isEmpty()) {
                 Toast.makeText(context, getString(R.string.unexpected_error), Toast.LENGTH_SHORT).show()
                 return@let
             }

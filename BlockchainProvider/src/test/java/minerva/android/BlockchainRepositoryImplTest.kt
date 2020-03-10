@@ -7,7 +7,7 @@ import io.reactivex.Flowable
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.BlockchainRepositoryImpl
+import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepositoryImpl
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.kotlinUtils.InvalidIndex
 import org.junit.After
@@ -27,7 +27,8 @@ class BlockchainRepositoryImplTest {
     private val ETH = "ETH"
     private val web3J = mockk<Web3j>()
     private val web3Js: Map<String, Web3j> = mapOf(Pair(ETH, web3J))
-    private val blockchainRepository: BlockchainRepositoryImpl = BlockchainRepositoryImpl(web3Js)
+    private val blockchainRepository: BlockchainRepositoryImpl =
+        BlockchainRepositoryImpl(web3Js)
 
     @get:Rule
 

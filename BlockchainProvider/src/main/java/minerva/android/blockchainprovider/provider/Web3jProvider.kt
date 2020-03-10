@@ -1,6 +1,6 @@
-package minerva.android.blockchainprovider
+package minerva.android.blockchainprovider.provider
 
-import minerva.android.blockchainprovider.model.defs.BlockchainDef.Companion.ENS
+import minerva.android.blockchainprovider.defs.BlockchainDef.Companion.ENS
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 

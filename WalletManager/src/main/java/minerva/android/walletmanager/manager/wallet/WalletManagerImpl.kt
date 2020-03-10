@@ -12,7 +12,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.BlockchainRepository
+import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.Empty
@@ -141,11 +141,11 @@ class WalletManagerImpl(
             }
     }
 
-    override fun createValue(network: Network, valueName: String, owner: String): Completable {
+    override fun createValue(network: Network, valueName: String, ownerAddress: String, smartContractAddress: String): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             val newValue = Value(config.newIndex, name = valueName, network = network.short)
             return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, newValue.index)
-                .map { createUpdatedWalletConfig(config, newValue, it, owner) }
+                .map { createUpdatedWalletConfig(config, newValue, it, ownerAddress, smartContractAddress) }
                 .flatMapCompletable { updateWalletConfig(it) }
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
@@ -280,11 +280,11 @@ class WalletManagerImpl(
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun getSafeAccountNumber(ownerPublicKey: String): Int {
+    override fun getSafeAccountNumber(ownerAddress: String): Int {
         var safeAccountNumber = 1
         walletConfigLiveData.value?.values?.let {
             it.forEach { savedValue ->
-                if (savedValue.owners?.get(OWNER_INDEX) == ownerPublicKey) safeAccountNumber++
+                if (savedValue.owners?.get(OWNER_INDEX) == ownerAddress) safeAccountNumber++
             }
         }
         return safeAccountNumber
@@ -394,22 +394,33 @@ class WalletManagerImpl(
         config: WalletConfig,
         newValue: Value,
         keys: Triple<Int, String, String>,
-        ownerPublicKey: String
+        ownerAddress: String,
+        contractAddress: String
     ): WalletConfig {
-        newValue.apply {
-            publicKey = keys.second
-            privateKey = keys.third
-            address = blockchainRepository.completeAddress(keys.third)
-            if (ownerPublicKey.isNotEmpty()) owners = listOf(ownerPublicKey)
-        }
+        prepareNewValue(newValue, keys, ownerAddress, contractAddress)
         config.run {
             val newValues = values.toMutableList()
             var newValuePosition = values.size
             values.forEachIndexed { position, value ->
-                if (value.publicKey == ownerPublicKey) newValuePosition = position + getSafeAccountNumber(ownerPublicKey)
+                if (value.address == ownerAddress) newValuePosition = position + getSafeAccountNumber(ownerAddress)
             }
             newValues.add(newValuePosition, newValue)
             return WalletConfig(updateVersion, identities, newValues, services)
+        }
+    }
+
+    private fun prepareNewValue(
+        newValue: Value,
+        keys: Triple<Int, String, String>,
+        ownerAddress: String,
+        contractAddress: String
+    ) {
+        newValue.apply {
+            publicKey = keys.second
+            privateKey = keys.third
+            address = blockchainRepository.completeAddress(keys.third)
+            if (ownerAddress.isNotEmpty()) owners = listOf(ownerAddress)
+            if (contractAddress.isNotEmpty()) smartContractAddress = contractAddress
         }
     }
 

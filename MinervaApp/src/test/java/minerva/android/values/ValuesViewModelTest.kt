@@ -7,11 +7,11 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
+import minerva.android.walletmanager.manager.SmartContractManager
 import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManagerImpl
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
-import minerva.android.walletmanager.model.Asset
-import minerva.android.walletmanager.model.Balance
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.*
 import org.amshove.kluent.shouldBe
 import org.junit.Test
 import java.math.BigDecimal
@@ -20,13 +20,17 @@ class ValuesViewModelTest : BaseViewModelTest() {
 
     private val walletManager: WalletManager = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
-    private val viewModel = ValuesViewModel(walletManager, walletActionsRepository)
+    private val smartContractManager: SmartContractManager = mock()
+    private val viewModel = ValuesViewModel(walletManager, walletActionsRepository, smartContractManager)
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
 
     private val assetsBalanceObserver: Observer<Map<String, List<Asset>>> = mock()
     private val assetsBalanceCaptor: KArgumentCaptor<Map<String, List<Asset>>> = argumentCaptor()
+
+    private val noFundsObserver: Observer<Event<Unit>> = mock()
+    private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
@@ -89,6 +93,32 @@ class ValuesViewModelTest : BaseViewModelTest() {
         viewModel.removeValue(1, "test")
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `create safe account error`() {
+        val error = Throwable("error")
+        walletManager.initWalletConfig()
+        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
+        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(smartContractManager.createSafeAccount(any())).thenReturn(Single.error(error))
+        whenever(walletManager.createValue(any(), any(), any(), any())).thenReturn(Completable.error(error))
+        viewModel.errorLiveData.observeForever(errorObserver)
+        viewModel.createSafeAccount(Value(index = 1, balance = BigDecimal.ONE))
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `create safe account when balance is 0`() {
+        walletManager.initWalletConfig()
+        whenever(smartContractManager.createSafeAccount(any())).thenReturn(Single.just("address"))
+        viewModel.noFundsLiveData.observeForever(noFundsObserver)
+        viewModel.createSafeAccount(Value(index = 1, balance = BigDecimal.ZERO))
+        noFundsCaptor.run {
+            verify(noFundsObserver).onChanged(capture())
         }
     }
 }

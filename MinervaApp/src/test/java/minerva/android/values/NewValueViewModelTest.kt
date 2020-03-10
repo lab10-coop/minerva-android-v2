@@ -24,7 +24,7 @@ class NewValueViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `create wallet action success`() {
-        whenever(walletManager.createValue(any(), any(), any())).thenReturn(Completable.complete())
+        whenever(walletManager.createValue(any(), any(), any(), any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
         whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.createValueLiveData.observeForever(createValueObserver)
@@ -37,7 +37,7 @@ class NewValueViewModelTest : BaseViewModelTest() {
     @Test
     fun `save wallet action error`() {
         val error = Throwable()
-        whenever(walletManager.createValue(any(), any(), any())).thenReturn(Completable.complete())
+        whenever(walletManager.createValue(any(), any(), any(), any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
         whenever(walletManager.masterKey).thenReturn(MasterKey("12", "34"))
         viewModel.createNewValue(Network.ARTIS, 1)

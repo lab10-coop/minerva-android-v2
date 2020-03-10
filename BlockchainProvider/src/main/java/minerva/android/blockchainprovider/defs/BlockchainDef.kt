@@ -1,7 +1,7 @@
-package minerva.android.blockchainprovider.model.defs
+package minerva.android.blockchainprovider.defs
 
 import androidx.annotation.StringDef
-import minerva.android.blockchainprovider.model.defs.BlockchainDef.Companion.ENS
+import minerva.android.blockchainprovider.defs.BlockchainDef.Companion.ENS
 
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(ENS)
