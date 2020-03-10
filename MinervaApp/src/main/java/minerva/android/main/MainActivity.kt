@@ -40,6 +40,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         prepareSettingsIcon()
     }
 
+    override fun onResume() {
+        super.onResume()
+        shouldShowLoadingScreen(false)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         viewModel.dispose()
