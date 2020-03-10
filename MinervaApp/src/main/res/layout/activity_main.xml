@@ -11,7 +11,7 @@
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/bottom_navigation_bar_height"/>
+        android:layout_marginBottom="@dimen/bottom_navigation_bar_height" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
@@ -20,10 +20,17 @@
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
         android:background="@android:color/white"
-        android:clickable="true"
         app:elevation="16dp"
         app:itemIconTint="@drawable/nav_bar_selector"
         app:itemTextColor="@drawable/nav_bar_selector"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
+
+    <minerva.android.widget.MinervaLoadingView
+        android:id="@+id/loadingScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:elevation="20dp"
+        android:visibility="gone" />
 </FrameLayout>

@@ -6,7 +6,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.BlockchainRepository
+import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ValuePayload
@@ -21,7 +21,6 @@ import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Compa
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_VALUES_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_VALUES_INDEX
-import minerva.android.walletmanager.model.defs.NetworkFullName
 import minerva.android.walletmanager.model.mappers.mapIdentityPayloadToIdentity
 import minerva.android.walletmanager.model.mappers.mapServicesResponseToServices
 import minerva.android.walletmanager.model.mappers.mapValueResponseToValue

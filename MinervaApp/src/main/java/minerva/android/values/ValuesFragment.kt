@@ -11,6 +11,8 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
+import minerva.android.extension.gone
+import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
@@ -84,7 +86,13 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
             balanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateBalances(it) })
             assetBalanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateAssetBalances(it) })
             errorLiveData.observe(this@ValuesFragment, Observer {
-                showErrorFlashbar(getString(R.string.remove_value_error), it.peekContent().message)
+                showErrorFlashbar(getString(R.string.error_header), it.peekContent().message)
+            })
+            noFundsLiveData.observe(this@ValuesFragment, Observer {
+                MinervaFlashbar.show(requireActivity(), getString(R.string.no_funds), getString(R.string.no_funds_message))
+            })
+            loadingLiveData.observe(this@ValuesFragment, EventObserver {
+                listener.shouldShowLoadingScreen(it)
             })
         }
     }

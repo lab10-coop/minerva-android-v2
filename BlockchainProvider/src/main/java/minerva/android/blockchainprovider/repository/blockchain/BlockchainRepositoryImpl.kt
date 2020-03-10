@@ -1,11 +1,13 @@
-package minerva.android.blockchainprovider
+package minerva.android.blockchainprovider.repository.blockchain
 
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import minerva.android.blockchainprovider.provider.AssetContractGasProvider
+import minerva.android.blockchainprovider.provider.DefaultContractGasProvider
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
-import minerva.android.blockchainprovider.model.defs.BlockchainDef.Companion.ENS
+import minerva.android.blockchainprovider.defs.BlockchainDef.Companion.ENS
 import minerva.android.kotlinUtils.InvalidIndex
 import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.crypto.Credentials
@@ -25,7 +27,8 @@ import java.math.BigInteger
 import java.math.RoundingMode
 
 
-class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : BlockchainRepository {
+class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
+    BlockchainRepository {
 
     /**
      * List arguments: first - network short name, second - wallet address (public)
@@ -61,8 +64,7 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) : Blockcha
                 payload.contractAddress,
                 web3j[network],
                 this,
-                AssetContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit)
-            )
+                AssetContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit))
                 .transfer(payload.receiverKey, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger()).flowable().toObservable()
                 .ignoreElements()
         }

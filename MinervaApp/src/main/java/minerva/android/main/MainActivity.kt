@@ -1,14 +1,15 @@
 package minerva.android.main
 
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.loadingScreen
 import minerva.android.R
-import minerva.android.extension.launchActivity
-import minerva.android.extension.launchActivityForResult
+import minerva.android.extension.*
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
@@ -27,6 +28,7 @@ import org.koin.android.ext.android.inject
 class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, FragmentInteractorListener {
 
     private val viewModel: MainViewModel by inject()
+    private var shouldDisableAddButton = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,14 +59,17 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        menu?.findItem(R.id.barcodeScanner)?.apply {
-            isVisible = isServicesTabSelected()
-        }
-        menu?.findItem(R.id.addIdentity)?.apply {
-            isVisible = shouldShowAddIdentityIcon()
-        }
-        menu?.findItem(R.id.addValue)?.apply {
-            isVisible = shouldShowAddValueIcon()
+        menu?.apply {
+            findItem(R.id.barcodeScanner)?.apply {
+                isVisible = isServicesTabSelected()
+            }
+            findItem(R.id.addIdentity)?.apply {
+                isVisible = shouldShowAddIdentityIcon()
+            }
+            findItem(R.id.addValue)?.apply {
+                isVisible = shouldShowAddValueIcon()
+                isEnabled = !shouldDisableAddButton
+            }
         }
         return super.onPrepareOptionsMenu(menu)
     }
@@ -98,6 +103,30 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             putExtra(VALUE_INDEX, valueIndex)
             putExtra(ASSET_INDEX, assetIndex)
         }
+    }
+
+    override fun shouldShowLoadingScreen(isLoading: Boolean) {
+        loadingScreen.visibleOrGone(isLoading)
+        toggleLoadingActionBar(isLoading)
+        toggleAddValueButton(isLoading)
+    }
+
+    private fun toggleLoadingActionBar(isLoading: Boolean) {
+        if (isLoading) {
+            setLoadingActionBar(R.color.loadingScreenBackground)
+        } else {
+            setLoadingActionBar(R.color.lightGray)
+        }
+    }
+
+    private fun toggleAddValueButton(isLoading: Boolean) {
+        shouldDisableAddButton = isLoading
+        invalidateOptionsMenu()
+    }
+
+    private fun setLoadingActionBar(color: Int) {
+        supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(color)))
+        window.statusBarColor = getColor(color)
     }
 
     override fun onBackPressed() {

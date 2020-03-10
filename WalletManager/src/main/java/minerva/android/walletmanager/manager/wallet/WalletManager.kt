@@ -32,7 +32,7 @@ interface WalletManager {
     fun removeIdentity(identity: Identity): Completable
 
     fun loadValue(position: Int): Value
-    fun createValue(network: Network, valueName: String, owner: String = String.Empty): Completable
+    fun createValue(network: Network, valueName: String, ownerAddress: String = String.Empty, smartContractAddress: String = String.Empty): Completable
     fun removeValue(index: Int): Completable
 
     fun saveService(service: Service): Completable

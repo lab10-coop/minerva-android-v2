@@ -7,6 +7,8 @@ import minerva.android.cryptographyProvider.createCryptographyModules
 import minerva.android.servicesApiProvider.createServicesApiProviderModule
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.keystore.KeystoreRepositoryImpl
+import minerva.android.walletmanager.manager.SmartContractManager
+import minerva.android.walletmanager.manager.SmartContractManagerImpl
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.wallet.WalletManagerImpl
 import minerva.android.walletmanager.manager.wallet.walletconfig.localProvider.LocalWalletConfigProvider
@@ -37,4 +39,5 @@ fun createWalletModules() = module {
     single { WalletManagerImpl(get(), get(), get(), get(), get(), get(), get()) as WalletManager }
     factory { LocalWalletActionsConfigProviderImpl(get()) as LocalWalletActionsConfigProvider }
     factory { WalletActionsRepositoryImpl(get(), get()) as WalletActionsRepository }
+    factory { SmartContractManagerImpl(get()) as SmartContractManager }
 }

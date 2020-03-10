@@ -1,4 +1,4 @@
-package minerva.android.blockchainprovider
+package minerva.android.blockchainprovider.repository.blockchain
 
 import io.reactivex.Completable
 import io.reactivex.Observable

@@ -44,4 +44,5 @@
     <color name="xDaiOpacity">#29FDAC42</color>
     <color name="black">#000000</color>
     <color name="separatorColor">#EAEAEE</color>
+    <color name="loadingScreenBackground">#70000000</color>
 </resources>
