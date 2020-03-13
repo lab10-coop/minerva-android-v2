@@ -53,6 +53,7 @@ interface WalletManager {
     fun resolveENS(ensName: String): Single<String>
 
     fun getSafeAccountNumber(ownerPublicKey: String): Int
+    fun getSafeAccountMasterOwnerPrivateKey(address: String?): String
 
     fun getValueIterator(): Int
     fun dispose()

@@ -41,7 +41,7 @@ private val appModules = module {
     viewModel { ValueAddressViewModel(get()) }
     viewModel { NewValueViewModel(get(), get()) }
     viewModel { ServicesViewModel(get()) }
-    viewModel { TransactionsViewModel(get(), get()) }
+    viewModel { TransactionsViewModel(get(), get(), get()) }
     viewModel { WalletActionsViewModel(get(), get()) }
     viewModel { PaymentRequestViewModel(get(), get()) }
 }

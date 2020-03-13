@@ -15,8 +15,8 @@ data class Value(
     var balance: BigDecimal = Int.InvalidValue.toBigDecimal(),
     var assets: List<Asset> = listOf(),
     var fiatBalance: BigDecimal = BigDecimal.ZERO,
-    var owners: List<String>? = null,
-    var smartContractAddress: String = String.Empty
+    var owners: MutableList<String>? = null,
+    var contractAddress: String = String.Empty
 ) {
     constructor(value: Value, isDeleted: Boolean) : this(
         value.index,
@@ -26,8 +26,7 @@ data class Value(
         value.name,
         value.network,
         isDeleted,
-        owners = value.owners,
-        smartContractAddress = value.smartContractAddress
+        owners = value.owners
     )
 
     val isSafeAccount: Boolean

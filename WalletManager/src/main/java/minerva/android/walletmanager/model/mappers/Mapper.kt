@@ -49,7 +49,8 @@ fun mapValueResponseToValue(
         response.network,
         response.isDeleted,
         owners = response.owners,
-        smartContractAddress = response.smartContractAddress
+        contractAddress = response.contractAddress
+
     )
 
 fun mapServiceResponseToService(response: ServicePayload): Service =
@@ -98,7 +99,7 @@ fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =
     )
 
 fun mapValueToValuePayload(value: Value): ValuePayload =
-    ValuePayload(value.index, value.name, value.network, value.isDeleted, value.owners, value.smartContractAddress)
+    ValuePayload(value.index, value.name, value.network, value.isDeleted, value.owners, value.contractAddress)
 
 fun mapTransactionToTransactionPayload(transaction: Transaction): TransactionPayload =
     transaction.run {
@@ -114,6 +115,4 @@ fun mapTransactionToTransactionPayload(transaction: Transaction): TransactionPay
     }
 
 fun mapTransactionCostPayloadToTransactionCost(payload: TransactionCostPayload): TransactionCost =
-    payload.run {
-        TransactionCost(gasPrice, gasLimit, cost)
-    }
+    payload.run { TransactionCost(gasPrice, gasLimit, cost) }

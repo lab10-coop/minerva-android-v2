@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
 import minerva.android.extension.getCurrentFragment
@@ -66,6 +67,14 @@ class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
             setDisplayUseLogoEnabled(true)
+            setLogo()
+        }
+    }
+
+    private fun ActionBar.setLogo() {
+        if (value.isSafeAccount) {
+            setLogo(getDrawable(R.drawable.ic_artis_safe_account))
+        } else {
             setLogo(getDrawable(getNetworkIcon(Network.fromString(value.network))))
         }
     }

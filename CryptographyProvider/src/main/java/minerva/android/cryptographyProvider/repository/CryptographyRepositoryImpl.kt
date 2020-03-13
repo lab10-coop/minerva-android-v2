@@ -40,7 +40,9 @@ class CryptographyRepositoryImpl(var contex: Context) : CryptographyRepository {
                 error?.let {
                     keysSubject.onError(Throwable(error))
                 }.orElse {
-                    keysSubject.onSuccess(Triple(index, publicKey.hexToBytes32(), privateKey))
+                    //TODO hacks for correct private key format
+                    keysSubject.onSuccess(Triple(index, publicKey.hexToBytes32(), "0x000000000000000000000000${privateKey.removePrefix("0x")}"))
+                    //end of hack
                 }
             })
         return keysSubject
