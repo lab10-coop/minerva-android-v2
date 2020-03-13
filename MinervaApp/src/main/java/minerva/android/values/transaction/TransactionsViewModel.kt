@@ -3,6 +3,7 @@ package minerva.android.values.transaction
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
+import io.reactivex.CompletableSource
 import io.reactivex.Single
 import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -13,7 +14,9 @@ import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
+import minerva.android.walletmanager.manager.SmartContractManager
 import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.manager.wallet.WalletManagerImpl.Companion.OWNER_INDEX
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
@@ -27,7 +30,10 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class TransactionsViewModel(private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository) :
+class TransactionsViewModel(
+    private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository,
+    private val smartContractManager: SmartContractManager
+) :
     BaseViewModel() {
 
     lateinit var transaction: Transaction
@@ -88,8 +94,91 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
     }
 
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
-        if (assetIndex == Int.InvalidIndex) sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-        else sendAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
+        when {
+            assetIndex == Int.InvalidIndex && !value.isSafeAccount -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            value.isSafeAccount -> sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            else -> sendAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
+        }
+    }
+
+    private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+        launchDisposable {
+            val ownerPrivateKey = value.owners?.get(OWNER_INDEX).let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
+            getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
+                .flatMap {
+                    transaction = it
+                    smartContractManager.transferNativeCoin(network, it).toSingleDefault(it) }
+                .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
+                .flatMapCompletable { saveWalletAction(SENT, it) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onComplete = {
+                        _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT))
+                    },
+                    onError = {
+                        Timber.e("Send safe account transaction error: ${it.message}")
+                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
+                    }
+                )
+
+        }
+    }
+
+    private fun getTransactionForSafeAccount(
+        ownerPrivateKey: String,
+        receiverKey: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ): Single<Transaction> {
+        return Single.just(
+            Transaction(
+                privateKey = ownerPrivateKey,
+                receiverKey = receiverKey,
+                amount = amount,
+                gasPrice = gasPrice,
+                gasLimit = gasLimit,
+                contractAddress = value.address
+            )
+        )
+    }
+
+    private fun sendMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+        launchDisposable {
+            resolveENS(receiverKey, amount, gasPrice, gasLimit)
+                .flatMap { walletManager.transferNativeCoin(network, it).toSingleDefault(it) }
+                .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
+                .flatMapCompletable { saveWalletAction(SENT, it) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
+                    onError = {
+                        Timber.e("Send transaction error: ${it.message}")
+                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
+                    }
+                )
+        }
+    }
+
+    private fun sendAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+        launchDisposable {
+            resolveENS(receiverKey, amount, gasPrice, gasLimit, value.assets[assetIndex].address)
+                .flatMapCompletable { walletManager.transferERC20Token(value.network, it) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
+                    onError = { _errorLiveData.value = Event(it) }
+                )
+        }
     }
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String =
@@ -125,6 +214,24 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
             )
         )
 
+    private fun saveTransferFailedWalletAction() {
+        launchDisposable {
+            saveWalletAction(FAILED, transaction)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onComplete = {
+                        _sendTransactionLiveData.value = Event(Pair("${transaction.amount} ${value.network}", FAILED))
+                    },
+                    onError = {
+                        Timber.e("Save wallet action error $it")
+                        _errorLiveData.value = Event(it)
+                    }
+                )
+        }
+    }
+
     private fun resolveENS(
         receiverKey: String,
         amount: BigDecimal,
@@ -133,9 +240,13 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
         contractAddress: String = String.Empty
     ): Single<Transaction> =
         walletManager.resolveENS(receiverKey)
-            .map {
-                prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this }
-            }
+            .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
+
+    private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
+        walletActionsRepository.saveWalletActions(
+            getValuesWalletAction(transaction, network, status),
+            walletManager.masterKey
+        )
 
     private fun prepareTransaction(
         receiverKey: String,
@@ -153,62 +264,6 @@ class TransactionsViewModel(private val walletManager: WalletManager, private va
             gasLimit,
             contractAddress
         )
-    }
-
-    private fun sendMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
-        launchDisposable {
-            resolveENS(receiverKey, amount, gasPrice, gasLimit)
-                .flatMap { walletManager.transferNativeCoin(network, it).toSingleDefault(it) }
-                .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
-                .flatMapCompletable { saveWalletAction(SENT, it) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
-                    onError = {
-                        Timber.e("Send transaction error: ${it.message}")
-                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
-                    }
-                )
-        }
-    }
-
-    private fun saveTransferFailedWalletAction() {
-        launchDisposable {
-            saveWalletAction(FAILED, transaction)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("${transaction.amount} ${value.network}", FAILED)) },
-                    onError = {
-                        Timber.e("Save wallet action error $it")
-                        _errorLiveData.value = Event(it) }
-                )
-        }
-    }
-
-    private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(
-            getValuesWalletAction(transaction, network, status),
-            walletManager.masterKey
-        )
-
-    private fun sendAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
-        launchDisposable {
-            resolveENS(receiverKey, amount, gasPrice, gasLimit, value.assets[assetIndex].address)
-                .flatMapCompletable { walletManager.transferERC20Token(value.network, it) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
-                    onError = { _errorLiveData.value = Event(it) }
-                )
-        }
     }
 
     val network

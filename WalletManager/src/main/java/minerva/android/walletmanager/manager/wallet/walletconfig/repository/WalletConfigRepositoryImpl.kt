@@ -94,10 +94,12 @@ class WalletConfigRepositoryImpl(
         walletConfigPayload.identityResponse.let { identitiesResponse ->
             walletConfigPayload.valueResponse.let { valuesResponse ->
                 Observable.range(START, identitiesResponse.size)
+                    .filter { !identitiesResponse[it].isDeleted }
                     .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, identitiesResponse[it].index) }
                     .toList()
                     .map { completeIdentitiesKeys(walletConfigPayload, it) }
                     .zipWith(Observable.range(START, valuesResponse.size)
+                        .filter { !valuesResponse[it].isDeleted }
                         .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, valuesResponse[it].index) }
                         .toList()
                         .map { completeValues(walletConfigPayload, it) },
@@ -117,13 +119,7 @@ class WalletConfigRepositoryImpl(
         val identities = mutableListOf<Identity>()
         list.forEach {
             walletConfigPayload.getIdentityPayload(it.first).apply {
-                identities.add(
-                    mapIdentityPayloadToIdentity(
-                        this,
-                        it.second,
-                        it.third
-                    )
-                )
+                identities.add(mapIdentityPayloadToIdentity(this, it.second, it.third))
             }
         }
         return identities
@@ -133,14 +129,8 @@ class WalletConfigRepositoryImpl(
         val values = mutableListOf<Value>()
         list.forEach {
             walletConfigPayload.getValuePayload(it.first).apply {
-                values.add(
-                    mapValueResponseToValue(
-                        this,
-                        it.second,
-                        it.third,
-                        blockchainRepository.completeAddress(it.third)
-                    )
-                )
+                val address = if (contractAddress.isEmpty()) blockchainRepository.completeAddress(it.third) else contractAddress
+                values.add(mapValueResponseToValue(this, it.second, it.third, address))
             }
         }
         return values

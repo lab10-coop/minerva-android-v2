@@ -3,7 +3,7 @@ package minerva.android.blockchainprovider.repository.blockchain
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.provider.AssetContractGasProvider
+import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.provider.DefaultContractGasProvider
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
@@ -47,9 +47,9 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
         }
     }
 
-    override fun reverseResolveENS(address: String): Single<String> = Single.just(address).map {
-        EnsResolver(web3j[ENS]).reverseResolve(it)
-    }
+    override fun reverseResolveENS(address: String): Single<String> =
+        Single.just(EnsResolver(web3j[ENS]).reverseResolve(address))
+
 
     override fun resolveENS(ensName: String): Single<String> =
         if (ensName.contains(DOT)) Single.just(ensName).map { EnsResolver(web3j[ENS]).resolve(it) }
@@ -64,7 +64,7 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
                 payload.contractAddress,
                 web3j[network],
                 this,
-                AssetContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit))
+                ContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit))
                 .transfer(payload.receiverKey, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger()).flowable().toObservable()
                 .ignoreElements()
         }
@@ -79,6 +79,7 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
                     .ethSendRawTransaction(getSignedTransaction(it.transactionCount, transactionPayload))
                     .flowable()
                     .flatMapCompletable { response -> handleTransactionResponse(response) }
+
             }
 
     //TODO DefaultContractGasProvider is MVP hack. Needs to be refactored
@@ -93,7 +94,8 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         getTransactionCostInEth(toWei(gasPrice, Convert.Unit.GWEI), BigDecimal(gasLimit))
 
-    override fun completeAddress(privateKey: String): String = Credentials.create(privateKey).address
+    override fun completeAddress(privateKey: String): String =
+        Credentials.create(privateKey).address
 
     override fun toGwei(balance: BigDecimal): BigInteger = toWei(balance, Convert.Unit.GWEI).toBigInteger()
 

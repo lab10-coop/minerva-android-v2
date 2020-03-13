@@ -14,9 +14,9 @@ data class ValuePayload(
     @SerializedName("isDeleted")
     private val _isDeleted: Boolean? = false,
     @SerializedName("owners")
-    private val _owners: List<String>? = null,
+    private val _owners: MutableList<String>? = null,
     @SerializedName("smartContractAddress")
-    private val _smartContractAddress: String? = null
+    private val _contractAddress: String? = null
 ) {
     val index: Int
         get() = _index ?: Int.InvalidId
@@ -26,8 +26,9 @@ data class ValuePayload(
         get() = _network ?: String.Empty
     val isDeleted: Boolean
         get() = _isDeleted ?: false
-    val owners: List<String>?
+    val owners: MutableList<String>?
         get() = _owners
-    val smartContractAddress: String
-        get() = _smartContractAddress ?: String.Empty
+    val contractAddress: String
+        get() = _contractAddress ?: String.Empty
+
 }

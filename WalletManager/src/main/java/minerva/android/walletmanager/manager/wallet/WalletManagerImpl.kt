@@ -79,9 +79,7 @@ class WalletManagerImpl(
             walletConfigMutableLiveData.value?.values?.filter { !it.isDeleted }?.let { values ->
                 return blockchainRepository.refreshBalances(getAddresses(values))
                     .zipWith(Observable.range(START, this.size)
-                        .flatMapSingle {
-                            binanceApi.fetchExchangeRate(this[it])
-                        }
+                        .flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }
                         .toList())
                     .map { calculateFiatBalances(it.first, values, it.second) }
             }
@@ -91,10 +89,11 @@ class WalletManagerImpl(
 
     override fun transferNativeCoin(network: String, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
-            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
-                .onErrorReturn { String.Empty })
-            .map { saveRecipient(it, transaction.receiverKey) }
-            .ignoreElement()
+//    TODO Wait until ENR issue is not resolved !!
+//            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
+//                .doOnError { String.Empty })
+//            .map { saveRecipient(it, transaction.receiverKey) }
+//            .ignoreElement()
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
         blockchainRepository.transferERC20Token(network, mapTransactionToTransactionPayload(transaction))
@@ -257,9 +256,7 @@ class WalletManagerImpl(
     }
 
     override fun getValueIterator(): Int {
-        walletConfigMutableLiveData.value?.values?.size?.let {
-            return it + 1
-        }
+        walletConfigMutableLiveData.value?.values?.size?.let { return it + 1 }
         throw Throwable("Wallet Config was not initialized")
     }
 
@@ -418,15 +415,26 @@ class WalletManagerImpl(
         newValue.apply {
             publicKey = keys.second
             privateKey = keys.third
-            address = blockchainRepository.completeAddress(keys.third)
-            if (ownerAddress.isNotEmpty()) owners = listOf(ownerAddress)
-            if (contractAddress.isNotEmpty()) smartContractAddress = contractAddress
+            if (ownerAddress.isNotEmpty()) owners = mutableListOf(ownerAddress)
+            address = if (contractAddress.isNotEmpty()) {
+                this.contractAddress = contractAddress
+                contractAddress
+            } else blockchainRepository.completeAddress(keys.third)
         }
+    }
+
+    override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String {
+        walletConfigLiveData.value?.values?.forEach {
+            if (it.address == address) {
+                return it.privateKey
+            }
+        }
+        return String.Empty
     }
 
     companion object {
         private const val START = 0
-        private const val OWNER_INDEX = 0
+        const val OWNER_INDEX = 0
         private const val ONE_ELEMENT = 1
         private const val DEMO_LOGIN = "Demo Web Page Login"
         //        TODO should be dynamically handled form qr code
