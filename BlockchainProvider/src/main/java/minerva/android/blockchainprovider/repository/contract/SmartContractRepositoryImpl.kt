@@ -4,6 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toFlowable
 import io.reactivex.rxkotlin.zipWith
+import minerva.android.blockchainprovider.contract.ERC20
 import minerva.android.blockchainprovider.contract.GnosisSafe
 import minerva.android.blockchainprovider.contract.ProxyFactory
 import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.GNOSIS_SETUP_DATA
@@ -31,6 +32,7 @@ import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
+import org.web3j.tx.ReadonlyTransactionManager
 import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
@@ -47,90 +49,87 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
             .map { it.proxy }
 
     override fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable {
-        val amount = Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger()
-        getGnosisSafe(transactionPayload, network).run {
-            return nonce().flowable()
-                .flatMapCompletable { nonce ->
-                    getTransactionHash(this, transactionPayload, amount, nonce)
-                        .flowable()
-                        .zipWith(
-                            (web3j[network] ?: error("Not supported Network! ($network)"))
-                                .ethGetTransactionCount(transactionPayload.contractAddress, DefaultBlockParameterName.LATEST)
-                                .flowable()
-                        )
-                        .flatMapCompletable { hashAndCount ->
-                            (web3j[network] ?: error("Not supported Network! ($network)"))
-                                .ethGetTransactionCount(
-                                    Credentials.create(transactionPayload.privateKey).address,
-                                    DefaultBlockParameterName.LATEST
-                                )
-                                .flowable()
-                                .flatMap { count ->
-                                    (web3j[network] ?: error("Not supported Network! ($network)"))
-                                        .ethSendRawTransaction(getSignedTransaction(count, transactionPayload, amount, hashAndCount))
-                                        .flowable()
-                                }
-                                .flatMapCompletable { transaction ->
-                                    if (transaction.error == null) Completable.complete()
-                                    else Completable.error(Throwable())
-                                }
-                        }
-                }
+        Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger().run {
+            return performTransaction(
+                getGnosisSafe(transactionPayload, network),
+                transactionPayload.receiverKey, data, network, transactionPayload, this
+            )
         }
     }
 
-    private fun getGnosisSafe(transactionPayload: TransactionPayload, network: String): GnosisSafe =
-        GnosisSafe.load(
-            transactionPayload.contractAddress,
-            web3j[network],
-            Credentials.create(transactionPayload.privateKey),
-            ContractGasProvider(Convert.toWei(transactionPayload.gasPrice, Convert.Unit.GWEI).toBigInteger(), transactionPayload.gasLimit)
-        )
+    override fun transferERC20Token(network: String, transactionPayload: TransactionPayload, erc20Address: String): Completable {
+        Numeric.hexStringToByteArray(getSafeTxData(getERC20(erc20Address, network, transactionPayload), transactionPayload)).run {
+            return performTransaction(getGnosisSafe(transactionPayload, network), erc20Address, this, network, transactionPayload)
+        }
+    }
+
+    private fun performTransaction(
+        gnosisSafe: GnosisSafe,
+        receiver: String,
+        signedData: ByteArray,
+        network: String,
+        transactionPayload: TransactionPayload,
+        amount: BigInteger = BigInteger.valueOf(0)
+    ): Completable =
+        gnosisSafe.nonce().flowable()
+            .flatMapCompletable { nonce ->
+                getTransactionHash(receiver, gnosisSafe, amount, nonce, signedData)
+                    .flowable()
+                    .zipWith(
+                        (web3j[network] ?: error("Not supported Network! ($network)"))
+                            .ethGetTransactionCount(
+                                Credentials.create(transactionPayload.privateKey).address,
+                                DefaultBlockParameterName.LATEST
+                            ).flowable()
+
+                    ).flatMapCompletable { hashAndCount ->
+                        (web3j[network] ?: error("Not supported Network! ($network)"))
+                            .ethSendRawTransaction(getSignedTransaction(receiver, transactionPayload, amount, hashAndCount, signedData))
+                            .flowable()
+                            .flatMapCompletable { transaction ->
+                                if (transaction.error == null) Completable.complete()
+                                else Completable.error(Throwable())
+                            }
+                    }
+            }
 
     private fun getSignedTransaction(
-        count: EthGetTransactionCount,
+        receiver: String,
         transactionPayload: TransactionPayload,
         amount: BigInteger,
-        hashAndCount: Pair<ByteArray, EthGetTransactionCount>
+        hashAndCount: Pair<ByteArray, EthGetTransactionCount>,
+        data: ByteArray
     ): String =
         Numeric.toHexString(
             TransactionEncoder.signMessage(
                 getRawTransaction(
+                    receiver,
                     transactionPayload,
-                    count.transactionCount,
+                    hashAndCount.second.transactionCount,
                     amount,
-                    getSignatureData(hashAndCount.first, transactionPayload)
+                    getSignatureData(hashAndCount.first, transactionPayload),
+                    data
                 ), Credentials.create(transactionPayload.privateKey)
             )
         )
 
-    private fun getSignatureData(hash: ByteArray, transactionPayload: TransactionPayload): Sign.SignatureData =
-        Sign.signMessage(hash, ECKeyPair.create(Numeric.hexStringToByteArray(transactionPayload.privateKey)), false)
-
-    private fun getTransactionHash(
-        gnosisContract: GnosisSafe,
-        transactionPayload: TransactionPayload,
-        amount: BigInteger,
-        nonce: BigInteger
-    ): RemoteFunctionCall<ByteArray> =
-        gnosisContract
-            .getTransactionHash(transactionPayload.receiverKey, amount, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refund, nonce)
-
     private fun getRawTransaction(
+        receiver: String,
         transactionPayload: TransactionPayload,
         count: BigInteger,
         amount: BigInteger,
-        sig: Sign.SignatureData
+        sig: Sign.SignatureData,
+        data: ByteArray
     ): RawTransaction =
         RawTransaction.createTransaction(
             count,
             SmartContractGasProvider().gasPrice,
             safeTxGas + baseGas,
             transactionPayload.contractAddress,
-            getTxFromTransactionFunction(transactionPayload.receiverKey, amount, sig)
+            getTxFromTransactionFunction(receiver, amount, sig, data)
         )
 
-    private fun getTxFromTransactionFunction(receiver: String, amount: BigInteger, sig: Sign.SignatureData): String =
+    private fun getTxFromTransactionFunction(receiver: String, amount: BigInteger, sig: Sign.SignatureData, data: ByteArray): String =
         FunctionEncoder.encode(
             getExecutionTransactionFunction(
                 receiver,
@@ -143,9 +142,6 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
                 getSignedByteArray(sig)
             )
         )
-
-    private fun getSignedByteArray(signature: Sign.SignatureData): ByteArray =
-        signature.run { r + s + v }
 
     private fun getExecutionTransactionFunction(
         receiver: String,
@@ -172,6 +168,42 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
                 DynamicBytes(sigByteArr)
             ), emptyList()
         )
+
+    private fun getSafeTxData(erc20: ERC20, transactionPayload: TransactionPayload) =
+        erc20.transfer(transactionPayload.receiverKey, Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger())
+            .encodeFunctionCall()
+
+    private fun getERC20(erc20Address: String, network: String, transactionPayload: TransactionPayload): ERC20 =
+        ERC20.load(
+            erc20Address,
+            web3j[network],
+            ReadonlyTransactionManager(web3j[network], transactionPayload.contractAddress),
+            ContractGasProvider(Convert.toWei(transactionPayload.gasPrice, Convert.Unit.GWEI).toBigInteger(), transactionPayload.gasLimit)
+        )
+
+    private fun getGnosisSafe(transactionPayload: TransactionPayload, network: String): GnosisSafe =
+        GnosisSafe.load(
+            transactionPayload.contractAddress,
+            web3j[network],
+            Credentials.create(transactionPayload.privateKey),
+            ContractGasProvider(Convert.toWei(transactionPayload.gasPrice, Convert.Unit.GWEI).toBigInteger(), transactionPayload.gasLimit)
+        )
+
+    private fun getSignatureData(hash: ByteArray, transactionPayload: TransactionPayload): Sign.SignatureData =
+        Sign.signMessage(hash, ECKeyPair.create(Numeric.hexStringToByteArray(transactionPayload.privateKey)), false)
+
+    private fun getTransactionHash(
+        receiver: String,
+        gnosisContract: GnosisSafe,
+        amount: BigInteger,
+        nonce: BigInteger,
+        data: ByteArray
+    ): RemoteFunctionCall<ByteArray> =
+        gnosisContract
+            .getTransactionHash(receiver, amount, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refund, nonce)
+
+    private fun getSignedByteArray(signature: Sign.SignatureData): ByteArray =
+        signature.run { r + s + v }
 
     private fun getGnosisSetupData(address: String) =
         Numeric.hexStringToByteArray(String.format(GNOSIS_SETUP_DATA, address.removePrefix(HEX_PREFIX)))

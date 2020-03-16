@@ -13,4 +13,7 @@ class SmartContractManagerImpl(private val smartContractRepository: SmartContrac
 
     override fun transferNativeCoin(network: String, transaction: Transaction): Completable =
         smartContractRepository.transferNativeCoin(network, TransactionMapper.map(transaction))
+
+    override fun transferERC20Token(network: String, transaction: Transaction, erc20Address: String): Completable =
+        smartContractRepository.transferERC20Token(network, TransactionMapper.map(transaction), erc20Address)
 }

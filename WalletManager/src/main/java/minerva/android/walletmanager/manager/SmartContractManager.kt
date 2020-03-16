@@ -10,4 +10,5 @@ import java.math.BigInteger
 interface SmartContractManager {
     fun createSafeAccount(value: Value): Single<String>
     fun transferNativeCoin(network: String, transaction: Transaction): Completable
+    fun transferERC20Token(network: String, transaction: Transaction, erc20Address: String): Completable
 }

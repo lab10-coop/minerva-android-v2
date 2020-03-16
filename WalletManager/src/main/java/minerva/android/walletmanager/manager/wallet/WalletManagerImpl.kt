@@ -89,7 +89,7 @@ class WalletManagerImpl(
 
     override fun transferNativeCoin(network: String, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
-//    TODO Wait until ENR issue is not resolved !!
+//    TODO Wait until ENR issue is not resolved !! (downgrade web3j to 4.2.1)
 //            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
 //                .doOnError { String.Empty })
 //            .map { saveRecipient(it, transaction.receiverKey) }
@@ -97,10 +97,11 @@ class WalletManagerImpl(
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
         blockchainRepository.transferERC20Token(network, mapTransactionToTransactionPayload(transaction))
-            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
-                .onErrorReturn { String.Empty })
-            .map { saveRecipient(it, transaction.receiverKey) }
-            .ignoreElement()
+//    TODO Wait until ENR issue is not resolved !!  (downgrade web3j to 4.2.1)
+//            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
+//                .onErrorReturn { String.Empty })
+//            .map { saveRecipient(it, transaction.receiverKey) }
+//            .ignoreElement()
 
     override fun loadRecipients(): List<Recipient> = localStorage.loadRecipients()
 
@@ -260,25 +261,8 @@ class WalletManagerImpl(
         throw Throwable("Wallet Config was not initialized")
     }
 
-    override fun refreshAssetBalance(): Single<Map<String, List<Asset>>> {
-        walletConfigMutableLiveData.value?.values?.let { values ->
-            return Observable.range(START, values.size)
-                .filter { position -> !values[position].isDeleted }
-                //TODO filter should be removed when all testnet will be implemented
-                .filter { position -> Network.fromString(values[position].network).run { this == Network.ETHEREUM || this == Network.ARTIS } }
-                .flatMapSingle { position ->
-                    AssetManager.getAssetAddresses(Network.fromString(values[position].network)).run {
-                        refreshAssetsBalance(values[position].privateKey, this)
-                    }
-                }
-                .toList()
-                .map { list -> list.map { it.first to AssetManager.mapToAssets(it.second) }.toMap() }
-        }
-        return Single.error(Throwable("Wallet Config was not initialized"))
-    }
-
     override fun getSafeAccountNumber(ownerAddress: String): Int {
-        var safeAccountNumber = 1
+        var safeAccountNumber = DEFAULT_SAFE_ACCOUNT_NUMBER
         walletConfigLiveData.value?.values?.let {
             it.forEach { savedValue ->
                 if (savedValue.owners?.get(OWNER_INDEX) == ownerAddress) safeAccountNumber++
@@ -287,21 +271,55 @@ class WalletManagerImpl(
         return safeAccountNumber
     }
 
+    override fun refreshAssetBalance(): Single<Map<String, List<Asset>>> {
+        walletConfigMutableLiveData.value?.values?.let { values ->
+            return Observable.range(START, values.size)
+                .filter { position -> !values[position].isDeleted }
+                //TODO filter should be removed when all testnet will be implemented
+                .filter { position -> Network.fromString(values[position].network).run { this == Network.ETHEREUM || this == Network.ARTIS } }
+                .flatMapSingle { position ->
+                    AssetManager.getAssetAddresses(Network.fromString(values[position].network)).run {
+                        refreshAssetsBalance(values[position], this)
+                    }
+                }
+                .toList()
+                .map { list -> list.map { it.first to AssetManager.mapToAssets(it.second) }.toMap() }
+        }
+        return Single.error(Throwable("Wallet Config was not initialized"))
+    }
+
     /**
      *
      * return statement: Single<Pair<String, List<Pair<String, BigDecimal>>>>
      *                   Single<Pair<ValuePrivateKey, List<ContractAddress, BalanceOnContract>>>>
      *
      */
-    private fun refreshAssetsBalance(
-        privateKey: String,
-        addresses: Pair<String, List<String>>
-    ): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
+    private fun refreshAssetsBalance(value: Value, addresses: Pair<String, List<String>>):
+            Single<Pair<String, List<Pair<String, BigDecimal>>>> =
         Observable.range(START, addresses.second.size)
-            .flatMap { position -> blockchainRepository.refreshAssetBalance(privateKey, addresses.first, addresses.second[position]) }
+            .flatMap { position ->
+                blockchainRepository.refreshAssetBalance(value.privateKey, addresses.first, addresses.second[position], value.address)
+            }
             .filter { it.second > NO_FUNDS }
             .toList()
-            .map { Pair(privateKey, it) }
+            .map { Pair(value.privateKey, it) }
+
+    private fun prepareNewValue(
+        newValue: Value,
+        keys: Triple<Int, String, String>,
+        ownerAddress: String,
+        contractAddress: String
+    ) {
+        newValue.apply {
+            publicKey = keys.second
+            privateKey = keys.third
+            if (ownerAddress.isNotEmpty()) owners = mutableListOf(ownerAddress)
+            address = if (contractAddress.isNotEmpty()) {
+                this.contractAddress = contractAddress
+                contractAddress
+            } else blockchainRepository.completeAddress(keys.third)
+        }
+    }
 
     private fun handleWalletConfigResponse(it: WalletConfigResponse, masterKey: MasterKey) {
         if (it.state != ResponseState.ERROR) {
@@ -406,23 +424,6 @@ class WalletManagerImpl(
         }
     }
 
-    private fun prepareNewValue(
-        newValue: Value,
-        keys: Triple<Int, String, String>,
-        ownerAddress: String,
-        contractAddress: String
-    ) {
-        newValue.apply {
-            publicKey = keys.second
-            privateKey = keys.third
-            if (ownerAddress.isNotEmpty()) owners = mutableListOf(ownerAddress)
-            address = if (contractAddress.isNotEmpty()) {
-                this.contractAddress = contractAddress
-                contractAddress
-            } else blockchainRepository.completeAddress(keys.third)
-        }
-    }
-
     override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String {
         walletConfigLiveData.value?.values?.forEach {
             if (it.address == address) {
@@ -441,5 +442,6 @@ class WalletManagerImpl(
         private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
         private val NO_FUNDS = BigDecimal.valueOf(0)
+        private const val DEFAULT_SAFE_ACCOUNT_NUMBER = 1
     }
 }
