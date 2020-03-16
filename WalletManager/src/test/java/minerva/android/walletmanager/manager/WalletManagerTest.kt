@@ -472,7 +472,7 @@ class WalletManagerTest {
     @Test
     fun `get assets balances complete test`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(blockchainRepository.refreshAssetBalance(any(), any(), any()))
+        whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any()))
             .thenReturn(Observable.just(Pair("privateKey1", BigDecimal.valueOf(23))))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         walletManager.initWalletConfig()

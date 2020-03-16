@@ -3,13 +3,13 @@ package minerva.android.blockchainprovider.repository.blockchain
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.provider.ContractGasProvider
-import minerva.android.blockchainprovider.provider.DefaultContractGasProvider
+import minerva.android.blockchainprovider.contract.ERC20
+import minerva.android.blockchainprovider.defs.BlockchainDef.Companion.ENS
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
-import minerva.android.blockchainprovider.defs.BlockchainDef.Companion.ENS
+import minerva.android.blockchainprovider.provider.ContractGasProvider
+import minerva.android.blockchainprovider.provider.DefaultContractGasProvider
 import minerva.android.kotlinUtils.InvalidIndex
-import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
@@ -38,14 +38,25 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
             .flatMapSingle { position -> getBalance(networkAddress[position].first, networkAddress[position].second) }
             .toList()
 
-    override fun refreshAssetBalance(privateKey: String, network: String, contractAddress: String): Observable<Pair<String, BigDecimal>> {
-        Credentials.create(privateKey).run {
-            return ERC20.load(contractAddress, web3j[network], this, DefaultContractGasProvider())
-                .balanceOf(this.address).flowable()
-                .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
-                .toObservable()
-        }
-    }
+    override fun refreshAssetBalance(
+        privateKey: String,
+        network: String,
+        contractAddress: String,
+        safeAccountAddress: String
+    ): Observable<Pair<String, BigDecimal>> =
+        if (safeAccountAddress.isEmpty()) getERC20Balance(contractAddress, network, privateKey, Credentials.create(privateKey).address)
+        else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
+
+    private fun getERC20Balance(
+        contractAddress: String,
+        network: String,
+        privateKey: String,
+        address: String
+    ): Observable<Pair<String, BigDecimal>> =
+        ERC20.load(contractAddress, web3j[network], Credentials.create(privateKey), DefaultContractGasProvider())
+            .balanceOf(address).flowable()
+            .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
+            .toObservable()
 
     override fun reverseResolveENS(address: String): Single<String> =
         Single.just(EnsResolver(web3j[ENS]).reverseResolve(address))
@@ -55,16 +66,9 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
         if (ensName.contains(DOT)) Single.just(ensName).map { EnsResolver(web3j[ENS]).resolve(it) }
         else Single.just(ensName)
 
-    override fun transferERC20Token(
-        network: String,
-        payload: TransactionPayload
-    ): Completable {
+    override fun transferERC20Token(network: String, payload: TransactionPayload): Completable {
         Credentials.create(payload.privateKey).run {
-            return ERC20.load(
-                payload.contractAddress,
-                web3j[network],
-                this,
-                ContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit))
+            return ERC20.load(payload.contractAddress, web3j[network], this, ContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit))
                 .transfer(payload.receiverKey, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger()).flowable().toObservable()
                 .ignoreElements()
         }

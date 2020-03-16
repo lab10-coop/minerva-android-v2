@@ -7,4 +7,5 @@ import minerva.android.blockchainprovider.model.TransactionPayload
 interface SmartContractRepository {
     fun deployGnosisSafeContract(privateKey: String, address: String, network: String): Single<String>
     fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable
+    fun transferERC20Token(network: String, transactionPayload: TransactionPayload, erc20Address: String): Completable
 }

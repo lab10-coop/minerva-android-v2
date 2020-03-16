@@ -3,7 +3,6 @@ package minerva.android.values.transaction
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
-import io.reactivex.CompletableSource
 import io.reactivex.Single
 import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -96,18 +95,20 @@ class TransactionsViewModel(
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         when {
             assetIndex == Int.InvalidIndex && !value.isSafeAccount -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-            value.isSafeAccount -> sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-            else -> sendAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
+            assetIndex == Int.InvalidIndex && value.isSafeAccount -> sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            assetIndex != Int.InvalidIndex && !value.isSafeAccount -> sendAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
+            assetIndex != Int.InvalidIndex && value.isSafeAccount -> sendSafeAccountAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
         }
     }
 
-    private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+    private fun sendSafeAccountAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             val ownerPrivateKey = value.owners?.get(OWNER_INDEX).let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
             getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it
-                    smartContractManager.transferNativeCoin(network, it).toSingleDefault(it) }
+                    smartContractManager.transferERC20Token(network, it, value.assets[assetIndex].address).toSingleDefault(it)
+                }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
@@ -123,7 +124,33 @@ class TransactionsViewModel(
                         _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
                     }
                 )
+        }
 
+    }
+
+    private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+        launchDisposable {
+            val ownerPrivateKey = value.owners?.get(OWNER_INDEX).let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
+            getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
+                .flatMap {
+                    transaction = it
+                    smartContractManager.transferNativeCoin(network, it).toSingleDefault(it)
+                }
+                .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
+                .flatMapCompletable { saveWalletAction(SENT, it) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onComplete = {
+                        _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT))
+                    },
+                    onError = {
+                        Timber.e("Send safe account transaction error: ${it.message}")
+                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
+                    }
+                )
         }
     }
 
