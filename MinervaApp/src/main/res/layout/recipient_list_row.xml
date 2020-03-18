@@ -18,7 +18,7 @@
 
     <TextView
         android:id="@+id/recipientAddress"
-        android:layout_width="@dimen/recipient_list_address_width"
+        android:layout_width="@dimen/address_width"
         android:layout_height="wrap_content"
         android:ellipsize="middle"
         android:singleLine="true"

@@ -15,7 +15,6 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.SmartContractManager
 import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.wallet.WalletManagerImpl.Companion.OWNER_INDEX
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
@@ -103,7 +102,7 @@ class TransactionsViewModel(
 
     private fun sendSafeAccountAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
-            val ownerPrivateKey = value.owners?.get(OWNER_INDEX).let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
+            val ownerPrivateKey = value.owners?.last().let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
             getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it
@@ -130,7 +129,7 @@ class TransactionsViewModel(
 
     private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
-            val ownerPrivateKey = value.owners?.get(OWNER_INDEX).let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
+            val ownerPrivateKey = value.owners?.last().let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
             getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it

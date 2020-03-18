@@ -14,6 +14,7 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Value
 import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton
+import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import net.glxn.qrgen.android.QRCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -27,10 +28,8 @@ class ValueAddressFragment : Fragment() {
         initializeFragment()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_value_address, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_value_address, container, false)
 
     private fun initializeView(value: Value) {
         value.address.run {
@@ -63,8 +62,6 @@ class ValueAddressFragment : Fragment() {
     }
 
     companion object {
-        private const val INDEX = "index"
-
         @JvmStatic
         fun newInstance(index: Int) =
             ValueAddressFragment().apply {

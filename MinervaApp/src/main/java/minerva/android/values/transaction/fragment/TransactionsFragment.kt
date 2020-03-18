@@ -19,7 +19,7 @@ import minerva.android.R
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.values.listener.TransactionFragmentsListener
+import minerva.android.values.listener.AddressFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.values.transaction.fragment.adapter.RecipientAdapter
 import minerva.android.walletmanager.model.Recipient
@@ -33,7 +33,7 @@ import java.math.BigInteger
 class TransactionsFragment : Fragment() {
 
     private var areTransactionCostsOpen = false
-    private lateinit var listener: TransactionFragmentsListener
+    private lateinit var listener: AddressFragmentsListener
     private val viewModel: TransactionsViewModel by sharedViewModel()
     private var validationDisposable: Disposable? = null
 
@@ -50,6 +50,10 @@ class TransactionsFragment : Fragment() {
         prepareRecipients()
         prepareObservers()
         calculateTransactionCost()
+    }
+
+    override fun onResume() {
+        super.onResume()
         prepareTextListeners()
     }
 
@@ -186,7 +190,7 @@ class TransactionsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as TransactionFragmentsListener
+        listener = context as AddressFragmentsListener
     }
 
     private fun setupListeners() {

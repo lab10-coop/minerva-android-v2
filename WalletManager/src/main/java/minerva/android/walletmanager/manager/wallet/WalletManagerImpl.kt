@@ -141,11 +141,11 @@ class WalletManagerImpl(
             }
     }
 
-    override fun createValue(network: Network, valueName: String, ownerAddress: String, smartContractAddress: String): Completable {
+    override fun createValue(network: Network, valueName: String, ownerAddress: String, contractAddress: String): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             val newValue = Value(config.newIndex, name = valueName, network = network.short)
             return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, newValue.index)
-                .map { createUpdatedWalletConfig(config, newValue, it, ownerAddress, smartContractAddress) }
+                .map { createUpdatedWalletConfig(config, newValue, it, ownerAddress, contractAddress) }
                 .flatMapCompletable { updateWalletConfig(it) }
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
@@ -167,6 +167,24 @@ class WalletManagerImpl(
             return Completable.error(Throwable("Missing value with this index"))
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
+    }
+
+    override fun updateSafeAccountOwners(index: Int, owners: List<String>): Single<List<String>> {
+        walletConfigMutableLiveData.value?.let { config ->
+            config.values.apply {
+                    forEach { if (it.index == index) it.owners = owners }
+                    return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, this, config.services))
+                        .andThen(Single.just(owners))
+            }
+        }
+        return Single.error(Throwable("Wallet Config was not initialized"))
+    }
+
+    override fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>> {
+        walletConfigMutableLiveData.value?.let {
+            TODO("Not yet implemented")
+        }
+        return Single.error(Throwable("Wallet Config was not initialized"))
     }
 
     override fun saveIdentity(identity: Identity): Completable {
@@ -265,7 +283,7 @@ class WalletManagerImpl(
         var safeAccountNumber = DEFAULT_SAFE_ACCOUNT_NUMBER
         walletConfigLiveData.value?.values?.let {
             it.forEach { savedValue ->
-                if (savedValue.owners?.get(OWNER_INDEX) == ownerAddress) safeAccountNumber++
+                if (savedValue.owners?.last() == ownerAddress) safeAccountNumber++
             }
         }
         return safeAccountNumber
@@ -287,6 +305,7 @@ class WalletManagerImpl(
         }
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
+
 
     /**
      *
@@ -435,7 +454,6 @@ class WalletManagerImpl(
 
     companion object {
         private const val START = 0
-        const val OWNER_INDEX = 0
         private const val ONE_ELEMENT = 1
         private const val DEMO_LOGIN = "Demo Web Page Login"
         //        TODO should be dynamically handled form qr code

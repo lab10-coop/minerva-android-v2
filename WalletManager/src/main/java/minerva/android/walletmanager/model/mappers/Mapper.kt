@@ -50,7 +50,6 @@ fun mapValueResponseToValue(
         response.isDeleted,
         owners = response.owners,
         contractAddress = response.contractAddress
-
     )
 
 fun mapServiceResponseToService(response: ServicePayload): Service =

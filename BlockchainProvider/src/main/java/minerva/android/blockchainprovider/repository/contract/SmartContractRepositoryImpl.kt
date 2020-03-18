@@ -17,6 +17,7 @@ import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.b
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.data
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.gasPrice
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.gasToken
+import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.noFunds
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.operation
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.refund
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeTxGas
@@ -29,14 +30,15 @@ import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.abi.datatypes.generated.Uint8
 import org.web3j.crypto.*
 import org.web3j.protocol.Web3j
+import org.web3j.utils.Numeric
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
+import kotlin.Pair
+//import kotlin.Pair
 import org.web3j.tx.ReadonlyTransactionManager
 import org.web3j.utils.Convert
-import org.web3j.utils.Numeric
 import java.math.BigInteger
-import kotlin.Pair
 
 class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : SmartContractRepository {
 
@@ -56,6 +58,26 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
             )
         }
     }
+
+    override fun getGnosisSafeOwners(gnosisAddress: String, network: String, privateKey: String): Single<List<String>> =
+        getGnosisSafe(gnosisAddress, network, privateKey).owners.flowable()
+            .map { it as List<String> }
+            .singleOrError()
+
+
+    override fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable {
+        val data: ByteArray = Numeric.hexStringToByteArray(
+            getGnosisSafe(gnosisAddress, network, privateKey).addOwnerWithThreshold(owner, ADD_OWNER_THRESHOLD).encodeFunctionCall()
+        )
+
+        getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
+            return performTransaction(
+                gnosisSafe, gnosisAddress, data, network,
+                TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
+            )
+        }
+    }
+
 
     override fun transferERC20Token(network: String, transactionPayload: TransactionPayload, erc20Address: String): Completable {
         Numeric.hexStringToByteArray(getSafeTxData(getERC20(erc20Address, network, transactionPayload), transactionPayload)).run {
@@ -92,6 +114,8 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
                             }
                     }
             }
+
+
 
     private fun getSignedTransaction(
         receiver: String,
@@ -181,6 +205,9 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
             ContractGasProvider(Convert.toWei(transactionPayload.gasPrice, Convert.Unit.GWEI).toBigInteger(), transactionPayload.gasLimit)
         )
 
+    private fun getGnosisSafe(gnosisAddress: String, network: String, privateKey: String) =
+        GnosisSafe.load(gnosisAddress, web3j[network], Credentials.create(privateKey), SmartContractGasProvider())
+
     private fun getGnosisSafe(transactionPayload: TransactionPayload, network: String): GnosisSafe =
         GnosisSafe.load(
             transactionPayload.contractAddress,
@@ -202,6 +229,7 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
         gnosisContract
             .getTransactionHash(receiver, amount, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refund, nonce)
 
+
     private fun getSignedByteArray(signature: Sign.SignatureData): ByteArray =
         signature.run { r + s + v }
 
@@ -213,5 +241,6 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
 
     companion object {
         private const val HEX_PREFIX = "0x"
+        private val ADD_OWNER_THRESHOLD = BigInteger.valueOf(1)
     }
 }

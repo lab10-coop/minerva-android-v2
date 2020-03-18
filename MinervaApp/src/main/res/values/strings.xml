@@ -10,7 +10,6 @@
     <string name="welcome_to_minerva">Welcome to Minerva!</string>
     <string name="welcome_message">Restore your old wallet or create your new Minerva digital wallet.</string>
     <string name="create_new_wallet">Create new wallet</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="restore_old_wallet">Restore old wallet</string>
     <string name="enter_your_new_wallet">Enter your new wallet</string>
     <string name="restore_wallet">Restore your wallet</string>
@@ -137,4 +136,7 @@
     <string name="no_funds">No funds</string>
     <string name="no_funds_message">Please add at least 0.1 ATS to this ARTIS (Tau1) account</string>
     <string name="processing">Processing...</string>
+    <string name="add_owner">Add owner</string>
+    <string name="current_owners">Current owners</string>
+    <string name="owner_address">Owner address</string>
 </resources>

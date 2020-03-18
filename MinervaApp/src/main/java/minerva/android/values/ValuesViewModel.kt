@@ -6,7 +6,6 @@ import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
@@ -15,7 +14,6 @@ import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
-import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionType
