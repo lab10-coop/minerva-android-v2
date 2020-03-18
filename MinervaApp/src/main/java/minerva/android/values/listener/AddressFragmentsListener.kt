@@ -1,6 +1,6 @@
 package minerva.android.values.listener
 
-interface TransactionFragmentsListener: BaseScannerListener {
+interface AddressFragmentsListener: BaseScannerListener {
     fun showScanner()
     fun setScanResult(text: String?)
 }

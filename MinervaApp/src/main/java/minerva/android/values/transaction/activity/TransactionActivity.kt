@@ -12,7 +12,7 @@ import minerva.android.extension.validator.Validator.HEX_PREFIX
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.values.listener.TransactionFragmentsListener
+import minerva.android.values.listener.AddressFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.values.transaction.fragment.TransactionsFragment
 import minerva.android.values.transaction.fragment.scanner.TransactionScannerFragment
@@ -21,7 +21,7 @@ import minerva.android.walletmanager.model.Value
 import minerva.android.widget.repository.getNetworkIcon
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class TransactionActivity : AppCompatActivity(), TransactionFragmentsListener {
+class TransactionActivity : AppCompatActivity(), AddressFragmentsListener {
 
     private val viewModel: TransactionsViewModel by viewModel()
     private lateinit var value: Value

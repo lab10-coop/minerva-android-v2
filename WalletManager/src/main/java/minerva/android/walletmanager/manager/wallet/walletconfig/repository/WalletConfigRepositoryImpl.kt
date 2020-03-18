@@ -129,8 +129,9 @@ class WalletConfigRepositoryImpl(
         val values = mutableListOf<Value>()
         list.forEach {
             walletConfigPayload.getValuePayload(it.first).apply {
-                val address = if (contractAddress.isEmpty()) blockchainRepository.completeAddress(it.third) else contractAddress
-                values.add(mapValueResponseToValue(this, it.second, it.third, address))
+                val address = if(contractAddress.isEmpty()) blockchainRepository.completeAddress(it.third) else contractAddress
+                values.add(mapValueResponseToValue(this, it.second, it.third, address)
+                )
             }
         }
         return values

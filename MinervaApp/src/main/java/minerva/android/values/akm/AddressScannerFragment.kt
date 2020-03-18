@@ -1,24 +1,24 @@
-package minerva.android.values.transaction.fragment.scanner
-
+package minerva.android.values.akm
 
 import android.content.Context
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScanner
-import minerva.android.values.listener.AddressFragmentsListener
+import minerva.android.wrapped.WrappedActivityListener
 
-//TODO need to be refactored - code duplication with AddressScannerFragment
-class TransactionScannerFragment : BaseScanner() {
+//TODO need to be refactored - code duplication with TransactionScannerFragment
+class AddressScannerFragment : BaseScanner() {
 
-    private lateinit var listener: AddressFragmentsListener
+    private lateinit var listener: WrappedActivityListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as AddressFragmentsListener
+        listener = context as WrappedActivityListener
     }
 
     override fun setupCodeScanner() {
@@ -28,12 +28,12 @@ class TransactionScannerFragment : BaseScanner() {
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
                         scannerProgressBar.visible()
-                        listener.setScanResult(it.text)
                         shouldScan = false
+                        listener.putStringExtra(it.text)
+                        listener.goBack(this@AddressScannerFragment)
                     }
                 }
             }
-
             errorCallback = ErrorCallback {
                 requireActivity().runOnUiThread {
                     Toast.makeText(context, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
@@ -44,16 +44,18 @@ class TransactionScannerFragment : BaseScanner() {
 
     override fun setOnCloseButtonListener() {
         closeButton.setOnClickListener {
-            listener.onBackPressed()
+            listener.goBack(this)
         }
     }
 
     override fun onPermissionNotGranted() {
-        listener.onBackPressed()
+        listener.goBack(this)
     }
 
     companion object {
         @JvmStatic
-        fun newInstance() = TransactionScannerFragment()
+        fun newInstance() = AddressScannerFragment()
+        const val SCANNER_FRAGMENT = "scannerFragment"
     }
+
 }

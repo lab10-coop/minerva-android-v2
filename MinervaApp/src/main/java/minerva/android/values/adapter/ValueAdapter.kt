@@ -6,7 +6,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -24,6 +23,7 @@ import minerva.android.walletmanager.model.Value
 import minerva.android.widget.AssetView
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
+import minerva.android.wrapped.startSafeAccountWrappedActivity
 import minerva.android.wrapped.startValueAddressWrappedActivity
 
 class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
@@ -210,11 +210,13 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.showAddress -> startValueAddressWrappedActivity(
-                    view.context, position, value.name,
+                    view.context, value.name, position,
                     getNetworkIcon(Network.fromString(value.network))
                 )
-                //TODO add Setting action
-                R.id.safeAccountSettings -> Toast.makeText(getContext(), "mock", Toast.LENGTH_SHORT).show()
+                R.id.safeAccountSettings -> startSafeAccountWrappedActivity(
+                    view.context, value.name, position,
+                    R.drawable.ic_safe_account_single_owner
+                )
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(value)
                 R.id.remove -> listener.onValueRemoved(position)
             }

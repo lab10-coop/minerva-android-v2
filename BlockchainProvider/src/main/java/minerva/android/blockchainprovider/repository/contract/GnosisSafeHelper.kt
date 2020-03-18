@@ -9,6 +9,7 @@ object GnosisSafeHelper {
     val safeTxGas: BigInteger = BigInteger.valueOf(50_000)
     val baseGas: BigInteger = BigInteger.valueOf(300_000)
     val gasPrice: BigInteger = BigInteger.valueOf(0)
+    val noFunds: BigInteger = BigInteger.valueOf(0)
     const val gasToken = "0x0000000000000000000000000000000000000000"
     const val refund = "0x0000000000000000000000000000000000000000"
 }

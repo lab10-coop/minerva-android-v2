@@ -9,7 +9,6 @@
         android:id="@+id/networkIcon"
         android:layout_width="@dimen/small_logo_size"
         android:layout_height="@dimen/small_logo_size"
-        android:layout_weight="1"
         android:src="@drawable/ic_artis" />
 
     <TextView
@@ -20,7 +19,6 @@
         android:layout_alignTop="@id/networkIcon"
         android:layout_toRightOf="@id/networkIcon"
         android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_weight="8"
         android:fontFamily="@font/rubik_regular"
         android:gravity="center_vertical"
         android:textColor="@color/gray"

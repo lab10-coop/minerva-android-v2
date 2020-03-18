@@ -17,7 +17,7 @@ fun startEditIdentityWrappedActivity(context: Context, position: Int, title: Str
     }
 }
 
-fun startValueAddressWrappedActivity(context: Context, position: Int, title: String, logoRes: Int) {
+fun startValueAddressWrappedActivity(context: Context, title: String, position: Int, logoRes: Int) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE_ADDRESS)
         putExtra(WrappedActivity.INDEX, position)
@@ -31,5 +31,14 @@ fun startNewValueWrappedActivity(context: Context, title: String, position: Int)
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE)
         putExtra(WrappedActivity.TITLE, title)
         putExtra(WrappedActivity.POSITION, position)
+    }
+}
+
+fun startSafeAccountWrappedActivity(context: Context, subtitle: String, position: Int, logoRes: Int) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.SAFE_ACCOUNT_SETTINGS)
+        putExtra(WrappedActivity.SUBTITLE, subtitle)
+        putExtra(WrappedActivity.INDEX, position)
+        putExtra(WrappedActivity.LOGO, logoRes)
     }
 }

@@ -14,6 +14,7 @@ import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.values.ValuesViewModel
 import minerva.android.values.address.ValueAddressViewModel
+import minerva.android.values.akm.SafeAccountSettingsViewModel
 import minerva.android.values.create.NewValueViewModel
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.walletActions.WalletActionsViewModel
@@ -39,6 +40,7 @@ private val appModules = module {
     viewModel { ChooseIdentityViewModel(get(), get()) }
     viewModel { ScannerViewModel(get()) }
     viewModel { ValueAddressViewModel(get()) }
+    viewModel { SafeAccountSettingsViewModel(get(), get()) }
     viewModel { NewValueViewModel(get(), get()) }
     viewModel { ServicesViewModel(get()) }
     viewModel { TransactionsViewModel(get(), get(), get()) }

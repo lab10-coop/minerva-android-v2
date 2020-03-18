@@ -15,7 +15,7 @@ data class Value(
     var balance: BigDecimal = Int.InvalidValue.toBigDecimal(),
     var assets: List<Asset> = listOf(),
     var fiatBalance: BigDecimal = BigDecimal.ZERO,
-    var owners: MutableList<String>? = null,
+    var owners: List<String>? = null,
     var contractAddress: String = String.Empty
 ) {
     constructor(value: Value, isDeleted: Boolean) : this(

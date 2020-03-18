@@ -1,7 +1,6 @@
 package minerva.android.walletmanager.manager.wallet
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.Empty
@@ -34,6 +33,8 @@ interface WalletManager {
     fun loadValue(position: Int): Value
     fun createValue(network: Network, valueName: String, ownerAddress: String = String.Empty, smartContractAddress: String = String.Empty): Completable
     fun removeValue(index: Int): Completable
+    fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>>
+    fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>>
 
     fun saveService(service: Service): Completable
 

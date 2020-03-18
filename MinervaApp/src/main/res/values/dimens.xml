@@ -25,5 +25,5 @@
     <dimen name="qr_code_size">256dp</dimen>
     <dimen name="fingerprint_view_elevation">8dp</dimen>
     <dimen name="circle_icon_size">60dp</dimen>
-    <dimen name="recipient_list_address_width">128dp</dimen>
+    <dimen name="address_width">192dp</dimen>
 </resources>

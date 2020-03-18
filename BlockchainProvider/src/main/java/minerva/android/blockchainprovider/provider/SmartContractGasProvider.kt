@@ -15,7 +15,7 @@ class SmartContractGasProvider : ContractGasProvider {
         DEFAULT_GAS_PRICE
 
     companion object {
-        private val DEFAULT_GAS_PRICE = BigInteger.valueOf(1000000000)
-        private val GAS_LIMIT = BigInteger.valueOf(800000)
+        private val DEFAULT_GAS_PRICE = BigInteger.valueOf(1000_000_000L)
+        private val GAS_LIMIT = BigInteger.valueOf(300_000L)
     }
 }
