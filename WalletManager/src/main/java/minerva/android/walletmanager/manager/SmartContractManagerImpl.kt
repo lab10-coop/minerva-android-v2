@@ -18,6 +18,9 @@ class SmartContractManagerImpl(private val smartContractRepository: SmartContrac
     override fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable =
         smartContractRepository.addSafeAccountOwner(owner, gnosisAddress, network, privateKey)
 
+    override fun removeSafeAccountOwner(removeAddress: String, gnosisAddress: String, network: String, privateKey: String): Completable =
+        smartContractRepository.removeSafeAccountOwner(removeAddress, gnosisAddress, network, privateKey)
+
     override fun transferNativeCoin(network: String, transaction: Transaction): Completable =
         smartContractRepository.transferNativeCoin(network, TransactionMapper.map(transaction))
 

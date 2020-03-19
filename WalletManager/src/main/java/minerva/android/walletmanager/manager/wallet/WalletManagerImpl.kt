@@ -283,7 +283,7 @@ class WalletManagerImpl(
         var safeAccountNumber = DEFAULT_SAFE_ACCOUNT_NUMBER
         walletConfigLiveData.value?.values?.let {
             it.forEach { savedValue ->
-                if (savedValue.owners?.last() == ownerAddress) safeAccountNumber++
+                if (savedValue.masterOwnerAddress == ownerAddress) safeAccountNumber++
             }
         }
         return safeAccountNumber

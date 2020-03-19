@@ -25,6 +25,7 @@ import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import minerva.android.wrapped.WrappedActivityListener
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
 
@@ -41,7 +42,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_safe_account_settings, container, false)
 
-    override fun onOwnerRemoved(index: Int) = viewModel.removeOwner(index)
+    override fun onOwnerRemoved(removeAddress: String) = viewModel.removeOwner(removeAddress)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -69,6 +70,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
             ownersLiveData.observe(this@SafeAccountSettingsFragment, Observer { ownerAdapter.updateList(it) })
             errorLiveData.observe(this@SafeAccountSettingsFragment, EventObserver {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.error_header), getString(R.string.unexpected_error))
+                Timber.e(it.message)
             })
             arguments?.let { loadValue(it.getInt(INDEX)) }
         }
@@ -80,7 +82,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
         addOwnerButton.setOnClickListener {
             viewModel.addOwner(newOwner.text.toString())
             newOwner.clearFocus()
-            //hacks
+            //hack
             safeAccountDisposable.clear()
             addOwnerButton.isEnabled = false
             newOwner.text?.clear()

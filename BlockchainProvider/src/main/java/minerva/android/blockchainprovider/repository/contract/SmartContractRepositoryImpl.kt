@@ -1,5 +1,8 @@
 package minerva.android.blockchainprovider.repository.contract
 
+// don't remove this commented import, please
+//import kotlin.Pair
+import kotlin.Pair
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toFlowable
@@ -20,6 +23,7 @@ import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.g
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.noFunds
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.operation
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.refund
+import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeSentinelAddress
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeTxGas
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
@@ -30,15 +34,14 @@ import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.abi.datatypes.generated.Uint8
 import org.web3j.crypto.*
 import org.web3j.protocol.Web3j
-import org.web3j.utils.Numeric
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
-import kotlin.Pair
-//import kotlin.Pair
 import org.web3j.tx.ReadonlyTransactionManager
 import org.web3j.utils.Convert
+import org.web3j.utils.Numeric
 import java.math.BigInteger
+import java.util.*
 
 class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : SmartContractRepository {
 
@@ -65,24 +68,50 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
             .singleOrError()
 
 
-    override fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable {
-        val data: ByteArray = Numeric.hexStringToByteArray(
-            getGnosisSafe(gnosisAddress, network, privateKey).addOwnerWithThreshold(owner, ADD_OWNER_THRESHOLD).encodeFunctionCall()
-        )
-
+    override fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable =
         getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
-            return performTransaction(
-                gnosisSafe, gnosisAddress, data, network,
-                TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
-            )
+            Numeric.hexStringToByteArray(
+                gnosisSafe.addOwnerWithThreshold(owner, EDIT_OWNER_THRESHOLD).encodeFunctionCall()
+            ).let { data ->
+                return performTransaction(
+                    gnosisSafe, gnosisAddress, data, network,
+                    TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
+                )
+            }
         }
-    }
 
+    override fun removeSafeAccountOwner(removeAddress: String, gnosisAddress: String, network: String, privateKey: String): Completable =
+        getGnosisSafeOwners(gnosisAddress, network, privateKey)
+            .flatMapCompletable {
+                getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
+                    Numeric.hexStringToByteArray(
+                        gnosisSafe.removeOwner(getPreviousOwner(removeAddress, it), removeAddress, EDIT_OWNER_THRESHOLD).encodeFunctionCall()
+                    ).let { safeTxData ->
+                        performTransaction(
+                            gnosisSafe,
+                            gnosisAddress,
+                            safeTxData,
+                            network,
+                            TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress),
+                            noFunds
+                        )
+                    }
+                }
+            }
 
     override fun transferERC20Token(network: String, transactionPayload: TransactionPayload, erc20Address: String): Completable {
         Numeric.hexStringToByteArray(getSafeTxData(getERC20(erc20Address, network, transactionPayload), transactionPayload)).run {
             return performTransaction(getGnosisSafe(transactionPayload, network), erc20Address, this, network, transactionPayload)
         }
+    }
+
+    private fun getPreviousOwner(owner: String, owners: List<String>): String {
+        owners.forEachIndexed { index, address ->
+            if (address == owner.toLowerCase(Locale.getDefault())) {
+                return if (index > 0) address else safeSentinelAddress
+            }
+        }
+        throw IllegalArgumentException("Remove Address is not a owner address!")
     }
 
     private fun performTransaction(
@@ -114,7 +143,6 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
                             }
                     }
             }
-
 
 
     private fun getSignedTransaction(
@@ -241,6 +269,6 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>) : Smart
 
     companion object {
         private const val HEX_PREFIX = "0x"
-        private val ADD_OWNER_THRESHOLD = BigInteger.valueOf(1)
+        private val EDIT_OWNER_THRESHOLD = BigInteger.valueOf(1)
     }
 }

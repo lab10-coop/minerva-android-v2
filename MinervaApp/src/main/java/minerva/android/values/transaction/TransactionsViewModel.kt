@@ -102,7 +102,7 @@ class TransactionsViewModel(
 
     private fun sendSafeAccountAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
-            val ownerPrivateKey = value.owners?.last().let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
+            val ownerPrivateKey = value.masterOwnerAddress.let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
             getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it
@@ -129,7 +129,7 @@ class TransactionsViewModel(
 
     private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
-            val ownerPrivateKey = value.owners?.last().let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
+            val ownerPrivateKey = value.masterOwnerAddress.let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
             getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it

@@ -31,4 +31,7 @@ data class Value(
 
     val isSafeAccount: Boolean
         get() = owners != null
+
+    val masterOwnerAddress: String
+        get() = owners?.last().orEmpty()
 }
