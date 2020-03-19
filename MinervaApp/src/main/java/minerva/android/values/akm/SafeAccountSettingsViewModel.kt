@@ -30,7 +30,7 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
         value = walletManager.loadValue(index)
         _ownersLiveData.value = value.owners?.reversed()
         getOwners(value.address, value.network, value.privateKey)
-        value.owners?.last().let {
+        value.masterOwnerAddress.let {
             walletManager.getSafeAccountMasterOwnerPrivateKey(it).apply {
                 masterOwnerPrivateKey = this
             }
@@ -42,27 +42,54 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
             _errorLiveData.value = Event(Throwable("Error: Owner already added!"))
             return
         }
-            launchDisposable {
-                smartContractManager.addSafeAccountOwner(owner, value.address, value.network, masterOwnerPrivateKey)
-                    .andThen(walletManager.updateSafeAccountOwners(value.index, prepareOwnerList(owner)))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onSuccess = { _ownersLiveData.value = it.reversed() },
-                        onError = {
-                            Timber.e("Owners list download error: ${it.message}")
-                            _errorLiveData.value = Event(it)
-                        }
-                    )
-            }
+        launchDisposable {
+            smartContractManager.addSafeAccountOwner(owner, value.address, value.network, masterOwnerPrivateKey)
+                .andThen(walletManager.updateSafeAccountOwners(value.index, prepareAddedOwnerList(owner)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { _ownersLiveData.value = it.reversed() },
+                    onError = {
+                        Timber.e("Owners list download error: ${it.message}")
+                        _errorLiveData.value = Event(it)
+                    }
+                )
+        }
+    }
+
+    fun removeOwner(removeAddress: String) {
+        if (isMasterOwner(removeAddress)) {
+            _errorLiveData.value = Event(Throwable("Error: Cannot remove masterOwner Address!"))
+            return
+        }
+        if (!isOwnerAlreadyAdded(removeAddress)) {
+            _errorLiveData.value = Event(Throwable("Error: No address owner on the list!"))
+            return
+        }
+
+        launchDisposable {
+            smartContractManager.removeSafeAccountOwner(removeAddress, value.address, value.network, masterOwnerPrivateKey)
+                .andThen(walletManager.updateSafeAccountOwners(value.index, prepareRemovedOwnerList(removeAddress)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { _ownersLiveData.value = it.reversed() },
+                    onError = {
+                        Timber.e("Owners list download error: ${it.message}")
+                        _errorLiveData.value = Event(it)
+                    }
+                )
+        }
     }
 
     private fun isOwnerAlreadyAdded(owner: String): Boolean {
         value.owners?.forEach {
-            if(it == owner) return true
+            if (it == owner) return true
         }
         return false
     }
+
+    private fun isMasterOwner(removeAddress: String) = value.masterOwnerAddress == removeAddress
 
     @VisibleForTesting
     fun getOwners(contractAddress: String, network: String, privateKey: String) {
@@ -78,7 +105,7 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
         }
     }
 
-    private fun prepareOwnerList(owner: String): List<String> {
+    private fun prepareAddedOwnerList(owner: String): List<String> {
         value.owners?.toMutableList()?.let {
             it.add(FIRST_POSITION, owner)
             return it
@@ -86,8 +113,12 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
         throw IllegalStateException("Owners Live Data was not initialized")
     }
 
-    fun removeOwner(position: Int) {
-        //TODO implement removing owner
+    private fun prepareRemovedOwnerList(removeAddress: String): List<String> {
+        value.owners?.toMutableList()?.let {
+            it.remove(removeAddress)
+            return it
+        }
+        throw IllegalStateException("Owners Live Data was not initialized")
     }
 
     companion object {

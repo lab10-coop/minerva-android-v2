@@ -35,8 +35,8 @@ class OwnerAdapter(private val listener: OnOwnerRemovedListener) : RecyclerView.
         notifyDataSetChanged()
     }
 
-    override fun onOwnerRemoved(index: Int) {
-        listener.onOwnerRemoved(index)
+    override fun onOwnerRemoved(position: Int) {
+        listener.onOwnerRemoved(owners[position])
     }
 }
 
