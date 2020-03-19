@@ -151,14 +151,19 @@ class WalletManagerImpl(
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
+    //TODO errors need to be handled better (Own Throwable implementation?)
     override fun removeValue(index: Int): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             val newValues = config.values.toMutableList()
             config.values.forEachIndexed { position, value ->
                 if (value.index == index) {
-                    if (isValueRemovable(value.balance, value.assets)) {
-                        //TODO need to be handled better (Own Throwable implementation?)
-                        return Completable.error(Throwable("This address is not empty and can't be removed."))
+                    when {
+                        areFundsOnValue(value.balance, value.assets) ->
+                            return Completable.error(Throwable("This address is not empty and can't be removed."))
+                        isNotSafeAccountMasterOwner(config.values, value) ->
+                            return Completable.error(Throwable("You can not remove this Safe Account"))
+                        hasMoreOwners(value) ->
+                            return Completable.error(Throwable("This Safe Account have more owners"))
                     }
                     newValues[position] = Value(value, true)
                     return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, newValues, config.services))
@@ -169,12 +174,27 @@ class WalletManagerImpl(
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
+    private fun isNotSafeAccountMasterOwner(values: List<Value>, value: Value): Boolean {
+        value.owners?.let {
+            values.forEach {
+                if (it.address == value.masterOwnerAddress) return false
+            }
+            return true
+        }
+        return false
+    }
+
+    private fun hasMoreOwners(value: Value): Boolean {
+        value.owners?.let { return it.size > 1 }
+        return false
+    }
+
     override fun updateSafeAccountOwners(index: Int, owners: List<String>): Single<List<String>> {
         walletConfigMutableLiveData.value?.let { config ->
             config.values.apply {
-                    forEach { if (it.index == index) it.owners = owners }
-                    return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, this, config.services))
-                        .andThen(Single.just(owners))
+                forEach { if (it.index == index) it.owners = owners }
+                return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, this, config.services))
+                    .andThen(Single.just(owners))
             }
         }
         return Single.error(Throwable("Wallet Config was not initialized"))
@@ -347,7 +367,7 @@ class WalletManagerImpl(
         }
     }
 
-    private fun isValueRemovable(balance: BigDecimal, assets: List<Asset>): Boolean {
+    private fun areFundsOnValue(balance: BigDecimal, assets: List<Asset>): Boolean {
         assets.forEach {
             if (blockchainRepository.toGwei(it.balance) >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
@@ -456,6 +476,7 @@ class WalletManagerImpl(
         private const val START = 0
         private const val ONE_ELEMENT = 1
         private const val DEMO_LOGIN = "Demo Web Page Login"
+
         //        TODO should be dynamically handled form qr code
         private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)

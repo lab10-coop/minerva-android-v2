@@ -12,8 +12,8 @@ import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepositoryImpl
 import minerva.android.blockchainprovider.model.TransactionCostPayload
+import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepositoryImpl
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.Empty
@@ -70,7 +70,23 @@ class WalletManagerTest {
         ),
         listOf(
             Value(2, "publicKey1", "privateKey1", "address", network = NetworkShortName.ETH),
-            Value(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ETH)
+            Value(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ETH),
+            Value(5, "publicKey3", "privateKey3", "address", network = NetworkShortName.ETH,
+            owners = listOf("masterOwner")),
+            Value(6, "publicKey4", "privateKey4", "address", network = NetworkShortName.ETH,
+                owners = listOf("notMasterOwner", "masterOwner"))
+        )
+    )
+
+    private val walletConfig2 = WalletConfig(
+        0, listOf(),
+        listOf(
+            Value(2, "publicKey11", "privateKey1", "address", network = NetworkShortName.ETH),
+            Value(4, "publicKey22", "privateKey2", "address", network = NetworkShortName.ETH),
+            Value(5, "publicKey33", "privateKey3", "masterOwner", network = NetworkShortName.ETH,
+                owners = listOf("masterOwner")),
+            Value(6, "publicKey44", "privateKey4", "address", network = NetworkShortName.ETH,
+                owners = listOf("notMasterOwner", "masterOwner"))
         )
     )
 
@@ -131,10 +147,10 @@ class WalletManagerTest {
         identity.privateKey shouldBeEqualTo "privateKey"
         val identity3 = walletManager.loadIdentity(3, "Identity")
         identity3.index shouldEqualTo walletConfig.newIndex
-        identity3.name shouldBeEqualTo "Identity #5"
+        identity3.name shouldBeEqualTo "Identity #7"
         val identityMinusOne = walletManager.loadIdentity(-1, "Identity")
         identityMinusOne.index shouldEqualTo walletConfig.newIndex
-        identityMinusOne.name shouldBeEqualTo "Identity #5"
+        identityMinusOne.name shouldBeEqualTo "Identity #7"
     }
 
     @Test
@@ -192,7 +208,7 @@ class WalletManagerTest {
         walletManager.loadWalletConfig()
         val test = walletManager.createValue(Network.ETHEREUM, "#3 Ethereum").test()
         test.assertError(error)
-        val loadedValue = walletManager.loadValue(2)
+        val loadedValue = walletManager.loadValue(10)
         loadedValue.index shouldEqualTo -1
         loadedValue.privateKey shouldBeEqualTo String.Empty
         loadedValue.publicKey shouldBeEqualTo String.Empty
@@ -226,8 +242,8 @@ class WalletManagerTest {
         val removedValue = walletManager.loadValue(0)
         val notRemovedValue = walletManager.loadValue(1)
         removedValue.index shouldEqualTo 2
-        removedValue.isDeleted shouldEqualTo identityToRemove.isDeleted
-        notRemovedValue.index shouldEqualTo identityToRemove.index
+        removedValue.isDeleted shouldEqualTo true
+        notRemovedValue.index shouldEqualTo 4
         notRemovedValue.isDeleted shouldEqualTo false
     }
 
@@ -245,6 +261,47 @@ class WalletManagerTest {
         removedValue.index shouldEqualTo 2
         removedValue.isDeleted shouldEqualTo false
         notRemovedValue.index shouldEqualTo 4
+        notRemovedValue.isDeleted shouldEqualTo false
+    }
+
+    @Test
+    fun `Check that wallet manager don't removes correct safe account value`() {
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        walletManager.removeValue(5).test()
+        walletManager.removeValue(6).test()
+        val notRemovedValue = walletManager.loadValue(2)
+        val notRemovedValue2 = walletManager.loadValue(3)
+        notRemovedValue.index shouldEqualTo 5
+        notRemovedValue.publicKey shouldEqual "publicKey3"
+        notRemovedValue.isDeleted shouldEqualTo false
+        notRemovedValue2.index shouldEqualTo 6
+        notRemovedValue2.publicKey shouldEqual "publicKey4"
+        notRemovedValue2.isDeleted shouldEqualTo false
+    }
+
+    @Test
+    fun `Check that wallet manager removes correct safe account value`() {
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(Triple(0, "publicKey", "privateKey")))
+        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig2))
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        walletManager.removeValue(5).test()
+        walletManager.removeValue(6).test()
+        val removedValue = walletManager.loadValue(2)
+        val notRemovedValue = walletManager.loadValue(3)
+        removedValue.index shouldEqualTo 5
+        removedValue.publicKey shouldEqual "publicKey33"
+        removedValue.isDeleted shouldEqualTo true
+        notRemovedValue.index shouldEqualTo 6
+        notRemovedValue.publicKey shouldEqual "publicKey44"
         notRemovedValue.isDeleted shouldEqualTo false
     }
 
@@ -478,8 +535,10 @@ class WalletManagerTest {
         walletManager.initWalletConfig()
         walletManager.refreshAssetBalance().test().assertComplete()
             .assertValue {
-                it.size == 2
+                it.size == 4
             }
+
+
 //TODO when uncommented not passing on CI - try to resolve this problem
 //            .assertValue {
 //                val list = it["privateKey1"] ?: listOf()
