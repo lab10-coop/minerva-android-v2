@@ -52,16 +52,20 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private va
         privateKey: String,
         address: String
     ): Observable<Pair<String, BigDecimal>> =
-        ERC20.load(contractAddress, web3j[network], Credentials.create(privateKey),
-                ContractGasProvider(gasPrice[network] ?: error("Not supported Network"),
-                Operation.TRANSFER_ERC20.gasLimit
-            ))
+        ERC20.load(
+                contractAddress, web3j[network], Credentials.create(privateKey),
+                ContractGasProvider(
+                    gasPrice[network] ?: error("Not supported Network"),
+                    Operation.TRANSFER_ERC20.gasLimit
+                )
+            )
             .balanceOf(address).flowable()
             .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
             .toObservable()
 
-    override fun reverseResolveENS(address: String): Single<String> =
-        Single.just(EnsResolver(web3j[ENS]).reverseResolve(address))
+    override fun reverseResolveENS(address: String): Single<String> {
+        return Single.just(address).map { EnsResolver(web3j[ENS]).reverseResolve(it) }
+    }
 
 
     override fun resolveENS(ensName: String): Single<String> =
@@ -85,7 +89,6 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private va
                     .ethSendRawTransaction(getSignedTransaction(it.transactionCount, transactionPayload))
                     .flowable()
                     .flatMapCompletable { response -> handleTransactionResponse(response) }
-
             }
 
     override fun getTransactionCosts(network: String, assetIndex: Int, operation: Operation): TransactionCostPayload =

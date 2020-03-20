@@ -88,21 +88,18 @@ class WalletManagerImpl(
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun transferNativeCoin(network: String, transaction: Transaction): Completable =
-        blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
-//    TODO Wait until ENR issue is not resolved !! (downgrade web3j to 4.2.1)
-//            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
-//                .doOnError { String.Empty })
-//            .map { saveRecipient(it, transaction.receiverKey) }
-//            .ignoreElement()
+    override fun transferNativeCoin(network: String, transaction: Transaction): Completable {
+        return blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
+            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
+            .map { saveRecipient(it, transaction.receiverKey) }
+            .ignoreElement()
+    }
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
         blockchainRepository.transferERC20Token(network, mapTransactionToTransactionPayload(transaction))
-//    TODO Wait until ENR issue is not resolved !!  (downgrade web3j to 4.2.1)
-//            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey)
-//                .onErrorReturn { String.Empty })
-//            .map { saveRecipient(it, transaction.receiverKey) }
-//            .ignoreElement()
+            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
+            .map { saveRecipient(it, transaction.receiverKey) }
+            .ignoreElement()
 
     override fun loadRecipients(): List<Recipient> = localStorage.loadRecipients()
 
@@ -111,7 +108,7 @@ class WalletManagerImpl(
     private fun saveRecipient(ensName: String, address: String) = localStorage.saveRecipient(Recipient(ensName, address))
 
     override fun getTransferCosts(network: String, assetIndex: Int): TransactionCost {
-        val operation = if(assetIndex == Int.InvalidIndex) Operation.TRANSFER_NATIVE else Operation.TRANSFER_ERC20
+        val operation = if (assetIndex == Int.InvalidIndex) Operation.TRANSFER_NATIVE else Operation.TRANSFER_ERC20
         return mapTransactionCostPayloadToTransactionCost(blockchainRepository.getTransactionCosts(network, assetIndex, operation))
     }
 
