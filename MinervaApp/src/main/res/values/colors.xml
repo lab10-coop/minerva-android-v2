@@ -12,6 +12,7 @@
     <color name="borderGray">#B5B5B5</color>
     <color name="gray">#3F3F4B</color>
     <color name="alert_red">#CC2800</color>
+    <color name="safe_account_background">#F8F8FA</color>
 
     <color name="colorSetOne">#FFF15161</color>
     <color name="colorSetOneOpacity">#29F15161</color>

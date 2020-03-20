@@ -3,6 +3,7 @@ package minerva.android.blockchainprovider.repository.blockchain
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.kotlinUtils.Empty
@@ -17,7 +18,7 @@ interface BlockchainRepository {
         contractAddress: String,
         safeAccountAddress: String = String.Empty
     ): Observable<Pair<String, BigDecimal>>
-    fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCostPayload>
+    fun getTransactionCosts(network: String, assetIndex: Int, operation: Operation): TransactionCostPayload
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable
     fun completeAddress(privateKey: String): String

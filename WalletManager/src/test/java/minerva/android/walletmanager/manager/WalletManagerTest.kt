@@ -467,35 +467,6 @@ class WalletManagerTest {
     }
 
     @Test
-    fun `send transaction cost success test`() {
-        whenever(blockchainRepository.getTransactionCosts(any(), any())).thenReturn(
-            Single.just(
-                TransactionCostPayload(
-                    BigDecimal.ONE,
-                    BigInteger.ONE,
-                    BigDecimal.ONE
-                )
-            )
-        )
-        walletManager.getTransactionCosts("", Int.InvalidIndex)
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.cost == BigDecimal.ONE &&
-                        it.gasLimit == BigInteger.ONE
-            }
-    }
-
-    @Test
-    fun `send transaction cost error test`() {
-        val error = Throwable()
-        whenever(blockchainRepository.getTransactionCosts(any(), any())).thenReturn(Single.error(error))
-        walletManager.getTransactionCosts("", Int.InvalidIndex)
-            .test()
-            .assertError(error)
-    }
-
-    @Test
     fun `calculate transaction cost success`() {
         whenever(blockchainRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.ONE)
         val result = walletManager.calculateTransactionCost(BigDecimal.ONE, BigInteger.ONE)

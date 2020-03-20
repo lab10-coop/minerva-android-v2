@@ -12,6 +12,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
+import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
@@ -109,9 +110,10 @@ class WalletManagerImpl(
 
     private fun saveRecipient(ensName: String, address: String) = localStorage.saveRecipient(Recipient(ensName, address))
 
-    override fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(network, assetIndex)
-            .map { mapTransactionCostPayloadToTransactionCost(it) }
+    override fun getTransferCosts(network: String, assetIndex: Int): TransactionCost {
+        val operation = if(assetIndex == Int.InvalidIndex) Operation.TRANSFER_NATIVE else Operation.TRANSFER_ERC20
+        return mapTransactionCostPayloadToTransactionCost(blockchainRepository.getTransactionCosts(network, assetIndex, operation))
+    }
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.calculateTransactionCost(gasPrice, gasLimit)

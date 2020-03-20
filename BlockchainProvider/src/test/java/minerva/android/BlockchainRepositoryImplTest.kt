@@ -7,9 +7,11 @@ import io.reactivex.Flowable
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
+import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepositoryImpl
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.kotlinUtils.InvalidIndex
+import org.amshove.kluent.shouldEqual
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -19,16 +21,23 @@ import org.web3j.protocol.core.methods.response.EthGasPrice
 import org.web3j.protocol.core.methods.response.EthGetBalance
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
 import org.web3j.protocol.core.methods.response.EthSendTransaction
+import java.lang.IllegalStateException
+import java.math.BigDecimal
 import java.math.BigInteger
 
 
 class BlockchainRepositoryImplTest {
 
+    private val ATS_GAS_PRICE = BigInteger.valueOf(100_000_000_000)
+    private val ETH_GAS_PRICE = BigInteger.valueOf(20_000_000_000)
+
     private val ETH = "ETH"
+    private val ATS = "ATS"
     private val web3J = mockk<Web3j>()
     private val web3Js: Map<String, Web3j> = mapOf(Pair(ETH, web3J))
+    private val gasPrice: Map<String, BigInteger> = mapOf(Pair(ETH, ETH_GAS_PRICE), Pair(ATS, ATS_GAS_PRICE))
     private val blockchainRepository: BlockchainRepositoryImpl =
-        BlockchainRepositoryImpl(web3Js)
+        BlockchainRepositoryImpl(web3Js, gasPrice)
 
     @get:Rule
 
@@ -74,28 +83,15 @@ class BlockchainRepositoryImplTest {
 
     @Test
     fun `get transaction costs success test`() {
-        val gasPrice = EthGasPrice()
-        gasPrice.result = "0x1"
-        every { web3J.ethGasPrice().flowable() } returns Flowable.just(gasPrice)
-        blockchainRepository.getTransactionCosts(ETH, Int.InvalidIndex)
-            .test()
-            .await()
-            .assertComplete()
-            .assertValue {
-                it.gasLimit == BigInteger.valueOf(21000)
-            }
-    }
-
-    @Test
-    fun `get transaction costs error test`() {
-        val error = Throwable()
-        val gasPrice = EthGasPrice()
-        gasPrice.result = "0x1"
-        every { web3J.ethGasPrice().flowable() } returns Flowable.error(error)
-        blockchainRepository.getTransactionCosts(ETH, Int.InvalidIndex)
-            .test()
-            .await()
-            .assertError(error)
+        val ethCostPayload = blockchainRepository.getTransactionCosts(ETH, Int.InvalidIndex, Operation.TRANSFER_NATIVE)
+        val atsCostPayload = blockchainRepository.getTransactionCosts(ATS, Int.InvalidIndex, Operation.TRANSFER_ERC20)
+        val atsCostPayload2 = blockchainRepository.getTransactionCosts(ATS, Int.InvalidIndex, Operation.SAFE_ACCOUNT_TXS)
+        ethCostPayload.gasPrice shouldEqual BigDecimal.valueOf(20)
+        ethCostPayload.gasLimit shouldEqual BigInteger.valueOf(21000)
+        atsCostPayload.gasPrice shouldEqual BigDecimal.valueOf(100)
+        atsCostPayload.gasLimit shouldEqual BigInteger.valueOf(200000)
+        atsCostPayload2.gasPrice shouldEqual BigDecimal.valueOf(100)
+        atsCostPayload2.gasLimit shouldEqual BigInteger.valueOf(350000)
     }
 
     @Test

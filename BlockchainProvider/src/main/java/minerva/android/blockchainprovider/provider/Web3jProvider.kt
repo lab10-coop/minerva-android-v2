@@ -7,6 +7,7 @@ import org.web3j.protocol.http.HttpService
 object Web3jProvider {
     fun provideWeb3j(blockchainUrl: MutableMap<String, String>, ensUrl: String): Map<String, Web3j> {
         blockchainUrl[ENS] = ensUrl
-        return blockchainUrl.mapValues { Web3j.build(HttpService(it.value)) }
+        return blockchainUrl.mapValues {
+            Web3j.build(HttpService(it.value)) }
     }
 }

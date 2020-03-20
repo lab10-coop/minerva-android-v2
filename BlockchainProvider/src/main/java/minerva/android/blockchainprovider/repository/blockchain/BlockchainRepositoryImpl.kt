@@ -5,11 +5,10 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.contract.ERC20
 import minerva.android.blockchainprovider.defs.BlockchainDef.Companion.ENS
+import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
-import minerva.android.blockchainprovider.provider.DefaultContractGasProvider
-import minerva.android.kotlinUtils.InvalidIndex
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
 import org.web3j.crypto.TransactionEncoder
@@ -27,7 +26,7 @@ import java.math.BigInteger
 import java.math.RoundingMode
 
 
-class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
+class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private val gasPrice: Map<String, BigInteger>) :
     BlockchainRepository {
 
     /**
@@ -53,7 +52,10 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
         privateKey: String,
         address: String
     ): Observable<Pair<String, BigDecimal>> =
-        ERC20.load(contractAddress, web3j[network], Credentials.create(privateKey), DefaultContractGasProvider())
+        ERC20.load(contractAddress, web3j[network], Credentials.create(privateKey),
+                ContractGasProvider(gasPrice[network] ?: error("Not supported Network"),
+                Operation.TRANSFER_ERC20.gasLimit
+            ))
             .balanceOf(address).flowable()
             .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
             .toObservable()
@@ -86,14 +88,8 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>) :
 
             }
 
-    //TODO DefaultContractGasProvider is MVP hack. Needs to be refactored
-    override fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCostPayload> =
-        if (assetIndex == Int.InvalidIndex) (web3j[network] ?: error("Not supported Network!"))
-            .ethGasPrice()
-            .flowable()
-            .map { prepareTransactionCosts(it.gasPrice) }
-            .singleOrError()
-        else Single.just(DefaultContractGasProvider()).map { prepareTransactionCosts(it.gasPrice, it.gasLimit) }
+    override fun getTransactionCosts(network: String, assetIndex: Int, operation: Operation): TransactionCostPayload =
+        prepareTransactionCosts((gasPrice[network] ?: error("Not supported Network!")), operation.gasLimit)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         getTransactionCostInEth(toWei(gasPrice, Convert.Unit.GWEI), BigDecimal(gasLimit))

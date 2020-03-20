@@ -25,51 +25,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
     private val smartContractManager: SmartContractManager = mock()
     private val viewModel = TransactionsViewModel(walletManager, walletActionsRepository, smartContractManager)
 
-    private val transactionCostObserver: Observer<Event<TransactionCost>> = mock()
-    private val transactionCostCaptor: KArgumentCaptor<Event<TransactionCost>> = argumentCaptor()
-
     private val sendTransactionObserver: Observer<Event<Pair<String, Int>>> = mock()
     private val sendTransactionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
 
-    private val saveActionFailedObserver: Observer<Event<Pair<String, Int>>> = mock()
     private val saveActionFailedCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
-
-    @Test
-    fun `get transaction cost test success`() {
-        whenever(walletManager.getTransactionCosts(any(), any())).thenReturn(
-            Single.just(
-                TransactionCost(
-                    BigDecimal(1),
-                    BigInteger.ONE,
-                    BigDecimal(10)
-                )
-            )
-        )
-        whenever(walletManager.getTransactionCosts(any(), any())).thenReturn(
-            Single.just(
-                TransactionCost(
-                    BigDecimal(1),
-                    BigInteger.ONE,
-                    BigDecimal(10)
-                )
-            )
-        )
-        viewModel.transactionCostLiveData.observeForever(transactionCostObserver)
-        viewModel.getTransactionCosts()
-        transactionCostCaptor.run {
-            verify(transactionCostObserver).onChanged(capture())
-            firstValue.peekContent().cost == BigDecimal(10)
-        }
-    }
-
-    @Test
-    fun `get transaction cost test error`() {
-        val error = Throwable()
-        whenever(walletManager.getTransactionCosts(any(), any())).thenReturn(Single.error(error))
-        viewModel.transactionCostLiveData.observeForever(transactionCostObserver)
-        viewModel.getTransactionCosts()
-        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
-    }
 
     @Test
     fun `send transaction test success and wallet action succeed`() {

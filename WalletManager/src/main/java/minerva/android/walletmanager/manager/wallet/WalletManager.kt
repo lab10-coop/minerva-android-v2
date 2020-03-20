@@ -3,6 +3,7 @@ package minerva.android.walletmanager.manager.wallet
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
+import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.*
 import java.math.BigDecimal
@@ -46,7 +47,7 @@ interface WalletManager {
     fun refreshBalances(): Single<HashMap<String, Balance>>
     fun refreshAssetBalance(): Single<Map<String, List<Asset>>>
     fun transferNativeCoin(network: String, transaction: Transaction): Completable
-    fun getTransactionCosts(network: String, assetIndex: Int): Single<TransactionCost>
+    fun getTransferCosts(network: String, assetIndex: Int): TransactionCost
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
 
     fun transferERC20Token(network: String, transaction: Transaction): Completable
