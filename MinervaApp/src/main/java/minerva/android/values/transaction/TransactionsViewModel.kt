@@ -74,20 +74,9 @@ class TransactionsViewModel(
     }
 
     fun getTransactionCosts() {
-        launchDisposable {
-            walletManager.getTransactionCosts(network, assetIndex)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = {
-                        transactionCost = it.cost
-                        _transactionCostLiveData.value = Event(it)
-                    },
-                    onError = {
-                        Timber.e("Transaction cost error: ${it.message}")
-                        _errorLiveData.value = Event(it)
-                    }
-                )
+        walletManager.getTransferCosts(network, assetIndex).let {
+            transactionCost = it.cost
+            _transactionCostLiveData.value = Event(it)
         }
     }
 

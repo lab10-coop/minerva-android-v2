@@ -6,9 +6,10 @@ import minerva.android.blockchainprovider.repository.blockchain.BlockchainReposi
 import minerva.android.blockchainprovider.repository.contract.SmartContractRepository
 import minerva.android.blockchainprovider.repository.contract.SmartContractRepositoryImpl
 import org.koin.dsl.module
+import java.math.BigInteger
 
-fun createBlockchainProviderModule(blockchainUrl: Map<String, String>, ensUrl: String) = module {
+fun createBlockchainProviderModule(blockchainUrl: Map<String, String>, ensUrl: String, gasPrice: Map<String, BigInteger>) = module {
     factory { Web3jProvider.provideWeb3j(blockchainUrl.toMutableMap(), ensUrl) }
-    factory { BlockchainRepositoryImpl(get()) as BlockchainRepository }
-    factory { SmartContractRepositoryImpl(get()) as SmartContractRepository }
+    factory { BlockchainRepositoryImpl(get(), gasPrice) as BlockchainRepository }
+    factory { SmartContractRepositoryImpl(get(), gasPrice) as SmartContractRepository }
 }

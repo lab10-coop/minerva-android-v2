@@ -138,9 +138,11 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     private fun View.prepareView(value: Value) {
         if (!value.isSafeAccount) {
             mainContent.margin(NO_FRAME, FRAME_TOP_WIDTH, NO_FRAME, NO_FRAME)
+            mainContent.setBackgroundResource(R.drawable.identity_background)
             safeAccountBadge.gone()
         } else {
             mainContent.margin(FRAME_WIDTH, FRAME_TOP_WIDTH, FRAME_WIDTH, FRAME_WIDTH)
+            mainContent.setBackgroundResource(R.drawable.safe_account_background)
             safeAccountBadge.visible()
         }
     }
