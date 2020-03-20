@@ -7,16 +7,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.uitls.LoginPayload
-import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_QUICK_USER
-import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_USER
+import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
+import minerva.android.services.login.uitls.LoginUtils.getRequestedData
+import minerva.android.services.login.uitls.LoginUtils.getServiceName
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.storage.ServiceName
-import minerva.android.walletmanager.storage.ServiceType
 
 class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
 
@@ -53,23 +50,6 @@ class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
             _scannerResultMutableLiveData.value = Event(response)
         }
     }
-
-    private fun getLoginStatus(qrCodeResponse: QrCodeResponse): Int =
-        if (qrCodeResponse.requestedData.contains(ChooseIdentityViewModel.FCM_ID)) KNOWN_QUICK_USER
-        else KNOWN_USER
-
-    private fun getRequestedData(requestedData: ArrayList<String>): String {
-        var identityFields: String = String.Empty
-        requestedData.forEach { identityFields += "$it " }
-        return identityFields
-    }
-
-    private fun getServiceName(response: QrCodeResponse): String =
-        when (response.issuer) {
-            ServiceType.UNICORN_LOGIN -> ServiceName.UNICORN_LOGIN_NAME
-            ServiceType.CHARGING_STATION -> ServiceName.CHARGING_STATION_NAME
-            else -> String.Empty
-        }
 
     fun onPause() {
         disposable?.dispose()

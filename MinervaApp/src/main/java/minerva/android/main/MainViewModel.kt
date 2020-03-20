@@ -15,7 +15,10 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils
+import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
+import minerva.android.services.login.uitls.LoginUtils.getRequestedData
 import minerva.android.services.login.uitls.LoginUtils.getService
+import minerva.android.services.login.uitls.LoginUtils.getServiceName
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
@@ -46,11 +49,33 @@ class MainViewModel(private val walletManager: WalletManager, private val wallet
 
     fun dispose() = walletManager.dispose()
 
+    fun loginFromNotification(jwtToken: String?) {
+        jwtToken?.let {
+            launchDisposable {
+                walletManager.decodeQrCodeResponse(it)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onSuccess = { handleQrCodeResponse(it) },
+                        onError = { _errorMutableLiveData.value = Event(it) }
+                    )
+            }
+        }
+    }
+
+    private fun handleQrCodeResponse(response: QrCodeResponse) {
+        response.run {
+            serviceName = getServiceName(response)
+            identityFields = getRequestedData(requestedData)
+        }
+        loginPayload = LoginPayload(getLoginStatus(response), walletManager.getLoggedInIdentityPublicKey(response.issuer), response)
+        painlessLogin()
+    }
+
     fun painlessLogin() {
         walletManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.let { identity ->
             performLogin(identity)
         }.orElse { _notExistedIdentityMutableLiveData.value = Event(Unit) }
-
     }
 
     private fun performLogin(identity: Identity) =

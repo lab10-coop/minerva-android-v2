@@ -1,6 +1,7 @@
 package minerva.android.services.login.uitls
 
 import com.google.firebase.iid.FirebaseInstanceId
+import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
@@ -10,6 +11,8 @@ import minerva.android.walletmanager.model.defs.IdentityField
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.storage.ServiceName
+import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
 
 object LoginUtils {
@@ -38,5 +41,22 @@ object LoginUtils {
                     this[ChooseIdentityViewModel.FCM_ID] = result.token
                 }
             }
+        }
+
+    fun getLoginStatus(qrCodeResponse: QrCodeResponse): Int =
+        if (qrCodeResponse.requestedData.contains(ChooseIdentityViewModel.FCM_ID)) LoginStatus.KNOWN_QUICK_USER
+        else LoginStatus.KNOWN_USER
+
+    fun getRequestedData(requestedData: ArrayList<String>): String {
+        var identityFields: String = String.Empty
+        requestedData.forEach { identityFields += "$it " }
+        return identityFields
+    }
+
+    fun getServiceName(response: QrCodeResponse): String =
+        when (response.issuer) {
+            ServiceType.UNICORN_LOGIN -> ServiceName.UNICORN_LOGIN_NAME
+            ServiceType.CHARGING_STATION -> ServiceName.CHARGING_STATION_NAME
+            else -> String.Empty
         }
 }
