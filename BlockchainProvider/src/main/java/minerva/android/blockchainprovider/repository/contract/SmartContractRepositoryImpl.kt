@@ -2,7 +2,6 @@ package minerva.android.blockchainprovider.repository.contract
 
 // don't remove this commented import, please
 //import kotlin.Pair
-import kotlin.Pair
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toFlowable
@@ -18,9 +17,9 @@ import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.baseGas
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.data
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.noGasPrice
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.gasToken
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.noFunds
+import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.noGasPrice
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.operation
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.refund
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeSentinelAddress
@@ -35,15 +34,15 @@ import org.web3j.abi.datatypes.generated.Uint8
 import org.web3j.crypto.*
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.RemoteFunctionCall
+import org.web3j.protocol.core.RemoteCall
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
-import org.web3j.tx.ReadonlyTransactionManager
 import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.*
 
-class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private val gasPrice: Map<String, BigInteger>) : SmartContractRepository {
+class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private val gasPrice: Map<String, BigInteger>) :
+    SmartContractRepository {
 
     override fun deployGnosisSafeContract(privateKey: String, address: String, network: String): Single<String> =
         getProxyFactory(network, privateKey)
@@ -70,13 +69,19 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
 
     override fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable =
         getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
-            Numeric.hexStringToByteArray(
-                gnosisSafe.addOwnerWithThreshold(owner, EDIT_OWNER_THRESHOLD).encodeFunctionCall()
-            ).let { data ->
-                return performTransaction(
-                    gnosisSafe, gnosisAddress, data, network,
-                    TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
-                )
+            Function(
+                GnosisSafe.FUNC_ADDOWNERWITHTHRESHOLD,
+                listOf<Type<*>>(
+                    Address(owner),
+                    Uint256(BigInteger.valueOf(1))
+                ), emptyList()
+            ).let { innerFn ->
+                Numeric.hexStringToByteArray(FunctionEncoder.encode(innerFn)).let { data ->
+                    return performTransaction(
+                        gnosisSafe, gnosisAddress, data, network,
+                        TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
+                    )
+                }
             }
         }
 
@@ -84,13 +89,18 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
         getGnosisSafeOwners(gnosisAddress, network, privateKey)
             .flatMapCompletable {
                 getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
-                    Numeric.hexStringToByteArray(
-                        gnosisSafe.removeOwner(getPreviousOwner(removeAddress, it), removeAddress, EDIT_OWNER_THRESHOLD).encodeFunctionCall()
-                    ).let { safeTxData ->
+                    Function(
+                        GnosisSafe.FUNC_REMOVEOWNER,
+                        listOf<Type<*>>(
+                            Address(getPreviousOwner(removeAddress, it)),
+                            Address(removeAddress),
+                            Uint256(BigInteger.valueOf(1))
+                        ), emptyList()
+                    ).let { innerFn ->
                         performTransaction(
                             gnosisSafe,
                             gnosisAddress,
-                            safeTxData,
+                            Numeric.hexStringToByteArray(FunctionEncoder.encode(innerFn)),
                             network,
                             TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress),
                             noFunds
@@ -100,7 +110,7 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
             }
 
     override fun transferERC20Token(network: String, transactionPayload: TransactionPayload, erc20Address: String): Completable {
-        Numeric.hexStringToByteArray(getSafeTxData(getERC20(erc20Address, network, transactionPayload), transactionPayload)).run {
+        Numeric.hexStringToByteArray(getSafeTxData(transactionPayload)).run {
             return performTransaction(getGnosisSafe(transactionPayload, network), erc20Address, this, network, transactionPayload)
         }
     }
@@ -221,21 +231,23 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
             ), emptyList()
         )
 
-    private fun getSafeTxData(erc20: ERC20, transactionPayload: TransactionPayload) =
-        erc20.transfer(transactionPayload.receiverKey, Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger())
-            .encodeFunctionCall()
-
-    private fun getERC20(erc20Address: String, network: String, transactionPayload: TransactionPayload): ERC20 =
-        ERC20.load(
-            erc20Address,
-            web3j[network],
-            ReadonlyTransactionManager(web3j[network], transactionPayload.contractAddress),
-            ContractGasProvider(Convert.toWei(transactionPayload.gasPrice, Convert.Unit.GWEI).toBigInteger(), transactionPayload.gasLimit)
-        )
+    private fun getSafeTxData(transactionPayload: TransactionPayload): String? {
+        Function(
+            ERC20.FUNC_TRANSFER,
+            listOf<Type<*>>(
+                Address(transactionPayload.receiverKey),
+                Uint256(Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger())
+            ), emptyList()
+        ).let { innerFn ->
+            return FunctionEncoder.encode(innerFn) // returns the abi-encoded hex string
+        }
+    }
 
     private fun getGnosisSafe(gnosisAddress: String, network: String, privateKey: String) =
-        GnosisSafe.load(gnosisAddress, web3j[network], Credentials.create(privateKey),
-            ContractGasProvider((gasPrice[network] ?: error("Not supported Network")), Operation.SAFE_ACCOUNT_TXS.gasLimit))
+        GnosisSafe.load(
+            gnosisAddress, web3j[network], Credentials.create(privateKey),
+            ContractGasProvider((gasPrice[network] ?: error("Not supported Network")), Operation.SAFE_ACCOUNT_TXS.gasLimit)
+        )
 
     private fun getGnosisSafe(transactionPayload: TransactionPayload, network: String): GnosisSafe =
         GnosisSafe.load(
@@ -254,7 +266,7 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
         amount: BigInteger,
         nonce: BigInteger,
         data: ByteArray
-    ): RemoteFunctionCall<ByteArray> =
+    ): RemoteCall<ByteArray> =
         gnosisContract
             .getTransactionHash(receiver, amount, data, operation, safeTxGas, baseGas, noGasPrice, gasToken, refund, nonce)
 
@@ -266,12 +278,13 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
         Numeric.hexStringToByteArray(String.format(GNOSIS_SETUP_DATA, address.removePrefix(HEX_PREFIX)))
 
     private fun getProxyFactory(network: String, privateKey: String): ProxyFactory =
-        ProxyFactory.load(PROXY_ADDRESS, web3j[network], Credentials.create(privateKey),
-            ContractGasProvider((gasPrice[network] ?: error("Not supported Network")), Operation.SAFE_ACCOUNT_TXS.gasLimit))
+        ProxyFactory.load(
+            PROXY_ADDRESS, web3j[network], Credentials.create(privateKey),
+            ContractGasProvider((gasPrice[network] ?: error("Not supported Network")), Operation.SAFE_ACCOUNT_TXS.gasLimit)
+        )
 
     companion object {
         private const val HEX_PREFIX = "0x"
         private const val ARTIS = "ATS"
-        private val EDIT_OWNER_THRESHOLD = BigInteger.valueOf(1)
     }
 }

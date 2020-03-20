@@ -104,9 +104,7 @@ class TransactionsViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = {
-                        _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT))
-                    },
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
                     onError = {
                         Timber.e("Send safe account transaction error: ${it.message}")
                         _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
@@ -131,9 +129,7 @@ class TransactionsViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = {
-                        _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT))
-                    },
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
                     onError = {
                         Timber.e("Send safe account transaction error: ${it.message}")
                         _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
@@ -184,7 +180,9 @@ class TransactionsViewModel(
     private fun sendAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, value.assets[assetIndex].address)
-                .flatMapCompletable { walletManager.transferERC20Token(value.network, it) }
+                .flatMapCompletable {
+                    walletManager.transferERC20Token(value.network, it)
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

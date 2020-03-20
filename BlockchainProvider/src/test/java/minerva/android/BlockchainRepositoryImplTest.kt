@@ -87,7 +87,7 @@ class BlockchainRepositoryImplTest {
         val atsCostPayload = blockchainRepository.getTransactionCosts(ATS, Int.InvalidIndex, Operation.TRANSFER_ERC20)
         val atsCostPayload2 = blockchainRepository.getTransactionCosts(ATS, Int.InvalidIndex, Operation.SAFE_ACCOUNT_TXS)
         ethCostPayload.gasPrice shouldEqual BigDecimal.valueOf(20)
-        ethCostPayload.gasLimit shouldEqual BigInteger.valueOf(21000)
+        ethCostPayload.gasLimit shouldEqual BigInteger.valueOf(50000)
         atsCostPayload.gasPrice shouldEqual BigDecimal.valueOf(100)
         atsCostPayload.gasLimit shouldEqual BigInteger.valueOf(200000)
         atsCostPayload2.gasPrice shouldEqual BigDecimal.valueOf(100)
