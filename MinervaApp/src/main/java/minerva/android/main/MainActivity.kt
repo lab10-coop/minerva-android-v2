@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         replaceFragment(IdentitiesFragment())
         prepareSettingsIcon()
         prepareObservers()
+//TODO works only for new app instance, not working for app on foreground and which comes back from background
+        viewModel.loginFromNotification(intent.getStringExtra(JWT))
     }
 
     private fun prepareObservers() {
@@ -199,5 +201,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         const val LOGIN_RESULT_REQUEST_CODE = 3
         private const val NEW_VALUE_TITLE_PATTERN = "%s #%d"
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
+        const val JWT = "jwt"
     }
 }

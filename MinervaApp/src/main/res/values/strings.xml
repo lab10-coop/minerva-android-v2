@@ -137,6 +137,7 @@
     <string name="no_funds">No funds</string>
     <string name="no_funds_message">Please add at least 0.1 ATS to this ARTIS (Tau1) account</string>
     <string name="processing">Processing...</string>
+    <string name="channel_id">MinervaLoginChannel</string>
     <string name="message">Message</string>
     <string name="known_user_login_message">You are already registered user of Charging Station\nDashboard with the identity %s</string>
     <string name="not_existed_identity_message">Identity that you already logged in does no exist</string>
@@ -144,4 +145,6 @@
     <string name="add_owner">Add owner</string>
     <string name="current_owners">Current owners</string>
     <string name="owner_address">Owner address</string>
+    <string name="login_notification_title">Painless Login Request by Charging Station Dashboard</string>
+    <string name="login_reqeust_message">Please double tap to confirm login</string>
 </resources>
