@@ -2,6 +2,7 @@ package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_EMAIL
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_IDENTITY
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_NAME
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PHONE
@@ -42,8 +43,9 @@ data class IncognitoIdentity(
     override var name: String = INCOGNITO_IDENTITY,
     override val data: LinkedHashMap<String, String> = linkedMapOf(
         Pair(IdentityField.NAME, INCOGNITO_NAME),
-        Pair(IdentityField.PHONE_NUMBER, INCOGNITO_PHONE)
+        Pair(IdentityField.PHONE_NUMBER, INCOGNITO_PHONE),
+        Pair(IdentityField.EMAIL, INCOGNITO_EMAIL)
     ),
-    override var privateKey:String = INCOGNITO_PRIVATE_KEY,
-    override var publicKey:String = INCOGNITO_PUBLIC_KEY
+    override var privateKey: String = INCOGNITO_PRIVATE_KEY,
+    override var publicKey: String = INCOGNITO_PUBLIC_KEY
 ) : Identity(index = Int.InvalidIndex)

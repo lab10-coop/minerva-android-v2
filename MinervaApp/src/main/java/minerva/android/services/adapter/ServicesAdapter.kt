@@ -39,8 +39,9 @@ class ServiceViewHolder(private val view: View, private val viewGroup: ViewGroup
     fun bindData(service: Service) {
         view.apply {
             when (service.type) {
-                ServiceType.DEMO_LOGIN -> showIcon(R.mipmap.ic_unicorn)
+                ServiceType.UNICORN_LOGIN -> showIcon(R.mipmap.ic_unicorn)
                 ServiceType.M27 -> showIcon(R.mipmap.ic_m27)
+                ServiceType.CHARGING_STATION -> showIcon(R.drawable.ic_charging_station)
             }
             serviceName.text = service.name
             lastUsed.text = "${context.getString(R.string.last_used)} ${service.lastUsed}"

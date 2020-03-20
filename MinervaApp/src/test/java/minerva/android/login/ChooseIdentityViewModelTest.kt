@@ -6,6 +6,7 @@ import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.identity.ChooseIdentityViewModel
+import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Identity
@@ -20,29 +21,29 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val viewModel = ChooseIdentityViewModel(walletManager, walletActionsRepository)
 
-    private val loginObserver: Observer<Event<Any>> = mock()
-    private val loginCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+    private val loginObserver: Observer<Event<LoginPayload>> = mock()
+    private val loginCaptor: KArgumentCaptor<Event<LoginPayload>> = argumentCaptor()
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
 
     @Test
     fun `login to 3rd party service test success`() {
-        whenever(walletManager.painlessLogin(any(), any(), any())).thenReturn(Completable.complete())
+        whenever(walletManager.painlessLogin(any(), any(), any(), any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
         whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.loginLiveData.observeForever(loginObserver)
         viewModel.handleLogin(QrCodeResponse("Minerva", "callback"), "jwtToken", Identity(1))
         loginCaptor.run {
             verify(loginObserver).onChanged(capture())
-            firstValue.peekContent() == Unit
+            firstValue.peekContent().loginStatus == 1
         }
     }
 
     @Test
     fun `login to 3rd party service test error`() {
         val error = Throwable()
-        whenever(walletManager.painlessLogin(any(), any(), any())).thenReturn(Completable.error(error))
+        whenever(walletManager.painlessLogin(any(), any(), any(), any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
         whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         doNothing().whenever(walletManager).initWalletConfig()

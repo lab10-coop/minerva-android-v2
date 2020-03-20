@@ -10,27 +10,27 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidVersion
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
+import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_QUICK_USER
+import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_USER
+import minerva.android.services.login.uitls.LoginUtils.createLoginPayload
+import minerva.android.services.login.uitls.LoginUtils.getService
+import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
+import minerva.android.services.login.uitls.LoginUtils.isIdentityValid
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
-import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.IdentityField.Companion.PHONE_NUMBER
-import minerva.android.walletmanager.model.defs.WalletActionFields
-import minerva.android.walletmanager.model.defs.WalletActionStatus
-import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.IncognitoIdentity
+import minerva.android.walletmanager.model.QrCodeResponse
 import timber.log.Timber
 
 class ChooseIdentityViewModel(private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository) :
     BaseViewModel() {
 
-    private var identityName: String = String.Empty
-    private var serviceName: String = String.Empty
-
-    private val _loginMutableLiveData = MutableLiveData<Event<Unit>>()
-    val loginLiveData: LiveData<Event<Unit>> get() = _loginMutableLiveData
+    private val _loginMutableLiveData = MutableLiveData<Event<LoginPayload>>()
+    val loginLiveData: LiveData<Event<LoginPayload>> get() = _loginMutableLiveData
 
     private val _errorMutableLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorMutableLiveData
@@ -54,16 +54,11 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
         }
     }
 
-    private fun minervaLogin(
-        identity: Identity,
-        qrCodeResponse: QrCodeResponse
-    ) {
+    private fun minervaLogin(identity: Identity, qrCodeResponse: QrCodeResponse) {
         if (handleNoKeysError(identity)) return
         viewModelScope.launch(Dispatchers.IO) {
-            val jwtToken = walletManager.createJwtToken(createLoginPayload(identity, identity.publicKey), identity.privateKey)
-            withContext(Dispatchers.Main) {
-                handleLogin(qrCodeResponse, jwtToken, identity)
-            }
+            val jwtToken = walletManager.createJwtToken(createLoginPayload(identity, qrCodeResponse), identity.privateKey)
+            withContext(Dispatchers.Main) { handleLogin(qrCodeResponse, jwtToken, identity) }
         }
     }
 
@@ -78,23 +73,20 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
     private fun doesIdentityHaveKeys(identity: Identity) =
         identity != IncognitoIdentity() && (identity.publicKey == String.Empty || identity.privateKey == String.Empty)
 
-    fun handleLogin(
-        qrCodeResponse: QrCodeResponse,
-        jwtToken: String,
-        identity: Identity
-    ) {
-        identityName = identity.name
-        serviceName = qrCodeResponse.serviceName
+    fun handleLogin(qrCodeResponse: QrCodeResponse, jwtToken: String, identity: Identity) {
         qrCodeResponse.callback?.let { callback ->
-            walletManager.painlessLogin(callback, jwtToken, identity)
+            walletManager.painlessLogin(callback, jwtToken, identity, getService(qrCodeResponse, identity))
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(), walletManager.masterKey))
+                .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(identity.name,
+                    qrCodeResponse.serviceName), walletManager.masterKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _loginMutableLiveData.value = Event(Unit) },
+                    onComplete = {
+                        _loginMutableLiveData.value = Event(LoginPayload(loginStatus = getLoginStatus(qrCodeResponse)))
+                    },
                     onError = {
                         Timber.e("Error while login $it")
                         _errorMutableLiveData.value = Event(Throwable(it.message))
@@ -103,37 +95,14 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
         }
     }
 
-    private fun getValuesWalletAction(): WalletAction {
-        return WalletAction(
-            WalletActionType.SERVICE,
-            WalletActionStatus.LOG_IN,
-            DateUtils.timestamp,
-            hashMapOf(
-                Pair(WalletActionFields.IDENTITY_NAME, identityName),
-                Pair(WalletActionFields.SERVICE_NAME, serviceName)
-            )
-        )
-    }
-
-    //todo change it to dynamic requested fields creation
-    private fun isIdentityValid(identity: Identity) =
-        identity.data[PHONE_NUMBER] != null && identity.data[NAME] != null
-
-    //todo change it to dynamic payload creation
-    private fun createLoginPayload(
-        identity: Identity,
-        publicKey: String
-    ): Map<String, String?> {
-        return mapOf(
-            Pair(PHONE, identity.data[PHONE_NUMBER]),
-            Pair(NAME, identity.data[NAME]),
-            Pair(IDENTITY_NO, publicKey)
-        )
-    }
+    private fun getLoginStatus(qrCodeResponse: QrCodeResponse): Int =
+        if (qrCodeResponse.requestedData.contains(FCM_ID)) NEW_QUICK_USER
+        else NEW_USER
 
     companion object {
         const val PHONE = "phone"
         const val NAME = "name"
         const val IDENTITY_NO = "identity_no"
+        const val FCM_ID = "fcm_id"
     }
 }

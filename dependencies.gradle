@@ -55,6 +55,7 @@ ext {
 
     spannableStringVersion = '1.1.0'
     biometricVersion = '1.0.1'
+    cloudMassagingVersion = '20.1.2'
 
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
@@ -145,5 +146,9 @@ ext {
     blockChainDependencies = [
             w3jCore    : "org.web3j:core:$w3jVersion",
             w3jContract: "org.web3j:contracts:$w3jVersion"
+    ]
+
+    firebaseDepenedencies = [
+            cloudMassaging: "com.google.firebase:firebase-messaging:$cloudMassagingVersion"
     ]
 }

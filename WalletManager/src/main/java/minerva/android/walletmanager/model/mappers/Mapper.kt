@@ -16,7 +16,7 @@ const val REQUESTED = "requested"
 fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCodeResponse =
     QrCodeResponse(
         callback = responseMap[CALLBACK] as String?,
-        issuer = responseMap[ISS] as String?,
+        issuer = responseMap[ISS] as String,
         requestedData = getRequestedData(responseMap)
     )
 
@@ -52,8 +52,8 @@ fun mapValueResponseToValue(
         contractAddress = response.contractAddress
     )
 
-fun mapServiceResponseToService(response: ServicePayload): Service =
-    Service(response.type, response.name, response.lastUsed)
+private fun mapServiceResponseToService(response: ServicePayload): Service =
+    Service(response.type, response.name, response.lastUsed, response.loggedInIdentityPublicKey)
 
 fun mapServicesResponseToServices(responses: List<ServicePayload>): List<Service> {
     val services = mutableListOf<Service>()
@@ -86,7 +86,7 @@ fun mapWalletConfigToWalletPayload(config: WalletConfig): WalletConfigPayload {
 }
 
 fun mapServiceToServicePayload(service: Service): ServicePayload =
-    ServicePayload(service.type, service.name, service.lastUsed)
+    ServicePayload(service.type, service.name, service.lastUsed, service.loggedInIdentityPublicKey)
 
 
 fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =

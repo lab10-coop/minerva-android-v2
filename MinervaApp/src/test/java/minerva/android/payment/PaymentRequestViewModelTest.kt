@@ -47,7 +47,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `decode token success when service is connected`() {
-        whenever(walletManager.decodePaymentRequestToken(any())).thenReturn(Single.just(Pair(Payment("12"), listOf(Service(1, name = "M27")))))
+        whenever(walletManager.decodePaymentRequestToken(any())).thenReturn(Single.just(Pair(Payment("12"), listOf(Service(type = "1", name = "M27")))))
         viewModel.showPaymentConfirmationLiveData.observeForever(showPaymentConfirmationObserver)
         viewModel.decodeJwtToken("token")
         showPaymentConfirmationCaptor.run {
