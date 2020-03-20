@@ -4,9 +4,16 @@ import android.app.Activity
 import android.content.Intent
 import minerva.android.R
 import minerva.android.main.MainActivity
+import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_QUICK_USER
+import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_USER
+import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_QUICK_USER
+import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_USER
 import minerva.android.services.login.PainlessLoginActivity
 import minerva.android.values.transaction.activity.TransactionActivity
+import minerva.android.widget.KnownUserLoginFlashBar
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.QuickLoginFlashBar
 
 internal fun MainActivity.handleTransactionResult(data: Intent?) {
     data?.apply {
@@ -30,20 +37,32 @@ internal fun MainActivity.handleTransactionResult(data: Intent?) {
 }
 
 internal fun MainActivity.handleLoginResult(data: Intent?) {
-    data?.getBooleanExtra(PainlessLoginActivity.IS_LOGIN_SUCCESS, false)?.let { isLoginSuccess ->
-        if (isLoginSuccess) {
-            MinervaFlashbar.show(
-                this,
-                getString(R.string.login_success_title),
-                getString(R.string.login_success_message)
-            )
-        } else {
-            MinervaFlashbar.show(
-                this,
-                getString(R.string.login_failure_title),
-                getString(R.string.login_failure_message)
-            )
+    data?.apply {
+        val isLoginSuccess = getBooleanExtra(PainlessLoginActivity.IS_LOGIN_SUCCESS, false)
+        (getSerializableExtra(PainlessLoginActivity.LOGIN_PAYLOAD) as LoginPayload).run {
+            viewModel.loginPayload = this
+            if (isLoginSuccess) handleSuccessLoginStatuses(loginStatus)
+            else handleLoginStatuses(loginStatus)
         }
+    }
+}
+
+fun MainActivity.handleLoginStatuses(loginAction: Int) {
+    when (loginAction) {
+        KNOWN_USER -> KnownUserLoginFlashBar.show(this, getString(R.string.known_user_login_message, viewModel.getIdentityName()), this)
+        KNOWN_QUICK_USER -> QuickLoginFlashBar.show(this, getString(R.string.quick_login_success_message), this, shouldLogin = true)
+        else -> MinervaFlashbar.show(this, getString(R.string.login_failure_title), getString(R.string.login_failure_message))
+    }
+}
+
+private fun MainActivity.handleSuccessLoginStatuses(loginAction: Int) {
+    when (loginAction) {
+        NEW_USER -> MinervaFlashbar.show(this, getString(R.string.login_success_title), getString(R.string.login_success_message))
+        NEW_QUICK_USER -> QuickLoginFlashBar.show(
+            this, getString(R.string.quick_login_success_message),
+            this, getString(R.string.login_success_title),
+            false
+        )
     }
 }
 

@@ -256,13 +256,12 @@ class WalletManagerImpl(
     override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
         cryptographyRepository.createJwtToken(payload, privateKey)
 
-    override fun painlessLogin(url: String, jwtToken: String, identity: Identity): Completable =
+    override fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
-            .flatMapCompletable { handleSavingServiceLogin(identity) }
-
-    private fun handleSavingServiceLogin(identity: Identity): Completable =
-        if (identity !is IncognitoIdentity) saveService(Service(ServiceType.DEMO_LOGIN, DEMO_LOGIN, getLastUsedFormatted()))
-        else Completable.complete()
+            .flatMapCompletable {
+                if (identity !is IncognitoIdentity) saveService(service)
+                else Completable.complete()
+            }
 
     override fun saveService(newService: Service): Completable {
         walletConfigMutableLiveData.value?.run {
@@ -464,20 +463,32 @@ class WalletManagerImpl(
     }
 
     override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String {
-        walletConfigLiveData.value?.values?.forEach {
-            if (it.address == address) {
-                return it.privateKey
-            }
-        }
+        walletConfigLiveData.value?.values?.forEach { if (it.address == address) return it.privateKey }
         return String.Empty
     }
+
+    override fun isAlreadyLoggedIn(issuer: String): Boolean {
+        walletConfigMutableLiveData.value?.services?.forEach { if (doesChargingStationIsAlreadyLoggedIn(it, issuer)) return true }
+        return false
+    }
+
+    override fun getLoggedInIdentityPublicKey(issuer: String): String {
+        walletConfigMutableLiveData.value?.services?.find { it.type == issuer }?.let {
+            return it.loggedInIdentityPublicKey
+        }.orElse { return String.Empty }
+    }
+
+    override fun getLoggedInIdentity(publicKey: String): Identity? {
+        walletConfigMutableLiveData.value?.identities?.find { it.publicKey == publicKey }?.let { return it }
+            .orElse { return null }
+    }
+
+    private fun doesChargingStationIsAlreadyLoggedIn(service: Service, issuer: String) =
+        service.type == issuer && service.type == ServiceType.CHARGING_STATION
 
     companion object {
         private const val START = 0
         private const val ONE_ELEMENT = 1
-        private const val DEMO_LOGIN = "Demo Web Page Login"
-
-        //        TODO should be dynamically handled form qr code
         private const val NEW_IDENTITY_TITLE_PATTERN = "%s #%d"
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
         private val NO_FUNDS = BigDecimal.valueOf(0)

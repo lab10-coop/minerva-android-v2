@@ -53,12 +53,12 @@ open class WalletConfigTestValues {
     )
 
     val services = listOf(
-        Service(0, "Service1", "123"),
-        Service(1, "Service2", "123")
+        Service("0", "Service1", "123"),
+        Service("1", "Service2", "123")
     )
 
     val serviceResponse = listOf(
-        ServicePayload(0, "Service1", "123"),
-        ServicePayload(1, "Service2", "123")
+        ServicePayload("0", "Service1", "123"),
+        ServicePayload("1", "Service2", "123")
     )
 }

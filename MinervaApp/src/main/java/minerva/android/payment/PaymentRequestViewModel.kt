@@ -28,6 +28,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.AUTHORISED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.storage.ServiceName.Companion.M27_NAME
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
 
@@ -81,7 +82,7 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
     }
 
     private fun isM27Connected(services: List<Service>?) =
-        services?.find { service -> service.name == M27 } != null
+        services?.find { service -> service.name == M27_NAME } != null
 
     fun connectToService() {
         launchDisposable {
@@ -135,8 +136,4 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
     }
 
     fun isMasterKeyAvailable() = walletManager.isMasterKeyAvailable()
-
-    companion object {
-        const val M27 = "M27"
-    }
 }

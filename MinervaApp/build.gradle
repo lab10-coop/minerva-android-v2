@@ -1,7 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.fabric'
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
@@ -63,6 +64,7 @@ dependencies {
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
 
+    implementation firebaseDepenedencies.values()
     implementation coroutinesDependencies.values()
     implementation crashlyticsDependencies.values()
     implementation qrDependency.values()
@@ -76,6 +78,3 @@ dependencies {
     testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
 }
-
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'io.fabric'

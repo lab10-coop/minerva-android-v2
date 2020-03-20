@@ -11,6 +11,7 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.identity.ChooseIdentityFragment
 import minerva.android.services.login.scanner.LoginScannerFragment
+import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.model.QrCodeResponse
 
 class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener {
@@ -39,8 +40,11 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
         supportActionBar?.hide()
     }
 
-    override fun onResult(isResultSucceed: Boolean, message: String?) {
-        setResult(Activity.RESULT_OK, Intent().putExtra(IS_LOGIN_SUCCESS, isResultSucceed))
+    override fun onResult(isResultSucceed: Boolean, message: String?, loginPayload: LoginPayload?) {
+        setResult(Activity.RESULT_OK, Intent().apply {
+            putExtra(IS_LOGIN_SUCCESS, isResultSucceed)
+            putExtra(LOGIN_PAYLOAD, loginPayload)
+        })
         finish()
     }
 
@@ -81,5 +85,6 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
 
     companion object {
         const val IS_LOGIN_SUCCESS = "is_login_succeed"
+        const val LOGIN_PAYLOAD = "login_payload"
     }
 }

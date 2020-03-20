@@ -13,6 +13,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.listener.AddressFragmentsListener
+import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.values.transaction.fragment.TransactionsFragment
 import minerva.android.values.transaction.fragment.scanner.TransactionScannerFragment
@@ -79,7 +80,7 @@ class TransactionActivity : AppCompatActivity(), AddressFragmentsListener {
         }
     }
 
-    override fun onResult(isResultSucceed: Boolean, message: String?) {
+    override fun onResult(isResultSucceed: Boolean, message: String?, loginPayload: LoginPayload?) {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(IS_TRANSACTION_SUCCESS, isResultSucceed)
             putExtra(TRANSACTION_MESSAGE, message)

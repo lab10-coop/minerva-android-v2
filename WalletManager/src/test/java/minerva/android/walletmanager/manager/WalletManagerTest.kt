@@ -71,10 +71,14 @@ class WalletManagerTest {
         listOf(
             Value(2, "publicKey1", "privateKey1", "address", network = NetworkShortName.ETH),
             Value(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ETH),
-            Value(5, "publicKey3", "privateKey3", "address", network = NetworkShortName.ETH,
-            owners = listOf("masterOwner")),
-            Value(6, "publicKey4", "privateKey4", "address", network = NetworkShortName.ETH,
-                owners = listOf("notMasterOwner", "masterOwner"))
+            Value(
+                5, "publicKey3", "privateKey3", "address", network = NetworkShortName.ETH,
+                owners = listOf("masterOwner")
+            ),
+            Value(
+                6, "publicKey4", "privateKey4", "address", network = NetworkShortName.ETH,
+                owners = listOf("notMasterOwner", "masterOwner")
+            )
         )
     )
 
@@ -83,10 +87,14 @@ class WalletManagerTest {
         listOf(
             Value(2, "publicKey11", "privateKey1", "address", network = NetworkShortName.ETH),
             Value(4, "publicKey22", "privateKey2", "address", network = NetworkShortName.ETH),
-            Value(5, "publicKey33", "privateKey3", "masterOwner", network = NetworkShortName.ETH,
-                owners = listOf("masterOwner")),
-            Value(6, "publicKey44", "privateKey4", "address", network = NetworkShortName.ETH,
-                owners = listOf("notMasterOwner", "masterOwner"))
+            Value(
+                5, "publicKey33", "privateKey3", "masterOwner", network = NetworkShortName.ETH,
+                owners = listOf("masterOwner")
+            ),
+            Value(
+                6, "publicKey44", "privateKey4", "address", network = NetworkShortName.ETH,
+                owners = listOf("notMasterOwner", "masterOwner")
+            )
         )
     )
 
@@ -390,7 +398,7 @@ class WalletManagerTest {
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         whenever(servicesApi.painlessLogin(any(), any(), any())).thenReturn(Single.just(LoginResponse(Profile("did:123"))))
         walletManager.initWalletConfig()
-        walletManager.painlessLogin("url", "jwtToken", Identity(1)).test()
+        walletManager.painlessLogin("url", "jwtToken", Identity(1), Service("1")).test()
             .assertComplete()
     }
 
@@ -398,7 +406,7 @@ class WalletManagerTest {
     fun `painless login with incognito identity test success`() {
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         whenever(servicesApi.painlessLogin(any(), any(), any())).thenReturn(Single.just(LoginResponse(Profile("did:123"))))
-        walletManager.painlessLogin("url", "jwtToken", IncognitoIdentity()).test()
+        walletManager.painlessLogin("url", "jwtToken", IncognitoIdentity(), Service("1")).test()
             .assertComplete()
     }
 
@@ -407,7 +415,7 @@ class WalletManagerTest {
         val error = Throwable()
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
         whenever(servicesApi.painlessLogin(any(), any(), any())).thenReturn(Single.error(error))
-        walletManager.painlessLogin("url", "jwtToken", IncognitoIdentity()).test()
+        walletManager.painlessLogin("url", "jwtToken", IncognitoIdentity(), Service("1")).test()
             .assertError(error)
     }
 
@@ -537,7 +545,6 @@ class WalletManagerTest {
             .assertValue {
                 it.size == 4
             }
-
 
 //TODO when uncommented not passing on CI - try to resolve this problem
 //            .assertValue {

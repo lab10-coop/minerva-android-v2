@@ -58,8 +58,13 @@ class LoginScannerFragment : BaseScanner() {
     }
 
     private fun prepareObserver() {
-        viewModel.scannerResultLiveData.observe(this, EventObserver { goToChooseIdentityFragment(it) })
-        viewModel.scannerErrorLiveData.observe(this, EventObserver { handleError() })
+        viewModel.apply {
+            scannerResultLiveData.observe(this@LoginScannerFragment, EventObserver { goToChooseIdentityFragment(it) })
+            scannerErrorLiveData.observe(this@LoginScannerFragment, EventObserver { handleError() })
+            knownUserLoginMutableLiveData.observe(this@LoginScannerFragment, EventObserver {
+                listener.onResult(false, loginPayload = it)
+            })
+        }
     }
 
     private fun goToChooseIdentityFragment(qrCodeResponse: QrCodeResponse) {

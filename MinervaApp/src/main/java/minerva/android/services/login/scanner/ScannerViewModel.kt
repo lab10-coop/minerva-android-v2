@@ -9,8 +9,14 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.services.login.identity.ChooseIdentityViewModel
+import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_QUICK_USER
+import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_USER
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.storage.ServiceName
+import minerva.android.walletmanager.storage.ServiceType
 
 class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
 
@@ -22,34 +28,48 @@ class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
     private val _scannerErrorMutableLiveData = MutableLiveData<Event<Throwable>>()
     val scannerErrorLiveData: LiveData<Event<Throwable>> get() = _scannerErrorMutableLiveData
 
+    private val _knownUserLoginMutableLiveData = MutableLiveData<Event<LoginPayload>>()
+    val knownUserLoginMutableLiveData: LiveData<Event<LoginPayload>> get() = _knownUserLoginMutableLiveData
+
     fun validateResult(token: String) {
         disposable = walletManager.decodeQrCodeResponse(token)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onSuccess = { handleQrCodeResponse(it, token) },
+                onSuccess = { handleQrCodeResponse(it) },
                 onError = { _scannerErrorMutableLiveData.value = Event(it) }
             )
     }
 
-    private fun handleQrCodeResponse(response: QrCodeResponse, token: String) {
+    private fun handleQrCodeResponse(response: QrCodeResponse) {
         response.run {
-            serviceName = getServiceName(token)
+            serviceName = getServiceName(response)
             identityFields = getRequestedData(requestedData)
-            _scannerResultMutableLiveData.value = Event(this)
+        }
+        if (walletManager.isAlreadyLoggedIn(response.issuer)) {
+            _knownUserLoginMutableLiveData.value =
+                Event(LoginPayload(getLoginStatus(response), walletManager.getLoggedInIdentityPublicKey(response.issuer), response))
+        } else {
+            _scannerResultMutableLiveData.value = Event(response)
         }
     }
+
+    private fun getLoginStatus(qrCodeResponse: QrCodeResponse): Int =
+        if (qrCodeResponse.requestedData.contains(ChooseIdentityViewModel.FCM_ID)) KNOWN_QUICK_USER
+        else KNOWN_USER
 
     private fun getRequestedData(requestedData: ArrayList<String>): String {
         var identityFields: String = String.Empty
-        requestedData.forEach {
-            identityFields += "$it "
-        }
+        requestedData.forEach { identityFields += "$it " }
         return identityFields
     }
 
-    //    TODO implement getting service name for QR code, leave it for demo purposes
-    private fun getServiceName(scanResult: String) = "Minerva Service"
+    private fun getServiceName(response: QrCodeResponse): String =
+        when (response.issuer) {
+            ServiceType.UNICORN_LOGIN -> ServiceName.UNICORN_LOGIN_NAME
+            ServiceType.CHARGING_STATION -> ServiceName.CHARGING_STATION_NAME
+            else -> String.Empty
+        }
 
     fun onPause() {
         disposable?.dispose()

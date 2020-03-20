@@ -29,9 +29,7 @@ class ChooseIdentityFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_choose_identity, container, false)
-    }
+    ): View? = inflater.inflate(R.layout.fragment_choose_identity, container, false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,7 +102,7 @@ class ChooseIdentityFragment : Fragment() {
         viewModel.apply {
             loadingLiveData.observe(this@ChooseIdentityFragment, EventObserver { if (it) showLoader() else hideLoader() })
             errorLiveData.observe(this@ChooseIdentityFragment, EventObserver { listener.onResult(false) })
-            loginLiveData.observe(this@ChooseIdentityFragment, EventObserver { listener.onResult(true) })
+            loginLiveData.observe(this@ChooseIdentityFragment, EventObserver { listener.onResult(true, loginPayload = it) })
             requestedFieldsLiveData.observe(this@ChooseIdentityFragment, EventObserver {
                 Toast.makeText(context, getString(R.string.requested_data_message), Toast.LENGTH_LONG).show()
             })
