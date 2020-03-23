@@ -40,7 +40,7 @@ ETHEREUM(NetworkFullName.ETH, NetworkShortName.ETH, BuildConfig.ETH_ADDRESS, ETH
 ### Adding new Network
 
 1. Add Network as new element in Network enum class
-2. Add correct shot, long name, Network default gas price and Network address (build.gradle file) in the same way, as others Networks.
+2. Add correct shot (which is id), long name, Network default gas price and Network address (build.gradle file) in the same way, as others Networks.
 3. Add missing Network Materials in NetworkMaterialRepository (colors, icons, etc)
 
 ##Build
