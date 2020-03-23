@@ -23,6 +23,8 @@ MinervaApp - the main application module. All UI etc. This module is connected w
 
 `WalletConfig` - json file which is uploaded/downloaded form the server (saved locally too). This is kind of map of the account. Using this file, the app is able to recreate user account and data. In this file you can find identites (with data) and wallet structure.
 
+![Diagram Image](MinervaDiagram.jpg)
+
 ## Description
 
 Application architecture uses dependency injection - Koin. All modules and viewModels are described in file AppModule.kt. All between modules communication is made using streams - RxKotlin. Communication between viewModels and views are made using LiveData. All screens which need WalletConfig data are observing `walletConfigLiveData`, so there is no need to refresh screens manually, after changing wallet data.
