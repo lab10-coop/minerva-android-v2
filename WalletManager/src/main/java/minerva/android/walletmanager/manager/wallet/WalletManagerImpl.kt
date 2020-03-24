@@ -138,6 +138,11 @@ class WalletManagerImpl(
                 keystoreRepository.encryptKey(masterKey)
                 walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
             }
+//          TODO Panic Button. Uncomment code below to save manually - not recommended
+//            .doOnError {
+//                keystoreRepository.encryptKey(masterKey)
+//                walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
+//            }
     }
 
     override fun createValue(network: Network, valueName: String, ownerAddress: String, contractAddress: String): Completable {
@@ -382,7 +387,7 @@ class WalletManagerImpl(
                     walletConfigRepository.saveWalletConfigLocally(this)
                 }
                 .doOnError {
-                    //TODO Panic Button. Uncomment code below to save manually - not recommended was supported somewhere?
+                    //TODO Panic Button. Uncomment code below to save manually - not recommended
                     //walletConfigRepository.saveWalletConfigLocally(walletConfig)
                     //_walletConfigMutableLiveData.value = walletConfig
                 }

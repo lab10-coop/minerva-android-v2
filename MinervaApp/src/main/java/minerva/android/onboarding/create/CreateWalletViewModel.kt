@@ -38,8 +38,9 @@ class CreateWalletViewModel(private val walletManager: WalletManager) : ViewMode
                     .subscribeBy(
                         onComplete = { _createWalletMutableLiveData.value = Event(Unit) },
                         onError = {
-                            _errorLiveData.value = Event(it)
-//                            _createWalletMutableLiveData.value = Event(Unit) uncomment when offline app is needed
+                            _errorLiveData.value = Event(it) //comment when offline app is needed
+                            //TODO Panic Button. Uncomment code below to save manually - not recommended
+                            _createWalletMutableLiveData.value = Event(Unit) //uncomment when offline app is needed
                         }
                     )
             } else {
