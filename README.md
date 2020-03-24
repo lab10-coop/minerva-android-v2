@@ -43,6 +43,10 @@ ETHEREUM(NetworkFullName.ETH, NetworkShortName.ETH, BuildConfig.ETH_ADDRESS, ETH
 2. Add correct shot (which is id), long name, Network default gas price and Network address (build.gradle file) in the same way, as others Networks.
 3. Add missing Network Materials in NetworkMaterialRepository (colors, icons, etc)
 
+### Making application offline working (not recommended)
+
+1. Find and uncomment code with `//TODO Panic Button` comment (`WalletManagerImpl.kt`, `CreateWalletViewModel.kt`)
+
 ##Build
 Build is done via docker. If you want to build an app and have docker installed just type:
 
