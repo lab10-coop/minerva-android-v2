@@ -37,14 +37,17 @@
 
             <TextView
                 android:id="@+id/identityName"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/margin_normal"
                 android:textSize="@dimen/text_normal"
                 android:fontFamily="@font/rubik_medium"
+                android:singleLine="true"
+                android:ellipsize="end"
                 app:layout_constraintBottom_toBottomOf="@id/profileImage"
                 app:layout_constraintLeft_toRightOf="@id/profileImage"
                 app:layout_constraintTop_toTopOf="@id/profileImage"
+                app:layout_constraintRight_toLeftOf="@id/arrow"
                 tools:text="@string/app_name" />
 
             <ImageView
