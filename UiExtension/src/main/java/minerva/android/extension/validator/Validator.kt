@@ -16,7 +16,7 @@ object Validator {
     fun validateAmountField(amount: String?, balance: BigDecimal): ValidationResult {
         return when {
             amount.isNullOrBlank() -> ValidationResult.error(R.string.field_cannot_be_empty)
-            BigDecimal(amount) >= balance -> ValidationResult.error(R.string.not_enough_funds_error)
+            BigDecimal(amount) > balance -> ValidationResult.error(R.string.not_enough_funds_error)
             else -> ValidationResult(true)
         }
     }

@@ -141,10 +141,10 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setTransactionsCosts(transactionCost: TransactionCost) {
-        transactionCost.apply {
-            gasPriceEditText.setText(gasPrice.toPlainString())
-            gasLimitEditText.setText(gasLimit.toString())
-            transactionCostLabel.text = getString(R.string.transaction_cost, cost.toPlainString(), viewModel.network)
+        transactionCost.let {
+            gasPriceEditText.setText(it.gasPrice.toPlainString())
+            gasLimitEditText.setText(it.gasLimit.toString())
+            transactionCostLabel.text = getString(R.string.transaction_cost, it.cost.toPlainString(), viewModel.network)
         }
     }
 
