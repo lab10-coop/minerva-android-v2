@@ -117,9 +117,10 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         view.apply {
             bindData(value)
             prepareView(value)
+            prepareAssets(value)
             setOnSendButtonClickListener(value)
             setOnMenuClickListener(rawPosition, value)
-            setOnItemClickListener(value)
+            setOnItemClickListener()
         }
     }
 
@@ -133,6 +134,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         }
         amountView.setAmounts(value.balance, value.fiatBalance)
         sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
+
     }
 
     private fun View.prepareView(value: Value) {
@@ -157,13 +159,14 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         menu.setOnClickListener { showMenu(rawPosition, value, menu) }
     }
 
-    private fun View.setOnItemClickListener(value: Value) {
+    private fun View.setOnItemClickListener() {
         setOnClickListener {
-            if (isOpen) close() else open(value)
+            if (isOpen) close() else open()
         }
     }
 
     private fun View.prepareAssets(value: Value) {
+        container.removeAllViews()
         value.assets.forEachIndexed { index, asset ->
             //TODO add correct icon!
             container.addView(AssetView(this@ValueViewHolder, value, index, R.drawable.ic_asset_sdai).apply {
@@ -172,13 +175,12 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
         }
     }
 
-    private fun open(value: Value) {
+    private fun open() {
         TransitionManager.beginDelayedTransition(viewGroup)
         view.apply {
             arrow.rotate180()
             sendButton.visible()
             container.visible()
-            prepareAssets(value)
         }
     }
 
@@ -189,7 +191,6 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
             arrow.rotate180back()
             sendButton.gone()
             container.gone()
-            container.removeAllViews()
         }
     }
 
