@@ -111,7 +111,8 @@
     <string name="logIn">Log in</string>
     <string name="authorised">Authorised</string>
     <string name="signed">Signed</string>
-    <string name="value_added">Value %s</string>
+    <string name="value_action_label">Account %s</string>
+    <string name="safe_account_action_label">Safe Account %s</string>
     <string name="service">Service</string>
     <string name="identity_name">Identity %s</string>
     <string name="today">TODAY</string>

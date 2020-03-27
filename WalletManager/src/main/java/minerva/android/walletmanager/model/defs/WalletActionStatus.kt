@@ -24,5 +24,6 @@ annotation class WalletActionStatus {
         const val LOG_IN = 6
         const val AUTHORISED = 7
         const val SIGNED = 8
+        const val SAFE_ACCOUNT_ADDED = 9
     }
 }

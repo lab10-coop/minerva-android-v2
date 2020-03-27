@@ -14,8 +14,8 @@ import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
-import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.utils.DateUtils
 import timber.log.Timber
@@ -96,7 +96,7 @@ class ValuesViewModel(
                 smartContractManager.createSafeAccount(value)
                     .flatMapCompletable { smartContractAddress -> createValue(value, smartContractAddress) }
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(getWalletAction(ADDED,
+                    .andThen(walletActionsRepository.saveWalletActions(getWalletAction(SAFE_ACCOUNT_ADDED,
                             createSafeAccountName(value)), walletManager.masterKey))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

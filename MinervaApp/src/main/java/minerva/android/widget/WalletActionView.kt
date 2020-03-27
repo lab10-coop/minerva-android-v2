@@ -5,7 +5,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.wallet_action_item_list_row.view.*
 import minerva.android.R
-import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.UNDEFINED
 import minerva.android.walletmanager.model.defs.WalletActionFields
@@ -16,6 +15,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.LOG_IN
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.RECEIVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -50,7 +50,12 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
             SENT -> showSentAction(walletAction, R.string.sent_values_label)
             ADDED, REMOVED -> showAction(
                 walletAction.fields[WalletActionFields.VALUE_NAME],
-                R.string.value_added,
+                R.string.value_action_label,
+                R.drawable.ic_values
+            )
+            SAFE_ACCOUNT_ADDED -> showAction(
+                walletAction.fields[WalletActionFields.VALUE_NAME],
+                R.string.safe_account_action_label,
                 R.drawable.ic_values
             )
         }
