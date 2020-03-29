@@ -1,5 +1,10 @@
-# Minerva android v2
+## About
 
+Minerva is a Digital Wallet for Android phones.  
+It uses emerging standards for Self Sovereign Identity (SSI) for identity management and supports multiple Blockchain networks for handling of digital assets (currently supported: native tokens, ERC-20 tokens and [Gnosis Safe](https://gnosis-safe.io/) accounts).  
+Development was co-sponsored by [Sitra](https://www.sitra.fi/en/) as an [IHAN pilot project](https://www.sitra.fi/en/projects/ihan-proof-concept-pilots/) "Minerva MVP".
+
+## Modules
 
 Minerva App Project is divided into several modules:
 
@@ -42,10 +47,6 @@ ETHEREUM(NetworkFullName.ETH, NetworkShortName.ETH, BuildConfig.ETH_ADDRESS, ETH
 1. Add Network as new element in Network enum class
 2. Add correct shot (which is id), long name, Network default gas price and Network address (build.gradle file) in the same way, as others Networks.
 3. Add missing Network Materials in NetworkMaterialRepository (colors, icons, etc)
-
-### Making application offline working (not recommended)
-
-1. Find and uncomment code with `//TODO Panic Button` comment (`WalletManagerImpl.kt`, `CreateWalletViewModel.kt`)
 
 ##Build
 Build is done via docker. If you want to build an app and have docker installed just type:
