@@ -15,3 +15,4 @@
 android-sdk.tgz
 android-sdk-linux
 *.zip
+**/google-services.json
