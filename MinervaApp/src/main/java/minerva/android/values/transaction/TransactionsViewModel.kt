@@ -92,10 +92,12 @@ class TransactionsViewModel(
     private fun sendSafeAccountAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             val ownerPrivateKey = value.masterOwnerAddress.let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
-            getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
-                .flatMap {
-                    transaction = it
-                    smartContractManager.transferERC20Token(network, it, value.assets[assetIndex].address).toSingleDefault(it)
+            walletManager.resolveENS(receiverKey).flatMap { resolvedENS ->
+                    getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
+                        .flatMap {
+                            transaction = it
+                            smartContractManager.transferERC20Token(network, it, value.assets[assetIndex].address).toSingleDefault(it)
+                        }
                 }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
@@ -104,10 +106,10 @@ class TransactionsViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
                     onError = {
                         Timber.e("Send safe account transaction error: ${it.message}")
-                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
+                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
                     }
                 )
         }
@@ -117,10 +119,12 @@ class TransactionsViewModel(
     private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             val ownerPrivateKey = value.masterOwnerAddress.let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
-            getTransactionForSafeAccount(ownerPrivateKey, receiverKey, amount, gasPrice, gasLimit)
-                .flatMap {
-                    transaction = it
-                    smartContractManager.transferNativeCoin(network, it).toSingleDefault(it)
+            walletManager.resolveENS(receiverKey).flatMap {
+                    getTransactionForSafeAccount(ownerPrivateKey, it, amount, gasPrice, gasLimit)
+                        .flatMap {
+                            transaction = it
+                            smartContractManager.transferNativeCoin(network, it).toSingleDefault(it)
+                        }
                 }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
@@ -129,10 +133,10 @@ class TransactionsViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
                     onError = {
                         Timber.e("Send safe account transaction error: ${it.message}")
-                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
+                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
                     }
                 )
         }
@@ -160,7 +164,9 @@ class TransactionsViewModel(
     private fun sendMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit)
-                .flatMap { walletManager.transferNativeCoin(network, it).toSingleDefault(it) }
+                .flatMap {
+                    walletManager.transferNativeCoin(network, it).toSingleDefault(it)
+                }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
@@ -168,10 +174,10 @@ class TransactionsViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
                     onError = {
                         Timber.e("Send transaction error: ${it.message}")
-                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${value.network}", SENT))
+                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
                     }
                 )
         }
@@ -188,19 +194,24 @@ class TransactionsViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${value.network}", SENT)) },
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
                     onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
 
-    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String =
-        walletManager.calculateTransactionCost(gasPrice, gasLimit).toPlainString()
+    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String {
+        walletManager.calculateTransactionCost(gasPrice, gasLimit).apply {
+            transactionCost = this
+            return transactionCost.toPlainString()
+        }
+    }
 
     fun getBalance(): BigDecimal = if (assetIndex == Int.InvalidIndex) value.balance else value.assets[assetIndex].balance
 
     fun getAllAvailableFunds(): String {
         if (assetIndex != Int.InvalidIndex) return value.assets[assetIndex].balance.toPlainString()
+        if (value.isSafeAccount) return value.balance.toPlainString()
 
         value.balance.minus(transactionCost).apply {
             return if (this < BigDecimal.ZERO) {
