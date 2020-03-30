@@ -14,7 +14,7 @@ import java.math.BigDecimal
 class SmartContractManagerTest {
 
     private val smartContractRepository: SmartContractRepository = mock()
-    private val smartContractManager = SmartContractManagerImpl(smartContractRepository)
+    private val smartContractManager = SmartContractManagerImpl(smartContractRepository, mock(), mock())
 
     @get:Rule
     val rule

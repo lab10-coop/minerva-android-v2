@@ -39,5 +39,5 @@ fun createWalletModules() = module {
     single { WalletManagerImpl(get(), get(), get(), get(), get(), get(), get()) as WalletManager }
     factory { LocalWalletActionsConfigProviderImpl(get()) as LocalWalletActionsConfigProvider }
     factory { WalletActionsRepositoryImpl(get(), get()) as WalletActionsRepository }
-    factory { SmartContractManagerImpl(get()) as SmartContractManager }
+    factory { SmartContractManagerImpl(get(), get(), get()) as SmartContractManager }
 }
