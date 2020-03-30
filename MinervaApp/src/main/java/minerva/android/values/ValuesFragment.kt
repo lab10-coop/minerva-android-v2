@@ -110,7 +110,7 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
                 .setTitle(value.name)
                 .setMessage(R.string.remove_value_dialog_message)
                 .setPositiveButton(R.string.yes) { dialog, _ ->
-                    viewModel.removeValue(value.index, value.name)
+                    viewModel.removeValue(value)
                     dialog.dismiss()
                 }
                 .setNegativeButton(R.string.no) { dialog, _ ->

@@ -90,7 +90,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
         whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.removeValue(1, "test")
+        viewModel.removeValue(Value(1, "test"))
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
