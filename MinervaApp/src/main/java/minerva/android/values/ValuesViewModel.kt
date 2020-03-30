@@ -16,6 +16,7 @@ import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_ADDED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.utils.DateUtils
 import timber.log.Timber
@@ -72,21 +73,27 @@ class ValuesViewModel(
                 )
         }
 
-    fun removeValue(index: Int, name: String) {
+    fun removeValue(value: Value) {
         launchDisposable {
-            walletManager.removeValue(index)
+            walletManager.removeValue(value.index)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(REMOVED, name), walletManager.masterKey))
+                .andThen(walletActionsRepository.saveWalletActions(getRemovedValueAction(value), walletManager.masterKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onError = {
-                        Timber.e("Removing value with index $index failure")
+                        Timber.e("Removing value with index ${value.index} failure")
                         _errorLiveData.value = Event(Throwable(it.message))
                     }
                 )
         }
     }
+
+    private fun getRemovedValueAction(value: Value) =
+        value.run {
+            if (isSafeAccount) getWalletAction(SAFE_ACCOUNT_REMOVED, name)
+            else getWalletAction(REMOVED, name)
+        }
 
     fun createSafeAccount(value: Value) {
         if (value.balance == BigDecimal.ZERO) {
@@ -96,8 +103,14 @@ class ValuesViewModel(
                 smartContractManager.createSafeAccount(value)
                     .flatMapCompletable { smartContractAddress -> createValue(value, smartContractAddress) }
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(getWalletAction(SAFE_ACCOUNT_ADDED,
-                            createSafeAccountName(value)), walletManager.masterKey))
+                    .andThen(
+                        walletActionsRepository.saveWalletActions(
+                            getWalletAction(
+                                SAFE_ACCOUNT_ADDED,
+                                createSafeAccountName(value)
+                            ), walletManager.masterKey
+                        )
+                    )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe { _loadingLiveData.value = Event(true) }
