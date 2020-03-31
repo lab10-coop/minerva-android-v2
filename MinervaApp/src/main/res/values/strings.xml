@@ -149,4 +149,7 @@
     <string name="owner_address">Owner address</string>
     <string name="login_notification_title">Painless Login Request by Charging Station Dashboard</string>
     <string name="login_reqeust_message">Please double tap to confirm login</string>
+    <string name="cannot_remove_safe_account_title">You can\'t remove a safe account with other owners and funds</string>
+    <string name="cannot_remove_safe_account_message">Please remove other owners first and then\n transfer yours funds to another account</string>
+    <string name="safe_account_removal_error">You can not remove this Safe Account</string>
 </resources>

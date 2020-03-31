@@ -11,8 +11,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
-import minerva.android.extension.gone
-import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
@@ -93,6 +91,12 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
             })
             loadingLiveData.observe(this@ValuesFragment, EventObserver {
                 listener.shouldShowLoadingScreen(it)
+            })
+            balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(this@ValuesFragment, EventObserver {
+                showErrorFlashbar(getString(R.string.cannot_remove_safe_account_title), getString(R.string.cannot_remove_safe_account_message))
+            })
+            isNotSafeAccountMasterOwnerErrorLiveData.observe(this@ValuesFragment, EventObserver {
+                showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
             })
         }
     }
