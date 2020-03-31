@@ -388,7 +388,7 @@ class WalletManagerImpl(
                 .doOnError {
                     //TODO Panic Button. Uncomment code below to save manually - not recommended
                     //walletConfigRepository.saveWalletConfigLocally(this)
-                    //_walletConfigMutableLiveData.value = walletConfig
+                    //walletConfigMutableLiveData.value = walletConfig
                 }
         }
     }
