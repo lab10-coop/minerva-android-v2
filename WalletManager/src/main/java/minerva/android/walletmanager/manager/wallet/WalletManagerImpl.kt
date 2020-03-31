@@ -22,6 +22,8 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.TokenPayload
+import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
+import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.assets.AssetManager
 import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
@@ -155,19 +157,16 @@ class WalletManagerImpl(
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
-    //TODO errors need to be handled better (Own Throwable implementation?)
     override fun removeValue(index: Int): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             val newValues = config.values.toMutableList()
             config.values.forEachIndexed { position, value ->
                 if (value.index == index) {
                     when {
-                        areFundsOnValue(value.balance, value.assets) ->
-                            return Completable.error(Throwable("This address is not empty and can't be removed."))
+                        areFundsOnValue(value.balance, value.assets) || hasMoreOwners(value) ->
+                            return Completable.error(BalanceIsNotEmptyAndHasMoreOwnersThrowable())
                         isNotSafeAccountMasterOwner(config.values, value) ->
-                            return Completable.error(Throwable("You can not remove this Safe Account"))
-                        hasMoreOwners(value) ->
-                            return Completable.error(Throwable("This Safe Account have more owners"))
+                            return Completable.error(IsNotSafeAccountMasterOwnerThrowable())
                     }
                     newValues[position] = Value(value, true)
                     return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, newValues, config.services))
