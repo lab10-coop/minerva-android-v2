@@ -1,4 +1,5 @@
 <resources>
+
     <style name="AppTheme" parent="@style/Theme.MaterialComponents.Light">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -53,5 +54,20 @@
         <item name="android:popupBackground">@drawable/rounded_popup_menu_background</item>
         <item name="android:dropDownVerticalOffset">-40dp</item>
         <item name="android:dropDownHorizontalOffset">3dp</item>
+    </style>
+
+    <style name="AlertDialogMaterialTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="materialAlertDialogTitleTextStyle">@style/AlertTitle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/AlertButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AlertButton</item>
+    </style>
+
+    <style name="AlertButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/rubik_medium</item>
+    </style>
+
+    <style name="AlertTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:fontFamily">@font/rubik_medium</item>
     </style>
 </resources>
