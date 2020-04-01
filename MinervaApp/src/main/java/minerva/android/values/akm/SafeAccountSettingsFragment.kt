@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_safe_account_settings.*
@@ -43,17 +43,16 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
 
     override fun onOwnerRemoved(removeAddress: String) {
         context?.let { context ->
-            val dialog = AlertDialog.Builder(context)
-                .setMessage(R.string.remove_safe_account_dialog_message)
+            MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
+                .setBackground(context.getDrawable(R.drawable.rounded_white_background))
+                .setTitle(R.string.remove_owner)
+                .setMessage(getString(R.string.remove_safe_account_dialog_message, removeAddress, viewModel.valueName))
                 .setPositiveButton(R.string.remove) { dialog, _ ->
                     viewModel.removeOwner(removeAddress)
                     dialog.dismiss()
                 }
-                .setNegativeButton(R.string.cancel) { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .create()
-            dialog.show()
+                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                .show()
         }
     }
 
