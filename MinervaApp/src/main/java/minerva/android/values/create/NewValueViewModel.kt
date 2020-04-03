@@ -48,8 +48,8 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
                     onComplete = { _createValueLiveData.value = Event(Unit) },
                     onError = {
                         //TODO Panic Button. Uncomment code below to save manually - not recommended
-                        //_saveErrorLiveData.value = Event(it) //comment when offline app is needed
-                        _createValueLiveData.value = Event(Unit)  //uncomment when offline app is needed
+                        _saveErrorLiveData.value = Event(it) //comment when offline app is needed
+                        //_createValueLiveData.value = Event(Unit)  //uncomment when offline app is needed
 
                     }
                 )
