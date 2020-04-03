@@ -297,7 +297,13 @@ class WalletManagerImpl(
     }
 
     override fun getValueIterator(): Int {
-        walletConfigMutableLiveData.value?.values?.size?.let { return it + 1 }
+        walletConfigMutableLiveData.value?.values?.let {
+            var iterator = 1
+            it.forEach { value ->
+                if (!value.isSafeAccount) iterator += 1
+            }
+            return iterator
+        }
         throw Throwable("Wallet Config was not initialized")
     }
 

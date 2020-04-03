@@ -70,15 +70,16 @@ class WalletManagerTest {
         ),
         listOf(
             Value(2, "publicKey1", "privateKey1", "address", network = NetworkShortName.ETH),
-            Value(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ETH),
+            Value(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ATS),
             Value(
-                5, "publicKey3", "privateKey3", "address", network = NetworkShortName.ETH,
+                5, "publicKey3", "privateKey3", "address", network = NetworkShortName.ATS,
                 owners = listOf("masterOwner")
             ),
             Value(
-                6, "publicKey4", "privateKey4", "address", network = NetworkShortName.ETH,
+                6, "publicKey4", "privateKey4", "address", network = NetworkShortName.ATS,
                 owners = listOf("notMasterOwner", "masterOwner")
-            )
+            ),
+            Value(7, "publicKey5", "privateKey5", "address", network = NetworkShortName.ATS)
         )
     )
 
@@ -155,10 +156,10 @@ class WalletManagerTest {
         identity.privateKey shouldBeEqualTo "privateKey"
         val identity3 = walletManager.loadIdentity(3, "Identity")
         identity3.index shouldEqualTo walletConfig.newIndex
-        identity3.name shouldBeEqualTo "Identity #7"
+        identity3.name shouldBeEqualTo "Identity #8"
         val identityMinusOne = walletManager.loadIdentity(-1, "Identity")
         identityMinusOne.index shouldEqualTo walletConfig.newIndex
-        identityMinusOne.name shouldBeEqualTo "Identity #7"
+        identityMinusOne.name shouldBeEqualTo "Identity #8"
     }
 
     @Test
@@ -514,7 +515,7 @@ class WalletManagerTest {
         walletManager.initWalletConfig()
         walletManager.refreshAssetBalance().test().assertComplete()
             .assertValue {
-                it.size == 4
+                it.size == 5
             }
 
 //TODO when uncommented not passing on CI - try to resolve this problem
@@ -592,5 +593,14 @@ class WalletManagerTest {
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         walletManager.saveService(Service()).test().assertError(error)
+    }
+
+    @Test
+    fun `get correct new Value number`() {
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterKey())
+        walletManager.initWalletConfig()
+        walletManager.loadWalletConfig()
+        walletManager.getValueIterator() shouldEqualTo 4
     }
 }
