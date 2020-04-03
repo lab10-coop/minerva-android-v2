@@ -93,12 +93,12 @@ class TransactionsViewModel(
         launchDisposable {
             val ownerPrivateKey = value.masterOwnerAddress.let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
             walletManager.resolveENS(receiverKey).flatMap { resolvedENS ->
-                    getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
-                        .flatMap {
-                            transaction = it
-                            smartContractManager.transferERC20Token(network, it, value.assets[assetIndex].address).toSingleDefault(it)
-                        }
-                }
+                getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
+                    .flatMap {
+                        transaction = it
+                        smartContractManager.transferERC20Token(network, it, value.assets[assetIndex].address).toSingleDefault(it)
+                    }
+            }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
@@ -120,12 +120,12 @@ class TransactionsViewModel(
         launchDisposable {
             val ownerPrivateKey = value.masterOwnerAddress.let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
             walletManager.resolveENS(receiverKey).flatMap {
-                    getTransactionForSafeAccount(ownerPrivateKey, it, amount, gasPrice, gasLimit)
-                        .flatMap {
-                            transaction = it
-                            smartContractManager.transferNativeCoin(network, it).toSingleDefault(it)
-                        }
-                }
+                getTransactionForSafeAccount(ownerPrivateKey, it, amount, gasPrice, gasLimit)
+                    .flatMap {
+                        transaction = it
+                        smartContractManager.transferNativeCoin(network, it).toSingleDefault(it)
+                    }
+            }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
@@ -271,17 +271,14 @@ class TransactionsViewModel(
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
         walletActionsRepository.saveWalletActions(
             getValuesWalletAction(transaction, network, status),
-            walletManager.masterKey
+            walletManager.masterSeed
         )
 
     private fun prepareTransaction(
-        receiverKey: String,
-        amount: BigDecimal,
-        gasPrice: BigDecimal,
-        gasLimit: BigInteger,
+        receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger,
         contractAddress: String = String.Empty
-    ): Transaction {
-        return Transaction(
+    ): Transaction =
+        Transaction(
             value.address,
             value.privateKey,
             receiverKey,
@@ -290,7 +287,6 @@ class TransactionsViewModel(
             gasLimit,
             contractAddress
         )
-    }
 
     val network
         get() = value.network

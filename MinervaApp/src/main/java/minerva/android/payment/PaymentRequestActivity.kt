@@ -33,7 +33,7 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
     }
 
     private fun checkIfWalletExists() {
-        if (viewModel.isMasterKeyAvailable()) {
+        if (viewModel.isMasterSeedAvailable()) {
             viewModel.initWalletConfig()
             setupActionBar()
             prepareObservers()

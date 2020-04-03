@@ -88,7 +88,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
         val error = Throwable("error")
         whenever(walletManager.removeValue(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.removeValue(Value(1, "test"))
         errorCaptor.run {
@@ -101,7 +101,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
         val error = Throwable("error")
         walletManager.initWalletConfig()
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         whenever(smartContractManager.createSafeAccount(any())).thenReturn(Single.error(error))
         whenever(walletManager.createValue(any(), any(), any(), any())).thenReturn(Completable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)

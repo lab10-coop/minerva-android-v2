@@ -39,7 +39,7 @@ class EditIdentityViewModel(private val walletManager: WalletManager, private va
         launchDisposable {
             walletManager.saveIdentity(identity)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(status, identity.name), walletManager.masterKey))
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(status, identity.name), walletManager.masterSeed))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

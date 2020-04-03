@@ -85,7 +85,7 @@ class ValuesViewModel(
         launchDisposable {
             walletManager.removeValue(value.index)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getRemovedValueAction(value), walletManager.masterKey))
+                .andThen(walletActionsRepository.saveWalletActions(getRemovedValueAction(value), walletManager.masterSeed))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -117,10 +117,7 @@ class ValuesViewModel(
                     .observeOn(Schedulers.io())
                     .andThen(
                         walletActionsRepository.saveWalletActions(
-                            getWalletAction(
-                                SAFE_ACCOUNT_ADDED,
-                                createSafeAccountName(value)
-                            ), walletManager.masterKey
+                            getWalletAction(SAFE_ACCOUNT_ADDED, createSafeAccountName(value)), walletManager.masterSeed
                         )
                     )
                     .subscribeOn(Schedulers.io())

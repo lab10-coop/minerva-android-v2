@@ -15,7 +15,7 @@ import minerva.android.configProvider.model.walletActions.WalletActionsConfigPay
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepositoryImpl
 import minerva.android.walletmanager.manager.walletActions.localProvider.LocalWalletActionsConfigProvider
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletAction
 import org.amshove.kluent.mock
 import org.junit.After
@@ -28,7 +28,7 @@ class WalletActionsRepositoryTest {
     private val localWalletActionsConfigProvider: LocalWalletActionsConfigProvider = mock()
     private val repository = WalletActionsRepositoryImpl(minervaApi, localWalletActionsConfigProvider)
     private val actions = mutableListOf(WalletActionClusteredPayload(1L, mutableListOf(WalletActionPayload(1, 2, 1234L, hashMapOf()))))
-    private val masterKey = MasterKey(_privateKey = "123", _publicKey = "456")
+    private val masterSeed = MasterSeed(_privateKey = "123", _publicKey = "456")
     private val error = Throwable()
 
     @Before
@@ -49,7 +49,7 @@ class WalletActionsRepositoryTest {
         whenever(minervaApi.getWalletActions(publicKey = "456")).thenReturn(
             Observable.just(WalletActionsResponse(_walletActionsConfigPayload = WalletActionsConfigPayload(1, actions)))
         )
-        val test = repository.getWalletActions(MasterKey(_privateKey = "123", _publicKey = "456")).test()
+        val test = repository.getWalletActions(MasterSeed(_privateKey = "123", _publicKey = "456")).test()
         test.assertNoErrors()
         test.assertValue {
             it[0].walletActions[0].status == 2
@@ -60,7 +60,7 @@ class WalletActionsRepositoryTest {
     fun `load wallet actions config error`() {
         whenever(localWalletActionsConfigProvider.loadWalletActionsConfig()).thenReturn(WalletActionsConfigPayload(1, actions))
         whenever(minervaApi.getWalletActions(publicKey = "456")).thenReturn(Observable.error(error))
-        val test = repository.getWalletActions(masterKey).test()
+        val test = repository.getWalletActions(masterSeed).test()
         test.assertError(error)
     }
 
@@ -69,7 +69,7 @@ class WalletActionsRepositoryTest {
         whenever(localWalletActionsConfigProvider.loadWalletActionsConfig()).thenReturn(WalletActionsConfigPayload(1, actions))
         doNothing().whenever(localWalletActionsConfigProvider).saveWalletActionsConfig(WalletActionsConfigPayload(1, actions))
         whenever(minervaApi.saveWalletActions(any(), any(), any())).thenReturn(Completable.complete())
-        val test = repository.saveWalletActions(WalletAction(1, 2, 1234L), masterKey).test()
+        val test = repository.saveWalletActions(WalletAction(1, 2, 1234L), masterSeed).test()
         test.apply {
             assertNoErrors()
             assertComplete()
@@ -81,7 +81,7 @@ class WalletActionsRepositoryTest {
         whenever(localWalletActionsConfigProvider.loadWalletActionsConfig()).thenReturn(WalletActionsConfigPayload(1, actions))
         doNothing().whenever(localWalletActionsConfigProvider).saveWalletActionsConfig(WalletActionsConfigPayload(1, actions))
         whenever(minervaApi.saveWalletActions(any(), any(), any())).thenReturn(Completable.error(error))
-        val test = repository.saveWalletActions(WalletAction(1, 2, 1234L), masterKey).test()
+        val test = repository.saveWalletActions(WalletAction(1, 2, 1234L), masterSeed).test()
         test.assertError(error)
     }
 }

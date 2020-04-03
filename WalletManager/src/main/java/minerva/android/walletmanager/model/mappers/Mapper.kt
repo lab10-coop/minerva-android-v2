@@ -25,14 +25,7 @@ private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> 
 }
 
 fun mapIdentityPayloadToIdentity(response: IdentityPayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Identity =
-    Identity(
-        response.index,
-        response.name,
-        publicKey,
-        privateKey,
-        response.data,
-        response.isDeleted
-    )
+    Identity(response.index, response.name, publicKey, privateKey, response.data, response.isDeleted)
 
 fun mapValueResponseToValue(
     response: ValuePayload,

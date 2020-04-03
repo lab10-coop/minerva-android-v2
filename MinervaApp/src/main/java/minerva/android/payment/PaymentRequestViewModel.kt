@@ -83,7 +83,7 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
         launchDisposable {
             walletManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.getLastUsedFormatted()))
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED), walletManager.masterKey))
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED), walletManager.masterSeed))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -97,7 +97,7 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
 
     fun confirmTransaction() {
         viewModelScope.launch(Dispatchers.IO) {
-            val jwtToken = walletManager.createJwtToken(encodedData(), walletManager.masterKey.privateKey)
+            val jwtToken = walletManager.createJwtToken(encodedData(), walletManager.masterSeed.privateKey)
             withContext(Dispatchers.Main) {
                 launchDisposable { saveSignedWalletAction(jwtToken) }
             }
@@ -105,7 +105,7 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
     }
 
     private fun saveSignedWalletAction(jwtToken: String): Disposable =
-        walletActionsRepository.saveWalletActions(getWalletAction(SIGNED), walletManager.masterKey)
+        walletActionsRepository.saveWalletActions(getWalletAction(SIGNED), walletManager.masterSeed)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
@@ -130,6 +130,6 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
         )
     }
 
-    fun isMasterKeyAvailable() = walletManager.isMasterKeyAvailable()
+    fun isMasterSeedAvailable() = walletManager.isMasterSeedAvailable()
     fun initWalletConfig() = walletManager.initWalletConfig()
 }

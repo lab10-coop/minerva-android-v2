@@ -21,7 +21,6 @@ interface BlockchainRepository {
     fun getTransactionCosts(network: String, assetIndex: Int, operation: Operation): TransactionCostPayload
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable
-    fun completeAddress(privateKey: String): String
     fun toGwei(balance: BigDecimal): BigInteger
     fun transferERC20Token(network: String, transactionPayload: TransactionPayload): Completable
     fun reverseResolveENS(ensAddress: String): Single<String>

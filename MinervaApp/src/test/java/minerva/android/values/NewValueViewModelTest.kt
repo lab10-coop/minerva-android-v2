@@ -9,7 +9,7 @@ import minerva.android.observeLiveDataEvent
 import minerva.android.values.create.NewValueViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Network
 import org.junit.Test
 
@@ -26,7 +26,7 @@ class NewValueViewModelTest : BaseViewModelTest() {
     fun `create wallet action success`() {
         whenever(walletManager.createValue(any(), any(), any(), any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", "", ""))
         viewModel.createValueLiveData.observeForever(createValueObserver)
         viewModel.createNewValue(Network.ARTIS, 1)
         createValueCaptor.run {
@@ -39,7 +39,7 @@ class NewValueViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         whenever(walletManager.createValue(any(), any(), any(), any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("12", "34"))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("12", "34", "21"))
         viewModel.createNewValue(Network.ARTIS, 1)
         viewModel.saveErrorLiveData.observeLiveDataEvent(Event(error))
     }

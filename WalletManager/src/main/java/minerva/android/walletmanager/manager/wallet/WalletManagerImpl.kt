@@ -16,6 +16,7 @@ import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
@@ -51,7 +52,7 @@ class WalletManagerImpl(
     private val binanceApi: BinanceApi
 ) : WalletManager {
 
-    override lateinit var masterKey: MasterKey
+    override lateinit var masterSeed: MasterSeed
     private val walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = walletConfigMutableLiveData
 
@@ -59,7 +60,7 @@ class WalletManagerImpl(
 
     @VisibleForTesting
     fun loadWalletConfig() {
-        disposable = walletConfigRepository.loadWalletConfig(masterKey)
+        disposable = walletConfigRepository.loadWalletConfig(masterSeed)
             .subscribeBy(
                 onNext = { walletConfigMutableLiveData.value = it },
                 onError = { Timber.e("Downloading WalletConfig error: $it") }
@@ -70,10 +71,10 @@ class WalletManagerImpl(
         disposable?.dispose()
     }
 
-    override fun isMasterKeyAvailable(): Boolean = keystoreRepository.isMasterKeySaved()
+    override fun isMasterSeedAvailable(): Boolean = keystoreRepository.isMasterSeedSaved()
 
     override fun initWalletConfig() {
-        masterKey = keystoreRepository.decryptKey()
+        masterSeed = keystoreRepository.decryptKey()
         loadWalletConfig()
     }
 
@@ -117,32 +118,35 @@ class WalletManagerImpl(
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.calculateTransactionCost(gasPrice, gasLimit)
 
-    override fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse> =
-        walletConfigRepository.getWalletConfig(masterKey)
+    override fun getWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse> =
+        walletConfigRepository.getWalletConfig(masterSeed)
             .map {
-                handleWalletConfigResponse(it, masterKey)
+                handleWalletConfigResponse(it, masterSeed)
                 RestoreWalletResponse(it.state, it.message)
             }
 
+    private fun handleWalletConfigResponse(walletConfigResponse: WalletConfigResponse, masterSeed: MasterSeed) {
+        if (walletConfigResponse.state != ResponseState.ERROR) {
+            keystoreRepository.encryptKey(masterSeed)
+            walletConfigRepository.saveWalletConfigLocally(walletConfigResponse.walletPayload)
+        }
+    }
+
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
-    override fun createMasterKeys(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
-        cryptographyRepository.createMasterKey(callback)
-    }
+    override fun createMasterSeed() = cryptographyRepository.createMasterSeed().map { it.run { MasterSeed(first, second, third) } }
 
-    override fun showMnemonic(callback: (error: Exception?, mnemonic: String) -> Unit) {
-        cryptographyRepository.showMnemonicForMasterKey(keystoreRepository.decryptKey().privateKey, "TEST", callback)
-    }
+    override fun getMnemonic() = cryptographyRepository.getMnemonicForMasterSeed(keystoreRepository.decryptKey().seed)
 
-    override fun createWalletConfig(masterKey: MasterKey): Completable {
-        return walletConfigRepository.createWalletConfig(masterKey)
+    override fun createWalletConfig(masterSeed: MasterSeed): Completable {
+        return walletConfigRepository.createWalletConfig(masterSeed)
             .doOnComplete {
-                keystoreRepository.encryptKey(masterKey)
+                keystoreRepository.encryptKey(masterSeed)
                 walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
             }
 //          TODO Panic Button. Uncomment code below to save manually - not recommended
 //            .doOnError {
-//                keystoreRepository.encryptKey(masterKey)
+//                keystoreRepository.encryptKey(masterSeed)
 //                walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
 //            }
     }
@@ -150,7 +154,7 @@ class WalletManagerImpl(
     override fun createValue(network: Network, valueName: String, ownerAddress: String, contractAddress: String): Completable {
         walletConfigMutableLiveData.value?.let { config ->
             val newValue = Value(config.newIndex, name = valueName, network = network.short)
-            return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, newValue.index)
+            return cryptographyRepository.computeDeliveredKeys(masterSeed.seed, newValue.index)
                 .map { createUpdatedWalletConfig(config, newValue, it, ownerAddress, contractAddress) }
                 .flatMapCompletable { updateWalletConfig(it) }
         }
@@ -179,9 +183,7 @@ class WalletManagerImpl(
 
     private fun isNotSafeAccountMasterOwner(values: List<Value>, value: Value): Boolean {
         value.owners?.let {
-            values.forEach {
-                if (it.address == value.masterOwnerAddress) return false
-            }
+            values.forEach { if (it.address == value.masterOwnerAddress) return false }
             return true
         }
         return false
@@ -212,11 +214,11 @@ class WalletManagerImpl(
 
     override fun saveIdentity(identity: Identity): Completable {
         walletConfigMutableLiveData.value?.let { config ->
-            return cryptographyRepository.computeDeliveredKeys(masterKey.privateKey, identity.index)
-                .map {
+            return cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identity.index)
+                .map { keys ->
                     identity.apply {
-                        publicKey = it.second
-                        privateKey = it.third
+                        publicKey = keys.publicKey
+                        privateKey = keys.privateKey
                     }
                     WalletConfig(config.updateVersion, prepareNewIdentitiesSet(identity, config), config.values, config.services)
                 }.flatMapCompletable { updateWalletConfig(it) }
@@ -351,27 +353,15 @@ class WalletManagerImpl(
             .toList()
             .map { Pair(value.privateKey, it) }
 
-    private fun prepareNewValue(
-        newValue: Value,
-        keys: Triple<Int, String, String>,
-        ownerAddress: String,
-        contractAddress: String
-    ) {
+    private fun prepareNewValue(newValue: Value, derivedKeys: DerivedKeys, ownerAddress: String, contractAddress: String) {
         newValue.apply {
-            publicKey = keys.second
-            privateKey = keys.third
+            publicKey = derivedKeys.publicKey
+            privateKey = derivedKeys.privateKey
             if (ownerAddress.isNotEmpty()) owners = mutableListOf(ownerAddress)
-            address = if (contractAddress.isNotEmpty()) {
+            address =  if (contractAddress.isNotEmpty()) {
                 this.contractAddress = contractAddress
                 contractAddress
-            } else blockchainRepository.completeAddress(keys.third)
-        }
-    }
-
-    private fun handleWalletConfigResponse(it: WalletConfigResponse, masterKey: MasterKey) {
-        if (it.state != ResponseState.ERROR) {
-            keystoreRepository.encryptKey(masterKey)
-            walletConfigRepository.saveWalletConfigLocally(it.walletPayload)
+            } else derivedKeys.address
         }
     }
 
@@ -384,7 +374,7 @@ class WalletManagerImpl(
 
     private fun updateWalletConfig(walletConfig: WalletConfig): Completable {
         mapWalletConfigToWalletPayload(walletConfig).run {
-            return walletConfigRepository.updateWalletConfig(masterKey, this)
+            return walletConfigRepository.updateWalletConfig(masterSeed, this)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
@@ -399,9 +389,8 @@ class WalletManagerImpl(
         }
     }
 
-    override fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit) {
-        cryptographyRepository.restoreMasterKey(mnemonic, callback)
-    }
+    override fun restoreMasterSeed(mnemonic: String): Single<MasterSeed> =
+        cryptographyRepository.restoreMasterSeed(mnemonic).map { it.run { MasterSeed(first, second, third) } }
 
     override fun saveIsMnemonicRemembered() {
         localStorage.saveIsMnemonicRemembered(true)
@@ -455,11 +444,11 @@ class WalletManagerImpl(
     private fun createUpdatedWalletConfig(
         config: WalletConfig,
         newValue: Value,
-        keys: Triple<Int, String, String>,
+        derivedKeys: DerivedKeys,
         ownerAddress: String,
         contractAddress: String
     ): WalletConfig {
-        prepareNewValue(newValue, keys, ownerAddress, contractAddress)
+        prepareNewValue(newValue, derivedKeys, ownerAddress, contractAddress)
         config.run {
             val newValues = values.toMutableList()
             var newValuePosition = values.size

@@ -2,22 +2,20 @@ package minerva.android.onboarding.restore
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.RestoreWalletResponse
 import minerva.android.walletmanager.model.defs.ResponseState
 import java.util.*
 
-class RestoreWalletViewModel(private val walletManager: WalletManager) : ViewModel() {
-
-    private var disposable: Disposable? = null
+class RestoreWalletViewModel(private val walletManager: WalletManager) : BaseViewModel() {
 
     private val _restoreWalletMutableLiveData = MutableLiveData<Event<RestoreWalletResponse>>()
     val restoreWalletLiveData: LiveData<Event<RestoreWalletResponse>> get() = _restoreWalletMutableLiveData
@@ -34,9 +32,6 @@ class RestoreWalletViewModel(private val walletManager: WalletManager) : ViewMod
     private val _walletConfigNotFoundLiveData = MutableLiveData<Event<Unit>>()
     val walletConfigNotFoundLiveData: LiveData<Event<Unit>> get() = _walletConfigNotFoundLiveData
 
-    private val _mnemonicErrorLiveData = MutableLiveData<Event<String>>()
-    val mnemonicErrorLiveData: LiveData<Event<String>> get() = _mnemonicErrorLiveData
-
     internal fun isMnemonicLengthValid(content: CharSequence?) =
         StringTokenizer(content.toString(), String.Space).countTokens() == WORDS_IN_MNEMONIC
 
@@ -52,38 +47,25 @@ class RestoreWalletViewModel(private val walletManager: WalletManager) : ViewMod
     }
 
     private fun restoreWallet(mnemonic: String) {
-        walletManager.restoreMasterKey(mnemonic) { error, privateKey, publicKey ->
-            if (error == null) {
-                disposable = walletManager.getWalletConfig(MasterKey(publicKey, privateKey))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
-                    .subscribeBy(
-                        onSuccess = {
-                            handleGetWalletConfigResponse(it)
-                        },
-                        onError = {
-                            _errorLiveData.value = Event(it)
+        launchDisposable {
+            walletManager.restoreMasterSeed(mnemonic)
+                .flatMap { walletManager.getWalletConfig(MasterSeed(it.seed, it.publicKey, it.privateKey)) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onSuccess = { handleGetWalletConfigResponse(it) },
+                    onError = {
+                        _errorLiveData.value = Event(it)
 //                            _restoreWalletMutableLiveData.value = Event(it) uncomment when offline app is needed, test that
-                        }
-                    )
-            } else {
-                _loadingLiveData.value = Event(false)
-                _mnemonicErrorLiveData.value = Event(error.localizedMessage)
-            }
+                    }
+                )
         }
     }
 
-    private fun handleGetWalletConfigResponse(it: RestoreWalletResponse) {
-        if (it.state == ResponseState.ERROR) {
-            _walletConfigNotFoundLiveData.value = Event(Unit)
-        } else {
-            _restoreWalletMutableLiveData.value = Event(it)
-        }
-    }
-
-    fun onPause() {
-        disposable?.dispose()
+    private fun handleGetWalletConfigResponse(response: RestoreWalletResponse) {
+        if (response.state == ResponseState.ERROR) _walletConfigNotFoundLiveData.value = Event(Unit)
+        else _restoreWalletMutableLiveData.value = Event(response)
     }
 
     companion object {
