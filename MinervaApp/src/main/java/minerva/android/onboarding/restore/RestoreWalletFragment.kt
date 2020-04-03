@@ -22,9 +22,7 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_restore_wallet, container, false)
-    }
+    ): View? = inflater.inflate(R.layout.fragment_restore_wallet, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,17 +41,13 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
     }
 
     private fun prepareObservers() {
-        viewModel.invalidMnemonicLiveData.observe(this, EventObserver { handleInvalidMnemonic(it) })
-        viewModel.errorLiveData.observe(this, EventObserver { handleError(R.string.creating_wallet_error_message) })
-        viewModel.restoreWalletLiveData.observe(this, EventObserver { listener.showMainActivity() })
-        viewModel.loadingLiveData.observe(this, EventObserver { if (it) showLoader() else hideLoader() })
-        viewModel.walletConfigNotFoundLiveData.observe(this, EventObserver { handleError(R.string.no_such_file_error_message) })
-        viewModel.mnemonicErrorLiveData.observe(this, EventObserver { handleInvalidMnemonic(it) })
-    }
-
-    private fun handleInvalidMnemonic(it: String) {
-        errorMessage.visible()
-        errorMessage.text = it
+        viewModel.apply {
+            invalidMnemonicLiveData.observe(this@RestoreWalletFragment, EventObserver { handleInvalidMnemonic(it) })
+            errorLiveData.observe(this@RestoreWalletFragment, EventObserver { handleError(R.string.creating_wallet_error_message) })
+            restoreWalletLiveData.observe(this@RestoreWalletFragment, EventObserver { listener.showMainActivity() })
+            loadingLiveData.observe(this@RestoreWalletFragment, EventObserver { if (it) showLoader() else hideLoader() })
+            walletConfigNotFoundLiveData.observe(this@RestoreWalletFragment, EventObserver { handleError(R.string.no_such_file_error_message) })
+        }
     }
 
     private fun hideLoader() {

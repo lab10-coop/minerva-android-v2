@@ -5,5 +5,5 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepositoryImp
 import org.koin.dsl.module
 
 fun createCryptographyModules() = module {
-    single { CryptographyRepositoryImpl(get()) as CryptographyRepository }
+    single { CryptographyRepositoryImpl() as CryptographyRepository }
 }

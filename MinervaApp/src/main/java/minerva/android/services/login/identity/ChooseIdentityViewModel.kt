@@ -78,7 +78,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
             walletManager.painlessLogin(callback, jwtToken, identity, getService(qrCodeResponse, identity))
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(identity.name,
-                    qrCodeResponse.serviceName), walletManager.masterKey))
+                    qrCodeResponse.serviceName), walletManager.masterSeed))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

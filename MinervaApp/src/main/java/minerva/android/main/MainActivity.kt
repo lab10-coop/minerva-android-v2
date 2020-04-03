@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         bottomNavigation.removeBadge(R.id.settings)
 
     private fun checkMasterSeedAvailability() {
-        if (!viewModel.isMasterKeyAvailable()) showOnBoardingActivity()
+        if (!viewModel.isMasterSeedAvailable()) showOnBoardingActivity()
         else viewModel.initWalletConfig()
     }
 

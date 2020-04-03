@@ -27,7 +27,7 @@ class WalletActionsViewModel(private val walletActionsRepository: WalletActionsR
     fun fetchWalletActions() {
         _loadingLiveData.value = Event(true)
         launchDisposable {
-            walletActionsRepository.getWalletActions(walletManager.masterKey)
+            walletActionsRepository.getWalletActions(walletManager.masterSeed)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(false) }

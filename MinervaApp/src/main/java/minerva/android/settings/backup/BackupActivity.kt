@@ -3,7 +3,6 @@ package minerva.android.settings.backup
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_backup.*
 import minerva.android.R
@@ -49,13 +48,11 @@ class BackupActivity : AppCompatActivity() {
         }
     }
 
-    private fun prepareMnemonic() = viewModel.apply {
-        showMnemonic()
-        showMnemonicLiveData.observe(this@BackupActivity, EventObserver { mnemonicTextView.text = it })
-        showMnemonicErrorLiveData.observe(this@BackupActivity, EventObserver {
-            Toast.makeText(this@BackupActivity, getString(R.string.retrieving_mnemonic_error), Toast.LENGTH_LONG).show()
-        })
-    }
+    private fun prepareMnemonic() =
+        viewModel.apply {
+            showMnemonic()
+            showMnemonicLiveData.observe(this@BackupActivity, EventObserver { mnemonicTextView.text = it })
+        }
 
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 }

@@ -9,7 +9,7 @@ import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.QrCodeResponse
 import org.junit.Test
 
@@ -56,7 +56,7 @@ class MainViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         whenever(walletManager.painlessLogin(any(), any(), any(), any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.handleLogin(QrCodeResponse("test", "callback"), "jwt", Identity(1, name = "name"))
         errorCaptor.run {

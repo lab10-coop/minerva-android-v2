@@ -11,8 +11,7 @@ import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.walletmanager.manager.SmartContractManager
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
-import minerva.android.walletmanager.model.MasterKey
-import minerva.android.walletmanager.model.TransactionCost
+import minerva.android.walletmanager.model.MasterSeed
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigDecimal
@@ -35,7 +34,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
         whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -49,7 +48,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
         whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         viewModel.saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         saveActionFailedCaptor.run {
@@ -63,7 +62,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.error(error))
         whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -77,7 +76,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Completable.error(error))
         whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))

@@ -39,7 +39,7 @@ class MainViewModel(private val walletManager: WalletManager, private val wallet
     private val _errorMutableLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorMutableLiveData
 
-    fun isMasterKeyAvailable() = walletManager.isMasterKeyAvailable()
+    fun isMasterSeedAvailable() = walletManager.isMasterSeedAvailable()
 
     fun initWalletConfig() = walletManager.initWalletConfig()
 
@@ -97,7 +97,7 @@ class MainViewModel(private val walletManager: WalletManager, private val wallet
                 .andThen(
                     walletActionsRepository.saveWalletActions(
                         getValuesWalletAction(identity.name, qrCodeResponse.serviceName),
-                        walletManager.masterKey
+                        walletManager.masterSeed
                     )
                 )
                 .subscribeOn(Schedulers.io())

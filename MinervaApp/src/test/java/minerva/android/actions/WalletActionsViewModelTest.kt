@@ -9,7 +9,7 @@ import minerva.android.observeLiveDataEvent
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.WalletActionClustered
 import org.junit.Test
@@ -26,7 +26,7 @@ class WalletActionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `test fetch wallet actions success`() {
-        whenever(walletManager.masterKey).thenReturn(MasterKey("123", "456"))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("123", "456"))
         whenever(walletActionsRepository.getWalletActions(any())).thenReturn(Observable.just(actions))
         viewModel.walletActionsLiveData.observeForever(walletActionsObserver)
         viewModel.fetchWalletActions()
@@ -39,7 +39,7 @@ class WalletActionsViewModelTest : BaseViewModelTest() {
     @Test
     fun `test fetch wallet actions error`() {
         val error = Throwable()
-        whenever(walletManager.masterKey).thenReturn(MasterKey("123", "456"))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("123", "456"))
         whenever(walletActionsRepository.getWalletActions(any())).thenReturn(Observable.error(error))
         viewModel.walletActionsLiveData.observeForever(walletActionsObserver)
         viewModel.fetchWalletActions()
