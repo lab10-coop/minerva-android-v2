@@ -3,7 +3,6 @@ package minerva.android.walletmanager.manager.wallet
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.*
 import java.math.BigDecimal
@@ -12,18 +11,18 @@ import java.math.BigInteger
 //TODO divide WalletManager to: Service, Identity, Value, Transaction, Cryptography managers
 interface WalletManager {
     val walletConfigLiveData: LiveData<WalletConfig>
-    val masterKey: MasterKey
+    val masterSeed: MasterSeed
 
     fun initWalletConfig()
-    fun createWalletConfig(masterKey: MasterKey): Completable
-    fun getWalletConfig(masterKey: MasterKey): Single<RestoreWalletResponse>
+    fun createWalletConfig(masterSeed: MasterSeed): Completable
+    fun getWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse>
 
-    fun isMasterKeyAvailable(): Boolean
-    fun createMasterKeys(callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
-    fun restoreMasterKey(mnemonic: String, callback: (error: Exception?, privateKey: String, publicKey: String) -> Unit)
+    fun isMasterSeedAvailable(): Boolean
+    fun createMasterSeed(): Single<MasterSeed>
+    fun restoreMasterSeed(mnemonic: String): Single<MasterSeed>
 
     fun validateMnemonic(mnemonic: String): List<String>
-    fun showMnemonic(callback: (error: Exception?, mnemonic: String) -> Unit)
+    fun getMnemonic(): String
     fun saveIsMnemonicRemembered()
     fun isMnemonicRemembered(): Boolean
 
@@ -32,7 +31,11 @@ interface WalletManager {
     fun removeIdentity(identity: Identity): Completable
 
     fun loadValue(position: Int): Value
-    fun createValue(network: Network, valueName: String, ownerAddress: String = String.Empty, smartContractAddress: String = String.Empty): Completable
+    fun createValue(
+        network: Network, valueName: String, ownerAddress: String = String.Empty,
+        smartContractAddress: String = String.Empty
+    ): Completable
+
     fun removeValue(index: Int): Completable
     fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>>
     fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>>

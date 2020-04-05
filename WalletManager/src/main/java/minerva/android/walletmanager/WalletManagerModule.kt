@@ -34,10 +34,10 @@ fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, binanceUrl: St
 fun createWalletModules() = module {
     factory { KeystoreRepositoryImpl(get()) as KeystoreRepository }
     factory { LocalWalletConfigProviderImpl(get()) as LocalWalletConfigProvider }
-    factory { WalletConfigRepositoryImpl(get(), get(), get(), get()) as WalletConfigRepository }
+    factory { WalletConfigRepositoryImpl(get(), get(), get()) as WalletConfigRepository }
     factory { LocalStorageImpl(get()) as LocalStorage }
     single { WalletManagerImpl(get(), get(), get(), get(), get(), get(), get()) as WalletManager }
     factory { LocalWalletActionsConfigProviderImpl(get()) as LocalWalletActionsConfigProvider }
     factory { WalletActionsRepositoryImpl(get(), get()) as WalletActionsRepository }
-    factory { SmartContractManagerImpl(get()) as SmartContractManager }
+    factory { SmartContractManagerImpl(get(), get(), get()) as SmartContractManager }
 }

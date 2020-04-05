@@ -10,7 +10,7 @@ import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import org.junit.Test
 
@@ -27,7 +27,7 @@ class EditIdentityViewModelTest : BaseViewModelTest() {
     fun `save identity success`() {
         whenever(walletManager.saveIdentity(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterKey).thenReturn(MasterKey("12", "34"))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("12", "34"))
         viewModel.apply {
             saveCompletedLiveData.observeForever(saveIdentityObserver)
             saveIdentity(Identity(1), ADDED)
@@ -42,7 +42,7 @@ class EditIdentityViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         whenever(walletManager.saveIdentity(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("12", "34"))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("12", "34"))
         viewModel.apply {
             saveIdentity(Identity(1), ADDED)
             saveErrorLiveData.observeLiveDataEvent(Event(error))

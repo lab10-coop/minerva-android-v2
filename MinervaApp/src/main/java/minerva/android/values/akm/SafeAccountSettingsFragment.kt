@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_safe_account_settings.*
@@ -19,7 +19,6 @@ import minerva.android.extension.onRightDrawableClicked
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.values.adapter.OwnerAdapter
-import minerva.android.values.akm.AddressScannerFragment.Companion.SCANNER_FRAGMENT
 import minerva.android.values.listener.OnOwnerRemovedListener
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
@@ -42,7 +41,21 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_safe_account_settings, container, false)
 
-    override fun onOwnerRemoved(removeAddress: String) = viewModel.removeOwner(removeAddress)
+    override fun onOwnerRemoved(removeAddress: String) {
+        context?.let { context ->
+            MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
+                .setBackground(context.getDrawable(R.drawable.rounded_white_background))
+                .setTitle(R.string.remove_owner)
+                .setMessage(getString(R.string.remove_safe_account_dialog_message, removeAddress, viewModel.valueName))
+                .setPositiveButton(R.string.remove) { dialog, _ ->
+                    viewModel.removeOwner(removeAddress)
+                    dialog.dismiss()
+                }
+                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                .show()
+        }
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -108,7 +121,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
     }
 
     private fun setAddressScannerListener() {
-        newOwner.onRightDrawableClicked { listener.showScanner()}
+        newOwner.onRightDrawableClicked { listener.showScanner() }
     }
 
     companion object {

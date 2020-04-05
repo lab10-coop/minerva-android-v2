@@ -26,8 +26,7 @@ import java.math.BigInteger
 import java.math.RoundingMode
 
 
-class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private val gasPrice: Map<String, BigInteger>) :
-    BlockchainRepository {
+class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private val gasPrice: Map<String, BigInteger>) : BlockchainRepository {
 
     /**
      * List arguments: first - network short name, second - wallet address (public)
@@ -53,12 +52,9 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private va
         address: String
     ): Observable<Pair<String, BigDecimal>> =
         ERC20.load(
-                contractAddress, web3j[network], Credentials.create(privateKey),
-                ContractGasProvider(
-                    gasPrice[network] ?: error("Not supported Network"),
-                    Operation.TRANSFER_ERC20.gasLimit
-                )
-            )
+            contractAddress, web3j[network], Credentials.create(privateKey),
+            ContractGasProvider(gasPrice[network] ?: error("Not supported Network"), Operation.TRANSFER_ERC20.gasLimit)
+        )
             .balanceOf(address).flowable()
             .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
             .toObservable()
@@ -96,9 +92,6 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private va
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         getTransactionCostInEth(toWei(gasPrice, Convert.Unit.GWEI), BigDecimal(gasLimit))
-
-    override fun completeAddress(privateKey: String): String =
-        Credentials.create(privateKey).address
 
     override fun toGwei(balance: BigDecimal): BigInteger = toWei(balance, Convert.Unit.GWEI).toBigInteger()
 

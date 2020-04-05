@@ -6,38 +6,36 @@ import android.security.keystore.KeyProperties
 import android.util.Base64
 import com.google.gson.Gson
 import minerva.android.kotlinUtils.NO_DATA
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.MasterSeed
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-class KeystoreRepositoryImpl(private val context: Context): KeystoreRepository {
+class KeystoreRepositoryImpl(private val context: Context) : KeystoreRepository {
 
-    override fun isMasterKeySaved(): Boolean {
+    override fun isMasterSeedSaved(): Boolean {
         val keyStore = KeyStore.getInstance(DIR_PROVIDER).apply { load(null) }
         val secretKeyEntry = keyStore.getEntry(MINERVA_ALIAS, null) as? KeyStore.SecretKeyEntry
-        return secretKeyEntry?.let {
-            true
-        } ?: false
+        return secretKeyEntry?.let { true } ?: false
     }
 
-    override fun encryptKey(masterKey: MasterKey) {
-        val rawMasterKey = Gson().toJson(masterKey)
+    override fun encryptKey(masterSeed: MasterSeed) {
+        val rawMasterSeed = Gson().toJson(masterSeed)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, generateSecretKey())
-        saveMasterKeyToSharedPrefs(cipher.doFinal(rawMasterKey.toByteArray()), cipher.iv)
+        saveMasterSeedToSharedPrefs(cipher.doFinal(rawMasterSeed.toByteArray()), cipher.iv)
     }
 
-    override fun decryptKey(): MasterKey {
-        if (!isMasterKeySaved()) throw IllegalStateException("Decrypt Error: No Master Key saved!")
+    override fun decryptKey(): MasterSeed {
+        if (!isMasterSeedSaved()) throw IllegalStateException("Decrypt Error: No Master Seed saved!")
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val spec = GCMParameterSpec(AUTHENTICATION_TAG_LENGTH, getEncryptedData(INIT_VECTOR))
         cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), spec)
-        val decoded = cipher.doFinal(getEncryptedData(MASTER_KEY))
-        val rawMasterKey = String(decoded, Charsets.UTF_8)
-        return Gson().fromJson(rawMasterKey, MasterKey::class.java)
+        val decoded = cipher.doFinal(getEncryptedData(MASTER_SEED))
+        val rawMasterSeed = String(decoded, Charsets.UTF_8)
+        return Gson().fromJson(rawMasterSeed, MasterSeed::class.java)
     }
 
     private fun getSecretKey(): SecretKey {
@@ -46,9 +44,9 @@ class KeystoreRepositoryImpl(private val context: Context): KeystoreRepository {
         return secretKeyEntry.secretKey
     }
 
-    private fun saveMasterKeyToSharedPrefs(encryptedMasterKey: ByteArray, initVector: ByteArray) {
+    private fun saveMasterSeedToSharedPrefs(encryptedMasterSeed: ByteArray, initVector: ByteArray) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().apply {
-            putString(MASTER_KEY, Base64.encodeToString(encryptedMasterKey, Base64.DEFAULT))
+            putString(MASTER_SEED, Base64.encodeToString(encryptedMasterSeed, Base64.DEFAULT))
             putString(INIT_VECTOR, Base64.encodeToString(initVector, Base64.DEFAULT))
             apply()
         }
@@ -78,7 +76,7 @@ class KeystoreRepositoryImpl(private val context: Context): KeystoreRepository {
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
         private const val AUTHENTICATION_TAG_LENGTH = 128
         private const val PREFS_NAME = "MinervaSharedPrefs"
-        private const val MASTER_KEY = "MasterKey"
+        private const val MASTER_SEED = "MasterSeed"
         private const val INIT_VECTOR = "InitializationVector"
     }
 }

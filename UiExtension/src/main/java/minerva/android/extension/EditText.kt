@@ -30,6 +30,7 @@ fun EditText.getValidationObservable(
         .doOnNext {
             inputLayout?.apply {
                 error = if (it.hasError) {
+                    setErrorIconDrawable(NO_ICON)
                     context.getString(it.errorMessageId)
                 } else {
                     isErrorEnabled = false
@@ -41,6 +42,7 @@ fun EditText.getValidationObservable(
 
 private const val TEXT_WATCHER_DEBOUNCE = 500L
 private const val FIRST = 1L
+private const val NO_ICON = 0
 
 fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
     this.addTextChangedListener(object : TextWatcher {

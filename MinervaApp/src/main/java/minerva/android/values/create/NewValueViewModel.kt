@@ -6,14 +6,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidVersion
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletAction
-import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -39,14 +37,18 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
         launchDisposable {
             walletManager.createValue(network, valueName)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterKey))
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterSeed))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = { _createValueLiveData.value = Event(Unit) },
-                    onError = { _saveErrorLiveData.value = Event(it) }
+                    onError = {
+                        //TODO Panic Button. Uncomment code below to save manually - not recommended
+                        _saveErrorLiveData.value = Event(it)
+//                        _createValueLiveData.value = Event(Unit)
+                    }
                 )
         }
     }

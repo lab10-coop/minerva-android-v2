@@ -5,15 +5,13 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
-import minerva.android.kotlinUtils.InvalidVersion
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.wallet.WalletManager
 import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
-import minerva.android.walletmanager.model.MasterKey
+import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Payment
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.WalletConfig
 import org.junit.Test
 
 class PaymentRequestViewModelTest : BaseViewModelTest() {
@@ -47,7 +45,14 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `decode token success when service is connected`() {
-        whenever(walletManager.decodePaymentRequestToken(any())).thenReturn(Single.just(Pair(Payment("12"), listOf(Service(type = "1", name = "M27")))))
+        whenever(walletManager.decodePaymentRequestToken(any())).thenReturn(
+            Single.just(
+                Pair(
+                    Payment("12"),
+                    listOf(Service(type = "1", name = "M27"))
+                )
+            )
+        )
         viewModel.showPaymentConfirmationLiveData.observeForever(showPaymentConfirmationObserver)
         viewModel.decodeJwtToken("token")
         showPaymentConfirmationCaptor.run {
@@ -80,7 +85,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
     fun `connect to services success`() {
         whenever(walletManager.saveService(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         viewModel.newServiceMutableLiveData.observeForever(newServiceObserver)
         viewModel.payment = Payment("1", serviceName = "test")
         viewModel.connectToService()
@@ -94,7 +99,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         whenever(walletManager.saveService(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterKey).thenReturn(MasterKey("", ""))
+        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
         viewModel.apply {
             newServiceMutableLiveData.observeForever(newServiceObserver)
             payment = Payment("1", serviceName = "test")

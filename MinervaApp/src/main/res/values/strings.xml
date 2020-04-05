@@ -66,8 +66,10 @@
     <string name="choose_an_identity">Choose an identity</string>
     <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
     <string name="remove_value_dialog_message">Do you really want to delete this value?</string>
-    <string name="yes">yes</string>
-    <string name="no">no</string>
+    <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
+    <string name="remove_owner">Remove owner</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     <string name="identity">Identity</string>
     <string name="select_identity_message">Please select identity</string>
     <string name="invalid_qr_code_message">Invalid Qr code, please try again</string>
@@ -148,4 +150,7 @@
     <string name="owner_address">Owner address</string>
     <string name="login_notification_title">Painless Login Request by Charging Station Dashboard</string>
     <string name="login_reqeust_message">Please double tap to confirm login</string>
+    <string name="cannot_remove_safe_account_title">You can\'t remove a safe account with other owners and funds</string>
+    <string name="cannot_remove_safe_account_message">Please remove other owners first and then\n transfer yours funds to another account</string>
+    <string name="safe_account_removal_error">You can not remove this Safe Account</string>
 </resources>

@@ -34,7 +34,7 @@ class IdentitiesViewModel(
         launchDisposable {
             walletManager.removeIdentity(identity)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getRemovedIdentityWalletAction(identity.name), walletManager.masterKey))
+                .andThen(walletActionsRepository.saveWalletActions(getRemovedIdentityWalletAction(identity.name), walletManager.masterSeed))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onError = { _errorLiveData.value = Event(it) })

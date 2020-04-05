@@ -15,17 +15,10 @@ class BackupViewModel(private val walletManager: WalletManager) : ViewModel() {
     private val _showMnemonicMutableLiveData = MutableLiveData<Event<String>>()
     val showMnemonicLiveData: LiveData<Event<String>> get() = _showMnemonicMutableLiveData
 
-    private val _showMnemonicErrorMutableLiveData = MutableLiveData<Event<Unit>>()
-    val showMnemonicErrorLiveData: LiveData<Event<Unit>> get() = _showMnemonicErrorMutableLiveData
-
     fun showMnemonic() {
-        walletManager.showMnemonic { error, mnemonic ->
-            if (error == null) {
-                this.mnemonic = mnemonic
-                _showMnemonicMutableLiveData.value = Event(getFormattedMnemonic(mnemonic))
-            } else {
-                _showMnemonicErrorMutableLiveData.value = Event(Unit)
-            }
+        walletManager.getMnemonic().apply {
+            mnemonic = this
+            _showMnemonicMutableLiveData.value = Event(getFormattedMnemonic(mnemonic))
         }
     }
 

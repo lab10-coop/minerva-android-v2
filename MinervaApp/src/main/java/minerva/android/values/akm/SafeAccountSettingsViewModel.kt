@@ -121,6 +121,8 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
         throw IllegalStateException("Owners Live Data was not initialized")
     }
 
+    val valueName get() = value.name
+
     companion object {
         private const val FIRST_POSITION = 0
     }
