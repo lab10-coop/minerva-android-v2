@@ -114,11 +114,11 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
                 .setBackground(context.getDrawable(R.drawable.rounded_white_background))
                 .setTitle(value.name)
                 .setMessage(R.string.remove_value_dialog_message)
-                .setPositiveButton(R.string.yes) { dialog, _ ->
+                .setPositiveButton(R.string.remove) { dialog, _ ->
                     viewModel.removeValue(value)
                     dialog.dismiss()
                 }
-                .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
+                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
                 .show()
         }
     }
