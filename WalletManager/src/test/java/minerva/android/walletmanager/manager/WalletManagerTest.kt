@@ -588,9 +588,11 @@ class WalletManagerTest {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(error))
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.error(error))
         whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
-        walletManager.initWalletConfig()
-        walletManager.loadWalletConfig()
-        walletManager.saveService(Service()).test().assertError(error)
+        walletManager.apply {
+            initWalletConfig()
+            loadWalletConfig()
+            saveService(Service()).test().assertError(error)
+        }
     }
 
     @Test
