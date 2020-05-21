@@ -7,11 +7,15 @@ apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.3"
 
     compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     defaultConfig {
@@ -75,6 +79,5 @@ dependencies {
     implementation koinDependencies.values()
     implementation rxDependencies.values()
 
-    testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
 }

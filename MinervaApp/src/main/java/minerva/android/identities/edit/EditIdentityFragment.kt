@@ -37,12 +37,6 @@ class EditIdentityFragment : Fragment() {
 
     private lateinit var identity: Identity
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        initializeFragment()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -52,6 +46,7 @@ class EditIdentityFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initializeFragment()
         moreFields.setOnClickListener {
             TransitionManager.beginDelayedTransition(viewGroup)
             moreFields.gone()
@@ -167,10 +162,10 @@ class EditIdentityFragment : Fragment() {
 
     private fun initializeFragment() {
         viewModel.apply {
-            editIdentityLiveData.observe(this@EditIdentityFragment, EventObserver { initializeView(it) })
-            saveCompletedLiveData.observe(this@EditIdentityFragment, EventObserver { activity?.onBackPressed() })
-            saveErrorLiveData.observe(this@EditIdentityFragment, EventObserver { showErrorMessage(it.message) })
-            loadingLiveData.observe(this@EditIdentityFragment, EventObserver { handleLoader(it) })
+            editIdentityLiveData.observe(viewLifecycleOwner, EventObserver { initializeView(it) })
+            saveCompletedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.onBackPressed() })
+            saveErrorLiveData.observe(viewLifecycleOwner, EventObserver { showErrorMessage(it.message) })
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
         }
         arguments?.let {
             index = it.getInt(INDEX)
@@ -204,8 +199,8 @@ class EditIdentityFragment : Fragment() {
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-            val datePickerDialog = DatePickerDialog(it, DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
-                birthDate.setText(String.format(DATE_FORMAT, dayOfMonth, monthOfYear + 1, year))
+            val datePickerDialog = DatePickerDialog(it, DatePickerDialog.OnDateSetListener { _, birthYear, monthOfYear, dayOfMonth ->
+                birthDate.setText(String.format(DATE_FORMAT, dayOfMonth, monthOfYear + 1, birthYear))
             }, year, month, day)
             datePickerDialog.apply {
                 datePicker.maxDate = System.currentTimeMillis()

@@ -40,7 +40,5 @@ dependencies {
     implementation coreDependencies.values()
     implementation rxDependencies.values()
     implementation cryptographyDependencies.values()
-
-    testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
 }

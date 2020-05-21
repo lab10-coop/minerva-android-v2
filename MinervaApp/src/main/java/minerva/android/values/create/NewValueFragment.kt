@@ -47,9 +47,9 @@ class NewValueFragment : Fragment() {
 
     private fun initializeFragment() {
         viewModel.apply {
-            createValueLiveData.observe(this@NewValueFragment, EventObserver { activity?.finish() })
-            loadingLiveData.observe(this@NewValueFragment, EventObserver { handleLoader(it) })
-            saveErrorLiveData.observe(this@NewValueFragment, EventObserver { showError(it) })
+            createValueLiveData.observe(viewLifecycleOwner, EventObserver { activity?.finish() })
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
+            saveErrorLiveData.observe(viewLifecycleOwner, EventObserver { showError(it) })
         }
         arguments?.let {
             position = it.getInt(POSITION)

@@ -68,9 +68,10 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
     private fun showFragment(fragment: Fragment, tag: String) {
-        supportFragmentManager.transaction {
+        supportFragmentManager.beginTransaction().apply {
             replace(R.id.mainContent, fragment)
             addToBackStack(tag)
+            commit()
         }
     }
 

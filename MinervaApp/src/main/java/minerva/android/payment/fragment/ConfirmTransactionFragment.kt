@@ -30,7 +30,7 @@ class ConfirmTransactionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setPayment()
-        viewModel.confirmPaymentLiveData.observe(this, EventObserver { listener.onResultOk(it) })
+        viewModel.confirmPaymentLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResultOk(it) })
         initBiometricPrompt()
         biometricPrompt.authenticate(getPromptInfoDialog())
     }

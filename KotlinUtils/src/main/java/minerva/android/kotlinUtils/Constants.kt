@@ -18,9 +18,6 @@ val Int.Companion.InvalidId: Int
 val Int.Companion.InvalidIndex: Int
     get() = -1
 
-val Int.Companion.InvalidVersion: Int
-    get() = -1
-
 val Int.Companion.InvalidValue: Int
     get() = -1
 

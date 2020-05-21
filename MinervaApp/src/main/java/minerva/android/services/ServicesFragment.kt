@@ -18,12 +18,8 @@ class ServicesFragment : Fragment() {
     private val servicesAdapter = ServicesAdapter()
     private val viewModel: ServicesViewModel by viewModel()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.recycler_view_layout, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.recycler_view_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,7 +28,7 @@ class ServicesFragment : Fragment() {
     }
 
     private fun prepareWalletConfigObserver() {
-        viewModel.walletConfigLiveData.observe(this, Observer {
+        viewModel.walletConfigLiveData.observe(viewLifecycleOwner, Observer {
             noDataMessage.visibleOrGone(it.services.isEmpty())
             servicesAdapter.updateList(it.services)
         })
