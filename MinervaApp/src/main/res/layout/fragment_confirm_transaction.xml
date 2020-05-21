@@ -27,7 +27,7 @@
             <ImageView
                 android:layout_width="100dp"
                 android:layout_height="0dp"
-                android:src="@drawable/minerva_card_backgroud"
+                android:src="@drawable/minerva_card_background"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

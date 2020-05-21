@@ -60,7 +60,7 @@
         android:foreground="@drawable/ripple"
         android:gravity="center"
         android:padding="@dimen/margin_small"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorSecondary"
         android:visibility="gone"
         tools:text="Send ATS"
         tools:visibility="visible" />

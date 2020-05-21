@@ -56,20 +56,13 @@
         app:layout_constraintTop_toBottomOf="@+id/mnemonicEditText"
         tools:text="@string/check_incorrect_mnemonic_words" />
 
-    <TextView
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/restoreWalletButton"
+        style="@style/PurpleButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginRight="@dimen/margin_normal"
-        android:layout_marginBottom="@dimen/margin_normal"
-        android:background="@drawable/purple_button_selector"
         android:enabled="false"
-        android:fontFamily="@font/rubik_medium"
-        android:gravity="center"
-        android:padding="@dimen/margin_small"
         android:text="@string/restore_wallet"
-        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

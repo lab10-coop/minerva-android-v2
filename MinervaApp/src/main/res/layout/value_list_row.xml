@@ -107,7 +107,7 @@
                     android:foreground="@drawable/ripple"
                     android:gravity="center"
                     android:padding="@dimen/margin_small"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/colorSecondary"
                     android:visibility="gone"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
