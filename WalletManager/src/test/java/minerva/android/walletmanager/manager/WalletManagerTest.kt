@@ -12,6 +12,7 @@ import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
+import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepositoryImpl
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
@@ -39,7 +40,7 @@ class WalletManagerTest {
     private val keyStoreRepository: KeystoreRepository = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
     private val walletConfigRepository: WalletConfigRepository = mock()
-    private val blockchainRepository: BlockchainRepositoryImpl = mock()
+    private val blockchainRepository: BlockchainRepository = mock()
     private val localStorage: LocalStorage = mock()
     private val servicesApi: ServicesApi = mock()
     private val binanaceApi: BinanceApi = mock()

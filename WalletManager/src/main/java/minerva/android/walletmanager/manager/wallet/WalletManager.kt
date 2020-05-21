@@ -33,7 +33,7 @@ interface WalletManager {
     fun loadValue(position: Int): Value
     fun createValue(
         network: Network, valueName: String, ownerAddress: String = String.Empty,
-        smartContractAddress: String = String.Empty
+        contractAddress: String = String.Empty
     ): Completable
 
     fun removeValue(index: Int): Completable
@@ -57,7 +57,7 @@ interface WalletManager {
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
 
-    fun getSafeAccountNumber(ownerPublicKey: String): Int
+    fun getSafeAccountNumber(ownerAddress: String): Int
     fun getSafeAccountMasterOwnerPrivateKey(address: String?): String
 
     fun getValueIterator(): Int

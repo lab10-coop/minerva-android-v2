@@ -1,7 +1,6 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidVersion
 
 data class Service(
     val type: String = String.Empty,

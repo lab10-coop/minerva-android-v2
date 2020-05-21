@@ -78,10 +78,10 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
         prepareAddButton()
         setAddressScannerListener()
         activity?.window?.setSoftInputMode(SOFT_INPUT_ADJUST_PAN)
-        listener.extraStringLiveData.observe(this, EventObserver { newOwner.setText(it) })
+        listener.extraStringLiveData.observe(viewLifecycleOwner, EventObserver { newOwner.setText(it) })
         viewModel.apply {
-            ownersLiveData.observe(this@SafeAccountSettingsFragment, Observer { ownerAdapter.updateList(it) })
-            errorLiveData.observe(this@SafeAccountSettingsFragment, EventObserver {
+            ownersLiveData.observe(viewLifecycleOwner, Observer { ownerAdapter.updateList(it) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.error_header), getString(R.string.unexpected_error))
                 Timber.e(it.message)
             })

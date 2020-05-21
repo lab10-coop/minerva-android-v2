@@ -17,12 +17,8 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
 
     private val viewModel: CreateWalletViewModel by viewModel()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_create_wallet, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_create_wallet, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,11 +39,13 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
     }
 
     private fun prepareObservers() {
-        viewModel.loadingLiveData.observe(this, EventObserver { if (it) showLoader() else hideLoader() })
-        viewModel.errorLiveData.observe(this, EventObserver {
-            Toast.makeText(context, getString(R.string.creating_wallet_error_message), Toast.LENGTH_LONG).show()
-        })
-        viewModel.createWalletLiveData.observe(this, EventObserver { listener.showMainActivity() })
+        viewModel.apply {
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver {
+                Toast.makeText(context, getString(R.string.creating_wallet_error_message), Toast.LENGTH_LONG).show()
+            })
+            createWalletLiveData.observe(viewLifecycleOwner, EventObserver { listener.showMainActivity() })
+        }
     }
 
     private fun hideLoader() {

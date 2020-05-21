@@ -100,10 +100,10 @@ class ChooseIdentityFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
-            loadingLiveData.observe(this@ChooseIdentityFragment, EventObserver { if (it) showLoader() else hideLoader() })
-            errorLiveData.observe(this@ChooseIdentityFragment, EventObserver { listener.onResult(false) })
-            loginLiveData.observe(this@ChooseIdentityFragment, EventObserver { listener.onResult(true, loginPayload = it) })
-            requestedFieldsLiveData.observe(this@ChooseIdentityFragment, EventObserver {
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResult(false) })
+            loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResult(true, loginPayload = it) })
+            requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver {
                 Toast.makeText(context, getString(R.string.requested_data_message), Toast.LENGTH_LONG).show()
             })
         }

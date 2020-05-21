@@ -194,10 +194,10 @@ class WalletManagerImpl(
         return false
     }
 
-    override fun updateSafeAccountOwners(index: Int, owners: List<String>): Single<List<String>> {
+    override fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>> {
         walletConfigMutableLiveData.value?.let { config ->
             config.values.apply {
-                forEach { if (it.index == index) it.owners = owners }
+                forEach { if (it.index == position) it.owners = owners }
                 return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, this, config.services))
                     .andThen(Single.just(owners))
             }
@@ -268,12 +268,12 @@ class WalletManagerImpl(
                 else Completable.complete()
             }
 
-    override fun saveService(newService: Service): Completable {
+    override fun saveService(service: Service): Completable {
         walletConfigMutableLiveData.value?.run {
             if (services.isEmpty()) {
-                return updateWalletConfig(WalletConfig(updateVersion, identities, values, listOf(newService)))
+                return updateWalletConfig(WalletConfig(updateVersion, identities, values, listOf(service)))
             }
-            return updateWalletConfig(getWalletConfigWithUpdatedService(newService))
+            return updateWalletConfig(getWalletConfigWithUpdatedService(service))
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }

@@ -77,25 +77,25 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
 
     private fun setupLiveData() {
         viewModel.apply {
-            walletConfigLiveData.observe(this@ValuesFragment, Observer {
+            walletConfigLiveData.observe(viewLifecycleOwner, Observer {
                 noDataMessage.visibleOrGone(it.hasActiveValue)
                 valueAdapter.updateList(it.values)
             })
-            balanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateBalances(it) })
-            assetBalanceLiveData.observe(this@ValuesFragment, Observer { valueAdapter.updateAssetBalances(it) })
-            errorLiveData.observe(this@ValuesFragment, Observer {
+            balanceLiveData.observe(viewLifecycleOwner, Observer { valueAdapter.updateBalances(it) })
+            assetBalanceLiveData.observe(viewLifecycleOwner, Observer { valueAdapter.updateAssetBalances(it) })
+            errorLiveData.observe(viewLifecycleOwner, Observer {
                 showErrorFlashbar(getString(R.string.error_header), it.peekContent().message)
             })
-            noFundsLiveData.observe(this@ValuesFragment, Observer {
+            noFundsLiveData.observe(viewLifecycleOwner, Observer {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.no_funds), getString(R.string.no_funds_message))
             })
-            loadingLiveData.observe(this@ValuesFragment, EventObserver {
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver {
                 listener.shouldShowLoadingScreen(it)
             })
-            balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(this@ValuesFragment, EventObserver {
+            balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.cannot_remove_safe_account_title), getString(R.string.cannot_remove_safe_account_message))
             })
-            isNotSafeAccountMasterOwnerErrorLiveData.observe(this@ValuesFragment, EventObserver {
+            isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
             })
         }

@@ -43,7 +43,7 @@ class IdentitiesFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             adapter = identityAdapter
         }
-        identityAdapter.removeIdentityLiveData.observe(this, EventObserver { showRemoveDialog(it) })
+        identityAdapter.removeIdentityLiveData.observe(viewLifecycleOwner, EventObserver { showRemoveDialog(it) })
     }
 
     private fun showError(error: Throwable) {
@@ -52,8 +52,8 @@ class IdentitiesFragment : Fragment() {
 
     private fun setupLiveData() {
         viewModel.apply {
-            walletConfigLiveData.observe(this@IdentitiesFragment, Observer { identityAdapter.updateList(it.identities.toMutableList()) })
-            errorLiveData.observe(this@IdentitiesFragment, EventObserver { showError(it) })
+            walletConfigLiveData.observe(viewLifecycleOwner, Observer { identityAdapter.updateList(it.identities.toMutableList()) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { showError(it) })
         }
     }
 

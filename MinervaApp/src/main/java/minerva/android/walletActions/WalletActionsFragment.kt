@@ -34,11 +34,11 @@ class WalletActionsFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
-            walletActionsLiveData.observe(this@WalletActionsFragment, EventObserver { handleWalletActionsLiveData(it) })
-            errorLiveData.observe(this@WalletActionsFragment, EventObserver {
+            walletActionsLiveData.observe(viewLifecycleOwner, EventObserver { handleWalletActionsLiveData(it) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.error_header), getString(R.string.activities_error))
             })
-            loadingLiveData.observe(this@WalletActionsFragment, EventObserver { handleLoadingLiveData(it) })
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoadingLiveData(it) })
         }
     }
 

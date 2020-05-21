@@ -71,11 +71,11 @@ class TransactionsFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
-            sendTransactionLiveData.observe(this@TransactionsFragment, EventObserver { handleTransactionStatus(it) })
-            transactionCostLiveData.observe(this@TransactionsFragment, EventObserver { setTransactionsCosts(it) })
-            errorLiveData.observe(this@TransactionsFragment, Observer { showErrorFlashBar() })
-            loadingLiveData.observe(this@TransactionsFragment, EventObserver { if (it) showLoader() else hideLoader() })
-            saveWalletActionFailedLiveData.observe(this@TransactionsFragment, EventObserver {
+            sendTransactionLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionStatus(it) })
+            transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { setTransactionsCosts(it) })
+            errorLiveData.observe(viewLifecycleOwner, Observer { showErrorFlashBar() })
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
+            saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver {
                 listener.onResult(true, it.first)
             })
         }

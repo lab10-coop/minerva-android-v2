@@ -59,9 +59,9 @@ class LoginScannerFragment : BaseScanner() {
 
     private fun prepareObserver() {
         viewModel.apply {
-            scannerResultLiveData.observe(this@LoginScannerFragment, EventObserver { goToChooseIdentityFragment(it) })
-            scannerErrorLiveData.observe(this@LoginScannerFragment, EventObserver { handleError() })
-            knownUserLoginMutableLiveData.observe(this@LoginScannerFragment, EventObserver {
+            scannerResultLiveData.observe(viewLifecycleOwner, EventObserver { goToChooseIdentityFragment(it) })
+            scannerErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleError() })
+            knownUserLoginMutableLiveData.observe(viewLifecycleOwner, EventObserver {
                 listener.onResult(false, loginPayload = it)
             })
         }

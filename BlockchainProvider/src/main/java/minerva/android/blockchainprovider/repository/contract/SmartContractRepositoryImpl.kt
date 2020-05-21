@@ -61,8 +61,8 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
         }
     }
 
-    override fun getGnosisSafeOwners(gnosisAddress: String, network: String, privateKey: String): Single<List<String>> =
-        getGnosisSafe(gnosisAddress, network, privateKey).owners.flowable()
+    override fun getGnosisSafeOwners(contractAddress: String, network: String, privateKey: String): Single<List<String>> =
+        getGnosisSafe(contractAddress, network, privateKey).owners.flowable()
             .map { it as List<String> }
             .singleOrError()
 
