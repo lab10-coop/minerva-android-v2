@@ -1,4 +1,4 @@
-## About
+# About
 
 Minerva is a Digital Wallet for Android phones.  
 It uses emerging standards for Self Sovereign Identity (SSI) for identity management and supports multiple Blockchain networks for handling of digital assets (currently supported: native tokens, ERC-20 tokens and [Gnosis Safe](https://gnosis-safe.io/) accounts).  
