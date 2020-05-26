@@ -8,9 +8,8 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.SmartContractManager
-import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.wallet.WalletManagerImpl
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.*
 import org.amshove.kluent.shouldBe
 import org.junit.Test
@@ -71,7 +70,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
         viewModel.getAssetBalance()
         assetsBalanceCaptor.run {
             verify(assetsBalanceObserver).onChanged(capture())
-            firstValue["test"]!![0].name shouldBe "name"
+            (firstValue["test"] ?: error(""))[0].name shouldBe "name"
         }
     }
 

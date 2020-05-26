@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.transaction
 import minerva.android.R
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivity

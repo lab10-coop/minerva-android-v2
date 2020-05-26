@@ -2,7 +2,7 @@ package minerva.android.backup
 
 import com.nhaarman.mockitokotlin2.mock
 import minerva.android.settings.backup.BackupViewModel
-import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.wallet.WalletManager
 import org.junit.Test
 import kotlin.test.assertEquals
 

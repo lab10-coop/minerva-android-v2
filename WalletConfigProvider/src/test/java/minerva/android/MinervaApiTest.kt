@@ -28,7 +28,7 @@ import javax.net.ssl.HttpsURLConnection
 
 class MinervaApiTest : KoinTest {
 
-    lateinit var mockServer: MockWebServer
+    private lateinit var mockServer: MockWebServer
     private val api: MinervaApi by inject()
 
     private val map1: LinkedHashMap<String, String> = linkedMapOf(

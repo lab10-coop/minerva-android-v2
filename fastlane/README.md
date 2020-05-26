@@ -1,6 +1,6 @@
 fastlane documentation
 ================
-# Installation
+## Installation
 
 Make sure you have the latest version of the Xcode command line tools installed:
 
@@ -14,7 +14,7 @@ Install _fastlane_ using
 ```
 or alternatively using `brew cask install fastlane`
 
-# Available Actions
+## Available Actions
 ## Android
 ### android test
 ```

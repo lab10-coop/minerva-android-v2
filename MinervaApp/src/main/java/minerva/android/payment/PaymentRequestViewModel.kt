@@ -13,8 +13,8 @@ import kotlinx.coroutines.withContext
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
-import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Payment
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.WalletAction

@@ -8,8 +8,8 @@ import minerva.android.BaseViewModelTest
 import minerva.android.identities.IdentitiesViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
 import org.junit.Test

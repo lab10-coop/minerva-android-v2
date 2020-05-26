@@ -41,8 +41,6 @@
     <color name="ethereumOpacity">#29486FFF</color>
     <color name="poa">#FF5C34A2</color>
     <color name="poaOpacity">#295C34A2</color>
-    <color name="xDai">#FFFDAC42</color>
-    <color name="xDaiOpacity">#29FDAC42</color>
     <color name="black">#000000</color>
     <color name="separatorColor">#EAEAEE</color>
     <color name="loadingScreenBackground">#70000000</color>

@@ -1,9 +1,12 @@
 package minerva.android.blockchainprovider.defs
 
 import androidx.annotation.StringDef
+import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.GNOSIS_SETUP_DATA
+import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.MASTER_COPY_KEY
+import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.PROXY_ADDRESS
 
 @Retention(AnnotationRetention.SOURCE)
-@StringDef()
+@StringDef(MASTER_COPY_KEY, PROXY_ADDRESS, GNOSIS_SETUP_DATA)
 annotation class SmartContractConstants {
     companion object {
         const val MASTER_COPY_KEY = "0x06164e64c055caf4bf9f22701e68dad169a26049"

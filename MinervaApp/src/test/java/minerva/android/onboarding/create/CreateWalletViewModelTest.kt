@@ -8,10 +8,10 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.observeWithPredicate
-import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.model.MasterSeed
+import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
-import org.amshove.kluent.shouldEqualTo
 import org.junit.Test
 
 class CreateWalletViewModelTest : BaseViewModelTest() {
@@ -47,9 +47,9 @@ class CreateWalletViewModelTest : BaseViewModelTest() {
         loadingDialogCaptor.run {
             verify(loadingDialogObserver, times(2)).onChanged(capture())
             firstValue shouldBeInstanceOf Event::class
-            firstValue.peekContent() shouldEqualTo true
+            firstValue.peekContent() shouldBeEqualTo true
             secondValue shouldBeInstanceOf Event::class
-            secondValue.peekContent() shouldEqualTo false
+            secondValue.peekContent() shouldBeEqualTo false
         }
         verifyNoMoreInteractions(loadingDialogObserver)
     }

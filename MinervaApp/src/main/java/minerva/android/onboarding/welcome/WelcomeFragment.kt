@@ -35,7 +35,5 @@ class WelcomeFragment : BaseOnBoardingFragment() {
     companion object {
         @JvmStatic
         fun newInstance() = WelcomeFragment()
-
-        val TAG: String = this::class.java.canonicalName ?: "WelcomeFragment"
     }
 }

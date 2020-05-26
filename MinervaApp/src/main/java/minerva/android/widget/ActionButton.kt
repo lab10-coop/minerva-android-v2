@@ -6,7 +6,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.action_button.view.*
-import kotlinx.android.synthetic.main.instruction_item.view.*
 import minerva.android.R
 
 class ActionButton @JvmOverloads constructor(

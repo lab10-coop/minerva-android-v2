@@ -8,8 +8,8 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
-import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields

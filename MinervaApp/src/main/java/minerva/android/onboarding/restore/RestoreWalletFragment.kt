@@ -1,5 +1,6 @@
 package minerva.android.onboarding.restore
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -65,6 +66,7 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
         errorMessage.text = getString(messageId)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun handleInvalidMnemonic(invalidMnemonicWords: List<String>) {
         restoreWalletButton.isEnabled = false
         errorMessage.visible()

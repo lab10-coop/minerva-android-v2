@@ -10,14 +10,14 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.SmartContractManager
-import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.model.Value
 import timber.log.Timber
 
 class SafeAccountSettingsViewModel(private val walletManager: WalletManager, private val smartContractManager: SmartContractManager) :
     BaseViewModel() {
 
-    private lateinit var value: Value
+    internal lateinit var value: Value
     private var masterOwnerPrivateKey: String = String.Empty
 
     private val _ownersLiveData = MutableLiveData<List<String>>()

@@ -37,7 +37,7 @@
                         android:layout_width="@dimen/small_logo_size"
                         android:layout_height="@dimen/small_logo_size"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginRight="@dimen/margin_small"
+                        android:layout_marginEnd="@dimen/margin_small"
                         android:backgroundTint="@color/colorSetOneOpacity"
                         android:textColor="@color/colorSetOne"
                         tools:text="I" />

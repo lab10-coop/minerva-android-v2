@@ -1,5 +1,6 @@
 package minerva.android.values.transaction.fragment
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.transition.TransitionManager
@@ -82,10 +83,9 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun handleTransactionStatus(status: Pair<String, Int>) {
-        if (status.second == WalletActionStatus.SENT) {
-            listener.onResult(true, status.first)
-        } else if (status.second == WalletActionStatus.FAILED) {
-            listener.onResult(false, status.first)
+        when (status.second) {
+            WalletActionStatus.SENT -> listener.onResult(true, status.first)
+            WalletActionStatus.FAILED -> listener.onResult(false, status.first)
         }
     }
 
@@ -140,6 +140,7 @@ class TransactionsFragment : Fragment() {
         )
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setTransactionsCosts(transactionCost: TransactionCost) {
         transactionCost.let {
             gasPriceEditText.setText(it.gasPrice.toPlainString())
@@ -249,6 +250,7 @@ class TransactionsFragment : Fragment() {
 
     private fun getGasPrice() = BigDecimal(gasPriceEditText.text.toString())
 
+    @SuppressLint("SetTextI18n")
     private fun setupTexts() {
         viewModel.prepareCurrency().apply {
             amountInputLayout.hint = "${getString(R.string.amount)}($this)"

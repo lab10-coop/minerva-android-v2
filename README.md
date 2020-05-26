@@ -54,4 +54,4 @@ Build is done via docker. If you want to build an app and have docker installed 
 ### Debug
 - `docker-compose up`
 ### Release
-- `docker-compose run builder ./gradlew assembleRelease`  
+- `docker-compose run builder ./gradlew assembleRelease`

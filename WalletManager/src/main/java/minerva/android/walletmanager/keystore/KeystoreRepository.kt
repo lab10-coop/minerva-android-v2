@@ -4,6 +4,6 @@ import minerva.android.walletmanager.model.MasterSeed
 
 interface KeystoreRepository {
     fun isMasterSeedSaved(): Boolean
-    fun encryptKey(masterSeed: MasterSeed)
-    fun decryptKey(): MasterSeed
+    fun encryptMasterSeed(masterSeed: MasterSeed)
+    fun decryptMasterSeed(): MasterSeed
 }

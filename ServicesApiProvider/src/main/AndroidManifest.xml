@@ -1,2 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="minerva.android.servicesApiProvider" />
+<manifest package="minerva.android.servicesApiProvider" />

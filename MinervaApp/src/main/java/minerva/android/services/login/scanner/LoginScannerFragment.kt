@@ -92,7 +92,5 @@ class LoginScannerFragment : BaseScanner() {
     companion object {
         @JvmStatic
         fun newInstance() = LoginScannerFragment()
-
-        val TAG: String = this::class.java.canonicalName ?: "ScannerFragment"
     }
 }

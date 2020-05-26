@@ -31,7 +31,8 @@
                     android:layout_height="@dimen/small_logo_size"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:src="@drawable/ic_artis" />
+                    tools:src="@drawable/ic_artis"
+                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/safeAccountBadge"
@@ -41,7 +42,8 @@
                     app:layout_constraintRight_toRightOf="@id/icon"
                     android:src="@drawable/ic_safe_account"
                     android:visibility="gone"
-                    tools:visibility="visible" />
+                    tools:visibility="visible"
+                    tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/valueName"
@@ -53,7 +55,8 @@
                     app:layout_constraintBottom_toBottomOf="@id/icon"
                     app:layout_constraintLeft_toRightOf="@id/icon"
                     app:layout_constraintTop_toTopOf="@id/icon"
-                    tools:text="#1 ARTIS" />
+                    tools:text="#1 ARTIS"
+                    tools:ignore="RtlHardcoded" />
 
                 <ImageView
                     android:id="@+id/menu"
@@ -64,7 +67,8 @@
                     app:layout_constraintBottom_toBottomOf="@id/icon"
                     app:layout_constraintLeft_toLeftOf="@id/arrow"
                     app:layout_constraintRight_toRightOf="@id/arrow"
-                    app:layout_constraintTop_toTopOf="@id/icon" />
+                    app:layout_constraintTop_toTopOf="@id/icon"
+                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/arrow"
@@ -73,7 +77,8 @@
                     android:src="@drawable/ic_down_arrow"
                     app:layout_constraintBottom_toBottomOf="@id/amountView"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/amountView" />
+                    app:layout_constraintTop_toTopOf="@id/amountView"
+                    tools:ignore="ContentDescription" />
 
                 <minerva.android.widget.CryptoAmountView
                     android:id="@+id/amountView"
@@ -82,7 +87,8 @@
                     android:layout_marginTop="@dimen/margin_small"
                     android:layout_marginRight="@dimen/margin_normal"
                     app:layout_constraintRight_toLeftOf="@id/arrow"
-                    app:layout_constraintTop_toBottomOf="@id/icon" />
+                    app:layout_constraintTop_toBottomOf="@id/icon"
+                    tools:ignore="RtlHardcoded" />
 
                 <TextView
                     android:id="@+id/cryptoShortName"

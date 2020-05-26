@@ -11,10 +11,6 @@ data class WalletActionsResponse(
     @SerializedName("data")
     private val _walletActionsConfigPayload: WalletActionsConfigPayload? = WalletActionsConfigPayload()
 ) {
-    val state: String
-        get() = _state ?: String.Empty
-    val message: String
-        get() = _message ?: String.Empty
     val walletActionsConfigPayload: WalletActionsConfigPayload
         get() = _walletActionsConfigPayload ?: WalletActionsConfigPayload()
 }

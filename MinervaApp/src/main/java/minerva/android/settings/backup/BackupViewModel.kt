@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.wallet.WalletManager
 import java.util.*
 
 class BackupViewModel(private val walletManager: WalletManager) : ViewModel() {

@@ -37,12 +37,10 @@
     <string name="postcode">Postcode</string>
     <string name="country">Country</string>
     <string name="create_new_identity">Create new identity</string>
-    <string name="save_identity_changes">Save identity changes</string>
     <string name="identity_name_label">Identity Name</string>
     <string name="more_fields">More fields</string>
     <string name="wrong_email">Wrong email</string>
     <string name="can_not_be_empty">This field should not be empty</string>
-    <string name="can_not_be_cloud_save">Identity backup save failed. Please try again later</string>
     <string name="unexpected_error">Unexpected error occurred. Please try again later</string>
     <string name="update_identity">Update identity</string>
     <string name="empty_identity_name">Identity name is empty</string>
@@ -52,9 +50,7 @@
     <string name="copy">Copy</string>
     <string name="share">Share</string>
     <string name="backup_instruction">A bip39 seed phrase is an alternative way to backup or remember your private key:</string>
-    <string name="retrieving_mnemonic_error">An error occurred while retrieving mnemonic</string>
     <string name="mnemonic_saved_to_clip_board">Mnemonic saved to clip board</string>
-    <string name="address_saved_to_clipboard">Address saved to clipboard</string>
     <string name="no_such_file_error_message">No Minerva Wallet found for the seed phrase you entered. Please make sure that you entered the words in the correct order and that you\'re using a seedphrase which was created by the Minerva App.</string>
     <string name="alert_title">You haven\'t yet made a backup of your Minerva Wallet.</string>
     <string name="alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
@@ -84,7 +80,6 @@
     <string name="login_failure_title">Painless Login Failure</string>
     <string name="login_failure_message">Login to service failed</string>
     <string name="dissmiss">Dismiss</string>
-    <string name="no_data_message">No data available</string>
     <string name="last_used">Last used:</string>
     <string name="new_account">New account</string>
     <string name="add_new_account">Add new account</string>
@@ -100,7 +95,6 @@
     <string name="transaction_cost">Transaction cost: %1$s %2$s</string>
     <string name="transactions_error_title">Transaction error occurs</string>
     <string name="transactions_error_message">Unexpected error occurred while making transaction actions</string>
-    <string name="fetch_balances_error">Fetch balances failure</string>
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>
     <string name="error_header">An error occurred</string>
     <string name="activities_error">Error while fetching activities</string>
@@ -115,7 +109,6 @@
     <string name="signed">Signed</string>
     <string name="value_action_label">Account %s</string>
     <string name="safe_account_action_label">Safe Account %s</string>
-    <string name="service">Service</string>
     <string name="identity_name">Identity %s</string>
     <string name="today">TODAY</string>
     <string name="yesterday">YESTERDAY</string>
@@ -139,7 +132,7 @@
     <string name="soon">Soon</string>
     <string name="no_funds">No funds</string>
     <string name="no_funds_message">Please add at least 0.1 ATS to this ARTIS (Tau1) account</string>
-    <string name="processing">Processing...</string>
+    <string name="processing">Processing…</string>
     <string name="channel_id">MinervaLoginChannel</string>
     <string name="message">Message</string>
     <string name="known_user_login_message">You are already registered user of Charging Station\nDashboard with the identity %s</string>
@@ -153,4 +146,5 @@
     <string name="cannot_remove_safe_account_title">You can\'t remove a safe account with other owners and funds</string>
     <string name="cannot_remove_safe_account_message">Please remove other owners first and then\n transfer yours funds to another account</string>
     <string name="safe_account_removal_error">You can not remove this Safe Account</string>
+    <string name="description">Description</string>
 </resources>

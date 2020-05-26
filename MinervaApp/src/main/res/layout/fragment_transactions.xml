@@ -8,7 +8,6 @@
     tools:context=".values.transaction.activity.TransactionActivity">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/margin_normal"
@@ -54,7 +53,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_barcode_scanner"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    tools:ignore="LabelFor" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <LinearLayout
@@ -62,7 +62,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_normal"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                tools:ignore="UseCompoundDrawables">
 
                 <TextView
                     android:id="@+id/transactionCostLabel"
@@ -76,7 +77,8 @@
                     android:id="@+id/arrow"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_down_arrow" />
+                    android:src="@drawable/ic_down_arrow"
+                    tools:ignore="ContentDescription" />
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -139,8 +141,8 @@
     <ProgressBar
         android:id="@+id/sendTransactionProgressBar"
         android:layout_width="wrap_content"
-        android:visibility="gone"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
-        android:layout_marginBottom="@dimen/margin_normal" />
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:visibility="gone" />
 </FrameLayout>

@@ -2,7 +2,6 @@ package minerva.android.values.akm
 
 import android.content.Context
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import kotlinx.android.synthetic.main.fragment_scanner.*

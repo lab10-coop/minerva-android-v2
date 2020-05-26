@@ -93,5 +93,4 @@ class CryptographyRepositoryTest {
         val validation = repository.validateMnemonic(mnemonic)
         assertEquals(validation, listOf("aaaaa", "kkkkk"))
     }
-
 }

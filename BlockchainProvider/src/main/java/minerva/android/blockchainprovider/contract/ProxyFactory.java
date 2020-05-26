@@ -52,9 +52,8 @@ public class ProxyFactory extends Contract {
     public static final String FUNC_CALCULATECREATEPROXYWITHNONCEADDRESS = "calculateCreateProxyWithNonceAddress";
 
     public static final Event PROXYCREATION_EVENT = new Event("ProxyCreation",
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Address>() {
             }));
-    ;
 
     @Deprecated
     protected ProxyFactory(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
@@ -76,10 +75,9 @@ public class ProxyFactory extends Contract {
 
     public List<ProxyCreationEventResponse> getProxyCreationEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(PROXYCREATION_EVENT, transactionReceipt);
-        ArrayList<ProxyCreationEventResponse> responses = new ArrayList<ProxyCreationEventResponse>(valueList.size());
+        ArrayList<ProxyCreationEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ProxyCreationEventResponse typedResponse = new ProxyCreationEventResponse();
-            //typedResponse.log = eventValues.getLog();
             typedResponse.proxy = (String) eventValues.getNonIndexedValues().get(0).getValue();
             responses.add(typedResponse);
         }
@@ -116,16 +114,16 @@ public class ProxyFactory extends Contract {
 
     public RemoteCall<byte[]> proxyRuntimeCode() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_PROXYRUNTIMECODE,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicBytes>() {
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<DynamicBytes>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
     public RemoteCall<byte[]> proxyCreationCode() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_PROXYCREATIONCODE,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicBytes>() {
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<DynamicBytes>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }

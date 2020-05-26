@@ -18,12 +18,10 @@
     <dimen name="rounded_background">16dp</dimen>
     <dimen name="small_logo_size">32dp</dimen>
     <dimen name="badge_logo_size">16dp</dimen>
-    <dimen name="form_margins">16dp</dimen>
     <dimen name="form_box_stroke_width">2dp</dimen>
 
     <dimen name="clickable_area">32dp</dimen>
     <dimen name="qr_code_size">256dp</dimen>
-    <dimen name="fingerprint_view_elevation">8dp</dimen>
     <dimen name="circle_icon_size">60dp</dimen>
     <dimen name="address_width">192dp</dimen>
 </resources>

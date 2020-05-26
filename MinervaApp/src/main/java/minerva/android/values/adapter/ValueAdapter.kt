@@ -199,7 +199,7 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
             menuInflater.inflate(R.menu.value_menu, menu)
             menu.findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(value)
             menu.findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(value)
-            gravity = Gravity.RIGHT
+            gravity = Gravity.END
             show()
             setOnItemMenuClickListener(position, value)
         }

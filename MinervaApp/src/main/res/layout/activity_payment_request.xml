@@ -12,6 +12,7 @@
         android:layout_width="@dimen/logo_size"
         android:layout_height="@dimen/logo_size"
         android:layout_gravity="center"
+        android:contentDescription="@string/description"
         android:src="@drawable/ic_minerva_icon" />
 
     <TextView
