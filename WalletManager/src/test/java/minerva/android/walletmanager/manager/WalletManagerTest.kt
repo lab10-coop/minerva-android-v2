@@ -433,8 +433,7 @@ class WalletManagerTest {
         walletManager.decodeQrCodeResponse("token").test()
             .assertComplete()
             .assertValue {
-                it.callback == "test" &&
-                        it.issuer == "test"
+                it.callback == "test" && it.issuer == "test"
             }
     }
 
