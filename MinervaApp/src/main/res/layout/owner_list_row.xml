@@ -23,7 +23,8 @@
         android:layout_width="@dimen/clickable_area"
         android:layout_height="@dimen/clickable_area"
         android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:scaleType="center"
-        android:src="@drawable/ic_three_dots" />
+        android:src="@drawable/ic_three_dots"
+        tools:ignore="ContentDescription" />
 </RelativeLayout>

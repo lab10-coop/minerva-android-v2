@@ -28,12 +28,12 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/reminderIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|top"
                 android:layout_marginTop="@dimen/margin_small"
-                android:src="@drawable/ic_alert" />
+                android:src="@drawable/ic_alert"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:id="@+id/alertTitle"
@@ -49,7 +49,6 @@
                 android:textSize="@dimen/text_normal" />
 
             <TextView
-                android:id="@+id/alertMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/margin_normal"
@@ -87,5 +86,6 @@
         android:layout_marginTop="@dimen/margin_xsmall"
         android:src="@drawable/ic_alert"
         app:layout_constraintLeft_toRightOf="@+id/backupItem"
-        app:layout_constraintTop_toTopOf="@+id/backupItem" />
+        app:layout_constraintTop_toTopOf="@+id/backupItem"
+        tools:ignore="ContentDescription" />
 </androidx.constraintlayout.widget.ConstraintLayout>

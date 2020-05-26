@@ -17,7 +17,8 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/amountView"
         android:layout_alignBottom="@id/amountView"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="@string/description"
         android:src="@drawable/ic_down_arrow" />
 
     <minerva.android.widget.CryptoAmountView
@@ -26,8 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/divider"
         android:layout_marginTop="@dimen/margin_small"
-        android:layout_marginRight="@dimen/margin_small"
-        android:layout_toLeftOf="@id/arrow" />
+        android:layout_marginEnd="@dimen/margin_small"
+        android:layout_toStartOf="@id/arrow" />
 
     <ImageView
         android:id="@+id/assetLogo"
@@ -35,8 +36,9 @@
         android:layout_height="@dimen/small_logo_size"
         android:layout_alignTop="@id/amountView"
         android:layout_alignBottom="@id/amountView"
-        android:layout_alignParentLeft="true"
-        tools:src="@drawable/ic_xdai" />
+        android:layout_alignParentStart="true"
+        tools:src="@drawable/ic_xdai"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/assetName"
@@ -44,8 +46,8 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/amountView"
         android:layout_alignBottom="@id/amountView"
-        android:layout_marginLeft="@dimen/margin_small"
-        android:layout_toRightOf="@id/assetLogo"
+        android:layout_marginStart="@dimen/margin_small"
+        android:layout_toEndOf="@id/assetLogo"
         android:gravity="center"
         tools:text="sDai" />
 

@@ -12,7 +12,7 @@ import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
 import minerva.android.services.login.uitls.LoginUtils.getRequestedData
 import minerva.android.services.login.uitls.LoginUtils.getServiceName
-import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.model.QrCodeResponse
 
 class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
@@ -43,6 +43,10 @@ class ScannerViewModel(private val walletManager: WalletManager) : ViewModel() {
             serviceName = getServiceName(response)
             identityFields = getRequestedData(requestedData)
         }
+        checkAlreadyLoginUser(response)
+    }
+
+    private fun checkAlreadyLoginUser(response: QrCodeResponse) {
         if (walletManager.isAlreadyLoggedIn(response.issuer)) {
             _knownUserLoginMutableLiveData.value =
                 Event(LoginPayload(getLoginStatus(response), walletManager.getLoggedInIdentityPublicKey(response.issuer), response))

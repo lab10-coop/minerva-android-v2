@@ -4,7 +4,6 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.contract.ERC20
-import minerva.android.blockchainprovider.defs.BlockchainDef.Companion.ENS
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
@@ -26,7 +25,11 @@ import java.math.BigInteger
 import java.math.RoundingMode
 
 
-class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private val gasPrice: Map<String, BigInteger>) : BlockchainRepository {
+class BlockchainRepositoryImpl(
+    private val web3j: Map<String, Web3j>,
+    private val gasPrice: Map<String, BigInteger>,
+    private val ensResolver: EnsResolver
+) : BlockchainRepository {
 
     /**
      * List arguments: first - network short name, second - wallet address (public)
@@ -60,12 +63,11 @@ class BlockchainRepositoryImpl(private val web3j: Map<String, Web3j>, private va
             .toObservable()
 
     override fun reverseResolveENS(ensAddress: String): Single<String> {
-        return Single.just(ensAddress).map { EnsResolver(web3j[ENS]).reverseResolve(it) }
+        return Single.just(ensAddress).map { ensResolver.reverseResolve(it) }
     }
 
-
     override fun resolveENS(ensName: String): Single<String> =
-        if (ensName.contains(DOT)) Single.just(ensName).map { EnsResolver(web3j[ENS]).resolve(it) }
+        if (ensName.contains(DOT)) Single.just(ensName).map { ensResolver.resolve(it) }
         else Single.just(ensName)
 
     override fun transferERC20Token(network: String, payload: TransactionPayload): Completable {

@@ -10,6 +10,7 @@ import java.math.BigInteger
 
 fun createBlockchainProviderModule(blockchainUrl: Map<String, String>, ensUrl: String, gasPrice: Map<String, BigInteger>) = module {
     factory { Web3jProvider.provideWeb3j(blockchainUrl.toMutableMap(), ensUrl) }
-    factory { BlockchainRepositoryImpl(get(), gasPrice) as BlockchainRepository }
-    factory { SmartContractRepositoryImpl(get(), gasPrice) as SmartContractRepository }
+    factory { Web3jProvider.provideEnsResolver(ensUrl) }
+    factory<BlockchainRepository> { BlockchainRepositoryImpl(get(), gasPrice, get()) }
+    factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), gasPrice) }
 }

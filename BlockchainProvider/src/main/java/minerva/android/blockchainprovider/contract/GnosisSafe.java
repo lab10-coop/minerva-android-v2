@@ -107,53 +107,50 @@ public class GnosisSafe extends Contract {
 
     public static final String FUNC_GETTRANSACTIONHASH = "getTransactionHash";
 
-    public static final Event ADDEDOWNER_EVENT = new Event("AddedOwner", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-    ;
+    public static final Event ADDEDOWNER_EVENT = new Event("AddedOwner",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Address>() {
+            }));
 
     public static final Event APPROVEHASH_EVENT = new Event("ApproveHash", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>(true) {}, new TypeReference<Address>(true) {}));
-    ;
 
-    public static final Event CHANGEDMASTERCOPY_EVENT = new Event("ChangedMasterCopy", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-    ;
+    public static final Event CHANGEDMASTERCOPY_EVENT = new Event("ChangedMasterCopy",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Address>() {
+            }));
 
-    public static final Event CHANGEDTHRESHOLD_EVENT = new Event("ChangedThreshold", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-    ;
+    public static final Event CHANGEDTHRESHOLD_EVENT = new Event("ChangedThreshold",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
+            }));
 
-    public static final Event DISABLEDMODULE_EVENT = new Event("DisabledModule", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-    ;
+    public static final Event DISABLEDMODULE_EVENT = new Event("DisabledModule",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Address>() {
+            }));
 
-    public static final Event ENABLEDMODULE_EVENT = new Event("EnabledModule", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-    ;
+    public static final Event ENABLEDMODULE_EVENT = new Event("EnabledModule",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Address>() {
+            }));
 
     public static final Event EXECUTIONFAILURE_EVENT = new Event("ExecutionFailure", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}, new TypeReference<Uint256>() {}));
-    ;
 
-    public static final Event EXECUTIONFROMMODULEFAILURE_EVENT = new Event("ExecutionFromModuleFailure", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}));
-    ;
+    public static final Event EXECUTIONFROMMODULEFAILURE_EVENT = new Event("ExecutionFromModuleFailure",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Address>(true) {
+            }));
 
-    public static final Event EXECUTIONFROMMODULESUCCESS_EVENT = new Event("ExecutionFromModuleSuccess", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}));
-    ;
+    public static final Event EXECUTIONFROMMODULESUCCESS_EVENT = new Event("ExecutionFromModuleSuccess",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Address>(true) {
+            }));
 
     public static final Event EXECUTIONSUCCESS_EVENT = new Event("ExecutionSuccess", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}, new TypeReference<Uint256>() {}));
-    ;
 
-    public static final Event REMOVEDOWNER_EVENT = new Event("RemovedOwner", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-    ;
+    public static final Event REMOVEDOWNER_EVENT = new Event("RemovedOwner",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Address>() {
+            }));
 
-    public static final Event SIGNMSG_EVENT = new Event("SignMsg", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>(true) {}));
-    ;
+    public static final Event SIGNMSG_EVENT = new Event("SignMsg",
+            Collections.<TypeReference<?>>singletonList(new TypeReference<Bytes32>(true) {
+            }));
 
     @Deprecated
     protected GnosisSafe(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
@@ -175,10 +172,9 @@ public class GnosisSafe extends Contract {
 
     public List<AddedOwnerEventResponse> getAddedOwnerEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(ADDEDOWNER_EVENT, transactionReceipt);
-        ArrayList<AddedOwnerEventResponse> responses = new ArrayList<AddedOwnerEventResponse>(valueList.size());
+        ArrayList<AddedOwnerEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             AddedOwnerEventResponse typedResponse = new AddedOwnerEventResponse();
-            //typedResponse.log = eventValues.getLog();
             typedResponse.owner = (String) eventValues.getNonIndexedValues().get(0).getValue();
             responses.add(typedResponse);
         }
@@ -206,7 +202,7 @@ public class GnosisSafe extends Contract {
 
     public List<ApproveHashEventResponse> getApproveHashEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(APPROVEHASH_EVENT, transactionReceipt);
-        ArrayList<ApproveHashEventResponse> responses = new ArrayList<ApproveHashEventResponse>(valueList.size());
+        ArrayList<ApproveHashEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ApproveHashEventResponse typedResponse = new ApproveHashEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -239,7 +235,7 @@ public class GnosisSafe extends Contract {
 
     public List<ChangedMasterCopyEventResponse> getChangedMasterCopyEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(CHANGEDMASTERCOPY_EVENT, transactionReceipt);
-        ArrayList<ChangedMasterCopyEventResponse> responses = new ArrayList<ChangedMasterCopyEventResponse>(valueList.size());
+        ArrayList<ChangedMasterCopyEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ChangedMasterCopyEventResponse typedResponse = new ChangedMasterCopyEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -270,7 +266,7 @@ public class GnosisSafe extends Contract {
 
     public List<ChangedThresholdEventResponse> getChangedThresholdEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(CHANGEDTHRESHOLD_EVENT, transactionReceipt);
-        ArrayList<ChangedThresholdEventResponse> responses = new ArrayList<ChangedThresholdEventResponse>(valueList.size());
+        ArrayList<ChangedThresholdEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ChangedThresholdEventResponse typedResponse = new ChangedThresholdEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -301,7 +297,7 @@ public class GnosisSafe extends Contract {
 
     public List<DisabledModuleEventResponse> getDisabledModuleEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(DISABLEDMODULE_EVENT, transactionReceipt);
-        ArrayList<DisabledModuleEventResponse> responses = new ArrayList<DisabledModuleEventResponse>(valueList.size());
+        ArrayList<DisabledModuleEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             DisabledModuleEventResponse typedResponse = new DisabledModuleEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -332,7 +328,7 @@ public class GnosisSafe extends Contract {
 
     public List<EnabledModuleEventResponse> getEnabledModuleEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(ENABLEDMODULE_EVENT, transactionReceipt);
-        ArrayList<EnabledModuleEventResponse> responses = new ArrayList<EnabledModuleEventResponse>(valueList.size());
+        ArrayList<EnabledModuleEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             EnabledModuleEventResponse typedResponse = new EnabledModuleEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -363,7 +359,7 @@ public class GnosisSafe extends Contract {
 
     public List<ExecutionFailureEventResponse> getExecutionFailureEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(EXECUTIONFAILURE_EVENT, transactionReceipt);
-        ArrayList<ExecutionFailureEventResponse> responses = new ArrayList<ExecutionFailureEventResponse>(valueList.size());
+        ArrayList<ExecutionFailureEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ExecutionFailureEventResponse typedResponse = new ExecutionFailureEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -396,7 +392,7 @@ public class GnosisSafe extends Contract {
 
     public List<ExecutionFromModuleFailureEventResponse> getExecutionFromModuleFailureEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(EXECUTIONFROMMODULEFAILURE_EVENT, transactionReceipt);
-        ArrayList<ExecutionFromModuleFailureEventResponse> responses = new ArrayList<ExecutionFromModuleFailureEventResponse>(valueList.size());
+        ArrayList<ExecutionFromModuleFailureEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ExecutionFromModuleFailureEventResponse typedResponse = new ExecutionFromModuleFailureEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -427,7 +423,7 @@ public class GnosisSafe extends Contract {
 
     public List<ExecutionFromModuleSuccessEventResponse> getExecutionFromModuleSuccessEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(EXECUTIONFROMMODULESUCCESS_EVENT, transactionReceipt);
-        ArrayList<ExecutionFromModuleSuccessEventResponse> responses = new ArrayList<ExecutionFromModuleSuccessEventResponse>(valueList.size());
+        ArrayList<ExecutionFromModuleSuccessEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ExecutionFromModuleSuccessEventResponse typedResponse = new ExecutionFromModuleSuccessEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -458,7 +454,7 @@ public class GnosisSafe extends Contract {
 
     public List<ExecutionSuccessEventResponse> getExecutionSuccessEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(EXECUTIONSUCCESS_EVENT, transactionReceipt);
-        ArrayList<ExecutionSuccessEventResponse> responses = new ArrayList<ExecutionSuccessEventResponse>(valueList.size());
+        ArrayList<ExecutionSuccessEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ExecutionSuccessEventResponse typedResponse = new ExecutionSuccessEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -491,7 +487,7 @@ public class GnosisSafe extends Contract {
 
     public List<RemovedOwnerEventResponse> getRemovedOwnerEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(REMOVEDOWNER_EVENT, transactionReceipt);
-        ArrayList<RemovedOwnerEventResponse> responses = new ArrayList<RemovedOwnerEventResponse>(valueList.size());
+        ArrayList<RemovedOwnerEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             RemovedOwnerEventResponse typedResponse = new RemovedOwnerEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -522,7 +518,7 @@ public class GnosisSafe extends Contract {
 
     public List<SignMsgEventResponse> getSignMsgEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(SIGNMSG_EVENT, transactionReceipt);
-        ArrayList<SignMsgEventResponse> responses = new ArrayList<SignMsgEventResponse>(valueList.size());
+        ArrayList<SignMsgEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             SignMsgEventResponse typedResponse = new SignMsgEventResponse();
 //            typedResponse.log = eventValues.getLog();
@@ -552,16 +548,18 @@ public class GnosisSafe extends Contract {
     }
 
     public RemoteCall<String> NAME() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_NAME, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_NAME,
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Utf8String>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteCall<String> VERSION() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_VERSION, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_VERSION,
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Utf8String>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
@@ -577,23 +575,24 @@ public class GnosisSafe extends Contract {
     public RemoteCall<BigInteger> approvedHashes(String param0, byte[] param1) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_APPROVEDHASHES, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(param0),
-                new org.web3j.abi.datatypes.generated.Bytes32(param1)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+                new org.web3j.abi.datatypes.generated.Bytes32(param1)),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteCall<TransactionReceipt> changeMasterCopy(String _masterCopy) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_CHANGEMASTERCOPY, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_masterCopy)),
+                FUNC_CHANGEMASTERCOPY,
+                Collections.<Type>singletonList(new Address(_masterCopy)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteCall<TransactionReceipt> changeThreshold(BigInteger _threshold) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_CHANGETHRESHOLD, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_threshold)), 
+                FUNC_CHANGETHRESHOLD,
+                Collections.<Type>singletonList(new Uint256(_threshold)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -608,16 +607,17 @@ public class GnosisSafe extends Contract {
     }
 
     public RemoteCall<byte[]> domainSeparator() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_DOMAINSEPARATOR, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_DOMAINSEPARATOR,
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Bytes32>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
     public RemoteCall<TransactionReceipt> enableModule(String module) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_ENABLEMODULE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(module)),
+                FUNC_ENABLEMODULE,
+                Collections.<Type>singletonList(new Address(module)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -645,17 +645,19 @@ public class GnosisSafe extends Contract {
     }
 
     public RemoteCall<String> getBeaconAddress() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETBEACONADDRESS, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETBEACONADDRESS,
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Address>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteCall<List> getModules() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETMODULES,
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Address>>() {}));
-        return new RemoteCall<List>(
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<DynamicArray<Address>>() {
+                }));
+        return new RemoteCall<>(
                 new Callable<List>() {
                     @Override
                     @SuppressWarnings("unchecked")
@@ -667,37 +669,41 @@ public class GnosisSafe extends Contract {
     }
 
     public RemoteCall<List> getOwners() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETOWNERS, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Address>>() {}));
-        return new RemoteCall<List>(new Callable<List>() {
-                    @Override
-                    @SuppressWarnings("unchecked")
-                    public List call() throws Exception {
-                        List<Type> result = (List<Type>) executeCallSingleValueReturn(function, List.class);
-                        return convertToNative(result);
-                    }
-                });
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETOWNERS,
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<DynamicArray<Address>>() {
+                }));
+        return new RemoteCall<>(new Callable<List>() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public List call() throws Exception {
+                List<Type> result = (List<Type>) executeCallSingleValueReturn(function, List.class);
+                return convertToNative(result);
+            }
+        });
     }
 
     public RemoteCall<BigInteger> getThreshold() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETTHRESHOLD, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETTHRESHOLD,
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteCall<Boolean> isOwner(String owner) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_ISOWNER, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(owner)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_ISOWNER,
+                Collections.<Type>singletonList(new Address(owner)),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Bool>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteCall<BigInteger> nonce() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_NONCE, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_NONCE,
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
@@ -713,16 +719,17 @@ public class GnosisSafe extends Contract {
 
     public RemoteCall<TransactionReceipt> setFallbackHandler(String handler) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_SETFALLBACKHANDLER, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(handler)),
+                FUNC_SETFALLBACKHANDLER,
+                Collections.<Type>singletonList(new Address(handler)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteCall<BigInteger> signedMessages(byte[] param0) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_SIGNEDMESSAGES, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(param0)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_SIGNEDMESSAGES,
+                Collections.<Type>singletonList(new Bytes32(param0)),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
@@ -739,9 +746,9 @@ public class GnosisSafe extends Contract {
     public RemoteCall<TransactionReceipt> setup(List<String> _owners, BigInteger _threshold, String to, byte[] data, String fallbackHandler, String paymentToken, BigInteger payment, String paymentReceiver) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_SETUP, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.Address>(
-                        org.web3j.abi.datatypes.Address.class,
-                        org.web3j.abi.Utils.typeMap(_owners, org.web3j.abi.datatypes.Address.class)), 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicArray<>(
+                                org.web3j.abi.datatypes.Address.class,
+                                org.web3j.abi.Utils.typeMap(_owners, org.web3j.abi.datatypes.Address.class)),
                 new org.web3j.abi.datatypes.generated.Uint256(_threshold), 
                 new org.web3j.abi.datatypes.Address(to),
                 new org.web3j.abi.datatypes.DynamicBytes(data), 
@@ -756,9 +763,9 @@ public class GnosisSafe extends Contract {
     public RemoteCall<TransactionReceipt> setupWithBeacon(List<String> _owners, BigInteger _threshold, String to, byte[] data, String fallbackHandler, String paymentToken, BigInteger payment, String paymentReceiver, String beaconContract) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_SETUPWITHBEACON, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.Address>(
-                        org.web3j.abi.datatypes.Address.class,
-                        org.web3j.abi.Utils.typeMap(_owners, org.web3j.abi.datatypes.Address.class)), 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicArray<>(
+                                org.web3j.abi.datatypes.Address.class,
+                                org.web3j.abi.Utils.typeMap(_owners, org.web3j.abi.datatypes.Address.class)),
                 new org.web3j.abi.datatypes.generated.Uint256(_threshold), 
                 new org.web3j.abi.datatypes.Address(to),
                 new org.web3j.abi.datatypes.DynamicBytes(data), 
@@ -801,16 +808,16 @@ public class GnosisSafe extends Contract {
 
     public RemoteCall<TransactionReceipt> approveHash(byte[] hashToApprove) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_APPROVEHASH, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(hashToApprove)), 
+                FUNC_APPROVEHASH,
+                Collections.<Type>singletonList(new Bytes32(hashToApprove)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteCall<TransactionReceipt> signMessage(byte[] _data) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_SIGNMESSAGE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(_data)), 
+                FUNC_SIGNMESSAGE,
+                Collections.<Type>singletonList(new DynamicBytes(_data)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -825,9 +832,10 @@ public class GnosisSafe extends Contract {
     }
 
     public RemoteCall<byte[]> getMessageHash(byte[] message) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETMESSAGEHASH, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(message)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETMESSAGEHASH,
+                Collections.<Type>singletonList(new DynamicBytes(message)),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Bytes32>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
@@ -842,8 +850,9 @@ public class GnosisSafe extends Contract {
                 new org.web3j.abi.datatypes.generated.Uint256(gasPrice), 
                 new org.web3j.abi.datatypes.Address(gasToken),
                 new org.web3j.abi.datatypes.Address(refundReceiver),
-                new org.web3j.abi.datatypes.generated.Uint256(_nonce)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicBytes>() {}));
+                new org.web3j.abi.datatypes.generated.Uint256(_nonce)),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<DynamicBytes>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
@@ -858,8 +867,9 @@ public class GnosisSafe extends Contract {
                 new org.web3j.abi.datatypes.generated.Uint256(gasPrice), 
                 new org.web3j.abi.datatypes.Address(gasToken),
                 new org.web3j.abi.datatypes.Address(refundReceiver),
-                new org.web3j.abi.datatypes.generated.Uint256(_nonce)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+                new org.web3j.abi.datatypes.generated.Uint256(_nonce)),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Bytes32>() {
+                }));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 

@@ -233,8 +233,7 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
 
     private fun getSafeTxData(transactionPayload: TransactionPayload): String? {
         Function(
-            ERC20.FUNC_TRANSFER,
-            listOf<Type<*>>(
+            ERC20.FUNC_TRANSFER, listOf<Type<*>>(
                 Address(transactionPayload.receiverKey),
                 Uint256(Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger())
             ), emptyList()
@@ -260,19 +259,12 @@ class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private
     private fun getSignatureData(hash: ByteArray, transactionPayload: TransactionPayload): Sign.SignatureData =
         Sign.signMessage(hash, ECKeyPair.create(Numeric.hexStringToByteArray(transactionPayload.privateKey)), false)
 
-    private fun getTransactionHash(
-        receiver: String,
-        gnosisContract: GnosisSafe,
-        amount: BigInteger,
-        nonce: BigInteger,
-        data: ByteArray
-    ): RemoteCall<ByteArray> =
-        gnosisContract
-            .getTransactionHash(receiver, amount, data, operation, safeTxGas, baseGas, noGasPrice, gasToken, refund, nonce)
+    private fun getTransactionHash(receiver: String, gnosisContract: GnosisSafe, amount: BigInteger, nonce: BigInteger, data: ByteArray):
+            RemoteCall<ByteArray> =
+        gnosisContract.getTransactionHash(receiver, amount, data, operation, safeTxGas, baseGas, noGasPrice, gasToken, refund, nonce)
 
 
-    private fun getSignedByteArray(signature: Sign.SignatureData): ByteArray =
-        signature.run { r + s + v }
+    private fun getSignedByteArray(signature: Sign.SignatureData): ByteArray = signature.run { r + s + v }
 
     private fun getGnosisSetupData(address: String) =
         Numeric.hexStringToByteArray(String.format(GNOSIS_SETUP_DATA, address.removePrefix(HEX_PREFIX)))

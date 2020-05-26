@@ -83,7 +83,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
             ownersLiveData.observe(viewLifecycleOwner, Observer { ownerAdapter.updateList(it) })
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.error_header), getString(R.string.unexpected_error))
-                Timber.e(it.message)
+                Timber.e(it)
             })
             arguments?.let { loadValue(it.getInt(INDEX)) }
         }

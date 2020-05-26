@@ -1,5 +1,6 @@
 package minerva.android.services.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +37,7 @@ class ServicesAdapter : RecyclerView.Adapter<ServiceViewHolder>() {
 }
 
 class ServiceViewHolder(private val view: View, private val viewGroup: ViewGroup) : RecyclerView.ViewHolder(view) {
+    @SuppressLint("SetTextI18n")
     fun bindData(service: Service) {
         view.apply {
             when (service.type) {

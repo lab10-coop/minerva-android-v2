@@ -10,7 +10,6 @@
     tools:context="minerva.android.values.akm.SafeAccountSettingsFragment">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/ownerList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/margin_normal"
@@ -35,7 +34,6 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/owners"
-                layout_constraintVertical_chainStyle="CHAIN_PACKED"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_normal"
@@ -47,7 +45,6 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/addOwner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_normal"

@@ -14,8 +14,6 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.walletmanager.manager.SmartContractManager
-import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.NETWORK
@@ -24,20 +22,22 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
 class TransactionsViewModel(
-    private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository,
+    private val walletManager: WalletManager,
+    private val walletActionsRepository: WalletActionsRepository,
     private val smartContractManager: SmartContractManager
-) :
-    BaseViewModel() {
+) : BaseViewModel() {
 
     lateinit var transaction: Transaction
 
-    var value: Value = Value(Int.InvalidIndex)
-    var assetIndex: Int = Int.InvalidIndex
+    internal var value: Value = Value(Int.InvalidIndex)
+    internal var assetIndex: Int = Int.InvalidIndex
     var transactionCost: BigDecimal = BigDecimal.ZERO
     lateinit var recipients: List<Recipient>
 
@@ -119,8 +119,8 @@ class TransactionsViewModel(
     private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             val ownerPrivateKey = value.masterOwnerAddress.let { walletManager.getSafeAccountMasterOwnerPrivateKey(it) }
-            walletManager.resolveENS(receiverKey).flatMap {
-                getTransactionForSafeAccount(ownerPrivateKey, it, amount, gasPrice, gasLimit)
+            walletManager.resolveENS(receiverKey).flatMap { resolvedENS ->
+                getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                     .flatMap {
                         transaction = it
                         smartContractManager.transferNativeCoin(network, it).toSingleDefault(it)
@@ -224,11 +224,7 @@ class TransactionsViewModel(
 
     fun prepareCurrency() = if (assetIndex != Int.InvalidIndex) value.assets[assetIndex].nameShort else value.network
 
-    private fun getValuesWalletAction(
-        transaction: Transaction,
-        network: String,
-        status: Int
-    ): WalletAction =
+    private fun getValuesWalletAction(transaction: Transaction, network: String, status: Int): WalletAction =
         WalletAction(
             WalletActionType.VALUE,
             status,
@@ -275,18 +271,8 @@ class TransactionsViewModel(
         )
 
     private fun prepareTransaction(
-        receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger,
-        contractAddress: String = String.Empty
-    ): Transaction =
-        Transaction(
-            value.address,
-            value.privateKey,
-            receiverKey,
-            amount,
-            gasPrice,
-            gasLimit,
-            contractAddress
-        )
+        receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger, contractAddress: String = String.Empty
+    ): Transaction = Transaction(value.address, value.privateKey, receiverKey, amount, gasPrice, gasLimit, contractAddress)
 
     val network
         get() = value.network

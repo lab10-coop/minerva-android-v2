@@ -2,7 +2,6 @@ package minerva.android.blockchainprovider.repository.contract
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import org.web3j.protocol.core.methods.response.TransactionReceipt
 import minerva.android.blockchainprovider.model.TransactionPayload
 
 interface SmartContractRepository {

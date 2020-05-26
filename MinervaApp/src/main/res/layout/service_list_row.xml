@@ -13,19 +13,20 @@
         android:id="@+id/serviceLogo"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_normal"
         android:src="@drawable/ic_minerva_icon"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/serviceName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_small"
+        android:layout_marginStart="@dimen/margin_small"
         android:fontFamily="@font/rubik_regular"
         android:textColor="@color/gray"
         app:layout_constraintLeft_toRightOf="@+id/serviceLogo"
@@ -36,7 +37,7 @@
         android:id="@+id/lastUsed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_small"
+        android:layout_marginStart="@dimen/margin_small"
         android:fontFamily="@font/rubik_regular"
         android:textColor="@color/borderGray"
         app:layout_constraintBottom_toBottomOf="@+id/serviceLogo"

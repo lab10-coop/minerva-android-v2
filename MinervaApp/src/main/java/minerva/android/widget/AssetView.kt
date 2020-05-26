@@ -15,8 +15,7 @@ import minerva.android.extension.visible
 import minerva.android.walletmanager.model.Value
 import java.math.BigDecimal
 
-class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @DrawableRes logoRes: Int) :
-    RelativeLayout(callback.getContext()) {
+class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @DrawableRes logoRes: Int) : RelativeLayout(callback.getContext()) {
 
     private val isOpen: Boolean
         get() = sendButton.isVisible

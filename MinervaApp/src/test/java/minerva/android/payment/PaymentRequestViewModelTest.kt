@@ -7,8 +7,8 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Payment
 import minerva.android.walletmanager.model.Service

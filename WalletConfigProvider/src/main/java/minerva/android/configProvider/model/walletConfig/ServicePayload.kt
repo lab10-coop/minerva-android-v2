@@ -2,7 +2,6 @@ package minerva.android.configProvider.model.walletConfig
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidValue
 
 data class ServicePayload(
     @SerializedName("type")

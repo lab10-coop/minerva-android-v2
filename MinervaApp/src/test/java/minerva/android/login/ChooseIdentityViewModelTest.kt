@@ -7,12 +7,12 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.uitls.LoginPayload
-import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.QrCodeResponse
-import org.amshove.kluent.shouldEqualTo
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
 class ChooseIdentityViewModelTest : BaseViewModelTest() {
@@ -57,9 +57,9 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
     @Test
     fun `is identity valid test`() {
         val result1 = viewModel.handleNoKeysError(Identity(1))
-        result1 shouldEqualTo true
+        result1 shouldBeEqualTo true
 
         val result2 = viewModel.handleNoKeysError(Identity(1, publicKey = "12", privateKey = "345"))
-        result2 shouldEqualTo false
+        result2 shouldBeEqualTo false
     }
 }

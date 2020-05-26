@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.painless_login_item.view.*
 import minerva.android.R
-import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.Identity

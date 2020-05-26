@@ -8,7 +8,6 @@
     tools:context=".settings.backup.BackupActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mnemonicView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginLeft="@dimen/margin_normal"
@@ -29,8 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:fontFamily="@font/rubik_regular"
-            android:paddingLeft="@dimen/margin_normal"
-            android:paddingRight="16dp"
+            android:paddingStart="@dimen/margin_normal"
+            android:paddingEnd="16dp"
             android:text="@string/backup_instruction"
             android:textColor="@color/gray"
             android:textSize="@dimen/text_normal"

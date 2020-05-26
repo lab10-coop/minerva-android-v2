@@ -13,7 +13,6 @@ import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
-import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepositoryImpl
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
@@ -22,8 +21,8 @@ import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.LoginResponse
 import minerva.android.servicesApiProvider.model.Profile
 import minerva.android.walletmanager.keystore.KeystoreRepository
-import minerva.android.walletmanager.manager.wallet.WalletManagerImpl
-import minerva.android.walletmanager.manager.wallet.walletconfig.repository.WalletConfigRepository
+import minerva.android.walletmanager.wallet.WalletManagerImpl
+import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.storage.LocalStorage
@@ -121,7 +120,7 @@ class WalletManagerTest {
 
     @Test
     fun `Check that loading wallet config returns success`() {
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
         walletConfigCaptor.run {
@@ -147,17 +146,17 @@ class WalletManagerTest {
 
     @Test
     fun `Check that wallet manager returns correct value`() {
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         val identity = walletManager.loadIdentity(0, "Identity")
-        identity.index shouldEqualTo 0
+        identity.index shouldBeEqualTo 0
         identity.name shouldBeEqualTo "identityName1"
         identity.privateKey shouldBeEqualTo "privateKey"
         val identity3 = walletManager.loadIdentity(3, "Identity")
-        identity3.index shouldEqualTo walletConfig.newIndex
+        identity3.index shouldBeEqualTo walletConfig.newIndex
         identity3.name shouldBeEqualTo "Identity #8"
         val identityMinusOne = walletManager.loadIdentity(-1, "Identity")
-        identityMinusOne.index shouldEqualTo walletConfig.newIndex
+        identityMinusOne.index shouldBeEqualTo walletConfig.newIndex
         identityMinusOne.name shouldBeEqualTo "Identity #8"
     }
 
@@ -165,7 +164,7 @@ class WalletManagerTest {
     fun `Check that wallet manager saves new identity`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         val newIdentity = Identity(0, "identityName1")
@@ -181,7 +180,7 @@ class WalletManagerTest {
     fun `Check that wallet manager doesn't save when server error`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(Throwable()))
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         val newIdentity = Identity(0, "identityName")
@@ -194,13 +193,13 @@ class WalletManagerTest {
     fun `Check that wallet manager saves new Value`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         val test = walletManager.createValue(Network.ETHEREUM, "#3 Ethereum").test()
         test.assertNoErrors()
         val loadedValue = walletManager.loadValue(1)
-        loadedValue.index shouldEqualTo 4
+        loadedValue.index shouldBeEqualTo 4
         loadedValue.publicKey shouldBeEqualTo "publicKey2"
         loadedValue.privateKey shouldBeEqualTo "privateKey2"
         loadedValue.address shouldBeEqualTo "address"
@@ -211,13 +210,13 @@ class WalletManagerTest {
         val error = Throwable()
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(error))
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         val test = walletManager.createValue(Network.ETHEREUM, "#3 Ethereum").test()
         test.assertError(error)
         val loadedValue = walletManager.loadValue(10)
-        loadedValue.index shouldEqualTo -1
+        loadedValue.index shouldBeEqualTo -1
         loadedValue.privateKey shouldBeEqualTo String.Empty
         loadedValue.publicKey shouldBeEqualTo String.Empty
         loadedValue.address shouldBeEqualTo String.Empty
@@ -228,13 +227,13 @@ class WalletManagerTest {
         val identityToRemove = Identity(1, "identityName2", isDeleted = true)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         walletManager.removeIdentity(identityToRemove).test()
         val loadedIdentity = walletManager.loadIdentity(1, "Identity")
         loadedIdentity.name shouldBeEqualTo identityToRemove.name
-        loadedIdentity.isDeleted shouldEqualTo identityToRemove.isDeleted
+        loadedIdentity.isDeleted shouldBeEqualTo identityToRemove.isDeleted
     }
 
     @Test
@@ -242,41 +241,41 @@ class WalletManagerTest {
         val identityToRemove = Identity(4, "identityName2", isDeleted = true)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         walletManager.removeValue(2).test()
         val removedValue = walletManager.loadValue(0)
         val notRemovedValue = walletManager.loadValue(1)
-        removedValue.index shouldEqualTo 2
-        removedValue.isDeleted shouldEqualTo true
-        notRemovedValue.index shouldEqualTo 4
-        notRemovedValue.isDeleted shouldEqualTo false
+        removedValue.index shouldBeEqualTo 2
+        removedValue.isDeleted shouldBeEqualTo true
+        notRemovedValue.index shouldBeEqualTo 4
+        notRemovedValue.isDeleted shouldBeEqualTo false
     }
 
     @Test
     fun `Check that wallet manager removes correct not empty value`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(300))
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         walletManager.removeValue(2).test()
         val removedValue = walletManager.loadValue(0)
         val notRemovedValue = walletManager.loadValue(1)
-        removedValue.index shouldEqualTo 2
-        removedValue.isDeleted shouldEqualTo false
-        notRemovedValue.index shouldEqualTo 4
-        notRemovedValue.isDeleted shouldEqualTo false
+        removedValue.index shouldBeEqualTo 2
+        removedValue.isDeleted shouldBeEqualTo false
+        notRemovedValue.index shouldBeEqualTo 4
+        notRemovedValue.isDeleted shouldBeEqualTo false
     }
 
     @Test
     fun `Check that wallet manager don't removes correct safe account value`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
@@ -284,12 +283,12 @@ class WalletManagerTest {
         walletManager.removeValue(6).test()
         val notRemovedValue = walletManager.loadValue(2)
         val notRemovedValue2 = walletManager.loadValue(3)
-        notRemovedValue.index shouldEqualTo 5
-        notRemovedValue.publicKey shouldEqual "publicKey3"
-        notRemovedValue.isDeleted shouldEqualTo false
-        notRemovedValue2.index shouldEqualTo 6
-        notRemovedValue2.publicKey shouldEqual "publicKey4"
-        notRemovedValue2.isDeleted shouldEqualTo false
+        notRemovedValue.index shouldBeEqualTo 5
+        notRemovedValue.publicKey shouldBeEqualTo "publicKey3"
+        notRemovedValue.isDeleted shouldBeEqualTo false
+        notRemovedValue2.index shouldBeEqualTo 6
+        notRemovedValue2.publicKey shouldBeEqualTo "publicKey4"
+        notRemovedValue2.isDeleted shouldBeEqualTo false
     }
 
     @Test
@@ -297,7 +296,7 @@ class WalletManagerTest {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig2))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
@@ -305,12 +304,12 @@ class WalletManagerTest {
         walletManager.removeValue(6).test()
         val removedValue = walletManager.loadValue(2)
         val notRemovedValue = walletManager.loadValue(3)
-        removedValue.index shouldEqualTo 5
-        removedValue.publicKey shouldEqual "publicKey33"
-        removedValue.isDeleted shouldEqualTo true
-        notRemovedValue.index shouldEqualTo 6
-        notRemovedValue.publicKey shouldEqual "publicKey44"
-        notRemovedValue.isDeleted shouldEqualTo false
+        removedValue.index shouldBeEqualTo 5
+        removedValue.publicKey shouldBeEqualTo "publicKey33"
+        removedValue.isDeleted shouldBeEqualTo true
+        notRemovedValue.index shouldBeEqualTo 6
+        notRemovedValue.publicKey shouldBeEqualTo "publicKey44"
+        notRemovedValue.isDeleted shouldBeEqualTo false
     }
 
     @Test
@@ -318,14 +317,14 @@ class WalletManagerTest {
         val identityToRemove = Identity(1)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(Throwable()))
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         walletManager.removeIdentity(identityToRemove).test()
         val loadedIdentity = walletManager.loadIdentity(1, "Identity")
         loadedIdentity.name shouldBeEqualTo "identityName2"
-        loadedIdentity.isDeleted shouldEqualTo false
-        loadedIdentity.data.size shouldEqualTo 3
+        loadedIdentity.isDeleted shouldBeEqualTo false
+        loadedIdentity.data.size shouldBeEqualTo 3
     }
 
     @Test
@@ -339,36 +338,36 @@ class WalletManagerTest {
         )
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         walletManager.removeIdentity(identityToRemove).test()
         val loadedIdentity = walletManager.loadIdentity(0, "Identity")
         loadedIdentity.name shouldBeEqualTo "identityName1"
-        loadedIdentity.isDeleted shouldEqualTo false
-        loadedIdentity.data.size shouldEqualTo 3
-        walletConfig.identities.size shouldEqualTo 2
+        loadedIdentity.isDeleted shouldBeEqualTo false
+        loadedIdentity.data.size shouldBeEqualTo 3
+        walletConfig.identities.size shouldBeEqualTo 2
     }
 
     @Test
     fun `Check that wallet manager will not remove, when try to remove identity with wrong index`() {
         val identityToRemove = Identity(22)
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         walletManager.removeIdentity(identityToRemove).test()
         val loadedIdentity = walletManager.loadIdentity(0, "Identity")
         loadedIdentity.name shouldBeEqualTo "identityName1"
-        loadedIdentity.isDeleted shouldEqualTo false
-        loadedIdentity.data.size shouldEqualTo 3
-        walletConfig.identities.size shouldEqualTo 3
+        loadedIdentity.isDeleted shouldBeEqualTo false
+        loadedIdentity.data.size shouldBeEqualTo 3
+        walletConfig.identities.size shouldBeEqualTo 3
     }
 
     @Test
     fun `refresh balances test success`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.refreshBalances(any())).thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
         whenever(binanaceApi.fetchExchangeRate(any())).thenReturn(Single.just(Market("ETHEUR", "12.21")))
         walletManager.initWalletConfig()
@@ -383,7 +382,7 @@ class WalletManagerTest {
     fun `refresh balances test error`() {
         val error = Throwable()
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.refreshBalances(any())).thenReturn(Single.error(error))
         whenever(binanaceApi.fetchExchangeRate(any())).thenReturn(Single.error(error))
         walletManager.initWalletConfig()
@@ -395,7 +394,7 @@ class WalletManagerTest {
     fun `painless login with identity test success`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(servicesApi.painlessLogin(any(), any(), any())).thenReturn(Single.just(LoginResponse(Profile("did:123"))))
         walletManager.initWalletConfig()
         walletManager.painlessLogin("url", "jwtToken", Identity(1), Service("1")).test()
@@ -404,7 +403,7 @@ class WalletManagerTest {
 
     @Test
     fun `painless login with incognito identity test success`() {
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(servicesApi.painlessLogin(any(), any(), any())).thenReturn(Single.just(LoginResponse(Profile("did:123"))))
         walletManager.painlessLogin("url", "jwtToken", IncognitoIdentity(), Service("1")).test()
             .assertComplete()
@@ -413,7 +412,7 @@ class WalletManagerTest {
     @Test
     fun `painless login with incognito identity test error`() {
         val error = Throwable()
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(servicesApi.painlessLogin(any(), any(), any())).thenReturn(Single.error(error))
         walletManager.painlessLogin("url", "jwtToken", IncognitoIdentity(), Service("1")).test()
             .assertError(error)
@@ -469,13 +468,13 @@ class WalletManagerTest {
     fun `calculate transaction cost success`() {
         whenever(blockchainRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.ONE)
         val result = walletManager.calculateTransactionCost(BigDecimal.ONE, BigInteger.ONE)
-        result shouldEqual BigDecimal.ONE
+        result shouldBeEqualTo BigDecimal.ONE
     }
 
     @Test
     fun `get wallet config success test`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(
             Single.just(
                 WalletConfigResponse(
@@ -496,7 +495,7 @@ class WalletManagerTest {
     fun `get wallet config error test`() {
         val error = Throwable()
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Single.error(error))
         walletManager.initWalletConfig()
         walletManager.getWalletConfig(MasterSeed("123", "567"))
@@ -509,7 +508,7 @@ class WalletManagerTest {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any()))
             .thenReturn(Observable.just(Pair("privateKey1", BigDecimal.valueOf(23))))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.refreshAssetBalance().test().assertComplete()
             .assertValue {
@@ -542,7 +541,7 @@ class WalletManagerTest {
     @Test
     fun `make ERC20 transfer with ENS resolved success test`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
         whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
         walletManager.initWalletConfig()
@@ -552,7 +551,7 @@ class WalletManagerTest {
     @Test
     fun `make ERC20 transfer with not ENS resolved success test`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
         whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
         walletManager.initWalletConfig()
@@ -563,7 +562,7 @@ class WalletManagerTest {
     fun `make ERC20 transfer error test`() {
         val error = Throwable()
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
         whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
         walletManager.initWalletConfig()
@@ -574,7 +573,7 @@ class WalletManagerTest {
     fun `save service test`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey","address")))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
         walletManager.saveService(Service()).test()
@@ -587,7 +586,7 @@ class WalletManagerTest {
         val error = Throwable()
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(error))
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(Single.error(error))
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.apply {
             initWalletConfig()
             loadWalletConfig()
@@ -598,9 +597,9 @@ class WalletManagerTest {
     @Test
     fun `get correct new Value number`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
-        whenever(keyStoreRepository.decryptKey()).thenReturn(MasterSeed())
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.loadWalletConfig()
-        walletManager.getValueIterator() shouldEqualTo 4
+        walletManager.getValueIterator() shouldBeEqualTo 4
     }
 }

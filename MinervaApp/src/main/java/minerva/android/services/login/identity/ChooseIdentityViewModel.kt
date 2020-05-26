@@ -19,8 +19,8 @@ import minerva.android.services.login.uitls.LoginUtils.createLoginPayload
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.services.login.uitls.LoginUtils.isIdentityValid
-import minerva.android.walletmanager.manager.wallet.WalletManager
-import minerva.android.walletmanager.manager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.QrCodeResponse

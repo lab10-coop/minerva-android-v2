@@ -91,8 +91,8 @@ public class ERC20 extends Contract {
 
     public RemoteCall<String> name() {
         final Function function = new Function(FUNC_NAME,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Utf8String>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
@@ -108,8 +108,8 @@ public class ERC20 extends Contract {
 
     public RemoteCall<BigInteger> totalSupply() {
         final Function function = new Function(FUNC_TOTALSUPPLY,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
@@ -126,24 +126,24 @@ public class ERC20 extends Contract {
 
     public RemoteCall<BigInteger> decimals() {
         final Function function = new Function(FUNC_DECIMALS,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint8>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteCall<BigInteger> balanceOf(String _owner) {
         final Function function = new Function(FUNC_BALANCEOF,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_owner)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                Collections.<Type>singletonList(new Address(_owner)),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteCall<String> symbol() {
         final Function function = new Function(FUNC_SYMBOL,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {
+                Collections.<Type>emptyList(),
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Utf8String>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
@@ -161,14 +161,14 @@ public class ERC20 extends Contract {
         final Function function = new Function(FUNC_ALLOWANCE,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_owner),
                         new org.web3j.abi.datatypes.Address(_spender)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {
+                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public List<ApprovalEventResponse> getApprovalEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(APPROVAL_EVENT, transactionReceipt);
-        ArrayList<ApprovalEventResponse> responses = new ArrayList<ApprovalEventResponse>(valueList.size());
+        ArrayList<ApprovalEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             ApprovalEventResponse typedResponse = new ApprovalEventResponse();
             typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -201,7 +201,7 @@ public class ERC20 extends Contract {
 
     public List<TransferEventResponse> getTransferEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(TRANSFER_EVENT, transactionReceipt);
-        ArrayList<TransferEventResponse> responses = new ArrayList<TransferEventResponse>(valueList.size());
+        ArrayList<TransferEventResponse> responses = new ArrayList<>(valueList.size());
         for (Contract.EventValuesWithLog eventValues : valueList) {
             TransferEventResponse typedResponse = new TransferEventResponse();
             typedResponse.from = (String) eventValues.getIndexedValues().get(0).getValue();

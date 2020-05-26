@@ -7,7 +7,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.viewmodel.BaseViewModel
-import minerva.android.walletmanager.manager.wallet.WalletManager
+import minerva.android.walletmanager.wallet.WalletManager
 
 class CreateWalletViewModel(private val walletManager: WalletManager) : BaseViewModel() {
 

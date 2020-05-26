@@ -1,14 +1,12 @@
 package minerva.android.services.login.scanner
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.budiyev.android.codescanner.AutoFocusMode
@@ -18,7 +16,6 @@ import com.google.zxing.BarcodeFormat
 import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.values.listener.BaseScannerListener
 
 abstract class BaseScanner : Fragment() {
 //TODO think about listeners extraction

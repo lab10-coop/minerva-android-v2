@@ -118,6 +118,5 @@ class ChooseIdentityFragment : Fragment() {
         }
 
         private const val QR_CODE_RESPONSE = "scanResult"
-        val TAG: String = this::class.java.canonicalName ?: "ChooseIdentityFragment"
     }
 }
