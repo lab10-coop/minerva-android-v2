@@ -12,7 +12,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.kotlinUtils.viewmodel.BaseViewModel
+import minerva.android.base.BaseViewModel
 import minerva.android.walletmanager.manager.SmartContractManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT

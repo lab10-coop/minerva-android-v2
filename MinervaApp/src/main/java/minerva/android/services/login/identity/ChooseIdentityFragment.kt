@@ -85,7 +85,7 @@ class ChooseIdentityFragment : Fragment() {
 
     private fun handleLoginButton() {
         identitiesAdapter.getSelectedIdentity()?.let {
-            viewModel.handleLoginButton(it, qrCodeResponse)
+            viewModel.handleLogin(it, qrCodeResponse)
         }.orElse {
             Toast.makeText(context, getString(R.string.select_identity_message), Toast.LENGTH_LONG).show()
         }

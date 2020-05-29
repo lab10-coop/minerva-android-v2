@@ -258,7 +258,7 @@ class WalletManagerImpl(
             .map { PaymentMapper.map(it) }
             .map { Pair(it, walletConfigLiveData.value?.services) }
 
-    override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
+    override fun createJwtToken(payload: Map<String, Any?>, privateKey: String): Single<String> =
         cryptographyRepository.createJwtToken(payload, privateKey)
 
     override fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable =
@@ -396,8 +396,7 @@ class WalletManagerImpl(
         localStorage.saveIsMnemonicRemembered(true)
     }
 
-    override fun isMnemonicRemembered(): Boolean =
-        localStorage.isMnemonicRemembered()
+    override fun isMnemonicRemembered(): Boolean = localStorage.isMnemonicRemembered()
 
     override fun loadValue(position: Int): Value {
         walletConfigMutableLiveData.value?.values?.apply {

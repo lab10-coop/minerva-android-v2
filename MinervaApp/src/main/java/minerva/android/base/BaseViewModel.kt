@@ -1,4 +1,4 @@
-package minerva.android.kotlinUtils.viewmodel
+package minerva.android.base
 
 import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable

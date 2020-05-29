@@ -44,7 +44,7 @@ interface WalletManager {
 
     fun decodeQrCodeResponse(token: String): Single<QrCodeResponse>
     fun decodePaymentRequestToken(token: String): Single<Pair<Payment, List<Service>?>>
-    suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
+    fun createJwtToken(payload: Map<String, Any?>, privateKey: String): Single<String>
     fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable
 
     fun refreshBalances(): Single<HashMap<String, Balance>>

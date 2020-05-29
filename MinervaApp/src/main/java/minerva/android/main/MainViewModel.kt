@@ -1,18 +1,13 @@
 package minerva.android.main
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.kotlinUtils.viewmodel.BaseViewModel
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils
 import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
@@ -20,13 +15,13 @@ import minerva.android.services.login.uitls.LoginUtils.getRequestedData
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getServiceName
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
-import minerva.android.walletmanager.wallet.WalletManager
-import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
-class MainViewModel(private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository) : BaseViewModel() {
+class MainViewModel(private val walletManager: WalletManager, private val repository: WalletActionsRepository) : BaseViewModel() {
 
     lateinit var loginPayload: LoginPayload
 
@@ -82,32 +77,24 @@ class MainViewModel(private val walletManager: WalletManager, private val wallet
         if (LoginUtils.isIdentityValid(identity)) loginPayload.qrCode?.let { minervaLogin(identity, it) }
         else _requestedFieldsMutableLiveData.value = Event(identity.name)
 
-    private fun minervaLogin(identity: Identity, qrCodeResponse: QrCodeResponse) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val jwtToken = walletManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCodeResponse), identity.privateKey)
-            withContext(Dispatchers.Main) { handleLogin(qrCodeResponse, jwtToken, identity) }
-        }
-    }
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun handleLogin(qrCodeResponse: QrCodeResponse, jwtToken: String, identity: Identity) {
-        qrCodeResponse.callback?.let { callback ->
-            walletManager.painlessLogin(callback, jwtToken, identity, getService(qrCodeResponse, identity))
-                .observeOn(Schedulers.io())
-                .andThen(
-                    walletActionsRepository.saveWalletActions(
-                        getValuesWalletAction(identity.name, qrCodeResponse.serviceName),
-                        walletManager.masterSeed
-                    )
-                )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onError = {
-                        Timber.e("Error while login $it")
-                        _errorMutableLiveData.value = Event(Throwable(it.message))
+    private fun minervaLogin(identity: Identity, qrCode: QrCodeResponse) {
+        qrCode.callback?.let { callback ->
+            launchDisposable {
+                walletManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCode), identity.privateKey)
+                    .flatMapCompletable { jwtToken ->
+                        walletManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
                     }
-                )
+                    .observeOn(Schedulers.io())
+                    .andThen(repository.saveWalletActions(getValuesWalletAction(identity.name, qrCode.serviceName), walletManager.masterSeed))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onError = {
+                            Timber.e("Error while login $it")
+                            _errorMutableLiveData.value = Event(Throwable(it.message))
+                        }
+                    )
+            }
         }
     }
 

@@ -39,6 +39,7 @@ dependencies {
     implementation koinDependencies.values()
     implementation coreDependencies.values()
     implementation rxDependencies.values()
+    implementation coroutinesDependencies.values()
     implementation cryptographyDependencies.values()
     testImplementation testDependencies.values()
 }

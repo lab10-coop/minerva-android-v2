@@ -3,7 +3,7 @@ package minerva.android.values.address
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.kotlinUtils.viewmodel.BaseViewModel
+import minerva.android.base.BaseViewModel
 import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.model.Value
 
