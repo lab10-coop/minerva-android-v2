@@ -33,7 +33,7 @@ platform :android do
            slack(
              message: "Fresh and funky staging build is in da house!",
              channel: "#minerva_wallet_status",
-             slack_url: "https://hooks.slack.com/services/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",
+             slack_url: "https://hooks.slack.com/services/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",
                 )
   end
 end
