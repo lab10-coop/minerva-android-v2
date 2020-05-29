@@ -74,19 +74,12 @@
             app:layout_constraintTop_toTopOf="@+id/copyButton" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/rememberButton"
+        style="@style/PurpleButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginRight="@dimen/margin_normal"
-        android:layout_marginBottom="@dimen/margin_normal"
-        android:background="@drawable/rounded_button_purple"
-        android:fontFamily="@font/rubik_medium"
-        android:gravity="center"
-        android:padding="@dimen/margin_small"
         android:text="@string/i_will_safety_remember"
-        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
