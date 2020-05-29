@@ -2,6 +2,7 @@ package minerva.android.cryptographyProvider.repository
 
 import io.reactivex.Single
 import io.reactivex.subjects.SingleSubject
+import kotlinx.coroutines.rx2.rxSingle
 import me.uport.sdk.core.padBase64
 import me.uport.sdk.core.toBase64
 import me.uport.sdk.jwt.InvalidJWTException
@@ -74,10 +75,10 @@ class CryptographyRepositoryImpl : CryptographyRepository {
         }
     }
 
-    override suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String =
-        JWTTools().createJWT(payload, getDIDKey(privateKey), KPSigner(privateKey))
+    override fun createJwtToken(payload: Map<String, Any?>, privateKey: String): Single<String> =
+        rxSingle { JWTTools().createJWT(payload, getDIDKey(privateKey), KPSigner(privateKey)) }
 
-    private fun getDIDKey(key: String) = "did:ethr:${KPSigner(key).getAddress()}"
+    private fun getDIDKey(key: String) = "$DID_PREFIX${KPSigner(key).getAddress()}"
 
     override fun validateMnemonic(mnemonic: String): List<String> {
         mutableListOf<String>().apply {
@@ -97,10 +98,10 @@ class CryptographyRepositoryImpl : CryptographyRepository {
 
     private fun handleTokenExpired(payload: Map<String, Any?>) {
         if (isTokenValidYet(payload)) {
-            throw InvalidJWTException("Jwt not valid yet (issued in the future) iat: ${payload["iat"]}")
+            throw InvalidJWTException("Jwt not valid yet (issued in the future) iat: ${payload[IAT]}")
         }
         if (isTokenExpired(payload)) {
-            throw InvalidJWTException("JWT has expired: exp: ${payload["exp"]}")
+            throw InvalidJWTException("JWT has expired: exp: ${payload[EXP]}")
         }
     }
 
@@ -118,5 +119,6 @@ class CryptographyRepositoryImpl : CryptographyRepository {
         private const val MASTER_KEYS_DERIVED_PATH = "m/"
         private const val ENTROPY_SIZE = 128 / 8
         private const val RADIX = 16
+        private const val DID_PREFIX = "did:ethr:"
     }
 }

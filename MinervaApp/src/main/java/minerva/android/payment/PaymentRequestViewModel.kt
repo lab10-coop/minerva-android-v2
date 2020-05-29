@@ -2,19 +2,12 @@ package minerva.android.payment
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.kotlinUtils.viewmodel.BaseViewModel
-import minerva.android.walletmanager.wallet.WalletManager
-import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.Payment
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.WalletAction
@@ -26,8 +19,10 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.storage.ServiceName.Companion.M27_NAME
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 
-class PaymentRequestViewModel(private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository) :
+class PaymentRequestViewModel(private val walletManager: WalletManager, private val repository: WalletActionsRepository) :
     BaseViewModel() {
 
     lateinit var payment: Payment
@@ -83,7 +78,7 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
         launchDisposable {
             walletManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.getLastUsedFormatted()))
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED), walletManager.masterSeed))
+                .andThen(repository.saveWalletActions(getWalletAction(AUTHORISED), walletManager.masterSeed))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -96,22 +91,17 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
     }
 
     fun confirmTransaction() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val jwtToken = walletManager.createJwtToken(encodedData(), walletManager.masterSeed.privateKey)
-            withContext(Dispatchers.Main) {
-                launchDisposable { saveSignedWalletAction(jwtToken) }
-            }
+        launchDisposable {
+            walletManager.createJwtToken(encodedData(), walletManager.masterSeed.privateKey)
+                .flatMap { repository.saveWalletActions(getWalletAction(SIGNED), walletManager.masterSeed).toSingleDefault(it) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { _confirmPaymentMutableLiveData.value = Event(it) },
+                    onError = { _errorMutableLiveData.value = Event(it) }
+                )
         }
     }
-
-    private fun saveSignedWalletAction(jwtToken: String): Disposable =
-        walletActionsRepository.saveWalletActions(getWalletAction(SIGNED), walletManager.masterSeed)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onComplete = { _confirmPaymentMutableLiveData.value = Event(jwtToken) },
-                onError = { _errorMutableLiveData.value = Event(it) }
-            )
 
     private fun encodedData() =
         mapOf(

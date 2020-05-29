@@ -69,7 +69,6 @@ dependencies {
     implementation project(':UiExtension')
 
     implementation firebaseDepenedencies.values()
-    implementation coroutinesDependencies.values()
     implementation crashlyticsDependencies.values()
     implementation qrDependency.values()
     implementation uiDependencies.values()

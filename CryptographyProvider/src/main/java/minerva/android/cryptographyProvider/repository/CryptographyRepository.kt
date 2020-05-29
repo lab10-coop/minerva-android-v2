@@ -10,5 +10,5 @@ interface CryptographyRepository {
     fun restoreMasterSeed(mnemonic: String): Single<Triple<String, String, String>>
     fun validateMnemonic(mnemonic: String): List<String>
     fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>>
-    suspend fun createJwtToken(payload: Map<String, Any?>, privateKey: String): String
+    fun createJwtToken(payload: Map<String, Any?>, privateKey: String): Single<String>
 }
