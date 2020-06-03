@@ -43,8 +43,22 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         replaceFragment(IdentitiesFragment())
         prepareSettingsIcon()
         prepareObservers()
-//TODO works only for new app instance, not working for app on foreground and which comes back from background
-        viewModel.loginFromNotification(intent.getStringExtra(JWT))
+        painlessLogin(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        shouldShowLoadingScreen(false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.dispose()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        painlessLogin(intent)
     }
 
     private fun prepareObservers() {
@@ -61,14 +75,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        shouldShowLoadingScreen(false)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.dispose()
+    private fun painlessLogin(intent: Intent?){
+        viewModel.loginFromNotification(intent?.getStringExtra(JWT))
     }
 
     private fun prepareSettingsIcon() {

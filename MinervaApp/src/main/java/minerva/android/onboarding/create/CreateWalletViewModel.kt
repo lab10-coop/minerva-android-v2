@@ -32,7 +32,7 @@ class CreateWalletViewModel(private val walletManager: WalletManager) : BaseView
                     onComplete = { _createWalletMutableLiveData.value = Event(Unit) },
                     onError = {
                         _errorLiveData.value = Event(it)
-                        //TODO Panic Button. Uncomment code below to save manually - not recommended
+                        //Panic Button. Uncomment code below to save manually - not recommended
                         //_createWalletMutableLiveData.value = Event(Unit) //uncomment when offline app is needed
                     }
                 )
