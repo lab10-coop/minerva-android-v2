@@ -167,7 +167,7 @@ class WalletManagerImpl(
             config.values.forEachIndexed { position, value ->
                 if (value.index == index) {
                     when {
-                        areFundsOnValue(value.balance, value.assets) || hasMoreOwners(value) ->
+                        areFundsOnValue(value.cryptoBalance, value.assets) || hasMoreOwners(value) ->
                             return Completable.error(BalanceIsNotEmptyAndHasMoreOwnersThrowable())
                         isNotSafeAccountMasterOwner(config.values, value) ->
                             return Completable.error(IsNotSafeAccountMasterOwnerThrowable())

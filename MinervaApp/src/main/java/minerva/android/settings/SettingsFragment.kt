@@ -44,7 +44,7 @@ class SettingsFragment : Fragment() {
     private fun hideReminder() {
         if (viewModel.isMnemonicRemembered()) {
             listener.removeSettingsBadgeIcon()
-            reminderCardView.gone()
+            reminderView.gone()
             alertIcon.gone()
         }
     }

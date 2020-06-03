@@ -10,9 +10,9 @@
         android:layout_width="18dp"
         android:layout_height="18dp"
         android:layout_marginEnd="4dp"
-        android:contentDescription="@string/description"
         android:gravity="center"
-        tools:src="@drawable/ic_copy" />
+        tools:src="@drawable/ic_copy"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/label"

@@ -25,12 +25,7 @@ object MinervaFlashbar {
 }
 
 object KnownUserLoginFlashBar {
-    fun show(
-        activity: Activity,
-        message: String,
-        listener: OnFlashBarTapListener,
-        title: String = activity.getString(R.string.message)
-    ) {
+    fun show(activity: Activity, message: String, listener: OnFlashBarTapListener, title: String = activity.getString(R.string.message)) {
         prepareFlashBarWithButtons(activity, title, message, R.string.login, R.string.cancel)
             .positiveActionTapListener(object : Flashbar.OnActionTapListener {
                 override fun onActionTapped(bar: Flashbar) {

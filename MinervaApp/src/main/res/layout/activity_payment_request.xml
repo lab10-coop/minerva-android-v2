@@ -12,8 +12,8 @@
         android:layout_width="@dimen/logo_size"
         android:layout_height="@dimen/logo_size"
         android:layout_gravity="center"
-        android:contentDescription="@string/description"
-        android:src="@drawable/ic_minerva_icon" />
+        android:src="@drawable/ic_minerva_icon"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/serviceName"
@@ -26,7 +26,7 @@
         android:textSize="@dimen/text_normal"
         tools:text="M27" />
 
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

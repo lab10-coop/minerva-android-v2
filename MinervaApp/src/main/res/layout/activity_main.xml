@@ -7,7 +7,7 @@
     android:background="@color/lightGray"
     tools:context=".main.MainActivity">
 
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"
-        android:elevation="20dp"
+        android:elevation="@dimen/elevation"
         android:focusable="true"
         android:visibility="gone" />
 </FrameLayout>
