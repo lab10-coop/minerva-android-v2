@@ -207,13 +207,13 @@ class TransactionsViewModel(
         }
     }
 
-    fun getBalance(): BigDecimal = if (assetIndex == Int.InvalidIndex) value.balance else value.assets[assetIndex].balance
+    fun getBalance(): BigDecimal = if (assetIndex == Int.InvalidIndex) value.cryptoBalance else value.assets[assetIndex].balance
 
     fun getAllAvailableFunds(): String {
         if (assetIndex != Int.InvalidIndex) return value.assets[assetIndex].balance.toPlainString()
-        if (value.isSafeAccount) return value.balance.toPlainString()
+        if (value.isSafeAccount) return value.cryptoBalance.toPlainString()
 
-        value.balance.minus(transactionCost).apply {
+        value.cryptoBalance.minus(transactionCost).apply {
             return if (this < BigDecimal.ZERO) {
                 String.EmptyBalance
             } else {

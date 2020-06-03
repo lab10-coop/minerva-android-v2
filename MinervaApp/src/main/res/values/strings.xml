@@ -146,5 +146,4 @@
     <string name="cannot_remove_safe_account_title">You can\'t remove a safe account with other owners and funds</string>
     <string name="cannot_remove_safe_account_message">Please remove other owners first and then\n transfer yours funds to another account</string>
     <string name="safe_account_removal_error">You can not remove this Safe Account</string>
-    <string name="description">Description</string>
 </resources>

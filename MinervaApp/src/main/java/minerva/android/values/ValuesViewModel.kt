@@ -108,7 +108,7 @@ class ValuesViewModel(
         }
 
     fun createSafeAccount(value: Value) {
-        if (value.balance == BigDecimal.ZERO) {
+        if (value.cryptoBalance == BigDecimal.ZERO) {
             _noFundsLiveData.value = Event(Unit)
         } else {
             launchDisposable {

@@ -21,6 +21,8 @@ import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.Value
 import minerva.android.widget.AssetView
+import minerva.android.utils.BalanceUtils.getCryptoBalance
+import minerva.android.utils.BalanceUtils.getFiatBalance
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.wrapped.startSafeAccountWrappedActivity
@@ -36,12 +38,7 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
     override fun getItemCount(): Int = activeValues.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ValueViewHolder =
-        ValueViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.value_list_row, parent,
-                false
-            ), parent
-        )
+        ValueViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.value_list_row, parent, false), parent)
 
     override fun onBindViewHolder(holder: ValueViewHolder, position: Int) {
         activeValues[position].let {
@@ -71,8 +68,8 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
     fun updateBalances(balances: HashMap<String, Balance>) {
         activeValues.forEachIndexed { index, value ->
             value.apply {
-                if (balance != balances[address]?.cryptoBalance) {
-                    balance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
+                if (cryptoBalance != balances[address]?.cryptoBalance) {
+                    cryptoBalance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
                     fiatBalance = balances[address]?.fiatBalance ?: Int.InvalidId.toBigDecimal()
                     notifyItemChanged(index)
                 }
@@ -125,28 +122,44 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     }
 
     private fun View.bindData(value: Value) {
-        card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
-        icon.setImageResource(getNetworkIcon(Network.fromString(value.network)))
-        valueName.text = value.name
-        cryptoShortName.run {
-            text = value.network
-            setTextColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(value.network))))
+        with(value) {
+            card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(network))))
+            icon.setImageResource(getNetworkIcon(Network.fromString(network)))
+            valueName.text = name
+            cryptoShortName.run {
+                text = network
+                setTextColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(network))))
+            }
+            with(amountView) {
+                setCrypto(getCryptoBalance(cryptoBalance))
+                setFiat(getFiatBalance(fiatBalance))
+            }
+            sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), network)
         }
-        amountView.setAmounts(value.balance, value.fiatBalance)
-        sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), value.network)
-
     }
 
     private fun View.prepareView(value: Value) {
         if (!value.isSafeAccount) {
-            mainContent.margin(NO_FRAME, FRAME_TOP_WIDTH, NO_FRAME, NO_FRAME)
-            mainContent.setBackgroundResource(R.drawable.identity_background)
-            safeAccountBadge.gone()
+            prepareView()
         } else {
-            mainContent.margin(FRAME_WIDTH, FRAME_TOP_WIDTH, FRAME_WIDTH, FRAME_WIDTH)
-            mainContent.setBackgroundResource(R.drawable.safe_account_background)
-            safeAccountBadge.visible()
+            prepareSafeAccountView()
         }
+    }
+
+    private fun View.prepareView() {
+        mainContent.run {
+            margin(NO_FRAME, FRAME_TOP_WIDTH, NO_FRAME, NO_FRAME)
+            setBackgroundResource(R.drawable.identity_background)
+        }
+        safeAccountBadge.gone()
+    }
+
+    private fun View.prepareSafeAccountView() {
+        mainContent.run {
+            margin(FRAME_WIDTH, FRAME_TOP_WIDTH, FRAME_WIDTH, FRAME_WIDTH)
+            setBackgroundResource(R.drawable.safe_account_background)
+        }
+        safeAccountBadge.visible()
     }
 
     private fun View.setOnSendButtonClickListener(value: Value) {

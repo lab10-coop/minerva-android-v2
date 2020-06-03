@@ -7,10 +7,11 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.action_button.view.*
 import minerva.android.R
+import minerva.android.kotlinUtils.InvalidValue
 
-class ActionButton @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr) {
+class ActionButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = Int.InvalidValue) :
+    LinearLayout(context, attrs, defStyleAttr) {
+
     init {
         LayoutInflater.from(context).inflate(R.layout.action_button, this, true)
         val padding = resources.getDimension(R.dimen.margin_small).toInt()

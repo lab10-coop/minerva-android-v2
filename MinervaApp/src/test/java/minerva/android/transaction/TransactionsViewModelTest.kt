@@ -214,7 +214,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get available funds test`() {
-        viewModel.value.balance = BigDecimal.valueOf(5)
+        viewModel.value.cryptoBalance = BigDecimal.valueOf(5)
         viewModel.transactionCost = BigDecimal.valueOf(1)
         val result = viewModel.getAllAvailableFunds()
         result shouldBeEqualTo "4"

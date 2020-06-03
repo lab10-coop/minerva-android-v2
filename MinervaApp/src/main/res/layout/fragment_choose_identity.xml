@@ -8,13 +8,13 @@
 
     <ImageView
         android:id="@+id/minervaLogo"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:contentDescription="@string/description"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         android:src="@drawable/ic_minerva_icon"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/serviceName"
@@ -29,7 +29,7 @@
         app:layout_constraintTop_toBottomOf="@+id/minervaLogo"
         tools:text="Service Name" />
 
-    <androidx.cardview.widget.CardView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/identitiesView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -38,69 +38,64 @@
         android:layout_marginRight="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_large"
         android:background="@drawable/rounded_white_background"
-        android:elevation="2dp"
-        app:cardCornerRadius="16dp"
+        android:elevation="@dimen/cardview_default_elevation"
         app:layout_constraintBottom_toTopOf="@+id/loginButton"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/serviceName">
+        app:layout_constraintTop_toBottomOf="@+id/serviceName"
+        tools:ignore="PrivateResource">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/requestedDataLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_large"
+            android:fontFamily="@font/rubik_bold"
+            android:text="@string/requested_data"
+            android:textColor="@color/gray"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/requestedDataLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginTop="@dimen/margin_large"
-                android:fontFamily="@font/rubik_bold"
-                android:text="@string/requested_data"
-                android:textColor="@color/gray"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/requestedFields"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="@dimen/margin_large"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_regular"
+            android:textColor="@color/gray"
+            app:layout_constraintLeft_toRightOf="@+id/requestedDataLabel"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="phone, email" />
 
-            <TextView
-                android:id="@+id/requestedFields"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginTop="@dimen/margin_large"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:fontFamily="@font/rubik_regular"
-                android:textColor="@color/gray"
-                app:layout_constraintLeft_toRightOf="@+id/requestedDataLabel"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="phone, email" />
+        <TextView
+            android:id="@+id/chooseIdentityLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_medium"
+            android:text="@string/choose_an_identity"
+            android:textAllCaps="true"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/requestedDataLabel" />
 
-            <TextView
-                android:id="@+id/chooseIdentityLabel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_normal"
-                android:layout_marginTop="@dimen/margin_normal"
-                android:layout_marginEnd="@dimen/margin_normal"
-                android:fontFamily="@font/rubik_medium"
-                android:text="@string/choose_an_identity"
-                android:textAllCaps="true"
-                android:textColor="@color/colorPrimary"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/requestedDataLabel" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/identities"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_margin="@dimen/margin_normal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/chooseIdentityLabel" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/identities"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/margin_normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/chooseIdentityLabel" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:layout_width="wrap_content"

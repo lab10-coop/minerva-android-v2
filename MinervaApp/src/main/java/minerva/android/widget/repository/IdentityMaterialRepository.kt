@@ -30,7 +30,8 @@ private val opacityColor = listOf(
 )
 
 fun generateColor(value: String, opacity: Boolean = false): Int {
-    val index = abs(value.hashCode() % color.size)
-    return if (opacity) opacityColor[index]
-    else color[index]
+    abs(value.hashCode() % color.size).apply {
+        return if (opacity) opacityColor[this]
+        else color[this]
+    }
 }

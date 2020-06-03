@@ -104,7 +104,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
         whenever(smartContractManager.createSafeAccount(any())).thenReturn(Single.error(error))
         whenever(walletManager.createValue(any(), any(), any(), any())).thenReturn(Completable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.createSafeAccount(Value(index = 1, balance = BigDecimal.ONE))
+        viewModel.createSafeAccount(Value(index = 1, cryptoBalance = BigDecimal.ONE))
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -115,7 +115,7 @@ class ValuesViewModelTest : BaseViewModelTest() {
         walletManager.initWalletConfig()
         whenever(smartContractManager.createSafeAccount(any())).thenReturn(Single.just("address"))
         viewModel.noFundsLiveData.observeForever(noFundsObserver)
-        viewModel.createSafeAccount(Value(index = 1, balance = BigDecimal.ZERO))
+        viewModel.createSafeAccount(Value(index = 1, cryptoBalance = BigDecimal.ZERO))
         noFundsCaptor.run {
             verify(noFundsObserver).onChanged(capture())
         }

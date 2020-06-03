@@ -12,7 +12,7 @@ data class Value(
     val name: String = String.Empty,
     val network: String = String.Empty,
     var isDeleted: Boolean = false,
-    var balance: BigDecimal = Int.InvalidValue.toBigDecimal(),
+    var cryptoBalance: BigDecimal = Int.InvalidValue.toBigDecimal(),
     var assets: List<Asset> = listOf(),
     var fiatBalance: BigDecimal = BigDecimal.ZERO,
     var owners: List<String>? = null,

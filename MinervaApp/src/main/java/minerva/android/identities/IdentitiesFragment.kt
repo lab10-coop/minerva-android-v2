@@ -12,19 +12,18 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.identities.adapter.IdentityAdapter
+import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Identity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class IdentitiesFragment : Fragment() {
+class IdentitiesFragment : Fragment(), IdentityFragmentListener {
 
     private val viewModel: IdentitiesViewModel by viewModel()
-    private val identityAdapter = IdentityAdapter()
+    private val identityAdapter = IdentityAdapter(this)
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.recycler_view_layout, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.recycler_view_layout, container, false)
 
     //TODO BaseFragment?
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -43,7 +42,6 @@ class IdentitiesFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             adapter = identityAdapter
         }
-        identityAdapter.removeIdentityLiveData.observe(viewLifecycleOwner, EventObserver { showRemoveDialog(it) })
     }
 
     private fun showError(error: Throwable) {
@@ -70,5 +68,9 @@ class IdentitiesFragment : Fragment() {
                 .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
                 .show()
         }
+    }
+
+    override fun onIdentityRemoved(identity: Identity) {
+        showRemoveDialog(identity)
     }
 }

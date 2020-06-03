@@ -20,7 +20,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         removeAllViews()
         map.forEach { (key, value) ->
             val titledTextView = TitledTextView(context)
-            titledTextView.setTitleAndBody(key, value)
+            titledTextView.setTitleAndBody(getIdentityDataLabel(context, key), value)
             setDefaultTopPadding(titledTextView)
             views.add(titledTextView)
             addView(titledTextView)
@@ -31,9 +31,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
 
     fun open() {
         showEverything()
-        if (views.isNotEmpty()) {
-            description.gone()
-        }
+        if (views.isNotEmpty()) description.gone()
     }
 
     fun close() {
@@ -46,9 +44,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
 
     private fun showOnlyFirstElement() {
         views.forEachIndexed { index, view ->
-            if (index > FIRST_ELEMENT) {
-                view.gone()
-            }
+            if (index > FIRST_ELEMENT) view.gone()
         }
     }
 
@@ -63,14 +59,15 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     }
 
     private fun createDescriptionText(keys: MutableSet<String>): String {
-        val str = StringBuilder(PLUS_SIGN)
-        keys.forEachIndexed { index, key ->
-            if (index > FIRST_ELEMENT) {
-                str.append(getIdentityDataLabel(context, key))
-                if (index < keys.size - 1) str.append(COMMA_SIGN)
+        with(StringBuilder(PLUS_SIGN)) {
+            keys.forEachIndexed { index, key ->
+                if (index > FIRST_ELEMENT) {
+                    append(getIdentityDataLabel(context, key))
+                    if (index < keys.size - 1) append(COMMA_SIGN)
+                }
             }
+            return this.toString()
         }
-        return str.toString()
     }
 
     private fun setDefaultTopPadding(view: View) {

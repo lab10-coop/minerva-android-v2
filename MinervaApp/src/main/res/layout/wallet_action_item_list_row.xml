@@ -44,5 +44,5 @@
         app:layout_constraintLeft_toRightOf="@+id/icon"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/header"
-        tools:text="Identityfasfjdshkfbasdhfashdfkjdsfnkjdsahfadkjsfklajdsfh,adsfbdsbfasdjkfbfadsffdsfasfsadasdas" />
+        tools:text="idetity" />
 </androidx.constraintlayout.widget.ConstraintLayout>

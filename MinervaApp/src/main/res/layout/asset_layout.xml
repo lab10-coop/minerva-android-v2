@@ -18,8 +18,8 @@
         android:layout_alignTop="@id/amountView"
         android:layout_alignBottom="@id/amountView"
         android:layout_alignParentEnd="true"
-        android:contentDescription="@string/description"
-        android:src="@drawable/ic_down_arrow" />
+        android:src="@drawable/ic_down_arrow"
+        tools:ignore="ContentDescription" />
 
     <minerva.android.widget.CryptoAmountView
         android:id="@+id/amountView"

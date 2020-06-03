@@ -13,9 +13,12 @@ import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.Value
+import minerva.android.utils.BalanceUtils.getCryptoBalance
+import minerva.android.utils.BalanceUtils.getFiatBalance
 import java.math.BigDecimal
 
-class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @DrawableRes logoRes: Int) : RelativeLayout(callback.getContext()) {
+class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @DrawableRes logoRes: Int) :
+    RelativeLayout(callback.getContext()) {
 
     private val isOpen: Boolean
         get() = sendButton.isVisible
@@ -26,8 +29,11 @@ class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @Dr
         prepareListeners(callback, value, assetIndex)
     }
 
-    fun setAmounts(crypto: BigDecimal, currency: BigDecimal = WRONG_CURRENCY_VALUE) {
-        amountView.setAmounts(crypto, currency)
+    fun setAmounts(crypto: BigDecimal, fiat: BigDecimal = WRONG_CURRENCY_VALUE) {
+        with(amountView) {
+            setCrypto(getCryptoBalance(crypto))
+            setFiat(getFiatBalance(fiat))
+        }
     }
 
     private fun open() {
@@ -53,9 +59,7 @@ class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @Dr
             TransitionManager.beginDelayedTransition(callback.getViewGroup())
             if (isOpen) close() else open()
         }
-        sendButton.setOnClickListener {
-            callback.onSendAssetClicked(value.index, assetIndex)
-        }
+        sendButton.setOnClickListener { callback.onSendAssetClicked(value.index, assetIndex) }
     }
 
     companion object {

@@ -10,10 +10,10 @@ import minerva.android.identities.data.getIdentityDataLabel
 
 class TitledTextView(context: Context) : LinearLayout(context) {
 
-    fun setTitleAndBody(titleKey: String, body: String) {
+    fun setTitleAndBody(titleText: String, bodyText: String) {
         visible()
-        this.title.text = getIdentityDataLabel(context, titleKey)
-        this.body.text = body
+        title.text = titleText
+        body.text = bodyText
     }
 
     init {
