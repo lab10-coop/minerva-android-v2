@@ -144,7 +144,7 @@ class WalletManagerImpl(
                 keystoreRepository.encryptMasterSeed(masterSeed)
                 walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
             }
-//          TODO Panic Button. Uncomment code below to save manually - not recommended
+//          Panic Button. Uncomment code below to save manually - not recommended
 //            .doOnError {
 //                keystoreRepository.encryptKey(masterSeed)
 //                walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
@@ -382,7 +382,7 @@ class WalletManagerImpl(
                     walletConfigRepository.saveWalletConfigLocally(this)
                 }
                 .doOnError {
-                    //TODO Panic Button. Uncomment code below to save manually - not recommended
+                    //Panic Button. Uncomment code below to save manually - not recommended
                     //walletConfigRepository.saveWalletConfigLocally(this)
                     //walletConfigMutableLiveData.value = walletConfig
                 }
