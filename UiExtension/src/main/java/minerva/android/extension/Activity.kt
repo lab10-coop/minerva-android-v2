@@ -8,13 +8,28 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
 
-inline fun <reified T : Any> Context.launchActivity(
-    options: Bundle? = null,
-    noinline init: Intent.() -> Unit = {}
-) {
-    val intent = newIntent<T>(this)
-    intent.init()
-    startActivity(intent, options)
+fun AppCompatActivity.addFragment(containerId: Int, fragment: Fragment, slideIn: Int = 0, slideOut: Int = 0) {
+    supportFragmentManager.beginTransaction().apply {
+        setCustomAnimations(slideIn, 0, 0, slideOut)
+        add(containerId, fragment)
+        commit()
+    }
+}
+
+fun AppCompatActivity.replaceFragment(containerId: Int, fragment: Fragment, slideIn: Int = 0, slideOut: Int = 0) {
+    supportFragmentManager.beginTransaction().apply {
+        setCustomAnimations(slideIn, 0, 0, slideOut)
+        replace(containerId, fragment)
+        addToBackStack(null)
+        commit()
+    }
+}
+
+inline fun <reified T : Any> Context.launchActivity(options: Bundle? = null, noinline init: Intent.() -> Unit = {}) {
+    newIntent<T>(this).apply {
+        init()
+        startActivity(this, options)
+    }
 }
 
 inline fun <reified T : Any> Activity.launchActivityForResult(
@@ -22,9 +37,10 @@ inline fun <reified T : Any> Activity.launchActivityForResult(
     options: Bundle? = null,
     noinline init: Intent.() -> Unit = {}
 ) {
-    val intent = newIntent<T>(this)
-    intent.init()
-    startActivityForResult(intent, requestCode, options)
+    newIntent<T>(this).apply {
+        init()
+        startActivityForResult(this, requestCode, options)
+    }
 }
 
 inline fun <reified T : Any> newIntent(context: Context): Intent =
@@ -32,4 +48,3 @@ inline fun <reified T : Any> newIntent(context: Context): Intent =
 
 fun AppCompatActivity.getCurrentFragment(): Fragment? =
     supportFragmentManager.fragments.firstOrNull { it.isVisible }
-

@@ -84,10 +84,7 @@ ext {
     ]
 
     coroutinesDependencies = [
-//            core            : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion",
             coroutinesRx2: "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion"
-//            android         : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion",
-//            viewModel       : "androidx.lifecycle:lifecycle-viewmodel-ktx:$viewModelScopeVersion"
     ]
 
     retrofitDependencies = [

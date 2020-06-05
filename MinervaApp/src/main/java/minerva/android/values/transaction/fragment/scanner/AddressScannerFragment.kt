@@ -1,4 +1,4 @@
-package minerva.android.values.akm
+package minerva.android.values.transaction.fragment.scanner
 
 import android.content.Context
 import android.widget.Toast
@@ -8,16 +8,15 @@ import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScanner
-import minerva.android.wrapped.WrappedActivityListener
+import minerva.android.values.listener.ScannerFragmentsListener
 
-//TODO need to be refactored - code duplication with TransactionScannerFragment
 class AddressScannerFragment : BaseScanner() {
 
-    private lateinit var listener: WrappedActivityListener
+    private lateinit var listener: ScannerFragmentsListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as WrappedActivityListener
+        listener = context as ScannerFragmentsListener
     }
 
     override fun setupCodeScanner() {
@@ -27,12 +26,12 @@ class AddressScannerFragment : BaseScanner() {
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
                         scannerProgressBar.visible()
+                        listener.setScanResult(it.text)
                         shouldScan = false
-                        listener.putStringExtra(it.text)
-                        listener.goBack(this@AddressScannerFragment)
                     }
                 }
             }
+
             errorCallback = ErrorCallback {
                 requireActivity().runOnUiThread {
                     Toast.makeText(context, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
@@ -43,18 +42,16 @@ class AddressScannerFragment : BaseScanner() {
 
     override fun setOnCloseButtonListener() {
         closeButton.setOnClickListener {
-            listener.goBack(this)
+            listener.onBackPressed()
         }
     }
 
     override fun onPermissionNotGranted() {
-        listener.goBack(this)
+        listener.onBackPressed()
     }
 
     companion object {
         @JvmStatic
         fun newInstance() = AddressScannerFragment()
-        const val SCANNER_FRAGMENT = "scannerFragment"
     }
-
 }

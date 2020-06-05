@@ -18,7 +18,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginScannerFragment : BaseScanner() {
 
-    private val viewModel: ScannerViewModel by viewModel()
+    private val viewModel: LoginScannerViewModel by viewModel()
     lateinit var listener: PainlessLoginFragmentListener
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,9 +68,7 @@ class LoginScannerFragment : BaseScanner() {
     }
 
     private fun goToChooseIdentityFragment(qrCodeResponse: QrCodeResponse) {
-        Handler().postDelayed({
-            listener.showChooseIdentityFragment(qrCodeResponse)
-        }, DELAY)
+        Handler().postDelayed({ listener.showChooseIdentityFragment(qrCodeResponse) }, DELAY)
     }
 
     private fun handleError() {

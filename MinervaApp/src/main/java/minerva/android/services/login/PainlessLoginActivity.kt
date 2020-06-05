@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
+import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
+import minerva.android.extension.replaceFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.identity.ChooseIdentityFragment
 import minerva.android.services.login.scanner.LoginScannerFragment
@@ -20,15 +22,8 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_painless_login)
         hideToolbar()
-        showScannerFragment()
+        addFragment(R.id.container, LoginScannerFragment.newInstance())
         window.statusBarColor = getColor(R.color.lightGray)
-    }
-
-    private fun showScannerFragment() {
-        supportFragmentManager.beginTransaction().apply {
-            add(R.id.loginFragmentsContainer, LoginScannerFragment.newInstance())
-            commit()
-        }
     }
 
     override fun onBackPressed() {
@@ -65,12 +60,10 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
     }
 
     private fun showFragment(qrCodeResponse: QrCodeResponse) {
-        supportFragmentManager.beginTransaction().apply {
-            setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right)
-            replace(R.id.loginFragmentsContainer, ChooseIdentityFragment.newInstance(qrCodeResponse))
-            addToBackStack(null)
-            commit()
-        }
+        replaceFragment(
+            R.id.container, ChooseIdentityFragment.newInstance(qrCodeResponse),
+            R.animator.slide_in_left, R.animator.slide_out_right
+        )
     }
 
     private fun setupActionBar() {

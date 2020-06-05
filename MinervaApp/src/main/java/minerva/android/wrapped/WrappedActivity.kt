@@ -3,34 +3,30 @@ package minerva.android.wrapped
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import minerva.android.R
+import minerva.android.extension.addFragment
+import minerva.android.extension.getCurrentFragment
+import minerva.android.extension.replaceFragment
 import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.kotlinUtils.event.Event
 import minerva.android.values.address.ValueAddressFragment
-import minerva.android.values.akm.AddressScannerFragment
-import minerva.android.values.akm.AddressScannerFragment.Companion.SCANNER_FRAGMENT
 import minerva.android.values.akm.SafeAccountSettingsFragment
 import minerva.android.values.create.NewValueFragment
+import minerva.android.values.listener.ScannerFragmentsListener
+import minerva.android.values.transaction.fragment.scanner.AddressScannerFragment
 import java.util.*
 
-class WrappedActivity : AppCompatActivity(), WrappedActivityListener {
-
-    private val _extraStringLiveData = MutableLiveData<Event<String>>()
-    override val extraStringLiveData: LiveData<Event<String>> get() = _extraStringLiveData
+class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wrapped)
-
-        val fragmentType = getFragmentType()
-        prepareActionBar(fragmentType)
-        prepareFragment(fragmentType)
+        getFragmentType().apply {
+            prepareActionBar(this)
+            prepareFragment(this)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
@@ -42,24 +38,14 @@ class WrappedActivity : AppCompatActivity(), WrappedActivityListener {
             else -> super.onOptionsItemSelected(item)
         }
 
-    override fun putStringExtra(string: String) {
-        _extraStringLiveData.value = Event(string)
-    }
-
-    override fun goBack(fragment: Fragment) {
-        supportActionBar?.show()
-        supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_from_right, R.anim.slide_to_right)
-            .remove(fragment)
-            .commit()
-        supportFragmentManager.popBackStack()
-
+    override fun setScanResult(text: String?) {
+        onBackPressed()
+        (getCurrentFragment() as? SafeAccountSettingsFragment)?.setScanResult(text)
     }
 
     override fun showScanner() {
         supportActionBar?.hide()
-        supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_from_right, R.anim.slide_to_right)
-            .add(R.id.fragmentContainer, AddressScannerFragment.newInstance())
-            .addToBackStack(SCANNER_FRAGMENT).commit()
+        replaceFragment(R.id.container, AddressScannerFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
     }
 
     override fun onBackPressed() {
@@ -73,13 +59,8 @@ class WrappedActivity : AppCompatActivity(), WrappedActivityListener {
             WrappedFragmentType.VALUE -> NewValueFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
             WrappedFragmentType.VALUE_ADDRESS -> ValueAddressFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
-            //else fragments
         }
-
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragmentContainer, fragment)
-            commit()
-        }
+        addFragment(R.id.container, fragment)
     }
 
     private fun getDefaultTitle(fragmentType: WrappedFragmentType) =

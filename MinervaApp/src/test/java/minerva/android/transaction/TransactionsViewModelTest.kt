@@ -18,6 +18,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.test.assertEquals
 
 class TransactionViewModelTest : BaseViewModelTest() {
 
@@ -130,7 +131,14 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `send asset main transaction test success`() {
         viewModel.apply {
-            value = Value(index = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa", assets = listOf(Asset("name")))
+            value = Value(
+                index = 0,
+                publicKey = "12",
+                privateKey = "12",
+                address = "address",
+                contractAddress = "aa",
+                assets = listOf(Asset("name"))
+            )
             assetIndex = 0
         }
         whenever(walletManager.transferERC20Token(any(), any())).thenReturn(Completable.complete())
@@ -146,8 +154,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send asset main transaction test error`() {
         val error = Throwable()
         viewModel.apply {
-            value = Value(index = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                assets = listOf(Asset("name")))
+            value = Value(
+                index = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
+                assets = listOf(Asset("name"))
+            )
             assetIndex = 0
         }
         whenever(walletManager.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
@@ -181,7 +191,6 @@ class TransactionViewModelTest : BaseViewModelTest() {
             verify(sendTransactionObserver).onChanged(capture())
         }
     }
-
 
     @Test
     fun `send safe account asset transaction test error`() {
@@ -218,5 +227,18 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.transactionCost = BigDecimal.valueOf(1)
         val result = viewModel.getAllAvailableFunds()
         result shouldBeEqualTo "4"
+    }
+
+    @Test
+    fun `prepare prefix address test`() {
+        val result = viewModel.preparePrefixAddress("prefixAddress", "prefix")
+        assertEquals(result, "Address")
+    }
+
+    @Test
+    fun`is correct network test`(){
+        viewModel.value = Value(0, name = "prefixName")
+        val result = viewModel.isCorrectNetwork("prefix")
+        assertEquals(result, true)
     }
 }

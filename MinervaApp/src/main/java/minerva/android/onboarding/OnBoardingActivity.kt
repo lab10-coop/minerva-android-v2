@@ -8,13 +8,16 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import minerva.android.R
+import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivity
+import minerva.android.extension.replaceFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.main.MainActivity
 import minerva.android.onboarding.create.CreateWalletFragment
 import minerva.android.onboarding.restore.RestoreWalletFragment
 import minerva.android.onboarding.welcome.WelcomeFragment
+import minerva.android.values.transaction.fragment.scanner.AddressScannerFragment
 
 class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
 
@@ -22,7 +25,7 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
         setupActionBar()
-        showWelcomeFragment()
+        addFragment(R.id.mainContent, WelcomeFragment())
     }
 
     override fun onBackPressed() {
@@ -32,15 +35,8 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
         super.onBackPressed()
     }
 
-    private fun showWelcomeFragment() {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.mainContent, WelcomeFragment())
-            commit()
-        }
-    }
-
-    private fun isRestoreOrCreateWalletFragment() = getCurrentFragment() is RestoreWalletFragment ||
-            getCurrentFragment() is CreateWalletFragment
+    private fun isRestoreOrCreateWalletFragment() =
+        getCurrentFragment() is RestoreWalletFragment || getCurrentFragment() is CreateWalletFragment
 
     private fun setupActionBar() {
         supportActionBar?.apply {
@@ -66,21 +62,13 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
 
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
-    private fun showFragment(fragment: Fragment, tag: String) {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.mainContent, fragment)
-            addToBackStack(tag)
-            commit()
-        }
-    }
-
     override fun showRestoreWalletFragment() {
-        showFragment(RestoreWalletFragment.newInstance(), RestoreWalletFragment.TAG)
+        replaceFragment(R.id.mainContent, RestoreWalletFragment.newInstance())
         setToolbarBackButtonVisibility(true)
     }
 
     override fun showCreateWalletFragment() {
-        showFragment(CreateWalletFragment.newInstance(), CreateWalletFragment.TAG)
+        replaceFragment(R.id.mainContent, CreateWalletFragment.newInstance())
         setToolbarBackButtonVisibility(true)
     }
 

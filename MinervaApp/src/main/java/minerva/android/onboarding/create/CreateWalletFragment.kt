@@ -91,7 +91,5 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
     companion object {
         @JvmStatic
         fun newInstance() = CreateWalletFragment()
-
-        val TAG: String = this::class.java.canonicalName ?: "CreateWalletFragment"
     }
 }
