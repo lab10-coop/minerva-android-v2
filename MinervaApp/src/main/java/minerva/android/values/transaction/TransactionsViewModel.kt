@@ -8,11 +8,11 @@ import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.base.BaseViewModel
 import minerva.android.walletmanager.manager.SmartContractManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
@@ -36,13 +36,11 @@ class TransactionsViewModel(
 
     lateinit var transaction: Transaction
 
-    internal var value: Value = Value(Int.InvalidIndex)
-    internal var assetIndex: Int = Int.InvalidIndex
+    var value: Value = Value(Int.InvalidIndex)
+    var assetIndex: Int = Int.InvalidIndex
+
     var transactionCost: BigDecimal = BigDecimal.ZERO
     lateinit var recipients: List<Recipient>
-
-    private val _getValueLiveData = MutableLiveData<Event<Value>>()
-    val getValueLiveData: LiveData<Event<Value>> get() = _getValueLiveData
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -64,7 +62,6 @@ class TransactionsViewModel(
             if (it.index == valueIndex) {
                 value = it
                 this.assetIndex = assetIndex
-                _getValueLiveData.value = Event(it)
             }
         }
     }
@@ -255,20 +252,13 @@ class TransactionsViewModel(
     }
 
     private fun resolveENS(
-        receiverKey: String,
-        amount: BigDecimal,
-        gasPrice: BigDecimal,
-        gasLimit: BigInteger,
-        contractAddress: String = String.Empty
+        receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger, contractAddress: String = String.Empty
     ): Single<Transaction> =
         walletManager.resolveENS(receiverKey)
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(
-            getValuesWalletAction(transaction, network, status),
-            walletManager.masterSeed
-        )
+        walletActionsRepository.saveWalletActions(getValuesWalletAction(transaction, network, status), walletManager.masterSeed)
 
     private fun prepareTransaction(
         receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger, contractAddress: String = String.Empty
@@ -276,4 +266,16 @@ class TransactionsViewModel(
 
     val network
         get() = value.network
+
+    fun preparePrefixAddress(prefixAddress: String, prefix: String): String =
+        prefixAddress.removePrefix(prefix).replace(META_ADDRESS_SEPARATOR, String.Empty)
+
+    fun prepareTitle() =
+        if (assetIndex != Int.InvalidIndex) value.assets[assetIndex].name else value.network
+
+    fun isCorrectNetwork(prefixAddress: String) = value.name.contains(prefixAddress, true)
+
+    companion object {
+        const val META_ADDRESS_SEPARATOR = ":"
+    }
 }

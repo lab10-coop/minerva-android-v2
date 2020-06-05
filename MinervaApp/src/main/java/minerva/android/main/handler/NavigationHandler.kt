@@ -25,22 +25,10 @@ internal fun MainActivity.prepareBottomNavMenu() {
     bottomNavigation.setOnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.identities -> replaceFragment(IdentitiesFragment())
-            R.id.values -> replaceFragment(
-                ValuesFragment(),
-                R.string.values
-            )
-            R.id.services -> replaceFragment(
-                ServicesFragment(),
-                R.string.services
-            )
-            R.id.activity -> replaceFragment(
-                WalletActionsFragment(),
-                R.string.activity
-            )
-            R.id.settings -> replaceFragment(
-                SettingsFragment(),
-                R.string.settings
-            )
+            R.id.values -> replaceFragment(ValuesFragment(), R.string.values)
+            R.id.services -> replaceFragment(ServicesFragment(), R.string.services)
+            R.id.activity -> replaceFragment(WalletActionsFragment(), R.string.activity)
+            R.id.settings -> replaceFragment(SettingsFragment(), R.string.settings)
         }
         true
     }
@@ -50,7 +38,7 @@ internal fun MainActivity.replaceFragment(fragment: Fragment, @StringRes title: 
     supportActionBar?.setTitle(title)
     invalidateOptionsMenu()
     supportFragmentManager.beginTransaction().apply {
-        replace(R.id.fragmentContainer, fragment)
+        replace(R.id.container, fragment)
         commit()
     }
 }

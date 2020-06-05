@@ -22,7 +22,6 @@ class FormValidatorTest {
 
     @Test
     fun `test receiver address validator`() {
-        checkExpectedEmptyResult(Validator.validateReceiverAddress(""))
         val incorrectReceiverValidationResult = Validator.validateReceiverAddress("123456789")
         incorrectReceiverValidationResult.hasError shouldBeEqualTo true
         incorrectReceiverValidationResult.errorMessageId shouldBeEqualTo R.string.invalid_account_address

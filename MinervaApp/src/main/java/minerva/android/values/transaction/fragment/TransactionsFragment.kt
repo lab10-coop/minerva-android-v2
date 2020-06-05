@@ -13,14 +13,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Function4
+import io.reactivex.functions.Function5
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_transactions.*
 import minerva.android.R
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.values.listener.AddressFragmentsListener
+import minerva.android.values.listener.ScannerFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.values.transaction.fragment.adapter.RecipientAdapter
 import minerva.android.walletmanager.model.Recipient
@@ -34,14 +34,12 @@ import java.math.BigInteger
 class TransactionsFragment : Fragment() {
 
     private var areTransactionCostsOpen = false
-    private lateinit var listener: AddressFragmentsListener
+    private lateinit var listener: ScannerFragmentsListener
     private val viewModel: TransactionsViewModel by sharedViewModel()
     private var validationDisposable: Disposable? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_transactions, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_transactions, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -92,11 +90,12 @@ class TransactionsFragment : Fragment() {
     private fun prepareTextListeners() {
         validationDisposable = Observable.combineLatest(
             amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
+            receiver.getValidationObservable(receiverInputLayout) { Validator.validateIsFilled(it) },
             receiver.getValidationObservable(receiverInputLayout) { Validator.validateReceiverAddress(it) },
             gasLimitEditText.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },
             gasPriceEditText.getValidationObservable(gasPriceInputLayout) { Validator.validateIsFilled(it) },
-            Function4<Boolean, Boolean, Boolean, Boolean, Boolean> { isAmountValid, isReceiverValid, isGasLimitValid, isGasPriceValid ->
-                isAmountValid && isReceiverValid && isGasLimitValid && isGasPriceValid
+            Function5<Boolean, Boolean, Boolean, Boolean, Boolean, Boolean> { isAmountValid, isFilled, isReceiverValid, isGasLimitValid, isGasPriceValid ->
+                isAmountValid && isFilled && isReceiverValid && isGasLimitValid && isGasPriceValid
             }
         ).subscribeBy(
             onNext = {
@@ -191,7 +190,7 @@ class TransactionsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as AddressFragmentsListener
+        listener = context as ScannerFragmentsListener
     }
 
     private fun setupListeners() {

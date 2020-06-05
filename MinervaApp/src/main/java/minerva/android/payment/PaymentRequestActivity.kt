@@ -7,6 +7,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_payment_request.*
 import minerva.android.R
+import minerva.android.extension.addFragment
+import minerva.android.extension.replaceFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.payment.fragment.ConfirmTransactionFragment
@@ -53,7 +55,7 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
         viewModel.apply {
             showConnectionRequestLiveData.observe(this@PaymentRequestActivity, EventObserver {
                 serviceName.text = it
-                showConnectionRequestFragment()
+                addFragment(R.id.container, ConnectionRequestFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
             })
             showPaymentConfirmationLiveData.observe(this@PaymentRequestActivity, EventObserver { showConfirmTransactionScreen() })
             errorLiveData.observe(this@PaymentRequestActivity, EventObserver { finish() })
@@ -68,20 +70,8 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
         window.statusBarColor = getColor(R.color.lightGray)
     }
 
-    private fun showConnectionRequestFragment() {
-        supportFragmentManager.beginTransaction().apply {
-            setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right)
-            add(R.id.fragmentContainer, ConnectionRequestFragment.newInstance())
-            commit()
-        }
-    }
-
     override fun showConfirmTransactionScreen() {
-        supportFragmentManager.beginTransaction().apply {
-            setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right)
-            replace(R.id.fragmentContainer, ConfirmTransactionFragment.newInstance())
-            commit()
-        }
+        replaceFragment(R.id.container, ConfirmTransactionFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
     }
 
     override fun onResultOk(signedData: String) {

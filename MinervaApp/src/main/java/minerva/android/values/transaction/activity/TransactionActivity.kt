@@ -7,40 +7,36 @@ import android.view.MenuItem
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
+import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
+import minerva.android.extension.replaceFragment
 import minerva.android.extension.validator.Validator.HEX_PREFIX
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.values.listener.AddressFragmentsListener
 import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.values.listener.ScannerFragmentsListener
 import minerva.android.values.transaction.TransactionsViewModel
+import minerva.android.values.transaction.TransactionsViewModel.Companion.META_ADDRESS_SEPARATOR
 import minerva.android.values.transaction.fragment.TransactionsFragment
-import minerva.android.values.transaction.fragment.scanner.TransactionScannerFragment
+import minerva.android.values.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.Value
 import minerva.android.widget.repository.getNetworkIcon
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class TransactionActivity : AppCompatActivity(), AddressFragmentsListener {
+class TransactionActivity : AppCompatActivity(), ScannerFragmentsListener {
 
     private val viewModel: TransactionsViewModel by viewModel()
-    private lateinit var value: Value
-    private var assetIndex: Int = Int.InvalidIndex
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transaction)
-        viewModel.getValueLiveData.observe(this, EventObserver { initView(it) })
-        getValue()
+        viewModel.getValue(intent.getIntExtra(VALUE_INDEX, Int.InvalidIndex), intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex))
+        initView()
     }
 
-    private fun initView(value: Value) {
-        value.apply {
-            this@TransactionActivity.value = this
-            prepareActionBar()
-            showTransactionFragment()
-        }
+    private fun initView() {
+        prepareActionBar()
+        addFragment(R.id.container, TransactionsFragment.newInstance())
     }
 
     override fun onBackPressed() {
@@ -48,23 +44,11 @@ class TransactionActivity : AppCompatActivity(), AddressFragmentsListener {
         super.onBackPressed()
     }
 
-    private fun showTransactionFragment() {
-        supportFragmentManager.beginTransaction().apply {
-            add(R.id.transactionFragmentsContainer, TransactionsFragment.newInstance())
-            commit()
-        }
-    }
-
-    private fun getValue() {
-        assetIndex = intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex)
-        viewModel.getValue(intent.getIntExtra(VALUE_INDEX, Int.InvalidIndex), assetIndex)
-    }
-
     private fun prepareActionBar() {
         supportActionBar?.apply {
             show()
-            title = " ${getString(R.string.send)} ${prepareTitle()}"
-            subtitle = " ${value.name}"
+            title = " ${getString(R.string.send)} ${viewModel.prepareTitle()}"
+            subtitle = " ${viewModel.value.name}"
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
             setDisplayUseLogoEnabled(true)
@@ -73,11 +57,8 @@ class TransactionActivity : AppCompatActivity(), AddressFragmentsListener {
     }
 
     private fun ActionBar.setLogo() {
-        if (value.isSafeAccount) {
-            setLogo(getDrawable(R.drawable.ic_artis_safe_account))
-        } else {
-            setLogo(getDrawable(getNetworkIcon(Network.fromString(value.network))))
-        }
+        if (viewModel.value.isSafeAccount) setLogo(getDrawable(R.drawable.ic_artis_safe_account))
+        else setLogo(getDrawable(getNetworkIcon(Network.fromString(viewModel.value.network))))
     }
 
     override fun onResult(isResultSucceed: Boolean, message: String?, loginPayload: LoginPayload?) {
@@ -90,12 +71,7 @@ class TransactionActivity : AppCompatActivity(), AddressFragmentsListener {
 
     override fun showScanner() {
         supportActionBar?.hide()
-        supportFragmentManager.beginTransaction().apply {
-            setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right)
-            replace(R.id.transactionFragmentsContainer, TransactionScannerFragment.newInstance())
-            addToBackStack(null)
-            commit()
-        }
+        replaceFragment(R.id.container, AddressScannerFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
     }
 
     override fun setScanResult(text: String?) {
@@ -103,7 +79,7 @@ class TransactionActivity : AppCompatActivity(), AddressFragmentsListener {
         text?.let {
             (getCurrentFragment() as TransactionsFragment).let { transactionFragment ->
                 text.replace(META_ADDRESS_SEPARATOR, String.Empty).substringBefore(HEX_PREFIX).apply {
-                    if (isCorrectNetwork(this)) transactionFragment.setReceiver(preparePrefixAddress(it, this))
+                    if (viewModel.isCorrectNetwork(this)) transactionFragment.setReceiver(viewModel.preparePrefixAddress(it, this))
                     else transactionFragment.setReceiver(it)
                 }
             }
@@ -117,20 +93,12 @@ class TransactionActivity : AppCompatActivity(), AddressFragmentsListener {
         return super.onOptionsItemSelected(menuItem)
     }
 
-    private fun isCorrectNetwork(prefixAddress: String) = value.name.contains(prefixAddress, true)
-
-    private fun preparePrefixAddress(prefixAddress: String, prefix: String): String =
-        prefixAddress.removePrefix(prefix).replace(META_ADDRESS_SEPARATOR, String.Empty)
-
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
-
-    private fun prepareTitle() = if (assetIndex != Int.InvalidIndex) value.assets[assetIndex].name else value.network
 
     companion object {
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val VALUE_INDEX = "value_index"
         const val ASSET_INDEX = "asset_index"
-        const val META_ADDRESS_SEPARATOR = ":"
     }
 }

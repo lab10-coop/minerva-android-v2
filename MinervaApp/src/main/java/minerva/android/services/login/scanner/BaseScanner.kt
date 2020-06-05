@@ -18,7 +18,6 @@ import minerva.android.R
 import minerva.android.kotlinUtils.function.orElse
 
 abstract class BaseScanner : Fragment() {
-//TODO think about listeners extraction
     private var isPermissionGranted = false
     var shouldScan = true
     lateinit var codeScanner: CodeScanner
@@ -32,10 +31,8 @@ abstract class BaseScanner : Fragment() {
         setOnCloseButtonListener()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_scanner, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_scanner, container, false)
 
     override fun onResume() {
         super.onResume()
@@ -70,7 +67,7 @@ abstract class BaseScanner : Fragment() {
     }
 
     private fun startCameraPreview() {
-        //        delay to wait when camera is active, enables smooth animations
+        //delay to wait when camera is active, enables smooth animations
         Handler().postDelayed({
             if (isPermissionGranted) {
                 if (!codeScanner.isPreviewActive) {

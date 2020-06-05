@@ -6,7 +6,7 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.services.login.scanner.ScannerViewModel
+import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.model.QrCodeResponse
 import org.junit.Test
@@ -14,7 +14,7 @@ import org.junit.Test
 class ScannerViewModelTest : BaseViewModelTest() {
 
     private val walletManager: WalletManager = mock()
-    private val viewModel = ScannerViewModel(walletManager)
+    private val viewModel = LoginScannerViewModel(walletManager)
 
     private val scannerResultObserver: Observer<Event<QrCodeResponse>> = mock()
     private val scannerResultCaptor: KArgumentCaptor<Event<QrCodeResponse>> = argumentCaptor()

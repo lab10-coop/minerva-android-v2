@@ -100,7 +100,5 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
     companion object {
         @JvmStatic
         fun newInstance() = RestoreWalletFragment()
-
-        val TAG: String = this::class.java.canonicalName ?: "RestoreWalletFragment"
     }
 }
