@@ -601,37 +601,35 @@ class WalletManagerTest {
     @Test
     fun `get assets balances complete test`() {
         whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
-        whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any()))
-            .thenReturn(Observable.just(Pair("privateKey1", BigDecimal.valueOf(23))))
+        whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any())).thenReturn(
+            Observable.just(Pair("privateKey1", BigDecimal.TEN))
+        )
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
-        walletManager.initWalletConfig()
-        walletManager.refreshAssetBalance().test().assertComplete()
-            .assertValue {
-                it.size == 5
-            }
-
-//TODO when uncommented not passing on CI - try to resolve this problem
-//            .assertValue {
-//                val list = it["privateKey1"] ?: listOf()
-//                list.size == 1
-//            }
+        walletManager.apply {
+            initWalletConfig()
+            loadWalletConfig()
+            refreshAssetBalance()
+                .test()
+                .assertComplete()
+        }
     }
 
-    //TODO when uncommented not passing on CI - try to resolve this problem
-//    @Test
-//    fun `get asset balances error test`() {
-//        val error = Throwable()
-//        whenever(blockchainRepository.refreshAssetBalance(any(), any(), any())).thenReturn(Observable.error(error))
-//        whenever(keyStoreRepository.decryptKey()).thenReturn(minerva.android.walletmanager.model.MasterSeed())
-//        walletManager.initWalletConfig()
-//        walletManager.refreshAssetBalance().test().assertError(error)
-//    }
-
-//    override fun transferERC20Token(network: String, transaction: Transaction): Completable =
-//        blockchainRepository.transferERC20Token(
-//            network,
-//            mapTransactionToTransactionPayload(transaction)
-//        ).ignoreElements()
+    @Test
+    fun `get asset balances when values are empty and there are no assets needed test`() {
+        val error = Throwable()
+        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, values = emptyList())))
+        whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any())) doReturn Observable.error(error)
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
+        walletManager.apply {
+            initWalletConfig()
+            refreshAssetBalance()
+                .test()
+                .assertComplete()
+                .assertValue {
+                    it.isEmpty()
+                }
+        }
+    }
 
     @Test
     fun `make ERC20 transfer with ENS resolved success test`() {

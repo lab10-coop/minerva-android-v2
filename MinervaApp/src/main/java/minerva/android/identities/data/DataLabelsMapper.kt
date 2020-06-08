@@ -14,7 +14,7 @@ import minerva.android.walletmanager.model.defs.IdentityField.Companion.PHONE_NU
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.POSTCODE
 
 
-//TODO labels will be changed to dynamic in phase 2.
+//TODO change to dynamic labels generation
 
 fun getIdentityDataLabel(context: Context, key: String): String {
     context.resources.getStringArray(R.array.identities_data_labels).apply {

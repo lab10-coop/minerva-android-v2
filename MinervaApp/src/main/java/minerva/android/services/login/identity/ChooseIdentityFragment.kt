@@ -34,7 +34,7 @@ class ChooseIdentityFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            qrCodeResponse = it.getSerializable(QR_CODE_RESPONSE) as QrCodeResponse
+            qrCodeResponse = it.getParcelable<QrCodeResponse>(QR_CODE_RESPONSE) as QrCodeResponse
         }
     }
 
@@ -112,9 +112,7 @@ class ChooseIdentityFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance(qrCodeResponse: QrCodeResponse) = ChooseIdentityFragment().apply {
-            arguments = Bundle().apply {
-                putSerializable(QR_CODE_RESPONSE, qrCodeResponse)
-            }
+            arguments = Bundle().apply { putParcelable(QR_CODE_RESPONSE, qrCodeResponse) }
         }
 
         private const val QR_CODE_RESPONSE = "scanResult"

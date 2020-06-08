@@ -39,7 +39,7 @@ internal fun MainActivity.handleTransactionResult(data: Intent?) {
 internal fun MainActivity.handleLoginResult(data: Intent?) {
     data?.apply {
         val isLoginSuccess = getBooleanExtra(PainlessLoginActivity.IS_LOGIN_SUCCESS, false)
-        (getSerializableExtra(PainlessLoginActivity.LOGIN_PAYLOAD) as LoginPayload).run {
+        (getParcelableExtra(PainlessLoginActivity.LOGIN_PAYLOAD) as LoginPayload).run {
             viewModel.loginPayload = this
             if (isLoginSuccess) handleSuccessLoginStatuses(loginStatus)
             else handleLoginStatuses(loginStatus)

@@ -11,8 +11,6 @@ object AssetsSet {
 
     val ethereumAssets = listOf(FAU)
     val artisAssets: List<Asset> = listOf(SFAU)
-
-    //TODO need to be implemented for the rest of blockchains
     val poaAssets: List<Asset> = listOf()
 
     val allAssets: List<Asset>

@@ -27,7 +27,6 @@ import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwners
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.assets.AssetManager
-import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.Markets
 import minerva.android.walletmanager.model.defs.ResponseState
@@ -37,6 +36,7 @@ import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils.getLastUsedFormatted
 import minerva.android.walletmanager.utils.MarketUtils.calculateFiatBalances
 import minerva.android.walletmanager.utils.MarketUtils.getAddresses
+import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -323,12 +323,10 @@ class WalletManagerImpl(
         walletConfigMutableLiveData.value?.values?.let { values ->
             return Observable.range(START, values.size)
                 .filter { position -> !values[position].isDeleted }
-                //TODO filter should be removed when all testnet will be implemented
+                //TODO filter should be removed when all test net will be implemented
                 .filter { position -> Network.fromString(values[position].network).run { this == Network.ETHEREUM || this == Network.ARTIS } }
                 .flatMapSingle { position ->
-                    AssetManager.getAssetAddresses(Network.fromString(values[position].network)).run {
-                        refreshAssetsBalance(values[position], this)
-                    }
+                    refreshAssetsBalance(values[position], AssetManager.getAssetAddresses(Network.fromString(values[position].network)))
                 }
                 .toList()
                 .map { list -> list.map { it.first to AssetManager.mapToAssets(it.second) }.toMap() }
@@ -336,15 +334,16 @@ class WalletManagerImpl(
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
 
-
     /**
      *
      * return statement: Single<Pair<String, List<Pair<String, BigDecimal>>>>
      *                   Single<Pair<ValuePrivateKey, List<ContractAddress, BalanceOnContract>>>>
      *
      */
-    private fun refreshAssetsBalance(value: Value, addresses: Pair<String, List<String>>):
-            Single<Pair<String, List<Pair<String, BigDecimal>>>> =
+    private fun refreshAssetsBalance(
+        value: Value,
+        addresses: Pair<String, List<String>>
+    ): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
         Observable.range(START, addresses.second.size)
             .flatMap { position ->
                 blockchainRepository.refreshAssetBalance(value.privateKey, addresses.first, addresses.second[position], value.address)
@@ -358,7 +357,7 @@ class WalletManagerImpl(
             publicKey = derivedKeys.publicKey
             privateKey = derivedKeys.privateKey
             if (ownerAddress.isNotEmpty()) owners = mutableListOf(ownerAddress)
-            address =  if (contractAddress.isNotEmpty()) {
+            address = if (contractAddress.isNotEmpty()) {
                 this.contractAddress = contractAddress
                 contractAddress
             } else derivedKeys.address
