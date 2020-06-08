@@ -127,7 +127,7 @@ class EditIdentityFragment : Fragment() {
         viewModel.saveIdentity(newIdentity, getActionStatus())
     }
 
-    //TODO Will be changed in phase 2 for dynamic labels
+    //TODO change for dynamic label generation
     private fun prepareFormData(): LinkedHashMap<String, String> {
         val map = mutableMapOf<String, String>()
         valueName.text.toString().apply {

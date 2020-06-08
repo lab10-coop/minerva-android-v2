@@ -181,7 +181,6 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
     private fun View.prepareAssets(value: Value) {
         container.removeAllViews()
         value.assets.forEachIndexed { index, asset ->
-            //TODO add correct icon!
             container.addView(AssetView(this@ValueViewHolder, value, index, R.drawable.ic_asset_sdai).apply {
                 setAmounts(asset.balance)
             })

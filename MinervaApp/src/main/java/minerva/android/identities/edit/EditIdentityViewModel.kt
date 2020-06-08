@@ -46,9 +46,9 @@ class EditIdentityViewModel(private val walletManager: WalletManager, private va
                 .subscribeBy(
                     onComplete = { _saveCompletedLiveData.value = Event(Unit) },
                     onError = {
-                        //TODO Panic Button. Uncomment code below to save manually - not recommended
+                        //Panic Button. Uncomment code below to save manually - not recommended
                         //_saveCompletedLiveData.value = Event(Unit)
-                        _saveErrorLiveData.value = Event(it) //comment this if you want offline
+                        _saveErrorLiveData.value = Event(it)
                     }
                 )
         }
