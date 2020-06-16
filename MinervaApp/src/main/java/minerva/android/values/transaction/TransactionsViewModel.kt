@@ -162,16 +162,22 @@ class TransactionsViewModel(
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
-                    walletManager.transferNativeCoin(network, it).toSingleDefault(it)
+                    transaction = it
+                    walletManager.transferNativeCoin(network, it)
                 }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
-                .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
+                .doOnEvent { _, _ ->
+                    saveWalletAction(SENT, transaction)
+                    _loadingLiveData.value = Event(false)
+                }.subscribeBy(
+                    onSuccess = {
+                        walletManager.currentTransactionHash(it)
+                        _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
+                    },
+
                     onError = {
                         Timber.e("Send transaction error: ${it.message}")
                         _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))

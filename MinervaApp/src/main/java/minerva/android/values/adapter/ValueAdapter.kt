@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.value_list_row.view.*
@@ -15,14 +16,14 @@ import minerva.android.R
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.utils.BalanceUtils.getCryptoBalance
+import minerva.android.utils.BalanceUtils.getFiatBalance
 import minerva.android.values.listener.ValuesFragmentToAdapterListener
 import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.Value
 import minerva.android.widget.AssetView
-import minerva.android.utils.BalanceUtils.getCryptoBalance
-import minerva.android.utils.BalanceUtils.getFiatBalance
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.wrapped.startSafeAccountWrappedActivity
@@ -50,14 +51,15 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
         }
     }
 
-    private fun getPositionInRaw(index: Int): Int {
-        rawValues.forEachIndexed { position, identity ->
-            if (identity.index == index) {
-                return position
-            }
-        }
-        return Int.InvalidIndex
-    }
+    override fun onSendValueClicked(value: Value) = listener.onSendTransaction(value)
+
+    override fun onSendAssetClicked(valueIndex: Int, assetIndex: Int) = listener.onSendAssetTransaction(valueIndex, assetIndex)
+
+    override fun onValueRemoved(position: Int) = listener.onValueRemove(rawValues[position])
+
+    override fun refreshAssets(rawPosition: Int): List<Asset> = rawValues[rawPosition].assets
+
+    override fun onCreateSafeAccountClicked(value: Value) = listener.onCreateSafeAccount(value)
 
     fun updateList(data: List<Value>) {
         rawValues = data
@@ -81,15 +83,23 @@ class ValueAdapter(private val listener: ValuesFragmentToAdapterListener) :
         activeValues.forEach { value -> assetBalances[value.privateKey]?.let { value.assets = it } }
     }
 
-    override fun onSendValueClicked(value: Value) = listener.onSendTransaction(value)
+    fun setPending(index: Int, pending: Boolean) {
+        rawValues.forEachIndexed { position, value ->
+            if (value.index == index) {
+                value.pending = pending
+                notifyItemChanged(position)
+            }
+        }
+    }
 
-    override fun onSendAssetClicked(valueIndex: Int, assetIndex: Int) = listener.onSendAssetTransaction(valueIndex, assetIndex)
-
-    override fun onValueRemoved(position: Int) = listener.onValueRemove(rawValues[position])
-
-    override fun refreshAssets(rawPosition: Int): List<Asset> = rawValues[rawPosition].assets
-
-    override fun onCreateSafeAccountClicked(value: Value) = listener.onCreateSafeAccount(value)
+    private fun getPositionInRaw(index: Int): Int {
+        rawValues.forEachIndexed { position, identity ->
+            if (identity.index == index) {
+                return position
+            }
+        }
+        return Int.InvalidIndex
+    }
 }
 
 class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) : AssetView.AssertViewCallback, RecyclerView.ViewHolder(view) {
@@ -123,18 +133,25 @@ class ValueViewHolder(private val view: View, private val viewGroup: ViewGroup) 
 
     private fun View.bindData(value: Value) {
         with(value) {
-            card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(network))))
-            icon.setImageResource(getNetworkIcon(Network.fromString(network)))
-            valueName.text = name
-            cryptoShortName.run {
-                text = network
-                setTextColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(network))))
+            getNetworkColor(Network.fromString(network)).let { networkColor ->
+                card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(network), pending)))
+                progress.apply {
+                    visibleOrGone(pending)
+                    DrawableCompat.setTint(indeterminateDrawable, ContextCompat.getColor(context, networkColor))
+                }
+                pendingMask.visibleOrGone(pending)
+                icon.setImageResource(getNetworkIcon(Network.fromString(network)))
+                valueName.text = name
+                cryptoShortName.run {
+                    text = network
+                    setTextColor(ContextCompat.getColor(context, networkColor))
+                }
+                with(amountView) {
+                    setCrypto(getCryptoBalance(cryptoBalance))
+                    setFiat(getFiatBalance(fiatBalance))
+                }
+                sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), network)
             }
-            with(amountView) {
-                setCrypto(getCryptoBalance(cryptoBalance))
-                setFiat(getFiatBalance(fiatBalance))
-            }
-            sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), network)
         }
     }
 

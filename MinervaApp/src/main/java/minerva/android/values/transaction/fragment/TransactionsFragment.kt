@@ -20,7 +20,7 @@ import minerva.android.R
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.values.listener.ScannerFragmentsListener
+import minerva.android.values.listener.TransactionListener
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.values.transaction.fragment.adapter.RecipientAdapter
 import minerva.android.walletmanager.model.Recipient
@@ -34,7 +34,7 @@ import java.math.BigInteger
 class TransactionsFragment : Fragment() {
 
     private var areTransactionCostsOpen = false
-    private lateinit var listener: ScannerFragmentsListener
+    private lateinit var listener: TransactionListener
     private val viewModel: TransactionsViewModel by sharedViewModel()
     private var validationDisposable: Disposable? = null
 
@@ -75,15 +75,15 @@ class TransactionsFragment : Fragment() {
             errorLiveData.observe(viewLifecycleOwner, Observer { showErrorFlashBar() })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
             saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver {
-                listener.onResult(true, it.first)
+                listener.onError(it.first)
             })
         }
     }
 
     private fun handleTransactionStatus(status: Pair<String, Int>) {
         when (status.second) {
-            WalletActionStatus.SENT -> listener.onResult(true, status.first)
-            WalletActionStatus.FAILED -> listener.onResult(false, status.first)
+            WalletActionStatus.SENT -> listener.onTransactionAccepted(status.first)
+            WalletActionStatus.FAILED -> listener.onError(status.first)
         }
     }
 
@@ -190,7 +190,7 @@ class TransactionsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as ScannerFragmentsListener
+        listener = context as TransactionListener
     }
 
     private fun setupListeners() {

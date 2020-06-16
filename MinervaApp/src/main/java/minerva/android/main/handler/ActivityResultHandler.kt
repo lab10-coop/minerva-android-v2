@@ -66,7 +66,7 @@ private fun MainActivity.handleSuccessLoginStatuses(loginAction: Int) {
     }
 }
 
-internal fun isTransactionResult(requestCode: Int, resultCode: Int) =
+internal fun isTransactionPrepared(requestCode: Int, resultCode: Int) =
     requestCode == MainActivity.TRANSACTION_RESULT_REQUEST_CODE && resultCode == Activity.RESULT_OK
 
 internal fun isLoginResult(requestCode: Int, resultCode: Int) =

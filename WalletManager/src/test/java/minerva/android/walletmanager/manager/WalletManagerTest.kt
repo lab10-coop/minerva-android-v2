@@ -533,7 +533,7 @@ class WalletManagerTest {
 
     @Test
     fun `send transaction success with resolved ENS test`() {
-        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
+        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Single.just(""))
         whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
         walletManager.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
             .test()
@@ -542,7 +542,7 @@ class WalletManagerTest {
 
     @Test
     fun `send transaction success with not resolved ENS test`() {
-        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Completable.complete())
+        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Single.just(""))
         whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable("No ENS")))
         walletManager.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
             .test()
@@ -552,7 +552,7 @@ class WalletManagerTest {
     @Test
     fun `send transaction error test`() {
         val error = Throwable()
-        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Completable.error(error))
+        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
         whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
         walletManager.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
             .test()

@@ -1,6 +1,7 @@
 package minerva.android.blockchainprovider.repository.blockchain
 
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.contract.ERC20
@@ -78,15 +79,18 @@ class BlockchainRepositoryImpl(
         }
     }
 
-    override fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable =
+    override fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Single<String> =
         (web3j[network] ?: error("Not supported Network!"))
             .ethGetTransactionCount(transactionPayload.address, DefaultBlockParameterName.LATEST)
             .flowable()
-            .flatMapCompletable {
+            .firstOrError()
+            .flatMap {
                 (web3j[network] ?: error("Not supported Network!"))
                     .ethSendRawTransaction(getSignedTransaction(it.transactionCount, transactionPayload))
                     .flowable()
-                    .flatMapCompletable { response -> handleTransactionResponse(response) }
+                    .firstOrError()
+                    .flatMap { response -> handleTransactionResponse(response) }
+
             }
 
     override fun getTransactionCosts(network: String, assetIndex: Int, operation: Operation): TransactionCostPayload =
@@ -97,12 +101,15 @@ class BlockchainRepositoryImpl(
 
     override fun toGwei(balance: BigDecimal): BigInteger = toWei(balance, Convert.Unit.GWEI).toBigInteger()
 
+
     private fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal) =
         fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)
 
-    private fun handleTransactionResponse(response: EthSendTransaction) =
-        if (response.error == null) Completable.complete()
-        else Completable.error(Throwable(response.error.message))
+    private fun handleTransactionResponse(response: EthSendTransaction): Single<String> {
+        return if (response.error == null) Single.just(response.transactionHash)
+        else Single.error(Throwable(response.error.message))
+    }
+
 
     private fun getSignedTransaction(count: BigInteger, transactionPayload: TransactionPayload): String? =
         Numeric.toHexString(
