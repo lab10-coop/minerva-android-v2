@@ -8,6 +8,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Payment
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.WalletAction
@@ -16,14 +17,17 @@ import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.AUTHORISED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.storage.ServiceName.Companion.M27_NAME
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
-import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 
-class PaymentRequestViewModel(private val walletManager: WalletManager, private val repository: WalletActionsRepository) :
-    BaseViewModel() {
+class PaymentRequestViewModel(
+    private val serviceManager: ServiceManager,
+    private val walletActionsRepository: WalletActionsRepository,
+    private val masterSeedRepository: MasterSeedRepository
+) : BaseViewModel() {
 
     lateinit var payment: Payment
 
@@ -48,7 +52,7 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
     fun decodeJwtToken(token: String?) {
         token?.let {
             launchDisposable {
-                walletManager.decodePaymentRequestToken(token)
+                serviceManager.decodePaymentRequestToken(token)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
@@ -76,9 +80,9 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
 
     fun connectToService() {
         launchDisposable {
-            walletManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.getLastUsedFormatted()))
+            serviceManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.getLastUsedFormatted()))
                 .observeOn(Schedulers.io())
-                .andThen(repository.saveWalletActions(getWalletAction(AUTHORISED), walletManager.masterSeed))
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -92,8 +96,8 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
 
     fun confirmTransaction() {
         launchDisposable {
-            walletManager.createJwtToken(encodedData(), walletManager.masterSeed.privateKey)
-                .flatMap { repository.saveWalletActions(getWalletAction(SIGNED), walletManager.masterSeed).toSingleDefault(it) }
+            serviceManager.createJwtToken(encodedData())
+                .flatMap { walletActionsRepository.saveWalletActions(getWalletAction(SIGNED)).toSingleDefault(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -120,6 +124,6 @@ class PaymentRequestViewModel(private val walletManager: WalletManager, private 
         )
     }
 
-    fun isMasterSeedAvailable() = walletManager.isMasterSeedAvailable()
-    fun initWalletConfig() = walletManager.initWalletConfig()
+    fun isMasterSeedAvailable() = masterSeedRepository.isMasterSeedAvailable()
+    fun initWalletConfig() = masterSeedRepository.initWalletConfig()
 }

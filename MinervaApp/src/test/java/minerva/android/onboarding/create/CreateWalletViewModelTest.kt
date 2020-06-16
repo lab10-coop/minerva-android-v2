@@ -8,24 +8,23 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.observeWithPredicate
-import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.model.MasterSeed
+import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
 import org.junit.Test
 
 class CreateWalletViewModelTest : BaseViewModelTest() {
 
-    private val walletManager: WalletManager = mock()
-    private val viewModel = CreateWalletViewModel(walletManager)
+    private val masterSeedRepository: MasterSeedRepository = mock()
+    private val viewModel = CreateWalletViewModel(masterSeedRepository)
 
     private val loadingDialogObserver: Observer<Event<Boolean>> = mock()
     private val loadingDialogCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
 
     @Test
     fun `create master seed should return success`() {
-        whenever(walletManager.createWalletConfig(any())).doReturn(Completable.complete())
-        whenever(walletManager.createMasterSeed()).doReturn(Single.just(MasterSeed("1", "12", "123")))
+        whenever(masterSeedRepository.createMasterSeed()).doReturn(Completable.complete())
         viewModel.loadingLiveData.observeForever(loadingDialogObserver)
         viewModel.createMasterSeed()
         checkLoadingDialogLiveData()
@@ -35,8 +34,7 @@ class CreateWalletViewModelTest : BaseViewModelTest() {
     @Test
     fun `create master seed should return error`() {
         val error = Throwable()
-        whenever(walletManager.createWalletConfig(any())).doReturn(Completable.error(error))
-        whenever(walletManager.createMasterSeed()).doReturn(Single.error(error))
+        whenever(masterSeedRepository.createMasterSeed()).doReturn(Completable.error(error))
         viewModel.loadingLiveData.observeForever(loadingDialogObserver)
         viewModel.createMasterSeed()
         checkLoadingDialogLiveData()

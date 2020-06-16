@@ -7,6 +7,6 @@ import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.WalletActionClustered
 
 interface WalletActionsRepository {
-    fun getWalletActions(masterSeed: MasterSeed): Observable<List<WalletActionClustered>>
-    fun saveWalletActions(walletAction: WalletAction, masterSeed: MasterSeed): Completable
+    fun getWalletActions(): Observable<List<WalletActionClustered>>
+    fun saveWalletActions(walletAction: WalletAction): Completable
 }

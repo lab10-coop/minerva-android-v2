@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.manager.assets
+package minerva.android.walletmanager.smartContract.assets
 
 import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.AssetsSet
@@ -23,5 +23,9 @@ object AssetManager {
         return Asset(asset.name, asset.nameShort, asset.address, raw.second)
     }
 
-    fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<Asset> = assetList.map { getAssetFromPair(it) }
+    fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<Asset> = assetList.map {
+        getAssetFromPair(
+            it
+        )
+    }
 }

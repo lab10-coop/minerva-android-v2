@@ -41,8 +41,10 @@ import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.*
 
-class SmartContractRepositoryImpl(private val web3j: Map<String, Web3j>, private val gasPrice: Map<String, BigInteger>) :
-    SmartContractRepository {
+class BlockchainContractRepositoryImpl(
+    private val web3j: Map<String, Web3j>,
+    private val gasPrice: Map<String, BigInteger>
+) : BlockchainContractRepository {
 
     override fun deployGnosisSafeContract(privateKey: String, address: String, network: String): Single<String> =
         getProxyFactory(network, privateKey)

@@ -8,11 +8,10 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.values.transaction.TransactionsViewModel
-import minerva.android.walletmanager.manager.SmartContractManager
 import minerva.android.walletmanager.model.Asset
-import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Value
-import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -22,10 +21,10 @@ import kotlin.test.assertEquals
 
 class TransactionViewModelTest : BaseViewModelTest() {
 
-    private val walletManager: WalletManager = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
-    private val smartContractManager: SmartContractManager = mock()
-    private val viewModel = TransactionsViewModel(walletManager, walletActionsRepository, smartContractManager)
+    private val smartContractRepository: SmartContractRepository = mock()
+    private val transactionRepository: TransactionRepository = mock()
+    private val viewModel = TransactionsViewModel(walletActionsRepository, smartContractRepository, transactionRepository)
 
     private val sendTransactionObserver: Observer<Event<Pair<String, Int>>> = mock()
     private val sendTransactionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
@@ -34,10 +33,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `send main transaction test success and wallet action succeed`() {
-        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Single.just(""))
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
-        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
+        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -45,27 +43,25 @@ class TransactionViewModelTest : BaseViewModelTest() {
         }
     }
 
-//    @Test
-//    fun `send main transaction test success and wallet action failed`() {
-//        val error = Throwable()
-//        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Single.just(""))
-//        whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
-//        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-//        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
-//        viewModel.saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
-//        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
-//        saveActionFailedCaptor.run {
-//            verify(sendTransactionObserver).onChanged(capture())
-//        }
-//    }
+    @Test
+    fun `send main transaction test success and wallet action failed`() {
+        val error = Throwable()
+        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("name"))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        viewModel.saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
+        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        saveActionFailedCaptor.run {
+            verify(sendTransactionObserver).onChanged(capture())
+        }
+    }
 
     @Test
     fun `send main transaction test error and send wallet action succeed`() {
         val error = Throwable()
-        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
-        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
+        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -76,10 +72,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `send main transaction test error and send wallet action failed`() {
         val error = Throwable()
-        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just(""))
-        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
+        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))
@@ -95,11 +90,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
             address = "address",
             contractAddress = "aa"
         )
-        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Single.just(""))
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just("tom"))
-        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
-        whenever(walletManager.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -118,11 +112,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
             address = "address",
             contractAddress = "aa"
         )
-        whenever(walletManager.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just("tom"))
-        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
-        whenever(walletManager.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))
@@ -141,8 +134,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
             )
             assetIndex = 0
         }
-        whenever(walletManager.transferERC20Token(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just("tom"))
+        whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -160,8 +153,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
             )
             assetIndex = 0
         }
-        whenever(walletManager.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just("tom"))
+        whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         viewModel.run {
             sendTransactionLiveData.observeForever(sendTransactionObserver)
             sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
@@ -180,11 +173,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
             contractAddress = "aa"
         )
         viewModel.assetIndex = 0
-        whenever(walletManager.transferERC20Token(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just("tom"))
-        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.complete())
-        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
-        whenever(walletManager.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -204,11 +196,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
             contractAddress = "aa"
         )
         viewModel.assetIndex = 0
-        whenever(walletManager.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.resolveENS(any())).thenReturn(Single.just("tom"))
-        whenever(walletActionsRepository.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
-        whenever(walletManager.masterSeed).thenReturn(MasterSeed("", ""))
-        whenever(walletManager.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))
@@ -216,7 +207,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `calculate transaction cost test`() {
-        whenever(walletManager.calculateTransactionCost(any(), any())).thenReturn(BigDecimal(4))
+        whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal(4))
         val result = viewModel.calculateTransactionCost(BigDecimal(2), BigInteger.valueOf(2))
         result shouldBeEqualTo BigDecimal(4).toPlainString()
     }

@@ -19,12 +19,8 @@ class SettingsFragment : Fragment() {
     private lateinit var listener: BottomNavigationMenuListener
     val viewModel: SettingsViewModel by viewModel()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_settings, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_settings, container, false)
 
     override fun onResume() {
         super.onResume()
