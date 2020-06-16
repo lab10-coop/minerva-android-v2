@@ -6,16 +6,18 @@ import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.base.BaseViewModel
-import minerva.android.walletmanager.manager.SmartContractManager
-import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.manager.values.ValueManager
 import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.smartContract.SmartContractRepository
 import timber.log.Timber
 
-class SafeAccountSettingsViewModel(private val walletManager: WalletManager, private val smartContractManager: SmartContractManager) :
-    BaseViewModel() {
+class SafeAccountSettingsViewModel(
+    private val valueManager: ValueManager,
+    private val smartContractRepository: SmartContractRepository
+) : BaseViewModel() {
 
     internal lateinit var value: Value
     private var masterOwnerPrivateKey: String = String.Empty
@@ -27,11 +29,11 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
     fun loadValue(index: Int) {
-        value = walletManager.loadValue(index)
+        value = valueManager.loadValue(index)
         _ownersLiveData.value = value.owners?.reversed()
         getOwners(value.address, value.network, value.privateKey)
         value.masterOwnerAddress.let {
-            walletManager.getSafeAccountMasterOwnerPrivateKey(it).apply {
+            smartContractRepository.getSafeAccountMasterOwnerPrivateKey(it).apply {
                 masterOwnerPrivateKey = this
             }
         }
@@ -43,8 +45,7 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
             return
         }
         launchDisposable {
-            smartContractManager.addSafeAccountOwner(owner, value.address, value.network, masterOwnerPrivateKey)
-                .andThen(walletManager.updateSafeAccountOwners(value.index, prepareAddedOwnerList(owner)))
+            smartContractRepository.addSafeAccountOwner(owner, value.address, value.network, masterOwnerPrivateKey, value)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -68,8 +69,7 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
         }
 
         launchDisposable {
-            smartContractManager.removeSafeAccountOwner(removeAddress, value.address, value.network, masterOwnerPrivateKey)
-                .andThen(walletManager.updateSafeAccountOwners(value.index, prepareRemovedOwnerList(removeAddress)))
+            smartContractRepository.removeSafeAccountOwner(removeAddress, value.address, value.network, masterOwnerPrivateKey, value)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -94,8 +94,7 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
     @VisibleForTesting
     fun getOwners(contractAddress: String, network: String, privateKey: String) {
         launchDisposable {
-            smartContractManager.getSafeAccountOwners(contractAddress, network, privateKey)
-                .flatMap { walletManager.updateSafeAccountOwners(value.index, it) }
+            smartContractRepository.getSafeAccountOwners(contractAddress, network, privateKey, value)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -105,25 +104,5 @@ class SafeAccountSettingsViewModel(private val walletManager: WalletManager, pri
         }
     }
 
-    private fun prepareAddedOwnerList(owner: String): List<String> {
-        value.owners?.toMutableList()?.let {
-            it.add(FIRST_POSITION, owner)
-            return it
-        }
-        throw IllegalStateException("Owners Live Data was not initialized")
-    }
-
-    private fun prepareRemovedOwnerList(removeAddress: String): List<String> {
-        value.owners?.toMutableList()?.let {
-            it.remove(removeAddress)
-            return it
-        }
-        throw IllegalStateException("Owners Live Data was not initialized")
-    }
-
     val valueName get() = value.name
-
-    companion object {
-        private const val FIRST_POSITION = 0
-    }
 }

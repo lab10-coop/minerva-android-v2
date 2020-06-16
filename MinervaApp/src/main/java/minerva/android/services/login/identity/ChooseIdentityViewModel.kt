@@ -15,14 +15,17 @@ import minerva.android.services.login.uitls.LoginUtils.createLoginPayload
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.services.login.uitls.LoginUtils.isIdentityValid
+import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
-class ChooseIdentityViewModel(private val walletManager: WalletManager, private val repository: WalletActionsRepository) : BaseViewModel() {
+class ChooseIdentityViewModel(
+    private val serviceManager: ServiceManager,
+    private val walletActionsRepository: WalletActionsRepository
+) : BaseViewModel() {
 
     private val _loginMutableLiveData = MutableLiveData<Event<LoginPayload>>()
     val loginLiveData: LiveData<Event<LoginPayload>> get() = _loginMutableLiveData
@@ -36,7 +39,7 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
     private val _requestedFieldsMutableLiveData = MutableLiveData<Event<Any>>()
     val requestedFieldsLiveData: LiveData<Event<Any>> get() = _requestedFieldsMutableLiveData
 
-    fun getIdentities() = walletManager.walletConfigLiveData.value?.identities
+    fun getIdentities() = serviceManager.walletConfigLiveData.value?.identities
 
     //    TODO implement dynamic login concerning different services
     fun handleLogin(identity: Identity, qrCodeResponse: QrCodeResponse) {
@@ -52,20 +55,16 @@ class ChooseIdentityViewModel(private val walletManager: WalletManager, private 
     private fun minervaLogin(identity: Identity, qrCode: QrCodeResponse) {
         if (handleNoKeysError(identity)) return
         qrCode.callback?.let { callback ->
-            walletManager.createJwtToken(createLoginPayload(identity, qrCode), identity.privateKey)
-                .flatMapCompletable { jwtToken ->
-                    walletManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
-                }
+            serviceManager.createJwtToken(createLoginPayload(identity, qrCode))
+                .flatMapCompletable { jwtToken -> serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity)) }
                 .observeOn(Schedulers.io())
-                .andThen(repository.saveWalletActions(getValuesWalletAction(identity.name, qrCode.serviceName), walletManager.masterSeed))
+                .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(identity.name, qrCode.serviceName)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = {
-                        _loginMutableLiveData.value = Event(LoginPayload(loginStatus = getLoginStatus(qrCode)))
-                    },
+                    onComplete = { _loginMutableLiveData.value = Event(LoginPayload(loginStatus = getLoginStatus(qrCode))) },
                     onError = {
                         Timber.e("Error while login $it")
                         _errorMutableLiveData.value = Event(Throwable(it.message))

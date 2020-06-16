@@ -7,13 +7,11 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.base.BaseViewModel
-import minerva.android.walletmanager.wallet.WalletManager
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.model.WalletActionClustered
 import timber.log.Timber
 
-class WalletActionsViewModel(private val walletActionsRepository: WalletActionsRepository, private val walletManager: WalletManager) :
-    BaseViewModel() {
+class WalletActionsViewModel(private val walletActionsRepository: WalletActionsRepository) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -27,14 +25,12 @@ class WalletActionsViewModel(private val walletActionsRepository: WalletActionsR
     fun fetchWalletActions() {
         _loadingLiveData.value = Event(true)
         launchDisposable {
-            walletActionsRepository.getWalletActions(walletManager.masterSeed)
+            walletActionsRepository.getWalletActions()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onNext = {
-                        _walletActionsLiveData.value = Event(it)
-                    },
+                    onNext = { _walletActionsLiveData.value = Event(it) },
                     onError = {
                         _errorLiveData.value = Event(it)
                         Timber.d("Fetch wallet actions error: ${it.message}")

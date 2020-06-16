@@ -5,11 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.base.BaseViewModel
-import minerva.android.walletmanager.wallet.WalletManager
-import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.manager.values.ValueManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
@@ -17,9 +16,12 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.utils.CryptoUtils
 import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 
-class NewValueViewModel(private val walletManager: WalletManager, private val walletActionsRepository: WalletActionsRepository) :
-    BaseViewModel() {
+class NewValueViewModel(
+    private val valueManager: ValueManager,
+    private val walletActionsRepository: WalletActionsRepository
+) : BaseViewModel() {
 
     private var valueName: String = String.Empty
 
@@ -35,9 +37,9 @@ class NewValueViewModel(private val walletManager: WalletManager, private val wa
     fun createNewValue(network: Network, position: Int) {
         valueName = CryptoUtils.prepareName(network, position)
         launchDisposable {
-            walletManager.createValue(network, valueName)
+            valueManager.createValue(network, valueName)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(), walletManager.masterSeed))
+                .andThen(walletActionsRepository.saveWalletActions(getWalletAction()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

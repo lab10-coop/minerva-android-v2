@@ -29,11 +29,11 @@ fun createAppModule() = mutableListOf<Module>().apply {
 }
 
 private val appModules = module {
-    viewModel { MainViewModel(get(), get()) }
+    viewModel { MainViewModel(get(), get(), get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { IdentitiesViewModel(get(), get()) }
-    viewModel { ValuesViewModel(get(), get(), get()) }
+    viewModel { ValuesViewModel(get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
@@ -41,9 +41,9 @@ private val appModules = module {
     viewModel { LoginScannerViewModel(get()) }
     viewModel { ValueAddressViewModel(get()) }
     viewModel { SafeAccountSettingsViewModel(get(), get()) }
+    viewModel { TransactionsViewModel(get(), get(), get()) }
     viewModel { NewValueViewModel(get(), get()) }
     viewModel { ServicesViewModel(get()) }
-    viewModel { TransactionsViewModel(get(), get(), get()) }
-    viewModel { WalletActionsViewModel(get(), get()) }
-    viewModel { PaymentRequestViewModel(get(), get()) }
+    viewModel { WalletActionsViewModel(get()) }
+    viewModel { PaymentRequestViewModel(get(), get(), get()) }
 }

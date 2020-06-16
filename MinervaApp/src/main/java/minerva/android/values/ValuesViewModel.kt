@@ -6,31 +6,33 @@ import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.base.BaseViewModel
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
-import minerva.android.walletmanager.manager.SmartContractManager
-import minerva.android.walletmanager.wallet.WalletManager
-import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.walletmanager.manager.values.ValueManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 
 class ValuesViewModel(
-    private val walletManager: WalletManager,
+    private val valueManager: ValueManager,
     private val walletActionsRepository: WalletActionsRepository,
-    private val smartContractManager: SmartContractManager
+    private val smartContractRepository: SmartContractRepository,
+    private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
 
-    val walletConfigLiveData: LiveData<WalletConfig> = walletManager.walletConfigLiveData
+    val walletConfigLiveData: LiveData<WalletConfig> = valueManager.walletConfigLiveData
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -55,7 +57,7 @@ class ValuesViewModel(
 
     fun refreshBalances() =
         launchDisposable {
-            walletManager.refreshBalances()
+            transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -69,7 +71,7 @@ class ValuesViewModel(
 
     fun getAssetBalance() =
         launchDisposable {
-            walletManager.refreshAssetBalance()
+            transactionRepository.refreshAssetBalance()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -83,9 +85,9 @@ class ValuesViewModel(
 
     fun removeValue(value: Value) {
         launchDisposable {
-            walletManager.removeValue(value.index)
+            valueManager.removeValue(value.index)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getRemovedValueAction(value), walletManager.masterSeed))
+                .andThen(walletActionsRepository.saveWalletActions(getRemovedValueAction(value)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -112,14 +114,10 @@ class ValuesViewModel(
             _noFundsLiveData.value = Event(Unit)
         } else {
             launchDisposable {
-                smartContractManager.createSafeAccount(value)
+                smartContractRepository.createSafeAccount(value)
                     .flatMapCompletable { smartContractAddress -> createValue(value, smartContractAddress) }
                     .observeOn(Schedulers.io())
-                    .andThen(
-                        walletActionsRepository.saveWalletActions(
-                            getWalletAction(SAFE_ACCOUNT_ADDED, createSafeAccountName(value)), walletManager.masterSeed
-                        )
-                    )
+                    .andThen(walletActionsRepository.saveWalletActions(getWalletAction(SAFE_ACCOUNT_ADDED, createSafeAccountName(value))))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -136,7 +134,7 @@ class ValuesViewModel(
     }
 
     private fun createValue(value: Value, smartContractAddress: String): Completable {
-        return walletManager.createValue(
+        return valueManager.createValue(
             Network.fromString(value.network),
             createSafeAccountName(value),
             value.address,
@@ -145,7 +143,7 @@ class ValuesViewModel(
     }
 
     private fun createSafeAccountName(value: Value): String =
-        value.name.replaceFirst(String.Space, " | ${walletManager.getSafeAccountNumber(value.address)} ")
+        value.name.replaceFirst(String.Space, " | ${valueManager.getSafeAccountNumber(value.address)} ")
 
     private fun getWalletAction(status: Int, name: String) = WalletAction(
         WalletActionType.VALUE,

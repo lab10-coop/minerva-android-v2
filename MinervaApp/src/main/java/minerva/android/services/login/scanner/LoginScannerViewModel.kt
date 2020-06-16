@@ -3,7 +3,6 @@ package minerva.android.services.login.scanner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
@@ -12,10 +11,10 @@ import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
 import minerva.android.services.login.uitls.LoginUtils.getRequestedData
 import minerva.android.services.login.uitls.LoginUtils.getServiceName
+import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.wallet.WalletManager
 
-class LoginScannerViewModel(private val walletManager: WalletManager) : BaseViewModel() {
+class LoginScannerViewModel(private val serviceManager: ServiceManager) : BaseViewModel() {
 
     private val _scannerResultMutableLiveData = MutableLiveData<Event<QrCodeResponse>>()
     val scannerResultLiveData: LiveData<Event<QrCodeResponse>> get() = _scannerResultMutableLiveData
@@ -28,7 +27,7 @@ class LoginScannerViewModel(private val walletManager: WalletManager) : BaseView
 
     fun validateResult(token: String) {
         launchDisposable {
-            walletManager.decodeQrCodeResponse(token)
+            serviceManager.decodeQrCodeResponse(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -47,9 +46,9 @@ class LoginScannerViewModel(private val walletManager: WalletManager) : BaseView
     }
 
     private fun checkAlreadyLoginUser(response: QrCodeResponse) {
-        if (walletManager.isAlreadyLoggedIn(response.issuer)) {
+        if (serviceManager.isAlreadyLoggedIn(response.issuer)) {
             _knownUserLoginMutableLiveData.value =
-                Event(LoginPayload(getLoginStatus(response), walletManager.getLoggedInIdentityPublicKey(response.issuer), response))
+                Event(LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.issuer), response))
         } else {
             _scannerResultMutableLiveData.value = Event(response)
         }

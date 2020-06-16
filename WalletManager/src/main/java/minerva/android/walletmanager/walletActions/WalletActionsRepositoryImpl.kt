@@ -6,40 +6,45 @@ import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
+import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.WalletActionClustered
 import minerva.android.walletmanager.model.mappers.configs.WalletActionsMapper
 import minerva.android.walletmanager.model.mappers.payloads.WalletActionPayloadMapper
+import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.utils.DateUtils.isTheSameDay
-import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
+import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 
 class WalletActionsRepositoryImpl(
     private val minervaApi: MinervaApi,
-    private val localWalletActionsConfigProvider: LocalWalletActionsConfigProvider
+    private val localWalletActionsConfigProvider: LocalWalletActionsConfigProvider,
+    private val walletConfigManager: WalletConfigManager
 ) : WalletActionsRepository {
 
     private var currentWalletActionsConfigVersion = Int.InvalidIndex
 
-    override fun getWalletActions(masterSeed: MasterSeed): Observable<List<WalletActionClustered>> =
+    override fun getWalletActions(): Observable<List<WalletActionClustered>> =
         Observable.mergeDelayError(
             Observable.just(localWalletActionsConfigProvider.loadWalletActionsConfig())
                 .doOnNext { currentWalletActionsConfigVersion = it.version }
                 .flatMap {
                     Observable.just(WalletActionsMapper.map(it.actions).sortedByDescending { action -> action.lastUsed })
                 },
-            minervaApi.getWalletActions(publicKey = encodePublicKey(masterSeed.publicKey))
+            minervaApi.getWalletActions(publicKey = encodePublicKey(walletConfigManager.masterSeed.publicKey))
                 .filter { it.walletActionsConfigPayload.version > currentWalletActionsConfigVersion }
                 .doOnNext {
                     currentWalletActionsConfigVersion = it.walletActionsConfigPayload.version
                     localWalletActionsConfigProvider.saveWalletActionsConfig(it.walletActionsConfigPayload)
                 }
-                .flatMap { Observable.just(WalletActionsMapper.map(it.walletActionsConfigPayload.actions).sortedByDescending { action -> action.lastUsed }) }
+                .flatMap {
+                    Observable.just(
+                        WalletActionsMapper.map(it.walletActionsConfigPayload.actions).sortedByDescending { action -> action.lastUsed })
+                }
         )
 
-    override fun saveWalletActions(walletAction: WalletAction, masterSeed: MasterSeed): Completable {
+    override fun saveWalletActions(walletAction: WalletAction): Completable {
         val walletActionPayload = WalletActionPayloadMapper.map(walletAction)
         var newActions: WalletActionClusteredPayload? = null
 
@@ -50,7 +55,7 @@ class WalletActionsRepositoryImpl(
                 actions.forEach { clusteredActionPayload ->
                     if (isTheSameDay(clusteredActionPayload.lastUsed, walletActionPayload.lastUsed)) {
                         clusteredActionPayload.clusteredActions.add(walletActionPayload)
-                        return updateWalletActionsConfig(this, masterSeed)
+                        return updateWalletActionsConfig(this, walletConfigManager.masterSeed)
                     } else {
                         newActions = WalletActionClusteredPayload(DateUtils.timestamp, mutableListOf(walletActionPayload))
                     }
@@ -59,7 +64,7 @@ class WalletActionsRepositoryImpl(
             newActions?.let {
                 actions.add(it)
             }
-            return updateWalletActionsConfig(this, masterSeed)
+            return updateWalletActionsConfig(this, walletConfigManager.masterSeed)
         }
     }
 

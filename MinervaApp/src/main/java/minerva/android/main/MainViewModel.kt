@@ -15,13 +15,18 @@ import minerva.android.services.login.uitls.LoginUtils.getRequestedData
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getServiceName
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
+import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
-class MainViewModel(private val walletManager: WalletManager, private val repository: WalletActionsRepository) : BaseViewModel() {
+class MainViewModel(
+    private val masterSeedRepository: MasterSeedRepository,
+    private val serviceManager: ServiceManager,
+    private val walletActionsRepository: WalletActionsRepository
+) : BaseViewModel() {
 
     lateinit var loginPayload: LoginPayload
 
@@ -37,20 +42,20 @@ class MainViewModel(private val walletManager: WalletManager, private val reposi
     private val _loadingLiveData = MutableLiveData<Event<Pair<Int, Boolean>>>()
     val loadingLiveData: LiveData<Event<Pair<Int, Boolean>>> get() = _loadingLiveData
 
-    fun isMasterSeedAvailable() = walletManager.isMasterSeedAvailable()
+    fun isMasterSeedAvailable() = masterSeedRepository.isMasterSeedAvailable()
 
-    fun initWalletConfig() = walletManager.initWalletConfig()
+    fun initWalletConfig() = masterSeedRepository.initWalletConfig()
 
-    fun isMnemonicRemembered(): Boolean = walletManager.isMnemonicRemembered()
+    fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
 
-    fun getValueIterator(): Int = walletManager.getValueIterator()
+    fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
 
-    fun dispose() = walletManager.dispose()
+    fun dispose() = masterSeedRepository.dispose()
 
     fun loginFromNotification(jwtToken: String?) {
         jwtToken?.let {
             launchDisposable {
-                walletManager.decodeQrCodeResponse(it)
+                serviceManager.decodeQrCodeResponse(it)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
@@ -66,12 +71,12 @@ class MainViewModel(private val walletManager: WalletManager, private val reposi
             serviceName = getServiceName(response)
             identityFields = getRequestedData(requestedData)
         }
-        loginPayload = LoginPayload(getLoginStatus(response), walletManager.getLoggedInIdentityPublicKey(response.issuer), response)
+        loginPayload = LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.issuer), response)
         painlessLogin()
     }
 
     fun painlessLogin() {
-        walletManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.let { identity ->
+        serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.let { identity ->
             performLogin(identity)
         }.orElse { _notExistedIdentityLiveData.value = Event(Unit) }
     }
@@ -83,12 +88,12 @@ class MainViewModel(private val walletManager: WalletManager, private val reposi
     private fun minervaLogin(identity: Identity, qrCode: QrCodeResponse) {
         qrCode.callback?.let { callback ->
             launchDisposable {
-                walletManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCode), identity.privateKey)
+                serviceManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCode))
                     .flatMapCompletable { jwtToken ->
-                        walletManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
+                        serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
                     }
                     .observeOn(Schedulers.io())
-                    .andThen(repository.saveWalletActions(getValuesWalletAction(identity.name, qrCode.serviceName), walletManager.masterSeed))
+                    .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(identity.name, qrCode.serviceName)))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
@@ -101,5 +106,5 @@ class MainViewModel(private val walletManager: WalletManager, private val reposi
         }
     }
 
-    fun getIdentityName(): String? = walletManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.name
+    fun getIdentityName(): String? = serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.name
 }

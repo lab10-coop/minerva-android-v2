@@ -1,0 +1,201 @@
+package minerva.android.walletmanager.manager.wallet
+
+import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
+import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.keystore.KeystoreRepository
+import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.ResponseState
+import minerva.android.walletmanager.model.mappers.mapWalletConfigToWalletPayload
+import minerva.android.walletmanager.storage.ServiceType
+import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
+import timber.log.Timber
+
+class WalletConfigManagerImpl(
+    private val keystoreRepository: KeystoreRepository,
+    private val walletConfigRepository: WalletConfigRepository
+) : WalletConfigManager {
+
+    override lateinit var masterSeed: MasterSeed
+    private var disposable: Disposable? = null
+
+    private val walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
+    override val walletConfigLiveData: LiveData<WalletConfig> get() = walletConfigMutableLiveData
+
+    override fun getWalletConfig(): WalletConfig? = walletConfigLiveData.value
+    override fun isMasterSeedSaved(): Boolean = keystoreRepository.isMasterSeedSaved()
+
+    @VisibleForTesting
+    fun loadWalletConfig() {
+        disposable = walletConfigRepository.loadWalletConfig(masterSeed)
+            .subscribeBy(
+                onNext = { walletConfigMutableLiveData.value = it },
+                onError = { Timber.e("Downloading WalletConfig error: $it") }
+            )
+    }
+
+    override fun dispose() {
+        disposable?.dispose()
+    }
+
+    override fun initWalletConfig() {
+        masterSeed = keystoreRepository.decryptMasterSeed()
+        loadWalletConfig()
+    }
+
+    override fun getWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse> =
+        walletConfigRepository.getWalletConfig(masterSeed)
+            .map {
+                handleWalletConfigResponse(it, masterSeed)
+                RestoreWalletResponse(it.state, it.message)
+            }
+
+    private fun handleWalletConfigResponse(walletConfigResponse: WalletConfigResponse, masterSeed: MasterSeed) {
+        if (walletConfigResponse.state != ResponseState.ERROR) {
+            keystoreRepository.encryptMasterSeed(masterSeed)
+            walletConfigRepository.saveWalletConfigLocally(walletConfigResponse.walletPayload)
+        }
+    }
+
+    override fun createWalletConfig(masterSeed: MasterSeed): Completable {
+        return walletConfigRepository.createWalletConfig(masterSeed)
+            .doOnComplete {
+                keystoreRepository.encryptMasterSeed(masterSeed)
+                walletConfigRepository.saveWalletConfigLocally()
+            }
+            .doOnError {
+                //Panic Button. Uncomment code below to save manually - not recommended
+                //keystoreRepository.encryptKey(masterSeed)
+                //walletConfigRepository.saveWalletConfigLocally(walletConfigRepository.createDefaultWalletConfig())
+            }
+    }
+
+    override fun updateWalletConfig(walletConfig: WalletConfig): Completable {
+        mapWalletConfigToWalletPayload(walletConfig).run {
+            return walletConfigRepository.updateWalletConfig(masterSeed, this)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete {
+                    walletConfigMutableLiveData.value = walletConfig
+                    walletConfigRepository.saveWalletConfigLocally(this)
+                }
+                .doOnError {
+                    //Panic Button. Uncomment code below to save manually - not recommended
+                    //walletConfigRepository.saveWalletConfigLocally(this)
+                    //walletConfigMutableLiveData.value = walletConfig
+                }
+        }
+    }
+
+    override fun getSafeAccountNumber(ownerAddress: String): Int {
+        var safeAccountNumber = DEFAULT_SAFE_ACCOUNT_NUMBER
+        getWalletConfig()?.values?.let {
+            it.forEach { savedValue ->
+                if (savedValue.masterOwnerAddress == ownerAddress) safeAccountNumber++
+            }
+        }
+        return safeAccountNumber
+    }
+
+    override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String {
+        getWalletConfig()?.values?.forEach {
+            if (it.address == address) return it.privateKey
+        }
+        return String.Empty
+    }
+
+    override fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>> {
+        getWalletConfig()?.let { config ->
+            config.values.apply {
+                forEach { if (it.index == position) it.owners = owners }
+                return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, this, config.services))
+                    .andThen(Single.just(owners))
+            }
+        }
+        return Single.error(Throwable("Wallet Config was not initialized"))
+    }
+
+    override fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>> {
+        getWalletConfig()?.let { TODO("Not yet implemented") }
+        return Single.error(Throwable("Wallet Config was not initialized"))
+    }
+
+    override fun getValueIterator(): Int {
+        getWalletConfig()?.values?.let {
+            var iterator = 1
+            it.forEach { value -> if (!value.isSafeAccount) iterator += 1 }
+            return iterator
+        }
+        throw Throwable("Wallet Config was not initialized")
+    }
+
+    override fun isAlreadyLoggedIn(issuer: String): Boolean {
+        getWalletConfig()?.services?.forEach {
+            if (doesChargingStationIsAlreadyLoggedIn(it, issuer)) return true
+        }
+        return false
+    }
+
+    override fun getLoggedInIdentityPublicKey(issuer: String): String {
+        getWalletConfig()?.services?.find { it.type == issuer }
+            ?.let { return it.loggedInIdentityPublicKey }
+            .orElse { return String.Empty }
+    }
+
+    override fun getLoggedInIdentity(publicKey: String): Identity? {
+        getWalletConfig()?.identities?.find { it.publicKey == publicKey }
+            ?.let { return it }
+            .orElse { return null }
+    }
+
+    private fun doesChargingStationIsAlreadyLoggedIn(service: Service, issuer: String) =
+        service.type == issuer && service.type == ServiceType.CHARGING_STATION
+
+    override fun saveService(service: Service): Completable {
+        getWalletConfig()?.run {
+            if (services.isEmpty()) {
+                return updateWalletConfig(WalletConfig(updateVersion, identities, values, listOf(service)))
+            }
+            return updateWalletConfig(getWalletConfigWithUpdatedService(service))
+        }
+        return Completable.error(Throwable("Wallet Config was not initialized"))
+    }
+
+    override fun getValue(valueIndex: Int, assetIndex: Int): Value? {
+        var value: Value? = null
+        getWalletConfig()?.values?.forEach {
+            if (it.index == valueIndex) value = it
+        }
+        return value
+    }
+
+    private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {
+        isServiceIsAlreadyConnected(newService)?.let {
+            updateService(it)
+            return WalletConfig(updateVersion, identities, values, services)
+        }.orElse {
+            return WalletConfig(updateVersion, identities, values, services + newService)
+        }
+    }
+
+    private fun WalletConfig.isServiceIsAlreadyConnected(newService: Service) =
+        services.find { service -> service.type == newService.type }
+
+    private fun WalletConfig.updateService(service: Service) {
+        services.forEach { if (it == service) it.lastUsed = DateUtils.getLastUsedFormatted() }
+    }
+
+    companion object {
+        private const val DEFAULT_SAFE_ACCOUNT_NUMBER = 1
+    }
+}

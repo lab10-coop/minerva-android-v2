@@ -5,16 +5,15 @@ import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.base.BaseViewModel
-import minerva.android.walletmanager.wallet.WalletManager
-import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.RestoreWalletResponse
 import minerva.android.walletmanager.model.defs.ResponseState
+import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import java.util.*
 
-class RestoreWalletViewModel(private val walletManager: WalletManager) : BaseViewModel() {
+class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedRepository) : BaseViewModel() {
 
     private val _restoreWalletMutableLiveData = MutableLiveData<Event<RestoreWalletResponse>>()
     val restoreWalletLiveData: LiveData<Event<RestoreWalletResponse>> get() = _restoreWalletMutableLiveData
@@ -36,7 +35,7 @@ class RestoreWalletViewModel(private val walletManager: WalletManager) : BaseVie
 
     internal fun validateMnemonic(mnemonic: String) {
         _loadingLiveData.value = Event(true)
-        val invalidWords = walletManager.validateMnemonic(mnemonic)
+        val invalidWords = masterSeedRepository.validateMnemonic(mnemonic)
         if (invalidWords.isEmpty()) {
             restoreWallet(mnemonic)
         } else {
@@ -47,8 +46,7 @@ class RestoreWalletViewModel(private val walletManager: WalletManager) : BaseVie
 
     private fun restoreWallet(mnemonic: String) {
         launchDisposable {
-            walletManager.restoreMasterSeed(mnemonic)
-                .flatMap { walletManager.getWalletConfig(MasterSeed(it.seed, it.publicKey, it.privateKey)) }
+            masterSeedRepository.restoreMasterSeed(mnemonic)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
@@ -56,7 +54,7 @@ class RestoreWalletViewModel(private val walletManager: WalletManager) : BaseVie
                     onSuccess = { handleGetWalletConfigResponse(it) },
                     onError = {
                         _errorLiveData.value = Event(it)
-//                            _restoreWalletMutableLiveData.value = Event(it) uncomment when offline app is needed, test that
+                        //_restoreWalletMutableLiveData.value = Event(it) uncomment when offline app is needed, test that
                     }
                 )
         }

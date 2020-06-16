@@ -23,7 +23,7 @@ import timber.log.Timber
 import java.security.SecureRandom
 import java.util.*
 
-
+/*Derivation path for identities and values "m/99'/n" where n is index of identity and value*/
 class CryptographyRepositoryImpl : CryptographyRepository {
 
     override fun createMasterSeed(): Single<Triple<String, String, String>> {

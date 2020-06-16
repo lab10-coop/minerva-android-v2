@@ -5,10 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import java.util.*
 
-class BackupViewModel(private val walletManager: WalletManager) : ViewModel() {
+class BackupViewModel(private val masterSeedRepository: MasterSeedRepository) : ViewModel() {
 
     var mnemonic: String = String.Empty
 
@@ -16,7 +16,7 @@ class BackupViewModel(private val walletManager: WalletManager) : ViewModel() {
     val showMnemonicLiveData: LiveData<Event<String>> get() = _showMnemonicMutableLiveData
 
     fun showMnemonic() {
-        walletManager.getMnemonic().apply {
+        masterSeedRepository.getMnemonic().apply {
             mnemonic = this
             _showMnemonicMutableLiveData.value = Event(getFormattedMnemonic(mnemonic))
         }
@@ -32,6 +32,6 @@ class BackupViewModel(private val walletManager: WalletManager) : ViewModel() {
     }
 
     fun saveIsMnemonicRemembered() {
-        walletManager.saveIsMnemonicRemembered()
+        masterSeedRepository.saveIsMnemonicRemembered()
     }
 }

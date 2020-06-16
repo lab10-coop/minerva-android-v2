@@ -7,25 +7,20 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
-import minerva.android.configProvider.model.walletConfig.IdentityPayload
-import minerva.android.configProvider.model.walletConfig.ValuePayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
-import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_VALUES_INDEX
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_VALUES_INDEX
+import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.MasterSeed
+import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.mappers.mapIdentityPayloadToIdentity
 import minerva.android.walletmanager.model.mappers.mapServicesResponseToServices
 import minerva.android.walletmanager.model.mappers.mapValueResponseToValue
-import minerva.android.walletmanager.utils.CryptoUtils
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
+import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
 
 class WalletConfigRepositoryImpl(
     private val cryptographyRepository: CryptographyRepository,
@@ -65,39 +60,25 @@ class WalletConfigRepositoryImpl(
             walletConfigPayload = walletConfigPayload
         )
 
-    override fun createWalletConfig(masterSeed: MasterSeed) = updateWalletConfig(masterSeed, createDefaultWalletConfig())
+    override fun createWalletConfig(masterSeed: MasterSeed) = updateWalletConfig(masterSeed)
 
-    override fun createDefaultWalletConfig() =
-        WalletConfigPayload(
-            DEFAULT_VERSION, listOf(IdentityPayload(FIRST_IDENTITY_INDEX, DEFAULT_IDENTITY_NAME)),
-            listOf(
-                ValuePayload(FIRST_VALUES_INDEX, CryptoUtils.prepareName(Network.ARTIS, FIRST_VALUES_INDEX), Network.ARTIS.short),
-                ValuePayload(SECOND_VALUES_INDEX, CryptoUtils.prepareName(Network.ETHEREUM, SECOND_VALUES_INDEX), Network.ETHEREUM.short)
-            )
-        )
-
-    private fun completeKeys(masterSeed: MasterSeed, walletConfigPayload: WalletConfigPayload): Observable<WalletConfig> =
-        walletConfigPayload.identityResponse.let { identitiesResponse ->
-            walletConfigPayload.valueResponse.let { valuesResponse ->
+    private fun completeKeys(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> =
+        payload.identityResponse.let { identitiesResponse ->
+            payload.valueResponse.let { valuesResponse ->
                 Observable.range(START, identitiesResponse.size)
                     .filter { !identitiesResponse[it].isDeleted }
                     .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identitiesResponse[it].index) }
                     .toList()
                     .map {
-                        completeIdentitiesKeys(walletConfigPayload, it)
+                        completeIdentitiesKeys(payload, it)
                     }
                     .zipWith(Observable.range(START, valuesResponse.size)
                         .filter { !valuesResponse[it].isDeleted }
                         .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, valuesResponse[it].index) }
                         .toList()
-                        .map { completeValues(walletConfigPayload, it) },
+                        .map { completeValues(payload, it) },
                         BiFunction { identity: List<Identity>, value: List<Value> ->
-                            WalletConfig(
-                                walletConfigPayload.version,
-                                identity,
-                                value,
-                                mapServicesResponseToServices(walletConfigPayload.serviceResponse)
-                            )
+                            WalletConfig(payload.version, identity, value, mapServicesResponseToServices(payload.serviceResponse))
                         }
                     ).toObservable()
             }

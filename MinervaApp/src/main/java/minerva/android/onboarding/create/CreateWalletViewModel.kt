@@ -5,11 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.kotlinUtils.event.Event
 import minerva.android.base.BaseViewModel
-import minerva.android.walletmanager.wallet.WalletManager
+import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 
-class CreateWalletViewModel(private val walletManager: WalletManager) : BaseViewModel() {
+class CreateWalletViewModel(private val masterSeedRepository: MasterSeedRepository) : BaseViewModel() {
 
     private val _createWalletMutableLiveData = MutableLiveData<Event<Unit>>()
     val createWalletLiveData: LiveData<Event<Unit>> get() = _createWalletMutableLiveData
@@ -22,8 +22,7 @@ class CreateWalletViewModel(private val walletManager: WalletManager) : BaseView
 
     fun createMasterSeed() {
         launchDisposable {
-            walletManager.createMasterSeed()
-                .flatMapCompletable { walletManager.createWalletConfig(it) }
+            masterSeedRepository.createMasterSeed()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
