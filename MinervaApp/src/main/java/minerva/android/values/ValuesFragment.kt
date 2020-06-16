@@ -68,6 +68,10 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
 
     override fun onValueRemove(value: Value) = showRemoveDialog(value)
 
+    fun setProgressValue(index: Int, pending: Boolean) {
+        valueAdapter.setPending(index, pending)
+    }
+
     private fun setupRecycleView(view: View) {
         recyclerView.apply {
             layoutManager = LinearLayoutManager(view.context)

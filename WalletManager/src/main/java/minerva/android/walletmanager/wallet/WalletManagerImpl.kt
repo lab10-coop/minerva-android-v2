@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.exchangemarketsprovider.api.BinanceApi
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -57,6 +58,7 @@ class WalletManagerImpl(
     override val walletConfigLiveData: LiveData<WalletConfig> get() = walletConfigMutableLiveData
 
     private var disposable: Disposable? = null
+    private var transactionHash = String.Empty
 
     @VisibleForTesting
     fun loadWalletConfig() {
@@ -91,12 +93,19 @@ class WalletManagerImpl(
         return Single.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun transferNativeCoin(network: String, transaction: Transaction): Completable {
-        return blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
-            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
-            .map { saveRecipient(it, transaction.receiverKey) }
-            .ignoreElement()
+    override fun currentTransactionHash(hash: String) {
+        transactionHash = hash
     }
+
+    override fun transferNativeCoin(network: String, transaction: Transaction): Single<String> {
+        return blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
+            .doOnSuccess {
+                blockchainRepository.reverseResolveENS(transaction.receiverKey)
+                    .onErrorReturn { String.Empty }
+                    .map { saveRecipient(it, transaction.receiverKey) }
+            }
+    }
+
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
         blockchainRepository.transferERC20Token(network, mapTransactionToTransactionPayload(transaction))

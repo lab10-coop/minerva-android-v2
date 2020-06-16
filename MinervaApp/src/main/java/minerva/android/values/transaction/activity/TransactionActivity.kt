@@ -13,17 +13,17 @@ import minerva.android.extension.replaceFragment
 import minerva.android.extension.validator.Validator.HEX_PREFIX
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.services.login.uitls.LoginPayload
-import minerva.android.values.listener.ScannerFragmentsListener
+import minerva.android.values.listener.TransactionListener
 import minerva.android.values.transaction.TransactionsViewModel
 import minerva.android.values.transaction.TransactionsViewModel.Companion.META_ADDRESS_SEPARATOR
 import minerva.android.values.transaction.fragment.TransactionsFragment
 import minerva.android.values.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.walletmanager.model.Network
+import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.repository.getNetworkIcon
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class TransactionActivity : AppCompatActivity(), ScannerFragmentsListener {
+class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     private val viewModel: TransactionsViewModel by viewModel()
 
@@ -61,13 +61,23 @@ class TransactionActivity : AppCompatActivity(), ScannerFragmentsListener {
         else setLogo(getDrawable(getNetworkIcon(Network.fromString(viewModel.value.network))))
     }
 
-    override fun onResult(isResultSucceed: Boolean, message: String?, loginPayload: LoginPayload?) {
+    override fun onTransactionAccepted(message: String) {
         setResult(Activity.RESULT_OK, Intent().apply {
-            putExtra(IS_TRANSACTION_SUCCESS, isResultSucceed)
+            putExtra(VALUE_INDEX, viewModel.value.index)
+            putExtra(IS_TRANSACTION_SUCCESS, true)
             putExtra(TRANSACTION_MESSAGE, message)
         })
         finish()
     }
+
+    override fun onError(message: String) {
+        MinervaFlashbar.show(
+            this,
+            getString(R.string.transaction_error_title),
+            getString(R.string.transaction_error_message, message)
+        )
+    }
+
 
     override fun showScanner() {
         supportActionBar?.hide()

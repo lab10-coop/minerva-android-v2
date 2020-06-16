@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import java.math.BigDecimal
 
@@ -16,7 +17,8 @@ data class Value(
     var assets: List<Asset> = listOf(),
     var fiatBalance: BigDecimal = BigDecimal.ZERO,
     var owners: List<String>? = null,
-    var contractAddress: String = String.Empty
+    var contractAddress: String = String.Empty,
+    var pending: Boolean = false
 ) {
     constructor(value: Value, isDeleted: Boolean) : this(
         value.index,
@@ -26,7 +28,8 @@ data class Value(
         value.name,
         value.network,
         isDeleted,
-        owners = value.owners
+        owners = value.owners,
+        pending = false
     )
 
     val isSafeAccount: Boolean

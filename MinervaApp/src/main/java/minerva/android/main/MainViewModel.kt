@@ -25,14 +25,17 @@ class MainViewModel(private val walletManager: WalletManager, private val reposi
 
     lateinit var loginPayload: LoginPayload
 
-    private val _notExistedIdentityMutableLiveData = MutableLiveData<Event<Unit>>()
-    val notExistedIdentityLiveData: LiveData<Event<Unit>> get() = _notExistedIdentityMutableLiveData
+    private val _notExistedIdentityLiveData = MutableLiveData<Event<Unit>>()
+    val notExistedIdentityLiveData: LiveData<Event<Unit>> get() = _notExistedIdentityLiveData
 
-    private val _requestedFieldsMutableLiveData = MutableLiveData<Event<String>>()
-    val requestedFieldsLiveData: LiveData<Event<String>> get() = _requestedFieldsMutableLiveData
+    private val _requestedFieldsLiveData = MutableLiveData<Event<String>>()
+    val requestedFieldsLiveData: LiveData<Event<String>> get() = _requestedFieldsLiveData
 
-    private val _errorMutableLiveData = MutableLiveData<Event<Throwable>>()
-    val errorLiveData: LiveData<Event<Throwable>> get() = _errorMutableLiveData
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
+
+    private val _loadingLiveData = MutableLiveData<Event<Pair<Int, Boolean>>>()
+    val loadingLiveData: LiveData<Event<Pair<Int, Boolean>>> get() = _loadingLiveData
 
     fun isMasterSeedAvailable() = walletManager.isMasterSeedAvailable()
 
@@ -52,7 +55,7 @@ class MainViewModel(private val walletManager: WalletManager, private val reposi
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onSuccess = { handleQrCodeResponse(it) },
-                        onError = { _errorMutableLiveData.value = Event(it) }
+                        onError = { _errorLiveData.value = Event(it) }
                     )
             }
         }
@@ -70,12 +73,12 @@ class MainViewModel(private val walletManager: WalletManager, private val reposi
     fun painlessLogin() {
         walletManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.let { identity ->
             performLogin(identity)
-        }.orElse { _notExistedIdentityMutableLiveData.value = Event(Unit) }
+        }.orElse { _notExistedIdentityLiveData.value = Event(Unit) }
     }
 
     private fun performLogin(identity: Identity) =
         if (LoginUtils.isIdentityValid(identity)) loginPayload.qrCode?.let { minervaLogin(identity, it) }
-        else _requestedFieldsMutableLiveData.value = Event(identity.name)
+        else _requestedFieldsLiveData.value = Event(identity.name)
 
     private fun minervaLogin(identity: Identity, qrCode: QrCodeResponse) {
         qrCode.callback?.let { callback ->
@@ -91,7 +94,7 @@ class MainViewModel(private val walletManager: WalletManager, private val reposi
                     .subscribeBy(
                         onError = {
                             Timber.e("Error while login $it")
-                            _errorMutableLiveData.value = Event(Throwable(it.message))
+                            _errorLiveData.value = Event(Throwable(it.message))
                         }
                     )
             }

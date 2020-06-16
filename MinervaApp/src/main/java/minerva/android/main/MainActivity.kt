@@ -9,16 +9,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
+import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivity
 import minerva.android.extension.launchActivityForResult
 import minerva.android.extension.visibleOrGone
 import minerva.android.identities.IdentitiesFragment
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.login.PainlessLoginActivity
+import minerva.android.values.ValuesFragment
 import minerva.android.values.transaction.activity.TransactionActivity
 import minerva.android.values.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
 import minerva.android.values.transaction.activity.TransactionActivity.Companion.VALUE_INDEX
@@ -72,6 +75,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             errorLiveData.observe(this@MainActivity, EventObserver {
                 Toast.makeText(this@MainActivity, getString(R.string.unexpected_error), Toast.LENGTH_LONG).show()
             })
+            loadingLiveData.observe(this@MainActivity, EventObserver {
+                (getCurrentFragment() as ValuesFragment)?.setProgressValue(it.first, it.second)
+            })
+
         }
     }
 
@@ -119,12 +126,26 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (isLoginResult(requestCode, resultCode)) {
-            handleLoginResult(data)
-        } else if (isTransactionResult(requestCode, resultCode)) {
-            handleTransactionResult(data)
+        when {
+            isLoginResult(requestCode, resultCode) -> handleLoginResult(data)
+            isTransactionPrepared(requestCode, resultCode) -> handlePreparedTransaction(data)
         }
     }
+
+    private fun handlePreparedTransaction(data: Intent?) {
+        data?.apply {
+            handleTransactionResult(data)
+            return
+            //TODO Pending UI - skipped for now (logic needs to be implemented)
+            getIntExtra(VALUE_INDEX, Int.InvalidValue).let {
+                if (it != Int.InvalidValue) {
+                    (getCurrentFragment() as ValuesFragment).setProgressValue(it, true)
+                    //TODO add transaction stage 2!
+                }
+            }
+        }
+    }
+
 
     override fun showSendTransactionScreen(value: Value) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
