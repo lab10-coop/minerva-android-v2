@@ -25,7 +25,7 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
         setupActionBar()
-        addFragment(R.id.mainContent, WelcomeFragment())
+        addFragment(R.id.mainContent, WelcomeFragment.newInstance())
     }
 
     override fun onBackPressed() {

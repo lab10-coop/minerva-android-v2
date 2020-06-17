@@ -25,4 +25,5 @@
     <dimen name="circle_icon_size">60dp</dimen>
     <dimen name="address_width">192dp</dimen>
     <dimen name="elevation">20dp</dimen>
+    <dimen name="bottom_button_margin">80dp</dimen>
 </resources>
