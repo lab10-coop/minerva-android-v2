@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightGray"
+    android:clipToPadding="false"
+    android:paddingLeft="@dimen/margin_small"
+    android:paddingTop="@dimen/margin_xsmall"
+    android:paddingRight="@dimen/margin_small"
+    android:paddingBottom="@dimen/margin_xsmall"
     tools:context=".settings.backup.BackupActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_xsmall"
-        android:layout_marginRight="@dimen/margin_normal"
-        android:layout_marginBottom="@dimen/margin_xsmall"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/bottom_button_margin"
         android:background="@drawable/rounded_white_background"
         android:elevation="2dp"
-        android:padding="@dimen/margin_small"
-        app:layout_constraintBottom_toTopOf="@+id/rememberButton"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:padding="@dimen/margin_small">
 
         <TextView
             android:id="@+id/backupMessage"
@@ -37,23 +35,39 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/mnemonicTextView"
+        <ScrollView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginBottom="@dimen/margin_xsmall"
-            android:fontFamily="@font/rubik_medium"
-            android:gravity="top|center"
-            android:lineSpacingExtra="4dp"
-            android:lines="14"
-            android:minLines="12"
-            android:textColor="@color/gray"
-            android:textSize="@dimen/text_big"
+            android:layout_height="0dp"
+            android:scrollbars="none"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/backupMessage"
-            tools:text="sd\nrwerwe\nfsdf\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\n" />
+            app:layout_constraintBottom_toTopOf="@id/copyButton"
+            android:layout_marginBottom="@dimen/margin_xsmall"
+            app:layout_constraintTop_toBottomOf="@+id/backupMessage">
+
+            <TextView
+                android:id="@+id/mnemonicTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_small"
+                android:layout_marginBottom="@dimen/margin_xsmall"
+                android:fontFamily="@font/rubik_medium"
+                android:gravity="top|center"
+                android:lineSpacingExtra="4dp"
+                android:lines="14"
+                android:minLines="12"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/text_big"
+                tools:text="sd\nrwerwe\nfsdf\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\nrew\n" />
+        </ScrollView>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/halfGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
 
         <minerva.android.widget.ActionButton
             android:id="@+id/copyButton"
@@ -62,25 +76,25 @@
             android:layout_marginEnd="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/shareButton" />
+            app:layout_constraintRight_toLeftOf="@+id/halfGuideline" />
 
         <minerva.android.widget.ActionButton
             android:id="@+id/shareButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@+id/copyButton"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/copyButton" />
+            app:layout_constraintLeft_toRightOf="@+id/halfGuideline"
+            app:layout_constraintRight_toRightOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/rememberButton"
         style="@style/PurpleButtonStyle"
-        android:layout_width="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/i_will_safety_remember"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_gravity="bottom"
+        android:text="@string/i_will_safety_remember" />
+</FrameLayout>
