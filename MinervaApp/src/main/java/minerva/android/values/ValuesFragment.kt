@@ -73,6 +73,16 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
     }
 
     private fun setupRecycleView(view: View) {
+        swipeRefresh.apply {
+            setColorSchemeResources(
+                R.color.colorSetOne,
+                R.color.colorSetFour,
+                R.color.colorSetSeven,
+                R.color.colorSetNine
+            )
+            setOnRefreshListener { viewModel.refreshBalances() }
+        }
+
         recyclerView.apply {
             layoutManager = LinearLayoutManager(view.context)
             adapter = valueAdapter
@@ -85,7 +95,10 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
                 noDataMessage.visibleOrGone(it.hasActiveValue)
                 valueAdapter.updateList(it.values)
             })
-            balanceLiveData.observe(viewLifecycleOwner, Observer { valueAdapter.updateBalances(it) })
+            balanceLiveData.observe(viewLifecycleOwner, Observer {
+                valueAdapter.updateBalances(it)
+                swipeRefresh.isRefreshing = false
+            })
             assetBalanceLiveData.observe(viewLifecycleOwner, Observer { valueAdapter.updateAssetBalances(it) })
             errorLiveData.observe(viewLifecycleOwner, Observer {
                 showErrorFlashbar(getString(R.string.error_header), it.peekContent().message)
