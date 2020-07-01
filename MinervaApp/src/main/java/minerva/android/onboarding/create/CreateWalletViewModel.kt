@@ -28,7 +28,10 @@ class CreateWalletViewModel(private val masterSeedRepository: MasterSeedReposito
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _createWalletMutableLiveData.value = Event(Unit) },
+                    onComplete = {
+                        masterSeedRepository.initWalletConfig()
+                        _createWalletMutableLiveData.value = Event(Unit)
+                    },
                     onError = {
                         _errorLiveData.value = Event(it)
                         //Panic Button. Uncomment code below to save manually - not recommended

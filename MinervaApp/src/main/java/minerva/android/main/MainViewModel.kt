@@ -42,10 +42,6 @@ class MainViewModel(
     private val _loadingLiveData = MutableLiveData<Event<Pair<Int, Boolean>>>()
     val loadingLiveData: LiveData<Event<Pair<Int, Boolean>>> get() = _loadingLiveData
 
-    fun isMasterSeedAvailable() = masterSeedRepository.isMasterSeedAvailable()
-
-    fun initWalletConfig() = masterSeedRepository.initWalletConfig()
-
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
 
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()

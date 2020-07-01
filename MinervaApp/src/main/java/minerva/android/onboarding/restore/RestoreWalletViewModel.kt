@@ -9,14 +9,14 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.RestoreWalletResponse
+import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.ResponseState
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import java.util.*
 
 class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedRepository) : BaseViewModel() {
 
-    private val _restoreWalletMutableLiveData = MutableLiveData<Event<RestoreWalletResponse>>()
-    val restoreWalletLiveData: LiveData<Event<RestoreWalletResponse>> get() = _restoreWalletMutableLiveData
+    val restoreWalletLiveData: LiveData<WalletConfig> get() = masterSeedRepository.walletConfigLiveData
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -49,7 +49,6 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
             masterSeedRepository.restoreMasterSeed(mnemonic)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onSuccess = { handleGetWalletConfigResponse(it) },
                     onError = {
@@ -62,7 +61,7 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
 
     private fun handleGetWalletConfigResponse(response: RestoreWalletResponse) {
         if (response.state == ResponseState.ERROR) _walletConfigNotFoundLiveData.value = Event(Unit)
-        else _restoreWalletMutableLiveData.value = Event(response)
+        else masterSeedRepository.initWalletConfig()
     }
 
     companion object {

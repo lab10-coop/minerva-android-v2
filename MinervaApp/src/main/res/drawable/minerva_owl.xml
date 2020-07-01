@@ -1,0 +1,121 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="128dp"
+            android:height="128dp"
+            android:viewportWidth="128"
+            android:viewportHeight="128">
+            <group android:name="group" />
+            <group android:name="loading_1_">
+                <group android:name="group_1" />
+                <group android:name="group_2" />
+            </group>
+            <path
+                android:name="path"
+                android:fillType="evenOdd"
+                android:pathData="M 64 14.183 C 50.732 14.183 37.994 19.436 28.612 28.774 C 19.23 38.113 13.954 50.793 13.954 64 C 13.954 77.207 19.23 89.887 28.612 99.226 C 37.994 108.564 50.732 113.817 64 113.817 C 77.268 113.817 90.006 108.564 99.388 99.226 C 108.77 89.887 114.046 77.207 114.046 64 C 114.046 50.793 108.77 38.113 99.388 28.774 C 90.006 19.436 77.268 14.183 64 14.183 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:endX="114.046"
+                        android:endY="64.0004"
+                        android:startX="13.9544"
+                        android:startY="64.0004"
+                        android:type="linear">
+                        <item
+                            android:color="#FFD3D3E9"
+                            android:offset="0" />
+                        <item
+                            android:color="#00FFFFFF"
+                            android:offset="1" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+            <group android:name="bg_1_">
+                <group android:name="group_3" />
+                <group android:name="group_4" />
+            </group>
+            <path
+                android:name="bg"
+                android:fillType="evenOdd"
+                android:pathData="M 64 16 C 51.274 16 39.057 21.061 30.059 30.059 C 21.061 39.057 16 51.274 16 64 C 16 76.726 21.061 88.943 30.059 97.941 C 39.057 106.939 51.274 112 64 112 C 76.726 112 88.943 106.939 97.941 97.941 C 106.939 88.943 112 76.726 112 64 C 112 51.274 106.939 39.057 97.941 30.059 C 88.943 21.061 76.726 16 64 16 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:endX="111.99976"
+                        android:endY="64.0004"
+                        android:startX="16.00008"
+                        android:startY="64.0004"
+                        android:type="linear">
+                        <item
+                            android:color="#FF8449D1"
+                            android:offset="0" />
+                        <item
+                            android:color="#FF443AD2"
+                            android:offset="1" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+            <group android:name="face_2_">
+                <group android:name="group_5" />
+                <group android:name="group_6" />
+            </group>
+            <path
+                android:name="face_1_"
+                android:fillType="evenOdd"
+                android:pathData="M 83.2 83.1 C 72.6 83.1 64 74.6 64 64 C 64 53.4 55.4 44.8 44.8 44.8 C 34.4 44.8 25.6 53.2 25.6 64 C 25.6 85.4 43 102.4 64 102.4 C 85 102.4 102 85.4 102.4 64.6 C 101.6 76.6 92.3 83.1 83.2 83.1 Z M 53.2 68.3 C 52.5 70.4 48.6 73.4 42.3 70.6 C 36.1 67.8 34.7 62.5 36.7 59.3 C 37.3 58.3 38.9 56.6 41.3 56.3 C 44.5 56 48 57 50.2 59.5 C 54.3 64.1 53.8 66.5 53.2 68.3 Z M 67.7 85.1 L 64.5 91.7 C 64.2 92.2 63.8 92.2 63.6 91.7 C 63.6 91.7 61.2 86.8 60.4 85.1 C 60 84.3 60.4 83.3 60.8 82.9 C 64 79.7 64 79.7 67.3 82.9 C 67.6 83.3 68.1 84.3 67.7 85.1 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:endX="25.6"
+                        android:endY="73.6"
+                        android:startX="102.4"
+                        android:startY="73.6"
+                        android:type="linear">
+                        <item
+                            android:color="#FFD3D3E9"
+                            android:offset="0" />
+                        <item
+                            android:color="#FFFFFFFF"
+                            android:offset="1" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+            <group android:name="eye_1_">
+                <group android:name="group_7" />
+                <group android:name="group_8" />
+            </group>
+            <path
+                android:name="eye"
+                android:fillType="evenOdd"
+                android:pathData="M 83.2 44.6 C 72.4 44.6 63.7 53.3 63.7 64.1 C 63.7 74.9 72.4 83.6 83.2 83.6 C 94 83.6 102.7 74.9 102.7 64.1 C 102.7 53.3 94 44.6 83.2 44.6 Z M 85.6 70.8 C 79.3 73.6 75.4 70.6 74.7 68.5 C 74.1 66.8 73.7 64.3 77.7 59.8 C 79.9 57.3 83.4 56.3 86.6 56.6 C 89 56.8 90.6 58.6 91.2 59.6 C 93.2 62.6 91.9 68 85.6 70.8 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:endX="102.7"
+                        android:endY="64.1"
+                        android:startX="63.7"
+                        android:startY="64.1"
+                        android:type="linear">
+                        <item
+                            android:color="#FFD3D3E9"
+                            android:offset="0" />
+                        <item
+                            android:color="#FFFFFFFF"
+                            android:offset="1" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+        </vector>
+    </aapt:attr>
+    <target android:name="path">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="900"
+                android:interpolator="@android:anim/linear_interpolator"
+                android:propertyName="pathData"
+                android:repeatCount="-1"
+                android:valueFrom="M 64 14.183 C 50.732 14.183 37.994 19.436 28.612 28.774 C 19.23 38.113 13.954 50.793 13.954 64 C 13.954 77.207 19.23 89.887 28.612 99.226 C 37.994 108.564 50.732 113.817 64 113.817 C 77.268 113.817 90.006 108.564 99.388 99.226 C 108.77 89.887 114.046 77.207 114.046 64 C 114.046 50.793 108.77 38.113 99.388 28.774 C 90.006 19.436 77.268 14.183 64 14.183 Z"
+                android:valueTo="M 64 16 C 51.274 16 39.057 21.061 30.059 30.059 C 21.061 39.057 16 51.274 16 64 C 16 76.726 21.061 88.943 30.059 97.941 C 39.057 106.939 51.274 112 64 112 C 76.726 112 88.943 106.939 97.941 97.941 C 106.939 88.943 112 76.726 112 64 C 112 51.274 106.939 39.057 97.941 30.059 C 88.943 21.061 76.726 16 64 16 Z"
+                android:valueType="pathType" />
+        </aapt:attr>
+    </target>
+</animated-vector>

@@ -3,9 +3,7 @@ package minerva.android.walletmanager.walletconfig.repository
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
-import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
@@ -43,8 +41,6 @@ class WalletConfigRepositoryImpl(
                     saveWalletConfigLocally(it.walletPayload)
                 }
                 .flatMap { completeKeys(masterSeed, it.walletPayload) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
         )
 
     override fun getWalletConfig(masterSeed: MasterSeed): Single<WalletConfigResponse> =
