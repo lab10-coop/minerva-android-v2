@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PassiveVideoView">
+        <attr name="fallbackImage" format="integer" />
+        <attr name="loadingImage" format="integer" />
+        <attr name="video" format="integer" />
+    </declare-styleable>
+</resources>

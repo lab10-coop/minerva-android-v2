@@ -1,5 +1,7 @@
 package minerva.android.onboarding.restore
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Single
@@ -7,8 +9,9 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.model.RestoreWalletResponse
+import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
-import org.amshove.kluent.shouldBe
+import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -24,8 +27,11 @@ class RestoreWalletViewModelTest : BaseViewModelTest() {
     private val walletConfigNotFoundObserver: Observer<Event<Unit>> = mock()
     private val walletConfigNotFoundCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
-    private val restoreWalletObserver: Observer<Event<RestoreWalletResponse>> = mock()
-    private val restoreWalletCaptor: KArgumentCaptor<Event<RestoreWalletResponse>> = argumentCaptor()
+    @Before
+    fun setup() {
+        val liveData: LiveData<WalletConfig> = MutableLiveData<WalletConfig>()
+        whenever(masterSeedRepository.walletConfigLiveData) doReturn liveData
+    }
 
     @Test
     fun `check mnemonic length validation`() {
@@ -36,20 +42,6 @@ class RestoreWalletViewModelTest : BaseViewModelTest() {
         assertFalse { viewModel.isMnemonicLengthValid("") }
         assertFalse { viewModel.isMnemonicLengthValid(" ") }
         assertTrue { viewModel.isMnemonicLengthValid("4 3 6 434 7 8 65 # $ % o o") }
-    }
-
-    @Test
-    fun `test restore wallet from mnemonic success`() {
-        val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture"
-        whenever(masterSeedRepository.restoreMasterSeed(any())).doReturn(Single.just(RestoreWalletResponse("success", "File fetched")))
-        whenever(masterSeedRepository.validateMnemonic(mnemonic)).thenReturn(emptyList())
-        viewModel.invalidMnemonicLiveData.observeForever(invalidMnemonicObserver)
-        viewModel.restoreWalletLiveData.observeForever(restoreWalletObserver)
-        viewModel.validateMnemonic(mnemonic)
-        restoreWalletCaptor.run {
-            verify(restoreWalletObserver).onChanged(capture())
-            this.firstValue.peekContent().state shouldBe "success"
-        }
     }
 
     @Test

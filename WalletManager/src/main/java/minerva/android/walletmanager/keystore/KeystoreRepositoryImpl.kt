@@ -20,8 +20,8 @@ class KeystoreRepositoryImpl(private val sharedPreferences: SharedPreferences, p
         }
     }
 
-    override fun decryptMasterSeed(): MasterSeed {
-        if (!isMasterSeedSaved()) throw IllegalStateException("Decrypt Error: No Master Seed saved!")
+    override fun decryptMasterSeed(): MasterSeed? {
+        if (!isMasterSeedSaved()) return null
         Cipher.getInstance(TRANSFORMATION).run {
             init(Cipher.DECRYPT_MODE, keyStoreManager.getSecretKey(), getGcmSpec())
             return Gson().fromJson(String(doFinal(getEncryptedData(MASTER_SEED)), Charsets.UTF_8), MasterSeed::class.java)

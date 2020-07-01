@@ -11,6 +11,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
@@ -32,12 +33,17 @@ class WalletConfigManagerImpl(
     private val walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = walletConfigMutableLiveData
 
+    private val walletConfigErrorMutableLiveData = MutableLiveData<Event<Throwable>>()
+    override val walletConfigErrorLiveData: LiveData<Event<Throwable>> get() = walletConfigErrorMutableLiveData
+
     override fun getWalletConfig(): WalletConfig? = walletConfigLiveData.value
     override fun isMasterSeedSaved(): Boolean = keystoreRepository.isMasterSeedSaved()
 
     @VisibleForTesting
     fun loadWalletConfig() {
         disposable = walletConfigRepository.loadWalletConfig(masterSeed)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = { walletConfigMutableLiveData.value = it },
                 onError = { Timber.e("Downloading WalletConfig error: $it") }
@@ -49,8 +55,10 @@ class WalletConfigManagerImpl(
     }
 
     override fun initWalletConfig() {
-        masterSeed = keystoreRepository.decryptMasterSeed()
-        loadWalletConfig()
+        keystoreRepository.decryptMasterSeed()?.let {
+            masterSeed = it
+            loadWalletConfig()
+        }.orElse { walletConfigErrorMutableLiveData.value = Event(Throwable()) }
     }
 
     override fun getWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse> =

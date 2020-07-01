@@ -44,6 +44,7 @@ ext {
     glideVersion = '4.11.0'
     flashVersion = '1.0.3'
     jodaVersion = '2.10.5'
+    waitingDotsVersion = '0.6.1'
 
     w3jVersion = '4.2.1-android'
     rxbindingVersion = '3.1.0'
@@ -126,7 +127,8 @@ ext {
             glide          : "com.github.bumptech.glide:glide:$glideVersion",
             flashbar       : "com.andrognito.flashbar:flashbar:$flashVersion",
             spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion",
-            biometric      : "androidx.biometric:biometric:$biometricVersion"
+            biometric      : "androidx.biometric:biometric:$biometricVersion",
+            waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion"
 
     ]
 

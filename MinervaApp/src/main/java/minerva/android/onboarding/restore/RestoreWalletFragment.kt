@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.fragment_restore_wallet.*
 import minerva.android.R
 import minerva.android.extension.gone
@@ -45,7 +46,7 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
         viewModel.apply {
             invalidMnemonicLiveData.observe(this@RestoreWalletFragment, EventObserver { handleInvalidMnemonic(it) })
             errorLiveData.observe(this@RestoreWalletFragment, EventObserver { handleError(R.string.creating_wallet_error_message) })
-            restoreWalletLiveData.observe(this@RestoreWalletFragment, EventObserver { listener.showMainActivity() })
+            restoreWalletLiveData.observe(this@RestoreWalletFragment, Observer { listener.showMainActivity() })
             loadingLiveData.observe(this@RestoreWalletFragment, EventObserver { if (it) showLoader() else hideLoader() })
             walletConfigNotFoundLiveData.observe(this@RestoreWalletFragment, EventObserver { handleError(R.string.no_such_file_error_message) })
         }

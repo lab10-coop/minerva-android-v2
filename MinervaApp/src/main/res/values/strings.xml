@@ -132,7 +132,7 @@
     <string name="soon">Soon</string>
     <string name="no_funds">No funds</string>
     <string name="no_funds_message">Please add at least 0.1 ATS to this ARTIS (Tau1) account</string>
-    <string name="processing">Processing…</string>
+    <string name="processing">Processing</string>
     <string name="channel_id">MinervaLoginChannel</string>
     <string name="message">Message</string>
     <string name="known_user_login_message">You are already registered user of Charging Station\nDashboard with the identity %s</string>

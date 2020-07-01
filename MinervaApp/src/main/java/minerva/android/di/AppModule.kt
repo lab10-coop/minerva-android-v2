@@ -12,6 +12,7 @@ import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
+import minerva.android.splash.SplashScreenViewModel
 import minerva.android.values.ValuesViewModel
 import minerva.android.values.address.ValueAddressViewModel
 import minerva.android.values.akm.SafeAccountSettingsViewModel
@@ -30,6 +31,7 @@ fun createAppModule() = mutableListOf<Module>().apply {
 
 private val appModules = module {
     viewModel { MainViewModel(get(), get(), get()) }
+    viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { IdentitiesViewModel(get(), get()) }

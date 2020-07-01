@@ -1,10 +1,13 @@
 package minerva.android.walletmanager.repository.seed
 
+import androidx.lifecycle.LiveData
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.RestoreWalletResponse
+import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 
 class MasterSeedRepositoryImpl(
@@ -12,6 +15,12 @@ class MasterSeedRepositoryImpl(
     private val localStorage: LocalStorage,
     private val cryptographyRepository: CryptographyRepository
 ) : MasterSeedRepository {
+
+    override val walletConfigLiveData: LiveData<WalletConfig>
+        get() = walletConfigManager.walletConfigLiveData
+
+    override val walletConfigErrorLiveData: LiveData<Event<Throwable>>
+        get() = walletConfigManager.walletConfigErrorLiveData
 
     override fun isMasterSeedAvailable(): Boolean = walletConfigManager.isMasterSeedSaved()
 

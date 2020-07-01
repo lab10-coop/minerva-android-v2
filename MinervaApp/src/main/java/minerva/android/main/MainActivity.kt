@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
 import minerva.android.extension.getCurrentFragment
-import minerva.android.extension.launchActivity
 import minerva.android.extension.launchActivityForResult
 import minerva.android.extension.visibleOrGone
 import minerva.android.identities.IdentitiesFragment
@@ -19,7 +18,6 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
-import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.services.login.PainlessLoginActivity
 import minerva.android.values.ValuesFragment
 import minerva.android.values.transaction.activity.TransactionActivity
@@ -39,8 +37,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //TODO can we do it better? Maybe on SplashScreen?
-        checkMasterSeedAvailability()
         setContentView(R.layout.activity_main)
         prepareBottomNavMenu()
         replaceFragment(IdentitiesFragment())
@@ -82,7 +78,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         }
     }
 
-    private fun painlessLogin(intent: Intent?){
+    private fun painlessLogin(intent: Intent?) {
         viewModel.loginFromNotification(intent?.getStringExtra(JWT))
     }
 
@@ -161,17 +157,17 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     }
 
     override fun shouldShowLoadingScreen(isLoading: Boolean) {
-        loadingScreen.visibleOrGone(isLoading)
+        loadingScreen.apply {
+            visibleOrGone(isLoading)
+            startAnimation()
+        }
         toggleLoadingActionBar(isLoading)
         toggleAddValueButton(isLoading)
     }
 
     private fun toggleLoadingActionBar(isLoading: Boolean) {
-        if (isLoading) {
-            setLoadingActionBar(R.color.loadingScreenBackground)
-        } else {
-            setLoadingActionBar(R.color.lightGray)
-        }
+        if (isLoading) setLoadingActionBar(R.color.loadingScreenBackground)
+        else setLoadingActionBar(R.color.lightGray)
     }
 
     private fun toggleAddValueButton(isLoading: Boolean) {
@@ -191,17 +187,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun removeSettingsBadgeIcon() =
         bottomNavigation.removeBadge(R.id.settings)
-
-    private fun checkMasterSeedAvailability() {
-        if (!viewModel.isMasterSeedAvailable()) showOnBoardingActivity()
-        else viewModel.initWalletConfig()
-    }
-
-    private fun showOnBoardingActivity() {
-        launchActivity<OnBoardingActivity> {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
-    }
 
     private fun startNewValueActivity() {
         startNewValueWrappedActivity(

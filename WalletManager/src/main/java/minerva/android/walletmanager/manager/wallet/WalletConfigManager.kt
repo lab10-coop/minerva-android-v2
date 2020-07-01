@@ -3,10 +3,12 @@ package minerva.android.walletmanager.manager.wallet
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.*
 
 interface WalletConfigManager {
     val walletConfigLiveData: LiveData<WalletConfig>
+    val walletConfigErrorLiveData: LiveData<Event<Throwable>>
     val masterSeed: MasterSeed
     fun isMasterSeedSaved(): Boolean
     fun dispose()
