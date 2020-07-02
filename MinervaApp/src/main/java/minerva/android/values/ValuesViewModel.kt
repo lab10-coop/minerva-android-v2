@@ -143,7 +143,7 @@ class ValuesViewModel(
     }
 
     private fun createSafeAccountName(value: Value): String =
-        value.name.replaceFirst(String.Space, " | ${valueManager.getSafeAccountNumber(value.address)} ")
+        value.name.replaceFirst(String.Space, " | ${valueManager.getSafeAccountCount(value.address)} ")
 
     private fun getWalletAction(status: Int, name: String) = WalletAction(
         WalletActionType.VALUE,

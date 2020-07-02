@@ -11,14 +11,14 @@ import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Compan
 import minerva.android.walletmanager.model.defs.IdentityField
 
 open class Identity(
-    open val index: Int,
-    open var name: String = String.Empty,
+    val index: Int,
+    override var name: String = String.Empty,
     open var publicKey: String = String.Empty,
     open var privateKey: String = String.Empty,
     open val data: LinkedHashMap<String, String> = linkedMapOf(),
-    val isDeleted: Boolean = false,
+    override var isDeleted: Boolean = false,
     var isSelected: Boolean = false
-) {
+): Account(publicKey, name, isDeleted) {
     constructor(index: Int, identity: Identity) : this(
         index,
         identity.name,

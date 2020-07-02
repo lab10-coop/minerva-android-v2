@@ -9,6 +9,7 @@ import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
@@ -72,7 +73,7 @@ class WalletConfigRepositoryImpl(
                         .filter { !valuesResponse[it].isDeleted }
                         .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, valuesResponse[it].index) }
                         .toList()
-                        .map { completeValues(payload, it) },
+                        .map { completeValuesKeys(payload, it) },
                         BiFunction { identity: List<Identity>, value: List<Value> ->
                             WalletConfig(payload.version, identity, value, mapServicesResponseToServices(payload.serviceResponse))
                         }
@@ -80,25 +81,32 @@ class WalletConfigRepositoryImpl(
             }
         }
 
-    private fun completeIdentitiesKeys(walletConfigPayload: WalletConfigPayload, list: List<DerivedKeys>): List<Identity> {
+    private fun completeIdentitiesKeys(walletConfigPayload: WalletConfigPayload, keys: List<DerivedKeys>): List<Identity> {
         val identities = mutableListOf<Identity>()
-        list.forEach {
-            walletConfigPayload.getIdentityPayload(it.index).apply {
-                identities.add(mapIdentityPayloadToIdentity(this, it.publicKey, it.privateKey))
+        walletConfigPayload.identityResponse.forEach { identityResponse ->
+            getKeys(identityResponse.index, keys).let { key ->
+                identities.add(mapIdentityPayloadToIdentity(identityResponse, key.publicKey, key.privateKey))
             }
         }
         return identities
     }
 
-    private fun completeValues(walletConfigPayload: WalletConfigPayload, list: List<DerivedKeys>): List<Value> {
+    private fun completeValuesKeys(walletConfigPayload: WalletConfigPayload, keys: List<DerivedKeys>): List<Value> {
         val values = mutableListOf<Value>()
-        list.forEach { keys ->
-            walletConfigPayload.getValuePayload(keys.index).apply {
-                val address = if (contractAddress.isEmpty()) keys.address else contractAddress
-                values.add(mapValueResponseToValue(this, keys.publicKey, keys.privateKey, address))
+        walletConfigPayload.valueResponse.forEach { valueResponse ->
+            getKeys(valueResponse.index, keys).let { key ->
+                val address = if (valueResponse.contractAddress.isEmpty()) key.address else valueResponse.contractAddress
+                values.add(mapValueResponseToValue(valueResponse, key.publicKey, key.privateKey, address))
             }
         }
         return values
+    }
+
+    private fun getKeys(index: Int, keys: List<DerivedKeys>): DerivedKeys {
+        keys.forEach {
+            if (it.index == index) return it
+        }
+        return DerivedKeys(index, String.Empty, String.Empty, String.Empty)
     }
 
     companion object {

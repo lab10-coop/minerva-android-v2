@@ -1,18 +1,14 @@
-package minerva.android.walletmanager.repository
+package minerva.android.walletmanager.manager.identity
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.schedulers.Schedulers
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
-import minerva.android.walletmanager.manager.identity.IdentityManagerImpl
+import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
@@ -22,33 +18,20 @@ import minerva.android.walletmanager.utils.DataProvider.walletConfig
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
-import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
-class IdentityManagerTest {
+class IdentityManagerTest : RxTest() {
 
     private val walletConfigManager: WalletConfigManager = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
     private val repository = IdentityManagerImpl(walletConfigManager, cryptographyRepository)
 
-    @get:Rule
-    val rule
-        get() = InstantTaskExecutorRule()
-
     @Before
-    fun setupRxSchedulers() {
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
+    override fun setupRxSchedulers() {
+        super.setupRxSchedulers()
         whenever(walletConfigManager.getWalletConfig()) doReturn walletConfig
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
-    }
-
-    @After
-    fun destroyRxSchedulers() {
-        RxJavaPlugins.reset()
-        RxAndroidPlugins.reset()
     }
 
     @Test

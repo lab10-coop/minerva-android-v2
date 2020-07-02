@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.service_list_row.view.*
 import minerva.android.R
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.storage.ServiceType
+import minerva.android.widget.repository.getServiceIcon
 
 class ServicesAdapter : RecyclerView.Adapter<ServiceViewHolder>() {
 
@@ -40,11 +41,7 @@ class ServiceViewHolder(private val view: View, private val viewGroup: ViewGroup
     @SuppressLint("SetTextI18n")
     fun bindData(service: Service) {
         view.apply {
-            when (service.type) {
-                ServiceType.UNICORN_LOGIN -> showIcon(R.mipmap.ic_unicorn)
-                ServiceType.M27 -> showIcon(R.mipmap.ic_m27)
-                ServiceType.CHARGING_STATION -> showIcon(R.drawable.ic_charging_station)
-            }
+            showIcon(getServiceIcon(service.type))
             serviceName.text = service.name
             lastUsed.text = "${context.getString(R.string.last_used)} ${service.lastUsed}"
         }

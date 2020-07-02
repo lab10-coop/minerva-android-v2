@@ -110,7 +110,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
             publicKey = "12",
             privateKey = "12",
             address = "address",
-            contractAddress = "aa"
+            contractAddress = "aa",
+            bindedOwner = "binded"
         )
         whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))

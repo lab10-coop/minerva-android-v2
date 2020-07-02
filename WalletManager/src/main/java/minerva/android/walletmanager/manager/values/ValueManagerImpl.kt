@@ -5,6 +5,7 @@ import io.reactivex.Completable
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
@@ -29,7 +30,7 @@ class ValueManagerImpl(
     override fun createValue(network: Network, valueName: String, ownerAddress: String, contract: String): Completable {
         with(walletConfigManager) {
             getWalletConfig()?.let { config ->
-                val newValue = Value(config.newIndex, name = valueName, network = network.short)
+                val newValue = Value(config.newIndex, name = valueName, network = network.short, bindedOwner = ownerAddress)
                 return cryptographyRepository.computeDeliveredKeys(masterSeed.seed, newValue.index)
                     .map { createUpdatedWalletConfig(config, newValue, it, ownerAddress, contract) }
                     .flatMapCompletable { updateWalletConfig(it) }
@@ -48,7 +49,8 @@ class ValueManagerImpl(
             val newValues = values.toMutableList()
             var newValuePosition = values.size
             values.forEachIndexed { position, value ->
-                if (value.address == ownerAddress) newValuePosition = position + getSafeAccountNumber(ownerAddress)
+                if (value.address == ownerAddress && ownerAddress != String.Empty)
+                    newValuePosition = position + getSafeAccountCount(ownerAddress)
             }
             newValues.add(newValuePosition, newValue)
             return WalletConfig(updateVersion, identities, newValues, services)
@@ -109,7 +111,9 @@ class ValueManagerImpl(
         return blockchainRepository.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
     }
 
-    override fun getSafeAccountNumber(ownerAddress: String): Int = walletConfigManager.getSafeAccountNumber(ownerAddress)
+    override fun getSafeAccountCount(ownerAddress: String): Int =
+        if (ownerAddress == String.Empty) NO_SAFE_ACCOUNTS
+        else walletConfigManager.getSafeAccountNumber(ownerAddress)
 
     override fun loadValue(position: Int): Value {
         walletConfigManager.getWalletConfig()?.values?.apply {
@@ -121,5 +125,6 @@ class ValueManagerImpl(
 
     companion object {
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
+        private const val NO_SAFE_ACCOUNTS = 0
     }
 }

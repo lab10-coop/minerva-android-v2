@@ -11,6 +11,8 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.keystore.KeystoreRepositoryImpl
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.identity.IdentityManagerImpl
+import minerva.android.walletmanager.manager.order.OrderManager
+import minerva.android.walletmanager.manager.order.OrderManagerImpl
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.manager.services.ServiceManagerImpl
 import minerva.android.walletmanager.manager.values.ValueManager
@@ -62,6 +64,7 @@ fun createWalletModules() = module {
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
+    factory<OrderManager> { (OrderManagerImpl(get())) }
 }
 
 private const val LocalStorage = "LocalStorage"

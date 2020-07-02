@@ -1,6 +1,7 @@
 package minerva.android.di
 
 import minerva.android.BuildConfig
+import minerva.android.edit.EditOrderViewModel
 import minerva.android.identities.IdentitiesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.main.MainViewModel
@@ -48,4 +49,5 @@ private val appModules = module {
     viewModel { ServicesViewModel(get()) }
     viewModel { WalletActionsViewModel(get()) }
     viewModel { PaymentRequestViewModel(get(), get(), get()) }
+    viewModel { EditOrderViewModel(get()) }
 }

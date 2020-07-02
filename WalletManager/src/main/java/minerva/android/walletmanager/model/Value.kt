@@ -9,17 +9,18 @@ data class Value(
     val index: Int,
     var publicKey: String = String.Empty,
     var privateKey: String = String.Empty,
-    var address: String = String.Empty,
-    val name: String = String.Empty,
-    val network: String = String.Empty,
-    var isDeleted: Boolean = false,
+    override var address: String = String.Empty,
+    override var name: String = String.Empty,
+    override val network: String = String.Empty,
+    override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = Int.InvalidValue.toBigDecimal(),
     var assets: List<Asset> = listOf(),
     var fiatBalance: BigDecimal = BigDecimal.ZERO,
     var owners: List<String>? = null,
     var contractAddress: String = String.Empty,
-    var pending: Boolean = false
-) {
+    var pending: Boolean = false,
+    override val bindedOwner: String = String.Empty
+): Account(address, name, isDeleted, bindedOwner, network) {
     constructor(value: Value, isDeleted: Boolean) : this(
         value.index,
         value.publicKey,
@@ -31,9 +32,6 @@ data class Value(
         owners = value.owners,
         pending = false
     )
-
-    val isSafeAccount: Boolean
-        get() = owners != null
 
     val masterOwnerAddress: String
         get() = owners?.last().orEmpty()

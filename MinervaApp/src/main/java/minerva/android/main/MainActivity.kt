@@ -25,8 +25,7 @@ import minerva.android.values.transaction.activity.TransactionActivity.Companion
 import minerva.android.values.transaction.activity.TransactionActivity.Companion.VALUE_INDEX
 import minerva.android.walletmanager.model.Value
 import minerva.android.widget.OnFlashBarTapListener
-import minerva.android.wrapped.startNewIdentityWrappedActivity
-import minerva.android.wrapped.startNewValueWrappedActivity
+import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
 
 
@@ -97,15 +96,24 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         menu?.apply {
-            findItem(R.id.barcodeScanner)?.apply {
-                isVisible = isServicesTabSelected()
+            findItem(R.id.editIdentityOrder)?.apply {
+                isVisible = shouldShowAddIdentityIcon()
             }
             findItem(R.id.addIdentity)?.apply {
                 isVisible = shouldShowAddIdentityIcon()
             }
+            findItem(R.id.editValueOrder)?.apply {
+                isVisible = shouldShowAddValueIcon()
+            }
             findItem(R.id.addValue)?.apply {
                 isVisible = shouldShowAddValueIcon()
                 isEnabled = !shouldDisableAddButton
+            }
+            findItem(R.id.editServiceOrder)?.apply {
+                isVisible = isServicesTabSelected()
+            }
+            findItem(R.id.barcodeScanner)?.apply {
+                isVisible = isServicesTabSelected()
             }
         }
         return super.onPrepareOptionsMenu(menu)
@@ -113,8 +121,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.editIdentityOrder -> startEditIdentityOrderWrappedActivity(this)
             R.id.addIdentity -> startNewIdentityWrappedActivity(this)
+            R.id.editValueOrder -> startEditValueOrderWrappedActivity(this)
             R.id.addValue -> startNewValueActivity()
+            R.id.editServiceOrder -> startEditServiceOrderWrappedActivity(this)
             R.id.barcodeScanner -> launchActivityForResult<PainlessLoginActivity>(LOGIN_RESULT_REQUEST_CODE)
         }
         return super.onOptionsItemSelected(item)
@@ -141,7 +152,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             }
         }
     }
-
 
     override fun showSendTransactionScreen(value: Value) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
@@ -212,8 +222,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     }
 
     companion object {
-        const val LOGIN_RESULT_REQUEST_CODE = 3
         private const val NEW_VALUE_TITLE_PATTERN = "%s #%d"
+        const val LOGIN_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val JWT = "jwt"
     }
