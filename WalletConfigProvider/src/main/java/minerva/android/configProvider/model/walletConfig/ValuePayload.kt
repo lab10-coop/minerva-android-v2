@@ -16,7 +16,9 @@ data class ValuePayload(
     @SerializedName("owners")
     private val _owners: List<String>? = null,
     @SerializedName("smartContractAddress")
-    private val _contractAddress: String? = null
+    private val _contractAddress: String? = null,
+    @SerializedName("bindedOwner")
+    private val _bindedOwner: String? = String.Empty
 ) {
     val index: Int
         get() = _index ?: Int.InvalidId
@@ -30,4 +32,6 @@ data class ValuePayload(
         get() = _owners
     val contractAddress: String
         get() = _contractAddress ?: String.Empty
+    val bindedOwner: String
+        get() = _bindedOwner ?: String.Empty
 }

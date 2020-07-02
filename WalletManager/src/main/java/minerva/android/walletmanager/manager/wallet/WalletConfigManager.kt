@@ -4,12 +4,12 @@ import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.*
 
-interface WalletConfigManager {
-    val walletConfigLiveData: LiveData<WalletConfig>
-    val walletConfigErrorLiveData: LiveData<Event<Throwable>>
+interface WalletConfigManager : Manager {
     val masterSeed: MasterSeed
+    val walletConfigErrorLiveData: LiveData<Event<Throwable>>
     fun isMasterSeedSaved(): Boolean
     fun dispose()
 
@@ -30,5 +30,4 @@ interface WalletConfigManager {
     fun getLoggedInIdentity(publicKey: String): Identity?
     fun saveService(service: Service): Completable
     fun getValue(valueIndex: Int, assetIndex: Int): Value?
-
 }

@@ -1,20 +1,16 @@
-package minerva.android.walletmanager.repository
+package minerva.android.walletmanager.manager.values
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.manager.values.ValueManagerImpl
+import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Network
@@ -23,36 +19,23 @@ import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
-import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import java.math.BigInteger
 import kotlin.test.assertEquals
 
-class ValueManagerTest {
+class ValueManagerTest : RxTest() {
 
     private val walletConfigManager: WalletConfigManager = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
     private val blockchainRepository: BlockchainRepository = mock()
     private val repository = ValueManagerImpl(walletConfigManager, cryptographyRepository, blockchainRepository)
 
-    @get:Rule
-    val rule
-        get() = InstantTaskExecutorRule()
-
     @Before
-    fun setupRxSchedulers() {
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
+    override fun setupRxSchedulers() {
+        super.setupRxSchedulers()
         whenever(walletConfigManager.getWalletConfig()) doReturn DataProvider.walletConfig
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
-    }
-
-    @After
-    fun destroyRxSchedulers() {
-        RxJavaPlugins.reset()
-        RxAndroidPlugins.reset()
     }
 
     @Test
@@ -170,7 +153,7 @@ class ValueManagerTest {
         whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(values = listOf(expected))
         whenever(walletConfigManager.getSafeAccountNumber(any())) doReturn 2
         repository.run {
-            val result = getSafeAccountNumber("owner")
+            val result = getSafeAccountCount("owner")
             assertEquals(result, 2)
         }
     }
@@ -181,7 +164,7 @@ class ValueManagerTest {
         whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(values = listOf(expected))
         whenever(walletConfigManager.getSafeAccountNumber(any())) doReturn 1
         repository.run {
-            val result = getSafeAccountNumber("owner")
+            val result = getSafeAccountCount("owner")
             assertEquals(result, 1)
         }
     }

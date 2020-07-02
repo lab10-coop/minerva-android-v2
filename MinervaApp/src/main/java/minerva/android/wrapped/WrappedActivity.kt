@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
+import minerva.android.edit.EditOrderFragment
 import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.replaceFragment
@@ -14,11 +15,13 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.values.address.ValueAddressFragment
 import minerva.android.values.akm.SafeAccountSettingsFragment
 import minerva.android.values.create.NewValueFragment
+import minerva.android.values.listener.OnBackListener
 import minerva.android.values.listener.ScannerFragmentsListener
 import minerva.android.values.transaction.fragment.scanner.AddressScannerFragment
+import minerva.android.walletmanager.model.defs.WalletActionType
 import java.util.*
 
-class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener {
+class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener, OnBackListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,14 +35,14 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             android.R.id.home -> {
-                finish()
+                onBackPressed()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
 
     override fun setScanResult(text: String?) {
-        onBackPressed()
+        onBack()
         (getCurrentFragment() as? SafeAccountSettingsFragment)?.setScanResult(text)
     }
 
@@ -49,6 +52,15 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener {
     }
 
     override fun onBackPressed() {
+        getCurrentFragment()?.let {
+            when (it) {
+                is EditOrderFragment -> it.saveNewOrder()
+                else -> onBack()
+            }
+        }
+    }
+
+    override fun onBack() {
         super.onBackPressed()
         supportActionBar?.show()
     }
@@ -56,9 +68,12 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener {
     private fun prepareFragment(fragmentType: WrappedFragmentType) {
         val fragment = when (fragmentType) {
             WrappedFragmentType.IDENTITY -> EditIdentityFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.IDENTITY_ORDER -> EditOrderFragment.newInstance(WalletActionType.IDENTITY)
             WrappedFragmentType.VALUE -> NewValueFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
             WrappedFragmentType.VALUE_ADDRESS -> ValueAddressFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.VALUE_ORDER -> EditOrderFragment.newInstance(WalletActionType.VALUE)
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
         }
         addFragment(R.id.container, fragment)
     }
@@ -66,9 +81,12 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener {
     private fun getDefaultTitle(fragmentType: WrappedFragmentType) =
         when (fragmentType) {
             WrappedFragmentType.IDENTITY -> getString(R.string.new_identity)
+            WrappedFragmentType.IDENTITY_ORDER -> getString(R.string.edit_identity_order)
             WrappedFragmentType.VALUE -> getString(R.string.new_account)
             WrappedFragmentType.VALUE_ADDRESS -> String.Empty
+            WrappedFragmentType.VALUE_ORDER -> getString(R.string.edit_value_order)
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> getString(R.string.settings)
+            WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
@@ -105,7 +123,10 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener {
 
 enum class WrappedFragmentType {
     IDENTITY,
+    IDENTITY_ORDER,
     VALUE,
     VALUE_ADDRESS,
-    SAFE_ACCOUNT_SETTINGS
+    VALUE_ORDER,
+    SAFE_ACCOUNT_SETTINGS,
+    SERVICE_ORDER
 }

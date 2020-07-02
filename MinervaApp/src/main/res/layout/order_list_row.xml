@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_small"
+    android:clipToPadding="false"
+    android:paddingLeft="@dimen/margin_normal"
+    android:paddingTop="@dimen/margin_xsmall"
+    android:paddingRight="@dimen/margin_normal"
+    android:paddingBottom="@dimen/margin_xxsmall"
+    app:cardCornerRadius="@dimen/card_corner_radius">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/margin_normal">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/small_logo_size"
+            android:layout_height="@dimen/small_logo_size"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription"
+            tools:src="@drawable/ic_artis" />
+
+        <minerva.android.widget.LetterLogo
+            android:id="@+id/letterLogo"
+            android:layout_width="@dimen/small_logo_size"
+            android:layout_height="@dimen/small_logo_size"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/dragIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_drag"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_xsmall"
+            android:fontFamily="@font/rubik_medium"
+            android:textSize="@dimen/text_normal"
+            app:layout_constraintBottom_toBottomOf="@id/icon"
+            app:layout_constraintLeft_toRightOf="@id/icon"
+            app:layout_constraintRight_toLeftOf="@id/dragIcon"
+            app:layout_constraintTop_toTopOf="@id/icon"
+            tools:text="#1 ARTIS (Tau1)" />
+
+        <TextView
+            android:id="@+id/safeAccountLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_small"
+            app:layout_constraintTop_toBottomOf="@id/name"
+            app:layout_constraintLeft_toLeftOf="@id/name"
+            app:layout_constraintRight_toRightOf="@id/name"
+            tools:text="#1 | 1 ARTIS (Tau)" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

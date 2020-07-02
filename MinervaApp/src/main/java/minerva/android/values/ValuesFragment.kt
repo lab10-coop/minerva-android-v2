@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.recycler_view_layout.*
+import kotlinx.android.synthetic.main.refreshable_recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
@@ -31,7 +31,7 @@ class ValuesFragment : Fragment(), ValuesFragmentToAdapterListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.recycler_view_layout, container, false)
+    ): View? = inflater.inflate(R.layout.refreshable_recycler_view_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

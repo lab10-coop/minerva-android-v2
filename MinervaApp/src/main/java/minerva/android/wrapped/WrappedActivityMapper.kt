@@ -9,6 +9,12 @@ fun startNewIdentityWrappedActivity(context: Context) {
     }
 }
 
+fun startEditIdentityOrderWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.IDENTITY_ORDER)
+    }
+}
+
 fun startEditIdentityWrappedActivity(context: Context, position: Int, title: String) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.IDENTITY)
@@ -34,11 +40,23 @@ fun startNewValueWrappedActivity(context: Context, title: String, position: Int)
     }
 }
 
+fun startEditValueOrderWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE_ORDER)
+    }
+}
+
 fun startSafeAccountWrappedActivity(context: Context, subtitle: String, position: Int, logoRes: Int) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.SAFE_ACCOUNT_SETTINGS)
         putExtra(WrappedActivity.SUBTITLE, subtitle)
         putExtra(WrappedActivity.INDEX, position)
         putExtra(WrappedActivity.LOGO, logoRes)
+    }
+}
+
+fun startEditServiceOrderWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.SERVICE_ORDER)
     }
 }
