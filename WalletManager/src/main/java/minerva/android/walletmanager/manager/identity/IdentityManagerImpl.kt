@@ -21,7 +21,7 @@ class IdentityManagerImpl(
         with(walletConfigManager) {
             getWalletConfig()?.let {
                 return cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identity.index)
-                    .map { keys -> WalletConfig(it.updateVersion, prepareIdentities(getIdentity(identity, keys), it), it.values, it.services) }
+                    .map { keys -> WalletConfig(it.updateVersion, prepareIdentities(getIdentity(identity, keys), it), it.accounts, it.services) }
                     .flatMapCompletable { updateWalletConfig(it) }
             }
             return Completable.error(Throwable("Wallet Config was not initialized"))

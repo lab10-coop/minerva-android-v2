@@ -3,7 +3,7 @@ package minerva.android.walletmanager.utils
 import com.exchangemarketsprovider.model.Market
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.Balance
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.defs.ExchangeRate
 import minerva.android.walletmanager.model.defs.Markets
 import minerva.android.walletmanager.model.defs.NetworkShortName
@@ -14,13 +14,13 @@ object MarketUtils {
 
     internal fun calculateFiatBalances(
         cryptoBalances: List<Pair<String, BigDecimal>>,
-        values: List<Value>?,
+        accounts: List<Account>?,
         markets: MutableList<Market>
     ): HashMap<String, Balance> =
         hashMapOf<String, Balance>().apply {
             cryptoBalances.forEachIndexed { index, cryptoBalance ->
-                if (cryptoBalance.first == values?.get(index)?.address) {
-                    when (values[index].network) {
+                if (cryptoBalance.first == accounts?.get(index)?.address) {
+                    when (accounts[index].network) {
                         NetworkShortName.ATS -> getBalance(this, cryptoBalance, ExchangeRate.ATS_EURO)
                         NetworkShortName.ETH -> getBalance(this, cryptoBalance, getRate(markets)[Markets.ETH_EUR])
                         NetworkShortName.POA -> getBalance(this, cryptoBalance, getRate(markets)[Markets.POA_EUR])
@@ -48,7 +48,7 @@ object MarketUtils {
         return hashMapOf(Pair(Markets.ETH_EUR, ethEuroRate), Pair(Markets.POA_EUR, poaEuroRate))
     }
 
-    fun getAddresses(values: List<Value>): List<Pair<String, String>> = values.map { it.network to it.address }
+    fun getAddresses(accounts: List<Account>): List<Pair<String, String>> = accounts.map { it.network to it.address }
 
     private const val SCALE = 2
 }

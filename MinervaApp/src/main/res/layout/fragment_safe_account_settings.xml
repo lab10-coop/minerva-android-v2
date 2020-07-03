@@ -7,7 +7,7 @@
     android:clipToPadding="false"
     android:orientation="vertical"
     android:padding="@dimen/margin_normal"
-    tools:context="minerva.android.values.akm.SafeAccountSettingsFragment">
+    tools:context="minerva.android.accounts.akm.SafeAccountSettingsFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

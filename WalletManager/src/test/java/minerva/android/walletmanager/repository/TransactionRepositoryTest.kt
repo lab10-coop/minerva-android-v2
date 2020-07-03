@@ -125,7 +125,7 @@ class TransactionRepositoryTest {
     @Test
     fun `get asset balances when values are empty and there are no assets needed test`() {
         val error = Throwable()
-        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(0, values = emptyList())
+        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(0, accounts = emptyList())
         whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any())) doReturn Observable.error(error)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed())
         repository.apply {
@@ -203,8 +203,8 @@ class TransactionRepositoryTest {
 
     @Test
     fun `get value test`(){
-        whenever(walletConfigManager.getValue(any(), any())) doReturn Value(index = 2)
-        val result = repository.getValue(2, 2)
+        whenever(walletConfigManager.getValue(any(), any())) doReturn Account(index = 2)
+        val result = repository.getAccount(2, 2)
         assertEquals(result?.index, 2)
     }
 }

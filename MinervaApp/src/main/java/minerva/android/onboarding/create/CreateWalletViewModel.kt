@@ -11,8 +11,8 @@ import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 
 class CreateWalletViewModel(private val masterSeedRepository: MasterSeedRepository) : BaseViewModel() {
 
-    private val _createWalletMutableLiveData = MutableLiveData<Event<Unit>>()
-    val createWalletLiveData: LiveData<Event<Unit>> get() = _createWalletMutableLiveData
+    private val _createWalletLiveData = MutableLiveData<Event<Unit>>()
+    val createWalletLiveData: LiveData<Event<Unit>> get() = _createWalletLiveData
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -30,7 +30,7 @@ class CreateWalletViewModel(private val masterSeedRepository: MasterSeedReposito
                 .subscribeBy(
                     onComplete = {
                         masterSeedRepository.initWalletConfig()
-                        _createWalletMutableLiveData.value = Event(Unit)
+                        _createWalletLiveData.value = Event(Unit)
                     },
                     onError = {
                         _errorLiveData.value = Event(it)

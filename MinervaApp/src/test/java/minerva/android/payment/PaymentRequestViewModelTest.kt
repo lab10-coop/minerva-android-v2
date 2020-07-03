@@ -97,7 +97,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
         whenever(serviceManager.saveService(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.run {
-            newServiceMutableLiveData.observeForever(newServiceObserver)
+            newServiceLiveData.observeForever(newServiceObserver)
             payment = Payment("1", serviceName = "test")
             connectToService()
         }
@@ -112,7 +112,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
         whenever(serviceManager.saveService(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         viewModel.apply {
-            newServiceMutableLiveData.observeForever(newServiceObserver)
+            newServiceLiveData.observeForever(newServiceObserver)
             payment = Payment("1", serviceName = "test")
             connectToService()
             errorLiveData.observeLiveDataEvent(Event(error))

@@ -31,7 +31,7 @@ class TransactionRepositoryImpl(
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
         listOf(Markets.ETH_EUR, Markets.POA_ETH).run {
-            walletConfigManager.getWalletConfig()?.values?.filter { !it.isDeleted }?.let { values ->
+            walletConfigManager.getWalletConfig()?.accounts?.filter { !it.isDeleted }?.let { values ->
                 return blockchainRepository.refreshBalances(MarketUtils.getAddresses(values))
                     .zipWith(Observable.range(START, this.size).flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }.toList())
                     .map { MarketUtils.calculateFiatBalances(it.first, values, it.second) }
@@ -70,7 +70,7 @@ class TransactionRepositoryImpl(
         blockchainRepository.calculateTransactionCost(gasPrice, gasLimit)
 
     override fun refreshAssetBalance(): Single<Map<String, List<Asset>>> {
-        walletConfigManager.getWalletConfig()?.values?.let { values ->
+        walletConfigManager.getWalletConfig()?.accounts?.let { values ->
             return Observable.range(START, values.size)
                 .filter { position -> !values[position].isDeleted }
                 //TODO filter should be removed when all test net will be implemented
@@ -91,16 +91,16 @@ class TransactionRepositoryImpl(
      *
      */
     private fun refreshAssetsBalance(
-        value: Value,
+        account: Account,
         addresses: Pair<String, List<String>>
     ): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
         Observable.range(START, addresses.second.size)
-            .flatMap { blockchainRepository.refreshAssetBalance(value.privateKey, addresses.first, addresses.second[it], value.address) }
+            .flatMap { blockchainRepository.refreshAssetBalance(account.privateKey, addresses.first, addresses.second[it], account.address) }
             .filter { it.second > NO_FUNDS }
             .toList()
-            .map { Pair(value.privateKey, it) }
+            .map { Pair(account.privateKey, it) }
 
-    override fun getValue(valueIndex: Int, assetIndex: Int): Value? = walletConfigManager.getValue(valueIndex, assetIndex)
+    override fun getAccount(valueIndex: Int, assetIndex: Int): Account? = walletConfigManager.getValue(valueIndex, assetIndex)
 
     override fun currentTransactionHash(transactionHash: String) {
         this.transactionHash = transactionHash

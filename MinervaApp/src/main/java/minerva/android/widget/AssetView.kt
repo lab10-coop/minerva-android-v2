@@ -12,12 +12,12 @@ import minerva.android.extension.gone
 import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visible
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.utils.BalanceUtils.getCryptoBalance
 import minerva.android.utils.BalanceUtils.getFiatBalance
 import java.math.BigDecimal
 
-class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @DrawableRes logoRes: Int) :
+class AssetView(callback: AssertViewCallback, account: Account, assetIndex: Int, @DrawableRes logoRes: Int) :
     RelativeLayout(callback.getContext()) {
 
     private val isOpen: Boolean
@@ -25,8 +25,8 @@ class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @Dr
 
     init {
         inflate(context, R.layout.asset_layout, this)
-        prepareView(value, assetIndex, logoRes)
-        prepareListeners(callback, value, assetIndex)
+        prepareView(account, assetIndex, logoRes)
+        prepareListeners(callback, account, assetIndex)
     }
 
     fun setAmounts(crypto: BigDecimal, fiat: BigDecimal = WRONG_CURRENCY_VALUE) {
@@ -46,20 +46,20 @@ class AssetView(callback: AssertViewCallback, value: Value, assetIndex: Int, @Dr
         sendButton.gone()
     }
 
-    private fun prepareView(value: Value, assetIndex: Int, @DrawableRes logoRes: Int) {
+    private fun prepareView(account: Account, assetIndex: Int, @DrawableRes logoRes: Int) {
         assetLogo.setImageResource(logoRes)
-        value.assets[assetIndex].let {
+        account.assets[assetIndex].let {
             assetName.text = it.name
             sendButton.text = String.format(SEND_BUTTON_FORMAT, context.getString(R.string.send), it.nameShort)
         }
     }
 
-    private fun prepareListeners(callback: AssertViewCallback, value: Value, assetIndex: Int) {
+    private fun prepareListeners(callback: AssertViewCallback, account: Account, assetIndex: Int) {
         setOnClickListener {
             TransitionManager.beginDelayedTransition(callback.getViewGroup())
             if (isOpen) close() else open()
         }
-        sendButton.setOnClickListener { callback.onSendAssetClicked(value.index, assetIndex) }
+        sendButton.setOnClickListener { callback.onSendAssetClicked(account.index, assetIndex) }
     }
 
     companion object {

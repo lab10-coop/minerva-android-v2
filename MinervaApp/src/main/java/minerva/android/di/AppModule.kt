@@ -14,11 +14,11 @@ import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
-import minerva.android.values.ValuesViewModel
-import minerva.android.values.address.ValueAddressViewModel
-import minerva.android.values.akm.SafeAccountSettingsViewModel
-import minerva.android.values.create.NewValueViewModel
-import minerva.android.values.transaction.TransactionsViewModel
+import minerva.android.accounts.AccountsViewModel
+import minerva.android.accounts.address.AccountAddressViewModel
+import minerva.android.accounts.akm.SafeAccountSettingsViewModel
+import minerva.android.accounts.create.NewAccountViewModel
+import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletmanager.createWalletManagerModules
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -36,16 +36,16 @@ private val appModules = module {
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { IdentitiesViewModel(get(), get()) }
-    viewModel { ValuesViewModel(get(), get(), get(), get()) }
+    viewModel { AccountsViewModel(get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
     viewModel { ChooseIdentityViewModel(get(), get()) }
     viewModel { LoginScannerViewModel(get()) }
-    viewModel { ValueAddressViewModel(get()) }
+    viewModel { AccountAddressViewModel(get()) }
     viewModel { SafeAccountSettingsViewModel(get(), get()) }
     viewModel { TransactionsViewModel(get(), get(), get()) }
-    viewModel { NewValueViewModel(get(), get()) }
+    viewModel { NewAccountViewModel(get(), get()) }
     viewModel { ServicesViewModel(get()) }
     viewModel { WalletActionsViewModel(get()) }
     viewModel { PaymentRequestViewModel(get(), get(), get()) }

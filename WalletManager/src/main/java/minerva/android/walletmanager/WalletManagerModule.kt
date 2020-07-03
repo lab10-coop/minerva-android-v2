@@ -15,8 +15,8 @@ import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.order.OrderManagerImpl
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.manager.services.ServiceManagerImpl
-import minerva.android.walletmanager.manager.values.ValueManager
-import minerva.android.walletmanager.manager.values.ValueManagerImpl
+import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.accounts.AccountManagerImpl
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
 import minerva.android.walletmanager.model.Network
@@ -57,7 +57,7 @@ fun createWalletModules() = module {
     factory<WalletConfigRepository> { WalletConfigRepositoryImpl(get(), get(), get()) }
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get()) }
-    factory<ValueManager> { ValueManagerImpl(get(), get(), get()) }
+    factory<AccountManager> { AccountManagerImpl(get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get(), get()) }
     factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get()) }

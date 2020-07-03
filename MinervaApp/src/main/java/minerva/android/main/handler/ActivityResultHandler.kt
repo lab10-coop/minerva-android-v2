@@ -10,7 +10,7 @@ import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_QUICK_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_USER
 import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.values.transaction.activity.TransactionActivity
+import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.widget.KnownUserLoginFlashBar
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.QuickLoginFlashBar

@@ -8,7 +8,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.order.OrderManager
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.WalletConfig
 
 class EditOrderViewModel(
@@ -20,9 +20,9 @@ class EditOrderViewModel(
     private val _saveNewOrderLiveData = MutableLiveData<Event<Unit>>()
     val saveNewOrderLiveData: LiveData<Event<Unit>> get() = _saveNewOrderLiveData
 
-    fun prepareList(type: Int): List<Account> = orderManager.prepareList(type)
+    fun prepareList(type: Int): List<MinervaPrimitive> = orderManager.prepareList(type)
 
-    fun saveChanges(type: Int, newOrderList: List<Account>) {
+    fun saveChanges(type: Int, newOrderList: List<MinervaPrimitive>) {
         launchDisposable {
             orderManager.updateList(type, newOrderList)
                 .subscribeOn(Schedulers.io())

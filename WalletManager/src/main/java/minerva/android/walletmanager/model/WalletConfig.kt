@@ -5,15 +5,15 @@ import minerva.android.kotlinUtils.InvalidId
 data class WalletConfig(
     val version: Int = Int.InvalidId,
     val identities: List<Identity> = listOf(),
-    val values: List<Value> = listOf(),
+    val accounts: List<Account> = listOf(),
     val services: List<Service> = listOf()
 ) {
     val newIndex: Int
-        get() = identities.size + values.size
+        get() = identities.size + accounts.size
 
     val updateVersion: Int
         get() = version + 1
 
-    val hasActiveValue: Boolean
-            get() = values.none { !it.isDeleted }
+    val hasActiveAccount: Boolean
+            get() = accounts.none { !it.isDeleted }
 }

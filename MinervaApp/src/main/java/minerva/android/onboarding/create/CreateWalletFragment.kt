@@ -75,8 +75,8 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
     private fun setupValuesItem() {
         valuesItem.apply {
             setIcon(R.drawable.ic_values)
-            setTitle(getString(R.string.values))
-            setContent(getString(R.string.values_instruction))
+            setTitle(getString(R.string.accounts))
+            setContent(getString(R.string.accounts_instruction))
         }
     }
 

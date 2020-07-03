@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.manager.wallet
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -31,11 +30,11 @@ class WalletConfigManagerImpl(
     override lateinit var masterSeed: MasterSeed
     private var disposable: Disposable? = null
 
-    private val walletConfigMutableLiveData = MutableLiveData<WalletConfig>()
-    override val walletConfigLiveData: LiveData<WalletConfig> get() = walletConfigMutableLiveData
+    private val _walletConfigLiveData = MutableLiveData<WalletConfig>()
+    override val walletConfigLiveData: LiveData<WalletConfig> get() = _walletConfigLiveData
 
-    private val walletConfigErrorMutableLiveData = MutableLiveData<Event<Throwable>>()
-    override val walletConfigErrorLiveData: LiveData<Event<Throwable>> get() = walletConfigErrorMutableLiveData
+    private val _walletConfigErrorLiveData = MutableLiveData<Event<Throwable>>()
+    override val walletConfigErrorLiveData: LiveData<Event<Throwable>> get() = _walletConfigErrorLiveData
 
     override fun getWalletConfig(): WalletConfig? = walletConfigLiveData.value
     override fun isMasterSeedSaved(): Boolean = keystoreRepository.isMasterSeedSaved()
@@ -46,7 +45,7 @@ class WalletConfigManagerImpl(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = { walletConfigMutableLiveData.value = it },
+                onNext = { _walletConfigLiveData.value = it },
                 onError = { Timber.e("Downloading WalletConfig error: $it") }
             )
     }
@@ -59,7 +58,7 @@ class WalletConfigManagerImpl(
         keystoreRepository.decryptMasterSeed()?.let {
             masterSeed = it
             loadWalletConfig()
-        }.orElse { walletConfigErrorMutableLiveData.value = Event(Throwable()) }
+        }.orElse { _walletConfigErrorLiveData.value = Event(Throwable()) }
     }
 
     override fun getWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse> =
@@ -95,7 +94,7 @@ class WalletConfigManagerImpl(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete {
-                    walletConfigMutableLiveData.value = walletConfig
+                    _walletConfigLiveData.value = walletConfig
                     walletConfigRepository.saveWalletConfigLocally(this)
                 }
                 .doOnError {
@@ -108,7 +107,7 @@ class WalletConfigManagerImpl(
 
     override fun getSafeAccountNumber(ownerAddress: String): Int {
         var safeAccountNumber = DEFAULT_SAFE_ACCOUNT_NUMBER
-        getWalletConfig()?.values?.let {
+        getWalletConfig()?.accounts?.let {
             it.forEach { savedValue ->
                 if (savedValue.masterOwnerAddress == ownerAddress) safeAccountNumber++
             }
@@ -117,7 +116,7 @@ class WalletConfigManagerImpl(
     }
 
     override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String {
-        getWalletConfig()?.values?.forEach {
+        getWalletConfig()?.accounts?.forEach {
             if (it.address == address) return it.privateKey
         }
         return String.Empty
@@ -125,7 +124,7 @@ class WalletConfigManagerImpl(
 
     override fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>> {
         getWalletConfig()?.let { config ->
-            config.values.apply {
+            config.accounts.apply {
                 forEach { if (it.index == position) it.owners = owners }
                 return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, this, config.services))
                     .andThen(Single.just(owners))
@@ -140,7 +139,7 @@ class WalletConfigManagerImpl(
     }
 
     override fun getValueIterator(): Int {
-        getWalletConfig()?.values?.let {
+        getWalletConfig()?.accounts?.let {
             var iterator = 1
             it.forEach { value -> if (!value.isSafeAccount) iterator += 1 }
             return iterator
@@ -173,27 +172,27 @@ class WalletConfigManagerImpl(
     override fun saveService(service: Service): Completable {
         getWalletConfig()?.run {
             if (services.isEmpty()) {
-                return updateWalletConfig(WalletConfig(updateVersion, identities, values, listOf(service)))
+                return updateWalletConfig(WalletConfig(updateVersion, identities, accounts, listOf(service)))
             }
             return updateWalletConfig(getWalletConfigWithUpdatedService(service))
         }
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun getValue(valueIndex: Int, assetIndex: Int): Value? {
-        var value: Value? = null
-        getWalletConfig()?.values?.forEach {
-            if (it.index == valueIndex) value = it
+    override fun getValue(valueIndex: Int, assetIndex: Int): Account? {
+        var account: Account? = null
+        getWalletConfig()?.accounts?.forEach {
+            if (it.index == valueIndex) account = it
         }
-        return value
+        return account
     }
 
     private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {
         isServiceIsAlreadyConnected(newService)?.let {
             updateService(it)
-            return WalletConfig(updateVersion, identities, values, services)
+            return WalletConfig(updateVersion, identities, accounts, services)
         }.orElse {
-            return WalletConfig(updateVersion, identities, values, services + newService)
+            return WalletConfig(updateVersion, identities, accounts, services + newService)
         }
     }
 

@@ -69,7 +69,7 @@
                 android:hint="@string/name">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/valueName"
+                    android:id="@+id/accountName"
                     style="@style/EditTextInputLayoutStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />

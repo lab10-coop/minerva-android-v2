@@ -15,7 +15,7 @@ interface TransactionRepository {
     fun transferERC20Token(network: String, transaction: Transaction): Completable
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
-    fun getValue(valueIndex: Int, assetIndex: Int): Value?
+    fun getAccount(valueIndex: Int, assetIndex: Int): Account?
     fun currentTransactionHash(transactionHash: String)
 
 }

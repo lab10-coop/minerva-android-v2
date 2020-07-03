@@ -4,7 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
-import minerva.android.configProvider.model.walletConfig.ValuePayload
+import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.walletmanager.model.MasterSeed
@@ -27,14 +27,14 @@ fun createDefaultWalletConfig() =
         DefaultWalletConfigIndexes.DEFAULT_VERSION,
         listOf(IdentityPayload(DefaultWalletConfigIndexes.FIRST_IDENTITY_INDEX, DefaultWalletConfigFields.DEFAULT_IDENTITY_NAME)),
         listOf(
-            ValuePayload(
-                DefaultWalletConfigIndexes.FIRST_VALUES_INDEX,
-                CryptoUtils.prepareName(Network.ARTIS, DefaultWalletConfigIndexes.FIRST_VALUES_INDEX),
+            AccountPayload(
+                DefaultWalletConfigIndexes.FIRST_ACCOUNTS_INDEX,
+                CryptoUtils.prepareName(Network.ARTIS, DefaultWalletConfigIndexes.FIRST_ACCOUNTS_INDEX),
                 Network.ARTIS.short
             ),
-            ValuePayload(
-                DefaultWalletConfigIndexes.SECOND_VALUES_INDEX,
-                CryptoUtils.prepareName(Network.ETHEREUM, DefaultWalletConfigIndexes.SECOND_VALUES_INDEX),
+            AccountPayload(
+                DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX,
+                CryptoUtils.prepareName(Network.ETHEREUM, DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX),
                 Network.ETHEREUM.short
             )
         )

@@ -12,13 +12,13 @@ class BackupViewModel(private val masterSeedRepository: MasterSeedRepository) : 
 
     var mnemonic: String = String.Empty
 
-    private val _showMnemonicMutableLiveData = MutableLiveData<Event<String>>()
-    val showMnemonicLiveData: LiveData<Event<String>> get() = _showMnemonicMutableLiveData
+    private val _showMnemonicLiveData = MutableLiveData<Event<String>>()
+    val showMnemonicLiveData: LiveData<Event<String>> get() = _showMnemonicLiveData
 
     fun showMnemonic() {
         masterSeedRepository.getMnemonic().apply {
             mnemonic = this
-            _showMnemonicMutableLiveData.value = Event(getFormattedMnemonic(mnemonic))
+            _showMnemonicLiveData.value = Event(getFormattedMnemonic(mnemonic))
         }
     }
 

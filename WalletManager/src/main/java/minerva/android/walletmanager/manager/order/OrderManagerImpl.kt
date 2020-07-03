@@ -11,17 +11,17 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletConfigManager.walletConfigLiveData
 
-    override fun updateList(type: Int, newOrderList: List<Account>): Completable {
+    override fun updateList(type: Int, newOrderList: List<MinervaPrimitive>): Completable {
         getWalletConfig()?.let {
             return when (type) {
                 WalletActionType.IDENTITY -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, (newOrderList as List<Identity>), it.values, it.services)
+                    WalletConfig(it.updateVersion, (newOrderList as List<Identity>), it.accounts, it.services)
                 )
-                WalletActionType.VALUE -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, it.identities, (newOrderList as List<Value>), it.services)
+                WalletActionType.ACCOUNT -> walletConfigManager.updateWalletConfig(
+                    WalletConfig(it.updateVersion, it.identities, (newOrderList as List<Account>), it.services)
                 )
                 WalletActionType.SERVICE -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, it.identities, it.values, (newOrderList as List<Service>))
+                    WalletConfig(it.updateVersion, it.identities, it.accounts, (newOrderList as List<Service>))
                 )
                 else -> Completable.error(Throwable("Not supported Account type"))
             }
@@ -29,31 +29,31 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
         return Completable.error(Throwable("Wallet Config was not initialized"))
     }
 
-    override fun prepareList(type: Int): List<Account> =
+    override fun prepareList(type: Int): List<MinervaPrimitive> =
         when (type) {
             WalletActionType.IDENTITY -> prepareIdentitiesList()
-            WalletActionType.VALUE -> prepareValuesList()
+            WalletActionType.ACCOUNT -> prepareValuesList()
             WalletActionType.SERVICE -> prepareServicesList()
             else -> listOf()
         }
 
     private fun getWalletConfig() = walletConfigManager.getWalletConfig()
 
-    private fun prepareIdentitiesList(): List<Account> {
+    private fun prepareIdentitiesList(): List<MinervaPrimitive> {
         getWalletConfig()?.let {
             return it.identities
         }
         return listOf()
     }
 
-    private fun prepareValuesList(): List<Account> {
+    private fun prepareValuesList(): List<MinervaPrimitive> {
         getWalletConfig()?.let {
-            return it.values
+            return it.accounts
         }
         return listOf()
     }
 
-    private fun prepareServicesList(): List<Account> {
+    private fun prepareServicesList(): List<MinervaPrimitive> {
         getWalletConfig()?.let {
             return it.services
         }

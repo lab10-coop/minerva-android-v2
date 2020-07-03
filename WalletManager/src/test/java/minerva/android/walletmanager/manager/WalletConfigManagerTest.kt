@@ -14,7 +14,7 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DataProvider.walletConfig
@@ -184,8 +184,8 @@ class WalletConfigManagerTest {
 
     @Test
     fun `get safe account master owner key test`() {
-        val expected = Value(0, address = "address", privateKey = "key")
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, values = listOf(expected))))
+        val expected = Account(0, address = "address", privateKey = "key")
+        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, accounts = listOf(expected))))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.run {
             initWalletConfig()
@@ -196,8 +196,8 @@ class WalletConfigManagerTest {
 
     @Test
     fun `get safe account master owner key error test`() {
-        val expected = Value(0, address = "123", privateKey = "key")
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, values = listOf(expected))))
+        val expected = Account(0, address = "123", privateKey = "key")
+        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, accounts = listOf(expected))))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.run {
             initWalletConfig()

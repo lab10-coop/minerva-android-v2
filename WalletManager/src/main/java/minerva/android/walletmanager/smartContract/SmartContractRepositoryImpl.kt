@@ -8,7 +8,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.model.Transaction
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.mappers.TransactionMapper
 import minerva.android.walletmanager.storage.LocalStorage
 
@@ -19,19 +19,19 @@ class SmartContractRepositoryImpl(
     private val walletConfigManager: WalletConfigManager
 ) : SmartContractRepository {
 
-    override fun createSafeAccount(value: Value) =
-        blockchainContractRepository.deployGnosisSafeContract(value.privateKey, value.address, value.network)
+    override fun createSafeAccount(account: Account) =
+        blockchainContractRepository.deployGnosisSafeContract(account.privateKey, account.address, account.network)
 
-    override fun getSafeAccountOwners(contractAddress: String, network: String, privateKey: String, value: Value): Single<List<String>> =
+    override fun getSafeAccountOwners(contractAddress: String, network: String, privateKey: String, account: Account): Single<List<String>> =
         blockchainContractRepository.getGnosisSafeOwners(contractAddress, network, privateKey)
-            .flatMap { walletConfigManager.updateSafeAccountOwners(value.index, it) }
+            .flatMap { walletConfigManager.updateSafeAccountOwners(account.index, it) }
 
-    override fun addSafeAccountOwner(owner: String, address: String, network: String, privateKey: String, value: Value): Single<List<String>> =
+    override fun addSafeAccountOwner(owner: String, address: String, network: String, privateKey: String, account: Account): Single<List<String>> =
         blockchainContractRepository.addSafeAccountOwner(owner, address, network, privateKey)
-            .andThen(walletConfigManager.updateSafeAccountOwners(value.index, prepareAddedOwnerList(owner, value)))
+            .andThen(walletConfigManager.updateSafeAccountOwners(account.index, prepareAddedOwnerList(owner, account)))
 
-    private fun prepareAddedOwnerList(owner: String, value: Value): List<String> {
-        value.owners?.toMutableList()?.let {
+    private fun prepareAddedOwnerList(owner: String, account: Account): List<String> {
+        account.owners?.toMutableList()?.let {
             it.add(FIRST_POSITION, owner)
             return it
         }
@@ -40,13 +40,13 @@ class SmartContractRepositoryImpl(
 
     override fun removeSafeAccountOwner(
         removeAddress: String, address: String,
-        network: String, privateKey: String, value: Value
+        network: String, privateKey: String, account: Account
     ): Single<List<String>> =
         blockchainContractRepository.removeSafeAccountOwner(removeAddress, address, network, privateKey)
-            .andThen(walletConfigManager.updateSafeAccountOwners(value.index, prepareRemovedOwnerList(removeAddress, value)))
+            .andThen(walletConfigManager.updateSafeAccountOwners(account.index, prepareRemovedOwnerList(removeAddress, account)))
 
-    private fun prepareRemovedOwnerList(removeAddress: String, value: Value): List<String> {
-        value.owners?.toMutableList()?.let {
+    private fun prepareRemovedOwnerList(removeAddress: String, account: Account): List<String> {
+        account.owners?.toMutableList()?.let {
             it.remove(removeAddress)
             return it
         }

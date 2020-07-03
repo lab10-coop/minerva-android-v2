@@ -19,11 +19,11 @@ import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.values.ValuesFragment
-import minerva.android.values.transaction.activity.TransactionActivity
-import minerva.android.values.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
-import minerva.android.values.transaction.activity.TransactionActivity.Companion.VALUE_INDEX
-import minerva.android.walletmanager.model.Value
+import minerva.android.accounts.AccountsFragment
+import minerva.android.accounts.transaction.activity.TransactionActivity
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ACCOUNT_INDEX
+import minerva.android.walletmanager.model.Account
 import minerva.android.widget.OnFlashBarTapListener
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
                 Toast.makeText(this@MainActivity, getString(R.string.unexpected_error), Toast.LENGTH_LONG).show()
             })
             loadingLiveData.observe(this@MainActivity, EventObserver {
-                (getCurrentFragment() as ValuesFragment)?.setProgressValue(it.first, it.second)
+                (getCurrentFragment() as AccountsFragment)?.setProgressAccount(it.first, it.second)
             })
 
         }
@@ -102,10 +102,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             findItem(R.id.addIdentity)?.apply {
                 isVisible = shouldShowAddIdentityIcon()
             }
-            findItem(R.id.editValueOrder)?.apply {
+            findItem(R.id.editAccountOrder)?.apply {
                 isVisible = shouldShowAddValueIcon()
             }
-            findItem(R.id.addValue)?.apply {
+            findItem(R.id.addAccount)?.apply {
                 isVisible = shouldShowAddValueIcon()
                 isEnabled = !shouldDisableAddButton
             }
@@ -123,8 +123,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         when (item.itemId) {
             R.id.editIdentityOrder -> startEditIdentityOrderWrappedActivity(this)
             R.id.addIdentity -> startNewIdentityWrappedActivity(this)
-            R.id.editValueOrder -> startEditValueOrderWrappedActivity(this)
-            R.id.addValue -> startNewValueActivity()
+            R.id.editAccountOrder -> startEditValueOrderWrappedActivity(this)
+            R.id.addAccount -> startNewValueActivity()
             R.id.editServiceOrder -> startEditServiceOrderWrappedActivity(this)
             R.id.barcodeScanner -> launchActivityForResult<PainlessLoginActivity>(LOGIN_RESULT_REQUEST_CODE)
         }
@@ -144,24 +144,24 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             handleTransactionResult(data)
             return
             //TODO Pending UI - skipped for now (logic needs to be implemented)
-            getIntExtra(VALUE_INDEX, Int.InvalidValue).let {
+            getIntExtra(ACCOUNT_INDEX, Int.InvalidValue).let {
                 if (it != Int.InvalidValue) {
-                    (getCurrentFragment() as ValuesFragment).setProgressValue(it, true)
+                    (getCurrentFragment() as AccountsFragment).setProgressAccount(it, true)
                     //TODO add transaction stage 2!
                 }
             }
         }
     }
 
-    override fun showSendTransactionScreen(value: Value) {
+    override fun showSendTransactionScreen(account: Account) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
-            putExtra(VALUE_INDEX, value.index)
+            putExtra(ACCOUNT_INDEX, account.index)
         }
     }
 
     override fun showSendAssetTransactionScreen(valueIndex: Int, assetIndex: Int) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
-            putExtra(VALUE_INDEX, valueIndex)
+            putExtra(ACCOUNT_INDEX, valueIndex)
             putExtra(ASSET_INDEX, assetIndex)
         }
     }

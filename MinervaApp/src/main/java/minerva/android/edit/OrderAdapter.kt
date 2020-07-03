@@ -9,16 +9,16 @@ import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Network
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.widget.repository.getServiceIcon
 
 class OrderAdapter : RecyclerView.Adapter<OrderViewHolder>() {
 
-    private lateinit var activeList: MutableList<Account>
-    private lateinit var inactiveList: List<Account>
-    private lateinit var safeAccountsList: List<Account>
+    private lateinit var activeList: MutableList<MinervaPrimitive>
+    private lateinit var inactiveList: List<MinervaPrimitive>
+    private lateinit var safeAccountsList: List<MinervaPrimitive>
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder =
         OrderViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.order_list_row, parent, false))
@@ -29,7 +29,7 @@ class OrderAdapter : RecyclerView.Adapter<OrderViewHolder>() {
         holder.setData(activeList[position], safeAccountsList)
     }
 
-    fun updateList(data: List<Account>) {
+    fun updateList(data: List<MinervaPrimitive>) {
         with(data) {
             activeList = filter { !it.isDeleted && !it.isSafeAccount }.toMutableList()
             inactiveList = filter { it.isDeleted }
@@ -51,13 +51,13 @@ class OrderAdapter : RecyclerView.Adapter<OrderViewHolder>() {
         notifyItemMoved(fromPosition, toPosition)
     }
 
-    fun getList(): List<Account> = activeList.toMutableList().apply {
+    fun getList(): List<MinervaPrimitive> = activeList.toMutableList().apply {
         safeAccountsList.asReversed().forEach {
             add(getSafeAccountPosition(it), it)
         }
     } + inactiveList
 
-    private fun getSafeAccountPosition(safeAccount: Account): Int {
+    private fun getSafeAccountPosition(safeAccount: MinervaPrimitive): Int {
         activeList.forEachIndexed { index, element ->
             if (element.address == safeAccount.bindedOwner) return index + 1
         }
@@ -66,7 +66,7 @@ class OrderAdapter : RecyclerView.Adapter<OrderViewHolder>() {
 }
 
 class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
-    fun setData(element: Account, safeAccounts: List<Account>) {
+    fun setData(element: MinervaPrimitive, safeAccounts: List<MinervaPrimitive>) {
         view.apply {
             name.text = element.name
             prepareIcon(element)
@@ -74,7 +74,7 @@ class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         }
     }
 
-    private fun prepareIcon(element: Account) {
+    private fun prepareIcon(element: MinervaPrimitive) {
         view.apply {
             (element.network == String.Empty && element.type == String.Empty).let { isIdentity ->
                 letterLogo.visibleOrGone(isIdentity)
@@ -89,7 +89,7 @@ class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         }
     }
 
-    private fun prepareSafeAccountLabel(element: Account, safeAccounts: List<Account>) {
+    private fun prepareSafeAccountLabel(element: MinervaPrimitive, safeAccounts: List<MinervaPrimitive>) {
         var safeAccountCount = 0
         var safeAccountLabelText = String.Empty
         safeAccounts.forEach {

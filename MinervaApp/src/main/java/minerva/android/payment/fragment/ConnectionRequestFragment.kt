@@ -36,7 +36,7 @@ class ConnectionRequestFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
-            newServiceMutableLiveData.observe(viewLifecycleOwner, EventObserver { listener.showConfirmTransactionScreen() })
+            newServiceLiveData.observe(viewLifecycleOwner, EventObserver { listener.showConfirmTransactionScreen() })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
         }
     }
