@@ -8,8 +8,8 @@ data class WalletConfigPayload(
     private var _version: Int? = Int.InvalidId,
     @SerializedName("identities")
     private var _identityPayloads: List<IdentityPayload>? = listOf(),
-    @SerializedName("values")
-    private var _valuePayloads: List<ValuePayload>? = listOf(),
+    @SerializedName("accounts")
+    private var _accountPayloads: List<AccountPayload>? = listOf(),
     @SerializedName("services")
     private var _servicesPayloads: List<ServicePayload>? = listOf()
 ) {
@@ -17,8 +17,8 @@ data class WalletConfigPayload(
         get() = _version ?: Int.InvalidId
     val identityResponse: List<IdentityPayload>
         get() = _identityPayloads ?: listOf()
-    val valueResponse: List<ValuePayload>
-        get() = _valuePayloads ?: listOf()
+    val accountResponse: List<AccountPayload>
+        get() = _accountPayloads ?: listOf()
     val serviceResponse: List<ServicePayload>
         get() = _servicesPayloads ?: listOf()
 
@@ -31,12 +31,12 @@ data class WalletConfigPayload(
         return IdentityPayload(index)
     }
 
-    fun getValuePayload(index: Int): ValuePayload {
-        valueResponse.forEach {
+    fun getAccountPayload(index: Int): AccountPayload {
+        accountResponse.forEach {
             if(index == it.index) {
                 return it
             }
         }
-        return ValuePayload(index)
+        return AccountPayload(index)
     }
 }

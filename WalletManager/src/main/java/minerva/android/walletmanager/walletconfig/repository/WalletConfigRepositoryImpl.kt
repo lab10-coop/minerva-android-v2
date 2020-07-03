@@ -13,11 +13,11 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.mappers.mapIdentityPayloadToIdentity
 import minerva.android.walletmanager.model.mappers.mapServicesResponseToServices
-import minerva.android.walletmanager.model.mappers.mapValueResponseToValue
+import minerva.android.walletmanager.model.mappers.mapAccountResponseToAccount
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
 
@@ -61,7 +61,7 @@ class WalletConfigRepositoryImpl(
 
     private fun completeKeys(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> =
         payload.identityResponse.let { identitiesResponse ->
-            payload.valueResponse.let { valuesResponse ->
+            payload.accountResponse.let { accountsResponse ->
                 Observable.range(START, identitiesResponse.size)
                     .filter { !identitiesResponse[it].isDeleted }
                     .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identitiesResponse[it].index) }
@@ -69,13 +69,13 @@ class WalletConfigRepositoryImpl(
                     .map {
                         completeIdentitiesKeys(payload, it)
                     }
-                    .zipWith(Observable.range(START, valuesResponse.size)
-                        .filter { !valuesResponse[it].isDeleted }
-                        .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, valuesResponse[it].index) }
+                    .zipWith(Observable.range(START, accountsResponse.size)
+                        .filter { !accountsResponse[it].isDeleted }
+                        .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, accountsResponse[it].index) }
                         .toList()
-                        .map { completeValuesKeys(payload, it) },
-                        BiFunction { identity: List<Identity>, value: List<Value> ->
-                            WalletConfig(payload.version, identity, value, mapServicesResponseToServices(payload.serviceResponse))
+                        .map { completeAccountsKeys(payload, it) },
+                        BiFunction { identity: List<Identity>, account: List<Account> ->
+                            WalletConfig(payload.version, identity, account, mapServicesResponseToServices(payload.serviceResponse))
                         }
                     ).toObservable()
             }
@@ -91,15 +91,15 @@ class WalletConfigRepositoryImpl(
         return identities
     }
 
-    private fun completeValuesKeys(walletConfigPayload: WalletConfigPayload, keys: List<DerivedKeys>): List<Value> {
-        val values = mutableListOf<Value>()
-        walletConfigPayload.valueResponse.forEach { valueResponse ->
-            getKeys(valueResponse.index, keys).let { key ->
-                val address = if (valueResponse.contractAddress.isEmpty()) key.address else valueResponse.contractAddress
-                values.add(mapValueResponseToValue(valueResponse, key.publicKey, key.privateKey, address))
+    private fun completeAccountsKeys(walletConfigPayload: WalletConfigPayload, keys: List<DerivedKeys>): List<Account> {
+        val accounts = mutableListOf<Account>()
+        walletConfigPayload.accountResponse.forEach { accountResponse ->
+            getKeys(accountResponse.index, keys).let { key ->
+                val address = if (accountResponse.contractAddress.isEmpty()) key.address else accountResponse.contractAddress
+                accounts.add(mapAccountResponseToAccount(accountResponse, key.publicKey, key.privateKey, address))
             }
         }
-        return values
+        return accounts
     }
 
     private fun getKeys(index: Int, keys: List<DerivedKeys>): DerivedKeys {

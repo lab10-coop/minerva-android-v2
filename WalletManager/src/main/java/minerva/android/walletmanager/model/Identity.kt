@@ -18,7 +18,7 @@ open class Identity(
     open val data: LinkedHashMap<String, String> = linkedMapOf(),
     override var isDeleted: Boolean = false,
     var isSelected: Boolean = false
-): Account(publicKey, name, isDeleted) {
+): MinervaPrimitive(publicKey, name, isDeleted) {
     constructor(index: Int, identity: Identity) : this(
         index,
         identity.name,

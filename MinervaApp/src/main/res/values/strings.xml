@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">MinervaMVP</string>
     <string name="identities">Identities</string>
-    <string name="values">Values</string>
+    <string name="accounts">Accounts</string>
     <string name="services">Services</string>
     <string name="activity">Activity</string>
     <string name="barcode">Barcode</string>
@@ -16,7 +16,7 @@
     <string name="restore_wallet">Restore your wallet</string>
     <string name="instruction">What you can do with your new Minerva digital wallet:</string>
     <string name="identity_instruction">Create new identities and use them to log in to different services.</string>
-    <string name="values_instruction">Own digital assets and use them for  transactions and trading.</string>
+    <string name="accounts_instruction">Own digital assets and use them for transactions and trading.</string>
     <string name="services_instruction">Have a control over all the services you are sharing your data with.</string>
     <string name="enter_your_backup_words">Enter your backup words.</string>
     <string name="edit">Edit</string>
@@ -27,7 +27,7 @@
     <string name="creating_wallet_error_message">Creating your wallet failed. Please check your connection and/or retry later</string>
     <string name="new_identity">New Identity</string>
     <string name="edit_identity_order">Edit Identity order</string>
-    <string name="edit_value_order">Edit Value order</string>
+    <string name="edit_account_order">Edit Account order</string>
     <string name="edit_service_order">Edit Service order</string>
     <string name="personal_data">Personal data</string>
     <string name="name">Name</string>
@@ -57,7 +57,7 @@
     <string name="mnemonic_saved_to_clip_board">Mnemonic saved to clip board</string>
     <string name="no_such_file_error_message">No Minerva Wallet found for the seed phrase you entered. Please make sure that you entered the words in the correct order and that you\'re using a seedphrase which was created by the Minerva App.</string>
     <string name="alert_title">You haven\'t yet made a backup of your Minerva Wallet.</string>
-    <string name="alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
+    <string name="alert_message">This is needed in order to recover identities and accounts in case something goes wrong with your phone.</string>
     <string name="close">Close</string>
     <string name="camera_error">Camera initialization error:</string>
     <string name="login">Login</string>
@@ -65,7 +65,7 @@
     <string name="requested_data">Requested data: </string>
     <string name="choose_an_identity">Choose an identity</string>
     <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
-    <string name="remove_value_dialog_message">Do you really want to remove this account?</string>
+    <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
     <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
     <string name="remove_owner">Remove owner</string>
     <string name="yes">Yes</string>
@@ -88,7 +88,7 @@
     <string name="new_account">New account</string>
     <string name="add_new_account">Add new account</string>
     <string name="networks">Networks</string>
-    <string name="creating_value_error">Creating new value failed</string>
+    <string name="creating_account_error">Creating new account failed</string>
     <string name="transaction_success_title">Transaction Successful</string>
     <string name="transaction_success_message">You successfully transferred %s</string>
     <string name="transaction_error_title">Error: Transaction failed</string>
@@ -111,13 +111,13 @@
     <string name="logIn">Log in</string>
     <string name="authorised">Authorised</string>
     <string name="signed">Signed</string>
-    <string name="value_action_label">Account %s</string>
+    <string name="account_action_label">Account %s</string>
     <string name="safe_account_action_label">Safe Account %s</string>
     <string name="identity_name">Identity %s</string>
     <string name="today">TODAY</string>
     <string name="yesterday">YESTERDAY</string>
-    <string name="sent_values_label">%1$s %2$s sent to %3$s</string>
-    <string name="failed_sent_values_label">%1$s %2$s failed sent to %3$s</string>
+    <string name="sent_accounts_label">%1$s %2$s sent to %3$s</string>
+    <string name="failed_sent_accounts_label">%1$s %2$s failed sent to %3$s</string>
     <string name="services_login_label">Identity %1$s at %2$s</string>
     <string name="wallet_action_header">%1$s • %2$s</string>
     <string name="service_action_label">%s interaction</string>

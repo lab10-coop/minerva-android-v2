@@ -27,17 +27,17 @@ class ChooseIdentityViewModel(
     private val walletActionsRepository: WalletActionsRepository
 ) : BaseViewModel() {
 
-    private val _loginMutableLiveData = MutableLiveData<Event<LoginPayload>>()
-    val loginLiveData: LiveData<Event<LoginPayload>> get() = _loginMutableLiveData
+    private val _loginLiveData = MutableLiveData<Event<LoginPayload>>()
+    val loginLiveData: LiveData<Event<LoginPayload>> get() = _loginLiveData
 
-    private val _errorMutableLiveData = MutableLiveData<Event<Throwable>>()
-    val errorLiveData: LiveData<Event<Throwable>> get() = _errorMutableLiveData
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
-    private val _requestedFieldsMutableLiveData = MutableLiveData<Event<Any>>()
-    val requestedFieldsLiveData: LiveData<Event<Any>> get() = _requestedFieldsMutableLiveData
+    private val _requestedFieldsLiveData = MutableLiveData<Event<Any>>()
+    val requestedFieldsLiveData: LiveData<Event<Any>> get() = _requestedFieldsLiveData
 
     fun getIdentities() = serviceManager.walletConfigLiveData.value?.identities
 
@@ -48,7 +48,7 @@ class ChooseIdentityViewModel(
             minervaLogin(identity, qrCodeResponse)
         } else {
             _loadingLiveData.value = Event(false)
-            _requestedFieldsMutableLiveData.value = Event(Any())
+            _requestedFieldsLiveData.value = Event(Any())
         }
     }
 
@@ -64,10 +64,10 @@ class ChooseIdentityViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _loginMutableLiveData.value = Event(LoginPayload(loginStatus = getLoginStatus(qrCode))) },
+                    onComplete = { _loginLiveData.value = Event(LoginPayload(loginStatus = getLoginStatus(qrCode))) },
                     onError = {
                         Timber.e("Error while login $it")
-                        _errorMutableLiveData.value = Event(Throwable(it.message))
+                        _errorLiveData.value = Event(Throwable(it.message))
                     }
                 )
 
@@ -76,7 +76,7 @@ class ChooseIdentityViewModel(
 
     private fun handleNoKeysError(identity: Identity): Boolean {
         if (doesIdentityHaveKeys(identity)) {
-            _errorMutableLiveData.value = Event(Throwable("Missing calculated keys"))
+            _errorLiveData.value = Event(Throwable("Missing calculated keys"))
             return true
         }
         return false

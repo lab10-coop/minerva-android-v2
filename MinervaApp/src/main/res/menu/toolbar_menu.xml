@@ -9,7 +9,7 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/editValueOrder"
+        android:id="@+id/editAccountOrder"
         android:icon="@drawable/ic_edit_order"
         android:title="@string/edit_order"
         app:showAsAction="ifRoom" />
@@ -33,7 +33,7 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/addValue"
+        android:id="@+id/addAccount"
         android:icon="@drawable/ic_add"
         android:title="@string/add"
         app:showAsAction="ifRoom" />

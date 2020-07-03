@@ -11,7 +11,7 @@ import minerva.android.blockchainprovider.repository.blockchain.BlockchainReposi
 import minerva.android.blockchainprovider.repository.contract.BlockchainContractRepository
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Transaction
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.smartContract.SmartContractRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
@@ -35,7 +35,7 @@ class SmartContractRepositoryTest {
         localStorage,
         walletConfigManager
     )
-    val value = Value(0, owners = listOf("owner"))
+    val value = Account(0, owners = listOf("owner"))
 
     @Before
     fun setup(){
@@ -49,7 +49,7 @@ class SmartContractRepositoryTest {
     @Test
     fun `create safe account success`() {
         whenever(blockchainContractRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.just("address"))
-        smartContractRepository.createSafeAccount(Value(index = 1, cryptoBalance = BigDecimal.ONE)).test()
+        smartContractRepository.createSafeAccount(Account(index = 1, cryptoBalance = BigDecimal.ONE)).test()
             .assertNoErrors()
             .assertComplete()
             .assertValue {
@@ -61,7 +61,7 @@ class SmartContractRepositoryTest {
     fun `create safe account error`() {
         val error = Throwable()
         whenever(blockchainContractRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.error(error))
-        smartContractRepository.createSafeAccount(Value(index = 1, cryptoBalance = BigDecimal.ONE)).test()
+        smartContractRepository.createSafeAccount(Account(index = 1, cryptoBalance = BigDecimal.ONE)).test()
             .assertError(error)
     }
 
@@ -174,8 +174,8 @@ class SmartContractRepositoryTest {
 
     @Test
     fun `get safe account master owner key test`() {
-        val expected = Value(0, address = "address", privateKey = "key")
-        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(values = listOf(expected))
+        val expected = Account(0, address = "address", privateKey = "key")
+        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(accounts = listOf(expected))
         whenever(walletConfigManager.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         smartContractRepository.run {
             val result = getSafeAccountMasterOwnerPrivateKey("address")
@@ -185,8 +185,8 @@ class SmartContractRepositoryTest {
 
     @Test
     fun `get safe account master owner key error test`() {
-        val expected = Value(0, address = "123", privateKey = "key")
-        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(values = listOf(expected))
+        val expected = Account(0, address = "123", privateKey = "key")
+        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(accounts = listOf(expected))
         whenever(walletConfigManager.getSafeAccountMasterOwnerPrivateKey(any())) doReturn ""
         smartContractRepository.run {
             val result = getSafeAccountMasterOwnerPrivateKey("address")

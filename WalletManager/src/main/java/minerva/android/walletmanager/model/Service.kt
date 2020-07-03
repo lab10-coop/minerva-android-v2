@@ -7,4 +7,4 @@ data class Service(
     override var name: String = String.Empty,
     var lastUsed: String = String.Empty,
     val loggedInIdentityPublicKey: String = String.Empty
-) : Account(name = name, type = type)
+) : MinervaPrimitive(name = name, type = type)

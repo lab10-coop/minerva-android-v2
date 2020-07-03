@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import minerva.android.R
 import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
@@ -17,7 +16,6 @@ import minerva.android.main.MainActivity
 import minerva.android.onboarding.create.CreateWalletFragment
 import minerva.android.onboarding.restore.RestoreWalletFragment
 import minerva.android.onboarding.welcome.WelcomeFragment
-import minerva.android.values.transaction.fragment.scanner.AddressScannerFragment
 
 class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
 

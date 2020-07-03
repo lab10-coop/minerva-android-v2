@@ -12,12 +12,12 @@ import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.values.address.ValueAddressFragment
-import minerva.android.values.akm.SafeAccountSettingsFragment
-import minerva.android.values.create.NewValueFragment
-import minerva.android.values.listener.OnBackListener
-import minerva.android.values.listener.ScannerFragmentsListener
-import minerva.android.values.transaction.fragment.scanner.AddressScannerFragment
+import minerva.android.accounts.address.AccountAddressFragment
+import minerva.android.accounts.akm.SafeAccountSettingsFragment
+import minerva.android.accounts.create.NewAccountFragment
+import minerva.android.accounts.listener.OnBackListener
+import minerva.android.accounts.listener.ScannerFragmentsListener
+import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.walletmanager.model.defs.WalletActionType
 import java.util.*
 
@@ -69,9 +69,9 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener, OnBackLis
         val fragment = when (fragmentType) {
             WrappedFragmentType.IDENTITY -> EditIdentityFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             WrappedFragmentType.IDENTITY_ORDER -> EditOrderFragment.newInstance(WalletActionType.IDENTITY)
-            WrappedFragmentType.VALUE -> NewValueFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
-            WrappedFragmentType.VALUE_ADDRESS -> ValueAddressFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
-            WrappedFragmentType.VALUE_ORDER -> EditOrderFragment.newInstance(WalletActionType.VALUE)
+            WrappedFragmentType.VALUE -> NewAccountFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
+            WrappedFragmentType.VALUE_ADDRESS -> AccountAddressFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.VALUE_ORDER -> EditOrderFragment.newInstance(WalletActionType.ACCOUNT)
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
         }
@@ -84,7 +84,7 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener, OnBackLis
             WrappedFragmentType.IDENTITY_ORDER -> getString(R.string.edit_identity_order)
             WrappedFragmentType.VALUE -> getString(R.string.new_account)
             WrappedFragmentType.VALUE_ADDRESS -> String.Empty
-            WrappedFragmentType.VALUE_ORDER -> getString(R.string.edit_value_order)
+            WrappedFragmentType.VALUE_ORDER -> getString(R.string.edit_account_order)
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> getString(R.string.settings)
             WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
         }

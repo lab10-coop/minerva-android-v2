@@ -42,7 +42,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".values.transaction.activity.TransactionActivity"
+            android:name=".accounts.transaction.activity.TransactionActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".services.login.PainlessLoginActivity"

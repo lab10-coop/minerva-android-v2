@@ -1,14 +1,12 @@
 package minerva.android.walletmanager.manager.order
 
-import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
-import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.WalletActionType
 import org.amshove.kluent.shouldBeEqualTo
@@ -28,9 +26,9 @@ class OrderManagerTest : RxTest() {
     )
 
     private val values = listOf(
-        Value(10, name = "Value1"),
-        Value(11, name = "Value2"),
-        Value(12, name = "Value3")
+        Account(10, name = "Value1"),
+        Account(11, name = "Value2"),
+        Account(12, name = "Value3")
     )
 
     private val services = listOf(
@@ -52,7 +50,7 @@ class OrderManagerTest : RxTest() {
         val resultIdentities = orderManager.prepareList(WalletActionType.IDENTITY)
         resultIdentities.size shouldBeEqualTo identities.size
         resultIdentities[0].name shouldBeEqualTo identities[0].name
-        val resultValues = orderManager.prepareList(WalletActionType.VALUE)
+        val resultValues = orderManager.prepareList(WalletActionType.ACCOUNT)
         resultValues.size shouldBeEqualTo values.size
         resultValues[0].name shouldBeEqualTo values[0].name
         val resultService = orderManager.prepareList(WalletActionType.SERVICE)

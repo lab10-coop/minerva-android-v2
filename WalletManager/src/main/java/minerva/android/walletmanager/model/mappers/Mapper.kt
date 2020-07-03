@@ -4,7 +4,7 @@ import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
-import minerva.android.configProvider.model.walletConfig.ValuePayload
+import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.*
@@ -27,13 +27,13 @@ private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> 
 fun mapIdentityPayloadToIdentity(response: IdentityPayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Identity =
     Identity(response.index, response.name, publicKey, privateKey, response.data, response.isDeleted)
 
-fun mapValueResponseToValue(
-    response: ValuePayload,
+fun mapAccountResponseToAccount(
+    response: AccountPayload,
     publicKey: String = String.Empty,
     privateKey: String = String.Empty,
     address: String = String.Empty
-): Value =
-    Value(
+): Account =
+    Account(
         response.index,
         publicKey,
         privateKey,
@@ -57,15 +57,15 @@ fun mapServicesResponseToServices(responses: List<ServicePayload>): List<Service
 
 fun mapWalletConfigToWalletPayload(config: WalletConfig): WalletConfigPayload {
     val idResponses = mutableListOf<IdentityPayload>()
-    val valResponses = mutableListOf<ValuePayload>()
+    val valResponses = mutableListOf<AccountPayload>()
     val servicesResponse = mutableListOf<ServicePayload>()
 
     config.identities.forEach {
         idResponses.add(mapIdentityToIdentityPayload(it))
     }
 
-    config.values.forEach {
-        valResponses.add(mapValueToValuePayload(it))
+    config.accounts.forEach {
+        valResponses.add(mapAccountToAccountPayload(it))
     }
 
     config.services.forEach {
@@ -91,8 +91,8 @@ fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =
         identity.isDeleted
     )
 
-fun mapValueToValuePayload(value: Value): ValuePayload =
-    ValuePayload(value.index, value.name, value.network, value.isDeleted, value.owners, value.contractAddress, value.bindedOwner)
+fun mapAccountToAccountPayload(account: Account): AccountPayload =
+    AccountPayload(account.index, account.name, account.network, account.isDeleted, account.owners, account.contractAddress, account.bindedOwner)
 
 fun mapTransactionToTransactionPayload(transaction: Transaction): TransactionPayload =
     transaction.run {

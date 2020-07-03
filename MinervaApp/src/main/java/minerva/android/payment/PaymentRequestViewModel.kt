@@ -31,20 +31,20 @@ class PaymentRequestViewModel(
 
     lateinit var payment: Payment
 
-    private val _showConnectionRequestMutableLiveData = MutableLiveData<Event<String?>>()
-    val showConnectionRequestLiveData: LiveData<Event<String?>> get() = _showConnectionRequestMutableLiveData
+    private val _showConnectionRequestLiveData = MutableLiveData<Event<String?>>()
+    val showConnectionRequestLiveData: LiveData<Event<String?>> get() = _showConnectionRequestLiveData
 
-    private val _showPaymentConfirmationMutableLiveData = MutableLiveData<Event<Unit>>()
-    val showPaymentConfirmationLiveData: LiveData<Event<Unit>> get() = _showPaymentConfirmationMutableLiveData
+    private val _showPaymentConfirmationLiveData = MutableLiveData<Event<Unit>>()
+    val showPaymentConfirmationLiveData: LiveData<Event<Unit>> get() = _showPaymentConfirmationLiveData
 
-    private val _newServiceMutableLiveData = MutableLiveData<Event<Unit>>()
-    val newServiceMutableLiveData: LiveData<Event<Unit>> get() = _newServiceMutableLiveData
+    private val _newServiceLiveData = MutableLiveData<Event<Unit>>()
+    val newServiceLiveData: LiveData<Event<Unit>> get() = _newServiceLiveData
 
-    private val _confirmPaymentMutableLiveData = MutableLiveData<Event<String>>()
-    val confirmPaymentLiveData: LiveData<Event<String>> get() = _confirmPaymentMutableLiveData
+    private val _confirmPaymentLiveData = MutableLiveData<Event<String>>()
+    val confirmPaymentLiveData: LiveData<Event<String>> get() = _confirmPaymentLiveData
 
-    private val _errorMutableLiveData = MutableLiveData<Event<Throwable>>()
-    val errorLiveData: LiveData<Event<Throwable>> get() = _errorMutableLiveData
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
@@ -57,11 +57,11 @@ class PaymentRequestViewModel(
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onSuccess = { handleDecodeResult(it.first, it.second) },
-                        onError = { _errorMutableLiveData.value = Event(it) }
+                        onError = { _errorLiveData.value = Event(it) }
                     )
             }
         }.orElse {
-            _errorMutableLiveData.value = Event(Throwable())
+            _errorLiveData.value = Event(Throwable())
         }
     }
 
@@ -71,8 +71,8 @@ class PaymentRequestViewModel(
     }
 
     private fun checkIfServiceIsAlreadyConnected(services: List<Service>?, payment: Payment) {
-        if (isM27Connected(services)) _showPaymentConfirmationMutableLiveData.value = Event(Unit)
-        else _showConnectionRequestMutableLiveData.value = Event(payment.serviceName)
+        if (isM27Connected(services)) _showPaymentConfirmationLiveData.value = Event(Unit)
+        else _showConnectionRequestLiveData.value = Event(payment.serviceName)
     }
 
     private fun isM27Connected(services: List<Service>?) =
@@ -88,8 +88,8 @@ class PaymentRequestViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _newServiceMutableLiveData.value = Event(Unit) },
-                    onError = { _errorMutableLiveData.value = Event(it) }
+                    onComplete = { _newServiceLiveData.value = Event(Unit) },
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
@@ -101,8 +101,8 @@ class PaymentRequestViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _confirmPaymentMutableLiveData.value = Event(it) },
-                    onError = { _errorMutableLiveData.value = Event(it) }
+                    onSuccess = { _confirmPaymentLiveData.value = Event(it) },
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }

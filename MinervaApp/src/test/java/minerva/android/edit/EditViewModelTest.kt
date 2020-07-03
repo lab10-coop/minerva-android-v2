@@ -9,7 +9,7 @@ import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.defs.WalletActionType
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
@@ -29,9 +29,9 @@ class EditViewModelTest : BaseViewModelTest() {
     )
 
     private val values = listOf(
-        Value(10, name = "Value1"),
-        Value(11, name = "Value2"),
-        Value(12, name = "Value3")
+        Account(10, name = "Value1"),
+        Account(11, name = "Value2"),
+        Account(12, name = "Value3")
     )
 
     private val services = listOf(
@@ -43,11 +43,11 @@ class EditViewModelTest : BaseViewModelTest() {
     @Test
     fun `Get correct list to make order`() {
         whenever(orderManager.prepareList(WalletActionType.IDENTITY)).thenReturn(identities)
-        whenever(orderManager.prepareList(WalletActionType.VALUE)).thenReturn(values)
+        whenever(orderManager.prepareList(WalletActionType.ACCOUNT)).thenReturn(values)
         whenever(orderManager.prepareList(WalletActionType.SERVICE)).thenReturn(services)
 
         val identitiesResult = viewModel.prepareList(WalletActionType.IDENTITY)
-        val valuesResult = viewModel.prepareList(WalletActionType.VALUE)
+        val valuesResult = viewModel.prepareList(WalletActionType.ACCOUNT)
         val servicesResult = viewModel.prepareList(WalletActionType.SERVICE)
 
         identitiesResult[0].name shouldBeEqualTo identities[0].name

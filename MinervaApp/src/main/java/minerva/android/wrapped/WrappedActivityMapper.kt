@@ -23,7 +23,7 @@ fun startEditIdentityWrappedActivity(context: Context, position: Int, title: Str
     }
 }
 
-fun startValueAddressWrappedActivity(context: Context, title: String, position: Int, logoRes: Int) {
+fun startAccountAddressWrappedActivity(context: Context, title: String, position: Int, logoRes: Int) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE_ADDRESS)
         putExtra(WrappedActivity.INDEX, position)

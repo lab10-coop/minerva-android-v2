@@ -7,9 +7,9 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.values.transaction.TransactionsViewModel
+import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.walletmanager.model.Asset
-import minerva.android.walletmanager.model.Value
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -82,7 +82,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `send safe account main transaction test success`() {
-        viewModel.value = Value(
+        viewModel.account = Account(
             index = 0,
             owners = listOf("tom", "beata", "bogdan"),
             publicKey = "12",
@@ -104,7 +104,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `send safe account main transaction test error`() {
         val error = Throwable()
-        viewModel.value = Value(
+        viewModel.account = Account(
             index = 0,
             owners = listOf("tom", "beata", "bogdan"),
             publicKey = "12",
@@ -125,7 +125,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `send asset main transaction test success`() {
         viewModel.apply {
-            value = Value(
+            account = Account(
                 index = 0,
                 publicKey = "12",
                 privateKey = "12",
@@ -148,7 +148,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send asset main transaction test error`() {
         val error = Throwable()
         viewModel.apply {
-            value = Value(
+            account = Account(
                 index = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
                 assets = listOf(Asset("name"))
             )
@@ -165,7 +165,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `send safe account asset transaction test success`() {
-        viewModel.value = Value(
+        viewModel.account = Account(
             index = 0,
             assets = listOf(Asset("name")),
             publicKey = "12",
@@ -188,7 +188,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `send safe account asset transaction test error`() {
         val error = Throwable()
-        viewModel.value = Value(
+        viewModel.account = Account(
             index = 0,
             assets = listOf(Asset("name")),
             publicKey = "12",
@@ -215,7 +215,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get available funds test`() {
-        viewModel.value.cryptoBalance = BigDecimal.valueOf(5)
+        viewModel.account.cryptoBalance = BigDecimal.valueOf(5)
         viewModel.transactionCost = BigDecimal.valueOf(1)
         val result = viewModel.getAllAvailableFunds()
         result shouldBeEqualTo "4"
@@ -229,7 +229,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun`is correct network test`(){
-        viewModel.value = Value(0, name = "prefixName")
+        viewModel.account = Account(0, name = "prefixName")
         val result = viewModel.isCorrectNetwork("prefix")
         assertEquals(result, true)
     }

@@ -13,7 +13,7 @@
         android:id="@+id/values"
         android:enabled="true"
         android:icon="@drawable/ic_values"
-        android:title="@string/values"
+        android:title="@string/accounts"
         app:showAsAction="ifRoom" />
 
     <item
