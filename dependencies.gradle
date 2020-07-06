@@ -46,7 +46,7 @@ ext {
     jodaVersion = '2.10.5'
     waitingDotsVersion = '0.6.1'
 
-    w3jVersion = '4.2.1-android'
+    w3jVersion = '4.6.0-android'
     rxbindingVersion = '3.1.0'
 
     spannableStringVersion = '1.1.0'
