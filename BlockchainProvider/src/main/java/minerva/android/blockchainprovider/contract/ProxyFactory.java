@@ -1,14 +1,5 @@
 package minerva.android.blockchainprovider.contract;
 
-import io.reactivex.Flowable;
-import io.reactivex.functions.Function;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
@@ -18,13 +9,22 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
-import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import io.reactivex.Flowable;
+import io.reactivex.functions.Function;
 
 /**
  * <p>Auto generated code.
@@ -90,7 +90,6 @@ public class ProxyFactory extends Contract {
             public ProxyCreationEventResponse apply(Log log) {
                 Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(PROXYCREATION_EVENT, log);
                 ProxyCreationEventResponse typedResponse = new ProxyCreationEventResponse();
-//                typedResponse.log = log;
                 typedResponse.proxy = (String) eventValues.getNonIndexedValues().get(0).getValue();
                 return typedResponse;
             }
@@ -103,7 +102,7 @@ public class ProxyFactory extends Contract {
         return proxyCreationEventFlowable(filter);
     }
 
-    public RemoteCall<TransactionReceipt> createProxy(String masterCopy, byte[] data) {
+    public RemoteFunctionCall<TransactionReceipt> createProxy(String masterCopy, byte[] data) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_CREATEPROXY,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(masterCopy),
@@ -112,7 +111,7 @@ public class ProxyFactory extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteCall<byte[]> proxyRuntimeCode() {
+    public RemoteFunctionCall<byte[]> proxyRuntimeCode() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_PROXYRUNTIMECODE,
                 Collections.<Type>emptyList(),
                 Collections.<TypeReference<?>>singletonList(new TypeReference<DynamicBytes>() {
@@ -120,7 +119,7 @@ public class ProxyFactory extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public RemoteCall<byte[]> proxyCreationCode() {
+    public RemoteFunctionCall<byte[]> proxyCreationCode() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_PROXYCREATIONCODE,
                 Collections.<Type>emptyList(),
                 Collections.<TypeReference<?>>singletonList(new TypeReference<DynamicBytes>() {
@@ -128,7 +127,7 @@ public class ProxyFactory extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public RemoteCall<TransactionReceipt> createProxyWithNonce(String _mastercopy, byte[] initializer, BigInteger saltNonce) {
+    public RemoteFunctionCall<TransactionReceipt> createProxyWithNonce(String _mastercopy, byte[] initializer, BigInteger saltNonce) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_CREATEPROXYWITHNONCE,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_mastercopy),
@@ -138,7 +137,7 @@ public class ProxyFactory extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteCall<TransactionReceipt> createProxyWithCallback(String _mastercopy, byte[] initializer, BigInteger saltNonce, String callback) {
+    public RemoteFunctionCall<TransactionReceipt> createProxyWithCallback(String _mastercopy, byte[] initializer, BigInteger saltNonce, String callback) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_CREATEPROXYWITHCALLBACK,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_mastercopy),
@@ -149,7 +148,7 @@ public class ProxyFactory extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteCall<TransactionReceipt> calculateCreateProxyWithNonceAddress(String _mastercopy, byte[] initializer, BigInteger saltNonce) {
+    public RemoteFunctionCall<TransactionReceipt> calculateCreateProxyWithNonceAddress(String _mastercopy, byte[] initializer, BigInteger saltNonce) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_CALCULATECREATEPROXYWITHNONCEADDRESS,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_mastercopy),
