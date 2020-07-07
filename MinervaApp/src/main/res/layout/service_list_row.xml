@@ -7,13 +7,15 @@
     android:layout_margin="@dimen/margin_small"
     android:background="@drawable/rounded_white_background"
     android:elevation="2dp"
-    android:padding="@dimen/margin_xxsmall">
+    android:paddingLeft="@dimen/margin_normal"
+    android:paddingTop="@dimen/margin_xsmall"
+    android:paddingRight="@dimen/margin_normal"
+    android:paddingBottom="@dimen/margin_xsmall">
 
     <ImageView
         android:id="@+id/serviceLogo"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_normal"
         android:src="@drawable/ic_minerva_icon"
@@ -44,4 +46,13 @@
         app:layout_constraintLeft_toRightOf="@+id/serviceLogo"
         tools:text="@string/last_used" />
 
+    <ImageView
+        android:id="@+id/popupMenu"
+        android:layout_width="@dimen/clickable_area"
+        android:layout_height="@dimen/clickable_area"
+        android:scaleType="center"
+        android:src="@drawable/ic_three_dots"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/serviceName"
+        tools:ignore="ContentDescription" />
 </androidx.constraintlayout.widget.ConstraintLayout>

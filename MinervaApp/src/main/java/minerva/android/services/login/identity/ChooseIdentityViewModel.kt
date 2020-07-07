@@ -15,6 +15,7 @@ import minerva.android.services.login.uitls.LoginUtils.createLoginPayload
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.services.login.uitls.LoginUtils.isIdentityValid
+import minerva.android.walletmanager.exception.MissingKeysThrowable
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
@@ -76,7 +77,7 @@ class ChooseIdentityViewModel(
 
     private fun handleNoKeysError(identity: Identity): Boolean {
         if (doesIdentityHaveKeys(identity)) {
-            _errorLiveData.value = Event(Throwable("Missing calculated keys"))
+            _errorLiveData.value = Event(MissingKeysThrowable())
             return true
         }
         return false

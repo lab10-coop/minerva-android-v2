@@ -5,6 +5,9 @@ import io.reactivex.Completable
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.list.inBounds
+import minerva.android.walletmanager.exception.CannotRemoveLastIdentityThrowable
+import minerva.android.walletmanager.exception.NoIdentityToRemoveThrowable
+import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
@@ -24,7 +27,7 @@ class IdentityManagerImpl(
                     .map { keys -> WalletConfig(it.updateVersion, prepareIdentities(getIdentity(identity, keys), it), it.accounts, it.services) }
                     .flatMapCompletable { updateWalletConfig(it) }
             }
-            return Completable.error(Throwable("Wallet Config was not initialized"))
+            return Completable.error(NotInitializedWalletConfigThrowable())
         }
     }
 
@@ -49,19 +52,19 @@ class IdentityManagerImpl(
 
     private fun getNewIndex(): Int {
         walletConfigManager.getWalletConfig()?.let { return it.newIndex }
-        throw Throwable("Wallet Config was not initialized")
+        throw NotInitializedWalletConfigThrowable()
     }
 
     override fun removeIdentity(identity: Identity): Completable {
         walletConfigManager.getWalletConfig()?.let {
             return handleRemovingIdentity(it.identities, getPositionForIdentity(identity, it), identity)
         }
-        return Completable.error(Throwable("Wallet config was not initialized"))
+        return Completable.error(NotInitializedWalletConfigThrowable())
     }
 
     private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {
-        if (!identities.inBounds(currentPosition)) return Completable.error(Throwable("Missing identity to remove"))
-        if (isOnlyOneElement(identities)) return Completable.error(Throwable("You can not remove last identity"))
+        if (!identities.inBounds(currentPosition)) return Completable.error(NoIdentityToRemoveThrowable())
+        if (isOnlyOneElement(identities)) return Completable.error(CannotRemoveLastIdentityThrowable())
         return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
     }
 

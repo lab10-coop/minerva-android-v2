@@ -68,7 +68,7 @@ class AssetView(callback: AssertViewCallback, account: Account, assetIndex: Int,
     }
 
     interface AssertViewCallback {
-        fun onSendAssetClicked(valueIndex: Int, assetIndex: Int)
+        fun onSendAssetClicked(accountIndex: Int, assetIndex: Int)
         fun getViewGroup(): ViewGroup
         fun getContext(): Context
     }

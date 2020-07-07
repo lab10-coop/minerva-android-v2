@@ -6,6 +6,7 @@ import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.TokenPayload
+import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.mappers.PaymentMapper
@@ -46,4 +47,17 @@ class ServiceManagerImpl(
     override fun getLoggedInIdentityPublicKey(issuer: String): String = walletConfigManager.getLoggedInIdentityPublicKey(issuer)
 
     override fun getLoggedInIdentity(publicKey: String): Identity? = walletConfigManager.getLoggedInIdentity(publicKey)
+
+    override fun removeService(type: String): Completable {
+        walletConfigManager.getWalletConfig()?.apply {
+            val newServices = services.toMutableList()
+            services.forEach {
+                if (it.type == type) {
+                    newServices.remove(it)
+                    return walletConfigManager.updateWalletConfig(WalletConfig(version, identities, accounts, newServices))
+                }
+            }
+        }
+        return Completable.error(NotInitializedWalletConfigThrowable())
+    }
 }

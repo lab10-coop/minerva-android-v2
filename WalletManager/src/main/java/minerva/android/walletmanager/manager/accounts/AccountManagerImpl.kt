@@ -10,10 +10,12 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
+import minerva.android.walletmanager.exception.MissingAccountThrowable
+import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.WalletConfig
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -35,7 +37,7 @@ class AccountManagerImpl(
                     .map { createUpdatedWalletConfig(config, newValue, it, ownerAddress, contract) }
                     .flatMapCompletable { updateWalletConfig(it) }
             }
-            return Completable.error(Throwable("Wallet Config was not initialized"))
+            return Completable.error(NotInitializedWalletConfigThrowable())
         }
     }
 
@@ -86,9 +88,9 @@ class AccountManagerImpl(
                     )
                 }
             }
-            return Completable.error(Throwable("Missing value with this index"))
+            return Completable.error(MissingAccountThrowable())
         }
-        return Completable.error(Throwable("Wallet Config was not initialized"))
+        return Completable.error(NotInitializedWalletConfigThrowable())
     }
 
     private fun isNotSafeAccountMasterOwner(accounts: List<Account>, account: Account): Boolean {
