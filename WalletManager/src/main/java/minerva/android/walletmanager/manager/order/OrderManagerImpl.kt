@@ -2,6 +2,8 @@ package minerva.android.walletmanager.manager.order
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
+import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
+import minerva.android.walletmanager.exception.NotSupportedAccountThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -23,10 +25,10 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
                 WalletActionType.SERVICE -> walletConfigManager.updateWalletConfig(
                     WalletConfig(it.updateVersion, it.identities, it.accounts, (newOrderList as List<Service>))
                 )
-                else -> Completable.error(Throwable("Not supported Account type"))
+                else -> Completable.error(NotSupportedAccountThrowable())
             }
         }
-        return Completable.error(Throwable("Wallet Config was not initialized"))
+        return Completable.error(NotInitializedWalletConfigThrowable())
     }
 
     override fun prepareList(type: Int): List<MinervaPrimitive> =

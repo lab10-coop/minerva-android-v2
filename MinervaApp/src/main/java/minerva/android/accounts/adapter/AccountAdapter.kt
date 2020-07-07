@@ -13,21 +13,21 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.account_list_row.view.*
 import minerva.android.R
+import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.utils.BalanceUtils.getCryptoBalance
 import minerva.android.utils.BalanceUtils.getFiatBalance
-import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.Account
 import minerva.android.widget.AssetView
 import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
-import minerva.android.wrapped.startSafeAccountWrappedActivity
 import minerva.android.wrapped.startAccountAddressWrappedActivity
+import minerva.android.wrapped.startSafeAccountWrappedActivity
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
@@ -102,7 +102,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     }
 }
 
-class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : AssetView.AssertViewCallback, RecyclerView.ViewHolder(view) {
+class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : AssetView.AssertViewCallback,
+    RecyclerView.ViewHolder(view) {
 
     private lateinit var listener: AccountsAdapterListener
     private var rawPosition: Int = Int.InvalidIndex
@@ -223,7 +224,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun showMenu(position: Int, account: Account, anchor: View): Boolean {
+    private fun showMenu(position: Int, account: Account, anchor: View) {
         PopupMenu(view.context, anchor).apply {
             menuInflater.inflate(R.menu.account_menu, menu)
             menu.findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
@@ -232,13 +233,9 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
             show()
             setOnItemMenuClickListener(position, account)
         }
-        return true
     }
 
-    private fun PopupMenu.setOnItemMenuClickListener(
-        position: Int,
-        account: Account
-    ) {
+    private fun PopupMenu.setOnItemMenuClickListener(position: Int, account: Account) {
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.showAddress -> startAccountAddressWrappedActivity(

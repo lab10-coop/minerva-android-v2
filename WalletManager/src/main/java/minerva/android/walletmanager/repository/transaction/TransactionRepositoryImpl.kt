@@ -9,6 +9,7 @@ import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.Markets
@@ -37,7 +38,7 @@ class TransactionRepositoryImpl(
                     .map { MarketUtils.calculateFiatBalances(it.first, values, it.second) }
             }
         }
-        return Single.error(Throwable("Wallet Config was not initialized"))
+        return Single.error(NotInitializedWalletConfigThrowable())
     }
 
     override fun transferNativeCoin(network: String, transaction: Transaction): Single<String> {
@@ -81,7 +82,7 @@ class TransactionRepositoryImpl(
                 .toList()
                 .map { list -> list.map { it.first to AssetManager.mapToAssets(it.second) }.toMap() }
         }
-        return Single.error(Throwable("Wallet Config was not initialized"))
+        return Single.error(NotInitializedWalletConfigThrowable())
     }
 
     /**

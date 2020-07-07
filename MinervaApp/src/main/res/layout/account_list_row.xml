@@ -23,7 +23,6 @@
         style="?android:attr/progressBarStyleHorizontal"
         />
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainContent"
         android:layout_width="match_parent"

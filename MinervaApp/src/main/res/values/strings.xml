@@ -66,6 +66,7 @@
     <string name="choose_an_identity">Choose an identity</string>
     <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
     <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
+    <string name="remove_service_dialog_message">Do you really want to remove this service?</string>
     <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
     <string name="remove_owner">Remove owner</string>
     <string name="yes">Yes</string>

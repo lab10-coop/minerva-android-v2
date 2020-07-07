@@ -35,7 +35,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
                 R.string.identity_name,
                 R.drawable.ic_identities
             )
-            WalletActionType.ACCOUNT -> showValues(walletAction)
+            WalletActionType.ACCOUNT -> showAccounts(walletAction)
             WalletActionType.SERVICE -> showServices(walletAction)
         }
     }
@@ -45,7 +45,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
         showIcon(actionIcon)
     }
 
-    private fun showValues(walletAction: WalletAction) {
+    private fun showAccounts(walletAction: WalletAction) {
         when (walletAction.status) {
             FAILED -> showSentAction(walletAction, R.string.failed_sent_accounts_label)
             SENT -> showSentAction(walletAction, R.string.sent_accounts_label)
@@ -72,6 +72,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
                     "${walletAction.fields[WalletActionFields.IDENTITY_NAME]}",
                     "${walletAction.fields[WalletActionFields.SERVICE_NAME]}"
                 )
+            REMOVED -> walletAction.fields[WalletActionFields.SERVICE_NAME]
             else -> UNDEFINED
         }
         showIcon(R.drawable.ic_services)

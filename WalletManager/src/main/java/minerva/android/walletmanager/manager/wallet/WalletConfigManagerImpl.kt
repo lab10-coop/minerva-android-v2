@@ -13,6 +13,7 @@ import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.ResponseState
@@ -130,12 +131,12 @@ class WalletConfigManagerImpl(
                     .andThen(Single.just(owners))
             }
         }
-        return Single.error(Throwable("Wallet Config was not initialized"))
+        return Single.error(NotInitializedWalletConfigThrowable())
     }
 
     override fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>> {
         getWalletConfig()?.let { TODO("Not yet implemented") }
-        return Single.error(Throwable("Wallet Config was not initialized"))
+        return Single.error(NotInitializedWalletConfigThrowable())
     }
 
     override fun getValueIterator(): Int {
@@ -144,7 +145,7 @@ class WalletConfigManagerImpl(
             it.forEach { value -> if (!value.isSafeAccount) iterator += 1 }
             return iterator
         }
-        throw Throwable("Wallet Config was not initialized")
+        throw NotInitializedWalletConfigThrowable()
     }
 
     override fun isAlreadyLoggedIn(issuer: String): Boolean {
@@ -176,7 +177,7 @@ class WalletConfigManagerImpl(
             }
             return updateWalletConfig(getWalletConfigWithUpdatedService(service))
         }
-        return Completable.error(Throwable("Wallet Config was not initialized"))
+        return Completable.error(NotInitializedWalletConfigThrowable())
     }
 
     override fun getValue(valueIndex: Int, assetIndex: Int): Account? {

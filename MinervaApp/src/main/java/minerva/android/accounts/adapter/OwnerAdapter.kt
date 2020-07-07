@@ -54,14 +54,13 @@ class OwnerViewHolder(private val view: View, private val onOwnerRemovedListener
         ownerRowMenu.setOnClickListener { showMenu(position, ownerRowMenu) }
     }
 
-    private fun showMenu(position: Int, anchor: View): Boolean {
+    private fun showMenu(position: Int, anchor: View){
         PopupMenu(view.context, anchor).apply {
-            menuInflater.inflate(R.menu.owner_menu, menu)
+            menuInflater.inflate(R.menu.remove_menu, menu)
             gravity = Gravity.END
             show()
             setOnItemMenuClickListener(position)
         }
-        return true
     }
 
     private fun PopupMenu.setOnItemMenuClickListener(position: Int) {

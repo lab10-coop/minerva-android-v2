@@ -221,4 +221,22 @@ class ServiceManagerTest : RxTest() {
             .test()
             .assertError(error)
     }
+
+    @Test
+    fun `remove service success test`() {
+        whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.complete()
+        repository.removeService(ServiceType.CHARGING_STATION)
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+    }
+
+    @Test
+    fun `remove service error test`() {
+        val error = Throwable()
+        whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.error(error)
+        repository.removeService(ServiceType.CHARGING_STATION)
+            .test()
+            .assertError(error)
+    }
 }

@@ -7,6 +7,7 @@ import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Payment
 import minerva.android.walletmanager.model.QrCodeResponse
 import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.storage.ServiceType
 
 interface ServiceManager : Manager {
     fun saveService(service: Service): Completable
@@ -17,4 +18,5 @@ interface ServiceManager : Manager {
     fun isAlreadyLoggedIn(issuer: String): Boolean
     fun getLoggedInIdentityPublicKey(issuer: String): String
     fun getLoggedInIdentity(publicKey: String): Identity?
+    fun removeService(@ServiceType type: String): Completable
 }

@@ -9,6 +9,9 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.exception.AlreadyRemovedOwnerThrowable
+import minerva.android.walletmanager.exception.CannotRemoveMasterOwnerAddressThrowable
+import minerva.android.walletmanager.exception.OwnerAlreadyAddedThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.smartContract.SmartContractRepository
@@ -41,7 +44,7 @@ class SafeAccountSettingsViewModel(
 
     fun addOwner(owner: String) {
         if (isOwnerAlreadyAdded(owner)) {
-            _errorLiveData.value = Event(Throwable("Error: Owner already added!"))
+            _errorLiveData.value = Event(OwnerAlreadyAddedThrowable())
             return
         }
         launchDisposable {
@@ -60,11 +63,11 @@ class SafeAccountSettingsViewModel(
 
     fun removeOwner(removeAddress: String) {
         if (isMasterOwner(removeAddress)) {
-            _errorLiveData.value = Event(Throwable("Error: Cannot remove masterOwner Address!"))
+            _errorLiveData.value = Event(CannotRemoveMasterOwnerAddressThrowable())
             return
         }
         if (!isOwnerAlreadyAdded(removeAddress)) {
-            _errorLiveData.value = Event(Throwable("Error: No address owner on the list!"))
+            _errorLiveData.value = Event(AlreadyRemovedOwnerThrowable())
             return
         }
 

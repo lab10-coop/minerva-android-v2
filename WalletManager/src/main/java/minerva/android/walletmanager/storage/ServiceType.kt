@@ -5,6 +5,7 @@ import minerva.android.walletmanager.storage.ServiceType.Companion.CHARGING_STAT
 import minerva.android.walletmanager.storage.ServiceType.Companion.M27
 import minerva.android.walletmanager.storage.ServiceType.Companion.UNICORN_LOGIN
 
+@Target(AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(UNICORN_LOGIN, M27, CHARGING_STATION)
 annotation class ServiceType {

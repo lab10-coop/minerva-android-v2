@@ -1,9 +1,11 @@
 package minerva.android.walletmanager.utils
 
-import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.storage.ServiceType
 
 object DataProvider {
 
@@ -32,21 +34,8 @@ object DataProvider {
             ),
             Account(7, "publicKey5", "privateKey5", "address", network = NetworkShortName.ATS)
         )
-    )
-
-    val walletConfig2 = WalletConfig(
-        0, listOf(),
-        listOf(
-            Account(2, "publicKey11", "privateKey1", "address", network = NetworkShortName.ETH),
-            Account(4, "publicKey22", "privateKey2", "address", network = NetworkShortName.ETH),
-            Account(
-                5, "publicKey33", "privateKey3", "masterOwner", network = NetworkShortName.ETH,
-                owners = listOf("masterOwner")
-            ),
-            Account(
-                6, "publicKey44", "privateKey4", "address", network = NetworkShortName.ETH,
-                owners = listOf("notMasterOwner", "masterOwner")
-            )
+        , listOf(
+            Service(ServiceType.CHARGING_STATION, "name")
         )
     )
 }
