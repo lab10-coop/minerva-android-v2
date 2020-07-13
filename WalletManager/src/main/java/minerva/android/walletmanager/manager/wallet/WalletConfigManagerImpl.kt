@@ -11,6 +11,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
@@ -145,7 +146,7 @@ class WalletConfigManagerImpl(
             it.forEach { value -> if (!value.isSafeAccount) iterator += 1 }
             return iterator
         }
-        throw NotInitializedWalletConfigThrowable()
+        return Int.InvalidValue
     }
 
     override fun isAlreadyLoggedIn(issuer: String): Boolean {

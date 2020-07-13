@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.CannotRemoveLastIdentityThrowable
 import minerva.android.walletmanager.exception.NoIdentityToRemoveThrowable
@@ -52,7 +53,7 @@ class IdentityManagerImpl(
 
     private fun getNewIndex(): Int {
         walletConfigManager.getWalletConfig()?.let { return it.newIndex }
-        throw NotInitializedWalletConfigThrowable()
+        return Int.InvalidIndex
     }
 
     override fun removeIdentity(identity: Identity): Completable {

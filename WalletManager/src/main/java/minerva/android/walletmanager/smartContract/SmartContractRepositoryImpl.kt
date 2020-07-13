@@ -35,7 +35,7 @@ class SmartContractRepositoryImpl(
             it.add(FIRST_POSITION, owner)
             return it
         }
-        throw IllegalStateException("Owners Live Data was not initialized")
+        return emptyList()
     }
 
     override fun removeSafeAccountOwner(
@@ -50,7 +50,7 @@ class SmartContractRepositoryImpl(
             it.remove(removeAddress)
             return it
         }
-        throw IllegalStateException("Owners Live Data was not initialized")
+        return emptyList()
     }
 
     override fun transferNativeCoin(network: String, transaction: Transaction): Completable =
