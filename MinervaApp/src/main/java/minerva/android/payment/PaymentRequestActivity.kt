@@ -29,11 +29,6 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
         checkIfWalletExists()
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     private fun checkIfWalletExists() {
         if (viewModel.isMasterSeedAvailable()) {
             viewModel.initWalletConfig()

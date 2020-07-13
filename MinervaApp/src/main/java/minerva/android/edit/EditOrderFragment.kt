@@ -45,11 +45,6 @@ class EditOrderFragment : Fragment() {
         viewModel.onResume()
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     fun saveNewOrder() {
         viewModel.saveChanges(type, orderAdapter.getList())
     }

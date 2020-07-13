@@ -33,11 +33,6 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
         prepareObservers()
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     private fun prepareObservers() {
         viewModel.apply {
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })

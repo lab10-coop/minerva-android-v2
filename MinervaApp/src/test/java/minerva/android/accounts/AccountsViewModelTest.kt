@@ -38,6 +38,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
 
+    private val accountRemoveObserver: Observer<Event<Unit>> = mock()
+    private val accountRemoveCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+
     @Test
     fun `refresh balances success`() {
         whenever(transactionRepository.refreshBalances()).thenReturn(
@@ -88,6 +91,17 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel.removeAccount(Account(1, "test"))
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `Remove value success`() {
+        whenever(accountManager.removeAccount(any())).thenReturn(Completable.complete())
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        viewModel.accountRemovedLiveData.observeForever(accountRemoveObserver)
+        viewModel.removeAccount(Account(1, "test"))
+        accountRemoveCaptor.run {
+            verify(accountRemoveObserver).onChanged(capture())
         }
     }
 

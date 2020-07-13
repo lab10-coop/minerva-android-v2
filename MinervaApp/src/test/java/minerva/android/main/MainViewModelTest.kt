@@ -7,12 +7,15 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.any
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
 class MainViewModelTest : BaseViewModelTest() {
@@ -20,7 +23,8 @@ class MainViewModelTest : BaseViewModelTest() {
     private val serviceManager: ServiceManager = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val masterSeedRepository: MasterSeedRepository = mock()
-    private val viewModel = MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository)
+    private val orderManager: OrderManager = mock()
+    private val viewModel = MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager)
 
     private val notExistedIdentityObserver: Observer<Event<Unit>> = mock()
     private val notExistedIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -103,5 +107,19 @@ class MainViewModelTest : BaseViewModelTest() {
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
+    }
+
+    @Test
+    fun `Should show edit order icon` () {
+        whenever(orderManager.isOrderAvailable(any())).thenReturn(true)
+        val isEditIconVisible = viewModel.isOrderEditAvailable(WalletActionType.IDENTITY)
+        isEditIconVisible shouldBeEqualTo true
+    }
+
+    @Test
+    fun `Should not show edit order icon` () {
+        whenever(orderManager.isOrderAvailable(any())).thenReturn(false)
+        val isEditIconVisible = viewModel.isOrderEditAvailable(WalletActionType.IDENTITY)
+        isEditIconVisible shouldBeEqualTo false
     }
 }

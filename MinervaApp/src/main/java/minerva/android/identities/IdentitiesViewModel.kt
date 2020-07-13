@@ -24,6 +24,9 @@ class IdentitiesViewModel(
 
     val walletConfigLiveData: LiveData<WalletConfig> = identityManager.walletConfigLiveData
 
+    private val _identityRemovedLiveData = MutableLiveData<Event<Unit>>()
+    val identityRemovedLiveData: LiveData<Event<Unit>> get() = _identityRemovedLiveData
+
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
@@ -34,7 +37,10 @@ class IdentitiesViewModel(
                 .andThen(walletActionsRepository.saveWalletActions(getRemovedIdentityWalletAction(identity.name)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { _errorLiveData.value = Event(it) })
+                .subscribeBy(
+                    onComplete = { _identityRemovedLiveData.value = Event(Unit) },
+                    onError = { _errorLiveData.value = Event(it) }
+                )
         }
     }
 

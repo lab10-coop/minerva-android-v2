@@ -32,11 +32,6 @@ class IdentitiesFragment : Fragment(), IdentityFragmentListener {
         setupLiveData()
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     private fun setupRecycleView() {
         recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
@@ -51,6 +46,7 @@ class IdentitiesFragment : Fragment(), IdentityFragmentListener {
     private fun setupLiveData() {
         viewModel.apply {
             walletConfigLiveData.observe(viewLifecycleOwner, Observer { identityAdapter.updateList(it.identities.toMutableList()) })
+            identityRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
             errorLiveData.observe(viewLifecycleOwner, EventObserver { showError(it) })
         }
     }

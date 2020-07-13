@@ -1,5 +1,6 @@
 package minerva.android.accounts
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
@@ -55,6 +56,9 @@ class AccountsViewModel(
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
+    private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
+    val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
+
     fun refreshBalances() =
         launchDisposable {
             transactionRepository.refreshBalances()
@@ -91,6 +95,7 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
+                    onComplete = { _accountRemovedLiveData.value = Event(Unit)},
                     onError = {
                         Timber.e("Removing account with index ${account.index} failure")
                         when (it) {

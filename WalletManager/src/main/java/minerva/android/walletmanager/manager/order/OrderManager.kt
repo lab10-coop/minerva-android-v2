@@ -7,4 +7,5 @@ import minerva.android.walletmanager.model.MinervaPrimitive
 interface OrderManager : Manager {
     fun updateList(type: Int, newOrderList: List<MinervaPrimitive>): Completable
     fun prepareList(type: Int): List<MinervaPrimitive>
+    fun isOrderAvailable(type: Int): Boolean
 }

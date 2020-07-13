@@ -39,6 +39,18 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
             else -> listOf()
         }
 
+    override fun isOrderAvailable(type: Int): Boolean {
+        walletConfigLiveData.value?.let { config ->
+            return when (type) {
+                WalletActionType.IDENTITY -> config.identities.filter { !it.isDeleted }.size > ONE_ELEMENT
+                WalletActionType.ACCOUNT -> config.accounts.filter { !it.isDeleted }.size > ONE_ELEMENT
+                WalletActionType.SERVICE -> config.services.filter { !it.isDeleted }.size > ONE_ELEMENT
+                else -> false
+            }
+        }
+        return false
+    }
+
     private fun getWalletConfig() = walletConfigManager.getWalletConfig()
 
     private fun prepareIdentitiesList(): List<MinervaPrimitive> {
@@ -60,5 +72,9 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
             return it.services
         }
         return listOf()
+    }
+
+    companion object {
+        private const val ONE_ELEMENT = 1
     }
 }

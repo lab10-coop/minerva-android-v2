@@ -24,6 +24,9 @@ class ServicesViewModel(
 
     val walletConfigLiveData: LiveData<WalletConfig> = serviceManager.walletConfigLiveData
 
+    private val _serviceRemovedLiveData = MutableLiveData<Event<Unit>>()
+    val serviceRemovedLiveData: LiveData<Event<Unit>> get() = _serviceRemovedLiveData
+
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
@@ -33,7 +36,10 @@ class ServicesViewModel(
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(getWalletAction(name)))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { _errorLiveData.value = Event(it) })
+                .subscribeBy(
+                    onComplete = { _serviceRemovedLiveData.value = Event(Unit) },
+                    onError = { _errorLiveData.value = Event(it) }
+                )
         }
     }
 

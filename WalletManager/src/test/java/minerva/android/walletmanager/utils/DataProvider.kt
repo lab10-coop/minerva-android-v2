@@ -5,6 +5,7 @@ import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.defs.NetworkTokenName
 import minerva.android.walletmanager.storage.ServiceType
 
 object DataProvider {
@@ -22,17 +23,17 @@ object DataProvider {
             Identity(3, "identityName3", "", "privateKey", data)
         ),
         listOf(
-            Account(2, "publicKey1", "privateKey1", "address", network = NetworkShortName.ETH),
-            Account(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ATS),
+            Account(2, "publicKey1", "privateKey1", "address", network = NetworkShortName.ETH_RIN),
+            Account(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ATS_TAU),
             Account(
-                5, "publicKey3", "privateKey3", "address", network = NetworkShortName.ATS,
+                5, "publicKey3", "privateKey3", "address", network = NetworkShortName.ATS_TAU,
                 owners = listOf("masterOwner")
             ),
             Account(
-                6, "publicKey4", "privateKey4", "address", network = NetworkShortName.ATS,
+                6, "publicKey4", "privateKey4", "address", network = NetworkShortName.ATS_TAU,
                 owners = listOf("notMasterOwner", "masterOwner")
             ),
-            Account(7, "publicKey5", "privateKey5", "address", network = NetworkShortName.ATS)
+            Account(7, "publicKey5", "privateKey5", "address", network = NetworkShortName.ATS_TAU)
         )
         , listOf(
             Service(ServiceType.CHARGING_STATION, "name")

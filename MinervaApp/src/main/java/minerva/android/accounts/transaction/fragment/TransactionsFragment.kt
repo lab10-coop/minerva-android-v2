@@ -17,12 +17,13 @@ import io.reactivex.functions.Function5
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_transactions.*
 import minerva.android.R
-import minerva.android.extension.*
-import minerva.android.extension.validator.Validator
-import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.accounts.transaction.fragment.adapter.RecipientAdapter
+import minerva.android.extension.*
+import minerva.android.extension.validator.Validator
+import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.model.TransactionCost
 import minerva.android.walletmanager.model.defs.WalletActionStatus
@@ -58,7 +59,6 @@ class TransactionsFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        viewModel.onPause()
         validationDisposable?.dispose()
     }
 
@@ -144,7 +144,8 @@ class TransactionsFragment : Fragment() {
         transactionCost.let {
             gasPriceEditText.setText(it.gasPrice.toPlainString())
             gasLimitEditText.setText(it.gasLimit.toString())
-            transactionCostLabel.text = getString(R.string.transaction_cost, it.cost.toPlainString(), viewModel.network)
+            transactionCostLabel.text =
+                getString(R.string.transaction_cost, it.cost.toPlainString(), Network.fromString(viewModel.network).token)
         }
     }
 
@@ -177,14 +178,14 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun clearTransactionCost() {
-        transactionCostLabel.text = getString(R.string.transaction_cost, ZER0, viewModel.network)
+        transactionCostLabel.text = getString(R.string.transaction_cost, ZER0, Network.fromString(viewModel.network).token)
     }
 
     private fun setTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger) {
         transactionCostLabel.text = getString(
             R.string.transaction_cost,
             viewModel.calculateTransactionCost(gasPrice, gasLimit),
-            viewModel.network
+            Network.fromString(viewModel.network).token
         )
     }
 

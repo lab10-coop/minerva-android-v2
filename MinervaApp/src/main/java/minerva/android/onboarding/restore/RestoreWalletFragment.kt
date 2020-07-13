@@ -37,11 +37,6 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
         prepareMnemonicLengthValidator()
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     private fun prepareObservers() {
         viewModel.apply {
             invalidMnemonicLiveData.observe(this@RestoreWalletFragment, EventObserver { handleInvalidMnemonic(it) })

@@ -10,6 +10,7 @@ import minerva.android.observeLiveDataEvent
 import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -36,7 +37,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = NetworkShortName.ATS_TAU))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
+        viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
             verify(sendTransactionObserver).onChanged(capture())
@@ -49,7 +52,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = NetworkShortName.ATS_TAU))
         viewModel.saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
+        viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         saveActionFailedCaptor.run {
             verify(sendTransactionObserver).onChanged(capture())
@@ -94,7 +99,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = NetworkShortName.ATS_TAU))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
+        viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
             verify(sendTransactionObserver).onChanged(capture())
