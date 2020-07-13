@@ -29,13 +29,13 @@ fun createDefaultWalletConfig() =
         listOf(
             AccountPayload(
                 DefaultWalletConfigIndexes.FIRST_ACCOUNTS_INDEX,
-                CryptoUtils.prepareName(Network.ARTIS, DefaultWalletConfigIndexes.FIRST_ACCOUNTS_INDEX),
-                Network.ARTIS.short
+                CryptoUtils.prepareName(Network.ATS_TAU, DefaultWalletConfigIndexes.FIRST_ACCOUNTS_INDEX),
+                Network.ATS_TAU.short
             ),
             AccountPayload(
                 DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX,
-                CryptoUtils.prepareName(Network.ETHEREUM, DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX),
-                Network.ETHEREUM.short
+                CryptoUtils.prepareName(Network.ETH_RIN, DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX),
+                Network.ETH_RIN.short
             )
         )
     )

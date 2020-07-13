@@ -15,6 +15,7 @@ import minerva.android.services.login.uitls.LoginUtils.getRequestedData
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getServiceName
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
+import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
@@ -25,7 +26,8 @@ import timber.log.Timber
 class MainViewModel(
     private val masterSeedRepository: MasterSeedRepository,
     private val serviceManager: ServiceManager,
-    private val walletActionsRepository: WalletActionsRepository
+    private val walletActionsRepository: WalletActionsRepository,
+    private val orderManager: OrderManager
 ) : BaseViewModel() {
 
     lateinit var loginPayload: LoginPayload
@@ -61,6 +63,8 @@ class MainViewModel(
             }
         }
     }
+
+    fun isOrderEditAvailable(type: Int) = orderManager.isOrderAvailable(type)
 
     private fun handleQrCodeResponse(response: QrCodeResponse) {
         response.run {

@@ -40,11 +40,6 @@ class NewAccountFragment : Fragment() {
         viewModel.onResume()
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     private fun initializeFragment() {
         viewModel.apply {
             createAccountLiveData.observe(viewLifecycleOwner, EventObserver { activity?.finish() })

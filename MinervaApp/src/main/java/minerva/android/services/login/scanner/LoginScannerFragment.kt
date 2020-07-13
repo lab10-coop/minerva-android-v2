@@ -31,11 +31,6 @@ class LoginScannerFragment : BaseScanner() {
         listener = context as PainlessLoginFragmentListener
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     override fun setupCodeScanner() {
         super.setupCodeScanner()
         codeScanner.apply {

@@ -97,7 +97,7 @@
             tools:ignore="RtlHardcoded" />
 
         <TextView
-            android:id="@+id/cryptoShortName"
+            android:id="@+id/cryptoTokenName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_small"

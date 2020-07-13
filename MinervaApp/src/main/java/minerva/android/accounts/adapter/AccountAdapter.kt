@@ -143,15 +143,15 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 pendingMask.visibleOrGone(pending)
                 icon.setImageResource(getNetworkIcon(Network.fromString(network)))
                 accountName.text = name
-                cryptoShortName.run {
-                    text = network
+                cryptoTokenName.run {
+                    text = Network.fromString(network).token
                     setTextColor(ContextCompat.getColor(context, networkColor))
                 }
                 with(amountView) {
                     setCrypto(getCryptoBalance(cryptoBalance))
                     setFiat(getFiatBalance(fiatBalance))
                 }
-                sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), network)
+                sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), Network.fromString(network).token)
             }
         }
     }
@@ -253,9 +253,9 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun isCreatingSafeAccountAvailable(account: Account) = account.network == Network.ARTIS.short && !account.isSafeAccount
+    private fun isCreatingSafeAccountAvailable(account: Account) = Network.hasSafeAccountOption(account.network) && !account.isSafeAccount
 
-    private fun isSafeAccount(account: Account) = account.network == Network.ARTIS.short && account.isSafeAccount
+    private fun isSafeAccount(account: Account) = Network.hasSafeAccountOption(account.network) && account.isSafeAccount
 
     companion object {
         private const val SEND_BUTTON_FORMAT = "%s %s"

@@ -66,11 +66,6 @@ class WalletActionsFragment : Fragment() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     private fun setupRecycleView(view: View) {
         recyclerView.apply {
             layoutManager = LinearLayoutManager(view.context)

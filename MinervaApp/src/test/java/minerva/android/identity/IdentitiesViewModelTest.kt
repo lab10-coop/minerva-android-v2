@@ -20,11 +20,19 @@ class IdentitiesViewModelTest : BaseViewModelTest() {
     private val viewModel = IdentitiesViewModel(identityManager, walletActionsRepository)
 
     @Test
-    fun `remove identity success error`(){
+    fun `remove identity error`(){
         val error = Throwable()
         whenever(identityManager.removeIdentity(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         viewModel.removeIdentity(Identity(1))
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))
+    }
+
+    @Test
+    fun `remove identity success`() {
+        whenever(identityManager.removeIdentity(any())).thenReturn(Completable.complete())
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        viewModel.removeIdentity(Identity(1))
+        viewModel.identityRemovedLiveData.observeLiveDataEvent(Event(Unit))
     }
 }

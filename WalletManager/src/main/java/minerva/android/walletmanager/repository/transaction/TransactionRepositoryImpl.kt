@@ -75,7 +75,8 @@ class TransactionRepositoryImpl(
             return Observable.range(START, values.size)
                 .filter { position -> !values[position].isDeleted }
                 //TODO filter should be removed when all test net will be implemented
-                .filter { position -> Network.fromString(values[position].network).run { this == Network.ETHEREUM || this == Network.ARTIS } }
+                //klop refactor
+                .filter { position -> Network.fromString(values[position].network).run { this == Network.ETH_RIN || this == Network.ATS_TAU } }
                 .flatMapSingle { position ->
                     refreshAssetsBalance(values[position], AssetManager.getAssetAddresses(Network.fromString(values[position].network)))
                 }

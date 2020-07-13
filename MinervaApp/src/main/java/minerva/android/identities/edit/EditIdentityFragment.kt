@@ -64,11 +64,6 @@ class EditIdentityFragment : Fragment() {
         confirmButton.setOnClickListener { onConfirmButtonClicked() }
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         viewModel.onDestroy()

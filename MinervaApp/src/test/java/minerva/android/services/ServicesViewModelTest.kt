@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -35,6 +36,13 @@ class ServicesViewModelTest : BaseViewModelTest() {
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
+    }
 
+    @Test
+    fun `Remove service success`() {
+        whenever(servicesManager.removeService(any())) doReturn Completable.complete()
+        whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.complete()
+        viewModel.removeService(ServiceType.CHARGING_STATION, "name")
+        viewModel.serviceRemovedLiveData.observeLiveDataEvent(Event(Unit))
     }
 }

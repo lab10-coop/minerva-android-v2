@@ -1,7 +1,6 @@
 package minerva.android.blockchainprovider.repository.blockchain
 
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.contract.ERC20

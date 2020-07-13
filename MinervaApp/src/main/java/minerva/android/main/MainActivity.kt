@@ -9,6 +9,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
+import minerva.android.accounts.AccountsFragment
+import minerva.android.accounts.transaction.activity.TransactionActivity
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ACCOUNT_INDEX
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivityForResult
 import minerva.android.extension.visibleOrGone
@@ -19,11 +23,8 @@ import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.accounts.AccountsFragment
-import minerva.android.accounts.transaction.activity.TransactionActivity
-import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
-import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ACCOUNT_INDEX
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.OnFlashBarTapListener
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
@@ -95,25 +96,27 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        menu?.apply {
-            findItem(R.id.editIdentityOrder)?.apply {
-                isVisible = shouldShowAddIdentityIcon()
-            }
-            findItem(R.id.addIdentity)?.apply {
-                isVisible = shouldShowAddIdentityIcon()
-            }
-            findItem(R.id.editAccountOrder)?.apply {
-                isVisible = shouldShowAddValueIcon()
-            }
-            findItem(R.id.addAccount)?.apply {
-                isVisible = shouldShowAddValueIcon()
-                isEnabled = !shouldDisableAddButton
-            }
-            findItem(R.id.editServiceOrder)?.apply {
-                isVisible = isServicesTabSelected()
-            }
-            findItem(R.id.barcodeScanner)?.apply {
-                isVisible = isServicesTabSelected()
+        with(viewModel) {
+            menu?.apply {
+                findItem(R.id.editIdentityOrder)?.apply {
+                    isVisible = shouldShowAddIdentityIcon() && isOrderEditAvailable(WalletActionType.IDENTITY)
+                }
+                findItem(R.id.addIdentity)?.apply {
+                    isVisible = shouldShowAddIdentityIcon()
+                }
+                findItem(R.id.editAccountOrder)?.apply {
+                    isVisible = shouldShowAddValueIcon() && isOrderEditAvailable(WalletActionType.ACCOUNT)
+                }
+                findItem(R.id.addAccount)?.apply {
+                    isVisible = shouldShowAddValueIcon()
+                    isEnabled = !shouldDisableAddButton
+                }
+                findItem(R.id.editServiceOrder)?.apply {
+                    isVisible = isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
+                }
+                findItem(R.id.barcodeScanner)?.apply {
+                    isVisible = isServicesTabSelected()
+                }
             }
         }
         return super.onPrepareOptionsMenu(menu)

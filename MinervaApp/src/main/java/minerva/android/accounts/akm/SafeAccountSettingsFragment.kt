@@ -50,7 +50,6 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
 
     override fun onPause() {
         super.onPause()
-        viewModel.onPause()
         safeAccountDisposable?.dispose()
     }
 

@@ -18,6 +18,8 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.accounts.adapter.AccountAdapter
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
+import minerva.android.main.MainActivity
+import minerva.android.main.MainViewModel
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -51,11 +53,6 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         listener = context as FragmentInteractorListener
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
     }
 
     override fun onSendTransaction(account: Account) = listener.showSendTransactionScreen(account)
@@ -115,6 +112,7 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
             isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
             })
+            accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
         }
     }
 

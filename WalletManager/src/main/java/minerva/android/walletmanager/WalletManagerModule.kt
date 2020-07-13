@@ -64,7 +64,7 @@ fun createWalletModules() = module {
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
-    factory<OrderManager> { (OrderManagerImpl(get())) }
+    factory<OrderManager> { OrderManagerImpl(get()) }
 }
 
 private const val LocalStorage = "LocalStorage"

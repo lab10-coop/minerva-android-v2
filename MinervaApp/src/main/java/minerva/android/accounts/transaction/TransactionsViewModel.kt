@@ -222,7 +222,7 @@ class TransactionsViewModel(
         }
     }
 
-    fun prepareCurrency() = if (assetIndex != Int.InvalidIndex) account.assets[assetIndex].nameShort else account.network
+    fun prepareCurrency() = if (assetIndex != Int.InvalidIndex) account.assets[assetIndex].nameShort else Network.fromString(account.network).token
 
     private fun getAccountsWalletAction(transaction: Transaction, network: String, status: Int): WalletAction =
         WalletAction(
@@ -274,7 +274,7 @@ class TransactionsViewModel(
         prefixAddress.removePrefix(prefix).replace(META_ADDRESS_SEPARATOR, String.Empty)
 
     fun prepareTitle() =
-        if (assetIndex != Int.InvalidIndex) account.assets[assetIndex].name else account.network
+        if (assetIndex != Int.InvalidIndex) account.assets[assetIndex].name else Network.fromString(account.network).token
 
     fun isCorrectNetwork(prefixAddress: String) = account.name.contains(prefixAddress, true)
 

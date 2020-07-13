@@ -44,7 +44,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        val test = repository.createAccount(Network.ETHEREUM, "#3 Ethereum").test()
+        val test = repository.createAccount(Network.ETH_RIN, "#3 Ethereum").test()
         test.assertNoErrors()
         repository.loadAccount(1).apply {
             index shouldBeEqualTo 4
@@ -61,7 +61,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        val test = repository.createAccount(Network.ETHEREUM, "#3 Ethereum").test()
+        val test = repository.createAccount(Network.ETH_RIN, "#3 Ethereum").test()
         test.assertError(error)
         repository.loadAccount(10).apply {
             index shouldBeEqualTo -1

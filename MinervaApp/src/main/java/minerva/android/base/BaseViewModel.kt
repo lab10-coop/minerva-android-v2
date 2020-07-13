@@ -10,7 +10,8 @@ abstract class BaseViewModel : ViewModel() {
 
     open fun onResume() {}
 
-    fun onPause() {
+    override fun onCleared() {
+        super.onCleared()
         compositeDisposable.clear()
         unsubscribe()
     }

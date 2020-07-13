@@ -9,9 +9,9 @@ object AssetManager {
 
     private fun getAssets(network: Network): List<Asset> =
         when (network) {
-            Network.ARTIS -> AssetsSet.artisAssets
-            Network.ETHEREUM -> AssetsSet.ethereumAssets
-            Network.POA -> AssetsSet.poaAssets
+            Network.ATS_TAU -> AssetsSet.artisAssets
+            Network.ETH_RIN -> AssetsSet.ethereumAssets
+            Network.POA_SKL -> AssetsSet.poaAssets
             else -> TODO("Implement the rest of assets for networks")
         }
 

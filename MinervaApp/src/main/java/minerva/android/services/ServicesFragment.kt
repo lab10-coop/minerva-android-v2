@@ -11,6 +11,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.adapter.ServicesAdapter
 import minerva.android.services.listener.ServicesMenuListener
 import minerva.android.widget.MinervaFlashbar
@@ -36,6 +37,7 @@ class ServicesFragment : Fragment(), ServicesMenuListener {
                 noDataMessage.visibleOrGone(it.services.isEmpty())
                 servicesAdapter.updateList(it.services)
             })
+            serviceRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
             errorLiveData.observe(viewLifecycleOwner, Observer {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.error_header), getString(R.string.unexpected_error))
             })

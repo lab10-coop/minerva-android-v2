@@ -1,12 +1,15 @@
 package minerva.android.walletmanager.manager.order
 
-import com.nhaarman.mockitokotlin2.*
+import androidx.lifecycle.MutableLiveData
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.WalletActionType
 import org.amshove.kluent.shouldBeEqualTo
@@ -32,12 +35,11 @@ class OrderManagerTest : RxTest() {
     )
 
     private val services = listOf(
-        Service(name = "Service1"),
-        Service(name = "Service2"),
-        Service(name = "Service3")
+        Service(name = "Service1")
     )
 
     private val walletConfig = WalletConfig(0, identities, values, services)
+
 
     @Before
     override fun setupRxSchedulers() {
@@ -91,4 +93,18 @@ class OrderManagerTest : RxTest() {
         }
     }
 
+    @Test
+    fun `Is edit order icon shown correct`() {
+        walletConfig.accounts[1].isDeleted = true
+        walletConfig.accounts[2].isDeleted = true
+        val walletConfigLD = MutableLiveData<WalletConfig>()
+        walletConfigLD.value = walletConfig
+        whenever(walletConfigManager.walletConfigLiveData).thenReturn(walletConfigLD)
+        val isIdentityIconShown = orderManager.isOrderAvailable(WalletActionType.IDENTITY)
+        isIdentityIconShown shouldBeEqualTo true
+        val isAccountIconShown = orderManager.isOrderAvailable(WalletActionType.ACCOUNT)
+        isAccountIconShown shouldBeEqualTo false
+        val isServiceIconShown = orderManager.isOrderAvailable(WalletActionType.SERVICE)
+        isServiceIconShown shouldBeEqualTo false
+    }
 }

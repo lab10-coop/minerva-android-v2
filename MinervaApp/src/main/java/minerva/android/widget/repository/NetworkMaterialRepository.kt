@@ -8,9 +8,9 @@ import minerva.android.walletmanager.model.defs.AssetName
 
 fun getNetworkColor(network: Network, opacity: Boolean = false): Int {
     val position = when (network) {
-        Network.ARTIS -> ARTIS_ARRAY_POSITION
-        Network.ETHEREUM -> ETHEREUM_ARRAY_POSITION
-        Network.POA -> POA_ARRAY_POSITION
+        Network.ATS_TAU -> ARTIS_ARRAY_POSITION
+        Network.ETH_RIN -> ETHEREUM_ARRAY_POSITION
+        Network.POA_SKL -> POA_ARRAY_POSITION
         else -> TODO("Implement the rest of colors for networks")
     }
     return if (opacity) networkOpacityColor[position]
@@ -19,13 +19,13 @@ fun getNetworkColor(network: Network, opacity: Boolean = false): Int {
 
 fun getNetworkIcon(network: Network): Int =
     when (network) {
-        Network.ARTIS -> R.drawable.ic_artis
-        Network.ETHEREUM -> R.drawable.ic_ethereum
-        Network.POA -> R.drawable.ic_poa
-        Network.LUKSO -> R.drawable.ic_lukso
-        Network.RSK -> R.drawable.ic_rsk
-        Network.ETHEREUM_CLASSIC -> R.drawable.ic_ethereum_classic
-
+        Network.ATS_TAU -> R.drawable.ic_artis
+        Network.ETH_RIN -> R.drawable.ic_ethereum
+        Network.POA_SKL -> R.drawable.ic_poa
+        Network.LUKSO_14 -> R.drawable.ic_lukso
+        Network.RSK_TRSK -> R.drawable.ic_rsk
+        Network.ETH_CLASSIC_KOTTI -> R.drawable.ic_ethereum_classic
+        Network.ETH_ROP, Network.ETH_GOR, Network.ETH_KOV -> R.drawable.ic_ethereum
     }
 
 //TODO add missing asset Icons
