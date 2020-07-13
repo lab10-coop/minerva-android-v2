@@ -25,6 +25,7 @@ import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.o
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.refund
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeSentinelAddress
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeTxGas
+import minerva.android.kotlinUtils.Empty
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Function
@@ -107,7 +108,7 @@ class BlockchainContractRepositoryImpl(
                 return if (index > 0) address else safeSentinelAddress
             }
         }
-        throw IllegalArgumentException("Remove Address is not a owner address!")
+        return String.Empty
     }
 
     private fun performTransaction(
