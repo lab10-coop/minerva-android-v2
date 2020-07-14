@@ -12,7 +12,7 @@
     <dimen name="text_normal">16sp</dimen>
     <dimen name="text_small">12sp</dimen>
     <dimen name="card_corner_radius">16dp</dimen>
-    <dimen name="logo_size">64dp</dimen>
+    <dimen name="logo_size">72dp</dimen>
     <dimen name="icon_size">40dp</dimen>
     <dimen name="rounded_background_small">8dp</dimen>
     <dimen name="rounded_background">16dp</dimen>

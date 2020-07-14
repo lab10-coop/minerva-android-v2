@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.3" />
+        app:layout_constraintGuide_percent="0.1" />
 
     <minerva.android.widget.PassiveVideoView
         android:id="@+id/passiveVideoView"
@@ -17,10 +17,10 @@
         android:layout_height="0dp"
         android:background="@android:color/white"
         app:fallbackImage="@drawable/animation_launcher_fallback"
-        app:layout_constraintBottom_toTopOf="@+id/bottomGuideline"
+        app:layout_constraintBottom_toBottomOf="@+id/bottomGuideline"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topGuideline"
+        app:layout_constraintTop_toTopOf="@id/topGuideline"
         app:loadingImage="@drawable/loading_launcher_view"
         app:video="@raw/minerva_launch_animation" />
 
@@ -29,5 +29,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.7" />
+        app:layout_constraintGuide_percent="0.5" />
 </androidx.constraintlayout.widget.ConstraintLayout>
