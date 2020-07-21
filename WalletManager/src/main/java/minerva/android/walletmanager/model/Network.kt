@@ -7,7 +7,7 @@ import minerva.android.walletmanager.model.defs.NetworkURL
 import java.math.BigInteger
 
 enum class Network(val full: String, val short: String, val token: String, val url: String, val gasPrice: BigInteger) {
-    ATS_TAU(NetworkFullName.ARTIS_TAU, NetworkShortName.ATS_TAU, NetworkTokenName.ATS_TAU, NetworkURL.ARTIS_TAU, ARTIS_GAS_PRICE),
+    ATS_TAU(NetworkFullName.ATS_TAU, NetworkShortName.ATS_TAU, NetworkTokenName.ATS_TAU, NetworkURL.ATS_TAU, ARTIS_GAS_PRICE),
     ETH_RIN(NetworkFullName.ETH_RIN, NetworkShortName.ETH_RIN, NetworkTokenName.ETH_RIN, NetworkURL.ETH_RIN, ETHEREUM_GAS_PRICE),
     POA_SKL(NetworkFullName.POA_SKL, NetworkShortName.POA_SKL, NetworkTokenName.POA_SKL, NetworkURL.POA_SKL, DEFAULT_GAS_PRICE),
 
