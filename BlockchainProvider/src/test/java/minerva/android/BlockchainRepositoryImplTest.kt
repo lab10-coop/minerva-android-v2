@@ -21,6 +21,7 @@ import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.methods.response.EthGetBalance
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
 import org.web3j.protocol.core.methods.response.EthSendTransaction
+import org.web3j.protocol.core.methods.response.NetVersion
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -103,8 +104,11 @@ class BlockchainRepositoryImplTest {
         transactionCount.result = "0x1"
         val sendTransaction = EthSendTransaction()
         sendTransaction.result = "0x2"
+        val netVersion = NetVersion()
+        netVersion.result = "124"
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.just(sendTransaction)
+        every { web3J.netVersion().flowable() } returns Flowable.just(netVersion)
         blockchainRepository.transferNativeCoin(ETH, TransactionPayload("address", "0x2313"))
             .test()
             .assertComplete()
@@ -117,8 +121,11 @@ class BlockchainRepositoryImplTest {
         transactionCount.result = "0x1"
         val sendTransaction = EthSendTransaction()
         sendTransaction.result = "0x2"
+        val netVersion = NetVersion()
+        netVersion.result = "124"
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.error(error)
+        every { web3J.netVersion().flowable() } returns Flowable.just(netVersion)
         blockchainRepository.transferNativeCoin(ETH, TransactionPayload("address", "0x2313"))
             .test()
             .assertError(error)

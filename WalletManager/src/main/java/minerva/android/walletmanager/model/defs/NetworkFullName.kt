@@ -1,7 +1,7 @@
 package minerva.android.walletmanager.model.defs
 
 import androidx.annotation.StringDef
-import minerva.android.walletmanager.model.defs.NetworkFullName.Companion.ARTIS_TAU
+import minerva.android.walletmanager.model.defs.NetworkFullName.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.NetworkFullName.Companion.ETH_CLASSIC_KOTTI
 import minerva.android.walletmanager.model.defs.NetworkFullName.Companion.ETH_GOR
 import minerva.android.walletmanager.model.defs.NetworkFullName.Companion.ETH_KOV
@@ -13,10 +13,10 @@ import minerva.android.walletmanager.model.defs.NetworkFullName.Companion.RSK_TR
 
 
 @Retention(AnnotationRetention.SOURCE)
-@StringDef(ARTIS_TAU, ETH_ROP, RSK_TRSK, ETH_RIN, ETH_KOV, ETH_GOR, ETH_CLASSIC_KOTTI, POA_SKL, LUKSO_14)
+@StringDef(ATS_TAU, ETH_ROP, RSK_TRSK, ETH_RIN, ETH_KOV, ETH_GOR, ETH_CLASSIC_KOTTI, POA_SKL, LUKSO_14)
 annotation class NetworkFullName {
     companion object {
-        const val ARTIS_TAU = "ARTIS (Tau1)"
+        const val ATS_TAU = "ARTIS (Tau1)"
         const val ETH_ROP = "Ethereum (Ropsten)"
         const val RSK_TRSK = "RSK (Testnet)"
         const val ETH_RIN = "Ethereum (Rinkeby)"

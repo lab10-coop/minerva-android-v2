@@ -4,6 +4,7 @@ package minerva.android.blockchainprovider.repository.contract
 //import kotlin.Pair
 import kotlin.Pair
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toFlowable
 import io.reactivex.rxkotlin.zipWith
@@ -25,7 +26,6 @@ import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.o
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.refund
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeSentinelAddress
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeTxGas
-import minerva.android.kotlinUtils.Empty
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Function
@@ -36,6 +36,7 @@ import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.RemoteCall
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
+import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
@@ -55,12 +56,11 @@ class BlockchainContractRepositoryImpl(
             .map { it.proxy }
 
     override fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable {
-        Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger().run {
-            return performTransaction(
-                getGnosisSafe(transactionPayload, network),
-                transactionPayload.receiverKey, data, network, transactionPayload, this
-            )
-        }
+        return performTransaction(
+            getGnosisSafe(transactionPayload, network),
+            transactionPayload.receiverKey, data, network, transactionPayload,
+            Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger()
+        )
     }
 
     override fun getGnosisSafeOwners(contractAddress: String, network: String, privateKey: String): Single<List<String>> =
@@ -108,7 +108,7 @@ class BlockchainContractRepositoryImpl(
                 return if (index > 0) address else safeSentinelAddress
             }
         }
-        return String.Empty
+        throw IllegalArgumentException("Remove Address is not a owner address!")
     }
 
     private fun performTransaction(
@@ -130,7 +130,8 @@ class BlockchainContractRepositoryImpl(
                                 DefaultBlockParameterName.LATEST
                             ).flowable()
 
-                    ).flatMapCompletable { hashAndCount ->
+                    ).zipWith(getChaiId(network))
+                    .flatMapCompletable {
                         (web3j[network] ?: error("Not supported Network! ($network)"))
                             .ethSendRawTransaction(
                                 getSignedTransaction(
@@ -138,8 +139,10 @@ class BlockchainContractRepositoryImpl(
                                     receiver,
                                     transactionPayload,
                                     amount,
-                                    hashAndCount,
-                                    signedData
+                                    it.first,
+                                    it.second.netVersion.toLong(),
+                                    signedData,
+                                    network
                                 )
                             )
                             .flowable()
@@ -150,6 +153,10 @@ class BlockchainContractRepositoryImpl(
                     }
             }
 
+    private fun getChaiId(network: String): Flowable<NetVersion> =
+        (web3j[network] ?: error("Not supported Network!"))
+            .netVersion()
+            .flowable()
 
     private fun getSignedTransaction(
         gnosisSafe: GnosisSafe,
@@ -157,7 +164,9 @@ class BlockchainContractRepositoryImpl(
         transactionPayload: TransactionPayload,
         amount: BigInteger,
         hashAndCount: Pair<ByteArray, EthGetTransactionCount>,
-        data: ByteArray
+        chaiId: Long,
+        data: ByteArray,
+        network: String
     ): String =
         Numeric.toHexString(
             TransactionEncoder.signMessage(
@@ -168,8 +177,9 @@ class BlockchainContractRepositoryImpl(
                     hashAndCount.second.transactionCount,
                     amount,
                     getSignatureData(hashAndCount.first, transactionPayload),
-                    data
-                ), Credentials.create(transactionPayload.privateKey)
+                    data,
+                    network
+                ), chaiId, Credentials.create(transactionPayload.privateKey)
             )
         )
 
@@ -180,20 +190,26 @@ class BlockchainContractRepositoryImpl(
         count: BigInteger,
         amount: BigInteger,
         sig: Sign.SignatureData,
-        data: ByteArray
+        data: ByteArray,
+        network: String
     ): RawTransaction =
         RawTransaction.createTransaction(
             count,
-            gasPrice[ARTIS],
+            gasPrice[network],
             safeTxGas + baseGas,
             transactionPayload.contractAddress,
             getTxFromTransaction(gnosisSafe, receiver, amount, sig, data)
         )
 
-    private fun getTxFromTransaction(gnosisSafe: GnosisSafe, receiver: String, amount: BigInteger, sig: Sign.SignatureData, data: ByteArray):
-            String =
-        gnosisSafe.execTransaction(receiver, amount, data, operation, safeTxGas, baseGas, noGasPrice, gasToken, refund, getSignedByteArray(sig))
-            .encodeFunctionCall()
+    private fun getTxFromTransaction(
+        gnosisSafe: GnosisSafe, receiver:
+        String, amount: BigInteger, sig:
+        Sign.SignatureData, data: ByteArray
+    ): String =
+        gnosisSafe.execTransaction(
+            receiver, amount, data, operation,
+            safeTxGas, baseGas, noGasPrice, gasToken, refund, getSignedByteArray(sig)
+        ).encodeFunctionCall()
 
     private fun getSafeTxData(transactionPayload: TransactionPayload): String? {
         Function(
@@ -241,6 +257,5 @@ class BlockchainContractRepositoryImpl(
 
     companion object {
         private const val HEX_PREFIX = "0x"
-        private const val ARTIS = "ATS"
     }
 }

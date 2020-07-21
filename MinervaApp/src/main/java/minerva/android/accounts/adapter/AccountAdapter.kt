@@ -28,6 +28,7 @@ import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.wrapped.startAccountAddressWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
+import timber.log.Timber
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),

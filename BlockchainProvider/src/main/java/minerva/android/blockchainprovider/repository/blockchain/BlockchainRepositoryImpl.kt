@@ -1,8 +1,10 @@
 package minerva.android.blockchainprovider.repository.blockchain
 
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.rxkotlin.zipWith
 import minerva.android.blockchainprovider.contract.ERC20
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -15,6 +17,8 @@ import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.response.EthSendTransaction
+import org.web3j.protocol.core.methods.response.NetVersion
+import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.Transfer
 import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
@@ -54,13 +58,17 @@ class BlockchainRepositoryImpl(
         privateKey: String,
         address: String
     ): Observable<Pair<String, BigDecimal>> =
-        ERC20.load(
-            contractAddress, web3j[network], Credentials.create(privateKey),
-            ContractGasProvider(gasPrice[network] ?: error("Not supported Network"), Operation.TRANSFER_ERC20.gasLimit)
-        )
-            .balanceOf(address).flowable()
-            .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
-            .toObservable()
+        getChainId(network)
+            .flatMap {
+                ERC20.load(
+                    contractAddress, web3j[network],
+                    RawTransactionManager(web3j[network], Credentials.create(privateKey), it.netVersion.toLong()),
+                    ContractGasProvider(gasPrice[network] ?: error("Not supported Network"), Operation.TRANSFER_ERC20.gasLimit)
+                )
+                    .balanceOf(address).flowable()
+                    .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
+
+            }.toObservable()
 
     override fun reverseResolveENS(ensAddress: String): Single<String> {
         return Single.just(ensAddress).map { ensResolver.reverseResolve(it) }
@@ -70,27 +78,45 @@ class BlockchainRepositoryImpl(
         if (ensName.contains(DOT)) Single.just(ensName).map { ensResolver.resolve(it) }
         else Single.just(ensName)
 
-    override fun transferERC20Token(network: String, payload: TransactionPayload): Completable {
-        Credentials.create(payload.privateKey).run {
-            return ERC20.load(payload.contractAddress, web3j[network], this, ContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit))
-                .transfer(payload.receiverKey, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger()).flowable().toObservable()
-                .ignoreElements()
-        }
-    }
+    override fun transferERC20Token(network: String, payload: TransactionPayload): Completable =
+        (web3j[network] ?: error("Not supported Network!"))
+            .netVersion()
+            .flowable()
+            .flatMapCompletable {
+                Credentials.create(payload.privateKey).run {
+                    ERC20.load(
+                        payload.contractAddress,
+                        web3j[network],
+                        RawTransactionManager(web3j[network], this, it.netVersion.toLong()),
+                        ContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit)
+                    )
+                        .transfer(payload.receiverKey, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
+                        .flowable()
+                        .ignoreElements()
+                }
+            }
 
     override fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Single<String> =
         (web3j[network] ?: error("Not supported Network!"))
             .ethGetTransactionCount(transactionPayload.address, DefaultBlockParameterName.LATEST)
             .flowable()
-            .firstOrError()
+            .zipWith(getChainId(network))
             .flatMap {
                 (web3j[network] ?: error("Not supported Network!"))
-                    .ethSendRawTransaction(getSignedTransaction(it.transactionCount, transactionPayload))
+                    .ethSendRawTransaction(getSignedTransaction(it.first.transactionCount, transactionPayload, it.second.netVersion.toLong()))
                     .flowable()
-                    .firstOrError()
-                    .flatMap { response -> handleTransactionResponse(response) }
+                    .flatMapSingle { response -> handleTransactionResponse(response) }
+            }.firstOrError()
 
-            }
+    private fun getChainId(network: String): Flowable<NetVersion> =
+        (web3j[network] ?: error("Not supported Network!"))
+            .netVersion()
+            .flowable()
+
+    private fun handleTransactionResponse(response: EthSendTransaction): Single<String> {
+        return if (response.error == null) Single.just(response.transactionHash)
+        else Single.error(Throwable(response.error.message))
+    }
 
     override fun getTransactionCosts(network: String, assetIndex: Int, operation: Operation): TransactionCostPayload =
         prepareTransactionCosts((gasPrice[network] ?: error("Not supported Network!")), operation.gasLimit)
@@ -100,20 +126,13 @@ class BlockchainRepositoryImpl(
 
     override fun toGwei(balance: BigDecimal): BigInteger = toWei(balance, Convert.Unit.GWEI).toBigInteger()
 
-
     private fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal) =
         fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)
 
-    private fun handleTransactionResponse(response: EthSendTransaction): Single<String> {
-        return if (response.error == null) Single.just(response.transactionHash)
-        else Single.error(Throwable(response.error.message))
-    }
-
-
-    private fun getSignedTransaction(count: BigInteger, transactionPayload: TransactionPayload): String? =
+    private fun getSignedTransaction(count: BigInteger, transactionPayload: TransactionPayload, chainId: Long): String? =
         Numeric.toHexString(
             TransactionEncoder.signMessage(
-                createTransaction(count, transactionPayload),
+                createTransaction(count, transactionPayload), chainId,
                 Credentials.create(transactionPayload.privateKey)
             )
         )
