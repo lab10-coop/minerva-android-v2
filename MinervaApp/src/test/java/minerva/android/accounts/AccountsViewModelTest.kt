@@ -8,9 +8,10 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.accounts.AccountManager
-import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -29,8 +30,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
 
-    private val assetsBalanceObserver: Observer<Map<String, List<Asset>>> = mock()
-    private val assetsBalanceCaptor: KArgumentCaptor<Map<String, List<Asset>>> = argumentCaptor()
+    private val assetsBalanceObserver: Observer<Map<String, List<AccountAsset>>> = mock()
+    private val assetsBalanceCaptor: KArgumentCaptor<Map<String, List<AccountAsset>>> = argumentCaptor()
 
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -65,12 +66,12 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get assets balance success test`() {
-        whenever(transactionRepository.refreshAssetBalance()).thenReturn(Single.just(mapOf(Pair("test", listOf(Asset("name"))))))
-        viewModel.assetBalanceLiveData.observeForever(assetsBalanceObserver)
-        viewModel.getAssetBalance()
+        whenever(transactionRepository.refreshAssetBalance()).thenReturn(Single.just(mapOf(Pair("test", listOf(AccountAsset(Asset("name")))))))
+        viewModel.accountAssetBalanceLiveData.observeForever(assetsBalanceObserver)
+        viewModel.refreshAssetBalance()
         assetsBalanceCaptor.run {
             verify(assetsBalanceObserver).onChanged(capture())
-            (firstValue["test"] ?: error(""))[0].name shouldBe "name"
+            (firstValue["test"] ?: error(""))[0].asset.name shouldBe "name"
         }
     }
 
@@ -78,7 +79,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get assets balance error test`() {
         val error = Throwable()
         whenever(transactionRepository.refreshAssetBalance()).thenReturn(Single.error(error))
-        viewModel.getAssetBalance()
+        viewModel.refreshAssetBalance()
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }
 

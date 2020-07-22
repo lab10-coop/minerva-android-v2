@@ -85,5 +85,4 @@
                 android:value="@string/channel_id" />
         </service>
     </application>
-
 </manifest>

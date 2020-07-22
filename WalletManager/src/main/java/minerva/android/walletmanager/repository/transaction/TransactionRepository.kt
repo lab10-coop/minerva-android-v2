@@ -8,7 +8,7 @@ import java.math.BigInteger
 
 interface TransactionRepository {
     fun refreshBalances(): Single<HashMap<String, Balance>>
-    fun refreshAssetBalance(): Single<Map<String, List<Asset>>>
+    fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>>
     fun getTransferCosts(network: String, assetIndex: Int): TransactionCost
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(network: String, transaction: Transaction): Single<String>

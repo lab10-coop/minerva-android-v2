@@ -9,8 +9,8 @@ import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Network
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.widget.repository.getServiceIcon
 
@@ -82,7 +82,7 @@ class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
             }
 
             when {
-                element.network != String.Empty -> icon.setImageResource(getNetworkIcon(Network.fromString(element.network)))
+                element.network != String.Empty -> icon.setImageResource(getNetworkIcon(NetworkManager.getNetwork(element.network)))
                 element.type != String.Empty -> icon.setImageResource(getServiceIcon(element.type))
                 else -> letterLogo.createLogo(element.name)
             }

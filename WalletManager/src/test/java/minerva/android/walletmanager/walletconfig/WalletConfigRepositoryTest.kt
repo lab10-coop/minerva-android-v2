@@ -11,8 +11,10 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepositoryImpl
 import minerva.android.walletmanager.model.MasterSeed
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import org.amshove.kluent.mock
 import org.junit.After
@@ -77,6 +79,7 @@ class WalletConfigRepositoryTest {
     @Test
     fun `create default walletConfig should return success`() {
         whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.complete())
+        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
         val test = repository.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertNoErrors()
     }
@@ -85,6 +88,7 @@ class WalletConfigRepositoryTest {
     fun `create default walletConfig should return error`() {
         val throwable = Throwable()
         val repository = WalletConfigRepositoryImpl(cryptographyRepository, local, api)
+        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
         whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.error(throwable))
         val test = repository.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertError(throwable)

@@ -18,8 +18,6 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.accounts.adapter.AccountAdapter
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
-import minerva.android.main.MainActivity
-import minerva.android.main.MainViewModel
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -46,7 +44,7 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
         viewModel.apply {
             onResume()
             refreshBalances()
-            getAssetBalance()
+            refreshAssetBalance()
         }
     }
 
@@ -77,7 +75,12 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
                 R.color.colorSetSeven,
                 R.color.colorSetNine
             )
-            setOnRefreshListener { viewModel.refreshBalances() }
+            setOnRefreshListener {
+                with(viewModel) {
+                    refreshBalances()
+                    refreshAssetBalance()
+                }
+            }
         }
 
         recyclerView.apply {
@@ -96,7 +99,7 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
                 accountAdapter.updateBalances(it)
                 swipeRefresh.isRefreshing = false
             })
-            assetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
+            accountAssetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
             errorLiveData.observe(viewLifecycleOwner, Observer {
                 showErrorFlashbar(getString(R.string.error_header), it.peekContent().message)
             })

@@ -13,7 +13,7 @@ data class Account(
     override val network: String = String.Empty,
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = Int.InvalidValue.toBigDecimal(),
-    var assets: List<Asset> = listOf(),
+    var accountAssets: List<AccountAsset> = listOf(),
     var fiatBalance: BigDecimal = BigDecimal.ZERO,
     var owners: List<String>? = null,
     var contractAddress: String = String.Empty,

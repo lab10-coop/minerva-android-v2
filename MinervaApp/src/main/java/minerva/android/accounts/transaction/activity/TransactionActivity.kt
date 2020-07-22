@@ -18,7 +18,7 @@ import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.accounts.transaction.TransactionsViewModel.Companion.META_ADDRESS_SEPARATOR
 import minerva.android.accounts.transaction.fragment.TransactionsFragment
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
-import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.repository.getNetworkIcon
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -58,7 +58,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     private fun ActionBar.setLogo() {
         if (viewModel.account.isSafeAccount) setLogo(getDrawable(R.drawable.ic_artis_safe_account))
-        else setLogo(getDrawable(getNetworkIcon(Network.fromString(viewModel.account.network))))
+        else setLogo(getDrawable(getNetworkIcon(NetworkManager.getNetwork(viewModel.account.network))))
     }
 
     override fun onTransactionAccepted(message: String) {

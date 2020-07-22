@@ -37,12 +37,12 @@ open class WalletConfigTestValues {
     )
 
     val values = listOf(
-        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", Network.ATS_TAU.short),
-        Account(2, "publicKey", "privateKey", "address", "ValuePayload2", Network.ETH_RIN.short)
+        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", "ATS"),
+        Account(2, "publicKey", "privateKey", "address", "ValuePayload2", "RIN")
     )
 
     val valuesResponse = listOf(
-        AccountPayload(1, "ValuePayload1", Network.ATS_TAU.short, false),
-        AccountPayload(2, "ValuePayload2", Network.ETH_RIN.short, false)
+        AccountPayload(1, "ValuePayload1", "ATS", false),
+        AccountPayload(2, "ValuePayload2", "RIN", false)
     )
 }

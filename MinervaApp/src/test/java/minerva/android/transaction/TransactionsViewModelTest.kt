@@ -5,12 +5,14 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
+import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.accounts.transaction.TransactionsViewModel
-import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.AccountAsset
+import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -37,7 +39,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = NetworkShortName.ATS_TAU))
+        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = "aaa"))
+        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
@@ -52,7 +55,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = NetworkShortName.ATS_TAU))
+        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = "aaa"))
+        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
         viewModel.saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
         viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
@@ -99,7 +103,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
-        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = NetworkShortName.ATS_TAU))
+        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = "aaa"))
+        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
@@ -138,7 +143,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 privateKey = "12",
                 address = "address",
                 contractAddress = "aa",
-                assets = listOf(Asset("name"))
+                accountAssets = listOf(AccountAsset(Asset("name")))
             )
             assetIndex = 0
         }
@@ -157,7 +162,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.apply {
             account = Account(
                 index = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                assets = listOf(Asset("name"))
+                accountAssets = listOf(AccountAsset(Asset("name")))
             )
             assetIndex = 0
         }
@@ -174,7 +179,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account asset transaction test success`() {
         viewModel.account = Account(
             index = 0,
-            assets = listOf(Asset("name")),
+            accountAssets = listOf(AccountAsset(Asset("name"))),
             publicKey = "12",
             privateKey = "12",
             address = "address",
@@ -197,7 +202,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         viewModel.account = Account(
             index = 0,
-            assets = listOf(Asset("name")),
+            accountAssets = listOf(AccountAsset(Asset("name"))),
             publicKey = "12",
             privateKey = "12",
             address = "address",
@@ -235,7 +240,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun`is correct network test`(){
+    fun `is correct network test`() {
         viewModel.account = Account(0, name = "prefixName")
         val result = viewModel.isCorrectNetwork("prefix")
         assertEquals(result, true)

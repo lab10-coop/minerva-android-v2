@@ -26,6 +26,7 @@ import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.o
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.refund
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeSentinelAddress
 import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeTxGas
+import minerva.android.kotlinUtils.map.value
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Function
@@ -41,6 +42,7 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.*
+
 
 class BlockchainContractRepositoryImpl(
     private val web3j: Map<String, Web3j>,
@@ -124,39 +126,33 @@ class BlockchainContractRepositoryImpl(
                 getTransactionHash(receiver, gnosisSafe, amount, nonce, signedData)
                     .flowable()
                     .zipWith(
-                        (web3j[network] ?: error("Not supported Network! ($network)"))
-                            .ethGetTransactionCount(
-                                Credentials.create(transactionPayload.privateKey).address,
-                                DefaultBlockParameterName.LATEST
-                            ).flowable()
+                        web3j.value(network).ethGetTransactionCount(
+                            Credentials.create(transactionPayload.privateKey).address,
+                            DefaultBlockParameterName.LATEST
+                        ).flowable()
 
-                    ).zipWith(getChaiId(network))
+                    ).zipWith(getChainId(network))
                     .flatMapCompletable {
-                        (web3j[network] ?: error("Not supported Network! ($network)"))
-                            .ethSendRawTransaction(
-                                getSignedTransaction(
-                                    gnosisSafe,
-                                    receiver,
-                                    transactionPayload,
-                                    amount,
-                                    it.first,
-                                    it.second.netVersion.toLong(),
-                                    signedData,
-                                    network
-                                )
+                        web3j.value(network).ethSendRawTransaction(
+                            getSignedTransaction(
+                                gnosisSafe,
+                                receiver,
+                                transactionPayload,
+                                amount,
+                                it.first,
+                                it.second.netVersion.toLong(),
+                                signedData
                             )
+                        )
                             .flowable()
                             .flatMapCompletable { transaction ->
                                 if (transaction.error == null) Completable.complete()
-                                else Completable.error(Throwable())
+                                else Completable.error(Throwable(transaction.error.message))
                             }
                     }
             }
 
-    private fun getChaiId(network: String): Flowable<NetVersion> =
-        (web3j[network] ?: error("Not supported Network!"))
-            .netVersion()
-            .flowable()
+    private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
 
     private fun getSignedTransaction(
         gnosisSafe: GnosisSafe,
@@ -164,9 +160,8 @@ class BlockchainContractRepositoryImpl(
         transactionPayload: TransactionPayload,
         amount: BigInteger,
         hashAndCount: Pair<ByteArray, EthGetTransactionCount>,
-        chaiId: Long,
-        data: ByteArray,
-        network: String
+        chainId: Long,
+        data: ByteArray
     ): String =
         Numeric.toHexString(
             TransactionEncoder.signMessage(
@@ -177,9 +172,8 @@ class BlockchainContractRepositoryImpl(
                     hashAndCount.second.transactionCount,
                     amount,
                     getSignatureData(hashAndCount.first, transactionPayload),
-                    data,
-                    network
-                ), chaiId, Credentials.create(transactionPayload.privateKey)
+                    data
+                ), chainId, Credentials.create(transactionPayload.privateKey)
             )
         )
 
@@ -190,12 +184,11 @@ class BlockchainContractRepositoryImpl(
         count: BigInteger,
         amount: BigInteger,
         sig: Sign.SignatureData,
-        data: ByteArray,
-        network: String
+        data: ByteArray
     ): RawTransaction =
         RawTransaction.createTransaction(
             count,
-            gasPrice[network],
+            transactionPayload.gasPriceWei,
             safeTxGas + baseGas,
             transactionPayload.contractAddress,
             getTxFromTransaction(gnosisSafe, receiver, amount, sig, data)
@@ -224,14 +217,14 @@ class BlockchainContractRepositoryImpl(
 
     private fun getGnosisSafe(gnosisAddress: String, network: String, privateKey: String) =
         GnosisSafe.load(
-            gnosisAddress, web3j[network], Credentials.create(privateKey),
-            ContractGasProvider((gasPrice[network] ?: error("Not supported Network")), Operation.SAFE_ACCOUNT_TXS.gasLimit)
+            gnosisAddress, web3j.value(network), Credentials.create(privateKey),
+            ContractGasProvider(gasPrice.value(network), Operation.SAFE_ACCOUNT_TXS.gasLimit)
         )
 
     private fun getGnosisSafe(transactionPayload: TransactionPayload, network: String): GnosisSafe =
         GnosisSafe.load(
             transactionPayload.contractAddress,
-            web3j[network],
+            web3j.value(network),
             Credentials.create(transactionPayload.privateKey),
             ContractGasProvider(Convert.toWei(transactionPayload.gasPrice, Convert.Unit.GWEI).toBigInteger(), transactionPayload.gasLimit)
         )
@@ -251,8 +244,8 @@ class BlockchainContractRepositoryImpl(
 
     private fun getProxyFactory(network: String, privateKey: String): ProxyFactory =
         ProxyFactory.load(
-            PROXY_ADDRESS, web3j[network], Credentials.create(privateKey),
-            ContractGasProvider((gasPrice[network] ?: error("Not supported Network")), Operation.SAFE_ACCOUNT_TXS.gasLimit)
+            PROXY_ADDRESS, web3j.value(network), Credentials.create(privateKey),
+            ContractGasProvider(gasPrice.value(network), Operation.SAFE_ACCOUNT_TXS.gasLimit)
         )
 
     companion object {

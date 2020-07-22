@@ -14,7 +14,7 @@ import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletConfig
 import java.math.BigDecimal
@@ -77,7 +77,7 @@ class AccountManagerImpl(
             it.accounts.forEachIndexed { position, value ->
                 if (value.index == index) {
                     when {
-                        areFundsOnValue(value.cryptoBalance, value.assets) || hasMoreOwners(value) ->
+                        areFundsOnValue(value.cryptoBalance, value.accountAssets) || hasMoreOwners(value) ->
                             return Completable.error(BalanceIsNotEmptyAndHasMoreOwnersThrowable())
                         isNotSafeAccountMasterOwner(it.accounts, value) ->
                             return Completable.error(IsNotSafeAccountMasterOwnerThrowable())
@@ -106,8 +106,8 @@ class AccountManagerImpl(
         return false
     }
 
-    private fun areFundsOnValue(balance: BigDecimal, assets: List<Asset>): Boolean {
-        assets.forEach {
+    private fun areFundsOnValue(balance: BigDecimal, accountAssets: List<AccountAsset>): Boolean {
+        accountAssets.forEach {
             if (blockchainRepository.toGwei(it.balance) >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
         return blockchainRepository.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE

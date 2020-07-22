@@ -10,12 +10,12 @@ import minerva.android.blockchainprovider.repository.blockchain.BlockchainReposi
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.Markets
 import minerva.android.walletmanager.model.mappers.mapTransactionCostPayloadToTransactionCost
 import minerva.android.walletmanager.model.mappers.mapTransactionToTransactionPayload
-import minerva.android.walletmanager.smartContract.assets.AssetManager
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import java.math.BigDecimal
@@ -41,14 +41,13 @@ class TransactionRepositoryImpl(
         return Single.error(NotInitializedWalletConfigThrowable())
     }
 
-    override fun transferNativeCoin(network: String, transaction: Transaction): Single<String> {
-        return blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
+    override fun transferNativeCoin(network: String, transaction: Transaction): Single<String> =
+        blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
             .doOnSuccess {
                 blockchainRepository.reverseResolveENS(transaction.receiverKey)
                     .onErrorReturn { String.Empty }
                     .map { saveRecipient(it, transaction.receiverKey) }
             }
-    }
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
         blockchainRepository.transferERC20Token(network, mapTransactionToTransactionPayload(transaction))
@@ -70,17 +69,14 @@ class TransactionRepositoryImpl(
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.calculateTransactionCost(gasPrice, gasLimit)
 
-    override fun refreshAssetBalance(): Single<Map<String, List<Asset>>> {
-        walletConfigManager.getWalletConfig()?.accounts?.let { values ->
-            return Observable.range(START, values.size)
-                .filter { position -> !values[position].isDeleted }
-                //TODO filter should be removed when all test net will be implemented
-                .filter { position -> Network.fromString(values[position].network).run { this == Network.ETH_RIN || this == Network.ATS_TAU } }
-                .flatMapSingle { position ->
-                    refreshAssetsBalance(values[position], AssetManager.getAssetAddresses(Network.fromString(values[position].network)))
-                }
+    override fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>> {
+        walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
+            return Observable.range(START, accounts.size)
+                .filter { position -> !accounts[position].isDeleted }
+                .filter { position -> NetworkManager.isAvailable(accounts[position].network) }
+                .flatMapSingle { position -> refreshAssetsBalance(accounts[position]) }
                 .toList()
-                .map { list -> list.map { it.first to AssetManager.mapToAssets(it.second) }.toMap() }
+                .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
         }
         return Single.error(NotInitializedWalletConfigThrowable())
     }
@@ -92,11 +88,17 @@ class TransactionRepositoryImpl(
      *
      */
     private fun refreshAssetsBalance(
-        account: Account,
-        addresses: Pair<String, List<String>>
+        account: Account
     ): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
-        Observable.range(START, addresses.second.size)
-            .flatMap { blockchainRepository.refreshAssetBalance(account.privateKey, addresses.first, addresses.second[it], account.address) }
+        Observable.range(START, NetworkManager.getAssetsAddresses(account.network).size)
+            .flatMap {
+                blockchainRepository.refreshAssetBalance(
+                    account.privateKey,
+                    account.network,
+                    NetworkManager.getAssetsAddresses(account.network)[it],
+                    account.address
+                )
+            }
             .filter { it.second > NO_FUNDS }
             .toList()
             .map { Pair(account.privateKey, it) }
