@@ -13,6 +13,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.NETWORK
@@ -92,7 +93,8 @@ class TransactionsViewModel(
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferERC20Token(network, it, account.assets[assetIndex].address).toSingleDefault(it)
+                            smartContractRepository.transferERC20Token(network, it, account.accountAssets[assetIndex].asset.address)
+                                .toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
@@ -129,7 +131,9 @@ class TransactionsViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
+                    onComplete = {
+                        _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
+                    },
                     onError = {
                         Timber.e("Send safe account transaction error: ${it.message}")
                         _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
@@ -185,7 +189,7 @@ class TransactionsViewModel(
 
     private fun sendAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
-            resolveENS(receiverKey, amount, gasPrice, gasLimit, account.assets[assetIndex].address)
+            resolveENS(receiverKey, amount, gasPrice, gasLimit, account.accountAssets[assetIndex].asset.address)
                 .flatMapCompletable {
                     transactionRepository.transferERC20Token(account.network, it)
                 }
@@ -195,7 +199,9 @@ class TransactionsViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = {
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }
@@ -207,10 +213,10 @@ class TransactionsViewModel(
         }
     }
 
-    fun getBalance(): BigDecimal = if (assetIndex == Int.InvalidIndex) account.cryptoBalance else account.assets[assetIndex].balance
+    fun getBalance(): BigDecimal = if (assetIndex == Int.InvalidIndex) account.cryptoBalance else account.accountAssets[assetIndex].balance
 
     fun getAllAvailableFunds(): String {
-        if (assetIndex != Int.InvalidIndex) return account.assets[assetIndex].balance.toPlainString()
+        if (assetIndex != Int.InvalidIndex) return account.accountAssets[assetIndex].balance.toPlainString()
         if (account.isSafeAccount) return account.cryptoBalance.toPlainString()
 
         account.cryptoBalance.minus(transactionCost).apply {
@@ -222,7 +228,8 @@ class TransactionsViewModel(
         }
     }
 
-    fun prepareCurrency() = if (assetIndex != Int.InvalidIndex) account.assets[assetIndex].nameShort else Network.fromString(account.network).token
+    fun prepareCurrency() =
+        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.nameShort else NetworkManager.getNetwork(account.network).token
 
     private fun getAccountsWalletAction(transaction: Transaction, network: String, status: Int): WalletAction =
         WalletAction(
@@ -274,7 +281,7 @@ class TransactionsViewModel(
         prefixAddress.removePrefix(prefix).replace(META_ADDRESS_SEPARATOR, String.Empty)
 
     fun prepareTitle() =
-        if (assetIndex != Int.InvalidIndex) account.assets[assetIndex].name else Network.fromString(account.network).token
+        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.name else NetworkManager.getNetwork(account.network).token
 
     fun isCorrectNetwork(prefixAddress: String) = account.name.contains(prefixAddress, true)
 

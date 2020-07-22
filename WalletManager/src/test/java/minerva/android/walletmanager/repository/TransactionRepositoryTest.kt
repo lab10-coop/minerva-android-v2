@@ -14,6 +14,7 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
@@ -115,6 +116,7 @@ class TransactionRepositoryTest {
         whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any())).thenReturn(
             Observable.just(Pair("privateKey1", BigDecimal.TEN))
         )
+        NetworkManager.initialize(listOf(Network(short = "tats1", url = "some"), Network(short = "rin", url = "some1")))
         repository.apply {
             refreshAssetBalance()
                 .test()

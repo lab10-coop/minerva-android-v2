@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -19,16 +18,14 @@ import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.utils.BalanceUtils.getCryptoBalance
 import minerva.android.utils.BalanceUtils.getFiatBalance
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Balance
-import minerva.android.walletmanager.model.Network
 import minerva.android.widget.AssetView
-import minerva.android.widget.repository.getNetworkColor
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.wrapped.startAccountAddressWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
-import timber.log.Timber
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
@@ -58,7 +55,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun onAccountRemoved(position: Int) = listener.onAccountRemove(rawAccounts[position])
 
-    override fun refreshAssets(rawPosition: Int): List<Asset> = rawAccounts[rawPosition].assets
+    override fun refreshAssets(rawPosition: Int): List<AccountAsset> = rawAccounts[rawPosition].accountAssets
 
     override fun onCreateSafeAccountClicked(account: Account) = listener.onCreateSafeAccount(account)
 
@@ -80,8 +77,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         }
     }
 
-    fun updateAssetBalances(assetBalances: Map<String, List<Asset>>) {
-        activeAccounts.forEach { account -> assetBalances[account.privateKey]?.let { account.assets = it } }
+    fun updateAssetBalances(accountAssetBalances: Map<String, List<AccountAsset>>) {
+        activeAccounts.forEach { account -> accountAssetBalances[account.privateKey]?.let { account.accountAssets = it } }
     }
 
     fun setPending(index: Int, pending: Boolean) {
@@ -135,24 +132,25 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.bindData(account: Account) {
         with(account) {
-            getNetworkColor(Network.fromString(network)).let { networkColor ->
-                card.setCardBackgroundColor(ContextCompat.getColor(context, getNetworkColor(Network.fromString(network), pending)))
+            NetworkManager.getColor(network).let { networkColor ->
+                card.setCardBackgroundColor(NetworkManager.getColor(network, pending))
                 progress.apply {
                     visibleOrGone(pending)
-                    DrawableCompat.setTint(indeterminateDrawable, ContextCompat.getColor(context, networkColor))
+                    DrawableCompat.setTint(indeterminateDrawable, networkColor)
                 }
                 pendingMask.visibleOrGone(pending)
-                icon.setImageResource(getNetworkIcon(Network.fromString(network)))
+                icon.setImageResource(getNetworkIcon(NetworkManager.getNetwork(network)))
                 accountName.text = name
                 cryptoTokenName.run {
-                    text = Network.fromString(network).token
-                    setTextColor(ContextCompat.getColor(context, networkColor))
+                    text = NetworkManager.getNetwork(network).token
+                    setTextColor(networkColor)
                 }
                 with(amountView) {
                     setCrypto(getCryptoBalance(cryptoBalance))
                     setFiat(getFiatBalance(fiatBalance))
                 }
-                sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), Network.fromString(network).token)
+                sendButton.text =
+                    String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), NetworkManager.getNetwork(network).token)
             }
         }
     }
@@ -199,7 +197,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.prepareAssets(account: Account) {
         container.removeAllViews()
-        account.assets.forEachIndexed { index, asset ->
+        account.accountAssets.forEachIndexed { index, asset ->
             container.addView(AssetView(this@AccountViewHolder, account, index, R.drawable.ic_asset_sdai).apply {
                 setAmounts(asset.balance)
             })
@@ -241,7 +239,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
             when (it.itemId) {
                 R.id.showAddress -> startAccountAddressWrappedActivity(
                     view.context, account.name, position,
-                    getNetworkIcon(Network.fromString(account.network))
+                    getNetworkIcon(NetworkManager.getNetwork(account.network))
                 )
                 R.id.safeAccountSettings -> startSafeAccountWrappedActivity(
                     view.context, account.name, position,
@@ -254,9 +252,11 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun isCreatingSafeAccountAvailable(account: Account) = Network.hasSafeAccountOption(account.network) && !account.isSafeAccount
+    private fun isCreatingSafeAccountAvailable(account: Account) =
+        NetworkManager.isSafeAccountAvailable(account.network) && !account.isSafeAccount
 
-    private fun isSafeAccount(account: Account) = Network.hasSafeAccountOption(account.network) && account.isSafeAccount
+    private fun isSafeAccount(account: Account) =
+        NetworkManager.isSafeAccountAvailable(account.network) && account.isSafeAccount
 
     companion object {
         private const val SEND_BUTTON_FORMAT = "%s %s"
@@ -269,7 +269,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         fun onSendAccountClicked(account: Account)
         fun onSendAssetClicked(accountIndex: Int, assetIndex: Int)
         fun onAccountRemoved(position: Int)
-        fun refreshAssets(rawPosition: Int): List<Asset>
+        fun refreshAssets(rawPosition: Int): List<AccountAsset>
         fun onCreateSafeAccountClicked(account: Account)
     }
 }

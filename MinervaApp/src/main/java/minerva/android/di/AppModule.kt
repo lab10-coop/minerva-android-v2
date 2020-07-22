@@ -1,6 +1,11 @@
 package minerva.android.di
 
 import minerva.android.BuildConfig
+import minerva.android.accounts.AccountsViewModel
+import minerva.android.accounts.address.AccountAddressViewModel
+import minerva.android.accounts.akm.SafeAccountSettingsViewModel
+import minerva.android.accounts.create.NewAccountViewModel
+import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.edit.EditOrderViewModel
 import minerva.android.identities.IdentitiesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
@@ -14,11 +19,6 @@ import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
-import minerva.android.accounts.AccountsViewModel
-import minerva.android.accounts.address.AccountAddressViewModel
-import minerva.android.accounts.akm.SafeAccountSettingsViewModel
-import minerva.android.accounts.create.NewAccountViewModel
-import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletmanager.createWalletManagerModules
 import org.koin.androidx.viewmodel.dsl.viewModel

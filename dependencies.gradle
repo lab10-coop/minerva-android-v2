@@ -53,6 +53,8 @@ ext {
     biometricVersion = '1.0.1'
     cloudMassagingVersion = '20.1.6'
 
+    startupVersion = '1.0.0-alpha01'
+
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
             rxbindingCore: "com.jakewharton.rxbinding3:rxbinding-core:$rxbindingVersion"
@@ -72,11 +74,11 @@ ext {
     ]
 
     androidCoreDependencies = [
-            core         : "androidx.core:core-ktx:$androidxCoreVersion",
-            fragment     : "androidx.fragment:fragment-ktx:$androidxFragmentVersion",
-            constraint   : "androidx.constraintlayout:constraintlayout:$constraintVersion",
-            material     : "com.google.android.material:material:$materialDesignVersion",
-            swipeRefresh : "androidx.swiperefreshlayout:swiperefreshlayout:$swipeRefreshVersion"
+            core        : "androidx.core:core-ktx:$androidxCoreVersion",
+            fragment    : "androidx.fragment:fragment-ktx:$androidxFragmentVersion",
+            constraint  : "androidx.constraintlayout:constraintlayout:$constraintVersion",
+            material    : "com.google.android.material:material:$materialDesignVersion",
+            swipeRefresh: "androidx.swiperefreshlayout:swiperefreshlayout:$swipeRefreshVersion"
     ]
 
     rxDependencies = [
@@ -139,5 +141,9 @@ ext {
 
     firebaseDepenedencies = [
             cloudMassaging: "com.google.firebase:firebase-messaging:$cloudMassagingVersion"
+    ]
+
+    startupDependencies = [
+            startup: "androidx.startup:startup-runtime:$startupVersion"
     ]
 }

@@ -9,14 +9,15 @@ import minerva.android.servicesApiProvider.createServicesApiProviderModule
 import minerva.android.walletmanager.keystore.KeyStoreManager
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.keystore.KeystoreRepositoryImpl
+import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.accounts.AccountManagerImpl
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.identity.IdentityManagerImpl
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.order.OrderManagerImpl
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.manager.services.ServiceManagerImpl
-import minerva.android.walletmanager.manager.accounts.AccountManager
-import minerva.android.walletmanager.manager.accounts.AccountManagerImpl
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
 import minerva.android.walletmanager.model.Network
@@ -44,7 +45,7 @@ fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, binanceUrl: St
     .plus(createCryptographyModules())
     .plus(createWalletConfigProviderModule(isDebug, baseUrl))
     .plus(createServicesApiProviderModule(isDebug, baseUrl))
-    .plus(createBlockchainProviderModule(Network.urlMap, BuildConfig.ENS_ADDRESS, Network.gasPriceMap))
+    .plus(createBlockchainProviderModule(NetworkManager.urlMap, BuildConfig.ENS_ADDRESS, NetworkManager.gasPriceMap))
     .plus(createExchangeRateProviderModule(isDebug, binanceUrl))
 
 fun createWalletModules() = module {

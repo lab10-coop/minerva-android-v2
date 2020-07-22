@@ -23,6 +23,6 @@ annotation class NetworkShortName {
         const val ETH_GOR = "gor"
         const val ETH_CLASSIC_KOTTI = "kot"
         const val POA_SKL = "skl"
-        const val LUKSO_14 = "luk14"
+        const val LUKSO_14 = "l14"
     }
 }

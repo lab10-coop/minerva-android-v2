@@ -1,6 +1,5 @@
 package minerva.android.accounts
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
@@ -13,6 +12,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
@@ -47,8 +47,8 @@ class AccountsViewModel(
     private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
-    private val _assetBalanceLiveData = MutableLiveData<Map<String, List<Asset>>>()
-    val assetBalanceLiveData: LiveData<Map<String, List<Asset>>> get() = _assetBalanceLiveData
+    private val _assetBalanceLiveData = MutableLiveData<Map<String, List<AccountAsset>>>()
+    val accountAssetBalanceLiveData: LiveData<Map<String, List<AccountAsset>>> get() = _assetBalanceLiveData
 
     private val _noFundsLiveData = MutableLiveData<Event<Unit>>()
     val noFundsLiveData: LiveData<Event<Unit>> get() = _noFundsLiveData
@@ -73,7 +73,7 @@ class AccountsViewModel(
                 )
         }
 
-    fun getAssetBalance() =
+    fun refreshAssetBalance() =
         launchDisposable {
             transactionRepository.refreshAssetBalance()
                 .subscribeOn(Schedulers.io())
@@ -140,7 +140,7 @@ class AccountsViewModel(
 
     private fun createAccount(account: Account, smartContractAddress: String): Completable {
         return accountManager.createAccount(
-            Network.fromString(account.network),
+            NetworkManager.getNetwork(account.network),
             createSafeAccountName(account),
             account.address,
             smartContractAddress
