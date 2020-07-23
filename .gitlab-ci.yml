@@ -1,0 +1,50 @@
+image: code.lab10.io:4567/graz/10-minerva/minerva-android-v2:builder
+
+variables:
+  ANDROID_BUILD_TOOLS: 28.0.2
+  ANDROID_HOME: /android-sdk-linux
+
+before_script:
+  - cp ./gradle/wrapper/gradle-wrapper.properties.ci ./gradle/wrapper/gradle-wrapper.properties
+  - yes | /android-sdk-linux/tools/bin/sdkmanager "platform-tools" >/dev/null 2>&1 || true
+  - yes | /android-sdk-linux/tools/bin/sdkmanager "build-tools;$ANDROID_BUILD_TOOLS" >/dev/null 2>&1 || true
+  - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
+
+stages:
+  - validation
+  - distribution
+
+validateBranch:
+  stage: validation
+  except:
+    refs:
+      - master
+  script:
+    - ./gradlew test
+
+validateLint:
+  stage: validation
+  except:
+    refs:
+      - master
+  script:
+    - ./gradlew lint
+
+distributeBuild:
+  stage: distribution
+  only:
+    refs:
+      - develop
+      - debug
+#      - master
+  script:
+    - ./gradlew build
+    - . /etc/profile.d/rvm.sh
+    - ./BuildScripts/build_fastlane.sh
+    - fastlane firebaseStaging
+    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
+
+  artifacts:
+    paths:
+      - ./MinervaApp/build/outputs/apk/debug
+      - ./MinervaApp/build/outputs/apk/release

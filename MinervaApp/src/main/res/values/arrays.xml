@@ -1,0 +1,13 @@
+<resources>
+    <string-array name="identities_data_labels">
+        <item>Name</item>
+        <item>Email</item>
+        <item>Phone number</item>
+        <item>Date of Birth</item>
+        <item>Address Line 1</item>
+        <item>Address Line 2</item>
+        <item>City</item>
+        <item>Postcode</item>
+        <item>Country</item>
+    </string-array>
+</resources>

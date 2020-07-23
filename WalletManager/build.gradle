@@ -1,9 +1,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply from: "$rootProject.projectDir/dependencies.gradle"
+
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.3"
 
 
     defaultConfig {
@@ -23,14 +25,34 @@ android {
         }
     }
 
+    productFlavors {
+        flavorDimensions 'enviroment'
+        staging {
+            versionCode Integer.valueOf(System.env.VERSION_CODE_STAGING ?: 1)
+            buildConfigField "String", "ENS_ADDRESS", '"https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
+        }
+
+        production {
+            versionCode Integer.valueOf(System.env.VERSION_CODE_PROD ?: 1)
+            buildConfigField "String", "ENS_ADDRESS", '"https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
+        }
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.1.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation project(':CryptographyProvider')
+    implementation project(':KotlinUtils')
+    implementation project(':WalletConfigProvider')
+    implementation project(':ServicesApiProvider')
+    implementation project(':BlockchainProvider')
+    implementation project(':ExchangeMarketsProvider')
+
+    implementation androidCoreDependencies.values()
+    implementation koinDependencies.values()
+    implementation coreDependencies.values()
+    implementation rxDependencies.values()
+    implementation startupDependencies.values()
+    
+    testImplementation testDependencies.values()
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/margin_normal">
+
+    <ImageView
+        android:id="@+id/networkIcon"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
+        android:src="@drawable/ic_artis"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/networkName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/networkIcon"
+        android:layout_alignTop="@id/networkIcon"
+        android:layout_toEndOf="@id/networkIcon"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center_vertical"
+        android:textColor="@color/gray"
+        android:textSize="@dimen/text_normal"
+        tools:text="@string/app_name"
+        tools:ignore="RelativeOverlap" />
+
+    <ImageView
+        android:id="@+id/checkButton"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/check_button_selector"
+        tools:ignore="ContentDescription" />
+</RelativeLayout>

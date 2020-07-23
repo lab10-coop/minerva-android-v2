@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+    builder:
+        build: .
+        image: code.lab10.io:4567/graz/10-minerva/minerva-android-v2:builder
+        env_file:
+          - .env
+        volumes:
+            - ./:/var/app
+        networks:
+          - minerva
+
+networks:
+    minerva:
+        driver: bridge

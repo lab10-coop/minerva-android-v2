@@ -1,24 +1,63 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.fabric'
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.3"
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     defaultConfig {
         applicationId "minerva.android"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "REST_API_URL", '"https://minerva-api.dev.lab10.io/"'
+        buildConfigField "String", "BINANCE_URL", '"https://api.binance.com"'
     }
+
+    signingConfigs {
+        release {
+            keyAlias String.valueOf(System.env.KEY_ALIAS ?: localProperty('keyAlias'))
+            keyPassword String.valueOf(System.env.KEY_PASSWORD ?: localProperty('keyPassword'))
+            storePassword String.valueOf(System.env.KEY_STORE_PASSWORD ?: localProperty('storePassword'))
+            storeFile file("../keyStoreMinerva.jks")
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    flavorDimensions 'enviroment'
+    productFlavors {
+        flavorDimensions 'enviroment'
+        staging {
+            versionCode Integer.valueOf(System.env.VERSION_CODE_STAGING ?: 1)
+            dimension 'enviroment'
+            applicationIdSuffix ".staging"
+            versionNameSuffix '-staging'
+        }
+
+        production {
+            versionCode Integer.valueOf(System.env.VERSION_CODE_PROD ?: 1)
+            dimension 'enviroment'
+            versionNameSuffix '-release'
         }
     }
 }
@@ -26,11 +65,19 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':WalletManager')
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation project(':KotlinUtils')
+    implementation project(':UiExtension')
 
+    implementation firebaseDepenedencies.values()
+    implementation crashlyticsDependencies.values()
+    implementation qrDependency.values()
+    implementation uiDependencies.values()
+    implementation startupDependencies.values()
+
+    implementation coreDependencies.values()
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
+    implementation rxDependencies.values()
 
-    testImplementation androidTestDependencies.values()
     testImplementation testDependencies.values()
 }

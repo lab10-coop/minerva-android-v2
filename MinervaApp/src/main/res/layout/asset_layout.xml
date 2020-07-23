@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginTop="@dimen/margin_small"
+        android:background="@color/dividerGray" />
+
+    <ImageView
+        android:id="@+id/arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/amountView"
+        android:layout_alignBottom="@id/amountView"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_down_arrow"
+        tools:ignore="ContentDescription" />
+
+    <minerva.android.widget.CryptoAmountView
+        android:id="@+id/amountView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/divider"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginEnd="@dimen/margin_small"
+        android:layout_toStartOf="@id/arrow" />
+
+    <ImageView
+        android:id="@+id/assetLogo"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
+        android:layout_alignTop="@id/amountView"
+        android:layout_alignBottom="@id/amountView"
+        android:layout_alignParentStart="true"
+        tools:src="@drawable/ic_xdai"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/assetName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/amountView"
+        android:layout_alignBottom="@id/amountView"
+        android:layout_marginStart="@dimen/margin_small"
+        android:layout_toEndOf="@id/assetLogo"
+        android:gravity="center"
+        tools:text="sDai" />
+
+    <TextView
+        android:id="@+id/sendButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/amountView"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:background="@drawable/border_light_button"
+        android:fontFamily="@font/rubik_medium"
+        android:foreground="@drawable/ripple"
+        android:gravity="center"
+        android:padding="@dimen/margin_small"
+        android:textColor="@color/colorSecondary"
+        android:visibility="gone"
+        tools:text="Send ATS"
+        tools:visibility="visible" />
+</merge>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/editIdentityOrder"
+        android:icon="@drawable/ic_edit_order"
+        android:title="@string/edit_order"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/editAccountOrder"
+        android:icon="@drawable/ic_edit_order"
+        android:title="@string/edit_order"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/editServiceOrder"
+        android:icon="@drawable/ic_edit_order"
+        android:title="@string/edit_order"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/barcodeScanner"
+        android:icon="@drawable/ic_barcode_scanner"
+        android:title="@string/barcode"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/addIdentity"
+        android:icon="@drawable/ic_add"
+        android:title="@string/add"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/addAccount"
+        android:icon="@drawable/ic_add"
+        android:title="@string/add"
+        app:showAsAction="ifRoom" />
+</menu>

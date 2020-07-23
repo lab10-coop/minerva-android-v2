@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_small"
+    android:background="@drawable/rounded_white_background"
+    android:elevation="2dp"
+    android:paddingLeft="@dimen/margin_normal"
+    android:paddingTop="@dimen/margin_xsmall"
+    android:paddingRight="@dimen/margin_normal"
+    android:paddingBottom="@dimen/margin_xsmall">
+
+    <ImageView
+        android:id="@+id/serviceLogo"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:src="@drawable/ic_minerva_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/serviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_small"
+        android:fontFamily="@font/rubik_regular"
+        android:textColor="@color/gray"
+        app:layout_constraintLeft_toRightOf="@+id/serviceLogo"
+        app:layout_constraintTop_toTopOf="@+id/serviceLogo"
+        tools:text="Minerva Service" />
+
+    <TextView
+        android:id="@+id/lastUsed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_small"
+        android:fontFamily="@font/rubik_regular"
+        android:textColor="@color/borderGray"
+        app:layout_constraintBottom_toBottomOf="@+id/serviceLogo"
+        app:layout_constraintLeft_toRightOf="@+id/serviceLogo"
+        tools:text="@string/last_used" />
+
+    <ImageView
+        android:id="@+id/popupMenu"
+        android:layout_width="@dimen/clickable_area"
+        android:layout_height="@dimen/clickable_area"
+        android:scaleType="center"
+        android:src="@drawable/ic_three_dots"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/serviceName"
+        tools:ignore="ContentDescription" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lightGray"
+    tools:context=".settings.SettingsFragment">
+
+    <LinearLayout
+        android:id="@+id/reminderView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:background="@drawable/rounded_white_background"
+        android:elevation="@dimen/cardview_default_elevation"
+        android:orientation="vertical"
+        android:padding="@dimen/margin_small"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="PrivateResource">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|top"
+            android:layout_marginTop="@dimen/margin_small"
+            android:src="@drawable/ic_alert"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/alertTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_medium"
+            android:padding="@dimen/margin_xxsmall"
+            android:text="@string/alert_title"
+            android:textColor="@color/alert_red"
+            android:textSize="@dimen/text_normal" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_regular"
+            android:padding="@dimen/margin_xxsmall"
+            android:text="@string/alert_message"
+            android:textColor="@color/gray"
+            android:textSize="@dimen/text_normal" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/backupItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_large"
+        android:drawableStart="@drawable/ic_backup_icon"
+        android:drawablePadding="@dimen/margin_small"
+        android:fontFamily="@font/rubik_medium"
+        android:text="@string/backup"
+        android:textColor="@color/gray"
+        android:textSize="@dimen/text_big"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reminderView" />
+
+    <ImageView
+        android:id="@+id/alertIcon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="@dimen/margin_xsmall"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:src="@drawable/ic_alert"
+        app:layout_constraintLeft_toRightOf="@+id/backupItem"
+        app:layout_constraintTop_toTopOf="@+id/backupItem"
+        tools:ignore="ContentDescription" />
+</androidx.constraintlayout.widget.ConstraintLayout>

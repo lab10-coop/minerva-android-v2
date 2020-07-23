@@ -1,5 +1,9 @@
 package minerva.android.walletmanager.keystore
 
-class KeystoreRepository {
-    val masterKey: String? = "VeryImportantMasterKey"
+import minerva.android.walletmanager.model.MasterSeed
+
+interface KeystoreRepository {
+    fun isMasterSeedSaved(): Boolean
+    fun encryptMasterSeed(masterSeed: MasterSeed)
+    fun decryptMasterSeed(): MasterSeed?
 }
