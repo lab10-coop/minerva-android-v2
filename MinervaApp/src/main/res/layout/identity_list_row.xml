@@ -57,14 +57,23 @@
             app:layout_constraintTop_toTopOf="@id/profileImage"
             tools:ignore="ContentDescription" />
 
-        <minerva.android.widget.IdentityDataContent
-            android:id="@+id/dataContainer"
-            android:layout_width="match_parent"
+        <minerva.android.widget.TitledTextView
+            android:id="@+id/identityDid"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_normal"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profileImage" />
+            app:layout_constraintTop_toBottomOf="@id/profileImage"/>
+
+        <minerva.android.widget.IdentityDataContent
+            android:id="@+id/dataContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_small"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/identityDid" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/editButton"

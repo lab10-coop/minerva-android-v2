@@ -62,6 +62,7 @@ class IdentityViewHolder(private val view: View, private val viewGroup: ViewGrou
                 identityName.text = name
                 card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(name)))
                 profileImage.createLogo(name)
+                identityDid.setSingleLineTitleAndBody(Identity.DID_LABEL, did)
                 dataContainer.prepareData(data)
                 setOnClickListeners(rawPosition, identity)
             }

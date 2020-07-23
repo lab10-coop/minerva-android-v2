@@ -16,9 +16,10 @@ class MapperTest : WalletConfigTestValues() {
     fun `Mapping Identity to IdentityResponse Test`() {
         val identity = Identity(
             0,
+            "IdentityTest",
             "publicKey",
             "privateKey",
-            "IdentityTest",
+            "address",
             identityData,
             true
         )

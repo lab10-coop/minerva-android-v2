@@ -85,7 +85,7 @@ class WalletConfigRepositoryImpl(
         val identities = mutableListOf<Identity>()
         walletConfigPayload.identityResponse.forEach { identityResponse ->
             getKeys(identityResponse.index, keys).let { key ->
-                identities.add(mapIdentityPayloadToIdentity(identityResponse, key.publicKey, key.privateKey))
+                identities.add(mapIdentityPayloadToIdentity(identityResponse, key.publicKey, key.privateKey, key.address))
             }
         }
         return identities

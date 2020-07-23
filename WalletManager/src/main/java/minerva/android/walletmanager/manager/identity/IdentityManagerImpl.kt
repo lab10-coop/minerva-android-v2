@@ -25,7 +25,14 @@ class IdentityManagerImpl(
         with(walletConfigManager) {
             getWalletConfig()?.let {
                 return cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identity.index)
-                    .map { keys -> WalletConfig(it.updateVersion, prepareIdentities(getIdentity(identity, keys), it), it.accounts, it.services) }
+                    .map { keys ->
+                        WalletConfig(
+                            it.updateVersion,
+                            prepareIdentities(getIdentity(identity, keys), it),
+                            it.accounts,
+                            it.services
+                        )
+                    }
                     .flatMapCompletable { updateWalletConfig(it) }
             }
             return Completable.error(NotInitializedWalletConfigThrowable())
@@ -36,6 +43,7 @@ class IdentityManagerImpl(
         identity.apply {
             publicKey = keys.publicKey
             privateKey = keys.privateKey
+            address = keys.address
         }
 
     override fun loadIdentity(position: Int, name: String): Identity {
@@ -66,7 +74,17 @@ class IdentityManagerImpl(
     private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {
         if (!identities.inBounds(currentPosition)) return Completable.error(NoIdentityToRemoveThrowable())
         if (isOnlyOneElement(identities)) return Completable.error(CannotRemoveLastIdentityThrowable())
-        return saveIdentity(Identity(identity.index, identity.name, identity.publicKey, identity.privateKey, identity.data, true))
+        return saveIdentity(
+            Identity(
+                identity.index,
+                identity.name,
+                identity.publicKey,
+                identity.privateKey,
+                identity.address,
+                identity.data,
+                true
+            )
+        )
     }
 
     private fun prepareIdentities(identity: Identity, walletConfig: WalletConfig): List<Identity> {
