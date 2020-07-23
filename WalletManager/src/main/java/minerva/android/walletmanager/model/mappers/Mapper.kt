@@ -2,9 +2,9 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
-import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.*
@@ -24,8 +24,13 @@ private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> 
     return if (responseMap[REQUESTED] is ArrayList<*>?) responseMap[REQUESTED] as ArrayList<String> else arrayListOf()
 }
 
-fun mapIdentityPayloadToIdentity(response: IdentityPayload, publicKey: String = String.Empty, privateKey: String = String.Empty): Identity =
-    Identity(response.index, response.name, publicKey, privateKey, response.data, response.isDeleted)
+fun mapIdentityPayloadToIdentity(
+    response: IdentityPayload,
+    publicKey: String = String.Empty,
+    privateKey: String = String.Empty,
+    address: String = String.Empty
+): Identity =
+    Identity(response.index, response.name, publicKey, privateKey, address, response.data, response.isDeleted)
 
 fun mapAccountResponseToAccount(
     response: AccountPayload,
@@ -92,7 +97,15 @@ fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =
     )
 
 fun mapAccountToAccountPayload(account: Account): AccountPayload =
-    AccountPayload(account.index, account.name, account.network, account.isDeleted, account.owners, account.contractAddress, account.bindedOwner)
+    AccountPayload(
+        account.index,
+        account.name,
+        account.network,
+        account.isDeleted,
+        account.owners,
+        account.contractAddress,
+        account.bindedOwner
+    )
 
 fun mapTransactionToTransactionPayload(transaction: Transaction): TransactionPayload =
     transaction.run {

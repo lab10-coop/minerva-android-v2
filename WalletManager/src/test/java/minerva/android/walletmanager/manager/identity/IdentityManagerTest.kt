@@ -79,7 +79,7 @@ class IdentityManagerTest : RxTest() {
 
     @Test
     fun `Check that wallet manager removes correct identity`() {
-        val identityToRemove = Identity(0, "identityName2", "", "privateKey", DataProvider.data)
+        val identityToRemove = Identity(0, "identityName2", "", "privateKey", "address", DataProvider.data)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
@@ -111,8 +111,8 @@ class IdentityManagerTest : RxTest() {
         val identityToRemove = Identity(0)
         val walletConfig = WalletConfig(
             0, listOf(
-                Identity(0, "identityName1", "", "privateKey", DataProvider.data),
-                Identity(1, "identityName1", "", "privateKey", DataProvider.data, isDeleted = true)
+                Identity(0, "identityName1", "", "privateKey", "address", DataProvider.data),
+                Identity(1, "identityName1", "", "privateKey", "address", DataProvider.data, isDeleted = true)
             )
         )
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())

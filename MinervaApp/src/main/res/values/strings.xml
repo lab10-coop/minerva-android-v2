@@ -27,9 +27,9 @@
     <string name="check_incorrect_mnemonic_words">Unknown words entered, please check:</string>
     <string name="creating_wallet_error_message">Creating your wallet failed. Please check your connection and/or retry later</string>
     <string name="new_identity">New Identity</string>
-    <string name="edit_identity_order">Edit Identity order</string>
-    <string name="edit_account_order">Edit Account order</string>
-    <string name="edit_service_order">Edit Service order</string>
+    <string name="edit_identity_order">Rearrange Identities</string>
+    <string name="edit_account_order">Rearrange Accounts</string>
+    <string name="edit_service_order">Rearrange Services</string>
     <string name="personal_data">Personal data</string>
     <string name="name">Name</string>
     <string name="email">Email</string>

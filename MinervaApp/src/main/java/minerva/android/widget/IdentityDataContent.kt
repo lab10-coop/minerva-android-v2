@@ -43,17 +43,15 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     private fun showEverything() = views.forEach { it.visible() }
 
     private fun showOnlyFirstElement() {
-        views.forEachIndexed { index, view ->
-            if (index > FIRST_ELEMENT) view.gone()
-        }
+        views.forEach { view -> view.gone() }
     }
 
     private fun prepareDescription(map: LinkedHashMap<String, String>) {
         description.text = when {
-            map.isEmpty() -> context.getString(R.string.no_data_available)
             map.size > FIELD_DESCRIPTION_LIMIT -> createDescriptionText(map.keys)
             else -> return
         }
+        if(map.isEmpty()) description.gone()
         setDefaultTopPadding(description)
         addView(description)
     }
@@ -61,10 +59,8 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     private fun createDescriptionText(keys: MutableSet<String>): String {
         with(StringBuilder(PLUS_SIGN)) {
             keys.forEachIndexed { index, key ->
-                if (index > FIRST_ELEMENT) {
-                    append(getIdentityDataLabel(context, key))
-                    if (index < keys.size - 1) append(COMMA_SIGN)
-                }
+                append(getIdentityDataLabel(context, key))
+                if (index < keys.size - 1) append(COMMA_SIGN)
             }
             return this.toString()
         }
@@ -80,8 +76,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
 
     companion object {
         private const val NO_PADDING = 0
-        private const val FIELD_DESCRIPTION_LIMIT = 2
-        private const val FIRST_ELEMENT = 0
+        private const val FIELD_DESCRIPTION_LIMIT = 1
         private const val PLUS_SIGN = "+ "
         private const val COMMA_SIGN = ", "
     }

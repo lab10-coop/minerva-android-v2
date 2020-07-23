@@ -16,11 +16,11 @@ open class WalletConfigTestValues {
     )
 
     val identity = listOf(
-        Identity(0, "IdentityName1", "publicKey", "privateKey", identityData, false)
+        Identity(0, "IdentityName1", "publicKey", "privateKey", "address", identityData, false)
     )
 
     val onlineIdentity = listOf(
-        Identity(0, "OnlineIdentityName1", "publicKey", "privateKey", identityData, false)
+        Identity(0, "OnlineIdentityName1", "publicKey", "privateKey", "address", identityData, false)
     )
 
     val identityResponse = listOf(
@@ -32,8 +32,8 @@ open class WalletConfigTestValues {
     )
 
     val identities = listOf(
-        Identity(2, "pubicKey", "privateKey", "IdentityName1", identityData, false),
-        Identity(3, "pubicKey", "privateKey", "IdentityName2", identityData, true)
+        Identity(2, "pubicKey", "privateKey", "IdentityName1", "address", identityData, false),
+        Identity(3, "pubicKey", "privateKey", "IdentityName2", "address", identityData, true)
     )
 
     val values = listOf(

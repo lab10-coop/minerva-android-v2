@@ -15,19 +15,24 @@ open class Identity(
     override var name: String = String.Empty,
     open var publicKey: String = String.Empty,
     open var privateKey: String = String.Empty,
+    override var address: String = String.Empty,
     open val data: LinkedHashMap<String, String> = linkedMapOf(),
     override var isDeleted: Boolean = false,
     var isSelected: Boolean = false
-): MinervaPrimitive(publicKey, name, isDeleted) {
+) : MinervaPrimitive(publicKey, name, isDeleted) {
     constructor(index: Int, identity: Identity) : this(
         index,
         identity.name,
         identity.publicKey,
         identity.privateKey,
+        identity.address,
         identity.data,
         identity.isDeleted,
         identity.isSelected
     )
+
+    val did: String
+        get() = DID_PREFIX + address
 
     override fun equals(other: Any?): Boolean = (other is Identity)
             && index == other.index
@@ -37,6 +42,11 @@ open class Identity(
             && data == other.data
             && isDeleted == other.isDeleted
             && isSelected == other.isSelected
+
+    companion object {
+        const val DID_LABEL = "DID"
+        private const val DID_PREFIX = "did:ethr:"
+    }
 }
 
 data class IncognitoIdentity(
