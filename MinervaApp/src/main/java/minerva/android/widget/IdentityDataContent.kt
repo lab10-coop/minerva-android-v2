@@ -14,6 +14,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
 
     private val description = TextView(context)
     private val views: MutableList<View> = arrayListOf()
+    var isOpen: Boolean = false
 
     fun prepareData(map: LinkedHashMap<String, String>) {
         views.clear()
@@ -32,12 +33,14 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     fun open() {
         showEverything()
         if (views.isNotEmpty()) description.gone()
+        isOpen = true
     }
 
     fun close() {
         if (views.size <= FIELD_DESCRIPTION_LIMIT) showEverything()
         else showOnlyFirstElement()
         description.visible()
+        isOpen = false
     }
 
     private fun showEverything() = views.forEach { it.visible() }
@@ -76,7 +79,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
 
     companion object {
         private const val NO_PADDING = 0
-        private const val FIELD_DESCRIPTION_LIMIT = 1
+        const val FIELD_DESCRIPTION_LIMIT = 1
         private const val PLUS_SIGN = "+ "
         private const val COMMA_SIGN = ", "
     }
