@@ -1,6 +1,7 @@
 package minerva.android.widget.repository
 
 import minerva.android.R
+import minerva.android.kotlinUtils.InvalidValue
 import kotlin.math.abs
 
 private val color = listOf(
@@ -29,9 +30,40 @@ private val opacityColor = listOf(
     R.color.colorSetTenOpacity
 )
 
+private val companyColor = listOf(
+    R.color.oamtc
+)
+
+private val companyOpacityColor = listOf(
+    R.color.oamtcOpacity
+)
+
+private const val OAMTC_COLOR_INDEX = 0
+
+private val oamtcKeywords = listOf(
+    "ÖAMTC",
+    "OeAMTC",
+    "OAMTC"
+)
+
 fun generateColor(value: String, opacity: Boolean = false): Int {
-    abs(value.hashCode() % color.size).apply {
-        return if (opacity) opacityColor[this]
-        else color[this]
+    getCompanyIndexColor(value)?.let {
+        return if(opacity) companyOpacityColor[it]
+        else companyColor[it]
     }
+    abs(value.hashCode() % color.size).let {
+        return if (opacity) opacityColor[it]
+        else color[it]
+    }
+}
+
+private fun getCompanyIndexColor(value: String): Int? =
+    if(isOamtc(value)) OAMTC_COLOR_INDEX
+    else null
+
+private fun isOamtc(value: String): Boolean {
+    oamtcKeywords.forEach {
+        if(value.equals(it, true)) return true
+    }
+    return false
 }
