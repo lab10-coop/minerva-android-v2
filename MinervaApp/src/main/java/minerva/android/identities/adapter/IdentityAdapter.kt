@@ -99,7 +99,7 @@ class IdentityViewHolder(
     private fun PopupMenu.setOnItemMenuClickListener(position: Int, identity: Identity) {
         setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.showIdentity -> listener.showIdentity(identity)
+                R.id.showIdentity -> listener.showIdentity(identity, position)
                 R.id.edit -> listener.onIdentityEdit(position, identity.name)
                 R.id.remove -> listener.onIdentityRemoved(identity)
             }
@@ -123,7 +123,7 @@ class IdentityViewHolder(
 }
 
 interface IdentityFragmentListener {
-    fun showIdentity(identity: Identity)
+    fun showIdentity(identity: Identity, position: Int)
     fun onIdentityRemoved(identity: Identity)
     fun onIdentityEdit(position: Int, name: String)
 }

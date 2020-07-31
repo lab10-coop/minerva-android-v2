@@ -35,7 +35,7 @@ class IdentityManagerImpl(
                     }
                     .flatMapCompletable { updateWalletConfig(it) }
             }
-            return Completable.error(NotInitializedWalletConfigThrowable())
+            throw NotInitializedWalletConfigThrowable()
         }
     }
 
@@ -68,7 +68,7 @@ class IdentityManagerImpl(
         walletConfigManager.getWalletConfig()?.let {
             return handleRemovingIdentity(it.identities, getPositionForIdentity(identity, it), identity)
         }
-        return Completable.error(NotInitializedWalletConfigThrowable())
+        throw NotInitializedWalletConfigThrowable()
     }
 
     private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {

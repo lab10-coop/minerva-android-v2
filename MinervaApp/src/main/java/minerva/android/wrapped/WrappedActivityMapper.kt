@@ -23,9 +23,17 @@ fun startEditIdentityWrappedActivity(context: Context, position: Int, title: Str
     }
 }
 
+fun startIdentityAddressWrappedActivity(context: Context, title: String, position: Int) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.IDENTITY_ADDRESS)
+        putExtra(WrappedActivity.INDEX, position)
+        putExtra(WrappedActivity.TITLE, title)
+    }
+}
+
 fun startAccountAddressWrappedActivity(context: Context, title: String, position: Int, logoRes: Int) {
     context.launchActivity<WrappedActivity> {
-        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE_ADDRESS)
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT_ADDRESS)
         putExtra(WrappedActivity.INDEX, position)
         putExtra(WrappedActivity.TITLE, title)
         putExtra(WrappedActivity.LOGO, logoRes)
@@ -34,7 +42,7 @@ fun startAccountAddressWrappedActivity(context: Context, title: String, position
 
 fun startNewValueWrappedActivity(context: Context, title: String, position: Int) {
     context.launchActivity<WrappedActivity> {
-        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE)
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT)
         putExtra(WrappedActivity.TITLE, title)
         putExtra(WrappedActivity.POSITION, position)
     }
@@ -42,7 +50,7 @@ fun startNewValueWrappedActivity(context: Context, title: String, position: Int)
 
 fun startEditValueOrderWrappedActivity(context: Context) {
     context.launchActivity<WrappedActivity> {
-        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.VALUE_ORDER)
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT_ORDER)
     }
 }
 

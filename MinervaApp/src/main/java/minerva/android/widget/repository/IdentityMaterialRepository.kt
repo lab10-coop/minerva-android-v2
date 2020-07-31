@@ -1,7 +1,6 @@
 package minerva.android.widget.repository
 
 import minerva.android.R
-import minerva.android.kotlinUtils.InvalidValue
 import kotlin.math.abs
 
 private val color = listOf(
