@@ -8,25 +8,25 @@ Development was co-sponsored by [Sitra](https://www.sitra.fi/en/) as an [IHAN pi
 
 Minerva App Project is divided into several modules:
 
-MinervaApp - the main application module. All UI etc. This module is connected with WalletMaanager only.
+MinervaApp - the main application module. All UI etc. This module is connected with WalletManager only.
 
 `WalletManager` - module, which is responsible preparing data which is needed for proper MinarvaApp working. Important part of this module is KeyStore, which is responsible for storing encryptionKey for encoding MasterKey. All rest data (private/public keys, addresses, mnemonic) are calculating on the application start. Another important part of this module is WalletConfigRepository. This part of code is responsible for building the wallet using WalletConfig file.
 
-`WalletConfigRepository` - module which is responsible for managing saving and loading WalletConfig file locally and on the server.
+`WalletConfigRepository` - module which is responsible for managing saving and loading WalletConfig file localy and on the server.
 
 `ExchangeMarketsProvider` - module which is responsible for downloading current cryptocurrency to traditional currency ratio (ETH-EUR).
 
 `BlockchainProvider` - this module is responsible for communication with blockchain. There is communication for simple blockchain operations (BlockchainRepository) and for SmartContracts (SmartContractRepository).
 
-`CryptographyProvider` - module which is responsible for all cryptography caluculations - public/private keys, addresses, mnenonic using MasterKey. All this calculations are made with every application start.
+`CryptographyProvider` - module which is responsible for all cryptography calculations - public/private keys, addresses, mnemonic using MasterKey. All this calculations are made with every application start.
 
 `ServiceApiProvider` - ServiceApiProvider was created in order to integrate 3rd party login using deep link mechanism.
 
-`WalletConfigProvider` - module where we make save/load operations of WalletConfig raw file. Data is saved in locall storage and on the external server. The application is able to run without internet connection (restore walletConfig from locall storage).
+`WalletConfigProvider` - module where we make save/load operations of WalletConfig raw file. Data is saved in local storage and on the external server. The application is able to run without internet connection (restore walletConfig from local storage).
 
 `KotlinUtils`, `UiExtension` - helpers modules - some universal code, widgets and extension to create application code more readable.
 
-`WalletConfig` - json file which is uploaded/downloaded form the server (saved locally too). This is kind of map of the account. Using this file, the app is able to recreate user account and data. In this file you can find identites (with data) and wallet structure.
+`WalletConfig` - json file which is uploaded/downloaded form the server (saved localy too). This is kind of map of the account. Using this file, the app is able to recreate user account and data. In this file you can find identities (with data) and wallet structure.
 
 ![Diagram Image](MinervaDiagram.jpg)
 

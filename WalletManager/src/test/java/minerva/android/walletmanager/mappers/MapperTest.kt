@@ -27,7 +27,7 @@ class MapperTest : WalletConfigTestValues() {
 
         identity.index shouldBeEqualTo identityResponse.index
         identity.name shouldBeEqualTo identityResponse.name
-        identity.data shouldBeEqualTo identityResponse.data
+        identity.personalData shouldBeEqualTo identityResponse.data
     }
 
     @Test
@@ -42,7 +42,7 @@ class MapperTest : WalletConfigTestValues() {
 
         identity.index shouldBeEqualTo identityResponse.index
         identity.name shouldBeEqualTo identityResponse.name
-        identity.data shouldBeEqualTo identityResponse.data
+        identity.personalData shouldBeEqualTo identityResponse.data
     }
 
     @Test

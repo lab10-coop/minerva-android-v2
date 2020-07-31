@@ -16,8 +16,10 @@ open class Identity(
     open var publicKey: String = String.Empty,
     open var privateKey: String = String.Empty,
     override var address: String = String.Empty,
-    open val data: LinkedHashMap<String, String> = linkedMapOf(),
+    open val personalData: LinkedHashMap<String, String> = linkedMapOf(),
     override var isDeleted: Boolean = false,
+    val credentials: List<Credential> = listOf(),
+    val services: List<Service> = listOf(),
     var isSelected: Boolean = false
 ) : MinervaPrimitive(publicKey, name, isDeleted) {
     constructor(index: Int, identity: Identity) : this(
@@ -26,8 +28,10 @@ open class Identity(
         identity.publicKey,
         identity.privateKey,
         identity.address,
-        identity.data,
+        identity.personalData,
         identity.isDeleted,
+        identity.credentials,
+        identity.services,
         identity.isSelected
     )
 
@@ -39,7 +43,7 @@ open class Identity(
             && name == other.name
             && publicKey == other.publicKey
             && privateKey == other.privateKey
-            && data == other.data
+            && personalData == other.personalData
             && isDeleted == other.isDeleted
             && isSelected == other.isSelected
 
@@ -51,7 +55,7 @@ open class Identity(
 
 data class IncognitoIdentity(
     override var name: String = INCOGNITO_IDENTITY,
-    override val data: LinkedHashMap<String, String> = linkedMapOf(
+    override val personalData: LinkedHashMap<String, String> = linkedMapOf(
         Pair(IdentityField.NAME, INCOGNITO_NAME),
         Pair(IdentityField.PHONE_NUMBER, INCOGNITO_PHONE),
         Pair(IdentityField.EMAIL, INCOGNITO_EMAIL)

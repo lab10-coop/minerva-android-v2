@@ -2,10 +2,7 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
-import minerva.android.configProvider.model.walletConfig.AccountPayload
-import minerva.android.configProvider.model.walletConfig.IdentityPayload
-import minerva.android.configProvider.model.walletConfig.ServicePayload
-import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
+import minerva.android.configProvider.model.walletConfig.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.*
 
@@ -30,7 +27,17 @@ fun mapIdentityPayloadToIdentity(
     privateKey: String = String.Empty,
     address: String = String.Empty
 ): Identity =
-    Identity(response.index, response.name, publicKey, privateKey, address, response.data, response.isDeleted)
+    Identity(
+        response.index,
+        response.name,
+        publicKey,
+        privateKey,
+        address,
+        response.data,
+        response.isDeleted,
+        mapCredentialPayloadToCredentials(response.credentials),
+        mapServicesResponseToServices(response.services)
+    )
 
 fun mapAccountResponseToAccount(
     response: AccountPayload,
@@ -51,14 +58,16 @@ fun mapAccountResponseToAccount(
         bindedOwner = response.bindedOwner
     )
 
-private fun mapServiceResponseToService(response: ServicePayload): Service =
-    Service(response.type, response.name, response.lastUsed, response.loggedInIdentityPublicKey)
 
-fun mapServicesResponseToServices(responses: List<ServicePayload>): List<Service> {
-    val services = mutableListOf<Service>()
-    responses.forEach { services.add(mapServiceResponseToService(it)) }
-    return services
-}
+fun mapServicesResponseToServices(responses: List<ServicePayload>): List<Service> =
+    mutableListOf<Service>().apply {
+        responses.forEach { add(Service(it.type, it.name, it.lastUsed, it.loggedInIdentityPublicKey)) }
+    }
+
+private fun mapCredentialPayloadToCredentials(responses: List<CredentialsPayload>): List<Credential> =
+    mutableListOf<Credential>().apply {
+        responses.forEach { add(Credential(it.name, it.type, it.lastUsed)) }
+    }
 
 fun mapWalletConfigToWalletPayload(config: WalletConfig): WalletConfigPayload {
     val idResponses = mutableListOf<IdentityPayload>()
@@ -92,9 +101,22 @@ fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =
     IdentityPayload(
         identity.index,
         identity.name,
-        identity.data,
-        identity.isDeleted
+        identity.personalData,
+        identity.isDeleted,
+        mapCredentialToCredentialsPayload(identity.credentials),
+        mapServicesToServicesPayload(identity.services)
+
     )
+
+fun mapServicesToServicesPayload(responses: List<Service>): List<ServicePayload> =
+    mutableListOf<ServicePayload>().apply {
+        responses.forEach { add(ServicePayload(it.type, it.name, it.lastUsed, it.loggedInIdentityPublicKey)) }
+    }
+
+fun mapCredentialToCredentialsPayload(responses: List<Credential>): List<CredentialsPayload> =
+    mutableListOf<CredentialsPayload>().apply {
+        responses.forEach { add(CredentialsPayload(it.name, it.type, it.lastUsed)) }
+    }
 
 fun mapAccountToAccountPayload(account: Account): AccountPayload =
     AccountPayload(
