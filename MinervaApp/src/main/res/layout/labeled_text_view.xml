@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_white_frame"
+    android:padding="@dimen/margin_small"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:paddingLeft="@dimen/margin_xxsmall"
+        android:paddingRight="@dimen/margin_xxsmall"
+        android:visibility="invisible"
+        android:layout_height="wrap_content"
+        android:textColor="@color/titleColor"
+        android:textSize="@dimen/text_small"
+        android:background="@color/white"
+        tools:text="Name" />
+
+    <TextView
+        android:id="@+id/body"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/bodyColor"
+        android:textSize="@dimen/text_normal"
+        tools:text="John Smith" />
+</LinearLayout>
