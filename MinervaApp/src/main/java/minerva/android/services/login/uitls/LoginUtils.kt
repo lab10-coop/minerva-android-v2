@@ -18,7 +18,7 @@ import minerva.android.walletmanager.utils.DateUtils
 object LoginUtils {
     //TODO change it to dynamic requested fields creation
     fun isIdentityValid(identity: Identity) =
-        identity.data[IdentityField.PHONE_NUMBER] != null && identity.data[ChooseIdentityViewModel.NAME] != null
+        identity.personalData[IdentityField.PHONE_NUMBER] != null && identity.personalData[ChooseIdentityViewModel.NAME] != null
 
     fun getService(qrCodeResponse: QrCodeResponse, identity: Identity) =
         Service(qrCodeResponse.issuer, qrCodeResponse.serviceName, DateUtils.getLastUsedFormatted(), identity.publicKey)
@@ -32,8 +32,8 @@ object LoginUtils {
     //todo change it to dynamic payload creation
     fun createLoginPayload(identity: Identity, qrCodeResponse: QrCodeResponse): Map<String, String?> =
         mutableMapOf(
-            Pair(ChooseIdentityViewModel.PHONE, identity.data[IdentityField.PHONE_NUMBER]),
-            Pair(ChooseIdentityViewModel.NAME, identity.data[ChooseIdentityViewModel.NAME]),
+            Pair(ChooseIdentityViewModel.PHONE, identity.personalData[IdentityField.PHONE_NUMBER]),
+            Pair(ChooseIdentityViewModel.NAME, identity.personalData[ChooseIdentityViewModel.NAME]),
             Pair(ChooseIdentityViewModel.IDENTITY_NO, identity.publicKey)
         ).apply {
             if (qrCodeResponse.requestedData.contains(ChooseIdentityViewModel.FCM_ID)) {

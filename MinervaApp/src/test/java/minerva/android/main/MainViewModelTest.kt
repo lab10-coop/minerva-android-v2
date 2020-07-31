@@ -68,7 +68,7 @@ class MainViewModelTest : BaseViewModelTest() {
         viewModel.loginPayload = LoginPayload(qrCode = QrCodeResponse(callback = "url"), loginStatus = 0)
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(
             Identity(
-                1, data = linkedMapOf("name" to "tom", "phone_number" to "123"),
+                1, personalData = linkedMapOf("name" to "tom", "phone_number" to "123"),
                 privateKey = "1", publicKey = "2"
             )
         )
@@ -92,7 +92,7 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(serviceManager.getLoggedInIdentityPublicKey(any())) doReturn "publickKey"
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(
             Identity(
-                1, data = linkedMapOf("name" to "tom", "phone_number" to "123"),
+                1, personalData = linkedMapOf("name" to "tom", "phone_number" to "123"),
                 privateKey = "1", publicKey = "2"
             )
         )

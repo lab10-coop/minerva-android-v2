@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/margin_small">
+
+    <ImageView
+        android:id="@+id/iconImageView"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
+        android:layout_marginTop="@dimen/margin_normal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription"
+        tools:src="@mipmap/ic_minerva" />
+
+    <TextView
+        android:id="@+id/dateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_xxsmall"
+        android:fontFamily="@font/rubik_regular"
+        android:textColor="@color/titleColor"
+        android:textSize="@dimen/text_small"
+        app:layout_constraintBottom_toTopOf="@+id/nameTextView"
+        app:layout_constraintLeft_toRightOf="@+id/iconImageView"
+        tools:text="03.03.2020" />
+
+    <TextView
+        android:id="@+id/nameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_regular"
+        android:textColor="@color/gray"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintBottom_toBottomOf="@+id/iconImageView"
+        app:layout_constraintLeft_toRightOf="@+id/iconImageView"
+        tools:text="ÖAMTC-Member Card" />
+
+    <ImageView
+        android:id="@+id/popupMenu"
+        android:layout_width="@dimen/clickable_area"
+        android:layout_height="@dimen/clickable_area"
+        android:scaleType="center"
+        android:src="@drawable/ic_three_dots"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/iconImageView"
+        tools:ignore="ContentDescription" />
+
+</merge>

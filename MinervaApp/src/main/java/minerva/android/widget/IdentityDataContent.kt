@@ -2,13 +2,19 @@ package minerva.android.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.widget.PopupMenu
+import kotlinx.android.synthetic.main.identity_binded_item.view.*
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.identities.data.getIdentityDataLabel
+import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.Service
 
 class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
@@ -16,18 +22,73 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     private val views: MutableList<View> = arrayListOf()
     var isOpen: Boolean = false
 
-    fun prepareData(map: LinkedHashMap<String, String>) {
+    init {
+        orientation = VERTICAL
+    }
+
+    fun prepareDataContainerFields(identity: Identity) {
         views.clear()
         removeAllViews()
-        map.forEach { (key, value) ->
+        with(identity) {
+            preparePersonalData(personalData)
+            prepareCredentials(credentials)
+            prepareServices(services)
+            prepareDescription(personalData)
+        }
+        close()
+    }
+
+    private fun preparePersonalData(personalData: LinkedHashMap<String, String>) {
+        personalData.forEach { (key, value) ->
             val titledTextView = TitledTextView(context)
             titledTextView.setTitleAndBody(getIdentityDataLabel(context, key), value)
             setDefaultTopPadding(titledTextView)
             views.add(titledTextView)
             addView(titledTextView)
         }
-        prepareDescription(map)
-        close()
+    }
+
+    private fun prepareCredentials(credentials: List<Credential>) {
+        if (credentials.isNotEmpty()) addHeader(R.string.credentials)
+        credentials.forEach {
+            val bindedCredential = IdentityBindedItem(context)
+            bindedCredential.setDateAndName(it.name, it.lastUsed)
+            //TODO change to adding proper icon based on the credential type, will be added in MNR-243
+            bindedCredential.setIcon(R.drawable.ic_backup_icon)
+            bindedCredential.popupMenu.setOnClickListener { showMenu(bindedCredential.popupMenu) }
+            views.add(bindedCredential)
+            addView(bindedCredential)
+        }
+    }
+
+    private fun prepareServices(services: List<Service>) {
+        if (services.isNotEmpty()) addHeader(R.string.connected_services)
+        services.forEach {
+            val bindedService = IdentityBindedItem(context)
+            bindedService.setDateAndName(it.name, it.lastUsed)
+            //TODO change to adding proper icon based on the service type, will be added in MNR-243
+            bindedService.setIcon(R.drawable.ic_backup_icon)
+            bindedService.popupMenu.setOnClickListener { showMenu(bindedService.popupMenu) }
+            views.add(bindedService)
+            addView(bindedService)
+        }
+    }
+
+    private fun showMenu(anchor: View) {
+        PopupMenu(context, anchor).apply {
+            menuInflater.inflate(R.menu.remove_menu, menu)
+            gravity = Gravity.END
+            show()
+        }
+    }
+
+    private fun addHeader(id: Int) {
+        val header = TextView(context)
+        header.setTextAppearance(R.style.BindedHeaderStyle)
+        header.text = context.getString(id)
+        setDefaultTopPadding(header)
+        views.add(header)
+        addView(header)
     }
 
     fun open() {
@@ -54,7 +115,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
             map.size > FIELD_DESCRIPTION_LIMIT -> createDescriptionText(map.keys)
             else -> return
         }
-        if(map.isEmpty()) description.gone()
+        if (map.isEmpty()) description.gone()
         setDefaultTopPadding(description)
         addView(description)
     }
@@ -71,10 +132,6 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
 
     private fun setDefaultTopPadding(view: View) {
         view.setPadding(NO_PADDING, resources.getDimensionPixelOffset(R.dimen.margin_normal), NO_PADDING, NO_PADDING)
-    }
-
-    init {
-        orientation = VERTICAL
     }
 
     companion object {

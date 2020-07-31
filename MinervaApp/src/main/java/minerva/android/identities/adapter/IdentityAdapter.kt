@@ -71,8 +71,8 @@ class IdentityViewHolder(
                 card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(name)))
                 profileImage.createLogo(name)
                 identityDid.setSingleLineTitleAndBody(Identity.DID_LABEL, did)
-                dataContainer.prepareData(data)
-                arrow.visibleOrGone(data.size > FIELD_DESCRIPTION_LIMIT)
+                dataContainer.prepareDataContainerFields(identity)
+                arrow.visibleOrGone(personalData.size > FIELD_DESCRIPTION_LIMIT)
                 setOnClickListeners(rawPosition, identity, removable)
             }
         }

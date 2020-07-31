@@ -81,7 +81,7 @@ class IdentityManagerImpl(
                 identity.publicKey,
                 identity.privateKey,
                 identity.address,
-                identity.data,
+                identity.personalData,
                 true
             )
         )

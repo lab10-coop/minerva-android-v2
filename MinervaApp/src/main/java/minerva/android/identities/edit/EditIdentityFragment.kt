@@ -102,22 +102,22 @@ class EditIdentityFragment : Fragment() {
 
     private fun setIdentityData(identity: Identity) {
         identityName.setText(identity.name)
-        accountName.setText(identity.data[NAME])
-        email.setText(identity.data[EMAIL])
-        phoneNumber.setText(identity.data[PHONE_NUMBER])
-        birthDate.setText(identity.data[BIRTH_DATE])
-        addressLine1.setText(identity.data[ADDRESS_1])
-        addressLine2.setText(identity.data[ADDRESS_2])
-        city.setText(identity.data[CITY])
-        postcode.setText(identity.data[POSTCODE])
-        country.setText(identity.data[COUNTRY])
+        accountName.setText(identity.personalData[NAME])
+        email.setText(identity.personalData[EMAIL])
+        phoneNumber.setText(identity.personalData[PHONE_NUMBER])
+        birthDate.setText(identity.personalData[BIRTH_DATE])
+        addressLine1.setText(identity.personalData[ADDRESS_1])
+        addressLine2.setText(identity.personalData[ADDRESS_2])
+        city.setText(identity.personalData[CITY])
+        postcode.setText(identity.personalData[POSTCODE])
+        country.setText(identity.personalData[COUNTRY])
     }
 
     private fun saveIdentity() {
         val newIdentity = Identity(
             identity.index,
             identityName.text.toString(),
-            data = prepareFormData()
+            personalData = prepareFormData()
         )
         viewModel.saveIdentity(newIdentity, getActionStatus())
     }
