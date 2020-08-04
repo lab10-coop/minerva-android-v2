@@ -22,12 +22,11 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.5" />
 
-        <minerva.android.widget.LetterLogo
+        <ImageView
             android:id="@+id/letterLogo"
-            android:layout_width="@dimen/big_letter_logo_size"
-            android:layout_height="@dimen/big_letter_logo_size"
+            android:layout_width="@dimen/large_letter_logo_size"
+            android:layout_height="@dimen/large_letter_logo_size"
             android:layout_marginTop="@dimen/margin_xsmall"
-            android:textSize="@dimen/big_logo_letter_size"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

@@ -10,6 +10,7 @@ import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
+import minerva.android.widget.LetterLogo
 
 class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(),
     ItemViewHolder.IdentitiesAdapterListener {
@@ -70,7 +71,7 @@ class ItemViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
             view.apply {
                 letterLogo.visible()
                 incognitoLogo.invisible()
-                letterLogo.createLogo(name)
+                letterLogo.setImageDrawable(LetterLogo.createLogo(context, name))
             }
         }
     }

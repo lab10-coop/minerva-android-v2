@@ -19,16 +19,13 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />
 
-    <minerva.android.widget.LetterLogo
+    <ImageView
         android:id="@+id/letterLogo"
         android:layout_width="@dimen/small_logo_size"
         android:layout_height="@dimen/small_logo_size"
-        android:backgroundTint="@color/colorSetOneOpacity"
-        android:textColor="@color/colorSetOne"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="M" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/identityName"

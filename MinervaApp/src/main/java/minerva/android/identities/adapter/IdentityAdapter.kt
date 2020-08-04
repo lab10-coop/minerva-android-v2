@@ -16,6 +16,7 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.Identity
 import minerva.android.widget.IdentityDataContent.Companion.FIELD_DESCRIPTION_LIMIT
+import minerva.android.widget.LetterLogo
 import minerva.android.widget.repository.generateColor
 
 class IdentityAdapter(private val listener: IdentityFragmentListener) : RecyclerView.Adapter<IdentityViewHolder>() {
@@ -69,7 +70,7 @@ class IdentityViewHolder(
             view.apply {
                 identityName.text = name
                 card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(name)))
-                profileImage.createLogo(name)
+                profileImage.setImageDrawable(LetterLogo.createLogo(context, name))
                 identityDid.setSingleLineTitleAndBody(Identity.DID_LABEL, did)
                 dataContainer.prepareDataContainerFields(identity)
                 arrow.visibleOrGone(personalData.size > FIELD_DESCRIPTION_LIMIT)
