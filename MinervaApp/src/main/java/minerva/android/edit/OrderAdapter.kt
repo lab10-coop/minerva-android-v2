@@ -7,10 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.order_list_row.view.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
-import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.widget.LetterLogo
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.widget.repository.getServiceIcon
 
@@ -76,15 +76,10 @@ class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
     private fun prepareIcon(element: MinervaPrimitive) {
         view.apply {
-            (element.network == String.Empty && element.type == String.Empty).let { isIdentity ->
-                letterLogo.visibleOrGone(isIdentity)
-                icon.visibleOrInvisible(!isIdentity)
-            }
-
             when {
                 element.network != String.Empty -> icon.setImageResource(getNetworkIcon(NetworkManager.getNetwork(element.network)))
                 element.type != String.Empty -> icon.setImageResource(getServiceIcon(element.type))
-                else -> letterLogo.createLogo(element.name)
+                else -> icon.setImageDrawable(LetterLogo.createLogo(context, element.name))
             }
         }
     }

@@ -153,8 +153,8 @@
     <string name="cannot_remove_safe_account_message">Please remove other owners first and then\n transfer yours funds to another account</string>
     <string name="safe_account_removal_error">You can not remove this Safe Account</string>
     <string name="safe_accounts_count_format">+%d Safe Accounts</string>
+    <string name="did">DID</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="show_identity">Show identity</string>
     <string name="credentials">Credentials</string>

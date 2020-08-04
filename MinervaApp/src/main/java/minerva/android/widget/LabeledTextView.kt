@@ -1,6 +1,7 @@
 package minerva.android.widget
 
 import android.content.Context
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -19,6 +20,13 @@ class LabeledTextView(context: Context, attrs: AttributeSet? = null) : FrameLayo
             text = titleText
         }
         body.text = bodyText
+    }
+
+    fun setSingleLine() {
+        body.apply {
+            setSingleLine()
+            ellipsize = TextUtils.TruncateAt.MIDDLE
+        }
     }
 
     init {

@@ -24,6 +24,7 @@ import minerva.android.walletmanager.model.defs.IdentityField.Companion.NAME
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.POSTCODE
 import minerva.android.walletmanager.model.defs.WalletActionStatus
+import minerva.android.widget.LetterLogo
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import java.util.*
@@ -57,7 +58,7 @@ class EditIdentityFragment : Fragment() {
             postcodeLayout.visible()
             countryLayout.visible()
         }
-        identityName.afterTextChanged { profileLogo.createLogo(it) }
+        identityName.afterTextChanged { imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), it)) }
         identityName.onFocusLost { identityName.error = isEmpty(it) }
         email.onFocusLost { email.error = getEmailErrorMessage(it) }
         birthDate.setOnClickListener { showDialogPicker() }
@@ -101,16 +102,25 @@ class EditIdentityFragment : Fragment() {
     }
 
     private fun setIdentityData(identity: Identity) {
-        identityName.setText(identity.name)
-        accountName.setText(identity.personalData[NAME])
-        email.setText(identity.personalData[EMAIL])
-        phoneNumber.setText(identity.personalData[PHONE_NUMBER])
-        birthDate.setText(identity.personalData[BIRTH_DATE])
-        addressLine1.setText(identity.personalData[ADDRESS_1])
-        addressLine2.setText(identity.personalData[ADDRESS_2])
-        city.setText(identity.personalData[CITY])
-        postcode.setText(identity.personalData[POSTCODE])
-        country.setText(identity.personalData[COUNTRY])
+        with(identity) {
+            identityName.setText(name)
+            accountName.setText(personalData[NAME])
+            this@EditIdentityFragment.did.apply {
+                setTitleAndBody(getString(R.string.did), did)
+                setSingleLine()
+            }
+            email.setText(personalData[EMAIL])
+            phoneNumber.setText(personalData[PHONE_NUMBER])
+            birthDate.setText(personalData[BIRTH_DATE])
+            addressLine1.setText(personalData[ADDRESS_1])
+            addressLine2.setText(personalData[ADDRESS_2])
+            city.setText(personalData[CITY])
+            postcode.setText(personalData[POSTCODE])
+            country.setText(personalData[COUNTRY])
+            imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), name))
+        }
+
+
     }
 
     private fun saveIdentity() {

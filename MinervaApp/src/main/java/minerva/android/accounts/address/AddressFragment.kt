@@ -15,6 +15,7 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.widget.LetterLogo
 import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton
 import minerva.android.wrapped.WrappedActivity.Companion.FRAGMENT_TYPE
@@ -54,7 +55,7 @@ class AddressFragment : Fragment() {
 
     private fun prepareLogo(minervaPrimitive: MinervaPrimitive) {
         letterLogo.apply {
-            createLogo(minervaPrimitive.name)
+            setImageDrawable(LetterLogo.createLogo(requireContext(), minervaPrimitive.name))
             visibleOrGone(isIdentity())
         }
     }
