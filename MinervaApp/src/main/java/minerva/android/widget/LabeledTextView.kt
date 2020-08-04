@@ -14,7 +14,6 @@ import minerva.android.extension.visibleOrInvisible
 class LabeledTextView(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs) {
 
     fun setTitleAndBody(titleText: String, bodyText: String) {
-        visible()
         title.apply {
             visibleOrInvisible(titleText.isNotBlank())
             text = titleText
@@ -31,6 +30,5 @@ class LabeledTextView(context: Context, attrs: AttributeSet? = null) : FrameLayo
 
     init {
         inflate(context, R.layout.labeled_text_view, this)
-        gone()
     }
 }

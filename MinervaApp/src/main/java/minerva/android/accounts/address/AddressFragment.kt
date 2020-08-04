@@ -1,15 +1,18 @@
 package minerva.android.accounts.address
 
 import android.os.Bundle
+import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_address.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
+import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
@@ -34,20 +37,25 @@ class AddressFragment : Fragment() {
         arguments?.get(FRAGMENT_TYPE) as WrappedFragmentType
     }
 
+    private var viewGroup: ViewGroup? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeFragment()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_address, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        viewGroup = container
+        return inflater.inflate(R.layout.fragment_address, container, false)
+    }
+
 
     private fun initializeView(minervaPrimitive: MinervaPrimitive) {
         with(minervaPrimitive) {
             prepareLogo(this)
             prepareHeader(this)
             prepareQR(this)
-            textAddress.setTitleAndBody(prepareTitleAddress(), prepareTextAddress(this))
+            prepareAddress(this)
             setupShareButton(shareButton, prepareTextAddress(this))
             setupCopyButton(copyButton, prepareTextAddress(this), getString(R.string.address_saved_to_clip_board))
         }
@@ -61,10 +69,10 @@ class AddressFragment : Fragment() {
     }
 
     private fun prepareHeader(minervaPrimitive: MinervaPrimitive) {
-            header.apply {
-                text = minervaPrimitive.name
-                visibleOrGone(isIdentity())
-            }
+        header.apply {
+            text = minervaPrimitive.name
+            visibleOrGone(isIdentity())
+        }
     }
 
     private fun prepareQR(minervaPrimitive: MinervaPrimitive) {
@@ -77,6 +85,20 @@ class AddressFragment : Fragment() {
                 val qr = QRCode.from(this).withSize(qrCodeSize, qrCodeSize).file()
                 context?.let {
                     Glide.with(it).load(qr).into(qrCode)
+                }
+            }
+        }
+    }
+
+    private fun prepareAddress(minervaPrimitive: MinervaPrimitive) {
+        prepareTextAddress(minervaPrimitive).let { address ->
+            textFullAddress.setTitleAndBody(prepareTitleAddress(), address)
+            textShortAddress.apply {
+                setTitleAndBody(prepareTitleAddress(), address)
+                setSingleLine()
+                setOnClickListener {
+                    TransitionManager.beginDelayedTransition(viewGroup)
+                    textFullAddress.visibleOrInvisible(!textFullAddress.isVisible)
                 }
             }
         }

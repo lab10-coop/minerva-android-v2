@@ -55,10 +55,21 @@
             tools:src="@drawable/ic_artis" />
 
         <minerva.android.widget.LabeledTextView
-            android:id="@+id/textAddress"
+            android:id="@+id/textShortAddress"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/qrCode"
+            tools:text="0xdaa21bfaa1575e1d725b37ac1efbb7c5f0a32822" />
+
+        <minerva.android.widget.LabeledTextView
+            android:id="@+id/textFullAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/qrCode"
@@ -72,7 +83,7 @@
             android:layout_marginEnd="@dimen/margin_xxsmall"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/textAddress" />
+            app:layout_constraintTop_toBottomOf="@id/textFullAddress" />
 
         <minerva.android.widget.ActionButton
             android:id="@+id/shareButton"
@@ -82,6 +93,6 @@
             android:layout_marginTop="@dimen/margin_normal"
             app:layout_constraintLeft_toLeftOf="@id/guideline"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textAddress" />
+            app:layout_constraintTop_toBottomOf="@id/textFullAddress" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
