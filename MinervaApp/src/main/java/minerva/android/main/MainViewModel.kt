@@ -11,14 +11,13 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils
 import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
-import minerva.android.services.login.uitls.LoginUtils.getRequestedData
 import minerva.android.services.login.uitls.LoginUtils.getService
-import minerva.android.services.login.uitls.LoginUtils.getServiceName
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.ServiceQrResponse
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -67,12 +66,10 @@ class MainViewModel(
     fun isOrderEditAvailable(type: Int) = orderManager.isOrderAvailable(type)
 
     private fun handleQrCodeResponse(response: QrCodeResponse) {
-        response.run {
-            serviceName = getServiceName(response)
-            identityFields = getRequestedData(requestedData)
+        (response as? ServiceQrResponse)?.apply {
+            loginPayload = LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.issuer), response)
+            painlessLogin()
         }
-        loginPayload = LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.issuer), response)
-        painlessLogin()
     }
 
     fun painlessLogin() {
@@ -85,7 +82,7 @@ class MainViewModel(
         if (LoginUtils.isIdentityValid(identity)) loginPayload.qrCode?.let { minervaLogin(identity, it) }
         else _requestedFieldsLiveData.value = Event(identity.name)
 
-    private fun minervaLogin(identity: Identity, qrCode: QrCodeResponse) {
+    private fun minervaLogin(identity: Identity, qrCode: ServiceQrResponse) {
         qrCode.callback?.let { callback ->
             launchDisposable {
                 serviceManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCode))

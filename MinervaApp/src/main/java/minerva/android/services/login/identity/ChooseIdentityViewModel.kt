@@ -20,6 +20,7 @@ import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.ServiceQrResponse
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -43,7 +44,7 @@ class ChooseIdentityViewModel(
     fun getIdentities() = serviceManager.walletConfigLiveData.value?.identities
 
     //    TODO implement dynamic login concerning different services
-    fun handleLogin(identity: Identity, qrCodeResponse: QrCodeResponse) {
+    fun handleLogin(identity: Identity, qrCodeResponse: ServiceQrResponse) {
         _loadingLiveData.value = Event(true)
         if (isIdentityValid(identity)) {
             minervaLogin(identity, qrCodeResponse)
@@ -53,7 +54,7 @@ class ChooseIdentityViewModel(
         }
     }
 
-    private fun minervaLogin(identity: Identity, qrCode: QrCodeResponse) {
+    private fun minervaLogin(identity: Identity, qrCode: ServiceQrResponse) {
         if (handleNoKeysError(identity)) return
         qrCode.callback?.let { callback ->
             serviceManager.createJwtToken(createLoginPayload(identity, qrCode))
@@ -86,7 +87,7 @@ class ChooseIdentityViewModel(
     private fun doesIdentityHaveKeys(identity: Identity) =
         identity != IncognitoIdentity() && (identity.publicKey == String.Empty || identity.privateKey == String.Empty)
 
-    private fun getLoginStatus(qrCodeResponse: QrCodeResponse): Int =
+    private fun getLoginStatus(qrCodeResponse: ServiceQrResponse): Int =
         if (qrCodeResponse.requestedData.contains(FCM_ID)) NEW_QUICK_USER
         else NEW_USER
 

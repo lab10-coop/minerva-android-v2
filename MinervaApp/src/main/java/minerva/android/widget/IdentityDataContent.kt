@@ -15,6 +15,8 @@ import minerva.android.identities.data.getIdentityDataLabel
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.defs.CredentialType
+import minerva.android.walletmanager.model.defs.VerifiableCredentialType
 
 class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
@@ -53,11 +55,17 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         credentials.forEach {
             val bindedCredential = IdentityBindedItem(context)
             bindedCredential.setDateAndName(it.name, it.lastUsed)
-            //TODO change to adding proper icon based on the credential type, will be added in MNR-243
-            bindedCredential.setIcon(R.drawable.ic_backup_icon)
+            setCredentialIcon(it, bindedCredential)
             bindedCredential.popupMenu.setOnClickListener { showMenu(bindedCredential.popupMenu) }
             views.add(bindedCredential)
             addView(bindedCredential)
+        }
+    }
+
+    private fun setCredentialIcon(it: Credential, bindedCredential: IdentityBindedItem) {
+        when {
+            it.issuer == CredentialType.OAMTC && it.type == VerifiableCredentialType.AUTOMOTIVE_CLUB -> bindedCredential.setIcon(R.drawable.ic_oamtc_credential)
+            else -> bindedCredential.setIcon(R.drawable.ic_minerva_icon)
         }
     }
 
@@ -66,7 +74,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         services.forEach {
             val bindedService = IdentityBindedItem(context)
             bindedService.setDateAndName(it.name, it.lastUsed)
-            //TODO change to adding proper icon based on the service type, will be added in MNR-243
+            //TODO change to adding proper icon based on the service type
             bindedService.setIcon(R.drawable.ic_backup_icon)
             bindedService.popupMenu.setOnClickListener { showMenu(bindedService.popupMenu) }
             views.add(bindedService)

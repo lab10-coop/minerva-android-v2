@@ -103,7 +103,7 @@ class TransactionRepositoryImpl(
             .toList()
             .map { Pair(account.privateKey, it) }
 
-    override fun getAccount(valueIndex: Int, assetIndex: Int): Account? = walletConfigManager.getValue(valueIndex, assetIndex)
+    override fun getAccount(valueIndex: Int, assetIndex: Int): Account? = walletConfigManager.getAccount(valueIndex, assetIndex)
 
     override fun currentTransactionHash(transactionHash: String) {
         this.transactionHash = transactionHash

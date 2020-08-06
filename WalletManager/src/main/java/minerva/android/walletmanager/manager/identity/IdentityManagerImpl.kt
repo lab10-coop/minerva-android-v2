@@ -12,6 +12,7 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.utils.IdentityUtils
 
 class IdentityManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -28,7 +29,7 @@ class IdentityManagerImpl(
                     .map { keys ->
                         WalletConfig(
                             it.updateVersion,
-                            prepareIdentities(getIdentity(identity, keys), it),
+                            IdentityUtils.prepareIdentities(getIdentity(identity, keys), it),
                             it.accounts,
                             it.services
                         )
@@ -66,7 +67,7 @@ class IdentityManagerImpl(
 
     override fun removeIdentity(identity: Identity): Completable {
         walletConfigManager.getWalletConfig()?.let {
-            return handleRemovingIdentity(it.identities, getPositionForIdentity(identity, it), identity)
+            return handleRemovingIdentity(it.identities, IdentityUtils.getPositionForIdentity(identity, it), identity)
         }
         throw NotInitializedWalletConfigThrowable()
     }
@@ -85,22 +86,6 @@ class IdentityManagerImpl(
                 true
             )
         )
-    }
-
-    private fun prepareIdentities(identity: Identity, walletConfig: WalletConfig): List<Identity> {
-        val position = getPositionForIdentity(identity, walletConfig)
-        walletConfig.identities.toMutableList().apply {
-            if (inBounds(position)) this[position] = identity
-            else add(identity)
-            return this
-        }
-    }
-
-    private fun getPositionForIdentity(newIdentity: Identity, walletConfig: WalletConfig): Int {
-        walletConfig.identities.forEachIndexed { position, identity ->
-            if (newIdentity.index == identity.index) return position
-        }
-        return walletConfig.identities.size
     }
 
     private fun isOnlyOneElement(identities: List<Identity>): Boolean {

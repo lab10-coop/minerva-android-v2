@@ -118,10 +118,11 @@ class AddressFragment : Fragment() {
         else minervaPrimitive.address
 
     private fun prepareTitleAddress() =
-        if (isIdentity()) Identity.DID_LABEL
+        if (isIdentity()) DID_LABEL
         else String.Empty
 
     companion object {
+        const val DID_LABEL = "DID"
         @JvmStatic
         fun newInstance(fragmentType: WrappedFragmentType, index: Int) =
             AddressFragment().apply {

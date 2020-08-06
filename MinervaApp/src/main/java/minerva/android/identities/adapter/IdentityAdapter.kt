@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.identity_list_row.view.*
 import minerva.android.R
+import minerva.android.accounts.address.AddressFragment.Companion.DID_LABEL
 import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visibleOrGone
@@ -71,13 +72,16 @@ class IdentityViewHolder(
                 identityName.text = name
                 card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(name)))
                 profileImage.setImageDrawable(LetterLogo.createLogo(context, name))
-                identityDid.setSingleLineTitleAndBody(Identity.DID_LABEL, did)
+                identityDid.setSingleLineTitleAndBody(DID_LABEL, did)
                 dataContainer.prepareDataContainerFields(identity)
-                arrow.visibleOrGone(personalData.size > FIELD_DESCRIPTION_LIMIT)
+                arrow.visibleOrGone(shouldShowArrow())
                 setOnClickListeners(rawPosition, identity, removable)
             }
         }
     }
+
+    private fun Identity.shouldShowArrow() =
+        personalData.size > FIELD_DESCRIPTION_LIMIT || credentials.isNotEmpty() || services.isNotEmpty()
 
     private fun View.setOnClickListeners(rawPosition: Int, identity: Identity, removable: Boolean) {
         setOnClickListener {

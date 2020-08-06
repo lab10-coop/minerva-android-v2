@@ -1,9 +1,9 @@
-package minerva.android.walletmanager.storage
+package minerva.android.walletmanager.model.defs
 
 import androidx.annotation.StringDef
-import minerva.android.walletmanager.storage.ServiceType.Companion.CHARGING_STATION
-import minerva.android.walletmanager.storage.ServiceType.Companion.M27
-import minerva.android.walletmanager.storage.ServiceType.Companion.UNICORN_LOGIN
+import minerva.android.walletmanager.model.defs.ServiceType.Companion.CHARGING_STATION
+import minerva.android.walletmanager.model.defs.ServiceType.Companion.M27
+import minerva.android.walletmanager.model.defs.ServiceType.Companion.UNICORN_LOGIN
 
 @Target(AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.SOURCE)

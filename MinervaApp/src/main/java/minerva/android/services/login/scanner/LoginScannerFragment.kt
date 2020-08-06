@@ -13,7 +13,7 @@ import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.PainlessLoginFragmentListener
-import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.ServiceQrResponse
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginScannerFragment : BaseScanner() {
@@ -59,10 +59,12 @@ class LoginScannerFragment : BaseScanner() {
             knownUserLoginLiveData.observe(viewLifecycleOwner, EventObserver {
                 listener.onResult(false, loginPayload = it)
             })
+            handleBindCredentialSuccessLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResult(true, it) })
+            handleBindCredentialErrorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResult(false) })
         }
     }
 
-    private fun goToChooseIdentityFragment(qrCodeResponse: QrCodeResponse) {
+    private fun goToChooseIdentityFragment(qrCodeResponse: ServiceQrResponse) {
         Handler().postDelayed({ listener.showChooseIdentityFragment(qrCodeResponse) }, DELAY)
     }
 

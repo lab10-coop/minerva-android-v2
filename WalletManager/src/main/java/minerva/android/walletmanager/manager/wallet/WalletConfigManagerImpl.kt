@@ -19,7 +19,6 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.ResponseState
 import minerva.android.walletmanager.model.mappers.mapWalletConfigToWalletPayload
-import minerva.android.walletmanager.storage.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
 import timber.log.Timber
@@ -151,7 +150,7 @@ class WalletConfigManagerImpl(
 
     override fun isAlreadyLoggedIn(issuer: String): Boolean {
         getWalletConfig()?.services?.forEach {
-            if (doesChargingStationIsAlreadyLoggedIn(it, issuer)) return true
+            if (it.type == issuer) return true
         }
         return false
     }
@@ -162,14 +161,11 @@ class WalletConfigManagerImpl(
             .orElse { return String.Empty }
     }
 
-    override fun getLoggedInIdentity(publicKey: String): Identity? {
+    override fun getLoggedInIdentityByPyblicKey(publicKey: String): Identity? {
         getWalletConfig()?.identities?.find { it.publicKey == publicKey }
             ?.let { return it }
             .orElse { return null }
     }
-
-    private fun doesChargingStationIsAlreadyLoggedIn(service: Service, issuer: String) =
-        service.type == issuer && service.type == ServiceType.CHARGING_STATION
 
     override fun saveService(service: Service): Completable {
         getWalletConfig()?.run {
@@ -179,14 +175,6 @@ class WalletConfigManagerImpl(
             return updateWalletConfig(getWalletConfigWithUpdatedService(service))
         }
         return Completable.error(NotInitializedWalletConfigThrowable())
-    }
-
-    override fun getValue(valueIndex: Int, assetIndex: Int): Account? {
-        var account: Account? = null
-        getWalletConfig()?.accounts?.forEach {
-            if (it.index == valueIndex) account = it
-        }
-        return account
     }
 
     private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {
@@ -202,7 +190,14 @@ class WalletConfigManagerImpl(
         services.find { service -> service.type == newService.type }
 
     private fun WalletConfig.updateService(service: Service) {
-        services.forEach { if (it == service) it.lastUsed = DateUtils.getLastUsedFormatted() }
+        services.forEach { if (it == service) it.lastUsed = DateUtils.getDateWithTimeFromTimestamp() }
+    }
+
+    override fun getAccount(valueIndex: Int, assetIndex: Int): Account? {
+        getWalletConfig()?.accounts?.forEach {
+            if (it.index == valueIndex) return  it
+        }
+        return null
     }
 
     companion object {

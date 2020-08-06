@@ -3,11 +3,8 @@ package minerva.android.walletmanager.manager.services
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.walletmanager.manager.Manager
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.Payment
-import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.storage.ServiceType
+import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.ServiceType
 
 interface ServiceManager : Manager {
     fun saveService(service: Service): Completable
@@ -19,4 +16,5 @@ interface ServiceManager : Manager {
     fun getLoggedInIdentityPublicKey(issuer: String): String
     fun getLoggedInIdentity(publicKey: String): Identity?
     fun removeService(@ServiceType type: String): Completable
+    fun bindCredentialToIdentity(newCredential: Credential): Single<String>
 }
