@@ -1,7 +1,7 @@
 package minerva.android.widget.repository
 
 import minerva.android.R
-import minerva.android.walletmanager.storage.ServiceType
+import minerva.android.walletmanager.model.defs.ServiceType
 
 fun getServiceIcon(type: String): Int =
     when (type) {

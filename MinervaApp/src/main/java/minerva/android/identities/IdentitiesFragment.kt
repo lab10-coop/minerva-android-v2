@@ -1,5 +1,6 @@
 package minerva.android.identities
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Identity
 import minerva.android.wrapped.startEditIdentityWrappedActivity
+import minerva.android.wrapped.startIdentityAddressWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class IdentitiesFragment : Fragment(), IdentityFragmentListener {
@@ -66,9 +68,8 @@ class IdentitiesFragment : Fragment(), IdentityFragmentListener {
         }
     }
 
-    override fun showIdentity(identity: Identity) {
-        //TODO add showing identity details
-        Toast.makeText(requireContext(), "Show identity", Toast.LENGTH_LONG).show()
+    override fun showIdentity(identity: Identity, position: Int) {
+        startIdentityAddressWrappedActivity(requireContext(), identity.name, position)
     }
 
     override fun onIdentityRemoved(identity: Identity) {

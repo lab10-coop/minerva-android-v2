@@ -17,13 +17,14 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.services.login.PainlessLoginFragmentListener
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.ServiceQrResponse
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ChooseIdentityFragment : Fragment() {
 
     private val viewModel: ChooseIdentityViewModel by viewModel()
     private val identitiesAdapter = IdentitiesAdapter()
-    private lateinit var qrCodeResponse: QrCodeResponse
+    private lateinit var qrCodeResponse: ServiceQrResponse
     private lateinit var listener: PainlessLoginFragmentListener
 
     override fun onCreateView(
@@ -34,7 +35,7 @@ class ChooseIdentityFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            qrCodeResponse = it.getParcelable<QrCodeResponse>(QR_CODE_RESPONSE) as QrCodeResponse
+            qrCodeResponse = it.getParcelable<QrCodeResponse>(QR_CODE_RESPONSE) as ServiceQrResponse
         }
     }
 
@@ -111,7 +112,7 @@ class ChooseIdentityFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(qrCodeResponse: QrCodeResponse) = ChooseIdentityFragment().apply {
+        fun newInstance(qrCodeResponse: ServiceQrResponse) = ChooseIdentityFragment().apply {
             arguments = Bundle().apply { putParcelable(QR_CODE_RESPONSE, qrCodeResponse) }
         }
 

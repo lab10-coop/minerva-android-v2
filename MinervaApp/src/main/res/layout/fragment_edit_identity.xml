@@ -23,39 +23,38 @@
             android:padding="@dimen/margin_normal"
             tools:ignore="PrivateResource">
 
-            <LinearLayout
+            <ImageView
+                android:id="@+id/imageLogo"
+                android:layout_width="@dimen/big_letter_logo_size"
+                android:layout_height="@dimen/big_letter_logo_size"
+                />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/FormTextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_normal"
-                android:orientation="horizontal">
+                android:layout_marginTop="@dimen/margin_normal"
+                android:hint="@string/identity_name_label">
 
-                <minerva.android.widget.LetterLogo
-                    android:id="@+id/profileLogo"
-                    android:layout_width="@dimen/small_logo_size"
-                    android:layout_height="@dimen/small_logo_size"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="@dimen/margin_small"
-                    android:backgroundTint="@color/colorSetOneOpacity"
-                    android:textColor="@color/colorSetOne"
-                    tools:text="I" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/FormTextInputLayoutStyle"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/identityName"
+                    style="@style/EditTextInputLayoutStyle"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/identity_name_label">
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/identityName"
-                        style="@style/EditTextInputLayoutStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
+            <minerva.android.widget.LabeledTextView
+                android:id="@+id/did"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/margin_normal"
+                tools:text="0xdaa21bfaa1575e1d725b37ac1efbb7c5f0a32822" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_normal"
                 android:layout_marginBottom="@dimen/margin_xsmall"
                 android:fontFamily="@font/rubik_medium"
                 android:text="@string/personal_data"

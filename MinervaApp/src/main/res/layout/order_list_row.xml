@@ -27,15 +27,6 @@
             tools:ignore="ContentDescription"
             tools:src="@drawable/ic_artis" />
 
-        <minerva.android.widget.LetterLogo
-            android:id="@+id/letterLogo"
-            android:layout_width="@dimen/small_logo_size"
-            android:layout_height="@dimen/small_logo_size"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
-            tools:ignore="ContentDescription" />
-
         <ImageView
             android:id="@+id/dragIcon"
             android:layout_width="wrap_content"

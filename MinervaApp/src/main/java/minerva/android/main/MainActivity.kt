@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
                 Toast.makeText(this@MainActivity, getString(R.string.unexpected_error), Toast.LENGTH_LONG).show()
             })
             loadingLiveData.observe(this@MainActivity, EventObserver {
-                (getCurrentFragment() as AccountsFragment)?.setProgressAccount(it.first, it.second)
+                (getCurrentFragment() as AccountsFragment).setProgressAccount(it.first, it.second)
             })
 
         }

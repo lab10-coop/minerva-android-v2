@@ -11,6 +11,7 @@ import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.ServiceQrResponse
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Test
 
@@ -36,8 +37,8 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.loginLiveData.observeForever(loginObserver)
         viewModel.handleLogin(
-            Identity(1, data = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "1", publicKey = "2"),
-            QrCodeResponse("Minerva", "callback")
+            Identity(1, personalData = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "1", publicKey = "2"),
+            ServiceQrResponse("Minerva", "callback")
         )
         loginCaptor.run {
             verify(loginObserver).onChanged(capture())
@@ -53,7 +54,7 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         viewModel.requestedFieldsLiveData.observeForever(requestFieldObserver)
         viewModel.handleLogin(
             Identity(1, privateKey = "1", publicKey = "2"),
-            QrCodeResponse("Minerva", "callback")
+            ServiceQrResponse("Minerva", "callback")
         )
         requestFieldCaptor.run {
             verify(requestFieldObserver).onChanged(capture())
@@ -68,8 +69,8 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.handleLogin(
-            Identity(1, data = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "1", publicKey = "2"),
-            QrCodeResponse("Minerva", "callback")
+            Identity(1, personalData = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "1", publicKey = "2"),
+            ServiceQrResponse("Minerva", "callback")
         )
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
@@ -83,8 +84,8 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.handleLogin(
-            Identity(1, data = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "", publicKey = ""),
-            QrCodeResponse("Minerva", "callback")
+            Identity(1, personalData = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "", publicKey = ""),
+            ServiceQrResponse("Minerva", "callback")
         )
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())

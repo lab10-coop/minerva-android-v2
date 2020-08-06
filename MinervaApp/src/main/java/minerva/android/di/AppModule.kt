@@ -2,7 +2,7 @@ package minerva.android.di
 
 import minerva.android.BuildConfig
 import minerva.android.accounts.AccountsViewModel
-import minerva.android.accounts.address.AccountAddressViewModel
+import minerva.android.accounts.address.AddressViewModel
 import minerva.android.accounts.akm.SafeAccountSettingsViewModel
 import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.accounts.transaction.TransactionsViewModel
@@ -41,8 +41,8 @@ private val appModules = module {
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
     viewModel { ChooseIdentityViewModel(get(), get()) }
-    viewModel { LoginScannerViewModel(get()) }
-    viewModel { AccountAddressViewModel(get()) }
+    viewModel { LoginScannerViewModel(get(), get()) }
+    viewModel { AddressViewModel(get(), get()) }
     viewModel { SafeAccountSettingsViewModel(get(), get()) }
     viewModel { TransactionsViewModel(get(), get(), get()) }
     viewModel { NewAccountViewModel(get(), get()) }

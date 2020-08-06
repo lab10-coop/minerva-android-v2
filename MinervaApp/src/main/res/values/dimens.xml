@@ -21,6 +21,8 @@
     <dimen name="form_box_stroke_width">2dp</dimen>
 
     <dimen name="clickable_area">32dp</dimen>
+    <dimen name="large_letter_logo_size">128dp</dimen>
+    <dimen name="big_letter_logo_size">96dp</dimen>
     <dimen name="qr_code_size">256dp</dimen>
     <dimen name="circle_icon_size">60dp</dimen>
     <dimen name="address_width">192dp</dimen>

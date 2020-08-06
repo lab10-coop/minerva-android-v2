@@ -12,7 +12,7 @@ import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.accounts.address.AccountAddressFragment
+import minerva.android.accounts.address.AddressFragment
 import minerva.android.accounts.akm.SafeAccountSettingsFragment
 import minerva.android.accounts.create.NewAccountFragment
 import minerva.android.accounts.listener.OnBackListener
@@ -69,9 +69,10 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener, OnBackLis
         val fragment = when (fragmentType) {
             WrappedFragmentType.IDENTITY -> EditIdentityFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             WrappedFragmentType.IDENTITY_ORDER -> EditOrderFragment.newInstance(WalletActionType.IDENTITY)
-            WrappedFragmentType.VALUE -> NewAccountFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
-            WrappedFragmentType.VALUE_ADDRESS -> AccountAddressFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
-            WrappedFragmentType.VALUE_ORDER -> EditOrderFragment.newInstance(WalletActionType.ACCOUNT)
+            WrappedFragmentType.ACCOUNT -> NewAccountFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
+            WrappedFragmentType.ACCOUNT_ADDRESS -> AddressFragment.newInstance(fragmentType, intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.IDENTITY_ADDRESS -> AddressFragment.newInstance(fragmentType, intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.ACCOUNT_ORDER -> EditOrderFragment.newInstance(WalletActionType.ACCOUNT)
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
         }
@@ -82,9 +83,9 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener, OnBackLis
         when (fragmentType) {
             WrappedFragmentType.IDENTITY -> getString(R.string.new_identity)
             WrappedFragmentType.IDENTITY_ORDER -> getString(R.string.edit_identity_order)
-            WrappedFragmentType.VALUE -> getString(R.string.new_account)
-            WrappedFragmentType.VALUE_ADDRESS -> String.Empty
-            WrappedFragmentType.VALUE_ORDER -> getString(R.string.edit_account_order)
+            WrappedFragmentType.ACCOUNT -> getString(R.string.new_account)
+            WrappedFragmentType.ACCOUNT_ADDRESS, WrappedFragmentType.IDENTITY_ADDRESS -> String.Empty
+            WrappedFragmentType.ACCOUNT_ORDER -> getString(R.string.edit_account_order)
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> getString(R.string.settings)
             WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
         }
@@ -118,15 +119,17 @@ class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener, OnBackLis
         const val POSITION = "position"
         const val FRAGMENT = "fragment"
         const val LOGO = "logo"
+        const val FRAGMENT_TYPE = "type"
     }
 }
 
 enum class WrappedFragmentType {
     IDENTITY,
+    IDENTITY_ADDRESS,
     IDENTITY_ORDER,
-    VALUE,
-    VALUE_ADDRESS,
-    VALUE_ORDER,
+    ACCOUNT,
+    ACCOUNT_ADDRESS,
+    ACCOUNT_ORDER,
     SAFE_ACCOUNT_SETTINGS,
     SERVICE_ORDER
 }
