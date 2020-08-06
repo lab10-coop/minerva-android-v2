@@ -29,11 +29,8 @@ object NetworkManager {
 
     fun getAssetsAddresses(type: String): List<String> = getNetwork(type).assets.map { it.address }
 
-    fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<AccountAsset> = assetList.map {
-        getAssetFromPair(
-            it
-        )
-    }
+    fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<AccountAsset> =
+        assetList.map { getAssetFromPair(it) }
 
     fun isSafeAccountAvailable(type: String) = getNetwork(type).isSafeAccountAvailable
 

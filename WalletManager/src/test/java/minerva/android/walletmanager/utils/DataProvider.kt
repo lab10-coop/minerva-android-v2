@@ -5,8 +5,7 @@ import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.NetworkShortName
-import minerva.android.walletmanager.model.defs.NetworkTokenName
-import minerva.android.walletmanager.storage.ServiceType
+import minerva.android.walletmanager.model.defs.ServiceType
 
 object DataProvider {
 
@@ -18,7 +17,7 @@ object DataProvider {
 
     val walletConfig = WalletConfig(
         0, listOf(
-            Identity(0, "identityName1", "", "privateKey", "address", data),
+            Identity(0, "identityName1", "11", "privateKey", "address", data),
             Identity(1, "identityName2", "", "privateKey", "address", data),
             Identity(3, "identityName3", "", "privateKey", "address", data)
         ),

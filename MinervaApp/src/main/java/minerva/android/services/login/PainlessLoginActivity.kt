@@ -14,7 +14,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.identity.ChooseIdentityFragment
 import minerva.android.services.login.scanner.LoginScannerFragment
 import minerva.android.services.login.uitls.LoginPayload
-import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.ServiceQrResponse
 
 class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener {
 
@@ -39,6 +39,7 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(IS_LOGIN_SUCCESS, isResultSucceed)
             putExtra(LOGIN_PAYLOAD, loginPayload)
+            putExtra(RESULT_MESSAGE, message)
         })
         finish()
     }
@@ -54,12 +55,12 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
 
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
-    override fun showChooseIdentityFragment(qrCodeResponse: QrCodeResponse) {
+    override fun showChooseIdentityFragment(qrCodeResponse: ServiceQrResponse) {
         showFragment(qrCodeResponse)
         setupActionBar()
     }
 
-    private fun showFragment(qrCodeResponse: QrCodeResponse) {
+    private fun showFragment(qrCodeResponse: ServiceQrResponse) {
         replaceFragment(
             R.id.container, ChooseIdentityFragment.newInstance(qrCodeResponse),
             R.animator.slide_in_left, R.animator.slide_out_right
@@ -79,5 +80,6 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
     companion object {
         const val IS_LOGIN_SUCCESS = "is_login_succeed"
         const val LOGIN_PAYLOAD = "login_payload"
+        const val RESULT_MESSAGE = "result_message"
     }
 }

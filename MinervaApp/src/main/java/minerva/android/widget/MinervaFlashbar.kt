@@ -10,7 +10,7 @@ object MinervaFlashbar {
     fun show(activity: Activity, title: String, message: String) {
         getDefaultFlashBar(activity, title, message)
             .duration(FLASHBAR_DURATION)
-            .primaryActionText(activity.getString(R.string.dissmiss))
+            .primaryActionText(activity.getString(R.string.dismiss))
             .primaryActionTextSizeInSp(FONT_SIZE)
             .primaryActionTextColorRes(R.color.colorPrimary)
             .primaryActionTapListener(object : Flashbar.OnActionTapListener {

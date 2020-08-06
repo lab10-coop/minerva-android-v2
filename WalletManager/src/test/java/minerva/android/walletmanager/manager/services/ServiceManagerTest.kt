@@ -10,11 +10,12 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.LoginResponse
 import minerva.android.servicesApiProvider.model.Profile
+import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.PaymentRequest
-import minerva.android.walletmanager.storage.ServiceType
+import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
 import org.junit.Before
@@ -78,7 +79,9 @@ class ServiceManagerTest : RxTest() {
             .test()
             .assertComplete()
             .assertValue {
-                it.callback == "test" && it.issuer == "test"
+                (it as ServiceQrResponse).run {
+                    it.callback == "test" && it.issuer == "test"
+                }
             }
     }
 
@@ -148,7 +151,7 @@ class ServiceManagerTest : RxTest() {
     @Test
     fun `get logged in identity test`() {
         val expected = Identity(0, name = "tom", publicKey = "publicKey")
-        whenever(walletConfigManager.getLoggedInIdentity(any())) doReturn expected
+        whenever(walletConfigManager.getLoggedInIdentityByPyblicKey(any())) doReturn expected
         repository.run {
             val result = getLoggedInIdentity("publicKey")
             assertEquals(result, expected)
@@ -238,5 +241,28 @@ class ServiceManagerTest : RxTest() {
         repository.removeService(ServiceType.CHARGING_STATION)
             .test()
             .assertError(error)
+    }
+
+    @Test
+    fun `bind credential to identity success test`() {
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        repository.bindCredentialToIdentity(Credential("test", "type", loggedInIdentityDid = "did:ethr:address"))
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it == "identityName1"
+            }
+    }
+
+    @Test
+    fun `bind credential to identity error test`() {
+        val error = NoBindedCredentialThrowable()
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        repository.bindCredentialToIdentity(Credential("test", "type", loggedInIdentityDid = "address"))
+            .test()
+            .assertError {
+                it is NoBindedCredentialThrowable
+            }
     }
 }

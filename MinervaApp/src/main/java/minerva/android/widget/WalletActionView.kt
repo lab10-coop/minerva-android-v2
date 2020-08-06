@@ -37,6 +37,11 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
             )
             WalletActionType.ACCOUNT -> showAccounts(walletAction)
             WalletActionType.SERVICE -> showServices(walletAction)
+            WalletActionType.CREDENTIAL -> showAction(
+                walletAction.fields[WalletActionFields.CREDENTIAL_NAME],
+                R.string.credential_added_action_label,
+                R.drawable.ic_identities //TODO change to credential icon
+            )
         }
     }
 

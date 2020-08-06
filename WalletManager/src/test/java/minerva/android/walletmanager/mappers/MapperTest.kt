@@ -1,16 +1,55 @@
 package minerva.android.walletmanager.mappers
 
-import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.AccountPayload
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.walletmanager.model.WalletConfigTestValues
+import minerva.android.configProvider.model.walletConfig.IdentityPayload
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.mappers.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
 class MapperTest : WalletConfigTestValues() {
+
+    private val credentialQrCodeResult = mapOf<String, Any?>(
+        "vc" to mapOf(
+            "type" to arrayListOf("VerifiableCredential", "AutomotiveMembershipCardCredential"),
+            "credentialSubject" to mapOf(
+                "automotiveMembershipCard" to mapOf(
+                    "memberId" to "123456",
+                    "since" to "2018",
+                    "coverage" to "touring",
+                    "name" to "name"
+                )
+            )
+        ),
+        "iss" to "did:ethr:01016a194e4d5beee3a634edb156f84d03354a03",
+        "exp" to 1234L,
+        "sub" to "loggedDid"
+    )
+
+    private val credentialQrCodeResultWithDifferentVCType = mapOf<String, Any?>(
+        "vc" to mapOf(
+            "type" to arrayListOf("VerifiableCredential", "differentType"),
+            "credentialSubject" to mapOf(
+                "automotiveMembershipCard" to mapOf(
+                    "memberId" to "123456",
+                    "name" to "name",
+                    "since" to "2018",
+                    "coverage" to "touring"
+                )
+            )
+        ),
+        "iss" to "did:ethr:01016a194e4d5beee3a634edb156f84d03354a03",
+        "exp" to 1234L,
+        "sub" to "loggedDid"
+    )
+
+    private val serviceQrCodeResult = mapOf<String, Any?>(
+        "iss" to "did:ethr:0x95b200870916377a74fc65d628a735d58bc22c98",
+        "exp" to 1234L,
+        "sub" to "loggedDid",
+        "requested" to arrayListOf("test1", "test2"),
+        "callback" to "callback"
+    )
 
     @Test
     fun `Mapping Identity to IdentityResponse Test`() {
@@ -89,5 +128,46 @@ class MapperTest : WalletConfigTestValues() {
         walletConfig.version shouldBeEqualTo walletPayload.version
         walletConfig.identities[0].name shouldBeEqualTo walletPayload.identityResponse[0].name
         walletConfig.accounts[0].name shouldBeEqualTo walletPayload.accountResponse[0].name
+    }
+
+    @Test
+    fun `map qr code result to credential qr code response`() {
+        val result = mapHashMapToQrCodeResponse(credentialQrCodeResult)
+        assert(result is CredentialQrResponse)
+        (result as CredentialQrResponse).run {
+            memberName == "name" &&
+                    name == "ÖAMTC-Member Card" &&
+                    issuer == "did:ethr:01016a194e4d5beee3a634edb156f84d03354a03" &&
+                    type == "AutomotiveMembershipCardCredential" &&
+                    memberId == "123456" &&
+                    creationDate == "2018" &&
+                    coverage == "touring"
+        }
+    }
+
+    @Test
+    fun `map qr code result to credential qr code response with no vc type`() {
+        val result = mapHashMapToQrCodeResponse(credentialQrCodeResultWithDifferentVCType)
+        assert(result is CredentialQrResponse)
+        (result as CredentialQrResponse).run {
+            name == "" &&
+                    memberId == "" &&
+                    creationDate == "" &&
+                    coverage == ""
+        }
+    }
+
+    @Test
+    fun `map qr code result to service qr code response`() {
+        val result = mapHashMapToQrCodeResponse(serviceQrCodeResult)
+        assert(result is ServiceQrResponse)
+        (result as ServiceQrResponse).run {
+            serviceName == "Demo Web Page Login" &&
+                    callback == "callback" &&
+                    requestedData[0] == "test1" &&
+                    identityFields == "test1 test2" &&
+                    issuer == "did:ethr:0x95b200870916377a74fc65d628a735d58bc22c98" &&
+                    identityFields == "touring"
+        }
     }
 }

@@ -18,7 +18,7 @@ open class Identity(
     override var address: String = String.Empty,
     open val personalData: LinkedHashMap<String, String> = linkedMapOf(),
     override var isDeleted: Boolean = false,
-    val credentials: List<Credential> = listOf(),
+    var credentials: List<Credential> = listOf(),
     val services: List<Service> = listOf(),
     var isSelected: Boolean = false
 ) : MinervaPrimitive(publicKey, name, isDeleted) {
@@ -48,7 +48,6 @@ open class Identity(
             && isSelected == other.isSelected
 
     companion object {
-        const val DID_LABEL = "DID"
         private const val DID_PREFIX = "did:ethr:"
     }
 }

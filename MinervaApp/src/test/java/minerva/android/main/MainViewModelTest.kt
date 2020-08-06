@@ -11,6 +11,7 @@ import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.QrCodeResponse
+import minerva.android.walletmanager.model.ServiceQrResponse
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -65,7 +66,7 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `test painless login error`() {
         val error = Throwable()
-        viewModel.loginPayload = LoginPayload(qrCode = QrCodeResponse(callback = "url"), loginStatus = 0)
+        viewModel.loginPayload = LoginPayload(qrCode = ServiceQrResponse(callback = "url"), loginStatus = 0)
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(
             Identity(
                 1, personalData = linkedMapOf("name" to "tom", "phone_number" to "123"),
@@ -87,9 +88,9 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `login from notification error`() {
         val error = Throwable()
-        viewModel.loginPayload = LoginPayload(qrCode = QrCodeResponse(callback = "url"), loginStatus = 0)
-        whenever(serviceManager.decodeQrCodeResponse(any())) doReturn Single.just(QrCodeResponse())
-        whenever(serviceManager.getLoggedInIdentityPublicKey(any())) doReturn "publickKey"
+        viewModel.loginPayload = LoginPayload(qrCode = ServiceQrResponse(callback = "url"), loginStatus = 0)
+        whenever(serviceManager.decodeQrCodeResponse(any())) doReturn Single.just(ServiceQrResponse() as QrCodeResponse)
+        whenever(serviceManager.getLoggedInIdentityPublicKey(any())) doReturn "publicKey"
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(
             Identity(
                 1, personalData = linkedMapOf("name" to "tom", "phone_number" to "123"),
