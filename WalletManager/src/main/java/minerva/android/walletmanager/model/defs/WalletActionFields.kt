@@ -14,5 +14,6 @@ annotation class WalletActionFields {
         const val NETWORK = "network"
         const val RECEIVER = "receiver"
         const val SERVICE_NAME = "service"
+        const val CREDENTIAL_NAME = "credentialName"
     }
 }

@@ -103,7 +103,7 @@ class IdentityManagerTest : RxTest() {
         val loadedIdentity = repository.loadIdentity(1, "Identity")
         loadedIdentity.name shouldBeEqualTo "identityName2"
         loadedIdentity.isDeleted shouldBeEqualTo false
-        loadedIdentity.data.size shouldBeEqualTo 3
+        loadedIdentity.personalData.size shouldBeEqualTo 3
     }
 
     @Test
@@ -124,7 +124,7 @@ class IdentityManagerTest : RxTest() {
         repository.loadIdentity(0, "Identity").apply {
             name shouldBeEqualTo "identityName1"
             isDeleted shouldBeEqualTo false
-            data.size shouldBeEqualTo 3
+            personalData.size shouldBeEqualTo 3
         }
         walletConfig.identities.size shouldBeEqualTo 2
     }
@@ -138,7 +138,7 @@ class IdentityManagerTest : RxTest() {
         repository.loadIdentity(0, "Identity").apply {
             name shouldBeEqualTo "identityName1"
             isDeleted shouldBeEqualTo false
-            data.size shouldBeEqualTo 3
+            personalData.size shouldBeEqualTo 3
         }
         walletConfig.identities.size shouldBeEqualTo 3
     }

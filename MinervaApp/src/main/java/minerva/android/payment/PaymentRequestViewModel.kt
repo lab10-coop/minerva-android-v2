@@ -18,8 +18,8 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.AUT
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
-import minerva.android.walletmanager.storage.ServiceName.Companion.M27_NAME
-import minerva.android.walletmanager.storage.ServiceType
+import minerva.android.walletmanager.model.defs.ServiceName.Companion.M27_NAME
+import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 
@@ -80,7 +80,7 @@ class PaymentRequestViewModel(
 
     fun connectToService() {
         launchDisposable {
-            serviceManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.getLastUsedFormatted()))
+            serviceManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.getDateWithTimeFromTimestamp()))
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED)))
                 .subscribeOn(Schedulers.io())

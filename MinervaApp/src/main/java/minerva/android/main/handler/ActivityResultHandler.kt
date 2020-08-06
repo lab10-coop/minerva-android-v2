@@ -3,14 +3,15 @@ package minerva.android.main.handler
 import android.app.Activity
 import android.content.Intent
 import minerva.android.R
+import minerva.android.accounts.transaction.activity.TransactionActivity
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.MainActivity
+import minerva.android.services.login.PainlessLoginActivity
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_QUICK_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_QUICK_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_USER
-import minerva.android.services.login.PainlessLoginActivity
-import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.widget.KnownUserLoginFlashBar
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.QuickLoginFlashBar
@@ -39,12 +40,19 @@ internal fun MainActivity.handleTransactionResult(data: Intent?) {
 internal fun MainActivity.handleLoginResult(data: Intent?) {
     data?.apply {
         val isLoginSuccess = getBooleanExtra(PainlessLoginActivity.IS_LOGIN_SUCCESS, false)
-        (getParcelableExtra(PainlessLoginActivity.LOGIN_PAYLOAD) as LoginPayload).run {
-            viewModel.loginPayload = this
-            if (isLoginSuccess) handleSuccessLoginStatuses(loginStatus)
-            else handleLoginStatuses(loginStatus)
+        (getParcelableExtra(PainlessLoginActivity.LOGIN_PAYLOAD) as? LoginPayload)?.let {
+            viewModel.loginPayload = it
+            if (isLoginSuccess) handleSuccessLoginStatuses(it.loginStatus)
+            else handleLoginStatuses(it.loginStatus)
+        }.orElse {
+            handleCredentials(isLoginSuccess, getStringExtra(PainlessLoginActivity.RESULT_MESSAGE))
         }
     }
+}
+
+fun MainActivity.handleCredentials(isLoginSuccess: Boolean, identityName: String?) {
+    if (isLoginSuccess) MinervaFlashbar.show(this, getString(R.string.success), getString(R.string.attached_credential_success, identityName))
+    else MinervaFlashbar.show(this, getString(R.string.error_importing_credential), getString(R.string.attached_credential_failure))
 }
 
 fun MainActivity.handleLoginStatuses(loginAction: Int) {

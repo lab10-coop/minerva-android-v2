@@ -10,12 +10,14 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.identity_list_row.view.*
 import minerva.android.R
+import minerva.android.accounts.address.AddressFragment.Companion.DID_LABEL
 import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.Identity
 import minerva.android.widget.IdentityDataContent.Companion.FIELD_DESCRIPTION_LIMIT
+import minerva.android.widget.LetterLogo
 import minerva.android.widget.repository.generateColor
 
 class IdentityAdapter(private val listener: IdentityFragmentListener) : RecyclerView.Adapter<IdentityViewHolder>() {
@@ -69,14 +71,17 @@ class IdentityViewHolder(
             view.apply {
                 identityName.text = name
                 card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(name)))
-                profileImage.createLogo(name)
-                identityDid.setSingleLineTitleAndBody(Identity.DID_LABEL, did)
-                dataContainer.prepareData(data)
-                arrow.visibleOrGone(data.size > FIELD_DESCRIPTION_LIMIT)
+                profileImage.setImageDrawable(LetterLogo.createLogo(context, name))
+                identityDid.setSingleLineTitleAndBody(DID_LABEL, did)
+                dataContainer.prepareDataContainerFields(identity)
+                arrow.visibleOrGone(shouldShowArrow())
                 setOnClickListeners(rawPosition, identity, removable)
             }
         }
     }
+
+    private fun Identity.shouldShowArrow() =
+        personalData.size > FIELD_DESCRIPTION_LIMIT || credentials.isNotEmpty() || services.isNotEmpty()
 
     private fun View.setOnClickListeners(rawPosition: Int, identity: Identity, removable: Boolean) {
         setOnClickListener {
@@ -99,7 +104,7 @@ class IdentityViewHolder(
     private fun PopupMenu.setOnItemMenuClickListener(position: Int, identity: Identity) {
         setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.showIdentity -> listener.showIdentity(identity)
+                R.id.showIdentity -> listener.showIdentity(identity, position)
                 R.id.edit -> listener.onIdentityEdit(position, identity.name)
                 R.id.remove -> listener.onIdentityRemoved(identity)
             }
@@ -123,7 +128,7 @@ class IdentityViewHolder(
 }
 
 interface IdentityFragmentListener {
-    fun showIdentity(identity: Identity)
+    fun showIdentity(identity: Identity, position: Int)
     fun onIdentityRemoved(identity: Identity)
     fun onIdentityEdit(position: Int, name: String)
 }

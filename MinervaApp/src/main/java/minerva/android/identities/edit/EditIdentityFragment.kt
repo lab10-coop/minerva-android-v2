@@ -24,6 +24,7 @@ import minerva.android.walletmanager.model.defs.IdentityField.Companion.NAME
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.POSTCODE
 import minerva.android.walletmanager.model.defs.WalletActionStatus
+import minerva.android.widget.LetterLogo
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import java.util.*
@@ -57,7 +58,7 @@ class EditIdentityFragment : Fragment() {
             postcodeLayout.visible()
             countryLayout.visible()
         }
-        identityName.afterTextChanged { profileLogo.createLogo(it) }
+        identityName.afterTextChanged { imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), it)) }
         identityName.onFocusLost { identityName.error = isEmpty(it) }
         email.onFocusLost { email.error = getEmailErrorMessage(it) }
         birthDate.setOnClickListener { showDialogPicker() }
@@ -101,23 +102,32 @@ class EditIdentityFragment : Fragment() {
     }
 
     private fun setIdentityData(identity: Identity) {
-        identityName.setText(identity.name)
-        accountName.setText(identity.data[NAME])
-        email.setText(identity.data[EMAIL])
-        phoneNumber.setText(identity.data[PHONE_NUMBER])
-        birthDate.setText(identity.data[BIRTH_DATE])
-        addressLine1.setText(identity.data[ADDRESS_1])
-        addressLine2.setText(identity.data[ADDRESS_2])
-        city.setText(identity.data[CITY])
-        postcode.setText(identity.data[POSTCODE])
-        country.setText(identity.data[COUNTRY])
+        with(identity) {
+            identityName.setText(name)
+            accountName.setText(personalData[NAME])
+            this@EditIdentityFragment.did.apply {
+                setTitleAndBody(getString(R.string.did), did)
+                setSingleLine()
+            }
+            email.setText(personalData[EMAIL])
+            phoneNumber.setText(personalData[PHONE_NUMBER])
+            birthDate.setText(personalData[BIRTH_DATE])
+            addressLine1.setText(personalData[ADDRESS_1])
+            addressLine2.setText(personalData[ADDRESS_2])
+            city.setText(personalData[CITY])
+            postcode.setText(personalData[POSTCODE])
+            country.setText(personalData[COUNTRY])
+            imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), name))
+        }
+
+
     }
 
     private fun saveIdentity() {
         val newIdentity = Identity(
             identity.index,
             identityName.text.toString(),
-            data = prepareFormData()
+            personalData = prepareFormData()
         )
         viewModel.saveIdentity(newIdentity, getActionStatus())
     }

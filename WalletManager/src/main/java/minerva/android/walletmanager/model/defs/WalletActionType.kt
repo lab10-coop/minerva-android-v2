@@ -12,5 +12,6 @@ annotation class WalletActionType {
         const val IDENTITY = 0
         const val ACCOUNT = 1
         const val SERVICE = 2
+        const val CREDENTIAL = 3
     }
 }

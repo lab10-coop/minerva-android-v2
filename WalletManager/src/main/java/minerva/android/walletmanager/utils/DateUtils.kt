@@ -5,28 +5,28 @@ import org.joda.time.LocalDate
 import java.text.SimpleDateFormat
 import java.util.*
 
-private const val SERVICE_LAST_USED_FORMAT = "dd.MM.yyyy hh:mm"
-private const val WALLET_ACTION_DATE_FORMAT = "dd.MM.yyyy"
-private const val WALLET_ACTION_TIME_FORMAT = "hh:mm"
+private const val DATE_WITH_TIME_FORMAT = "dd.MM.yyyy hh:mm"
+private const val DATE_FORMAT = "dd.MM.yyyy"
+private const val TIME_FORMAT = "hh:mm"
 
 object DateUtils {
 
-    fun getLastUsedFormatted(): String =
+    fun getDateWithTimeFromTimestamp(dateInMillis: Long = timestamp): String =
         SimpleDateFormat(
-            SERVICE_LAST_USED_FORMAT,
+            DATE_WITH_TIME_FORMAT,
             Locale.getDefault()
-        ).format(Date(timestamp))
+        ).format(Date(dateInMillis))
 
 
     fun getDateFromTimestamp(timestamp: Long): String =
         SimpleDateFormat(
-            WALLET_ACTION_DATE_FORMAT,
+            DATE_FORMAT,
             Locale.getDefault()
         ).format(Date(timestamp))
 
     fun getTimeFromTimeStamp(time: Long): String =
         SimpleDateFormat(
-            WALLET_ACTION_TIME_FORMAT,
+            TIME_FORMAT,
             Locale.getDefault()
         ).format(Date(time))
 

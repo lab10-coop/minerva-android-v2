@@ -31,14 +31,14 @@ fun createDefaultWalletConfig() =
                 AccountPayload(
                     DefaultWalletConfigIndexes.FIRST_ACCOUNTS_INDEX,
                     CryptoUtils.prepareName(this, DefaultWalletConfigIndexes.FIRST_ACCOUNTS_INDEX),
-                    this.short
+                    short
                 )
             },
             with(NetworkManager.secondDefaultValueNetwork()) {
             AccountPayload(
                 DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX,
                 CryptoUtils.prepareName(this, DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX),
-                this.short
+                short
             )}
         )
     )
