@@ -116,7 +116,8 @@
     <string name="account_action_label">Account %s</string>
     <string name="safe_account_action_label">Safe Account %s</string>
     <string name="identity_name">Identity %s</string>
-    <string name="credential_added_action_label">Credential %s</string>
+    <string name="credential_action_label">Credential %s</string>
+    <string name="credential_import_label">Credential import</string>
     <string name="today">TODAY</string>
     <string name="yesterday">YESTERDAY</string>
     <string name="sent_accounts_label">%1$s %2$s sent to %3$s</string>
@@ -164,4 +165,6 @@
     <string name="error_importing_credential">Error importing credential</string>
     <string name="attached_credential_success">Your credential was successfully attached\nto your identity %s</string>
     <string name="attached_credential_failure">The imported credential could not be attached to any of your identities</string>
+    <string name="remove_credential_dialog_title">Remove Credential?</string>
+    <string name="remove_credential_dialog_message">You will have to get a new credential from the issuer.</string>
 </resources>

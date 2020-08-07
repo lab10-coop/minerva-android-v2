@@ -118,7 +118,7 @@ interface OnFlashBarTapListener {
     fun onLogin()
 }
 
-const val FLASHBAR_DURATION = 5000L
+const val FLASHBAR_DURATION = 8000L
 const val ENTER_ANIM_DURATION = 750L
 const val EXIT_ANIM_DURATION = 400L
 const val FONT_SIZE = 12F

@@ -242,27 +242,4 @@ class ServiceManagerTest : RxTest() {
             .test()
             .assertError(error)
     }
-
-    @Test
-    fun `bind credential to identity success test`() {
-        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        repository.bindCredentialToIdentity(Credential("test", "type", loggedInIdentityDid = "did:ethr:address"))
-            .test()
-            .assertNoErrors()
-            .assertComplete()
-            .assertValue {
-                it == "identityName1"
-            }
-    }
-
-    @Test
-    fun `bind credential to identity error test`() {
-        val error = NoBindedCredentialThrowable()
-        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        repository.bindCredentialToIdentity(Credential("test", "type", loggedInIdentityDid = "address"))
-            .test()
-            .assertError {
-                it is NoBindedCredentialThrowable
-            }
-    }
 }

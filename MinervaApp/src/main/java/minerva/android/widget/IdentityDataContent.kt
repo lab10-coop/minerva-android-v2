@@ -11,9 +11,11 @@ import kotlinx.android.synthetic.main.identity_binded_item.view.*
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.visible
+import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.identities.data.getIdentityDataLabel
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.VerifiableCredentialType
@@ -23,6 +25,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     private val description = TextView(context)
     private val views: MutableList<View> = arrayListOf()
     var isOpen: Boolean = false
+    private lateinit var listener: IdentityFragmentListener
 
     init {
         orientation = VERTICAL
@@ -40,6 +43,10 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         close()
     }
 
+    fun setListener(listener: IdentityFragmentListener) {
+        this.listener = listener
+    }
+
     private fun preparePersonalData(personalData: LinkedHashMap<String, String>) {
         personalData.forEach { (key, value) ->
             val titledTextView = TitledTextView(context)
@@ -52,40 +59,45 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
 
     private fun prepareCredentials(credentials: List<Credential>) {
         if (credentials.isNotEmpty()) addHeader(R.string.credentials)
-        credentials.forEach {
+        credentials.forEach { credential ->
             val bindedCredential = IdentityBindedItem(context)
-            bindedCredential.setDateAndName(it.name, it.lastUsed)
-            setCredentialIcon(it, bindedCredential)
-            bindedCredential.popupMenu.setOnClickListener { showMenu(bindedCredential.popupMenu) }
+            bindedCredential.setDateAndName(credential.name, credential.lastUsed)
+            setCredentialIcon(credential, bindedCredential)
+            bindedCredential.popupMenu.setOnClickListener { showMenu(bindedCredential.popupMenu, credential) }
             views.add(bindedCredential)
             addView(bindedCredential)
         }
     }
 
-    private fun setCredentialIcon(it: Credential, bindedCredential: IdentityBindedItem) {
+    private fun setCredentialIcon(credential: Credential, bindedCredential: IdentityBindedItem) {
         when {
-            it.issuer == CredentialType.OAMTC && it.type == VerifiableCredentialType.AUTOMOTIVE_CLUB -> bindedCredential.setIcon(R.drawable.ic_oamtc_credential)
+            credential.issuer == CredentialType.OAMTC && credential.type == VerifiableCredentialType.AUTOMOTIVE_CLUB ->
+                bindedCredential.setIcon(R.drawable.ic_oamtc_credential)
             else -> bindedCredential.setIcon(R.drawable.ic_minerva_icon)
         }
     }
 
     private fun prepareServices(services: List<Service>) {
         if (services.isNotEmpty()) addHeader(R.string.connected_services)
-        services.forEach {
+        services.forEach { service ->
             val bindedService = IdentityBindedItem(context)
-            bindedService.setDateAndName(it.name, it.lastUsed)
+            bindedService.setDateAndName(service.name, service.lastUsed)
             //TODO change to adding proper icon based on the service type
             bindedService.setIcon(R.drawable.ic_backup_icon)
-            bindedService.popupMenu.setOnClickListener { showMenu(bindedService.popupMenu) }
+            bindedService.popupMenu.setOnClickListener { showMenu(bindedService.popupMenu, service) }
             views.add(bindedService)
             addView(bindedService)
         }
     }
 
-    private fun showMenu(anchor: View) {
+    private fun showMenu(anchor: View, minervaPrimitive: MinervaPrimitive) {
         PopupMenu(context, anchor).apply {
             menuInflater.inflate(R.menu.remove_menu, menu)
             gravity = Gravity.END
+            setOnMenuItemClickListener {
+                if (it.itemId == R.id.remove) listener.onBindedItemDeleted(minervaPrimitive)
+                true
+            }
             show()
         }
     }
