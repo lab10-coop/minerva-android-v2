@@ -2,6 +2,7 @@ package minerva.android.services.login.scanner
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -10,6 +11,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
+import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.CredentialQrResponse
 import minerva.android.walletmanager.model.QrCodeResponse
@@ -21,10 +23,12 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeResponseMapper
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import timber.log.Timber
 
 class LoginScannerViewModel(
     private val serviceManager: ServiceManager,
-    private val walletActionsRepository: WalletActionsRepository
+    private val walletActionsRepository: WalletActionsRepository,
+    private val identityManager: IdentityManager
 ) : BaseViewModel() {
 
     private val _scannerResultLiveData = MutableLiveData<Event<ServiceQrResponse>>()
@@ -62,25 +66,36 @@ class LoginScannerViewModel(
     }
 
     private fun handleCredentialQrCodeResponse(response: CredentialQrResponse) {
-        if (response.loggedInDid.isNotEmpty()) {
-            launchDisposable {
-                serviceManager.bindCredentialToIdentity(CredentialQrCodeResponseMapper.map(response))
-                    .observeOn(Schedulers.io())
-                    .flatMap { walletActionsRepository.saveWalletActions(getWalletAction(response)).toSingleDefault(it) }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onSuccess = { _handleBindCredentialSuccessLiveData.value = Event(it) },
-                        onError = { _handleBindCredentialErrorLiveData.value = Event(it) }
-                    )
-            }
-        } else {
-            _handleBindCredentialErrorLiveData.value = Event(NoBindedCredentialThrowable())
+        launchDisposable {
+            identityManager.bindCredentialToIdentity(CredentialQrCodeResponseMapper.map(response))
+                .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(response, WalletActionStatus.FAILED)) } }
+                .doOnSuccess { saveWalletAction(getWalletAction(response, WalletActionStatus.ADDED)) }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { _handleBindCredentialSuccessLiveData.value = Event(it) },
+                    onError = { _handleBindCredentialErrorLiveData.value = Event(it) }
+                )
         }
     }
 
-    private fun getWalletAction(response: CredentialQrResponse): WalletAction =
+    private fun saveWalletAction(walletAction: WalletAction) {
+        launchDisposable {
+            walletActionsRepository.saveWalletActions(walletAction)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = {
+                        Timber.d("Save bind credential failed success")
+                        _handleBindCredentialErrorLiveData.value = Event(NoBindedCredentialThrowable())
+                    },
+                    onError = { Timber.e("Save bind credential error: $it") }
+                )
+        }
+    }
+
+    private fun getWalletAction(response: CredentialQrResponse, status: Int): WalletAction =
         WalletAction(
-            WalletActionType.CREDENTIAL, WalletActionStatus.ADDED,
+            WalletActionType.CREDENTIAL, status,
             response.lastUsed,
             hashMapOf(WalletActionFields.CREDENTIAL_NAME to response.name)
         )

@@ -8,9 +8,9 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.services.login.scanner.LoginScannerViewModel
+import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.CredentialQrResponse
-import minerva.android.walletmanager.model.QrCodeResponse
 import minerva.android.walletmanager.model.ServiceQrResponse
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Before
@@ -19,12 +19,13 @@ import org.junit.Test
 class LoginScannerViewModelTest : BaseViewModelTest() {
 
     private val serviceManager: ServiceManager = mock()
+    private val identityManager: IdentityManager = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
-    private lateinit var  viewModel: LoginScannerViewModel
+    private lateinit var viewModel: LoginScannerViewModel
 
     @Before
-    fun setup(){
-        viewModel =  LoginScannerViewModel(serviceManager, walletActionsRepository)
+    fun setup() {
+        viewModel = LoginScannerViewModel(serviceManager, walletActionsRepository, identityManager)
     }
 
     private val scannerResultObserver: Observer<Event<ServiceQrResponse>> = mock()
@@ -50,7 +51,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
     @Test
     fun `test validate credential qr code result success`() {
         whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.just(CredentialQrResponse("Minerva App", loggedInDid = "did")))
-        whenever(serviceManager.bindCredentialToIdentity(any())).thenReturn(Single.just("name"))
+        whenever(identityManager.bindCredentialToIdentity(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.validateResult("token")
         viewModel.handleBindCredentialSuccessLiveData.observeForever(handleQrCodeResponseResultObserver)
@@ -64,7 +65,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
     fun `test validate credential qr code result error`() {
         val error = Throwable()
         whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.just(CredentialQrResponse("Minerva App", loggedInDid = "did")))
-        whenever(serviceManager.bindCredentialToIdentity(any())).thenReturn(Single.error(error))
+        whenever(identityManager.bindCredentialToIdentity(any())).thenReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.validateResult("token")
         viewModel.handleBindCredentialErrorLiveData.observeForever(handleQrCodeResponseErrorObserver)

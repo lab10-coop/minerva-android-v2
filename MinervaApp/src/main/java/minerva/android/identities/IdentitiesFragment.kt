@@ -1,6 +1,5 @@
 package minerva.android.identities
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +14,10 @@ import minerva.android.R
 import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.walletmanager.model.Service
 import minerva.android.wrapped.startEditIdentityWrappedActivity
 import minerva.android.wrapped.startIdentityAddressWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -53,30 +55,38 @@ class IdentitiesFragment : Fragment(), IdentityFragmentListener {
         }
     }
 
-    private fun showRemoveDialog(identity: Identity) {
-        context?.let { context ->
-            MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
-                .setBackground(context.getDrawable(R.drawable.rounded_white_background))
-                .setTitle(identity.name)
-                .setMessage(R.string.remove_identity_dialog_message)
-                .setPositiveButton(R.string.yes) { dialog, _ ->
-                    viewModel.removeIdentity(identity)
-                    dialog.dismiss()
-                }
-                .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
-                .show()
-        }
-    }
-
     override fun showIdentity(identity: Identity, position: Int) {
         startIdentityAddressWrappedActivity(requireContext(), identity.name, position)
     }
 
     override fun onIdentityRemoved(identity: Identity) {
-        showRemoveDialog(identity)
+        showRemoveDialog(identity.name, R.string.remove_identity_dialog_message) { viewModel.removeIdentity(identity) }
     }
 
     override fun onIdentityEdit(position: Int, name: String) {
         startEditIdentityWrappedActivity(requireContext(), position, name)
+    }
+
+    override fun onBindedItemDeleted(minervaPrimitive: MinervaPrimitive) {
+        when (minervaPrimitive) {
+            is Service -> TODO("Handle deleting binded service")
+            is Credential -> showRemoveDialog(getString(R.string.remove_credential_dialog_title), R.string.remove_credential_dialog_message)
+            { viewModel.removeCredential(minervaPrimitive) }
+        }
+    }
+
+    private fun showRemoveDialog(title: String, messageId: Int, removeAction: () -> Unit) {
+        context?.let { context ->
+            MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
+                .setBackground(context.getDrawable(R.drawable.rounded_white_background))
+                .setTitle(title)
+                .setMessage(getString(messageId))
+                .setPositiveButton(R.string.remove) { dialog, _ ->
+                    removeAction()
+                    dialog.dismiss()
+                }
+                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                .show()
+        }
     }
 }
