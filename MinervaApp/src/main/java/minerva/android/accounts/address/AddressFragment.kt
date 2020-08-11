@@ -57,7 +57,7 @@ class AddressFragment : Fragment() {
             prepareQR(this)
             prepareAddress(this)
             setupShareButton(shareButton, prepareTextAddress(this))
-            setupCopyButton(copyButton, prepareTextAddress(this), getString(R.string.address_saved_to_clip_board))
+            setupCopyButton(copyButton, prepareTextAddress(this), prepareToastMessage(this))
         }
     }
 
@@ -116,6 +116,10 @@ class AddressFragment : Fragment() {
     private fun prepareTextAddress(minervaPrimitive: MinervaPrimitive) =
         if (isIdentity()) (minervaPrimitive as? Identity)?.did ?: String.Empty
         else minervaPrimitive.address
+
+    private fun prepareToastMessage(minervaPrimitive: MinervaPrimitive) =
+        if(isIdentity()) getString(R.string.identity_saved_to_clipboard)
+        else getString(R.string.address_saved_to_clip_board)
 
     private fun prepareTitleAddress() =
         if (isIdentity()) DID_LABEL

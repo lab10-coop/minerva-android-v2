@@ -102,6 +102,7 @@
     <string name="transactions_error_title">Transaction error occurs</string>
     <string name="transactions_error_message">Unexpected error occurred while making transaction actions</string>
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>
+    <string name="identity_saved_to_clipboard">Identity saved to clipboard</string>
     <string name="error_header">An error occurred</string>
     <string name="activities_error">Error while fetching activities</string>
     <string name="removed">Removed</string>
