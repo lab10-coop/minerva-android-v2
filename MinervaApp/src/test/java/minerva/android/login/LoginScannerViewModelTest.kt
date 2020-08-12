@@ -56,7 +56,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
         whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
         whenever(identityManager.bindCredentialToIdentity(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(identityManager.isCredentialBinded(any(), any())).doReturn(false)
+        whenever(identityManager.isCredentialLoggedIn(any())).doReturn(false)
         viewModel.validateResult("token")
         viewModel.bindCredentialSuccessLiveData.observeForever(handleQrCodeResponseResultObserver)
         handleQrCodeResponseResultCaptor.run {
@@ -81,7 +81,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
     @Test
     fun `test update credential qr code success`() {
         whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
-        whenever(identityManager.isCredentialBinded(any(), any())).doReturn(true)
+        whenever(identityManager.isCredentialLoggedIn(any())).doReturn(true)
         viewModel.validateResult("token")
         viewModel.updateBindedCredential.observeForever(updateCredentialObserver)
         updateCredentialCaptor.run {

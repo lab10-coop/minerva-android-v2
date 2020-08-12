@@ -42,7 +42,6 @@ fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCode {
                     creationDate = getVerifiableCredentialsData(responseMap, AUTOMOTIVE_MEMBERSHIP_CARD)[SINCE] as String,
                     loggedInDid = responseMap[SUB] as String,
                     lastUsed = DateUtils.timestamp
-
                 )
             else -> CredentialQrCode() //todo should return Credential object in stead of CredentialQrCode() ?
         }

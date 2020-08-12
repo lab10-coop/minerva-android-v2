@@ -5,6 +5,7 @@ import io.reactivex.Single
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.Identity
 
 interface IdentityManager : Manager {
@@ -14,5 +15,5 @@ interface IdentityManager : Manager {
     fun bindCredentialToIdentity(newCredential: Credential): Single<String>
     fun updateBindedCredential(credential: Credential): Single<String>
     fun removeBindedCredentialFromIdentity(credential: Credential): Completable
-    fun isCredentialBinded(loggedInIdentityDid: String, issuer: String): Boolean
+    fun isCredentialLoggedIn(credential: Credential): Boolean
 }
