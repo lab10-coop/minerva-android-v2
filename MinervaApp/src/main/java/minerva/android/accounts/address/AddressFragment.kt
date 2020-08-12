@@ -16,9 +16,11 @@ import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.widget.LetterLogo
+import minerva.android.widget.clubCard.OamtcClubCard
 import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton
 import minerva.android.wrapped.WrappedActivity.Companion.FRAGMENT_TYPE
@@ -57,7 +59,7 @@ class AddressFragment : Fragment() {
             prepareQR(this)
             prepareAddress(this)
             setupShareButton(shareButton, prepareTextAddress(this))
-            setupCopyButton(copyButton, prepareTextAddress(this), prepareToastMessage(this))
+            setupCopyButton(copyButton, prepareTextAddress(this), prepareToastMessage())
         }
     }
 
@@ -91,15 +93,13 @@ class AddressFragment : Fragment() {
     }
 
     private fun prepareAddress(minervaPrimitive: MinervaPrimitive) {
-        prepareTextAddress(minervaPrimitive).let { address ->
-            textFullAddress.setTitleAndBody(prepareTitleAddress(), address)
-            textShortAddress.apply {
-                setTitleAndBody(prepareTitleAddress(), address)
-                setSingleLine()
-                setOnClickListener {
-                    TransitionManager.beginDelayedTransition(viewGroup)
-                    textFullAddress.visibleOrInvisible(!textFullAddress.isVisible)
-                }
+        textFullAddress.setTitleAndBody(prepareTitleAddress(), prepareTextAddress(minervaPrimitive))
+        textShortAddress.apply {
+            setTitleAndBody(prepareTitleAddress(), prepareTextAddress(minervaPrimitive))
+            setSingleLine()
+            setOnClickListener {
+                TransitionManager.beginDelayedTransition(viewGroup)
+                textFullAddress.visibleOrInvisible(!textFullAddress.isVisible)
             }
         }
     }
@@ -117,7 +117,7 @@ class AddressFragment : Fragment() {
         if (isIdentity()) (minervaPrimitive as? Identity)?.did ?: String.Empty
         else minervaPrimitive.address
 
-    private fun prepareToastMessage(minervaPrimitive: MinervaPrimitive) =
+    private fun prepareToastMessage() =
         if(isIdentity()) getString(R.string.identity_saved_to_clipboard)
         else getString(R.string.address_saved_to_clip_board)
 
@@ -127,6 +127,7 @@ class AddressFragment : Fragment() {
 
     companion object {
         const val DID_LABEL = "DID"
+
         @JvmStatic
         fun newInstance(fragmentType: WrappedFragmentType, index: Int) =
             AddressFragment().apply {

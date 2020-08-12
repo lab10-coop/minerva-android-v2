@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.main.wallet_action_list_row.view.*
 import minerva.android.R
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.WalletActionClustered
+import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.utils.DateUtils.getDateFromTimestamp
 import minerva.android.walletmanager.utils.DateUtils.isTheDayAfterTomorrow
 import minerva.android.walletmanager.utils.DateUtils.isTheSameDay
@@ -61,7 +62,7 @@ class WalletActionsViewHolder(private val view: View) : RecyclerView.ViewHolder(
         return when {
             isTheSameDay(timestamp, lastUsed) -> context.getString(R.string.today)
             isTheDayAfterTomorrow(lastUsed) -> context.getString(R.string.yesterday)
-            else -> getDateFromTimestamp(lastUsed)
+            else -> getDateFromTimestamp(lastUsed, DateUtils.DATE_FORMAT)
         }
     }
 }

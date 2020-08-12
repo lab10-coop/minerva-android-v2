@@ -2,7 +2,9 @@
 <resources>
     <dimen name="bottom_navigation_bar_height">64dp</dimen>
     <dimen name="margin_big">20dp</dimen>
+    <dimen name="margin_xbig">24dp</dimen>
     <dimen name="margin_large">32dp</dimen>
+    <dimen name="margin_xlarge">64dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">12dp</dimen>
     <dimen name="margin_xsmall">8dp</dimen>
@@ -28,4 +30,8 @@
     <dimen name="address_width">192dp</dimen>
     <dimen name="elevation">20dp</dimen>
     <dimen name="bottom_button_margin">80dp</dimen>
+    <dimen name="barcode_height">60dp</dimen>
+    <dimen name="barcode_width">192dp</dimen>
+    <dimen name="card_height">242dp</dimen>
+    <dimen name="card_width">384dp</dimen>
 </resources>

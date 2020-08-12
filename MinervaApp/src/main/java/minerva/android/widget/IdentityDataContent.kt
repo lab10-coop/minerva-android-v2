@@ -20,6 +20,7 @@ import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.VerifiableCredentialType
 import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.widget.clubCard.OamtcClubCard
 
 class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
@@ -61,12 +62,14 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     private fun prepareCredentials(credentials: List<Credential>) {
         if (credentials.isNotEmpty()) addHeader(R.string.credentials)
         credentials.forEach { credential ->
-            val bindedCredential = IdentityBindedItem(context)
-            bindedCredential.setDateAndName(credential.name, DateUtils.getDateFromTimestamp(credential.lastUsed))
-            setCredentialIcon(credential, bindedCredential)
-            bindedCredential.popupMenu.setOnClickListener { showMenu(bindedCredential.popupMenu, credential) }
-            views.add(bindedCredential)
-            addView(bindedCredential)
+            IdentityBindedItem(context).let {
+                setCredentialIcon(credential, it)
+                it.setDateAndName(credential.name, DateUtils.getDateFromTimestamp(credential.lastUsed, DateUtils.DATE_FORMAT))
+                it.popupMenu.setOnClickListener { showMenu(it.popupMenu, credential) }
+                it.setOnItemClickListener { OamtcClubCard(context, OamtcClubCard.CARD_URL, credential).show() }
+                views.add(it)
+                addView(it)
+            }
         }
     }
 

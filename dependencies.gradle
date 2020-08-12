@@ -55,6 +55,8 @@ ext {
 
     startupVersion = '1.0.0-alpha01'
 
+    jsoupVersion = '1.13.1'
+
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
             rxbindingCore: "com.jakewharton.rxbinding3:rxbinding-core:$rxbindingVersion"
@@ -145,5 +147,13 @@ ext {
 
     startupDependencies = [
             startup: "androidx.startup:startup-runtime:$startupVersion"
+    ]
+
+    kotlinReflect = [
+            kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect"
+    ]
+
+    jsoup = [
+        jsoup : "org.jsoup:jsoup:$jsoupVersion"
     ]
 }
