@@ -20,48 +20,36 @@ object MinervaFlashbar {
             })
             .build()
             .show()
-
     }
 }
 
-object KnownUserLoginFlashBar {
-    fun show(activity: Activity, message: String, listener: OnFlashBarTapListener, title: String = activity.getString(R.string.message)) {
-        prepareFlashBarWithButtons(activity, title, message, R.string.login, R.string.cancel)
-            .positiveActionTapListener(object : Flashbar.OnActionTapListener {
-                override fun onActionTapped(bar: Flashbar) {
-                    bar.dismiss()
-                    listener.onLogin()
-                }
-            })
-            .negativeActionTapListener(object : Flashbar.OnActionTapListener {
-                override fun onActionTapped(bar: Flashbar) {
-                    bar.dismiss()
-                }
-            })
-            .build()
-            .show()
-    }
-}
-
-object QuickLoginFlashBar {
+object MinervaFlashBarWithButtons {
     fun show(
         activity: Activity,
         message: String,
-        listener: OnFlashBarTapListener,
-        title: String = activity.getString(R.string.message),
-        shouldLogin: Boolean
+        positiveButton: Int,
+        negativeButton: Int,
+        positiveAction: () -> Unit,
+        negativeAction: () -> Unit = {},
+        title: String = activity.getString(R.string.message)
     ) {
-        prepareFlashBarWithButtons(activity, title, message, R.string.allow, R.string.deny)
+        getDefaultFlashBar(activity, title, message)
+            .positiveActionTextSizeInSp(FONT_SIZE)
+            .positiveActionTextColorRes(R.color.colorPrimary)
+            .negativeActionTextSizeInSp(FONT_SIZE)
+            .negativeActionTextColorRes(R.color.colorPrimary)
+            .positiveActionText(activity.getString(positiveButton))
+            .negativeActionText(activity.getString(negativeButton))
             .positiveActionTapListener(object : Flashbar.OnActionTapListener {
                 override fun onActionTapped(bar: Flashbar) {
                     bar.dismiss()
-                    listener.onAllow(shouldLogin)
+                    positiveAction()
                 }
             })
             .negativeActionTapListener(object : Flashbar.OnActionTapListener {
                 override fun onActionTapped(bar: Flashbar) {
                     bar.dismiss()
-                    listener.onDeny()
+                    negativeAction()
                 }
             })
             .build()
@@ -69,22 +57,7 @@ object QuickLoginFlashBar {
     }
 }
 
-private fun prepareFlashBarWithButtons(
-    activity: Activity,
-    title: String,
-    message: String,
-    positiveButtonId: Int,
-    negativeButtonId: Int
-): Flashbar.Builder =
-    getDefaultFlashBar(activity, title, message)
-        .positiveActionTextSizeInSp(FONT_SIZE)
-        .positiveActionTextColorRes(R.color.colorPrimary)
-        .negativeActionTextSizeInSp(FONT_SIZE)
-        .negativeActionTextColorRes(R.color.colorPrimary)
-        .positiveActionText(activity.getString(positiveButtonId))
-        .negativeActionText(activity.getString(negativeButtonId))
-
-private fun getDefaultFlashBar(activity: Activity, title: String, message: String): Flashbar.Builder =
+fun getDefaultFlashBar(activity: Activity, title: String, message: String): Flashbar.Builder =
     Flashbar.Builder(activity)
         .gravity(Flashbar.Gravity.TOP)
         .title(title)
@@ -111,12 +84,6 @@ private fun getDefaultFlashBar(activity: Activity, title: String, message: Strin
                 .accelerateDecelerate()
         )
         .backgroundColorRes(R.color.white)
-
-interface OnFlashBarTapListener {
-    fun onAllow(shouldLogin: Boolean)
-    fun onDeny()
-    fun onLogin()
-}
 
 const val FLASHBAR_DURATION = 8000L
 const val ENTER_ANIM_DURATION = 750L

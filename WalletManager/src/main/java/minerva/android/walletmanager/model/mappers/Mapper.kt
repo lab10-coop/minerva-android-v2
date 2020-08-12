@@ -6,15 +6,17 @@ import minerva.android.configProvider.model.walletConfig.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.*
+import minerva.android.walletmanager.model.defs.ServiceName
+import minerva.android.walletmanager.model.defs.ServiceType
+import minerva.android.walletmanager.model.defs.VerifiableCredentialType
 import minerva.android.walletmanager.utils.DateUtils
-import java.lang.StringBuilder
 
 const val CALLBACK = "callback"
 const val ISS = "iss"
 const val REQUESTED = "requested"
 const val MEMBER_ID = "memberId"
 const val NAME = "name"
+const val CREDENTIAL_NAME = "credentialName"
 const val COVERAGE = "coverage"
 const val EXP = "exp"
 const val SUB = "sub"
@@ -25,12 +27,12 @@ const val AUTOMOTIVE_MEMBERSHIP_CARD = "automotiveMembershipCard"
 const val VERIFIABLE_CREDENTIAL = "VerifiableCredential"
 const val TYPE = "type"
 
-fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCodeResponse {
+fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCode {
     if (isVerifiableCredential(responseMap)) {
         return when (getVCType(responseMap)) {
             VerifiableCredentialType.AUTOMOTIVE_CLUB ->
-                CredentialQrResponse(
-                    name = getCredentialName(responseMap),
+                CredentialQrCode(
+                    name = getVerifiableCredentialsData(responseMap, AUTOMOTIVE_MEMBERSHIP_CARD)[CREDENTIAL_NAME] as String,
                     issuer = responseMap[ISS] as String,
                     type = VerifiableCredentialType.AUTOMOTIVE_CLUB,
                     memberName = getVerifiableCredentialsData(responseMap, AUTOMOTIVE_MEMBERSHIP_CARD)[NAME] as String,
@@ -42,12 +44,11 @@ fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCodeResponse {
                     lastUsed = DateUtils.timestamp
 
                 )
-            else -> CredentialQrResponse()
+            else -> CredentialQrCode() //todo should return Credential object in stead of CredentialQrCode() ?
         }
-
     } else {
         //todo should check if it is service qr code response type?
-        return ServiceQrResponse(
+        return ServiceQrCode(
             issuer = responseMap[ISS] as String,
             serviceName = getServiceName(responseMap[ISS] as String),
             callback = responseMap[CALLBACK] as String?,
@@ -56,12 +57,6 @@ fun mapHashMapToQrCodeResponse(responseMap: Map<String, Any?>): QrCodeResponse {
         )
     }
 }
-
-private fun getCredentialName(responseMap: Map<String, Any?>): String =
-    when {
-        responseMap[ISS] as String == CredentialType.OAMTC && getVCType(responseMap) == VerifiableCredentialType.AUTOMOTIVE_CLUB -> CredentialName.OAMTC_AUTOMOTIVE_CARD
-        else -> String.Empty
-    }
 
 private fun getIdentityRequestedFields(requestedData: ArrayList<String>): String {
     val identityFields = StringBuilder()

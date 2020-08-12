@@ -31,7 +31,7 @@ fun createAppModule() = mutableListOf<Module>().apply {
 }
 
 private val appModules = module {
-    viewModel { MainViewModel(get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }

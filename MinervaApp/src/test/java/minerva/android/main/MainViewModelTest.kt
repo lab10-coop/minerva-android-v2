@@ -7,11 +7,14 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.walletmanager.manager.identity.IdentityManager
+import minerva.android.walletmanager.manager.identity.IdentityManagerImpl
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
+import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.model.ServiceQrResponse
+import minerva.android.walletmanager.model.QrCode
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -25,7 +28,8 @@ class MainViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
-    private val viewModel = MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager)
+    private val identityManager: IdentityManager = mock()
+    private val viewModel = MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager, identityManager)
 
     private val notExistedIdentityObserver: Observer<Event<Unit>> = mock()
     private val notExistedIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -35,6 +39,9 @@ class MainViewModelTest : BaseViewModelTest() {
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
+
+    private val updateCredentialObserver: Observer<Event<String>> = mock()
+    private val updateCredentialCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
 
     @Test
     fun `test known user login when there is no identity`() {
@@ -66,7 +73,7 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `test painless login error`() {
         val error = Throwable()
-        viewModel.loginPayload = LoginPayload(qrCode = ServiceQrResponse(callback = "url"), loginStatus = 0)
+        viewModel.loginPayload = LoginPayload(qrCode = ServiceQrCode(callback = "url"), loginStatus = 0)
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(
             Identity(
                 1, personalData = linkedMapOf("name" to "tom", "phone_number" to "123"),
@@ -88,8 +95,8 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `login from notification error`() {
         val error = Throwable()
-        viewModel.loginPayload = LoginPayload(qrCode = ServiceQrResponse(callback = "url"), loginStatus = 0)
-        whenever(serviceManager.decodeQrCodeResponse(any())) doReturn Single.just(ServiceQrResponse() as QrCodeResponse)
+        viewModel.loginPayload = LoginPayload(qrCode = ServiceQrCode(callback = "url"), loginStatus = 0)
+        whenever(serviceManager.decodeQrCodeResponse(any())) doReturn Single.just(ServiceQrCode() as QrCode)
         whenever(serviceManager.getLoggedInIdentityPublicKey(any())) doReturn "publicKey"
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(
             Identity(
@@ -122,5 +129,35 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(orderManager.isOrderAvailable(any())).thenReturn(false)
         val isEditIconVisible = viewModel.isOrderEditAvailable(WalletActionType.IDENTITY)
         isEditIconVisible shouldBeEqualTo false
+    }
+
+    @Test
+    fun `update binded credential test`(){
+        whenever(identityManager.updateBindedCredential(any())).doReturn(Single.just("name"))
+        whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
+        viewModel.run {
+            credential = Credential("name", "type")
+            updateCredentialSuccessLiveData.observeForever(updateCredentialObserver)
+            updateBindedCredential()
+        }
+        updateCredentialCaptor.run {
+            verify(updateCredentialObserver).onChanged(capture())
+            firstValue.peekContent() == "name"
+        }
+    }
+
+    @Test
+    fun `update binded credential test error`(){
+        val error = Throwable()
+        whenever(identityManager.updateBindedCredential(any())).doReturn(Single.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
+        viewModel.run {
+            credential = Credential("name", "type")
+            updateCredentialErrorLiveData.observeForever(errorObserver)
+            updateBindedCredential()
+        }
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+        }
     }
 }

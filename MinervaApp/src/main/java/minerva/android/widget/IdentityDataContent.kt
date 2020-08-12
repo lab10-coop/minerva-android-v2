@@ -19,6 +19,7 @@ import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.VerifiableCredentialType
+import minerva.android.walletmanager.utils.DateUtils
 
 class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
@@ -61,7 +62,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         if (credentials.isNotEmpty()) addHeader(R.string.credentials)
         credentials.forEach { credential ->
             val bindedCredential = IdentityBindedItem(context)
-            bindedCredential.setDateAndName(credential.name, credential.lastUsed)
+            bindedCredential.setDateAndName(credential.name, DateUtils.getDateFromTimestamp(credential.lastUsed))
             setCredentialIcon(credential, bindedCredential)
             bindedCredential.popupMenu.setOnClickListener { showMenu(bindedCredential.popupMenu, credential) }
             views.add(bindedCredential)
@@ -70,6 +71,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     }
 
     private fun setCredentialIcon(credential: Credential, bindedCredential: IdentityBindedItem) {
+        //todo change for getting icon from external repo
         when {
             credential.issuer == CredentialType.OAMTC && credential.type == VerifiableCredentialType.AUTOMOTIVE_CLUB ->
                 bindedCredential.setIcon(R.drawable.ic_oamtc_credential)

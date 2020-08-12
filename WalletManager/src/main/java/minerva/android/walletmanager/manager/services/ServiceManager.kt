@@ -8,7 +8,7 @@ import minerva.android.walletmanager.model.defs.ServiceType
 
 interface ServiceManager : Manager {
     fun saveService(service: Service): Completable
-    fun decodeQrCodeResponse(token: String): Single<QrCodeResponse>
+    fun decodeQrCodeResponse(token: String): Single<QrCode>
     fun decodePaymentRequestToken(token: String): Single<Pair<Payment, List<Service>?>>
     fun createJwtToken(payload: Map<String, Any?>): Single<String>
     fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable

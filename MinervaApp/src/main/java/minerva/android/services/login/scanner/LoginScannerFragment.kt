@@ -12,14 +12,14 @@ import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.services.login.PainlessLoginFragmentListener
-import minerva.android.walletmanager.model.ServiceQrResponse
+import minerva.android.services.login.LoginScannerListener
+import minerva.android.walletmanager.model.ServiceQrCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginScannerFragment : BaseScanner() {
 
     private val viewModel: LoginScannerViewModel by viewModel()
-    lateinit var listener: PainlessLoginFragmentListener
+    lateinit var listener: LoginScannerListener
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -28,7 +28,7 @@ class LoginScannerFragment : BaseScanner() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as PainlessLoginFragmentListener
+        listener = context as LoginScannerListener
     }
 
     override fun setupCodeScanner() {
@@ -54,18 +54,17 @@ class LoginScannerFragment : BaseScanner() {
 
     private fun prepareObserver() {
         viewModel.apply {
-            scannerResultLiveData.observe(viewLifecycleOwner, EventObserver { goToChooseIdentityFragment(it) })
+            handleServiceQrCodeLiveData.observe(viewLifecycleOwner, EventObserver { goToChooseIdentityFragment(it) })
             scannerErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleError() })
-            knownUserLoginLiveData.observe(viewLifecycleOwner, EventObserver {
-                listener.onResult(false, loginPayload = it)
-            })
-            handleBindCredentialSuccessLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResult(true, it) })
-            handleBindCredentialErrorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResult(false) })
+            knownUserLoginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false, payload = it) })
+            bindCredentialSuccessLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(true, it) })
+            bindCredentialErrorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(false) })
+            updateBindedCredential.observe(viewLifecycleOwner, EventObserver { listener.updateBindedCredential(it) })
         }
     }
 
-    private fun goToChooseIdentityFragment(qrCodeResponse: ServiceQrResponse) {
-        Handler().postDelayed({ listener.showChooseIdentityFragment(qrCodeResponse) }, DELAY)
+    private fun goToChooseIdentityFragment(qrCodeCode: ServiceQrCode) {
+        Handler().postDelayed({ listener.showChooseIdentityFragment(qrCodeCode) }, DELAY)
     }
 
     private fun handleError() {

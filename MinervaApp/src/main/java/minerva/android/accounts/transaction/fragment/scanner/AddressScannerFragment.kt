@@ -8,15 +8,15 @@ import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScanner
-import minerva.android.accounts.listener.ScannerFragmentsListener
+import minerva.android.accounts.listener.AddressScannerListener
 
 class AddressScannerFragment : BaseScanner() {
 
-    private lateinit var listener: ScannerFragmentsListener
+    private lateinit var listener: AddressScannerListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as ScannerFragmentsListener
+        listener = context as AddressScannerListener
     }
 
     override fun setupCodeScanner() {

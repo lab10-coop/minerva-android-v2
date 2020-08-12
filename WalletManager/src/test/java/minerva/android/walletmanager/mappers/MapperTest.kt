@@ -17,7 +17,8 @@ class MapperTest : WalletConfigTestValues() {
                     "memberId" to "123456",
                     "since" to "2018",
                     "coverage" to "touring",
-                    "name" to "name"
+                    "name" to "name",
+                    "credentialName" to "card"
                 )
             )
         ),
@@ -133,10 +134,10 @@ class MapperTest : WalletConfigTestValues() {
     @Test
     fun `map qr code result to credential qr code response`() {
         val result = mapHashMapToQrCodeResponse(credentialQrCodeResult)
-        assert(result is CredentialQrResponse)
-        (result as CredentialQrResponse).run {
+        assert(result is CredentialQrCode)
+        (result as CredentialQrCode).run {
             memberName == "name" &&
-                    name == "ÖAMTC-Member Card" &&
+                    name == "card" &&
                     issuer == "did:ethr:01016a194e4d5beee3a634edb156f84d03354a03" &&
                     type == "AutomotiveMembershipCardCredential" &&
                     memberId == "123456" &&
@@ -148,8 +149,8 @@ class MapperTest : WalletConfigTestValues() {
     @Test
     fun `map qr code result to credential qr code response with no vc type`() {
         val result = mapHashMapToQrCodeResponse(credentialQrCodeResultWithDifferentVCType)
-        assert(result is CredentialQrResponse)
-        (result as CredentialQrResponse).run {
+        assert(result is CredentialQrCode)
+        (result as CredentialQrCode).run {
             name == "" &&
                     memberId == "" &&
                     creationDate == "" &&
@@ -160,8 +161,8 @@ class MapperTest : WalletConfigTestValues() {
     @Test
     fun `map qr code result to service qr code response`() {
         val result = mapHashMapToQrCodeResponse(serviceQrCodeResult)
-        assert(result is ServiceQrResponse)
-        (result as ServiceQrResponse).run {
+        assert(result is ServiceQrCode)
+        (result as ServiceQrCode).run {
             serviceName == "Demo Web Page Login" &&
                     callback == "callback" &&
                     requestedData[0] == "test1" &&

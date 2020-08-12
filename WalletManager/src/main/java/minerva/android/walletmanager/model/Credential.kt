@@ -13,5 +13,5 @@ data class Credential(
     val expirationDate: Long = Long.InvalidValue,
     val creationDate: String = String.Empty,
     val loggedInIdentityDid: String = String.Empty,
-    var lastUsed: String = String.Empty
+    var lastUsed: Long = Long.InvalidValue
 ) : MinervaPrimitive(name = name, type = type)

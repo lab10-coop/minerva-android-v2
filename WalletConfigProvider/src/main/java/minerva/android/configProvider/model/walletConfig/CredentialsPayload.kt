@@ -24,7 +24,7 @@ data class CredentialsPayload(
     @SerializedName("loggedInIdentityDid")
     private val _loggedInIdentityDid: String? = String.Empty,
     @SerializedName("lastUsed")
-    private val _lastUsed: String? = String.Empty
+    private val _lastUsed: Long? = Long.InvalidValue
 ) {
     val name: String
         get() = _name ?: String.Empty
@@ -44,6 +44,6 @@ data class CredentialsPayload(
         get() = _creationDate ?: String.Empty
     val loggedInIdentityDid: String
         get() = _loggedInIdentityDid ?: String.Empty
-    val lastUsed: String
-        get() = _lastUsed ?: String.Empty
+    val lastUsed: Long
+        get() = _lastUsed ?: Long.InvalidValue
 }
