@@ -10,8 +10,7 @@ import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.model.ServiceQrResponse
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Test
 
@@ -38,7 +37,7 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         viewModel.loginLiveData.observeForever(loginObserver)
         viewModel.handleLogin(
             Identity(1, personalData = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "1", publicKey = "2"),
-            ServiceQrResponse("Minerva", "callback")
+            ServiceQrCode("Minerva", "callback")
         )
         loginCaptor.run {
             verify(loginObserver).onChanged(capture())
@@ -54,7 +53,7 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         viewModel.requestedFieldsLiveData.observeForever(requestFieldObserver)
         viewModel.handleLogin(
             Identity(1, privateKey = "1", publicKey = "2"),
-            ServiceQrResponse("Minerva", "callback")
+            ServiceQrCode("Minerva", "callback")
         )
         requestFieldCaptor.run {
             verify(requestFieldObserver).onChanged(capture())
@@ -70,7 +69,7 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.handleLogin(
             Identity(1, personalData = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "1", publicKey = "2"),
-            ServiceQrResponse("Minerva", "callback")
+            ServiceQrCode("Minerva", "callback")
         )
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
@@ -85,7 +84,7 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.handleLogin(
             Identity(1, personalData = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "", publicKey = ""),
-            ServiceQrResponse("Minerva", "callback")
+            ServiceQrCode("Minerva", "callback")
         )
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())

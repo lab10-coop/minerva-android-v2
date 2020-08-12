@@ -6,21 +6,21 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 
 @Parcelize
-open class QrCodeResponse(
+open class QrCode(
     open var issuer: String = String.Empty
 ) : Parcelable
 
 @Parcelize
-data class ServiceQrResponse(
+data class ServiceQrCode(
     override var issuer: String = String.Empty,
     var serviceName: String = String.Empty,
     var callback: String? = String.Empty,
     var requestedData: ArrayList<String> = arrayListOf(),
     var identityFields: String = String.Empty
-) : QrCodeResponse(issuer = issuer)
+) : QrCode(issuer = issuer)
 
 @Parcelize
-data class CredentialQrResponse(
+data class CredentialQrCode(
     override var issuer: String = String.Empty,
     val name: String = String.Empty,
     val type: String = String.Empty,
@@ -31,4 +31,4 @@ data class CredentialQrResponse(
     val creationDate: String = String.Empty,
     val loggedInDid: String = String.Empty,
     val lastUsed: Long = Long.InvalidValue
-) : QrCodeResponse(issuer = issuer)
+) : QrCode(issuer = issuer)

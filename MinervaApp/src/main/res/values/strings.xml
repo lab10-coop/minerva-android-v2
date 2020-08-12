@@ -113,6 +113,7 @@
     <string name="logIn">Log in</string>
     <string name="authorised">Authorised</string>
     <string name="signed">Signed</string>
+    <string name="updated">Updated</string>
     <string name="account_action_label">Account %s</string>
     <string name="safe_account_action_label">Safe Account %s</string>
     <string name="identity_name">Identity %s</string>
@@ -167,4 +168,5 @@
     <string name="attached_credential_failure">The imported credential could not be attached to any of your identities</string>
     <string name="remove_credential_dialog_title">Remove Credential?</string>
     <string name="remove_credential_dialog_message">You will have to get a new credential from the issuer.</string>
+    <string name="update_credential_message">Do you want to update your existing credential?</string>
 </resources>

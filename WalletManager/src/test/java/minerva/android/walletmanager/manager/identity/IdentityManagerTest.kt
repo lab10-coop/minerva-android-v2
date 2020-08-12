@@ -175,7 +175,6 @@ class IdentityManagerTest : RxTest() {
             .test()
             .assertNoErrors()
             .assertComplete()
-
     }
 
     @Test
@@ -183,6 +182,27 @@ class IdentityManagerTest : RxTest() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         manager.removeBindedCredentialFromIdentity(Credential("test", "type", loggedInIdentityDid = "did:ethr:address"))
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `update credential success test`() {
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        manager.updateBindedCredential(Credential("test", "type", loggedInIdentityDid = "did:ethr:address", issuer = "iss"))
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it == "identityName1"
+            }
+    }
+
+    @Test
+    fun `update credential success error`() {
+        val error = Throwable()
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        manager.updateBindedCredential(Credential("test", "type", loggedInIdentityDid = "did:ethr:address", issuer = "iss"))
             .test()
             .assertError(error)
     }

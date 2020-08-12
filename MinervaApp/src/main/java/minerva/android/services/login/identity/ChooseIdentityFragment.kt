@@ -15,17 +15,17 @@ import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.services.login.PainlessLoginFragmentListener
-import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.model.ServiceQrResponse
+import minerva.android.services.login.LoginScannerListener
+import minerva.android.walletmanager.model.QrCode
+import minerva.android.walletmanager.model.ServiceQrCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ChooseIdentityFragment : Fragment() {
 
     private val viewModel: ChooseIdentityViewModel by viewModel()
     private val identitiesAdapter = IdentitiesAdapter()
-    private lateinit var qrCodeResponse: ServiceQrResponse
-    private lateinit var listener: PainlessLoginFragmentListener
+    private lateinit var serviceQrCode: ServiceQrCode
+    private lateinit var listener: LoginScannerListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,7 +35,7 @@ class ChooseIdentityFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            qrCodeResponse = it.getParcelable<QrCodeResponse>(QR_CODE_RESPONSE) as ServiceQrResponse
+            serviceQrCode = it.getParcelable<QrCode>(SERVICE_QR_CODE) as ServiceQrCode
         }
     }
 
@@ -47,7 +47,7 @@ class ChooseIdentityFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as PainlessLoginFragmentListener
+        listener = context as LoginScannerListener
     }
 
     override fun onResume() {
@@ -68,8 +68,8 @@ class ChooseIdentityFragment : Fragment() {
     }
 
     private fun setupServiceData() {
-        serviceName.text = qrCodeResponse.serviceName
-        requestedFields.text = qrCodeResponse.identityFields
+        serviceName.text = serviceQrCode.serviceName
+        requestedFields.text = serviceQrCode.identityFields
     }
 
     private fun setupIdentitiesList() {
@@ -86,7 +86,7 @@ class ChooseIdentityFragment : Fragment() {
 
     private fun handleLoginButton() {
         identitiesAdapter.getSelectedIdentity()?.let {
-            viewModel.handleLogin(it, qrCodeResponse)
+            viewModel.handleLogin(it, serviceQrCode)
         }.orElse {
             Toast.makeText(context, getString(R.string.select_identity_message), Toast.LENGTH_LONG).show()
         }
@@ -102,8 +102,8 @@ class ChooseIdentityFragment : Fragment() {
     private fun prepareObservers() {
         viewModel.apply {
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResult(false) })
-            loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onResult(true, loginPayload = it) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false) })
+            loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(true, payload = it) })
             requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver {
                 Toast.makeText(context, getString(R.string.requested_data_message), Toast.LENGTH_LONG).show()
             })
@@ -112,10 +112,10 @@ class ChooseIdentityFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(qrCodeResponse: ServiceQrResponse) = ChooseIdentityFragment().apply {
-            arguments = Bundle().apply { putParcelable(QR_CODE_RESPONSE, qrCodeResponse) }
+        fun newInstance(serviceQrCode: ServiceQrCode) = ChooseIdentityFragment().apply {
+            arguments = Bundle().apply { putParcelable(SERVICE_QR_CODE, serviceQrCode) }
         }
 
-        private const val QR_CODE_RESPONSE = "scanResult"
+        private const val SERVICE_QR_CODE = "service_qr_code"
     }
 }

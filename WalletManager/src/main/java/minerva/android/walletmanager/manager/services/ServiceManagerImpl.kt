@@ -21,7 +21,7 @@ class ServiceManagerImpl(
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletConfigManager.walletConfigLiveData
 
-    override fun decodeQrCodeResponse(token: String): Single<QrCodeResponse> =
+    override fun decodeQrCodeResponse(token: String): Single<QrCode> =
         cryptographyRepository.decodeJwtToken(token)
             .map { mapHashMapToQrCodeResponse(it) }
 
