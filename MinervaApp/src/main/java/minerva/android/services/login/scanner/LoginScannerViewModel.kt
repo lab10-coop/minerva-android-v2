@@ -67,10 +67,10 @@ class LoginScannerViewModel(
     }
 
     private fun handleCredentialQrCodeResponse(credentialQrCode: CredentialQrCode) {
-        if (identityManager.isCredentialBinded(credentialQrCode.loggedInDid, credentialQrCode.issuer)) {
+        val credential = CredentialQrCodeResponseMapper.map(credentialQrCode)
+        if (identityManager.isCredentialLoggedIn(credential)) {
             _updateBindedCredential.value = Event(credentialQrCode)
         } else {
-            val credential = CredentialQrCodeResponseMapper.map(credentialQrCode)
             launchDisposable {
                 identityManager.bindCredentialToIdentity(credential)
                     .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(credential, FAILED)) } }

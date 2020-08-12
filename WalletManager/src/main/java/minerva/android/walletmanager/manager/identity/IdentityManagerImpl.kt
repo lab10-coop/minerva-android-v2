@@ -15,7 +15,6 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.walletmanager.utils.DateUtils
 
 class IdentityManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -116,10 +115,10 @@ class IdentityManagerImpl(
 
     override fun updateBindedCredential(credential: Credential): Single<String> {
         walletConfigManager.getWalletConfig()?.apply {
-            getLoggedInIdentity(credential.loggedInIdentityDid)?.let {
-                getBindedCredential(it, credential)?.let { credential ->
-                    updateCredential(it, credential)
-                    return updateWalletConfig(it, this).toSingleDefault(it.name)
+            getLoggedInIdentity(credential.loggedInIdentityDid)?.let { identity ->
+                getPositionForCredential(identity, credential).let { index ->
+                    identity.credentials = getUpdatedCredentialList(identity, index, credential)
+                    return updateWalletConfig(identity, this).toSingleDefault(identity.name)
                 }
             }
             return Single.error(NoBindedCredentialThrowable())
@@ -127,6 +126,21 @@ class IdentityManagerImpl(
         throw  NotInitializedWalletConfigThrowable()
     }
 
+    private fun getUpdatedCredentialList(identity: Identity, index: Int, credential: Credential): List<Credential> =
+        identity.credentials.toMutableList().apply { this[index] = credential }
+
+    private fun getPositionForCredential(identity: Identity, credential: Credential): Int {
+        identity.credentials.forEachIndexed { index, item ->
+            if (isCredentialBinded(item, credential)) return index
+        }
+        return Int.InvalidIndex
+    }
+
+    private fun isCredentialBinded(credential: Credential, newCredential: Credential): Boolean =
+        credential.issuer == newCredential.issuer && credential.type == newCredential.type
+
+    override fun isCredentialLoggedIn(credential: Credential): Boolean =
+        getLoggedInIdentity(credential.loggedInIdentityDid)?.credentials?.find { isCredentialBinded(it, credential) } != null
 
     override fun removeBindedCredentialFromIdentity(credential: Credential): Completable {
         walletConfigManager.getWalletConfig()?.let {
@@ -140,18 +154,8 @@ class IdentityManagerImpl(
         throw  NotInitializedWalletConfigThrowable()
     }
 
-    override fun isCredentialBinded(loggedInIdentityDid: String, issuer: String): Boolean =
-        getLoggedInIdentity(loggedInIdentityDid)?.credentials?.find { it.issuer == issuer } != null
-
     private fun getLoggedInIdentity(loggedInIdentityDid: String): Identity? =
         walletConfigManager.getWalletConfig()?.identities?.filter { !it.isDeleted }?.find { it.did == loggedInIdentityDid }
-
-    private fun getBindedCredential(identity: Identity, credential: Credential): Credential? =
-        identity.credentials.find { item -> item.issuer == credential.issuer && item.type == credential.type }
-
-    private fun updateCredential(identity: Identity, credential: Credential) {
-        identity.credentials.find { found -> found == credential }?.lastUsed = DateUtils.timestamp
-    }
 
     private fun getIdentityWithNewCredential(identity: Identity, newCredential: Credential): Identity =
         identity.apply { credentials = credentials + newCredential }
