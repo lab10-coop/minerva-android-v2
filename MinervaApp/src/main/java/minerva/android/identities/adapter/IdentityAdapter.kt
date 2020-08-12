@@ -16,6 +16,8 @@ import minerva.android.extension.rotate180back
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.utils.AddressConverter
+import minerva.android.walletmanager.utils.AddressType
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.widget.IdentityDataContent.Companion.FIELD_DESCRIPTION_LIMIT
 import minerva.android.widget.LetterLogo
@@ -73,7 +75,7 @@ class IdentityViewHolder(
                 identityName.text = name
                 card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(name)))
                 profileImage.setImageDrawable(LetterLogo.createLogo(context, name))
-                identityDid.setSingleLineTitleAndBody(DID_LABEL, did)
+                identityDid.setSingleLineTitleAndBody(DID_LABEL, AddressConverter.getShortAddress(AddressType.DID_ADDRESS, did))
                 dataContainer.apply {
                     prepareDataContainerFields(identity)
                     setListener(listener)
