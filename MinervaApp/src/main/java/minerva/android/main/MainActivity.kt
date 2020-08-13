@@ -22,15 +22,14 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
-import minerva.android.services.login.PainlessLoginActivity
+import minerva.android.services.login.LoginScannerActivity
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.widget.OnFlashBarTapListener
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
 
 
-class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, FragmentInteractorListener, OnFlashBarTapListener {
+class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, FragmentInteractorListener {
 
     internal val viewModel: MainViewModel by inject()
     private var shouldDisableAddButton = false
@@ -74,7 +73,12 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             loadingLiveData.observe(this@MainActivity, EventObserver {
                 (getCurrentFragment() as AccountsFragment).setProgressAccount(it.first, it.second)
             })
-
+            updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
+                showBindCredentialFlashbar(true, it)
+            })
+            updateCredentialErrorLiveData.observe(this@MainActivity, EventObserver {
+                showBindCredentialFlashbar(false, null)
+            })
         }
     }
 
@@ -114,7 +118,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
                 findItem(R.id.editServiceOrder)?.apply {
                     isVisible = isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
                 }
-                findItem(R.id.barcodeScanner)?.apply {
+                findItem(R.id.qrCodeScanner)?.apply {
                     isVisible = isServicesTabSelected()
                 }
             }
@@ -129,7 +133,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             R.id.editAccountOrder -> startEditValueOrderWrappedActivity(this)
             R.id.addAccount -> startNewValueActivity()
             R.id.editServiceOrder -> startEditServiceOrderWrappedActivity(this)
-            R.id.barcodeScanner -> launchActivityForResult<PainlessLoginActivity>(LOGIN_RESULT_REQUEST_CODE)
+            R.id.qrCodeScanner -> launchActivityForResult<LoginScannerActivity>(LOGIN_SCANNER_RESULT_REQUEST_CODE)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -137,7 +141,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when {
-            isLoginResult(requestCode, resultCode) -> handleLoginResult(data)
+            isLoginScannerResult(requestCode, resultCode) -> handleLoginScannerResult(data)
             isTransactionPrepared(requestCode, resultCode) -> handlePreparedTransaction(data)
         }
     }
@@ -209,24 +213,28 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         )
     }
 
-    override fun onAllow(shouldLogin: Boolean) {
+    fun onPainlessLogin() {
+        viewModel.painlessLogin()
+    }
+
+    fun updateCredential() {
+        viewModel.updateBindedCredential()
+    }
+
+    fun onAllowNotifications(shouldLogin: Boolean) {
         if (shouldLogin) viewModel.painlessLogin()
         else Toast.makeText(this, "Allow push notifications, will be added soon", Toast.LENGTH_SHORT).show()
         //        TODO send to API that push notifications are allowed
     }
 
-    override fun onLogin() {
-        viewModel.painlessLogin()
-    }
-
-    override fun onDeny() {
+    fun onDenyNotifications() {
 //        TODO send to API that push notifications are no longer allowed
         Toast.makeText(this, "Disable push notifications, will be added soon", Toast.LENGTH_SHORT).show()
     }
 
     companion object {
         private const val NEW_VALUE_TITLE_PATTERN = "%s #%d"
-        const val LOGIN_RESULT_REQUEST_CODE = 3
+        const val LOGIN_SCANNER_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val JWT = "jwt"
     }

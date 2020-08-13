@@ -15,6 +15,7 @@
         android:roundIcon="@mipmap/ic_minerva"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".splash.SplashScreenActivity">
             <intent-filter>
@@ -45,7 +46,7 @@
             android:name=".accounts.transaction.activity.TransactionActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".services.login.PainlessLoginActivity"
+            android:name=".services.login.LoginScannerActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".wrapped.WrappedActivity"

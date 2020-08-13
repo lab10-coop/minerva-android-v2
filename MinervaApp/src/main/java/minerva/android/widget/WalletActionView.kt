@@ -19,6 +19,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAF
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.utils.DateUtils
 
@@ -37,9 +38,20 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
             )
             WalletActionType.ACCOUNT -> showAccounts(walletAction)
             WalletActionType.SERVICE -> showServices(walletAction)
-            WalletActionType.CREDENTIAL -> showAction(
+            WalletActionType.CREDENTIAL -> showCredentials(walletAction)
+        }
+    }
+
+    private fun showCredentials(walletAction: WalletAction) {
+        when (walletAction.status) {
+            ADDED, REMOVED, UPDATED -> showAction(
                 walletAction.fields[WalletActionFields.CREDENTIAL_NAME],
-                R.string.credential_added_action_label,
+                R.string.credential_action_label,
+                R.drawable.ic_identities //TODO change to credential icon
+            )
+            FAILED -> showAction(
+                walletAction.fields[WalletActionFields.CREDENTIAL_NAME],
+                R.string.credential_import_label,
                 R.drawable.ic_identities //TODO change to credential icon
             )
         }
@@ -110,6 +122,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
                 LOG_IN -> getString(R.string.wallet_action_header, getString(R.string.logIn), lastUsed)
                 AUTHORISED -> getString(R.string.wallet_action_header, getString(R.string.authorised), lastUsed)
                 SIGNED -> getString(R.string.wallet_action_header, getString(R.string.signed), lastUsed)
+                UPDATED -> getString(R.string.wallet_action_header, getString(R.string.updated), lastUsed)
                 else -> UNDEFINED
             }
         }

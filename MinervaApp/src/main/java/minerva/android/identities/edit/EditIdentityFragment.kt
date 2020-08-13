@@ -124,13 +124,16 @@ class EditIdentityFragment : Fragment() {
     }
 
     private fun saveIdentity() {
-        val newIdentity = Identity(
+        viewModel.saveIdentity(getUpdatedIdentity(), getActionStatus())
+    }
+
+    private fun getUpdatedIdentity(): Identity =
+         Identity(
             identity.index,
             identityName.text.toString(),
-            personalData = prepareFormData()
+            personalData = prepareFormData(),
+            credentials = identity.credentials
         )
-        viewModel.saveIdentity(newIdentity, getActionStatus())
-    }
 
     //TODO change for dynamic label generation
     private fun prepareFormData(): LinkedHashMap<String, String> {

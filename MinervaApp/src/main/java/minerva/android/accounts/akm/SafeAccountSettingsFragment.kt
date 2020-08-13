@@ -22,7 +22,7 @@ import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.accounts.adapter.OwnerAdapter
 import minerva.android.accounts.listener.OnOwnerRemovedListener
-import minerva.android.accounts.listener.ScannerFragmentsListener
+import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -33,7 +33,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
     private val viewModel: SafeAccountSettingsViewModel by viewModel()
     private val ownerAdapter = OwnerAdapter(this)
     private var safeAccountDisposable: Disposable? = null
-    private lateinit var listener: ScannerFragmentsListener
+    private lateinit var listener: AddressScannerListener
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_safe_account_settings, container, false)
@@ -55,7 +55,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as ScannerFragmentsListener
+        listener = context as AddressScannerListener
     }
 
     private fun initializeFragment() {

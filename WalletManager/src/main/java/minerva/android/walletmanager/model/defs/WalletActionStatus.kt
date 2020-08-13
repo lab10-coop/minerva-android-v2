@@ -10,9 +10,10 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REC
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
 
 @Retention(AnnotationRetention.SOURCE)
-@IntDef(REMOVED, CHANGED, ADDED, RECEIVED, SENT, FAILED, LOG_IN, AUTHORISED, SIGNED)
+@IntDef(REMOVED, CHANGED, ADDED, RECEIVED, SENT, FAILED, LOG_IN, AUTHORISED, SIGNED, UPDATED)
 annotation class WalletActionStatus {
     companion object {
         const val REMOVED = 0
@@ -26,5 +27,6 @@ annotation class WalletActionStatus {
         const val SIGNED = 8
         const val SAFE_ACCOUNT_ADDED = 9
         const val SAFE_ACCOUNT_REMOVED = 10
+        const val UPDATED = 11
     }
 }

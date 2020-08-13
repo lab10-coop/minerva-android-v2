@@ -1,6 +1,6 @@
 package minerva.android.accounts.listener
 
-interface ScannerFragmentsListener: BaseScannerListener {
+interface AddressScannerListener: BaseScannerListener {
     fun showScanner()
     fun setScanResult(text: String?)
 }

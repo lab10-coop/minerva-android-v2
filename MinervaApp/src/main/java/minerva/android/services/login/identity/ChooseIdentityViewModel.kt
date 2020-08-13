@@ -19,8 +19,7 @@ import minerva.android.walletmanager.exception.MissingKeysThrowable
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
-import minerva.android.walletmanager.model.QrCodeResponse
-import minerva.android.walletmanager.model.ServiceQrResponse
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -44,17 +43,17 @@ class ChooseIdentityViewModel(
     fun getIdentities() = serviceManager.walletConfigLiveData.value?.identities
 
     //    TODO implement dynamic login concerning different services
-    fun handleLogin(identity: Identity, qrCodeResponse: ServiceQrResponse) {
+    fun handleLogin(identity: Identity, serviceQrCode: ServiceQrCode) {
         _loadingLiveData.value = Event(true)
         if (isIdentityValid(identity)) {
-            minervaLogin(identity, qrCodeResponse)
+            minervaLogin(identity, serviceQrCode)
         } else {
             _loadingLiveData.value = Event(false)
             _requestedFieldsLiveData.value = Event(Any())
         }
     }
 
-    private fun minervaLogin(identity: Identity, qrCode: ServiceQrResponse) {
+    private fun minervaLogin(identity: Identity, qrCode: ServiceQrCode) {
         if (handleNoKeysError(identity)) return
         qrCode.callback?.let { callback ->
             serviceManager.createJwtToken(createLoginPayload(identity, qrCode))
@@ -87,8 +86,8 @@ class ChooseIdentityViewModel(
     private fun doesIdentityHaveKeys(identity: Identity) =
         identity != IncognitoIdentity() && (identity.publicKey == String.Empty || identity.privateKey == String.Empty)
 
-    private fun getLoginStatus(qrCodeResponse: ServiceQrResponse): Int =
-        if (qrCodeResponse.requestedData.contains(FCM_ID)) NEW_QUICK_USER
+    private fun getLoginStatus(serviceQrCode: ServiceQrCode): Int =
+        if (serviceQrCode.requestedData.contains(FCM_ID)) NEW_QUICK_USER
         else NEW_USER
 
     companion object {

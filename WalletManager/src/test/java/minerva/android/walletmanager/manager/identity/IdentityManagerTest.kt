@@ -8,8 +8,10 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletConfig
@@ -25,7 +27,7 @@ class IdentityManagerTest : RxTest() {
 
     private val walletConfigManager: WalletConfigManager = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
-    private val repository = IdentityManagerImpl(walletConfigManager, cryptographyRepository)
+    private val manager = IdentityManagerImpl(walletConfigManager, cryptographyRepository)
 
     @Before
     override fun setupRxSchedulers() {
@@ -36,16 +38,16 @@ class IdentityManagerTest : RxTest() {
 
     @Test
     fun `Check that wallet manager returns correct value`() {
-        repository.loadIdentity(0, "Identity").apply {
+        manager.loadIdentity(0, "Identity").apply {
             index shouldBeEqualTo 0
             name shouldBeEqualTo "identityName1"
             privateKey shouldBeEqualTo "privateKey"
         }
-        repository.loadIdentity(3, "Identity").apply {
+        manager.loadIdentity(3, "Identity").apply {
             index shouldBeEqualTo walletConfig.newIndex
             name shouldBeEqualTo "Identity #8"
         }
-        repository.loadIdentity(-1, "Identity").apply {
+        manager.loadIdentity(-1, "Identity").apply {
             index shouldBeEqualTo walletConfig.newIndex
             name shouldBeEqualTo "Identity #8"
         }
@@ -58,8 +60,8 @@ class IdentityManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val newIdentity = Identity(0, "identityName1")
-        val test = repository.saveIdentity(newIdentity).test()
-        val loadedIdentity = repository.loadIdentity(0, "Identity")
+        val test = manager.saveIdentity(newIdentity).test()
+        val loadedIdentity = manager.loadIdentity(0, "Identity")
         test.assertNoErrors()
         loadedIdentity.name shouldBeEqualTo newIdentity.name
         loadedIdentity.privateKey shouldBeEqualTo "privateKey"
@@ -72,8 +74,8 @@ class IdentityManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val newIdentity = Identity(0, "identityName")
-        repository.saveIdentity(newIdentity).test()
-        val loadedIdentity = repository.loadIdentity(0, "Identity")
+        manager.saveIdentity(newIdentity).test()
+        val loadedIdentity = manager.loadIdentity(0, "Identity")
         loadedIdentity.name shouldNotBeEqualTo newIdentity.name
     }
 
@@ -85,8 +87,8 @@ class IdentityManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.removeIdentity(identityToRemove).test()
-        val loadedIdentity = repository.loadIdentity(1, "Identity")
+        manager.removeIdentity(identityToRemove).test()
+        val loadedIdentity = manager.loadIdentity(1, "Identity")
         loadedIdentity.name shouldBeEqualTo identityToRemove.name
         loadedIdentity.isDeleted shouldBeEqualTo identityToRemove.isDeleted
     }
@@ -99,8 +101,8 @@ class IdentityManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.removeIdentity(identityToRemove).test()
-        val loadedIdentity = repository.loadIdentity(1, "Identity")
+        manager.removeIdentity(identityToRemove).test()
+        val loadedIdentity = manager.loadIdentity(1, "Identity")
         loadedIdentity.name shouldBeEqualTo "identityName2"
         loadedIdentity.isDeleted shouldBeEqualTo false
         loadedIdentity.personalData.size shouldBeEqualTo 3
@@ -120,8 +122,8 @@ class IdentityManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.removeIdentity(identityToRemove).test()
-        repository.loadIdentity(0, "Identity").apply {
+        manager.removeIdentity(identityToRemove).test()
+        manager.loadIdentity(0, "Identity").apply {
             name shouldBeEqualTo "identityName1"
             isDeleted shouldBeEqualTo false
             personalData.size shouldBeEqualTo 3
@@ -134,12 +136,74 @@ class IdentityManagerTest : RxTest() {
         val identityToRemove = Identity(22)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.removeIdentity(identityToRemove).test()
-        repository.loadIdentity(0, "Identity").apply {
+        manager.removeIdentity(identityToRemove).test()
+        manager.loadIdentity(0, "Identity").apply {
             name shouldBeEqualTo "identityName1"
             isDeleted shouldBeEqualTo false
             personalData.size shouldBeEqualTo 3
         }
         walletConfig.identities.size shouldBeEqualTo 3
+    }
+
+    @Test
+    fun `bind credential to identity success test`() {
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        manager.bindCredentialToIdentity(Credential("test", "type", loggedInIdentityDid = "did:ethr:address"))
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it == "identityName1"
+            }
+    }
+
+    @Test
+    fun `bind credential to identity error test`() {
+        val error = NoBindedCredentialThrowable()
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        manager.bindCredentialToIdentity(Credential("test", "type", loggedInIdentityDid = "address"))
+            .test()
+            .assertError {
+                it is NoBindedCredentialThrowable
+            }
+    }
+
+    @Test
+    fun `removed binded credential to identity success test`() {
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        manager.removeBindedCredentialFromIdentity(Credential("test", "type", loggedInIdentityDid = "did:ethr:address"))
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+    }
+
+    @Test
+    fun `removed binded credential to identity error test`() {
+        val error = Throwable()
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        manager.removeBindedCredentialFromIdentity(Credential("test", "type", loggedInIdentityDid = "did:ethr:address"))
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `update credential success test`() {
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        manager.updateBindedCredential(Credential("test", "type", loggedInIdentityDid = "did:ethr:address", issuer = "iss"))
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it == "identityName1"
+            }
+    }
+
+    @Test
+    fun `update credential success error`() {
+        val error = Throwable()
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        manager.updateBindedCredential(Credential("test", "type", loggedInIdentityDid = "did:ethr:address", issuer = "iss"))
+            .test()
+            .assertError(error)
     }
 }

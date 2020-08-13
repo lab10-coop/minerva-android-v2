@@ -16,12 +16,12 @@ import minerva.android.accounts.address.AddressFragment
 import minerva.android.accounts.akm.SafeAccountSettingsFragment
 import minerva.android.accounts.create.NewAccountFragment
 import minerva.android.accounts.listener.OnBackListener
-import minerva.android.accounts.listener.ScannerFragmentsListener
+import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.walletmanager.model.defs.WalletActionType
 import java.util.*
 
-class WrappedActivity : AppCompatActivity(), ScannerFragmentsListener, OnBackListener {
+class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

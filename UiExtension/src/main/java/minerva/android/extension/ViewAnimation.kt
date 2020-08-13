@@ -10,3 +10,7 @@ fun View.rotate180() {
 fun View.rotate180back() {
     startAnimation(AnimationUtils.loadAnimation(context, R.anim.rotate_180_back))
 }
+
+fun View.fadeIn() {
+    startAnimation(AnimationUtils.loadAnimation(context, R.anim.fade_in))
+}

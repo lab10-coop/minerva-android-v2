@@ -14,9 +14,10 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.identity.ChooseIdentityFragment
 import minerva.android.services.login.scanner.LoginScannerFragment
 import minerva.android.services.login.uitls.LoginPayload
-import minerva.android.walletmanager.model.ServiceQrResponse
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.ServiceQrCode
 
-class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener {
+class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,12 +36,24 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
         supportActionBar?.hide()
     }
 
-    override fun onResult(isResultSucceed: Boolean, message: String?, loginPayload: LoginPayload?) {
+    override fun onScannerResult(isResultSucceed: Boolean, message: String?) {
         setResult(Activity.RESULT_OK, Intent().apply {
-            putExtra(IS_LOGIN_SUCCESS, isResultSucceed)
-            putExtra(LOGIN_PAYLOAD, loginPayload)
+            putExtra(IS_RESULT_SUCCEED, isResultSucceed)
             putExtra(RESULT_MESSAGE, message)
         })
+        finish()
+    }
+
+    override fun onPainlessLoginResult(isLoginSucceed: Boolean, payload: LoginPayload?) {
+        setResult(Activity.RESULT_OK, Intent().apply {
+            putExtra(IS_RESULT_SUCCEED, isLoginSucceed)
+            putExtra(LOGIN_PAYLOAD, payload)
+        })
+        finish()
+    }
+
+    override fun updateBindedCredential(qrCode: CredentialQrCode) {
+        setResult(Activity.RESULT_OK, Intent().putExtra(CREDENTIAL_QR_CODE, qrCode))
         finish()
     }
 
@@ -55,14 +68,14 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
 
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
-    override fun showChooseIdentityFragment(qrCodeResponse: ServiceQrResponse) {
-        showFragment(qrCodeResponse)
+    override fun showChooseIdentityFragment(qrCode: ServiceQrCode) {
+        showFragment(qrCode)
         setupActionBar()
     }
 
-    private fun showFragment(qrCodeResponse: ServiceQrResponse) {
+    private fun showFragment(qrCodeCodeResponse: ServiceQrCode) {
         replaceFragment(
-            R.id.container, ChooseIdentityFragment.newInstance(qrCodeResponse),
+            R.id.container, ChooseIdentityFragment.newInstance(qrCodeCodeResponse),
             R.animator.slide_in_left, R.animator.slide_out_right
         )
     }
@@ -78,8 +91,9 @@ class PainlessLoginActivity : AppCompatActivity(), PainlessLoginFragmentListener
     }
 
     companion object {
-        const val IS_LOGIN_SUCCESS = "is_login_succeed"
+        const val IS_RESULT_SUCCEED = "is_result_succeed"
         const val LOGIN_PAYLOAD = "login_payload"
         const val RESULT_MESSAGE = "result_message"
+        const val CREDENTIAL_QR_CODE = "credential_qr_code"
     }
 }

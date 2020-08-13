@@ -21,7 +21,7 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/barcodeScanner"
+        android:id="@+id/qrCodeScanner"
         android:icon="@drawable/ic_barcode_scanner"
         android:title="@string/barcode"
         app:showAsAction="ifRoom" />
