@@ -74,7 +74,7 @@
     <string name="no">No</string>
     <string name="identity">Identity</string>
     <string name="select_identity_message">Please select identity</string>
-    <string name="invalid_qr_code_message">Invalid Qr code, please try again</string>
+    <string name="invalid_qr_code_message">Invalid QR code, please try again</string>
     <string name="requested_data_message">Please, use identity with requested data</string>
     <string name="send">Send</string>
     <string name="amount">Amount</string>
