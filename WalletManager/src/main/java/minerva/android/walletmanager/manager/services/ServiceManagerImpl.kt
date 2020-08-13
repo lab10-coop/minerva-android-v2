@@ -64,46 +64,4 @@ class ServiceManagerImpl(
         }
         throw NotInitializedWalletConfigThrowable()
     }
-
-    override fun bindCredentialToIdentity(newCredential: Credential): Single<String> {
-        walletConfigManager.getWalletConfig()?.apply {
-            identities.filter { !it.isDeleted }.forEach { identity ->
-                if (isLoggedInCredential(identity, newCredential)) return bindCredential(identity, newCredential)
-            }
-            return Single.error(NoBindedCredentialThrowable())
-        }
-        throw  NotInitializedWalletConfigThrowable()
-    }
-
-    private fun isLoggedInCredential(identity: Identity, newCredential: Credential) = identity.did == newCredential.loggedInIdentityDid
-
-    private fun WalletConfig.bindCredential(identity: Identity, newCredential: Credential): Single<String> {
-        getBindedCredential(identity, newCredential)?.let { credential ->
-            updateCredential(identity, credential)
-            return updateWalletConfig(identity, this)
-        }.orElse {
-            return updateWalletConfig(getIdentityWithNewCredential(identity, newCredential), this)
-        }
-    }
-
-    private fun getBindedCredential(identity: Identity, credential: Credential): Credential? =
-        identity.credentials.find { item -> item.issuer == credential.issuer && item.type == credential.type }
-
-    private fun updateCredential(identity: Identity, credential: Credential) {
-        identity.credentials.find { found -> found == credential }?.lastUsed = DateUtils.getDateWithTimeFromTimestamp()
-    }
-
-    private fun getIdentityWithNewCredential(identity: Identity, newCredential: Credential): Identity =
-        identity.apply { credentials = credentials + newCredential }
-
-    private fun updateWalletConfig(identity: Identity, walletConfig: WalletConfig): Single<String> =
-        walletConfigManager.updateWalletConfig(
-            WalletConfig(
-                walletConfig.version,
-                IdentityUtils.prepareIdentities(identity, walletConfig),
-                walletConfig.accounts,
-                walletConfig.services
-            )
-        ).toSingleDefault(identity.name)
-
 }
