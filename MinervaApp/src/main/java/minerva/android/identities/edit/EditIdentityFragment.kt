@@ -58,9 +58,6 @@ class EditIdentityFragment : Fragment() {
             postcodeLayout.visible()
             countryLayout.visible()
         }
-        identityName.afterTextChanged { imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), it)) }
-        identityName.onFocusLost { identityName.error = isEmpty(it) }
-        email.onFocusLost { email.error = getEmailErrorMessage(it) }
         birthDate.setOnClickListener { showDialogPicker() }
         confirmButton.setOnClickListener { onConfirmButtonClicked() }
     }
@@ -108,6 +105,7 @@ class EditIdentityFragment : Fragment() {
             this@EditIdentityFragment.did.apply {
                 setTitleAndBody(getString(R.string.did), did)
                 setSingleLine()
+                makeEnabled(false)
             }
             email.setText(personalData[EMAIL])
             phoneNumber.setText(personalData[PHONE_NUMBER])
@@ -119,8 +117,6 @@ class EditIdentityFragment : Fragment() {
             country.setText(personalData[COUNTRY])
             imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), name))
         }
-
-
     }
 
     private fun saveIdentity() {
@@ -128,7 +124,7 @@ class EditIdentityFragment : Fragment() {
     }
 
     private fun getUpdatedIdentity(): Identity =
-         Identity(
+        Identity(
             identity.index,
             identityName.text.toString(),
             personalData = prepareFormData(),
@@ -179,6 +175,23 @@ class EditIdentityFragment : Fragment() {
             index = it.getInt(INDEX)
             viewModel.loadIdentity(index, getString(R.string.identity))
         }
+
+        identityName.apply {
+            afterTextChanged { imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), it)) }
+            onFocusLost { identityName.error = isEmpty(it) }
+            clearButton()
+        }
+        accountName.clearButton()
+        email.apply {
+            onFocusLost { email.error = getEmailErrorMessage(it) }
+            clearButton()
+        }
+        phoneNumber.clearButton()
+        addressLine1.clearButton()
+        addressLine2.clearButton()
+        city.clearButton()
+        postcode.clearButton()
+        country.clearButton()
     }
 
     private fun getActionStatus(): Int =
