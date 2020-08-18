@@ -38,8 +38,8 @@
     <color name="oamtc">#FFFBDC00</color>
     <color name="oamtcOpacity">#29FBDC00</color>
 
-    <color name="artis">#FF129C6B</color>
-    <color name="artisOpacity">#29129C6B</color>
+    <color name="artis">#FFF97599</color>
+    <color name="artisOpacity">#29F97599</color>
     <color name="ethereum">#FF486FFF</color>
     <color name="ethereumOpacity">#29486FFF</color>
     <color name="poa">#FF5C34A2</color>
