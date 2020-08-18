@@ -24,7 +24,7 @@
         android:layout_marginStart="@dimen/margin_xsmall"
         android:fontFamily="@font/rubik_regular"
         android:textColor="@color/titleColor"
-        android:textSize="@dimen/text_small"
+        android:textSize="@dimen/text_xsmall"
         app:layout_constraintBottom_toTopOf="@+id/type"
         app:layout_constraintLeft_toRightOf="@id/icon"
         app:layout_constraintTop_toTopOf="parent"

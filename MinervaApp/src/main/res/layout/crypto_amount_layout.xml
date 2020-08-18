@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_xxsmall"
         android:textColor="@color/titleColor"
-        android:textSize="@dimen/text_small"
+        android:textSize="@dimen/text_xsmall"
         android:gravity="end"
         tools:text="€ 3.14159" />
 </merge>

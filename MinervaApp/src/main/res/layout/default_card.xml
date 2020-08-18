@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/rounded_white_background"
+    android:padding="@dimen/margin_normal">
+
+    <TextView
+        android:id="@+id/cardName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="true"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_big"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="OAMTC CLUBKARTE" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/centerHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.3" />
+
+    <TextView
+        android:id="@+id/validLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/valid_until"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_small"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardName" />
+
+    <TextView
+        android:id="@+id/valid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintBottom_toBottomOf="@id/validLabel"
+        app:layout_constraintLeft_toLeftOf="@id/centerHorizontal"
+        tools:text="03/2023" />
+
+    <TextView
+        android:id="@+id/memberLabelId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:text="@string/memberId"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_small"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/validLabel" />
+
+    <TextView
+        android:id="@+id/memberId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintBottom_toBottomOf="@id/memberLabelId"
+        app:layout_constraintLeft_toLeftOf="@id/centerHorizontal"
+        tools:text="324867345" />
+
+    <TextView
+        android:id="@+id/memberNameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:text="@string/name_colon"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_small"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/memberLabelId" />
+
+    <TextView
+        android:id="@+id/memberName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintBottom_toBottomOf="@id/memberNameLabel"
+        app:layout_constraintLeft_toLeftOf="@id/centerHorizontal"
+        tools:text="Maximilian Musterperson" />
+
+    <TextView
+        android:id="@+id/sinceLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:text="@string/since"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_small"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/memberNameLabel" />
+
+    <TextView
+        android:id="@+id/since"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintBottom_toBottomOf="@id/sinceLabel"
+        app:layout_constraintLeft_toLeftOf="@id/centerHorizontal"
+        tools:text="1970" />
+
+    <TextView
+        android:id="@+id/coverageLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:text="@string/coverage"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_small"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sinceLabel" />
+
+    <TextView
+        android:id="@+id/coverage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintBottom_toBottomOf="@id/coverageLabel"
+        app:layout_constraintLeft_toLeftOf="@id/centerHorizontal"
+        tools:text="Touring" />
+
+    <TextView
+        android:id="@+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorSecondary"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/coverageLabel"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:text="@string/ok"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
