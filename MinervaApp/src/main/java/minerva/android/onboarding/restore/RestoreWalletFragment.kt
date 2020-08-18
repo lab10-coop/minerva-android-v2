@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.fragment_restore_wallet.*
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.invisible
+import minerva.android.extension.clearButton
 import minerva.android.extension.visible
 import minerva.android.extension.wrapper.TextWatcherWrapper
 import minerva.android.kotlinUtils.event.EventObserver
@@ -28,6 +29,7 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        mnemonicEditText.clearButton()
         handleRestoreWalletButton()
     }
 
