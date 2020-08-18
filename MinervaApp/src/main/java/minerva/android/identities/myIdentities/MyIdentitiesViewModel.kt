@@ -1,4 +1,4 @@
-package minerva.android.identities
+package minerva.android.identities.myIdentities
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,7 +21,7 @@ import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
-class IdentitiesViewModel(
+class MyIdentitiesViewModel(
     private val identityManager: IdentityManager,
     private val walletActionsRepository: WalletActionsRepository
 ) : BaseViewModel() {
