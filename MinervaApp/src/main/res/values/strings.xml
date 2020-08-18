@@ -170,6 +170,9 @@
     <string name="remove_credential_dialog_title">Remove Credential?</string>
     <string name="remove_credential_dialog_message">You will have to get a new credential from the issuer.</string>
     <string name="update_credential_message">Do you want to update your existing credential?</string>
+    <string name="credentials_label">Credentials</string>
+    <string name="contacts_label">Contacts</string>
+    <string name="my_identities_label">My Identities</string>
     <string name="valid_until">Valid until:</string>
     <string name="memberId">MemberID:</string>
     <string name="name_colon">Name:</string>
