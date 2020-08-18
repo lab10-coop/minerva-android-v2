@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="@dimen/margin_xsmall">
+    android:layout_height="match_parent">
 
     <ProgressBar
         android:id="@+id/progress"
@@ -14,7 +13,13 @@
 
     <WebView
         android:id="@+id/webView"
+        android:layout_margin="@dimen/margin_xsmall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"/>
+
+    <include
+        android:id="@+id/defaultCard"
+        layout="@layout/default_card"
+        android:visibility="gone"/>
 </FrameLayout>

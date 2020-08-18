@@ -13,9 +13,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.club_card_layout.*
+import kotlinx.android.synthetic.main.default_card.*
 import minerva.android.R
 import minerva.android.extension.fadeIn
+import minerva.android.extension.gone
+import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
+import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.model.mappers.*
 import org.jsoup.Jsoup
 import org.w3c.dom.Document
 import timber.log.Timber
@@ -29,7 +34,6 @@ import javax.xml.transform.stream.StreamResult
 abstract class ClubCard(context: Context, private val path: String) : Dialog(context, R.style.CardDialog) {
 
     abstract fun getAsHashMap(): HashMap<String, String>
-
     private val propertyMap: HashMap<String, String> by lazy {
         getAsHashMap()
     }
@@ -38,15 +42,19 @@ abstract class ClubCard(context: Context, private val path: String) : Dialog(con
         super.onCreate(savedInstanceState)
         prepareWebView()
 
-        val disposable = downloadWebPageSource().subscribeOn(Schedulers.io()).firstOrError()
-            .doOnSubscribe { handleLoader(true) }
+        val disposable = downloadWebPageSource().firstOrError()
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { handleLoader(true) }
+            .doOnEvent { _, _ -> handleLoader(false) }
             .subscribeBy(
                 onSuccess = {
-                    handleLoader(false)
                     correctXML(it)
                 },
-                onError = { Timber.e("Creating card preview error: ${it.message}") }
+                onError = {
+                    showDefaultCard()
+                    Timber.e("Creating card preview error: ${it.message}")
+                }
             )
 
         setOnDismissListener {
@@ -54,22 +62,42 @@ abstract class ClubCard(context: Context, private val path: String) : Dialog(con
         }
     }
 
-    private fun correctXML(xml: String) {
-        val doc = DocumentBuilderFactory
-            .newInstance()
-            .newDocumentBuilder()
-            .parse(xml.byteInputStream())
-
-        doc.getElementsByTagName(TEXT).let {
-            for (i in 0..it.length) {
-                it.item(i)?.attributes?.let { attributes ->
-                    for (j in 0 until attributes.length) {
-                        propertyMap[attributes.item(j).nodeValue]?.let { value -> it.item(i)?.textContent = value }
+    private fun correctXML(xml: String = String.Empty) {
+        prepareDoc(xml)?.let { doc ->
+            doc.getElementsByTagName(TEXT).let {
+                for (i in 0..it.length) {
+                    it.item(i)?.attributes?.let { attributes ->
+                        for (j in 0 until attributes.length) {
+                            propertyMap[attributes.item(j).nodeValue]?.let { value -> it.item(i)?.textContent = value }
+                        }
                     }
                 }
             }
+            webView.loadDataWithBaseURL(null, toString(doc), MIME_TYPE, UTF8, null)
         }
-        webView.loadDataWithBaseURL(null, toString(doc), MIME_TYPE, UTF8, null)
+    }
+
+    private fun prepareDoc(xml: String): Document? =
+        try {
+            DocumentBuilderFactory
+                .newInstance()
+                .newDocumentBuilder().parse(xml.byteInputStream())
+        } catch (e: Exception) {
+            showDefaultCard()
+            null
+        }
+
+    private fun showDefaultCard() {
+        webView.gone()
+        defaultCard.visible()
+
+        cardName.text = propertyMap[CREDENTIAL_NAME]
+        valid.text = propertyMap[EXP]
+        memberId.text = propertyMap[MEMBER_ID]
+        memberName.text = propertyMap[NAME]
+        since.text = propertyMap[SINCE]
+        coverage.text = propertyMap[COVERAGE]
+        ok.setOnClickListener { dismiss() }
     }
 
     private fun toString(doc: Document): String {

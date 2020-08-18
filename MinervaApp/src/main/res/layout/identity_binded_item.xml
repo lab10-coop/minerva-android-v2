@@ -24,7 +24,7 @@
         android:layout_marginBottom="@dimen/margin_xxsmall"
         android:fontFamily="@font/rubik_regular"
         android:textColor="@color/titleColor"
-        android:textSize="@dimen/text_small"
+        android:textSize="@dimen/text_xsmall"
         app:layout_constraintBottom_toTopOf="@+id/nameTextView"
         app:layout_constraintLeft_toRightOf="@+id/iconImageView"
         tools:text="03.03.2020" />

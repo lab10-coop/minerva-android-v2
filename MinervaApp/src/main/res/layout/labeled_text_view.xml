@@ -15,7 +15,7 @@
         android:visibility="invisible"
         android:layout_height="wrap_content"
         android:textColor="@color/titleColor"
-        android:textSize="@dimen/text_small"
+        android:textSize="@dimen/text_xsmall"
         android:background="@color/white"
         tools:text="Name" />
 
