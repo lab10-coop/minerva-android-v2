@@ -179,4 +179,5 @@
     <string name="since">Since:</string>
     <string name="coverage">Coverage:</string>
     <string name="ok">OK</string>
+    <string name="future_contacts_info">Here you will be able to save your contacts in the future.</string>
 </resources>
