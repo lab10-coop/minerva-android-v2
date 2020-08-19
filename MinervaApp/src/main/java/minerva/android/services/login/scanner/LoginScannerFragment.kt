@@ -9,7 +9,6 @@ import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
-import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.LoginScannerListener
@@ -55,22 +54,18 @@ class LoginScannerFragment : BaseScanner() {
     private fun prepareObserver() {
         viewModel.apply {
             handleServiceQrCodeLiveData.observe(viewLifecycleOwner, EventObserver { goToChooseIdentityFragment(it) })
-            scannerErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleError() })
+            scannerErrorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(false, getString(R.string.invalid_signature_error_message)) })
             knownUserLoginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false, payload = it) })
             bindCredentialSuccessLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(true, it) })
-            bindCredentialErrorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(false) })
+            bindCredentialErrorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { listener.onScannerResult(false, getString(R.string.attached_credential_failure)) })
             updateBindedCredential.observe(viewLifecycleOwner, EventObserver { listener.updateBindedCredential(it) })
         }
     }
 
     private fun goToChooseIdentityFragment(qrCodeCode: ServiceQrCode) {
         Handler().postDelayed({ listener.showChooseIdentityFragment(qrCodeCode) }, DELAY)
-    }
-
-    private fun handleError() {
-        scannerProgressBar.gone()
-        Toast.makeText(context, getString(R.string.invalid_qr_code_message), Toast.LENGTH_LONG).show()
-        shouldScan = true
     }
 
     override fun setOnCloseButtonListener() {

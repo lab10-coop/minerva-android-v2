@@ -43,14 +43,17 @@ internal fun MainActivity.handleTransactionResult(data: Intent?) {
 internal fun MainActivity.handleLoginScannerResult(data: Intent?) {
     data?.let { intent ->
         (intent.getParcelableExtra(LoginScannerActivity.LOGIN_PAYLOAD) as? LoginPayload)?.let {
-            viewModel.loginPayload = it
-            if (intent.getBooleanExtra(LoginScannerActivity.IS_RESULT_SUCCEED, false)) handleSuccessLoginStatuses(it.loginStatus)
-            else handleLoginStatuses(it.loginStatus)
+            handleServiceLogin(it, intent)
         }.orElse {
             handleCredentialLogin(intent)
         }
     }
+}
 
+private fun MainActivity.handleServiceLogin(loginPayload: LoginPayload, intent: Intent) {
+    viewModel.loginPayload = loginPayload
+    if (intent.getBooleanExtra(LoginScannerActivity.IS_RESULT_SUCCEED, false)) handleSuccessLoginStatuses(loginPayload.loginStatus)
+    else handleLoginStatuses(loginPayload.loginStatus)
 }
 
 private fun MainActivity.handleCredentialLogin(intent: Intent) {
@@ -70,9 +73,12 @@ private fun MainActivity.handleCredentialLogin(intent: Intent) {
     }
 }
 
-fun MainActivity.showBindCredentialFlashbar(isLoginSuccess: Boolean, identityName: String?) {
-    if (isLoginSuccess) MinervaFlashbar.show(this, getString(R.string.success), getString(R.string.attached_credential_success, identityName))
-    else MinervaFlashbar.show(this, getString(R.string.error_importing_credential), getString(R.string.attached_credential_failure))
+fun MainActivity.showBindCredentialFlashbar(isLoginSuccess: Boolean, message: String?) {
+    if (isLoginSuccess) MinervaFlashbar.show(this, getString(R.string.success), getString(R.string.attached_credential_success, message))
+    else message?.let { MinervaFlashbar.show(this, getString(R.string.error_importing_credential), it) }
+        .orElse {
+            MinervaFlashbar.show(this, getString(R.string.error_importing_credential), getString(R.string.unexpected_error))
+        }
 }
 
 fun MainActivity.handleLoginStatuses(loginAction: Int) {

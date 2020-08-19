@@ -74,7 +74,7 @@ class ServiceManagerTest : RxTest() {
                 )
             )
         )
-        repository.decodeQrCodeResponse("token")
+        repository.decodeJwtToken("token")
             .test()
             .assertComplete()
             .assertValue {
@@ -129,7 +129,7 @@ class ServiceManagerTest : RxTest() {
     fun `decode qr code response success test`() {
         val jwtData = mapOf<String, Any?>(PaymentRequest.URL to "url", "iss" to "123", "requested" to arrayListOf<String>("test"))
         whenever(cryptographyRepository.decodeJwtToken(any())) doReturn Single.just(jwtData)
-        repository.decodeQrCodeResponse("token")
+        repository.decodeJwtToken("token")
             .test()
             .assertNoErrors()
             .assertComplete()
@@ -142,7 +142,7 @@ class ServiceManagerTest : RxTest() {
     fun `decode qr code response error test`() {
         val error = Throwable()
         whenever(cryptographyRepository.decodeJwtToken(any())) doReturn Single.error(error)
-        repository.decodeQrCodeResponse("token")
+        repository.decodeJwtToken("token")
             .test()
             .assertError(error)
     }

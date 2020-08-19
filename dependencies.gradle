@@ -33,7 +33,8 @@ ext {
     kluentVersion = '1.60'
     androidxCoreTestingVersion = '2.0.1'
 
-    uPortSignerVersion = '0.5.1'
+    didJwtVersion = "0.4.0"
+    kethereum_version = "0.81.4"
 
     crashlyticsVersion = '2.10.1'
     scannerVersion = '2.1.0'
@@ -115,7 +116,10 @@ ext {
     ]
 
     cryptographyDependencies = [
-            uPortSigner: "com.github.uport-project.uport-android-sdk:sdk:$uPortSignerVersion",
+            khetereum   : "com.github.komputing.kethereum:bip39:$kethereum_version",
+            khetereumWordList: "com.github.komputing.kethereum:bip39_wordlist_en:$kethereum_version",
+            bip32:     "com.github.komputing.kethereum:bip32:$kethereum_version",
+            kotlinDidJwt: "com.github.uport-project.kotlin-did-jwt:jwt:$didJwtVersion"
     ]
 
     qrDependency = [
@@ -133,7 +137,6 @@ ext {
             spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion",
             biometric      : "androidx.biometric:biometric:$biometricVersion",
             waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion"
-
     ]
 
     blockChainDependencies = [

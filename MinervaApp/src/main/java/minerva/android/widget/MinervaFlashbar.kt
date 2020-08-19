@@ -57,7 +57,7 @@ object MinervaFlashBarWithButtons {
     }
 }
 
-fun getDefaultFlashBar(activity: Activity, title: String, message: String): Flashbar.Builder =
+private fun getDefaultFlashBar(activity: Activity, title: String, message: String): Flashbar.Builder =
     Flashbar.Builder(activity)
         .gravity(Flashbar.Gravity.TOP)
         .title(title)
@@ -85,7 +85,7 @@ fun getDefaultFlashBar(activity: Activity, title: String, message: String): Flas
         )
         .backgroundColorRes(R.color.white)
 
-const val FLASHBAR_DURATION = 8000L
+const val FLASHBAR_DURATION = 10000L
 const val ENTER_ANIM_DURATION = 750L
 const val EXIT_ANIM_DURATION = 400L
 const val FONT_SIZE = 12F
