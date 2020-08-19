@@ -1,12 +1,17 @@
 package minerva.android.cryptographyProvider.repository
 
 import io.reactivex.Single
-import io.reactivex.subjects.SingleSubject
 import kotlinx.coroutines.rx2.rxSingle
+import me.uport.sdk.core.hexToByteArray
 import me.uport.sdk.core.padBase64
 import me.uport.sdk.core.toBase64
+import me.uport.sdk.ethrdid.EthrDIDNetwork
+import me.uport.sdk.ethrdid.EthrDIDResolver
+import me.uport.sdk.jsonrpc.JsonRPC
 import me.uport.sdk.jwt.InvalidJWTException
+import me.uport.sdk.jwt.JWTEncodingException
 import me.uport.sdk.jwt.JWTTools
+import me.uport.sdk.jwt.model.JwtPayload
 import me.uport.sdk.signer.KPSigner
 import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
@@ -17,8 +22,7 @@ import org.kethereum.bip39.toKey
 import org.kethereum.bip39.wordlists.WORDLIST_ENGLISH
 import org.kethereum.crypto.toAddress
 import org.kethereum.model.ECKeyPair
-import org.walleth.khex.hexToByteArray
-import org.walleth.khex.toNoPrefixHexString
+import org.komputing.khex.extensions.toNoPrefixHexString
 import timber.log.Timber
 import java.security.SecureRandom
 import java.util.*
@@ -63,17 +67,30 @@ class CryptographyRepositoryImpl : CryptographyRepository {
 
     private fun getDerivedPath(index: Int) = "${DERIVED_PATH_PREFIX}$index"
 
-    override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> {
-        val keysSubject: SingleSubject<Map<String, Any?>> = SingleSubject.create()
-        return try {
-            val payload = JWTTools().decodeRaw(jwtToken).second
-            handleTokenExpired(payload)
-            keysSubject.apply { onSuccess(payload) }
-        } catch (exception: IllegalArgumentException) {
-            Timber.e(exception)
-            keysSubject.apply { onError(Throwable()) }
+    override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> =
+        rxSingle {
+            try {
+                val payload: JwtPayload? = JWTTools().verify(jwtToken, getResolver())
+
+                /*JWTTools().decodeRaw(jwtToken).second is used for decoding payload from jwtToken, because JwtPayload, which is automatically
+                * generated from JWTTools().verify(jwtToken, resolver) is missing essential fields, hence this object is omitted*/
+
+                if (payload != null) {
+                    JWTTools().decodeRaw(jwtToken).second
+                } else {
+                    error(Throwable("JWT Payload is null"))
+                }
+            } catch (exception: InvalidJWTException) {
+                error(InvalidJWTException("Invalid JWT Exception: ${exception.message}"))
+            } catch (exception: JWTEncodingException) {
+                error(JWTEncodingException("JWT Encoding Exception: ${exception.message}"))
+            }
         }
-    }
+
+    private fun getResolver(): EthrDIDResolver =
+        EthrDIDResolver.Builder()
+            .addNetwork(EthrDIDNetwork(NETWORK_ID, REGISTRY_ADDRESS, JsonRPC(JSON_RPC_URL)))
+            .build()
 
     override fun createJwtToken(payload: Map<String, Any?>, privateKey: String): Single<String> =
         rxSingle { JWTTools().createJWT(payload, getDIDKey(privateKey), KPSigner(privateKey)) }
@@ -96,29 +113,18 @@ class CryptographyRepositoryImpl : CryptographyRepository {
         }
     }
 
-    private fun handleTokenExpired(payload: Map<String, Any?>) {
-        if (isTokenValidYet(payload)) {
-            throw InvalidJWTException("Jwt not valid yet (issued in the future) iat: ${payload[IAT]}")
-        }
-        if (isTokenExpired(payload)) {
-            throw InvalidJWTException("JWT has expired: exp: ${payload[EXP]}")
-        }
-    }
-
-    private fun isTokenValidYet(payload: Map<String, Any?>) =
-        payload[IAT] != null && payload[IAT] as Long > (System.currentTimeMillis() / 1000 + TIME_SKEW)
-
-    private fun isTokenExpired(payload: Map<String, Any?>) =
-        payload[EXP] != null && payload[EXP] as Long <= (System.currentTimeMillis() / 1000 - TIME_SKEW)
-
     companion object {
-        private const val TIME_SKEW = 300L
-        private const val IAT = "iat"
-        private const val EXP = "exp"
         private const val DERIVED_PATH_PREFIX = "m/99'/"
         private const val MASTER_KEYS_DERIVED_PATH = "m/"
         private const val ENTROPY_SIZE = 128 / 8
         private const val RADIX = 16
         private const val DID_PREFIX = "did:ethr:"
+
+        /*Those parameters for EthrDIDResolver should be taken based on NetworkID, hence all registry addresses are now stored on Artis Tau1,
+         for now it is okay to keep them hardcoded. In the future those data should be generated dynamically based
+         on what kind of network given registry is stored*/
+        private const val NETWORK_ID = "artis_t1"
+        private const val REGISTRY_ADDRESS = "0xdCa7EF03e98e0DC2B855bE647C39ABe984fcF21B"
+        private const val JSON_RPC_URL = "https://rpc.tau1.artis.network"
     }
 }

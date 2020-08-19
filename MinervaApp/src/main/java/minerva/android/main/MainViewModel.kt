@@ -24,7 +24,6 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
-import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -66,12 +65,15 @@ class MainViewModel(
     fun loginFromNotification(jwtToken: String?) {
         jwtToken?.let {
             launchDisposable {
-                serviceManager.decodeQrCodeResponse(it)
+                serviceManager.decodeJwtToken(it)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onSuccess = { handleQrCodeResponse(it) },
-                        onError = { _errorLiveData.value = Event(it) }
+                        onError = {
+                            Timber.e(it)
+                            _errorLiveData.value = Event(it)
+                        }
                     )
             }
         }
