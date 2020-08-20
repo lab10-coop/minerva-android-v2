@@ -49,12 +49,14 @@ class LoginScannerViewModel(
 
     fun validateResult(token: String) {
         launchDisposable {
-            serviceManager.decodeQrCodeResponse(token)
+            serviceManager.decodeJwtToken(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = { handleQrCodeResponse(it) },
-                    onError = { _scannerErrorLiveData.value = Event(it) }
+                    onError = {
+                        Timber.e(it)
+                        _scannerErrorLiveData.value = Event(it) }
                 )
         }
     }

@@ -8,7 +8,6 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.identity.IdentityManager
-import minerva.android.walletmanager.manager.identity.IdentityManagerImpl
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Credential
@@ -96,7 +95,7 @@ class MainViewModelTest : BaseViewModelTest() {
     fun `login from notification error`() {
         val error = Throwable()
         viewModel.loginPayload = LoginPayload(qrCode = ServiceQrCode(callback = "url"), loginStatus = 0)
-        whenever(serviceManager.decodeQrCodeResponse(any())) doReturn Single.just(ServiceQrCode() as QrCode)
+        whenever(serviceManager.decodeJwtToken(any())) doReturn Single.just(ServiceQrCode() as QrCode)
         whenever(serviceManager.getLoggedInIdentityPublicKey(any())) doReturn "publicKey"
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(
             Identity(

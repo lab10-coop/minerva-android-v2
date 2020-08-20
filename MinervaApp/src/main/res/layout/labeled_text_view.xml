@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/rounded_white_frame"
@@ -15,7 +16,7 @@
         android:visibility="invisible"
         android:layout_height="wrap_content"
         android:textColor="@color/titleColor"
-        android:textSize="@dimen/text_small"
+        android:textSize="@dimen/text_xsmall"
         android:background="@color/white"
         tools:text="Name" />
 

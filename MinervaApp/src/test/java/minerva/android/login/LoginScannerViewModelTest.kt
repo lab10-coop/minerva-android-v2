@@ -42,7 +42,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `test validate service qr code result success`() {
-        whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.just(ServiceQrCode("Minerva App")))
+        whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.just(ServiceQrCode("Minerva App")))
         viewModel.handleServiceQrCodeLiveData.observeForever(scannerResultObserver)
         viewModel.validateResult("token")
         scannerResultCaptor.run {
@@ -53,7 +53,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `test bind credential qr code to identity success`() {
-        whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
+        whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
         whenever(identityManager.bindCredentialToIdentity(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(identityManager.isCredentialLoggedIn(any())).doReturn(false)
@@ -68,7 +68,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
     @Test
     fun `test bind credential qr code to identity error`() {
         val error = Throwable()
-        whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
+        whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
         whenever(identityManager.bindCredentialToIdentity(any())).thenReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.validateResult("token")
@@ -80,7 +80,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `test update credential qr code success`() {
-        whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
+        whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
         whenever(identityManager.isCredentialLoggedIn(any())).doReturn(true)
         viewModel.validateResult("token")
         viewModel.updateBindedCredential.observeForever(updateCredentialObserver)
@@ -92,7 +92,7 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
     @Test
     fun `validate qr code result failed`() {
         val error = Throwable()
-        whenever(serviceManager.decodeQrCodeResponse(any())).thenReturn(Single.error(error))
+        whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.error(error))
         viewModel.handleServiceQrCodeLiveData.observeForever(scannerResultObserver)
         viewModel.validateResult("token")
         viewModel.scannerErrorLiveData.observeLiveDataEvent(Event(error))

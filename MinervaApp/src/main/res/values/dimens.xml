@@ -12,7 +12,8 @@
     <dimen name="margin_xxxsmall">2dp</dimen>
     <dimen name="text_big">20sp</dimen>
     <dimen name="text_normal">16sp</dimen>
-    <dimen name="text_small">12sp</dimen>
+    <dimen name="text_small">14sp</dimen>
+    <dimen name="text_xsmall">12sp</dimen>
     <dimen name="card_corner_radius">16dp</dimen>
     <dimen name="logo_size">72dp</dimen>
     <dimen name="icon_size">40dp</dimen>
@@ -34,4 +35,5 @@
     <dimen name="barcode_width">192dp</dimen>
     <dimen name="card_height">242dp</dimen>
     <dimen name="card_width">384dp</dimen>
+    <dimen name="tab_height">30dp</dimen>
 </resources>

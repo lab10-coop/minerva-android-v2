@@ -13,6 +13,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import minerva.android.extension.validator.ValidationResult
 import java.util.concurrent.TimeUnit
 
+private const val RIGHT_DRAWABLE_INDEX = 2
+private const val VISIBLE = 255
+private const val INVISIBLE = 0
+private const val NO_IMAGE = 0
+private const val EMPTY_STRING = ""
+private const val TEXT_WATCHER_DEBOUNCE = 500L
+private const val FIRST = 1L
+private const val NO_ICON = 0
+
 fun EditText.getValidationObservable(
     inputLayout: TextInputLayout? = null,
     checkFunction: (String) -> ValidationResult
@@ -40,10 +49,6 @@ fun EditText.getValidationObservable(
         }
         .map { it.isSuccessful }
 
-private const val TEXT_WATCHER_DEBOUNCE = 500L
-private const val FIRST = 1L
-private const val NO_ICON = 0
-
 fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
     this.addTextChangedListener(object : TextWatcher {
         override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) {
@@ -62,6 +67,26 @@ fun EditText.onFocusLost(onFocusLost: (String) -> Unit) =
     this.setOnFocusChangeListener { _, hasFocus ->
         if (!hasFocus) onFocusLost(this.text.toString())
     }
+
+fun EditText.clearButton() {
+    setCompoundDrawablesWithIntrinsicBounds(NO_IMAGE, NO_IMAGE, R.drawable.ic_clear, NO_IMAGE)
+    text?.let {
+        drawableRightVisibility(it.isEmpty())
+    }
+    afterTextChanged {
+        drawableRightVisibility(it.isNotEmpty())
+    }
+    onRightDrawableClicked {
+        it.setText(EMPTY_STRING)
+    }
+}
+
+fun EditText.drawableRightVisibility(isVisible: Boolean) {
+    compoundDrawables[RIGHT_DRAWABLE_INDEX]?.let {
+        it.alpha = if(isVisible) VISIBLE
+        else INVISIBLE
+    }
+}
 
 @SuppressLint("ClickableViewAccessibility")
 fun EditText.onRightDrawableClicked(onClicked: (view: EditText) -> Unit) {

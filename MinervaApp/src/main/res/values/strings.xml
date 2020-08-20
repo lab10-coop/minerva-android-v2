@@ -74,7 +74,7 @@
     <string name="no">No</string>
     <string name="identity">Identity</string>
     <string name="select_identity_message">Please select identity</string>
-    <string name="invalid_qr_code_message">Invalid Qr code, please try again</string>
+    <string name="invalid_qr_code_message">Invalid QR code, please try again</string>
     <string name="requested_data_message">Please, use identity with requested data</string>
     <string name="send">Send</string>
     <string name="amount">Amount</string>
@@ -170,4 +170,15 @@
     <string name="remove_credential_dialog_title">Remove Credential?</string>
     <string name="remove_credential_dialog_message">You will have to get a new credential from the issuer.</string>
     <string name="update_credential_message">Do you want to update your existing credential?</string>
+    <string name="credentials_label">Credentials</string>
+    <string name="contacts_label">Contacts</string>
+    <string name="my_identities_label">My Identities</string>
+    <string name="valid_until">Valid until:</string>
+    <string name="memberId">MemberID:</string>
+    <string name="name_colon">Name:</string>
+    <string name="since">Since:</string>
+    <string name="coverage">Coverage:</string>
+    <string name="ok">OK</string>
+    <string name="future_contacts_info">Here you will be able to save your contacts in the future.</string>
+    <string name="invalid_signature_error_message">Unfortunately the signature of this certificate is not correct, therefore it was not imported. Please contact the certificate issuer.</string>
 </resources>

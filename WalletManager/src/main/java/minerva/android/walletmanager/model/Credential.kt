@@ -3,21 +3,22 @@ package minerva.android.walletmanager.model
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.model.mappers.*
 
 data class Credential(
-    @SerializedName("credentialName")
+    @SerializedName(CREDENTIAL_NAME)
     override var name: String = String.Empty,
     override val type: String = String.Empty,
     val issuer: String = String.Empty,
-    @SerializedName("name")
+    @SerializedName(NAME)
     val memberName: String = String.Empty,
-    @SerializedName("memberId")
+    @SerializedName(MEMBER_ID)
     val memberId: String = String.Empty,
-    @SerializedName("coverage")
+    @SerializedName(COVERAGE)
     val coverage: String = String.Empty,
-    @SerializedName("exp")
+    @SerializedName(EXP)
     val expirationDate: Long = Long.InvalidValue,
-    @SerializedName("since")
+    @SerializedName(SINCE)
     val creationDate: String = String.Empty,
     val loggedInIdentityDid: String = String.Empty,
     var lastUsed: Long = Long.InvalidValue
