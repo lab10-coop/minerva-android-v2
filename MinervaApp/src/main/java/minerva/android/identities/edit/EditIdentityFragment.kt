@@ -187,6 +187,7 @@ class EditIdentityFragment : Fragment() {
             clearButton()
         }
         phoneNumber.clearButton()
+        birthDate.clearButton()
         addressLine1.clearButton()
         addressLine2.clearButton()
         city.clearButton()
