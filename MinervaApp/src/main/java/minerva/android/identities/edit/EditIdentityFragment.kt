@@ -127,8 +127,7 @@ class EditIdentityFragment : Fragment() {
         Identity(
             identity.index,
             identityName.text.toString(),
-            personalData = prepareFormData(),
-            credentials = identity.credentials
+            personalData = prepareFormData()
         )
 
     //TODO change for dynamic label generation
@@ -187,6 +186,7 @@ class EditIdentityFragment : Fragment() {
             clearButton()
         }
         phoneNumber.clearButton()
+        birthDate.clearButton()
         addressLine1.clearButton()
         addressLine2.clearButton()
         city.clearButton()

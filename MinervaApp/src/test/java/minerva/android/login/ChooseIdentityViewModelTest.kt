@@ -32,7 +32,7 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
     @Test
     fun `login to 3rd party service test success`() {
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())).thenReturn(Completable.complete())
-        whenever(serviceManager.createJwtToken(any())).thenReturn(Single.just("token"))
+        whenever(serviceManager.createJwtToken(any(), any())).thenReturn(Single.just("token"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.loginLiveData.observeForever(loginObserver)
         viewModel.handleLogin(
@@ -48,12 +48,12 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
     @Test
     fun `login to 3rd party service invalid identity test`() {
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())).thenReturn(Completable.complete())
-        whenever(serviceManager.createJwtToken(any())).thenReturn(Single.just("token"))
+        whenever(serviceManager.createJwtToken(any(), any())).thenReturn(Single.just("token"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.requestedFieldsLiveData.observeForever(requestFieldObserver)
         viewModel.handleLogin(
             Identity(1, privateKey = "1", publicKey = "2"),
-            ServiceQrCode("Minerva", "callback")
+            ServiceQrCode("Minerva", "callback", requestedData = listOf("name"))
         )
         requestFieldCaptor.run {
             verify(requestFieldObserver).onChanged(capture())
@@ -64,7 +64,7 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
     fun `login to 3rd party service error`() {
         val error = Throwable()
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())).thenReturn(Completable.error(error))
-        whenever(serviceManager.createJwtToken(any())).thenReturn(Single.error(error))
+        whenever(serviceManager.createJwtToken(any(), any())).thenReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.handleLogin(
@@ -79,7 +79,7 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
     @Test
     fun `login to 3rd party service invalid with no keys test`() {
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())).thenReturn(Completable.complete())
-        whenever(serviceManager.createJwtToken(any())).thenReturn(Single.just("token"))
+        whenever(serviceManager.createJwtToken(any(), any())).thenReturn(Single.just("token"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.handleLogin(

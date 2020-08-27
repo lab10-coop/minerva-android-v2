@@ -15,7 +15,7 @@ data class ServiceQrCode(
     override var issuer: String = String.Empty,
     var serviceName: String = String.Empty,
     var callback: String? = String.Empty,
-    var requestedData: ArrayList<String> = arrayListOf(),
+    var requestedData: List<String> = listOf(),
     var identityFields: String = String.Empty
 ) : QrCode(issuer = issuer)
 

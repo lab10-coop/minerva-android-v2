@@ -17,13 +17,16 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
         getWalletConfig()?.let {
             return when (type) {
                 WalletActionType.IDENTITY -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, (newOrderList as List<Identity>), it.accounts, it.services)
+                    WalletConfig(it.updateVersion, (newOrderList as List<Identity>), it.accounts, it.services, it.credentials)
                 )
                 WalletActionType.ACCOUNT -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, it.identities, (newOrderList as List<Account>), it.services)
+                    WalletConfig(it.updateVersion, it.identities, (newOrderList as List<Account>), it.services, it.credentials)
                 )
                 WalletActionType.SERVICE -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, it.identities, it.accounts, (newOrderList as List<Service>))
+                    WalletConfig(it.updateVersion, it.identities, it.accounts, (newOrderList as List<Service>), it.credentials)
+                )
+                WalletActionType.CREDENTIAL -> walletConfigManager.updateWalletConfig(
+                    WalletConfig(it.updateVersion, it.identities, it.accounts, it.services, (newOrderList as List<Credential>))
                 )
                 else -> Completable.error(NotSupportedAccountThrowable())
             }
@@ -36,6 +39,7 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
             WalletActionType.IDENTITY -> prepareIdentitiesList()
             WalletActionType.ACCOUNT -> prepareValuesList()
             WalletActionType.SERVICE -> prepareServicesList()
+            WalletActionType.CREDENTIAL -> prepareCredentialList()
             else -> listOf()
         }
 
@@ -45,6 +49,7 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
                 WalletActionType.IDENTITY -> config.identities.filter { !it.isDeleted }.size > ONE_ELEMENT
                 WalletActionType.ACCOUNT -> config.accounts.filter { !it.isDeleted }.size > ONE_ELEMENT
                 WalletActionType.SERVICE -> config.services.filter { !it.isDeleted }.size > ONE_ELEMENT
+                WalletActionType.CREDENTIAL -> config.credentials.filter { !it.isDeleted }.size > ONE_ELEMENT
                 else -> false
             }
         }
@@ -70,6 +75,13 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
     private fun prepareServicesList(): List<MinervaPrimitive> {
         getWalletConfig()?.let {
             return it.services
+        }
+        return listOf()
+    }
+
+    private fun prepareCredentialList(): List<MinervaPrimitive> {
+        getWalletConfig()?.let { config ->
+            return config.credentials
         }
         return listOf()
     }

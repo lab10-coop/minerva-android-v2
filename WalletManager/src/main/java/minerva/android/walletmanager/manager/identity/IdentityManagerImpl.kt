@@ -8,13 +8,15 @@ import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.CannotRemoveLastIdentityThrowable
-import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.exception.NoIdentityToRemoveThrowable
+import minerva.android.walletmanager.exception.NoLoggedInIdentityThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.mappers.mapCredentialQrCodeToCredential
 
 class IdentityManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -33,7 +35,8 @@ class IdentityManagerImpl(
                             it.updateVersion,
                             prepareIdentities(getIdentity(identity, keys), it),
                             it.accounts,
-                            it.services
+                            it.services,
+                            it.credentials
                         )
                     }
                     .flatMapCompletable { updateWalletConfig(it) }
@@ -85,8 +88,7 @@ class IdentityManagerImpl(
                 identity.privateKey,
                 identity.address,
                 identity.personalData,
-                true,
-                identity.credentials
+                true
             )
         )
     }
@@ -99,76 +101,63 @@ class IdentityManagerImpl(
         return realIdentitiesCount <= ONE_ELEMENT
     }
 
-    override fun bindCredentialToIdentity(newCredential: Credential): Single<String> {
+    override fun bindCredentialToIdentity(qrCode: CredentialQrCode): Single<String> {
         walletConfigManager.getWalletConfig()?.let {
-            return bindCredential(newCredential, it)
-        }
-        throw  NotInitializedWalletConfigThrowable()
-    }
-
-    private fun bindCredential(newCredential: Credential, walletConfig: WalletConfig): Single<String> {
-        getLoggedInIdentity(newCredential.loggedInIdentityDid)?.let { identity ->
-            return updateWalletConfig(getIdentityWithNewCredential(identity, newCredential), walletConfig).toSingleDefault(identity.name)
-        }
-        return Single.error(NoBindedCredentialThrowable())
-    }
-
-    override fun updateBindedCredential(credential: Credential): Single<String> {
-        walletConfigManager.getWalletConfig()?.apply {
-            getLoggedInIdentity(credential.loggedInIdentityDid)?.let { identity ->
-                getPositionForCredential(identity, credential).let { index ->
-                    identity.credentials = getUpdatedCredentialList(identity, index, credential)
-                    return updateWalletConfig(identity, this).toSingleDefault(identity.name)
-                }
+            with(it) {
+                return if (doesIdentityExist(qrCode.loggedInDid)) {
+                    walletConfigManager.updateWalletConfig(
+                        WalletConfig(
+                            updateVersion,
+                            identities,
+                            accounts,
+                            services,
+                            credentials + mapCredentialQrCodeToCredential(qrCode)
+                        )
+                    ).toSingleDefault(findIdentityByDid(qrCode.loggedInDid)?.name)
+                } else Single.error(NoLoggedInIdentityThrowable())
             }
-            return Single.error(NoBindedCredentialThrowable())
         }
         throw  NotInitializedWalletConfigThrowable()
     }
 
-    private fun getUpdatedCredentialList(identity: Identity, index: Int, credential: Credential): List<Credential> =
-        identity.credentials.toMutableList().apply { this[index] = credential }
+    private fun doesIdentityExist(did: String): Boolean =
+        findIdentityByDid(did) != null
 
-    private fun getPositionForCredential(identity: Identity, credential: Credential): Int {
-        identity.credentials.forEachIndexed { index, item ->
-            if (isCredentialBinded(item, credential)) return index
+    private fun findIdentityByDid(did: String) =
+        walletConfigManager.getWalletConfig()?.let { config -> config.identities.find { it.did == did } }
+
+    override fun updateBindedCredential(qrCode: CredentialQrCode): Single<String> {
+        walletConfigManager.getWalletConfig()?.apply {
+            val updatedCredential = mapCredentialQrCodeToCredential(qrCode)
+            val newCredentials = credentials.toMutableList().apply {
+                this[getPositionForCredential(updatedCredential)] = updatedCredential
+            }
+            return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, services, newCredentials))
+                .toSingleDefault(findIdentityByDid(qrCode.loggedInDid)?.name)
         }
-        return Int.InvalidIndex
+        throw  NotInitializedWalletConfigThrowable()
     }
 
-    private fun isCredentialBinded(credential: Credential, newCredential: Credential): Boolean =
-        credential.issuer == newCredential.issuer && credential.type == newCredential.type
+    override fun isCredentialLoggedIn(qrCode: CredentialQrCode): Boolean {
+        walletConfigManager.getWalletConfig()?.credentials?.let { credentials ->
+            if (credentials.isNotEmpty()) {
+                credentials.filter { !it.isDeleted }.forEach { credential -> return isCredentialBinded(qrCode, credential) }
+            } else return false
+        }
+        throw  NotInitializedWalletConfigThrowable()
+    }
 
-    override fun isCredentialLoggedIn(credential: Credential): Boolean =
-        getLoggedInIdentity(credential.loggedInIdentityDid)?.credentials?.find { isCredentialBinded(it, credential) } != null
+    private fun isCredentialBinded(qrCode: CredentialQrCode, credential: Credential) =
+        qrCode.loggedInDid == credential.loggedInIdentityDid && qrCode.type == credential.type && qrCode.issuer == credential.issuer
 
     override fun removeBindedCredentialFromIdentity(credential: Credential): Completable {
-        walletConfigManager.getWalletConfig()?.let {
-            getLoggedInIdentity(credential.loggedInIdentityDid)?.let { identity ->
-                val newCredentials = identity.credentials.toMutableList()
-                newCredentials.remove(credential)
-                identity.credentials = newCredentials
-                return updateWalletConfig(identity, it)
-            }
+        walletConfigManager.getWalletConfig()?.apply {
+            val newCredentials = credentials.toMutableList()
+            newCredentials.remove(credential)
+            return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, services, newCredentials))
         }
         throw  NotInitializedWalletConfigThrowable()
     }
-
-    private fun getLoggedInIdentity(loggedInIdentityDid: String): Identity? =
-        walletConfigManager.getWalletConfig()?.identities?.filter { !it.isDeleted }?.find { it.did == loggedInIdentityDid }
-
-    private fun getIdentityWithNewCredential(identity: Identity, newCredential: Credential): Identity =
-        identity.apply { credentials = credentials + newCredential }
-
-    private fun updateWalletConfig(identity: Identity, walletConfig: WalletConfig): Completable =
-        walletConfigManager.updateWalletConfig(
-            WalletConfig(
-                walletConfig.version,
-                prepareIdentities(identity, walletConfig),
-                walletConfig.accounts,
-                walletConfig.services
-            )
-        )
 
     private fun prepareIdentities(identity: Identity, walletConfig: WalletConfig): List<Identity> {
         val position = getPositionForIdentity(identity, walletConfig)
@@ -184,6 +173,13 @@ class IdentityManagerImpl(
             if (newIdentity.index == identity.index) return position
         }
         return walletConfig.identities.size
+    }
+
+    private fun WalletConfig.getPositionForCredential(credential: Credential): Int {
+        credentials.forEachIndexed { position, item ->
+            if (item.loggedInIdentityDid == credential.loggedInIdentityDid && item.type == credential.type && item.issuer == credential.issuer) return position
+        }
+        return identities.size
     }
 
     companion object {

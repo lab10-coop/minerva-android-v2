@@ -13,10 +13,8 @@ data class IdentityPayload(
     private val _data: LinkedHashMap<String, String>? = linkedMapOf(),
     @SerializedName("isDeleted")
     private val _isDeleted: Boolean? = false,
-    @SerializedName("credentials")
-    private val _credentials: List<CredentialsPayload>? = listOf(),
     @SerializedName("services")
-    private val _services: List<ServicePayload>? = listOf()
+    private val _services: List<ServicePayload>? = listOf() //todo should be deleted and implement in the same way as credentials
 ) {
     val index: Int
         get() = _index ?: Int.InvalidId
@@ -26,8 +24,6 @@ data class IdentityPayload(
         get() = _data ?: linkedMapOf()
     val isDeleted: Boolean
         get() = _isDeleted ?: false
-    val credentials: List<CredentialsPayload>
-        get() = _credentials ?: emptyList()
     val services: List<ServicePayload>
         get() = _services ?: emptyList()
 }

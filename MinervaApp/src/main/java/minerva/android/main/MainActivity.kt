@@ -17,8 +17,11 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivityForResult
 import minerva.android.extension.visibleOrGone
 import minerva.android.identities.IdentitiesFragment
+import minerva.android.identities.credentials.CredentialsFragment
+import minerva.android.identities.myIdentities.MyIdentitiesFragment
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
@@ -27,7 +30,6 @@ import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
-
 
 class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, FragmentInteractorListener {
 
@@ -102,36 +104,33 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         with(viewModel) {
             menu?.apply {
-                findItem(R.id.editIdentityOrder)?.apply {
-                    isVisible = shouldShowAddIdentityIcon() && isOrderEditAvailable(WalletActionType.IDENTITY)
-                }
-                findItem(R.id.addIdentity)?.apply {
-                    isVisible = shouldShowAddIdentityIcon()
-                }
-                findItem(R.id.editAccountOrder)?.apply {
-                    isVisible = shouldShowAddValueIcon() && isOrderEditAvailable(WalletActionType.ACCOUNT)
-                }
+                findItem(R.id.editIdentityOrder)?.isVisible =
+                    shouldShowAddIdentityIcon() && isOrderEditAvailable(WalletActionType.IDENTITY) && getCurrentChildFragment() is MyIdentitiesFragment
+                findItem(R.id.addIdentity)?.isVisible = shouldShowAddIdentityIcon() && getCurrentChildFragment() is MyIdentitiesFragment
+                findItem(R.id.editAccountOrder)?.isVisible = shouldShowAddValueIcon() && isOrderEditAvailable(WalletActionType.ACCOUNT)
                 findItem(R.id.addAccount)?.apply {
                     isVisible = shouldShowAddValueIcon()
                     isEnabled = !shouldDisableAddButton
                 }
-                findItem(R.id.editServiceOrder)?.apply {
-                    isVisible = isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
-                }
-                findItem(R.id.qrCodeScanner)?.apply {
-                    isVisible = isServicesTabSelected()
-                }
+                findItem(R.id.editServiceOrder)?.isVisible = isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
+                findItem(R.id.editCredentialsOrder)?.isVisible =
+                    getCurrentChildFragment() is CredentialsFragment && isOrderEditAvailable(WalletActionType.CREDENTIAL)
+                findItem(R.id.qrCodeScanner)?.isVisible = isServicesTabSelected() || getCurrentChildFragment() is CredentialsFragment
             }
         }
         return super.onPrepareOptionsMenu(menu)
     }
 
+    private fun getCurrentChildFragment() =
+        (getCurrentFragment() as? IdentitiesFragment)?.currentFragment.orElse { MyIdentitiesFragment.newInstance() }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.editIdentityOrder -> startEditIdentityOrderWrappedActivity(this)
             R.id.addIdentity -> startNewIdentityWrappedActivity(this)
-            R.id.editAccountOrder -> startEditValueOrderWrappedActivity(this)
-            R.id.addAccount -> startNewValueActivity()
+            R.id.editAccountOrder -> startEditAccountOrderWrappedActivity(this)
+            R.id.editCredentialsOrder -> startEditCredentialOrderWrappedActivity(this)
+            R.id.addAccount -> startNewAccountActivity()
             R.id.editServiceOrder -> startEditServiceOrderWrappedActivity(this)
             R.id.qrCodeScanner -> launchActivityForResult<LoginScannerActivity>(LOGIN_SCANNER_RESULT_REQUEST_CODE)
         }
@@ -205,8 +204,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     override fun removeSettingsBadgeIcon() =
         bottomNavigation.removeBadge(R.id.settings)
 
-    private fun startNewValueActivity() {
-        startNewValueWrappedActivity(
+    private fun startNewAccountActivity() {
+        startNewAccountWrappedActivity(
             this,
             String.format(NEW_VALUE_TITLE_PATTERN, getString(R.string.new_account), viewModel.getValueIterator()),
             viewModel.getValueIterator()

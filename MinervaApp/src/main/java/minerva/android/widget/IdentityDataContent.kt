@@ -20,6 +20,7 @@ import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.VerifiableCredentialType
 import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.walletmanager.utils.DateUtils.DATE_FORMAT
 import minerva.android.widget.clubCard.OamtcClubCard
 
 class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
@@ -33,7 +34,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         orientation = VERTICAL
     }
 
-    fun prepareDataContainerFields(identity: Identity) {
+    fun prepareDataContainerFields(identity: Identity, credentials: List<Credential>) {
         views.clear()
         removeAllViews()
         with(identity) {
@@ -64,7 +65,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         credentials.forEach { credential ->
             IdentityBindedItem(context).let {
                 setCredentialIcon(credential, it)
-                it.setDateAndName(credential.name, DateUtils.getDateFromTimestamp(credential.lastUsed, DateUtils.DATE_FORMAT))
+                it.setDateAndName(credential.name, DateUtils.getDateFromTimestamp(credential.lastUsed, DATE_FORMAT))
                 it.popupMenu.setOnClickListener { showMenu(it.popupMenu, credential) }
                 it.setOnItemClickListener { OamtcClubCard(context, credential = credential).show() }
                 views.add(it)
@@ -74,7 +75,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
     }
 
     private fun setCredentialIcon(credential: Credential, bindedCredential: IdentityBindedItem) {
-        //todo change for getting icon from external repo
+        //todo change for getting icon from external repo using url when backend is ready
         when {
             credential.issuer == CredentialType.OAMTC && credential.type == VerifiableCredentialType.AUTOMOTIVE_CLUB ->
                 bindedCredential.setIcon(R.drawable.ic_oamtc_credential)
@@ -86,7 +87,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
         if (services.isNotEmpty()) addHeader(R.string.connected_services)
         services.forEach { service ->
             val bindedService = IdentityBindedItem(context)
-            bindedService.setDateAndName(service.name, service.lastUsed)
+            bindedService.setDateAndName(service.name, DateUtils.getDateFromTimestamp(service.lastUsed, DATE_FORMAT))
             //TODO change to adding proper icon based on the service type
             bindedService.setIcon(R.drawable.ic_backup_icon)
             bindedService.popupMenu.setOnClickListener { showMenu(bindedService.popupMenu, service) }

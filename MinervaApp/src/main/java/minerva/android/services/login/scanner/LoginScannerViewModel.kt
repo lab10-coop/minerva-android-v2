@@ -13,13 +13,15 @@ import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.QrCode
+import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.model.mappers.CredentialQrCodeResponseMapper
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -56,7 +58,8 @@ class LoginScannerViewModel(
                     onSuccess = { handleQrCodeResponse(it) },
                     onError = {
                         Timber.e(it)
-                        _scannerErrorLiveData.value = Event(it) }
+                        _scannerErrorLiveData.value = Event(it)
+                    }
                 )
         }
     }
@@ -68,15 +71,14 @@ class LoginScannerViewModel(
         }
     }
 
-    private fun handleCredentialQrCodeResponse(credentialQrCode: CredentialQrCode) {
-        val credential = CredentialQrCodeResponseMapper.map(credentialQrCode)
-        if (identityManager.isCredentialLoggedIn(credential)) {
-            _updateBindedCredential.value = Event(credentialQrCode)
+    private fun handleCredentialQrCodeResponse(qrCode: CredentialQrCode) {
+        if (identityManager.isCredentialLoggedIn(qrCode)) {
+            _updateBindedCredential.value = Event(qrCode)
         } else {
             launchDisposable {
-                identityManager.bindCredentialToIdentity(credential)
-                    .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(credential, FAILED)) } }
-                    .doOnSuccess { saveWalletAction(getWalletAction(credential, ADDED)) }
+                identityManager.bindCredentialToIdentity(qrCode)
+                    .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED)) } }
+                    .doOnSuccess { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, ADDED)) }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onSuccess = { _bindCredentialSuccessLiveData.value = Event(it) },
@@ -103,11 +105,11 @@ class LoginScannerViewModel(
         }
     }
 
-    private fun getWalletAction(credential: Credential, status: Int): WalletAction =
+    private fun getWalletAction(lastUsed: Long, name: String, status: Int): WalletAction =
         WalletAction(
             WalletActionType.CREDENTIAL, status,
-            credential.lastUsed,
-            hashMapOf(WalletActionFields.CREDENTIAL_NAME to credential.name)
+            lastUsed,
+            hashMapOf(WalletActionFields.CREDENTIAL_NAME to name)
         )
 
     private fun handleServiceQrCodeResponse(serviceQrCode: ServiceQrCode) {

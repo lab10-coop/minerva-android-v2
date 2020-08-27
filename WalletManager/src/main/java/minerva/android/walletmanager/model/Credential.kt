@@ -2,6 +2,7 @@ package minerva.android.walletmanager.model
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.mappers.*
 
@@ -21,5 +22,6 @@ data class Credential(
     @SerializedName(SINCE)
     val creationDate: String = String.Empty,
     val loggedInIdentityDid: String = String.Empty,
-    var lastUsed: Long = Long.InvalidValue
+    override var lastUsed: Long = Long.InvalidValue,
+    override var isDeleted: Boolean = false
 ) : MinervaPrimitive(name = name, type = type)

@@ -10,10 +10,7 @@ import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.QrCode
-import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -57,7 +54,8 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `test known user login when there is no required fields`() {
-        viewModel.loginPayload = LoginPayload(1, identityPublicKey = "123")
+        val qrCode = ServiceQrCode(requestedData = listOf("name"))
+        viewModel.loginPayload = LoginPayload(1, identityPublicKey = "123", qrCode = qrCode)
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(Identity(1, name = "tom"))
         viewModel.run {
             requestedFieldsLiveData.observeForever(requestedFieldsObserver)
@@ -79,7 +77,7 @@ class MainViewModelTest : BaseViewModelTest() {
                 privateKey = "1", publicKey = "2"
             )
         )
-        whenever(serviceManager.createJwtToken(any())) doReturn Single.error(error)
+        whenever(serviceManager.createJwtToken(any(), any())) doReturn Single.error(error)
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())) doReturn Completable.error(error)
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.error(error)
         viewModel.run {
@@ -103,7 +101,7 @@ class MainViewModelTest : BaseViewModelTest() {
                 privateKey = "1", publicKey = "2"
             )
         )
-        whenever(serviceManager.createJwtToken(any())) doReturn Single.error(error)
+        whenever(serviceManager.createJwtToken(any(), any())) doReturn Single.error(error)
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())) doReturn Completable.error(error)
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.error(error)
         viewModel.run {
@@ -135,7 +133,7 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(identityManager.updateBindedCredential(any())).doReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
-            credential = Credential("name", "type")
+            qrCode = CredentialQrCode("name", "type")
             updateCredentialSuccessLiveData.observeForever(updateCredentialObserver)
             updateBindedCredential()
         }
@@ -151,7 +149,7 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(identityManager.updateBindedCredential(any())).doReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
-            credential = Credential("name", "type")
+            qrCode = CredentialQrCode("name", "type")
             updateCredentialErrorLiveData.observeForever(errorObserver)
             updateBindedCredential()
         }
