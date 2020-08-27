@@ -12,8 +12,8 @@ interface IdentityManager : Manager {
     fun loadIdentity(position: Int, defaultName: String = String.Empty): Identity
     fun saveIdentity(identity: Identity): Completable
     fun removeIdentity(identity: Identity): Completable
-    fun bindCredentialToIdentity(newCredential: Credential): Single<String>
-    fun updateBindedCredential(credential: Credential): Single<String>
+    fun bindCredentialToIdentity(qrCode: CredentialQrCode): Single<String>
+    fun updateBindedCredential(qrCode: CredentialQrCode): Single<String>
     fun removeBindedCredentialFromIdentity(credential: Credential): Completable
-    fun isCredentialLoggedIn(credential: Credential): Boolean
+    fun isCredentialLoggedIn(qrCode: CredentialQrCode): Boolean
 }

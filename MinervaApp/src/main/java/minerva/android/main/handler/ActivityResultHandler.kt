@@ -15,7 +15,6 @@ import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_QUICK_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_USER
 import minerva.android.walletmanager.model.CredentialQrCode
-import minerva.android.walletmanager.model.mappers.CredentialQrCodeResponseMapper
 import minerva.android.widget.MinervaFlashBarWithButtons
 import minerva.android.widget.MinervaFlashbar
 
@@ -58,7 +57,7 @@ private fun MainActivity.handleServiceLogin(loginPayload: LoginPayload, intent: 
 
 private fun MainActivity.handleCredentialLogin(intent: Intent) {
     (intent.getParcelableExtra(LoginScannerActivity.CREDENTIAL_QR_CODE) as? CredentialQrCode)?.let {
-        viewModel.credential = CredentialQrCodeResponseMapper.map(it)
+        viewModel.qrCode = it
         MinervaFlashBarWithButtons.show(
             this,
             getString(R.string.update_credential_message),

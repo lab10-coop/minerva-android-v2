@@ -80,7 +80,7 @@ class PaymentRequestViewModel(
 
     fun connectToService() {
         launchDisposable {
-            serviceManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.getDateWithTimeFromTimestamp()))
+            serviceManager.saveService(Service(ServiceType.M27, payment.shortName, DateUtils.timestamp))
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED)))
                 .subscribeOn(Schedulers.io())

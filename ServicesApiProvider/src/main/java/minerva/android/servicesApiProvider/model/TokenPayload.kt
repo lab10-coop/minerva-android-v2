@@ -3,6 +3,6 @@ package minerva.android.servicesApiProvider.model
 import com.google.gson.annotations.SerializedName
 
 data class TokenPayload(
-    @SerializedName("token")
+    @SerializedName("access_token")
     var jwtToken: String
 )

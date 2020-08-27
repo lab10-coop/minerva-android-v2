@@ -4,17 +4,13 @@ import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.TokenPayload
-import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.mappers.PaymentMapper
 import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
-import minerva.android.walletmanager.utils.DateUtils
-import minerva.android.walletmanager.utils.IdentityUtils
 
 class ServiceManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -34,8 +30,8 @@ class ServiceManagerImpl(
             .map { PaymentMapper.map(it) }
             .map { Pair(it, walletConfigManager.getWalletConfig()?.services) }
 
-    override fun createJwtToken(payload: Map<String, Any?>): Single<String> =
-        cryptographyRepository.createJwtToken(payload, walletConfigManager.masterSeed.privateKey)
+    override fun createJwtToken(payload: Map<String, Any?>, privateKey: String?): Single<String> =
+        cryptographyRepository.createJwtToken(payload, privateKey ?: walletConfigManager.masterSeed.privateKey)
 
     override fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
@@ -58,7 +54,7 @@ class ServiceManagerImpl(
             services.forEach {
                 if (it.type == type) {
                     newServices.remove(it)
-                    return walletConfigManager.updateWalletConfig(WalletConfig(version, identities, accounts, newServices))
+                    return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, newServices, credentials))
                 }
             }
         }

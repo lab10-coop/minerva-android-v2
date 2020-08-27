@@ -105,7 +105,6 @@ fun mapIdentityPayloadToIdentity(
         address,
         response.data,
         response.isDeleted,
-        mapCredentialPayloadToCredentials(response.credentials),
         mapServicesResponseToServices(response.services)
     )
 
@@ -134,47 +133,33 @@ fun mapServicesResponseToServices(responses: List<ServicePayload>): List<Service
         responses.forEach { add(Service(it.type, it.name, it.lastUsed, it.loggedInIdentityPublicKey)) }
     }
 
-private fun mapCredentialPayloadToCredentials(responses: List<CredentialsPayload>): List<Credential> =
-    mutableListOf<Credential>().apply {
-        responses.forEach {
-            add(
-                Credential(
-                    it.name,
-                    it.type,
-                    it.issuer,
-                    it.memberName,
-                    it.memberId,
-                    it.coverage,
-                    it.expirationDate,
-                    it.creationDate,
-                    it.loggedInIdentityDid,
-                    it.lastUsed
-                )
-            )
-        }
-    }
-
 fun mapWalletConfigToWalletPayload(config: WalletConfig): WalletConfigPayload {
     val idResponses = mutableListOf<IdentityPayload>()
-    val valResponses = mutableListOf<AccountPayload>()
+    val accountsResponse = mutableListOf<AccountPayload>()
     val servicesResponse = mutableListOf<ServicePayload>()
+    val credentialsResponse = mutableListOf<CredentialsPayload>()
 
     config.identities.forEach {
         idResponses.add(mapIdentityToIdentityPayload(it))
     }
 
     config.accounts.forEach {
-        valResponses.add(mapAccountToAccountPayload(it))
+        accountsResponse.add(mapAccountToAccountPayload(it))
     }
 
     config.services.forEach {
         servicesResponse.add(mapServiceToServicePayload(it))
     }
+
+    config.credentials.forEach {
+        credentialsResponse.add(mapCredentialToCredentialPayload(it))
+    }
     return WalletConfigPayload(
         config.version,
         idResponses,
-        valResponses,
-        servicesResponse
+        accountsResponse,
+        servicesResponse,
+        credentialsResponse
     )
 }
 
@@ -188,7 +173,6 @@ fun mapIdentityToIdentityPayload(identity: Identity): IdentityPayload =
         identity.name,
         identity.personalData,
         identity.isDeleted,
-        mapCredentialToCredentialsPayload(identity.credentials),
         mapServicesToServicesPayload(identity.services)
 
     )
@@ -198,25 +182,40 @@ fun mapServicesToServicesPayload(responses: List<Service>): List<ServicePayload>
         responses.forEach { add(ServicePayload(it.type, it.name, it.lastUsed, it.loggedInIdentityPublicKey)) }
     }
 
-fun mapCredentialToCredentialsPayload(responses: List<Credential>): List<CredentialsPayload> =
-    mutableListOf<CredentialsPayload>().apply {
-        responses.forEach {
-            add(
-                CredentialsPayload(
-                    it.name,
-                    it.type,
-                    it.issuer,
-                    it.memberName,
-                    it.memberId,
-                    it.coverage,
-                    it.expirationDate,
-                    it.creationDate,
-                    it.loggedInIdentityDid,
-                    it.lastUsed
-                )
-            )
-        }
+fun mapCredentialsPayloadToCredentials(responses: List<CredentialsPayload>): List<Credential> =
+    mutableListOf<Credential>().apply {
+        responses.forEach { add(mapCredentialPayloadToCredential(it)) }
     }
+
+private fun mapCredentialPayloadToCredential(payload: CredentialsPayload): Credential =
+    Credential(
+        payload.name,
+        payload.type,
+        payload.issuer,
+        payload.memberName,
+        payload.memberId,
+        payload.coverage,
+        payload.expirationDate,
+        payload.creationDate,
+        payload.loggedInIdentityDid,
+        payload.lastUsed,
+        payload.isDeleted
+    )
+
+private fun mapCredentialToCredentialPayload(credential: Credential): CredentialsPayload =
+    CredentialsPayload(
+        credential.name,
+        credential.type,
+        credential.issuer,
+        credential.memberName,
+        credential.memberId,
+        credential.coverage,
+        credential.expirationDate,
+        credential.creationDate,
+        credential.loggedInIdentityDid,
+        credential.lastUsed,
+        credential.isDeleted
+    )
 
 fun mapAccountToAccountPayload(account: Account): AccountPayload =
     AccountPayload(
@@ -244,3 +243,17 @@ fun mapTransactionToTransactionPayload(transaction: Transaction): TransactionPay
 
 fun mapTransactionCostPayloadToTransactionCost(payload: TransactionCostPayload): TransactionCost =
     payload.run { TransactionCost(gasPrice, gasLimit, cost) }
+
+fun mapCredentialQrCodeToCredential(input: CredentialQrCode): Credential =
+    Credential(
+        name = input.name,
+        type = input.type,
+        issuer = input.issuer,
+        creationDate = input.creationDate,
+        expirationDate = input.expirationDate,
+        coverage = input.coverage,
+        memberId = input.memberId,
+        memberName = input.memberName,
+        lastUsed = input.lastUsed,
+        loggedInIdentityDid = input.loggedInDid
+    )

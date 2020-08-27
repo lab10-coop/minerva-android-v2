@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
+import minerva.android.extensions.showRemoveDialog
 import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
@@ -49,7 +50,7 @@ class MyIdentitiesFragment : Fragment(), IdentityFragmentListener {
 
     private fun setupLiveData() {
         viewModel.apply {
-            walletConfigLiveData.observe(viewLifecycleOwner, Observer { identityAdapter.updateList(it.identities.toMutableList()) })
+            walletConfigLiveData.observe(viewLifecycleOwner, Observer { identityAdapter.updateList(it.identities.toMutableList(), it.credentials) })
             identityRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
             errorLiveData.observe(viewLifecycleOwner, EventObserver { showError(it) })
         }
@@ -72,21 +73,6 @@ class MyIdentitiesFragment : Fragment(), IdentityFragmentListener {
             is Service -> TODO("Handle deleting binded service")
             is Credential -> showRemoveDialog(getString(R.string.remove_credential_dialog_title), R.string.remove_credential_dialog_message)
             { viewModel.removeCredential(minervaPrimitive) }
-        }
-    }
-
-    private fun showRemoveDialog(title: String, messageId: Int, removeAction: () -> Unit) {
-        context?.let { context ->
-            MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
-                .setBackground(context.getDrawable(R.drawable.rounded_white_background))
-                .setTitle(title)
-                .setMessage(getString(messageId))
-                .setPositiveButton(R.string.remove) { dialog, _ ->
-                    removeAction()
-                    dialog.dismiss()
-                }
-                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                .show()
         }
     }
 

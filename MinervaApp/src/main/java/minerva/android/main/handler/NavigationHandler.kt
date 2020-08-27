@@ -4,11 +4,11 @@ import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
+import minerva.android.accounts.AccountsFragment
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.MainActivity
 import minerva.android.services.ServicesFragment
 import minerva.android.settings.SettingsFragment
-import minerva.android.accounts.AccountsFragment
 import minerva.android.walletActions.WalletActionsFragment
 
 internal fun MainActivity.shouldShowAddIdentityIcon() = isIdentitiesTabSelected()
@@ -26,7 +26,7 @@ internal fun MainActivity.prepareBottomNavMenu() {
         when (item.itemId) {
             R.id.identities -> replaceFragment(IdentitiesFragment())
             R.id.values -> replaceFragment(AccountsFragment(), R.string.accounts)
-            R.id.services -> replaceFragment(ServicesFragment(), R.string.services)
+            R.id.services -> replaceFragment(ServicesFragment.newInstance(), R.string.services)
             R.id.activity -> replaceFragment(WalletActionsFragment(), R.string.activity)
             R.id.settings -> replaceFragment(SettingsFragment(), R.string.settings)
         }

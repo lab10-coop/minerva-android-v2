@@ -18,7 +18,6 @@ open class Identity(
     override var address: String = String.Empty,
     open val personalData: LinkedHashMap<String, String> = linkedMapOf(),
     override var isDeleted: Boolean = false,
-    var credentials: List<Credential> = listOf(),
     val services: List<Service> = listOf(),
     var isSelected: Boolean = false
 ) : MinervaPrimitive(publicKey, name, isDeleted) {
@@ -30,7 +29,6 @@ open class Identity(
         identity.address,
         identity.personalData,
         identity.isDeleted,
-        identity.credentials,
         identity.services,
         identity.isSelected
     )
