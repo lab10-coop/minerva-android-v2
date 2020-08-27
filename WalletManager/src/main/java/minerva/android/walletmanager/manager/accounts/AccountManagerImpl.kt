@@ -48,14 +48,14 @@ class AccountManagerImpl(
     ): WalletConfig {
         prepareNewValue(newAccount, derivedKeys, ownerAddress, contractAddress)
         config.run {
-            val newValues = accounts.toMutableList()
+            val newAccounts = accounts.toMutableList()
             var newValuePosition = accounts.size
             accounts.forEachIndexed { position, value ->
                 if (value.address == ownerAddress && ownerAddress != String.Empty)
                     newValuePosition = position + getSafeAccountCount(ownerAddress)
             }
-            newValues.add(newValuePosition, newAccount)
-            return WalletConfig(updateVersion, identities, newValues, services)
+            newAccounts.add(newValuePosition, newAccount)
+            return WalletConfig(updateVersion, identities, newAccounts, services, credentials)
         }
     }
 
@@ -84,7 +84,7 @@ class AccountManagerImpl(
                     }
                     newValues[position] = Account(value, true)
                     return walletConfigManager.updateWalletConfig(
-                        WalletConfig(it.updateVersion, it.identities, newValues, it.services)
+                        WalletConfig(it.updateVersion, it.identities, newValues, it.services, it.credentials)
                     )
                 }
             }

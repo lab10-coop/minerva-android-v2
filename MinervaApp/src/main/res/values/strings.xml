@@ -30,6 +30,7 @@
     <string name="edit_identity_order">Rearrange Identities</string>
     <string name="edit_account_order">Rearrange Accounts</string>
     <string name="edit_service_order">Rearrange Services</string>
+    <string name="edit_credentials_order">Rearrange Credentials</string>
     <string name="personal_data">Personal data</string>
     <string name="name">Name</string>
     <string name="email">Email</string>

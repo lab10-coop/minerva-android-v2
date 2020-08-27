@@ -11,10 +11,7 @@ import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MasterSeed
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.DataProvider.walletConfig
 import org.amshove.kluent.mock
@@ -148,7 +145,7 @@ class IdentityManagerTest : RxTest() {
     @Test
     fun `bind credential to identity success test`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        manager.bindCredentialToIdentity(Credential("test", "type", loggedInIdentityDid = "did:ethr:address"))
+        manager.bindCredentialToIdentity(CredentialQrCode("iss", "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertNoErrors()
             .assertComplete()
@@ -161,7 +158,7 @@ class IdentityManagerTest : RxTest() {
     fun `bind credential to identity error test`() {
         val error = NoBindedCredentialThrowable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        manager.bindCredentialToIdentity(Credential("test", "type", loggedInIdentityDid = "address"))
+        manager.bindCredentialToIdentity(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertError {
                 it is NoBindedCredentialThrowable
@@ -189,7 +186,7 @@ class IdentityManagerTest : RxTest() {
     @Test
     fun `update credential success test`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        manager.updateBindedCredential(Credential("test", "type", loggedInIdentityDid = "did:ethr:address", issuer = "iss"))
+        manager.updateBindedCredential(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertNoErrors()
             .assertComplete()
@@ -202,7 +199,7 @@ class IdentityManagerTest : RxTest() {
     fun `update credential success error`() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        manager.updateBindedCredential(Credential("test", "type", loggedInIdentityDid = "did:ethr:address", issuer = "iss"))
+        manager.updateBindedCredential(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertError(error)
     }

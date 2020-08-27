@@ -49,7 +49,7 @@ class PaymentRequestActivity : AppCompatActivity(), PaymentCommunicationListener
     private fun prepareObservers() {
         viewModel.apply {
             showConnectionRequestLiveData.observe(this@PaymentRequestActivity, EventObserver {
-                serviceName.text = it
+                minervaPrimitiveName.text = it
                 addFragment(R.id.container, ConnectionRequestFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
             })
             showPaymentConfirmationLiveData.observe(this@PaymentRequestActivity, EventObserver { showConfirmTransactionScreen() })

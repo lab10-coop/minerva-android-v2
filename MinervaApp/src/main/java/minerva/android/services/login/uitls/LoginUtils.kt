@@ -22,7 +22,7 @@ object LoginUtils {
     }
 
     fun getService(serviceQrCode: ServiceQrCode, identity: Identity) =
-        Service(serviceQrCode.issuer, serviceQrCode.serviceName, DateUtils.getDateWithTimeFromTimestamp(), identity.publicKey)
+        Service(serviceQrCode.issuer, serviceQrCode.serviceName, DateUtils.timestamp, identity.publicKey)
 
     fun getValuesWalletAction(identityName: String, serviceName: String): WalletAction =
         WalletAction(

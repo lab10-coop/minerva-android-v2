@@ -10,10 +10,7 @@ import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.QrCode
-import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -136,7 +133,7 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(identityManager.updateBindedCredential(any())).doReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
-            credential = Credential("name", "type")
+            qrCode = CredentialQrCode("name", "type")
             updateCredentialSuccessLiveData.observeForever(updateCredentialObserver)
             updateBindedCredential()
         }
@@ -152,7 +149,7 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(identityManager.updateBindedCredential(any())).doReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
-            credential = Credential("name", "type")
+            qrCode = CredentialQrCode("name", "type")
             updateCredentialErrorLiveData.observeForever(errorObserver)
             updateBindedCredential()
         }

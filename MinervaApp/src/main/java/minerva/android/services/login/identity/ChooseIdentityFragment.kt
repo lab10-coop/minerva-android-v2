@@ -68,7 +68,7 @@ class ChooseIdentityFragment : Fragment() {
     }
 
     private fun setupServiceData() {
-        serviceName.text = serviceQrCode.serviceName
+        minervaPrimitiveName.text = serviceQrCode.serviceName
         requestedFields.text = serviceQrCode.identityFields
     }
 
