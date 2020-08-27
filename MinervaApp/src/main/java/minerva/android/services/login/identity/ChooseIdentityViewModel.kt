@@ -42,10 +42,9 @@ class ChooseIdentityViewModel(
 
     fun getIdentities() = serviceManager.walletConfigLiveData.value?.identities
 
-    //    TODO implement dynamic login concerning different services
     fun handleLogin(identity: Identity, serviceQrCode: ServiceQrCode) {
         _loadingLiveData.value = Event(true)
-        if (isIdentityValid(identity)) {
+        if (isIdentityValid(identity, serviceQrCode.requestedData)) {
             minervaLogin(identity, serviceQrCode)
         } else {
             _loadingLiveData.value = Event(false)
@@ -56,7 +55,7 @@ class ChooseIdentityViewModel(
     private fun minervaLogin(identity: Identity, qrCode: ServiceQrCode) {
         if (handleNoKeysError(identity)) return
         qrCode.callback?.let { callback ->
-            serviceManager.createJwtToken(createLoginPayload(identity, qrCode))
+            serviceManager.createJwtToken(createLoginPayload(identity, qrCode), identity.privateKey)
                 .flatMapCompletable { jwtToken -> serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity)) }
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(identity.name, qrCode.serviceName)))
@@ -91,9 +90,7 @@ class ChooseIdentityViewModel(
         else NEW_USER
 
     companion object {
-        const val PHONE = "phone"
-        const val NAME = "name"
-        const val IDENTITY_NO = "identity_no"
         const val FCM_ID = "fcm_id"
+        const val PAYLOAD_KEYWORD = "own"
     }
 }

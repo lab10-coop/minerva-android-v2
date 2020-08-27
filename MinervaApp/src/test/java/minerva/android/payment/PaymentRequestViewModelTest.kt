@@ -122,7 +122,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
     @Test
     fun `confirm transaction success test`() {
         viewModel.payment = Payment(shortName = "short")
-        whenever(serviceManager.createJwtToken(any())) doReturn Single.just("token")
+        whenever(serviceManager.createJwtToken(any(), anyOrNull())) doReturn Single.just("token")
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.complete()
         viewModel.run {
             confirmPaymentLiveData.observeForever(confirmPaymentObserver)
@@ -137,7 +137,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
     fun `confirm transaction error test`() {
         val error = Throwable()
         viewModel.payment = Payment(shortName = "short")
-        whenever(serviceManager.createJwtToken(any())) doReturn Single.error(error)
+        whenever(serviceManager.createJwtToken(any(), anyOrNull())) doReturn Single.error(error)
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.complete()
         viewModel.run {
             errorLiveData.observeForever(errorObserver)

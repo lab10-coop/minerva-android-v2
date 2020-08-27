@@ -8,7 +8,6 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils
 import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
@@ -90,18 +89,22 @@ class MainViewModel(
 
     fun painlessLogin() {
         serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.let { identity ->
-            performLogin(identity)
-        }.orElse { _notExistedIdentityLiveData.value = Event(Unit) }
+            loginPayload.qrCode?.requestedData?.let { requestedData ->
+                performLogin(identity, requestedData)
+                return
+            }
+        }
+        _notExistedIdentityLiveData.value = Event(Unit)
     }
 
-    private fun performLogin(identity: Identity) =
-        if (LoginUtils.isIdentityValid(identity)) loginPayload.qrCode?.let { minervaLogin(identity, it) }
+    private fun performLogin(identity: Identity, requestedData: List<String>) =
+        if (LoginUtils.isIdentityValid(identity, requestedData)) loginPayload.qrCode?.let { minervaLogin(identity, it) }
         else _requestedFieldsLiveData.value = Event(identity.name)
 
     private fun minervaLogin(identity: Identity, qrCode: ServiceQrCode) {
         qrCode.callback?.let { callback ->
             launchDisposable {
-                serviceManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCode))
+                serviceManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCode), identity.privateKey)
                     .flatMapCompletable { jwtToken ->
                         serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
                     }

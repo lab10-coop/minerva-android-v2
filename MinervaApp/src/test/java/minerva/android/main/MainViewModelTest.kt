@@ -57,7 +57,8 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `test known user login when there is no required fields`() {
-        viewModel.loginPayload = LoginPayload(1, identityPublicKey = "123")
+        val qrCode = ServiceQrCode(requestedData = listOf("name"))
+        viewModel.loginPayload = LoginPayload(1, identityPublicKey = "123", qrCode = qrCode)
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(Identity(1, name = "tom"))
         viewModel.run {
             requestedFieldsLiveData.observeForever(requestedFieldsObserver)
@@ -79,7 +80,7 @@ class MainViewModelTest : BaseViewModelTest() {
                 privateKey = "1", publicKey = "2"
             )
         )
-        whenever(serviceManager.createJwtToken(any())) doReturn Single.error(error)
+        whenever(serviceManager.createJwtToken(any(), any())) doReturn Single.error(error)
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())) doReturn Completable.error(error)
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.error(error)
         viewModel.run {
@@ -103,7 +104,7 @@ class MainViewModelTest : BaseViewModelTest() {
                 privateKey = "1", publicKey = "2"
             )
         )
-        whenever(serviceManager.createJwtToken(any())) doReturn Single.error(error)
+        whenever(serviceManager.createJwtToken(any(), any())) doReturn Single.error(error)
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())) doReturn Completable.error(error)
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.error(error)
         viewModel.run {

@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.manager.services
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -15,6 +16,7 @@ import minerva.android.walletmanager.model.mappers.PaymentMapper
 import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.utils.IdentityUtils
+import java.security.PrivateKey
 
 class ServiceManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -34,8 +36,8 @@ class ServiceManagerImpl(
             .map { PaymentMapper.map(it) }
             .map { Pair(it, walletConfigManager.getWalletConfig()?.services) }
 
-    override fun createJwtToken(payload: Map<String, Any?>): Single<String> =
-        cryptographyRepository.createJwtToken(payload, walletConfigManager.masterSeed.privateKey)
+    override fun createJwtToken(payload: Map<String, Any?>, privateKey: String?): Single<String> =
+        cryptographyRepository.createJwtToken(payload, privateKey ?: walletConfigManager.masterSeed.privateKey)
 
     override fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
