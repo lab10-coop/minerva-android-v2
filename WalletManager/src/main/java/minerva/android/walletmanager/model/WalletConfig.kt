@@ -6,14 +6,18 @@ data class WalletConfig(
     val version: Int = Int.InvalidId,
     val identities: List<Identity> = listOf(),
     val accounts: List<Account> = listOf(),
-    val services: List<Service> = listOf()
+    val services: List<Service> = listOf(),
+    val credentials: List<Credential> = listOf()
 ) {
     val newIndex: Int
         get() = identities.size + accounts.size
+
+    val newCredentialIndex: Int
+        get() = credentials.size + 1
 
     val updateVersion: Int
         get() = version + 1
 
     val hasActiveAccount: Boolean
-            get() = accounts.none { !it.isDeleted }
+        get() = accounts.none { !it.isDeleted }
 }

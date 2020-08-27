@@ -14,7 +14,7 @@ object DataProvider {
 
     val walletConfig = WalletConfig(
         0, listOf(
-            Identity(0, "identityName1", "11", "privateKey", "address", data, credentials = listOf(Credential(type = "type", issuer = "iss"))),
+            Identity(0, "identityName1", "11", "privateKey", "address", data),
             Identity(1, "identityName2", "", "privateKey", "address", data),
             Identity(3, "identityName3", "", "privateKey", "address", data)
         ),
@@ -33,6 +33,7 @@ object DataProvider {
         )
         , listOf(
             Service(ServiceType.CHARGING_STATION, "name")
-        )
+        ),
+        listOf(Credential(loggedInIdentityDid = "did:ethr:address", type = "type", issuer = "iss"))
     )
 }

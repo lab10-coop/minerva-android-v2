@@ -1,22 +1,16 @@
 package minerva.android.walletmanager.manager.services
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.TokenPayload
-import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.mappers.PaymentMapper
 import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
-import minerva.android.walletmanager.utils.DateUtils
-import minerva.android.walletmanager.utils.IdentityUtils
-import java.security.PrivateKey
 
 class ServiceManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -60,7 +54,7 @@ class ServiceManagerImpl(
             services.forEach {
                 if (it.type == type) {
                     newServices.remove(it)
-                    return walletConfigManager.updateWalletConfig(WalletConfig(version, identities, accounts, newServices))
+                    return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, newServices, credentials))
                 }
             }
         }

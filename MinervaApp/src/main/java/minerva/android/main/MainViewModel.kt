@@ -35,7 +35,7 @@ class MainViewModel(
 ) : BaseViewModel() {
 
     lateinit var loginPayload: LoginPayload
-    lateinit var credential: Credential
+    lateinit var qrCode: CredentialQrCode
 
     private val _notExistedIdentityLiveData = MutableLiveData<Event<Unit>>()
     val notExistedIdentityLiveData: LiveData<Event<Unit>> get() = _notExistedIdentityLiveData
@@ -126,9 +126,9 @@ class MainViewModel(
 
     fun updateBindedCredential() {
         launchDisposable {
-            identityManager.updateBindedCredential(credential)
-                .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(credential, FAILED)) } }
-                .doOnSuccess { saveWalletAction(getWalletAction(credential, UPDATED)) }
+            identityManager.updateBindedCredential(qrCode)
+                .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED)) } }
+                .doOnSuccess { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, UPDATED)) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = { _updateCredentialSuccessLiveData.value = Event(it) },
@@ -154,10 +154,10 @@ class MainViewModel(
         }
     }
 
-    private fun getWalletAction(credential: Credential, status: Int): WalletAction =
+    private fun getWalletAction(lastUsed: Long, name: String, status: Int): WalletAction =
         WalletAction(
             WalletActionType.CREDENTIAL, status,
-            credential.lastUsed,
-            hashMapOf(WalletActionFields.CREDENTIAL_NAME to credential.name)
+            lastUsed,
+            hashMapOf(WalletActionFields.CREDENTIAL_NAME to name)
         )
 }

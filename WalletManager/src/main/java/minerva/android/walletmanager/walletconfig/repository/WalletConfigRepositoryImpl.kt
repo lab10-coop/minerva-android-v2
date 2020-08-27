@@ -11,13 +11,14 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
-import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.mappers.mapAccountResponseToAccount
+import minerva.android.walletmanager.model.mappers.mapCredentialsPayloadToCredentials
 import minerva.android.walletmanager.model.mappers.mapIdentityPayloadToIdentity
 import minerva.android.walletmanager.model.mappers.mapServicesResponseToServices
-import minerva.android.walletmanager.model.mappers.mapAccountResponseToAccount
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
 
@@ -66,16 +67,20 @@ class WalletConfigRepositoryImpl(
                     .filter { !identitiesResponse[it].isDeleted }
                     .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identitiesResponse[it].index) }
                     .toList()
-                    .map {
-                        completeIdentitiesKeys(payload, it)
-                    }
+                    .map { completeIdentitiesKeys(payload, it) }
                     .zipWith(Observable.range(START, accountsResponse.size)
                         .filter { !accountsResponse[it].isDeleted }
                         .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, accountsResponse[it].index) }
                         .toList()
                         .map { completeAccountsKeys(payload, it) },
                         BiFunction { identity: List<Identity>, account: List<Account> ->
-                            WalletConfig(payload.version, identity, account, mapServicesResponseToServices(payload.serviceResponse))
+                            WalletConfig(
+                                payload.version,
+                                identity,
+                                account,
+                                mapServicesResponseToServices(payload.serviceResponse),
+                                mapCredentialsPayloadToCredentials(payload.credentialResponse)
+                            )
                         }
                     ).toObservable()
             }

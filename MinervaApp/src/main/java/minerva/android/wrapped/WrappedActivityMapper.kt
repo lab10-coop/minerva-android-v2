@@ -40,7 +40,7 @@ fun startAccountAddressWrappedActivity(context: Context, title: String, position
     }
 }
 
-fun startNewValueWrappedActivity(context: Context, title: String, position: Int) {
+fun startNewAccountWrappedActivity(context: Context, title: String, position: Int) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT)
         putExtra(WrappedActivity.TITLE, title)
@@ -48,9 +48,15 @@ fun startNewValueWrappedActivity(context: Context, title: String, position: Int)
     }
 }
 
-fun startEditValueOrderWrappedActivity(context: Context) {
+fun startEditAccountOrderWrappedActivity(context: Context) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT_ORDER)
+    }
+}
+
+fun startEditCredentialOrderWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.CREDENTIAL_ORDER)
     }
 }
 

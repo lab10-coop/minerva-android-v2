@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
+import minerva.android.accounts.listener.OnBackListener
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.accounts.listener.OnBackListener
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EditOrderFragment : Fragment() {
@@ -59,13 +59,10 @@ class EditOrderFragment : Fragment() {
         recyclerView.let {
             it.layoutManager = LinearLayoutManager(it.context)
             it.adapter = orderAdapter
-            DragManageAdapter(
-                orderAdapter, ItemTouchHelper.UP.or(ItemTouchHelper.DOWN), ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT)
-            ).let { drag ->
-                ItemTouchHelper(drag).apply {
-                    attachToRecyclerView(it)
+            DragManageAdapter(orderAdapter, ItemTouchHelper.UP.or(ItemTouchHelper.DOWN), ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT))
+                .let { drag ->
+                    ItemTouchHelper(drag).apply { attachToRecyclerView(it) }
                 }
-            }
         }
     }
 

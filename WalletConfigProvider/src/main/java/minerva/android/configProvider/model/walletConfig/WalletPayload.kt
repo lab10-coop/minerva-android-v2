@@ -11,7 +11,9 @@ data class WalletConfigPayload(
     @SerializedName("accounts")
     private var _accountPayloads: List<AccountPayload>? = listOf(),
     @SerializedName("services")
-    private var _servicesPayloads: List<ServicePayload>? = listOf()
+    private var _servicesPayloads: List<ServicePayload>? = listOf(),
+    @SerializedName("credentials")
+    private var _credentialPayloads: List<CredentialsPayload>? = listOf()
 ) {
     val version: Int
         get() = _version ?: Int.InvalidId
@@ -21,22 +23,7 @@ data class WalletConfigPayload(
         get() = _accountPayloads ?: listOf()
     val serviceResponse: List<ServicePayload>
         get() = _servicesPayloads ?: listOf()
+    val credentialResponse: List<CredentialsPayload>
+        get() = _credentialPayloads ?: listOf()
 
-    fun getIdentityPayload(index: Int): IdentityPayload {
-        identityResponse.forEach {
-            if(index == it.index) {
-                return it
-            }
-        }
-        return IdentityPayload(index)
-    }
-
-    fun getAccountPayload(index: Int): AccountPayload {
-        accountResponse.forEach {
-            if(index == it.index) {
-                return it
-            }
-        }
-        return AccountPayload(index)
-    }
 }

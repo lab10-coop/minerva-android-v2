@@ -15,10 +15,11 @@ import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.utils.AddressConverter
 import minerva.android.walletmanager.utils.AddressType
-import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.widget.IdentityDataContent.Companion.FIELD_DESCRIPTION_LIMIT
 import minerva.android.widget.LetterLogo
 import minerva.android.widget.repository.generateColor
@@ -27,11 +28,12 @@ class IdentityAdapter(private val listener: IdentityFragmentListener) : Recycler
 
     private var activeIdentities = listOf<Identity>()
     private var rawIdentities = listOf<Identity>()
+    private var credentials = listOf<Credential>()
 
     override fun getItemCount(): Int = activeIdentities.size
 
     override fun onBindViewHolder(holder: IdentityViewHolder, position: Int) {
-        holder.setData(getPositionInRaw(activeIdentities[position].index), activeIdentities[position], isRemovable())
+        holder.setData(getPositionInRaw(activeIdentities[position].index), activeIdentities[position], isRemovable(), credentials)
     }
 
     private fun isRemovable() = activeIdentities.size > LAST_ELEMENT
@@ -39,9 +41,10 @@ class IdentityAdapter(private val listener: IdentityFragmentListener) : Recycler
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IdentityViewHolder =
         IdentityViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.identity_list_row, parent, false), parent, listener)
 
-    fun updateList(data: List<Identity>) {
-        rawIdentities = data
-        activeIdentities = data.filter { !it.isDeleted }
+    fun updateList(identities: List<Identity>, credentials: List<Credential>) {
+        rawIdentities = identities
+        activeIdentities = identities.filter { !it.isDeleted }
+        this.credentials = credentials
         notifyDataSetChanged()
     }
 
@@ -68,7 +71,7 @@ class IdentityViewHolder(
     private val isOpen get() = view.dataContainer.isOpen
     private var removable = true
 
-    fun setData(rawPosition: Int, identity: Identity, removable: Boolean) {
+    fun setData(rawPosition: Int, identity: Identity, removable: Boolean, credentials: List<Credential>) {
         this.removable = removable
         with(identity) {
             view.apply {
@@ -77,17 +80,17 @@ class IdentityViewHolder(
                 profileImage.setImageDrawable(LetterLogo.createLogo(context, name))
                 identityDid.setSingleLineTitleAndBody(DID_LABEL, AddressConverter.getShortAddress(AddressType.DID_ADDRESS, did))
                 dataContainer.apply {
-                    prepareDataContainerFields(identity)
+                    prepareDataContainerFields(identity, credentials.filter { it.loggedInIdentityDid == identity.did })
                     setListener(listener)
                 }
-                arrow.visibleOrGone(shouldShowArrow())
+                arrow.visibleOrGone(shouldShowArrow(credentials))
                 setOnClickListeners(rawPosition, identity, removable)
             }
         }
     }
 
-    private fun Identity.shouldShowArrow() =
-        personalData.size > FIELD_DESCRIPTION_LIMIT || credentials.isNotEmpty() || services.isNotEmpty()
+    private fun Identity.shouldShowArrow(credentials: List<Credential>) =
+        personalData.size > FIELD_DESCRIPTION_LIMIT || credentials.any { it.loggedInIdentityDid == did } || services.isNotEmpty()
 
     private fun View.setOnClickListeners(rawPosition: Int, identity: Identity, removable: Boolean) {
         setOnClickListener {

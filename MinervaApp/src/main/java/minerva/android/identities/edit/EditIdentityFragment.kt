@@ -127,8 +127,7 @@ class EditIdentityFragment : Fragment() {
         Identity(
             identity.index,
             identityName.text.toString(),
-            personalData = prepareFormData(),
-            credentials = identity.credentials
+            personalData = prepareFormData()
         )
 
     //TODO change for dynamic label generation

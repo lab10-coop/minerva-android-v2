@@ -127,7 +127,7 @@ class WalletConfigManagerImpl(
         getWalletConfig()?.let { config ->
             config.accounts.apply {
                 forEach { if (it.index == position) it.owners = owners }
-                return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, this, config.services))
+                return updateWalletConfig(WalletConfig(config.updateVersion, config.identities, this, config.services, config.credentials))
                     .andThen(Single.just(owners))
             }
         }
@@ -170,7 +170,7 @@ class WalletConfigManagerImpl(
     override fun saveService(service: Service): Completable {
         getWalletConfig()?.run {
             if (services.isEmpty()) {
-                return updateWalletConfig(WalletConfig(updateVersion, identities, accounts, listOf(service)))
+                return updateWalletConfig(WalletConfig(updateVersion, identities, accounts, listOf(service), credentials))
             }
             return updateWalletConfig(getWalletConfigWithUpdatedService(service))
         }
@@ -180,9 +180,9 @@ class WalletConfigManagerImpl(
     private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {
         isServiceIsAlreadyConnected(newService)?.let {
             updateService(it)
-            return WalletConfig(updateVersion, identities, accounts, services)
+            return WalletConfig(updateVersion, identities, accounts, services, credentials)
         }.orElse {
-            return WalletConfig(updateVersion, identities, accounts, services + newService)
+            return WalletConfig(updateVersion, identities, accounts, services + newService, credentials)
         }
     }
 
@@ -190,7 +190,7 @@ class WalletConfigManagerImpl(
         services.find { service -> service.type == newService.type }
 
     private fun WalletConfig.updateService(service: Service) {
-        services.forEach { if (it == service) it.lastUsed = DateUtils.getDateWithTimeFromTimestamp() }
+        services.forEach { if (it == service) it.lastUsed = DateUtils.timestamp }
     }
 
     override fun getAccount(valueIndex: Int, assetIndex: Int): Account? {
