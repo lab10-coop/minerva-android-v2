@@ -2,17 +2,24 @@ package minerva.android.services.login.uitls
 
 import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.services.login.identity.ChooseIdentityViewModel
-import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.IdentityField
+import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.utils.DateUtils
 
 object LoginUtils {
-    //TODO change it to dynamic requested fields creation
-    fun isIdentityValid(identity: Identity) =
-        identity.personalData[IdentityField.PHONE_NUMBER] != null && identity.personalData[ChooseIdentityViewModel.NAME] != null
+    fun isIdentityValid(identity: Identity, requiredData: List<String>): Boolean {
+        identity.personalData.let { personalData ->
+            requiredData.forEach {
+                if (!personalData.containsKey(it)) return false
+            }
+            return true
+        }
+    }
 
     fun getService(serviceQrCode: ServiceQrCode, identity: Identity) =
         Service(serviceQrCode.issuer, serviceQrCode.serviceName, DateUtils.getDateWithTimeFromTimestamp(), identity.publicKey)
@@ -23,13 +30,12 @@ object LoginUtils {
             hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, identityName), Pair(WalletActionFields.SERVICE_NAME, serviceName))
         )
 
-    //todo change it to dynamic payload creation
-    fun createLoginPayload(identity: Identity, serviceQrCode: ServiceQrCode): Map<String, String?> =
-        mutableMapOf(
-            Pair(ChooseIdentityViewModel.PHONE, identity.personalData[IdentityField.PHONE_NUMBER]),
-            Pair(ChooseIdentityViewModel.NAME, identity.personalData[ChooseIdentityViewModel.NAME]),
-            Pair(ChooseIdentityViewModel.IDENTITY_NO, identity.publicKey)
-        ).apply {
+    fun createLoginPayload(identity: Identity, serviceQrCode: ServiceQrCode): Map<String, Map<String, String?>> =
+        mutableMapOf(Pair(ChooseIdentityViewModel.PAYLOAD_KEYWORD, createMap(identity, serviceQrCode)))
+
+    private fun createMap(identity: Identity, serviceQrCode: ServiceQrCode): Map<String, String?> =
+        mutableMapOf<String, String?>().apply {
+            serviceQrCode.requestedData.forEach { identity.personalData[it]?.let { data -> this[it] = data } }
             if (serviceQrCode.requestedData.contains(ChooseIdentityViewModel.FCM_ID)) {
                 FirebaseInstanceId.getInstance().instanceId.addOnSuccessListener { result ->
                     this[ChooseIdentityViewModel.FCM_ID] = result.token
