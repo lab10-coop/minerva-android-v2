@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.model
 
+import android.graphics.Bitmap
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_EMAIL
@@ -19,7 +20,8 @@ open class Identity(
     open val personalData: LinkedHashMap<String, String> = linkedMapOf(),
     override var isDeleted: Boolean = false,
     val services: List<Service> = listOf(),
-    var isSelected: Boolean = false
+    var isSelected: Boolean = false,
+    var profileImageBitmap: Bitmap? = null
 ) : MinervaPrimitive(publicKey, name, isDeleted) {
     constructor(index: Int, identity: Identity) : this(
         index,
@@ -30,11 +32,15 @@ open class Identity(
         identity.personalData,
         identity.isDeleted,
         identity.services,
-        identity.isSelected
+        identity.isSelected,
+        identity.profileImageBitmap
     )
 
     val did: String
         get() = DID_PREFIX + address
+
+    val profileImageName: String
+        get() = address
 
     override fun equals(other: Any?): Boolean = (other is Identity)
             && index == other.index

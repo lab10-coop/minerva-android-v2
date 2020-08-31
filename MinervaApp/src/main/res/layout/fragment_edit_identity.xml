@@ -23,11 +23,26 @@
             android:padding="@dimen/margin_normal"
             tools:ignore="PrivateResource">
 
-            <ImageView
-                android:id="@+id/imageLogo"
-                android:layout_width="@dimen/big_letter_logo_size"
-                android:layout_height="@dimen/big_letter_logo_size"
-                />
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/profileImage"
+                    android:layout_width="@dimen/big_letter_logo_size"
+                    android:scaleType="centerCrop"
+                    tools:ignore="ContentDescription"
+                    android:layout_height="@dimen/big_letter_logo_size" />
+
+                <ImageView
+                    android:layout_width="@dimen/small_logo_size"
+                    android:layout_height="@dimen/small_logo_size"
+                    android:layout_margin="@dimen/margin_xxsmall"
+                    android:layout_gravity="bottom|end"
+                    tools:ignore="ContentDescription"
+                    android:src="@drawable/camera_icon" />
+
+            </FrameLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/FormTextInputLayoutStyle"
@@ -47,8 +62,8 @@
                 android:id="@+id/did"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
                 android:layout_marginBottom="@dimen/margin_normal"
+                android:gravity="center_horizontal"
                 tools:text="0xdaa21bfaa1575e1d725b37ac1efbb7c5f0a32822" />
 
             <TextView

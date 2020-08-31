@@ -14,6 +14,7 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.DataProvider.walletConfig
+import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
@@ -24,7 +25,8 @@ class IdentityManagerTest : RxTest() {
 
     private val walletConfigManager: WalletConfigManager = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
-    private val manager = IdentityManagerImpl(walletConfigManager, cryptographyRepository)
+    private val localStorage: LocalStorage = mock()
+    private val manager = IdentityManagerImpl(walletConfigManager, cryptographyRepository, localStorage)
 
     @Before
     override fun setupRxSchedulers() {
