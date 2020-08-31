@@ -11,10 +11,12 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepositoryImpl
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import org.amshove.kluent.mock
 import org.junit.After
@@ -27,10 +29,11 @@ class WalletConfigRepositoryTest {
     private val local = LocalMock()
     private val online = OnlineMock()
     private val onlineLikeLocal = OnlineLikeLocalMock()
+    private val localStorage: LocalStorage = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
     private val api: MinervaApi = mock()
 
-    private val repository = WalletConfigRepositoryImpl(cryptographyRepository, local, onlineLikeLocal)
+    private val repository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, onlineLikeLocal)
 
     @Before
     fun setupRxSchedulers() {
@@ -55,7 +58,9 @@ class WalletConfigRepositoryTest {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(2)))
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
 
-        val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, local, online)
+        whenever(localStorage.loadProfileImage(any())).thenReturn(String.Empty)
+
+        val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, online)
         val observable = walletConfigRepository.loadWalletConfig(MasterSeed())
         observable.test().assertValueSequence(listOf(local.prepareWalletConfig(), online.prepareWalletConfig()))
     }
@@ -71,7 +76,9 @@ class WalletConfigRepositoryTest {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(2)))
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
 
-        val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, local, onlineLikeLocal)
+        whenever(localStorage.loadProfileImage(any())).thenReturn(String.Empty)
+
+        val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, onlineLikeLocal)
         val observable = walletConfigRepository.loadWalletConfig(MasterSeed())
         observable.test().assertValueSequence(listOf(local.prepareWalletConfig()))
     }
@@ -87,7 +94,7 @@ class WalletConfigRepositoryTest {
     @Test
     fun `create default walletConfig should return error`() {
         val throwable = Throwable()
-        val repository = WalletConfigRepositoryImpl(cryptographyRepository, local, api)
+        val repository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, api)
         NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
         whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.error(throwable))
         val test = repository.createWalletConfig(MasterSeed("1234", "5678")).test()

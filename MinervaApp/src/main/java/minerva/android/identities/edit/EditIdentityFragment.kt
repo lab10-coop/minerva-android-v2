@@ -1,13 +1,19 @@
 package minerva.android.identities.edit
 
+import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.fragment_edit_identity.*
 import minerva.android.R
 import minerva.android.extension.*
@@ -25,18 +31,22 @@ import minerva.android.walletmanager.model.defs.IdentityField.Companion.PHONE_NU
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.POSTCODE
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.widget.LetterLogo
+import minerva.android.widget.ProfileImage
+import minerva.android.widget.ProfileImageDialog
+import minerva.android.widget.ProfileImageDialog.Companion.TAKE_PHOTO_REQUEST
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import java.util.*
 
-class EditIdentityFragment : Fragment() {
 
+class EditIdentityFragment : Fragment() {
     private var index: Int = Int.InvalidIndex
+    private lateinit var identity: Identity
+    private lateinit var profileImageDialog: ProfileImageDialog
     private val viewModel: EditIdentityViewModel by viewModel()
+    private var wasProfileImageChanged: Boolean = false
 
     private var viewGroup: ViewGroup? = null
-
-    private lateinit var identity: Identity
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -65,6 +75,24 @@ class EditIdentityFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.onDestroy()
+    }
+
+    private fun prepareImageUri(requestCode: Int, data: Intent?): Uri? =
+        if (requestCode == TAKE_PHOTO_REQUEST) data?.data
+        else profileImageDialog.imageUri
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        profileImageDialog.onRequestPermissionsResult(requestCode, permissions)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            Glide.with(requireContext())
+                .load(prepareImageUri(requestCode, data))
+                .apply(RequestOptions.circleCropTransform()).into(profileImage)
+            wasProfileImageChanged = true
+        }
     }
 
     private fun onConfirmButtonClicked() {
@@ -115,7 +143,7 @@ class EditIdentityFragment : Fragment() {
             city.setText(personalData[CITY])
             postcode.setText(personalData[POSTCODE])
             country.setText(personalData[COUNTRY])
-            imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), name))
+            ProfileImage.load(profileImage, identity)
         }
     }
 
@@ -123,12 +151,17 @@ class EditIdentityFragment : Fragment() {
         viewModel.saveIdentity(getUpdatedIdentity(), getActionStatus())
     }
 
-    private fun getUpdatedIdentity(): Identity =
-        Identity(
-            identity.index,
-            identityName.text.toString(),
-            personalData = prepareFormData()
-        )
+    private fun getUpdatedIdentity(): Identity {
+        (if (wasProfileImageChanged) profileImage.drawable.toBitmap() else identity.profileImageBitmap).let {
+            return Identity(
+                identity.index,
+                identityName.text.toString(),
+                address = identity.address,
+                personalData = prepareFormData(),
+                profileImageBitmap = it
+            )
+        }
+    }
 
     //TODO change for dynamic label generation
     private fun prepareFormData(): LinkedHashMap<String, String> {
@@ -176,7 +209,11 @@ class EditIdentityFragment : Fragment() {
         }
 
         identityName.apply {
-            afterTextChanged { imageLogo.setImageDrawable(LetterLogo.createLogo(requireContext(), it)) }
+            afterTextChanged {
+                if (!wasProfileImageChanged && identity.profileImageBitmap == null) {
+                    profileImage.setImageDrawable(LetterLogo.createLogo(context, it))
+                }
+            }
             onFocusLost { identityName.error = isEmpty(it) }
             clearButton()
         }
@@ -184,6 +221,11 @@ class EditIdentityFragment : Fragment() {
         email.apply {
             onFocusLost { email.error = getEmailErrorMessage(it) }
             clearButton()
+        }
+        profileImage.setOnClickListener {
+            profileImageDialog = ProfileImageDialog(this).apply {
+                show()
+            }
         }
         phoneNumber.clearButton()
         birthDate.clearButton()
