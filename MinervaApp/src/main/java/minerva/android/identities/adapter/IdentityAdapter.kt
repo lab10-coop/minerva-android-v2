@@ -21,7 +21,7 @@ import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.utils.AddressConverter
 import minerva.android.walletmanager.utils.AddressType
 import minerva.android.widget.IdentityDataContent.Companion.FIELD_DESCRIPTION_LIMIT
-import minerva.android.widget.LetterLogo
+import minerva.android.widget.ProfileImage
 import minerva.android.widget.repository.generateColor
 
 class IdentityAdapter(private val listener: IdentityFragmentListener) : RecyclerView.Adapter<IdentityViewHolder>() {
@@ -77,7 +77,7 @@ class IdentityViewHolder(
             view.apply {
                 identityName.text = name
                 card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(name)))
-                profileImage.setImageDrawable(LetterLogo.createLogo(context, name))
+                ProfileImage.load(profileImage, identity)
                 identityDid.setSingleLineTitleAndBody(DID_LABEL, AddressConverter.getShortAddress(AddressType.DID_ADDRESS, did))
                 dataContainer.apply {
                     prepareDataContainerFields(identity, credentials.filter { it.loggedInIdentityDid == identity.did })

@@ -11,6 +11,7 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.mapper.BitmapMapper
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
@@ -19,12 +20,14 @@ import minerva.android.walletmanager.model.mappers.mapAccountResponseToAccount
 import minerva.android.walletmanager.model.mappers.mapCredentialsPayloadToCredentials
 import minerva.android.walletmanager.model.mappers.mapIdentityPayloadToIdentity
 import minerva.android.walletmanager.model.mappers.mapServicesResponseToServices
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
 
 class WalletConfigRepositoryImpl(
     private val cryptographyRepository: CryptographyRepository,
     private val localWalletProvider: LocalWalletConfigProvider,
+    private val localStorage: LocalStorage,
     private val minervaApi: MinervaApi
 ) : WalletConfigRepository {
     private var currentWalletConfigVersion = Int.InvalidIndex
@@ -68,6 +71,7 @@ class WalletConfigRepositoryImpl(
                     .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identitiesResponse[it].index) }
                     .toList()
                     .map { completeIdentitiesKeys(payload, it) }
+                    .map { completeIdentitiesProfileImages(it) }
                     .zipWith(Observable.range(START, accountsResponse.size)
                         .filter { !accountsResponse[it].isDeleted }
                         .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, accountsResponse[it].index) }
@@ -92,6 +96,13 @@ class WalletConfigRepositoryImpl(
             getKeys(identityResponse.index, keys).let { key ->
                 identities.add(mapIdentityPayloadToIdentity(identityResponse, key.publicKey, key.privateKey, key.address))
             }
+        }
+        return identities
+    }
+
+    private fun completeIdentitiesProfileImages(identities: List<Identity>): List<Identity> {
+        identities.forEach {
+            it.profileImageBitmap = BitmapMapper.fromBase64(localStorage.loadProfileImage(it.profileImageName))
         }
         return identities
     }

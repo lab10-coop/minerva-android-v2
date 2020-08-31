@@ -11,16 +11,16 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_address.*
 import minerva.android.R
+import minerva.android.extension.gone
+import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.widget.LetterLogo
-import minerva.android.widget.clubCard.OamtcClubCard
+import minerva.android.widget.ProfileImage
 import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton
 import minerva.android.wrapped.WrappedActivity.Companion.FRAGMENT_TYPE
@@ -64,9 +64,13 @@ class AddressFragment : Fragment() {
     }
 
     private fun prepareLogo(minervaPrimitive: MinervaPrimitive) {
-        letterLogo.apply {
-            setImageDrawable(LetterLogo.createLogo(requireContext(), minervaPrimitive.name))
-            visibleOrGone(isIdentity())
+        profileImage.apply {
+            (minervaPrimitive as? Identity)?.let {
+                ProfileImage.load(this, it)
+                visible()
+                return
+            }
+            gone()
         }
     }
 
@@ -118,7 +122,7 @@ class AddressFragment : Fragment() {
         else minervaPrimitive.address
 
     private fun prepareToastMessage() =
-        if(isIdentity()) getString(R.string.identity_saved_to_clipboard)
+        if (isIdentity()) getString(R.string.identity_saved_to_clipboard)
         else getString(R.string.address_saved_to_clip_board)
 
     private fun prepareTitleAddress() =

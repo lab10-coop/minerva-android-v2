@@ -22,6 +22,7 @@
     <dimen name="small_logo_size">32dp</dimen>
     <dimen name="badge_logo_size">16dp</dimen>
     <dimen name="form_box_stroke_width">2dp</dimen>
+    <dimen name="circle_icon_background">48dp</dimen>
 
     <dimen name="clickable_area">32dp</dimen>
     <dimen name="large_letter_logo_size">128dp</dimen>

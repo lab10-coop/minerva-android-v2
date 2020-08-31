@@ -55,4 +55,23 @@ class LocalStorageTest {
         }
         confirmVerified(sharedPref)
     }
+
+    @Test
+    fun `save profile image test`() {
+        val imageInBase64 = "imageInBase64"
+        localStorage.saveProfileImage("name", imageInBase64)
+        every { localStorage.loadProfileImage(any()) } returns imageInBase64
+        verify {
+            sharedPref.edit().putString(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
+    }
+
+    @Test
+    fun `load profile image test`() {
+        localStorage.loadProfileImage("name")
+        verify {
+            sharedPref.getString(any(), any())
+        }
+    }
 }

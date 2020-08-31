@@ -7,6 +7,7 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
+import minerva.android.kotlinUtils.mapper.BitmapMapper
 import minerva.android.walletmanager.exception.CannotRemoveLastIdentityThrowable
 import minerva.android.walletmanager.exception.NoIdentityToRemoveThrowable
 import minerva.android.walletmanager.exception.NoLoggedInIdentityThrowable
@@ -16,11 +17,13 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.model.mappers.mapCredentialQrCodeToCredential
 
 class IdentityManagerImpl(
     private val walletConfigManager: WalletConfigManager,
-    private val cryptographyRepository: CryptographyRepository
+    private val cryptographyRepository: CryptographyRepository,
+    private val localStorage: LocalStorage
 ) : IdentityManager {
 
     override val walletConfigLiveData: LiveData<WalletConfig>
@@ -161,6 +164,9 @@ class IdentityManagerImpl(
 
     private fun prepareIdentities(identity: Identity, walletConfig: WalletConfig): List<Identity> {
         val position = getPositionForIdentity(identity, walletConfig)
+        identity.profileImageBitmap?.let {
+            localStorage.saveProfileImage(identity.profileImageName, BitmapMapper.toBase64(it))
+        }
         walletConfig.identities.toMutableList().apply {
             if (inBounds(position)) this[position] = identity
             else add(identity)

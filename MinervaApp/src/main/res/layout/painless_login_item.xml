@@ -20,7 +20,7 @@
         tools:ignore="ContentDescription" />
 
     <ImageView
-        android:id="@+id/letterLogo"
+        android:id="@+id/profileImage"
         android:layout_width="@dimen/small_logo_size"
         android:layout_height="@dimen/small_logo_size"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,7 +36,7 @@
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/letterLogo"
+        app:layout_constraintLeft_toRightOf="@id/profileImage"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@string/app_name" />
 

@@ -33,6 +33,10 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         }
     }
 
+    override fun loadProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
+
+    override fun saveProfileImage(name: String, image: String) = sharedPreferences.edit().putString(name, image).apply()
+
     private fun findRecipient(list: List<Recipient>, recipient: Recipient): Int {
         list.forEachIndexed { index, it ->
             if (it.address.equals(recipient.address, true)) return index

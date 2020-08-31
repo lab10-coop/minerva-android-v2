@@ -24,7 +24,7 @@
             app:layout_constraintGuide_percent="0.5" />
 
         <ImageView
-            android:id="@+id/letterLogo"
+            android:id="@+id/profileImage"
             android:layout_width="@dimen/large_letter_logo_size"
             android:layout_height="@dimen/large_letter_logo_size"
             android:layout_marginTop="@dimen/margin_xsmall"
@@ -42,7 +42,7 @@
             android:textSize="@dimen/text_big"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/letterLogo"
+            app:layout_constraintTop_toBottomOf="@id/profileImage"
             tools:text="Tom Johnson" />
 
         <ImageView
