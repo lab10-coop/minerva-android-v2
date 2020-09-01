@@ -43,12 +43,8 @@ class BlockchainRepositoryImpl(
             .flatMapSingle { position -> getBalance(networkAddress[position].first, networkAddress[position].second) }
             .toList()
 
-    override fun refreshAssetBalance(
-        privateKey: String,
-        network: String,
-        contractAddress: String,
-        safeAccountAddress: String
-    ): Observable<Pair<String, BigDecimal>> =
+    override fun refreshAssetBalance(privateKey: String, network: String, contractAddress: String, safeAccountAddress: String):
+            Observable<Pair<String, BigDecimal>> =
         if (safeAccountAddress.isEmpty()) getERC20Balance(contractAddress, network, privateKey, Credentials.create(privateKey).address)
         else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
 

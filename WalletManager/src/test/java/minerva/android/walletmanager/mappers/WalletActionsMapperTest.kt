@@ -2,7 +2,7 @@ package minerva.android.walletmanager.mappers
 
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
-import minerva.android.walletmanager.model.mappers.configs.WalletActionsMapper
+import minerva.android.walletmanager.model.mappers.WalletActionsMapper
 import org.amshove.kluent.shouldBe
 import org.junit.Test
 

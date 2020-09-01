@@ -2,7 +2,6 @@ package minerva.android.configProvider.model.walletConfig
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 
 data class CredentialsPayload(
@@ -26,8 +25,10 @@ data class CredentialsPayload(
     private val _loggedInIdentityDid: String? = String.Empty,
     @SerializedName("lastUsed")
     private val _lastUsed: Long? = Long.InvalidValue,
-    @SerializedName("isDeleted")
-    private val _isDeleted: Boolean? = false
+    @SerializedName("cardUrl")
+    private val _cardUrl: String? = String.Empty,
+    @SerializedName("iconUrl")
+    private val _iconUrl: String? = String.Empty
 ) {
     val name: String
         get() = _name ?: String.Empty
@@ -49,6 +50,8 @@ data class CredentialsPayload(
         get() = _loggedInIdentityDid ?: String.Empty
     val lastUsed: Long
         get() = _lastUsed ?: Long.InvalidValue
-    val isDeleted: Boolean
-        get() = _isDeleted ?: false
+    val cardUrl: String
+        get() = _cardUrl ?: String.Empty
+    val iconUrl: String
+        get() = _iconUrl ?: String.Empty
 }

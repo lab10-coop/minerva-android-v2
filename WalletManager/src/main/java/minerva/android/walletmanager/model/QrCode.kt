@@ -30,5 +30,7 @@ data class CredentialQrCode(
     val expirationDate: Long = Long.InvalidValue,
     val creationDate: String = String.Empty,
     val loggedInDid: String = String.Empty,
-    val lastUsed: Long = Long.InvalidValue
+    val lastUsed: Long = Long.InvalidValue,
+    val cardUrl: String? = String.Empty,
+    val iconUrl: String? = String.Empty
 ) : QrCode(issuer = issuer)

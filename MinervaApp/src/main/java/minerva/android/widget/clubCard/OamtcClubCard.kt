@@ -6,7 +6,7 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.utils.DateUtils
 import kotlin.reflect.full.declaredMemberProperties
 
-class OamtcClubCard(context: Context, path: String = CARD_URL, private val credential: Credential) : ClubCard(context, path) {
+class OamtcClubCard(context: Context, private val credential: Credential) : ClubCard(context, credential.cardUrl) {
 
     override fun getAsHashMap(): HashMap<String, String> =
         HashMap<String, String>().apply {
@@ -24,10 +24,5 @@ class OamtcClubCard(context: Context, path: String = CARD_URL, private val crede
     private fun getProperFormat(data: Any?): String = when (data) {
         is Long -> DateUtils.getDateFromTimestamp(data, DateUtils.SHORT_DATE_FORMAT)
         else -> data.toString()
-    }
-
-    companion object {
-        //TODO remove this hardcoded link, when backend will be ready for delivering it
-        const val CARD_URL = "http://vc-issuer.dev.lab10.io:8070/detail.svg"
     }
 }

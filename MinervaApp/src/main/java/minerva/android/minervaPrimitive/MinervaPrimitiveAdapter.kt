@@ -1,6 +1,7 @@
 package minerva.android.minervaPrimitive
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -10,12 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.minerva_primitive_list_row.view.*
 import minerva.android.R
+import minerva.android.extensions.loadImageUrl
 import minerva.android.services.listener.MinervaPrimitiveMenuListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.defs.CredentialType
-import minerva.android.walletmanager.model.defs.VerifiableCredentialType
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.widget.repository.getServiceIcon
 
@@ -51,7 +51,7 @@ class MinervaPrimitiveViewHolder(
         view.apply {
 
             when (minervaPrimitive) {
-                is Credential -> setCredentialIcon(minervaPrimitive)
+                is Credential -> minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl)
                 is Service -> showIcon(getServiceIcon(minervaPrimitive.type))
             }
 
@@ -68,15 +68,6 @@ class MinervaPrimitiveViewHolder(
                     }
                 }
             }
-        }
-    }
-
-    //todo change for getting icon from external repo using url when backend is ready
-    private fun View.setCredentialIcon(credential: Credential) {
-        when {
-            credential.issuer == CredentialType.OAMTC && credential.type == VerifiableCredentialType.AUTOMOTIVE_CLUB ->
-                showIcon(R.drawable.ic_oamtc_credential)
-            else -> showIcon(R.drawable.ic_minerva_icon)
         }
     }
 

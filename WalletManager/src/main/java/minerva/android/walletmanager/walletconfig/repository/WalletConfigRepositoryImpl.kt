@@ -16,10 +16,10 @@ import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.mappers.CredentialsPayloadToCredentials
+import minerva.android.walletmanager.model.mappers.ServicesResponseToServicesMapper
 import minerva.android.walletmanager.model.mappers.mapAccountResponseToAccount
-import minerva.android.walletmanager.model.mappers.mapCredentialsPayloadToCredentials
 import minerva.android.walletmanager.model.mappers.mapIdentityPayloadToIdentity
-import minerva.android.walletmanager.model.mappers.mapServicesResponseToServices
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
@@ -82,8 +82,8 @@ class WalletConfigRepositoryImpl(
                                 payload.version,
                                 identity,
                                 account,
-                                mapServicesResponseToServices(payload.serviceResponse),
-                                mapCredentialsPayloadToCredentials(payload.credentialResponse)
+                                ServicesResponseToServicesMapper.map(payload.serviceResponse),
+                                CredentialsPayloadToCredentials.map(payload.credentialResponse)
                             )
                         }
                     ).toObservable()

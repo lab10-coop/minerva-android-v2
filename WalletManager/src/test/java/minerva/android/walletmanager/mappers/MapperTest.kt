@@ -1,11 +1,16 @@
 package minerva.android.walletmanager.mappers
 
+import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.AccountPayload
+import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
+import minerva.android.configProvider.model.walletConfig.ServicePayload
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.mappers.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
+import java.math.BigDecimal
+import java.math.BigInteger
 
 class MapperTest : WalletConfigTestValues() {
 
@@ -18,7 +23,9 @@ class MapperTest : WalletConfigTestValues() {
                     "since" to "2018",
                     "coverage" to "touring",
                     "name" to "name",
-                    "credentialName" to "card"
+                    "credentialName" to "card",
+                    "cardImage" to mapOf("/" to "urlImage"),
+                    "iconImage" to mapOf("/" to "urlIcon")
                 )
             )
         ),
@@ -63,7 +70,7 @@ class MapperTest : WalletConfigTestValues() {
             identityData,
             true
         )
-        val identityResponse = mapIdentityToIdentityPayload(identity)
+        val identityResponse = IdentityToIdentityPayloadMapper.map(identity)
 
         identity.index shouldBeEqualTo identityResponse.index
         identity.name shouldBeEqualTo identityResponse.name
@@ -86,7 +93,7 @@ class MapperTest : WalletConfigTestValues() {
     }
 
     @Test
-    fun `Mapping Value to ValueResponse Test`() {
+    fun `Mapping Account to AccountResponse Test`() {
         val value = Account(
             0,
             "publicKey",
@@ -95,11 +102,75 @@ class MapperTest : WalletConfigTestValues() {
             "ValueNetworkTest"
         )
 
-        val valueResponse = mapAccountToAccountPayload(value)
+        val valueResponse = AccountToAccountPayloadMapper.map(value)
 
         value.index shouldBeEqualTo valueResponse.index
         value.name shouldBeEqualTo valueResponse.name
         value.network shouldBeEqualTo value.network
+    }
+
+    @Test
+    fun `mapping credential qr code to credential test`() {
+        val input = CredentialQrCode(
+            "iss",
+            "name",
+            "type"
+        )
+
+        val response = CredentialQrCodeToCredentialMapper.map(input)
+
+        input.name shouldBeEqualTo response.name
+        input.issuer shouldBeEqualTo response.issuer
+        input.type shouldBeEqualTo response.type
+    }
+
+    @Test
+    fun `mapping credentials payload code to credentials test`() {
+        val input = listOf(
+            CredentialsPayload(
+                "name",
+                "type",
+                "iss"
+            )
+        )
+
+        val response = CredentialsPayloadToCredentials.map(input)
+
+        input[0].name shouldBeEqualTo response[0].name
+        input[0].issuer shouldBeEqualTo response[0].issuer
+        input[0].type shouldBeEqualTo response[0].type
+    }
+
+    @Test
+    fun `mapping credential payload code to credential test`() {
+        val input =
+            CredentialsPayload(
+                "name",
+                "type",
+                "iss"
+            )
+
+        val response = CredentialPayloadToCredentialMapper.map(input)
+
+        input.name shouldBeEqualTo response.name
+        input.issuer shouldBeEqualTo response.issuer
+        input.type shouldBeEqualTo response.type
+    }
+
+    @Test
+    fun `mapping credential code to credential payload test`() {
+        val input =
+            Credential(
+                "name",
+                "type",
+                "iss"
+            )
+
+        val response = CredentialToCredentialPayloadMapper.map(input)
+
+        input.name shouldBeEqualTo response.name
+        input.issuer shouldBeEqualTo response.issuer
+        input.type shouldBeEqualTo response.type
     }
 
     @Test
@@ -118,13 +189,91 @@ class MapperTest : WalletConfigTestValues() {
     }
 
     @Test
+    fun `map service response to service Test`() {
+        val input = listOf(
+            ServicePayload(
+                "type",
+                "name",
+                123
+            )
+        )
+
+        val response = ServicesResponseToServicesMapper.map(input)
+
+        response[0].type shouldBeEqualTo input[0].type
+        response[0].name shouldBeEqualTo input[0].name
+        response[0].lastUsed shouldBeEqualTo input[0].lastUsed
+    }
+
+    @Test
+    fun `map services to services payload Test`() {
+        val input = listOf(
+            Service(
+                "type",
+                "name",
+                123
+            )
+        )
+
+        val response = ServicesToServicesPayloadMapper.map(input)
+
+        response[0].type shouldBeEqualTo input[0].type
+        response[0].name shouldBeEqualTo input[0].name
+        response[0].lastUsed shouldBeEqualTo input[0].lastUsed
+    }
+
+    @Test
+    fun `map service to service payload Test`() {
+        val input = Service(
+                "type",
+                "name",
+                123
+            )
+
+        val response = ServiceToServicePayloadMapper.map(input)
+
+        response.type shouldBeEqualTo input.type
+        response.name shouldBeEqualTo input.name
+        response.lastUsed shouldBeEqualTo input.lastUsed
+    }
+
+    @Test
+    fun `map transaction cost payload to transaction cost test`() {
+        val input = TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
+
+        val response = TransactionCostPayloadToTransactionCost.map(input)
+
+        response.gasLimit shouldBeEqualTo input.gasLimit
+        response.gasPrice shouldBeEqualTo input.gasPrice
+        response.cost shouldBeEqualTo input.cost
+    }
+
+    @Test
+    fun `transaction mapper test`() {
+        val input = Transaction(contractAddress = "address", privateKey = "private", receiverKey = "receiver")
+        val response = TransactionMapper.map(input)
+        response.contractAddress shouldBeEqualTo input.contractAddress
+        response.privateKey shouldBeEqualTo input.privateKey
+        response.receiverKey shouldBeEqualTo input.receiverKey
+    }
+
+    @Test
+    fun `map transaction to transaction payload test`() {
+        val input = Transaction(contractAddress = "address", privateKey = "private", receiverKey = "receiver")
+        val response = TransactionToTransactionPayloadMapper.map(input)
+        response.contractAddress shouldBeEqualTo input.contractAddress
+        response.privateKey shouldBeEqualTo input.privateKey
+        response.receiverKey shouldBeEqualTo input.receiverKey
+    }
+
+    @Test
     fun `Mapping WalletConfig to WalletPayload Test`() {
         val walletConfig = WalletConfig(
             0,
             identities,
             values
         )
-        val walletPayload = mapWalletConfigToWalletPayload(walletConfig)
+        val walletPayload = WalletConfigToWalletPayloadMapper.map(walletConfig)
 
         walletConfig.version shouldBeEqualTo walletPayload.version
         walletConfig.identities[0].name shouldBeEqualTo walletPayload.identityResponse[0].name
@@ -142,7 +291,9 @@ class MapperTest : WalletConfigTestValues() {
                     type == "AutomotiveMembershipCardCredential" &&
                     memberId == "123456" &&
                     creationDate == "2018" &&
-                    coverage == "touring"
+                    coverage == "touring" &&
+                    iconUrl == "urlImage" &&
+                    cardUrl == "urlCard"
         }
     }
 

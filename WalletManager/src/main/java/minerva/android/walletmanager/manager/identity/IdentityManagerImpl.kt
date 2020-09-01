@@ -18,7 +18,7 @@ import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.model.mappers.mapCredentialQrCodeToCredential
+import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 
 class IdentityManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -114,7 +114,7 @@ class IdentityManagerImpl(
                             identities,
                             accounts,
                             services,
-                            credentials + mapCredentialQrCodeToCredential(qrCode)
+                            credentials + CredentialQrCodeToCredentialMapper.map(qrCode)
                         )
                     ).toSingleDefault(findIdentityByDid(qrCode.loggedInDid)?.name)
                 } else Single.error(NoLoggedInIdentityThrowable())
@@ -131,7 +131,7 @@ class IdentityManagerImpl(
 
     override fun updateBindedCredential(qrCode: CredentialQrCode): Single<String> {
         walletConfigManager.getWalletConfig()?.apply {
-            val updatedCredential = mapCredentialQrCodeToCredential(qrCode)
+            val updatedCredential = CredentialQrCodeToCredentialMapper.map(qrCode)
             val newCredentials = credentials.toMutableList().apply {
                 this[getPositionForCredential(updatedCredential)] = updatedCredential
             }
