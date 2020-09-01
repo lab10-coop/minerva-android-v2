@@ -3,19 +3,16 @@ package minerva.android.edit
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.order_list_row.view.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
+import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.defs.CredentialType
-import minerva.android.walletmanager.model.defs.VerifiableCredentialType
-import minerva.android.widget.IdentityBindedItem
 import minerva.android.widget.LetterLogo
 import minerva.android.widget.ProfileImage
 import minerva.android.widget.repository.getNetworkIcon
@@ -85,19 +82,10 @@ class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         view.apply {
             when {
                 element.network != String.Empty -> icon.setImageResource(getNetworkIcon(NetworkManager.getNetwork(element.network)))
-                element.type != String.Empty && element !is Credential-> icon.setImageResource(getServiceIcon(element.type))
-                element is Credential -> setCredentialIcon(element, icon)
-                element is Identity -> ProfileImage.load(icon, element)
+                element.type != String.Empty && element !is Credential -> icon.setImageResource(getServiceIcon(element.type))
+                element is Credential -> icon.loadImageUrl(element.iconUrl)
+                else -> ProfileImage.load(icon, element as Identity)
             }
-        }
-    }
-
-    //todo change for getting icon from external repo using url when backend is ready
-    private fun setCredentialIcon(credential: Credential, icon: ImageView) {
-        when {
-            credential.issuer == CredentialType.OAMTC && credential.type == VerifiableCredentialType.AUTOMOTIVE_CLUB ->
-                icon.setImageResource(R.drawable.ic_oamtc_credential)
-            else -> icon.setImageResource(R.drawable.ic_minerva_icon)
         }
     }
 
