@@ -3,10 +3,6 @@ package minerva.android.base
 import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.schedulers.Schedulers
-import minerva.android.walletmanager.model.WalletAction
-import timber.log.Timber
 
 abstract class BaseViewModel : ViewModel() {
 

@@ -35,6 +35,9 @@
         <item name="boxCornerRadiusBottomEnd">@dimen/rounded_background_small</item>
         <item name="android:textColorHint">@color/titleColor</item>
         <item name="android:layout_marginBottom">@dimen/margin_xsmall</item>
+        <item name="endIconMode">clear_text</item>
+        <item name="endIconDrawable">@drawable/ic_clear</item>
+        <item name="endIconContentDescription">@string/clear_text</item>
     </style>
 
     <style name="ErrorTextStyle">

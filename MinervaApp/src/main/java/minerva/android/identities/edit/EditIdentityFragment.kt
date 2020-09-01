@@ -14,9 +14,15 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.fragment_edit_identity.*
 import minerva.android.R
-import minerva.android.extension.*
+import minerva.android.extension.afterTextChanged
+import minerva.android.extension.gone
+import minerva.android.extension.isEmail
+import minerva.android.extension.visible
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Identity
@@ -113,8 +119,8 @@ class EditIdentityFragment : Fragment() {
         if (text.isEmail()) null
         else getString(R.string.wrong_email)
 
-    private fun isEmpty(text: String): String? =
-        if (text.isEmpty()) getString(R.string.can_not_be_empty)
+    private fun isBlank(text: String): String? =
+        if (text.isBlank()) getString(R.string.can_not_be_empty)
         else null
 
     private fun isNotEmailAndIsNotEmpty(text: String): Boolean = !text.isEmail() && text.isNotEmpty()
@@ -214,26 +220,29 @@ class EditIdentityFragment : Fragment() {
                     profileImage.setImageDrawable(LetterLogo.createLogo(context, it))
                 }
             }
-            onFocusLost { identityName.error = isEmpty(it) }
-            clearButton()
         }
-        accountName.clearButton()
-        email.apply {
-            onFocusLost { email.error = getEmailErrorMessage(it) }
-            clearButton()
-        }
+
+        checkEditTextInput(emailLayout, email) { getEmailErrorMessage(it) }
+        checkEditTextInput(identityNameLayout, identityName) { isBlank(it) }
+
         profileImage.setOnClickListener {
             profileImageDialog = ProfileImageDialog(this).apply {
                 show()
             }
         }
-        phoneNumber.clearButton()
-        birthDate.clearButton()
-        addressLine1.clearButton()
-        addressLine2.clearButton()
-        city.clearButton()
-        postcode.clearButton()
-        country.clearButton()
+    }
+
+    private fun checkEditTextInput(layout: TextInputLayout, editText: TextInputEditText, prepareErrorMessage: (String) -> String?) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            layout.error = if (hasFocus) {
+                if(editText.text.toString().isBlank()) editText.setText(String.Empty)
+                layout.apply {
+                    endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
+                    endIconDrawable = layout.context.getDrawable(R.drawable.ic_clear)
+                }
+                null
+            } else prepareErrorMessage(editText.text.toString())
+        }
     }
 
     private fun getActionStatus(): Int =
@@ -262,7 +271,7 @@ class EditIdentityFragment : Fragment() {
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-            val datePickerDialog = DatePickerDialog(it, DatePickerDialog.OnDateSetListener { _, birthYear, monthOfYear, dayOfMonth ->
+            val datePickerDialog = DatePickerDialog(it, { _, birthYear, monthOfYear, dayOfMonth ->
                 birthDate.setText(String.format(DATE_FORMAT, dayOfMonth, monthOfYear + 1, birthYear))
             }, year, month, day)
             datePickerDialog.apply {
