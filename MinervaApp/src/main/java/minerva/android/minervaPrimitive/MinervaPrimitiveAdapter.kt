@@ -1,7 +1,6 @@
 package minerva.android.minervaPrimitive
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -11,15 +10,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.minerva_primitive_list_row.view.*
 import minerva.android.R
+import minerva.android.extension.visible
 import minerva.android.extensions.loadImageUrl
-import minerva.android.services.listener.MinervaPrimitiveMenuListener
+import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.widget.repository.getServiceIcon
 
-class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveMenuListener) : RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {
+class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) : RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {
 
     private var primitives: List<MinervaPrimitive> = listOf()
 
@@ -43,7 +43,7 @@ class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveMenuListener
 class MinervaPrimitiveViewHolder(
     private val view: View,
     private val viewGroup: ViewGroup,
-    private val listener: MinervaPrimitiveMenuListener
+    private val listener: MinervaPrimitiveClickListener
 ) : RecyclerView.ViewHolder(view) {
 
     @SuppressLint("SetTextI18n")
@@ -51,12 +51,19 @@ class MinervaPrimitiveViewHolder(
         view.apply {
 
             when (minervaPrimitive) {
-                is Credential -> minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl)
+                is Credential -> {
+                    minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl)
+                    identityName.apply {
+                        visible()
+                        text = String.format(context.getString(R.string.identity_label, minervaPrimitive.memberName))
+                    }
+                }
                 is Service -> showIcon(getServiceIcon(minervaPrimitive.type))
             }
 
             minervaPrimitiveName.text = minervaPrimitive.name
             lastUsedLabel.text = "${context.getString(R.string.last_used)} ${DateUtils.getDateWithTimeFromTimestamp(minervaPrimitive.lastUsed)}"
+            container.setOnClickListener { listener.onContainerClick(minervaPrimitive) }
             popupMenu.setOnClickListener { view ->
                 PopupMenu(this@MinervaPrimitiveViewHolder.view.context, view).apply {
                     menuInflater.inflate(R.menu.remove_menu, menu)

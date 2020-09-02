@@ -8,18 +8,19 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
-import minerva.android.services.listener.MinervaPrimitiveMenuListener
+import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 
-abstract class MinervaPrimitiveListFragment() : Fragment(), MinervaPrimitiveMenuListener {
+abstract class MinervaPrimitiveListFragment : Fragment(), MinervaPrimitiveClickListener {
 
-    val primitivesAdapter = MinervaPrimitiveAdapter(this)
+    lateinit var primitivesAdapter: MinervaPrimitiveAdapter
     abstract fun prepareObservers()
 
     open fun onRemoveCredential(credential: Credential) {}
     open fun onRemoveService(service: Service) {}
+    open fun onCredentialContainerClick(credential: Credential) {}
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.recycler_view_layout, container, false)
@@ -31,6 +32,7 @@ abstract class MinervaPrimitiveListFragment() : Fragment(), MinervaPrimitiveMenu
     }
 
     private fun setupRecycleView() {
+        primitivesAdapter = MinervaPrimitiveAdapter(this)
         recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = primitivesAdapter
@@ -41,6 +43,12 @@ abstract class MinervaPrimitiveListFragment() : Fragment(), MinervaPrimitiveMenu
         when (minervaPrimitive) {
             is Service -> onRemoveService(minervaPrimitive)
             is Credential -> onRemoveCredential(minervaPrimitive)
+        }
+    }
+
+    override fun onContainerClick(minervaPrimitive: MinervaPrimitive) {
+        when (minervaPrimitive) {
+            is Credential -> onCredentialContainerClick(minervaPrimitive)
         }
     }
 }

@@ -65,7 +65,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
                 it.setIconUrl(credential.iconUrl)
                 it.setDateAndName(credential.name, DateUtils.getDateFromTimestamp(credential.lastUsed, DATE_FORMAT))
                 it.popupMenu.setOnClickListener { item -> showMenu(item.popupMenu, credential) }
-                it.setOnItemClickListener { OamtcClubCard(context, credential = credential).show() }
+                it.setOnItemClickListener { OamtcClubCard(context, credential).show() }
                 views.add(it)
                 addView(it)
             }
