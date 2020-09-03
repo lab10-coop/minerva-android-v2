@@ -13,18 +13,26 @@ import android.provider.MediaStore
 import android.view.Window
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlinx.android.synthetic.main.profile_image_menu_layout.*
 import minerva.android.R
+import minerva.android.extension.visibleOrGone
+import minerva.android.kotlinUtils.event.Event
 
 class ProfileImageDialog(private val fragment: Fragment) : Dialog(fragment.requireContext(), R.style.CardDialog) {
 
     var imageUri: Uri? = null
 
+    private val _resetPhotoLiveData = MutableLiveData<Event<Unit>>()
+    val resetPhotoLiveData: LiveData<Event<Unit>> get() = _resetPhotoLiveData
 
     fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>) {
         if (isPermissionGranted(permissions)) preparePhoto(requestCode)
         else onPermissionDenied()
     }
+
+    fun showDeleteOption(showDelete: Boolean) = deletePhoto.visibleOrGone(showDelete)
 
     private fun preparePhoto(request: Int) {
         when (request) {
@@ -58,6 +66,10 @@ class ProfileImageDialog(private val fragment: Fragment) : Dialog(fragment.requi
         }
         choosePhoto.setOnClickListener {
             checkRequestPermissions(TAKE_PHOTO_REQUEST)
+            dismiss()
+        }
+        deletePhoto.setOnClickListener {
+            _resetPhotoLiveData.value = Event(Unit)
             dismiss()
         }
     }

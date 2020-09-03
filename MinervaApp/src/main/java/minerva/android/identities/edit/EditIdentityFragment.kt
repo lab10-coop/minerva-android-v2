@@ -50,7 +50,7 @@ class EditIdentityFragment : Fragment() {
     private lateinit var identity: Identity
     private lateinit var profileImageDialog: ProfileImageDialog
     private val viewModel: EditIdentityViewModel by viewModel()
-    private var wasProfileImageChanged: Boolean = false
+    private var wasCustomPhotoSet: Boolean = false
 
     private var viewGroup: ViewGroup? = null
 
@@ -97,7 +97,7 @@ class EditIdentityFragment : Fragment() {
             Glide.with(requireContext())
                 .load(prepareImageUri(requestCode, data))
                 .apply(RequestOptions.circleCropTransform()).into(profileImage)
-            wasProfileImageChanged = true
+            wasCustomPhotoSet = true
         }
     }
 
@@ -126,8 +126,8 @@ class EditIdentityFragment : Fragment() {
     private fun isNotEmailAndIsNotEmpty(text: String): Boolean = !text.isEmail() && text.isNotEmpty()
 
     private fun initializeView(identity: Identity) {
-        this.identity = identity
-        setIdentityData(identity)
+        this.identity = Identity(identity.index, identity)
+        setIdentityData(this.identity)
         confirmButton.text = if (index == Int.InvalidIndex) getString(R.string.create_new_identity)
         else getString(R.string.update_identity)
     }
@@ -153,12 +153,18 @@ class EditIdentityFragment : Fragment() {
         }
     }
 
+    private fun resetPhoto() {
+        profileImage.setImageDrawable(LetterLogo.createLogo(requireContext(), identityName.text.toString()))
+        wasCustomPhotoSet = false
+        identity.profileImageBitmap = null
+    }
+
     private fun saveIdentity() {
         viewModel.saveIdentity(getUpdatedIdentity(), getActionStatus())
     }
 
     private fun getUpdatedIdentity(): Identity {
-        (if (wasProfileImageChanged) profileImage.drawable.toBitmap() else identity.profileImageBitmap).let {
+        (if (wasCustomPhotoSet) profileImage.drawable.toBitmap() else identity.profileImageBitmap).let {
             return Identity(
                 identity.index,
                 identityName.text.toString(),
@@ -216,7 +222,7 @@ class EditIdentityFragment : Fragment() {
 
         identityName.apply {
             afterTextChanged {
-                if (!wasProfileImageChanged && identity.profileImageBitmap == null) {
+                if (!wasCustomPhotoSet && identity.profileImageBitmap == null) {
                     profileImage.setImageDrawable(LetterLogo.createLogo(context, it))
                 }
             }
@@ -227,6 +233,8 @@ class EditIdentityFragment : Fragment() {
 
         profileImage.setOnClickListener {
             profileImageDialog = ProfileImageDialog(this).apply {
+                resetPhotoLiveData.observe(viewLifecycleOwner, EventObserver { resetPhoto() })
+                showDeleteOption(identity.profileImageBitmap != null)
                 show()
             }
         }
@@ -235,7 +243,7 @@ class EditIdentityFragment : Fragment() {
     private fun checkEditTextInput(layout: TextInputLayout, editText: TextInputEditText, prepareErrorMessage: (String) -> String?) {
         editText.setOnFocusChangeListener { _, hasFocus ->
             layout.error = if (hasFocus) {
-                if(editText.text.toString().isBlank()) editText.setText(String.Empty)
+                if (editText.text.toString().isBlank()) editText.setText(String.Empty)
                 layout.apply {
                     endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
                     endIconDrawable = layout.context.getDrawable(R.drawable.ic_clear)
