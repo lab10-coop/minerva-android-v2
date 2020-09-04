@@ -36,8 +36,10 @@ class ServiceManagerImpl(
     override fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
             .flatMapCompletable {
-                if (identity !is IncognitoIdentity) saveService(service)
-                else Completable.complete()
+                //TODO uncomment this after server side service object type refactor
+                //if (identity !is IncognitoIdentity) saveService(service)
+                //else Completable.complete()
+                Completable.complete()
             }
 
     override fun saveService(service: Service): Completable = walletConfigManager.saveService(service)
