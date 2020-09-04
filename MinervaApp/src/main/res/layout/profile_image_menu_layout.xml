@@ -24,4 +24,14 @@
         android:textColor="@color/black"
         android:padding="@dimen/margin_xsmall"
         android:text="@string/choose_existed_photo" />
+
+    <TextView
+        android:id="@+id/deletePhoto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_small"
+        android:textSize="@dimen/text_normal"
+        android:textColor="@color/black"
+        android:padding="@dimen/margin_xsmall"
+        android:text="@string/delete_photo" />
 </LinearLayout>

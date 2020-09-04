@@ -46,6 +46,7 @@ ext {
     flashVersion = '1.0.3'
     jodaVersion = '2.10.5'
     waitingDotsVersion = '0.6.1'
+    glideToVector = 'v2.0.0'
 
     w3jVersion = '4.6.0-android'
     rxbindingVersion = '3.1.0'
@@ -116,10 +117,10 @@ ext {
     ]
 
     cryptographyDependencies = [
-            khetereum   : "com.github.komputing.kethereum:bip39:$kethereum_version",
+            khetereum        : "com.github.komputing.kethereum:bip39:$kethereum_version",
             khetereumWordList: "com.github.komputing.kethereum:bip39_wordlist_en:$kethereum_version",
-            bip32:     "com.github.komputing.kethereum:bip32:$kethereum_version",
-            kotlinDidJwt: "com.github.uport-project.kotlin-did-jwt:jwt:$didJwtVersion"
+            bip32            : "com.github.komputing.kethereum:bip32:$kethereum_version",
+            kotlinDidJwt     : "com.github.uport-project.kotlin-did-jwt:jwt:$didJwtVersion"
     ]
 
     qrDependency = [
@@ -136,7 +137,8 @@ ext {
             flashbar       : "com.andrognito.flashbar:flashbar:$flashVersion",
             spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion",
             biometric      : "androidx.biometric:biometric:$biometricVersion",
-            waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion"
+            waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion",
+            glidetoVector  : "com.github.corouteam:GlideToVectorYou:$glideToVector"
     ]
 
     blockChainDependencies = [
@@ -157,6 +159,6 @@ ext {
     ]
 
     jsoup = [
-        jsoup : "org.jsoup:jsoup:$jsoupVersion"
+            jsoup: "org.jsoup:jsoup:$jsoupVersion"
     ]
 }

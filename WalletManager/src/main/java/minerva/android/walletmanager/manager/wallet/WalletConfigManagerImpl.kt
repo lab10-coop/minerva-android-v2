@@ -18,7 +18,7 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.ResponseState
-import minerva.android.walletmanager.model.mappers.mapWalletConfigToWalletPayload
+import minerva.android.walletmanager.model.mappers.WalletConfigToWalletPayloadMapper
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
 import timber.log.Timber
@@ -90,7 +90,7 @@ class WalletConfigManagerImpl(
     }
 
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable {
-        mapWalletConfigToWalletPayload(walletConfig).run {
+        WalletConfigToWalletPayloadMapper.map(walletConfig).run {
             return walletConfigRepository.updateWalletConfig(masterSeed, this)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

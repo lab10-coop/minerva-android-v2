@@ -10,8 +10,8 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.WalletActionClustered
-import minerva.android.walletmanager.model.mappers.configs.WalletActionsMapper
-import minerva.android.walletmanager.model.mappers.payloads.WalletActionPayloadMapper
+import minerva.android.walletmanager.model.mappers.WalletActionsMapper
+import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.utils.DateUtils
 import minerva.android.walletmanager.utils.DateUtils.isTheSameDay

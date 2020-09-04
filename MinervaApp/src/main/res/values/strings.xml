@@ -27,6 +27,7 @@
     <string name="check_incorrect_mnemonic_words">Unknown words entered, please check:</string>
     <string name="creating_wallet_error_message">Creating your wallet failed. Please check your connection and/or retry later</string>
     <string name="new_identity">New Identity</string>
+    <string name="identity_label">Identity: %s</string>
     <string name="edit_identity_order">Rearrange Identities</string>
     <string name="edit_account_order">Rearrange Accounts</string>
     <string name="edit_service_order">Rearrange Services</string>
@@ -182,9 +183,11 @@
     <string name="ok">OK</string>
     <string name="future_contacts_info">Here you will be able to save your contacts in the future.</string>
     <string name="invalid_signature_error_message">Unfortunately the signature of this certificate is not correct, therefore it was not imported. Please contact the certificate issuer.</string>
-    <string name="take_photo">Take a photo</string>
-    <string name="choose_existed_photo">Choose existed photo</string>
+    <string name="take_photo">Take new photo</string>
+    <string name="choose_existed_photo">Select from gallery</string>
+    <string name="delete_photo">Delete photo</string>
 
     <string name="permission_error">Permission Error</string>
     <string name="permission_error_message">Can not change profile photo without necessary permissions</string>
+    <string name="clear_text">Clear text</string>
 </resources>

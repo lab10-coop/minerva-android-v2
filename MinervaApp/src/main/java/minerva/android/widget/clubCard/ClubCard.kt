@@ -31,7 +31,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-abstract class ClubCard(context: Context, private val path: String) : Dialog(context, R.style.CardDialog) {
+abstract class ClubCard(context: Context, private val path: String?) : Dialog(context, R.style.CardDialog) {
 
     abstract fun getAsHashMap(): HashMap<String, String>
     private val propertyMap: HashMap<String, String> by lazy {
@@ -41,7 +41,6 @@ abstract class ClubCard(context: Context, private val path: String) : Dialog(con
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prepareWebView()
-
         val disposable = downloadWebPageSource().firstOrError()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

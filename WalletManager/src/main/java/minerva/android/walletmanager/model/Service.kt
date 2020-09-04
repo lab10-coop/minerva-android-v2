@@ -8,4 +8,4 @@ open class Service(
     override var name: String = String.Empty,
     override var lastUsed: Long = Long.InvalidValue,
     val loggedInIdentityPublicKey: String = String.Empty
-) : MinervaPrimitive(name = name, type = type)
+) : MinervaPrimitive(name = name, type = type, lastUsed = lastUsed)

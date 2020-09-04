@@ -14,8 +14,8 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.Markets
-import minerva.android.walletmanager.model.mappers.mapTransactionCostPayloadToTransactionCost
-import minerva.android.walletmanager.model.mappers.mapTransactionToTransactionPayload
+import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTransactionCost
+import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import java.math.BigDecimal
@@ -42,7 +42,7 @@ class TransactionRepositoryImpl(
     }
 
     override fun transferNativeCoin(network: String, transaction: Transaction): Single<String> =
-        blockchainRepository.transferNativeCoin(network, mapTransactionToTransactionPayload(transaction))
+        blockchainRepository.transferNativeCoin(network, TransactionToTransactionPayloadMapper.map(transaction))
             .doOnSuccess {
                 blockchainRepository.reverseResolveENS(transaction.receiverKey)
                     .onErrorReturn { String.Empty }
@@ -50,7 +50,7 @@ class TransactionRepositoryImpl(
             }
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
-        blockchainRepository.transferERC20Token(network, mapTransactionToTransactionPayload(transaction))
+        blockchainRepository.transferERC20Token(network, TransactionToTransactionPayloadMapper.map(transaction))
             .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
@@ -63,7 +63,7 @@ class TransactionRepositoryImpl(
 
     override fun getTransferCosts(network: String, assetIndex: Int): TransactionCost {
         val operation = if (assetIndex == Int.InvalidIndex) Operation.TRANSFER_NATIVE else Operation.TRANSFER_ERC20
-        return mapTransactionCostPayloadToTransactionCost(blockchainRepository.getTransactionCosts(network, assetIndex, operation))
+        return TransactionCostPayloadToTransactionCost.map(blockchainRepository.getTransactionCosts(network, assetIndex, operation))
     }
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =

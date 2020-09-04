@@ -37,4 +37,5 @@
     <dimen name="card_height">242dp</dimen>
     <dimen name="card_width">384dp</dimen>
     <dimen name="tab_height">30dp</dimen>
+    <dimen name="elevation_small">2dp</dimen>
 </resources>
