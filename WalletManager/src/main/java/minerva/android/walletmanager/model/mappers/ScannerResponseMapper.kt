@@ -36,8 +36,8 @@ fun mapHashMapToQrCodeResponse(map: Map<String, Any?>): QrCode {
             VerifiableCredentialType.AUTOMOTIVE_CLUB ->
                 CredentialQrCode(
                     name = getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[CREDENTIAL_NAME] as String,
-                    cardUrl = GATEWAY + (getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[CARD_URL] as Map<*, *>)[URL],
-                    iconUrl = GATEWAY + (getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[ICON_URL] as Map<*, *>)[URL],
+                    cardUrl = getImageUrl(map, CARD_URL),
+                    iconUrl = getImageUrl(map, ICON_URL),
                     issuer = map[ISS] as String,
                     type = VerifiableCredentialType.AUTOMOTIVE_CLUB,
                     memberName = getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[NAME] as String,
@@ -61,6 +61,12 @@ fun mapHashMapToQrCodeResponse(map: Map<String, Any?>): QrCode {
         )
     }
 }
+
+private fun getImageUrl(map: Map<String, Any?>, key: String): String =
+    ((getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[key] as Map<*, *>)[URL] as String).apply {
+        return if (isNullOrEmpty()) this
+        else GATEWAY + this
+    }
 
 private fun getIdentityRequestedFields(requestedData: ArrayList<String>): String {
     val identityFields = StringBuilder()
