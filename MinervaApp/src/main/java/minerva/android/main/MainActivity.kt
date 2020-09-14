@@ -113,9 +113,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
                     isEnabled = !shouldDisableAddButton
                 }
                 findItem(R.id.editServiceOrder)?.isVisible = isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
-                findItem(R.id.editCredentialsOrder)?.isVisible =
-                    getCurrentChildFragment() is CredentialsFragment && isOrderEditAvailable(WalletActionType.CREDENTIAL)
-                findItem(R.id.qrCodeScanner)?.isVisible = isServicesTabSelected() || getCurrentChildFragment() is CredentialsFragment
+                findItem(R.id.editCredentialsOrder)?.isVisible = isIdentitiesTabSelected() &&
+                        getCurrentChildFragment() is CredentialsFragment && isOrderEditAvailable(WalletActionType.CREDENTIAL)
+                findItem(R.id.qrCodeScanner)?.isVisible = isServicesTabSelected() ||
+                        (isIdentitiesTabSelected() && getCurrentChildFragment() is CredentialsFragment)
             }
         }
         return super.onPrepareOptionsMenu(menu)
