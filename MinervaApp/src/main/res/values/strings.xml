@@ -53,7 +53,7 @@
     <string name="empty_identity_name">Identity name is empty</string>
     <string name="backup">Backup</string>
     <string name="account_backup">Account Backup</string>
-    <string name="i_will_safety_remember">I will safety remember</string>
+    <string name="i_will_safety_remember">I stored them safely</string>
     <string name="copy">Copy</string>
     <string name="share">Share</string>
     <string name="backup_instruction">A bip39 seed phrase is an alternative way to backup or remember your private key:</string>
