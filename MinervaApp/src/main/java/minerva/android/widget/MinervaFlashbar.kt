@@ -75,7 +75,7 @@ private fun getDefaultFlashBar(activity: Activity, title: String, message: Strin
                 .animateBar()
                 .duration(ENTER_ANIM_DURATION)
                 .alpha()
-                .overshoot()
+                .accelerateDecelerate()
         )
         .exitAnimation(
             FlashAnim.with(activity)
@@ -85,7 +85,7 @@ private fun getDefaultFlashBar(activity: Activity, title: String, message: Strin
         )
         .backgroundColorRes(R.color.white)
 
-const val FLASHBAR_DURATION = 10000L
+const val FLASHBAR_DURATION = 30000L
 const val ENTER_ANIM_DURATION = 750L
 const val EXIT_ANIM_DURATION = 400L
 const val FONT_SIZE = 12F

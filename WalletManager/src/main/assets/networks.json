@@ -1,104 +1,113 @@
 [
-   {
-      "full":"ARTIS (Tau1)",
-      "short":"tats1",
-      "token":"tATS",
-      "isSafeAccountAvailable":"true",
-      "url":"https://rpc.tau1.artis.network",
-      "gasPrice":"100000000000",
-      "assets":[
-         {
-            "name": "FaucetToken",
-            "shortName": "SFAU",
-            "address": "0xf6ef10e21166cf2e33db070affe262f90365e8d4"
-         }
-      ],
-      "color": "#FFF97599"
-   },
-   {
-      "full":"Ethereum (Ropsten)",
-      "short":"rop",
-      "token":"tETH",
-      "isSafeAccountAvailable":"false",
-      "url":"",
-      "gasPrice":"0",
-      "assets":[],
-      "color": "#C0C0C0"
-   },
-   {
-      "full":"RSK (Testnet)",
-      "short":"trsk",
-      "token":"tRIF",
-      "isSafeAccountAvailable":"false",
-      "url":"",
-      "gasPrice":"0",
-      "assets":[],
-      "color": "#C0C0C0"
-   },
-   {
-      "full":"Ethereum (Rinkeby)",
-      "short":"rin",
-      "token":"tETH",
-      "isSafeAccountAvailable":"false",
-      "url":"https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
-      "gasPrice":"20000000000",
-      "assets":[
-         {
-            "name": "FaucetToken",
-            "shortName": "FAU",
-            "address": "0xFab46E002BbF0b4509813474841E0716E6730136"
-         }
-      ],
-      "color": "#FF486FFF"
-   },
-   {
-      "full":"Ethereum (Kovan)",
-      "short":"kov",
-      "token":"kETH",
-      "isSafeAccountAvailable":"false",
-      "url":"",
-      "gasPrice":"0",
-      "assets":[],
-      "color": "#C0C0C0"
-   },
-   {
-      "full":"Ethereum (Görli)",
-      "short":"gor",
-      "token":"gETH",
-      "isSafeAccountAvailable":"false",
-      "url":"",
-      "gasPrice":"0",
-      "assets":[],
-      "color": "#C0C0C0"
-   },
-   {
-      "full":"Ethereum Classic (Kotti)",
-      "short":"kot",
-      "token":"tETC",
-      "isSafeAccountAvailable":"false",
-      "url":"",
-      "gasPrice":"0",
-      "assets":[],
-      "color": "#C0C0C0"
-   },
-   {
-      "full":"POA Network (Sokol)",
-      "short":"skl",
-      "token":"tPOA",
-      "isSafeAccountAvailable":"false",
-      "url":"https://sokol.poa.network",
-      "gasPrice":"1000000000",
-      "assets":[],
-      "color": "#FF45A196"
-   },
-   {
-      "full":"LUKSO (L14 Testnet)",
-      "short":"l14",
-      "token":"tLYX",
-      "isSafeAccountAvailable":"false",
-      "url":"",
-      "gasPrice":"0",
-      "assets":[],
-      "color": "#C0C0C0"
-   }
+  {
+    "full": "ARTIS (Tau1)",
+    "short": "tats1",
+    "token": "tATS",
+    "isSafeAccountAvailable": "true",
+    "https": "https://rpc.tau1.artis.network",
+    "wss": "wss://ws.tau1.artis.network/",
+    "gasPrice": "100000000000",
+    "assets": [
+      {
+        "name": "FaucetToken",
+        "shortName": "SFAU",
+        "address": "0xf6ef10e21166cf2e33db070affe262f90365e8d4"
+      }
+    ],
+    "color": "#FFF97599"
+  },
+  {
+    "full": "Ethereum (Ropsten)",
+    "short": "rop",
+    "token": "tETH",
+    "isSafeAccountAvailable": "false",
+    "https": "",
+    "wss": "",
+    "gasPrice": "0",
+    "assets": [],
+    "color": "#C0C0C0"
+  },
+  {
+    "full": "RSK (Testnet)",
+    "short": "trsk",
+    "token": "tRIF",
+    "isSafeAccountAvailable": "false",
+    "https": "",
+    "wss": "",
+    "gasPrice": "0",
+    "assets": [],
+    "color": "#C0C0C0"
+  },
+  {
+    "full": "Ethereum (Rinkeby)",
+    "short": "rin",
+    "token": "tETH",
+    "isSafeAccountAvailable": "false",
+    "https": "https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
+    "wss": "wss://rinkeby.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
+    "gasPrice": "20000000000",
+    "assets": [
+      {
+        "name": "FaucetToken",
+        "shortName": "FAU",
+        "address": "0xFab46E002BbF0b4509813474841E0716E6730136"
+      }
+    ],
+    "color": "#FF486FFF"
+  },
+  {
+    "full": "Ethereum (Kovan)",
+    "short": "kov",
+    "token": "kETH",
+    "isSafeAccountAvailable": "false",
+    "https": "",
+    "wss": "",
+    "gasPrice": "0",
+    "assets": [],
+    "color": "#C0C0C0"
+  },
+  {
+    "full": "Ethereum (Görli)",
+    "short": "gor",
+    "token": "gETH",
+    "isSafeAccountAvailable": "false",
+    "https": "",
+    "wss": "",
+    "gasPrice": "0",
+    "assets": [],
+    "color": "#C0C0C0"
+  },
+  {
+    "full": "Ethereum Classic (Kotti)",
+    "short": "kot",
+    "token": "tETC",
+    "isSafeAccountAvailable": "false",
+    "https": "",
+    "wss": "",
+    "gasPrice": "0",
+    "assets": [],
+    "color": "#C0C0C0"
+  },
+  {
+    "full": "POA Network (Sokol)",
+    "short": "skl",
+    "token": "tPOA",
+    "isSafeAccountAvailable": "false",
+    "https": "https://sokol.poa.network",
+    "wss": "ws://sokol.poa.network:8546",
+    "gasPrice": "1000000000",
+    "assets": [],
+    "color": "#FF5C34A2"
+  },
+  {
+    "full": "LUKSO (L14 Testnet)",
+    "short": "l14",
+    "token": "tLYX",
+    "isSafeAccountAvailable": "false",
+    "https": "",
+    "wss": "",
+    "gasPrice": "0",
+    "assets": [],
+    "color": "#C0C0C0"
+  }
 ]

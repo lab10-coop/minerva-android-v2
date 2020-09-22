@@ -178,31 +178,31 @@ class EditIdentityFragment : Fragment() {
     //TODO change for dynamic label generation
     private fun prepareFormData(): LinkedHashMap<String, String> {
         val map = mutableMapOf<String, String>()
-        accountName.text.toString().apply {
+        accountName.text.toString().trim().apply {
             if (isNotEmpty()) map[NAME] = this
         }
-        email.text.toString().apply {
+        email.text.toString().trim().apply {
             if (isNotEmpty()) map[EMAIL] = this
         }
-        phoneNumber.text.toString().apply {
+        phoneNumber.text.toString().trim().apply {
             if (isNotEmpty()) map[PHONE_NUMBER] = this
         }
-        birthDate.text.toString().apply {
+        birthDate.text.toString().trim().apply {
             if (isNotEmpty()) map[BIRTH_DATE] = this
         }
-        addressLine1.text.toString().apply {
+        addressLine1.text.toString().trim().apply {
             if (isNotEmpty()) map[ADDRESS_1] = this
         }
-        addressLine2.text.toString().apply {
+        addressLine2.text.toString().trim().apply {
             if (isNotEmpty()) map[ADDRESS_2] = this
         }
-        city.text.toString().apply {
+        city.text.toString().trim().apply {
             if (isNotEmpty()) map[CITY] = this
         }
-        postcode.text.toString().apply {
+        postcode.text.toString().trim().apply {
             if (isNotEmpty()) map[POSTCODE] = this
         }
-        country.text.toString().apply {
+        country.text.toString().trim().apply {
             if (isNotEmpty()) map[COUNTRY] = this
         }
         return map as LinkedHashMap<String, String>

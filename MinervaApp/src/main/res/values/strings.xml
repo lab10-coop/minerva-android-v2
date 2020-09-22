@@ -53,7 +53,7 @@
     <string name="empty_identity_name">Identity name is empty</string>
     <string name="backup">Backup</string>
     <string name="account_backup">Account Backup</string>
-    <string name="i_will_safety_remember">I will safety remember</string>
+    <string name="i_will_safety_remember">I stored them safely</string>
     <string name="copy">Copy</string>
     <string name="share">Share</string>
     <string name="backup_instruction">A bip39 seed phrase is an alternative way to backup or remember your private key:</string>
@@ -94,9 +94,10 @@
     <string name="networks">Networks</string>
     <string name="creating_account_error">Creating new account failed</string>
     <string name="transaction_success_title">Transaction Successful</string>
-    <string name="transaction_success_message">You successfully transferred %s</string>
+    <string name="transaction_success_message">You successfully transferred  %1$s %2$s</string>
     <string name="transaction_error_title">Error: Transaction failed</string>
     <string name="transaction_error_message"><b>Error cause:</b> %s</string>
+    <string name="transaction_error_details_message">Transfer of %1$s %2$s failed.</string>
     <string name="receiver">Receiver</string>
     <string name="gas_price_gwei">Gas Price (Gwei)</string>
     <string name="gas_limit">Gas Limit</string>
@@ -167,7 +168,7 @@
     <string name="connected_services">Connected services</string>
     <string name="success">Success</string>
     <string name="error_importing_credential">Error importing credential</string>
-    <string name="attached_credential_success">Your credential was successfully attached\nto your identity %s</string>
+    <string name="attached_credential_success">Your credential was successfully attached to your identity %s</string>
     <string name="attached_credential_failure">The imported credential could not be attached to any of your identities</string>
     <string name="remove_credential_dialog_title">Remove Credential?</string>
     <string name="remove_credential_dialog_message">You will have to get a new credential from the issuer.</string>
@@ -190,4 +191,5 @@
     <string name="permission_error">Permission Error</string>
     <string name="permission_error_message">Can not change profile photo without necessary permissions</string>
     <string name="clear_text">Clear text</string>
+    <string name="pending_account_error_message">Something went wrong, please check your balances.</string>
 </resources>

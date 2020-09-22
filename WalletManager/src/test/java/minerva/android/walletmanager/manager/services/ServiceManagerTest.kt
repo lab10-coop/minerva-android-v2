@@ -150,7 +150,7 @@ class ServiceManagerTest : RxTest() {
     @Test
     fun `get logged in identity test`() {
         val expected = Identity(0, name = "tom", publicKey = "publicKey")
-        whenever(walletConfigManager.getLoggedInIdentityByPyblicKey(any())) doReturn expected
+        whenever(walletConfigManager.getLoggedInIdentityByPublicKey(any())) doReturn expected
         repository.run {
             val result = getLoggedInIdentity("publicKey")
             assertEquals(result, expected)
@@ -238,6 +238,29 @@ class ServiceManagerTest : RxTest() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.error(error)
         repository.removeService(ServiceType.CHARGING_STATION)
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `update credential success test`() {
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        repository.updateBindedCredential(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it == "identityName1"
+            }
+    }
+
+    @Test
+    fun `update credential success error`() {
+        val error = Throwable()
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        repository.updateBindedCredential(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertError(error)
     }

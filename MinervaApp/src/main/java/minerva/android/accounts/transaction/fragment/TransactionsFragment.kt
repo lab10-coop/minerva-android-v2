@@ -70,6 +70,7 @@ class TransactionsFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
+            transactionCompletedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onTransactionAccepted() })
             sendTransactionLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionStatus(it) })
             transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { setTransactionsCosts(it) })
             errorLiveData.observe(viewLifecycleOwner, Observer { showErrorFlashBar() })

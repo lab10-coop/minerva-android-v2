@@ -13,7 +13,6 @@ interface IdentityManager : Manager {
     fun saveIdentity(identity: Identity): Completable
     fun removeIdentity(identity: Identity): Completable
     fun bindCredentialToIdentity(qrCode: CredentialQrCode): Single<String>
-    fun updateBindedCredential(qrCode: CredentialQrCode): Single<String>
     fun removeBindedCredentialFromIdentity(credential: Credential): Completable
     fun isCredentialLoggedIn(qrCode: CredentialQrCode): Boolean
 }

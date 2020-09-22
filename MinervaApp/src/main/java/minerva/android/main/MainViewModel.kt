@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
@@ -14,7 +15,6 @@ import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
-import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.*
@@ -23,6 +23,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -31,7 +32,7 @@ class MainViewModel(
     private val serviceManager: ServiceManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val orderManager: OrderManager,
-    private val identityManager: IdentityManager
+    private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
 
     lateinit var loginPayload: LoginPayload
@@ -55,11 +56,82 @@ class MainViewModel(
     private val _updateCredentialErrorLiveData = MutableLiveData<Event<Throwable>>()
     val updateCredentialErrorLiveData: LiveData<Event<Throwable>> get() = _updateCredentialErrorLiveData
 
+    private val _updatePendingAccountLiveData = MutableLiveData<Event<PendingAccount>>()
+    val updatePendingAccountLiveData: LiveData<Event<PendingAccount>> get() = _updatePendingAccountLiveData
+
+    private val _updatePendingTransactionErrorLiveData = MutableLiveData<Event<Throwable>>()
+    val updatePendingTransactionErrorLiveData: LiveData<Event<Throwable>> get() = _updatePendingTransactionErrorLiveData
+
+    private val _handleTimeoutOnPendingTransactionsLiveData = MutableLiveData<Event<List<PendingAccount>>>()
+    val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
+
+    val executedAccounts = mutableListOf<PendingAccount>()
+    private var webSocketSubscription = CompositeDisposable()
+
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
-
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
-
     fun dispose() = masterSeedRepository.dispose()
+
+    private fun shouldOpenNewConnection(accountIndex: Int) = transactionRepository.getPendingAccounts().size == ONE_PENDING_ACCOUNT ||
+            transactionRepository.getPendingAccounts().size > ONE_PENDING_ACCOUNT && !isSubscribeToTheNetwork(accountIndex)
+
+    private fun isSubscribeToTheNetwork(accountIndex: Int): Boolean {
+        val network = transactionRepository.getPendingAccount(accountIndex)?.network
+        transactionRepository.getPendingAccounts().forEach {
+            return it.network == network
+        }
+        return false
+    }
+
+    fun subscribeToExecutedTransactions(accountIndex: Int) {
+        if (shouldOpenNewConnection(accountIndex)) {
+            webSocketSubscription.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)
+                .subscribeOn(Schedulers.io())
+                .doOnComplete { restorePendingTransactions() }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = { handleExecutedAccounts(it) },
+                    onError = {
+                        Timber.e("WebSocket subscription error: $it")
+                        _updatePendingTransactionErrorLiveData.value = Event(it)
+                    }
+                )
+            )
+        }
+    }
+
+
+    private fun handleExecutedAccounts(it: PendingAccount) {
+        if (_updatePendingAccountLiveData.hasActiveObservers()) {
+            transactionRepository.removePendingAccount(it)
+            _updatePendingAccountLiveData.value = Event(it)
+        } else executedAccounts.add(it)
+    }
+
+    fun clearWebSocketSubscription() {
+        if (transactionRepository.getPendingAccounts().isEmpty())
+            webSocketSubscription.clear()
+    }
+
+    fun restorePendingTransactions() {
+        launchDisposable {
+            transactionRepository.getTransactions()
+                .doOnSuccess { clearPendingAccounts() }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { _handleTimeoutOnPendingTransactionsLiveData.value = Event(it) },
+                    onError = {
+                        Timber.e("Pending transactions timeout error: $it")
+                        _updatePendingTransactionErrorLiveData.value = Event(it)
+                    }
+                )
+        }
+    }
+
+    fun clearPendingAccounts() {
+        transactionRepository.clearPendingAccounts()
+    }
 
     fun loginFromNotification(jwtToken: String?) {
         jwtToken?.let {
@@ -82,7 +154,8 @@ class MainViewModel(
 
     private fun handleQrCodeResponse(response: QrCode) {
         (response as? ServiceQrCode)?.apply {
-            loginPayload = LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.issuer), response)
+            loginPayload =
+                LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.issuer), response)
             painlessLogin()
         }
     }
@@ -126,7 +199,7 @@ class MainViewModel(
 
     fun updateBindedCredential() {
         launchDisposable {
-            identityManager.updateBindedCredential(qrCode)
+            serviceManager.updateBindedCredential(qrCode)
                 .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED)) } }
                 .doOnSuccess { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, UPDATED)) }
                 .observeOn(AndroidSchedulers.mainThread())
@@ -160,4 +233,13 @@ class MainViewModel(
             lastUsed,
             hashMapOf(WalletActionFields.CREDENTIAL_NAME to name)
         )
+
+    fun clearAndUnsubscribe() {
+        clearPendingAccounts()
+        clearWebSocketSubscription()
+    }
+
+    companion object {
+        const val ONE_PENDING_ACCOUNT = 1
+    }
 }

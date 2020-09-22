@@ -4,16 +4,21 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.exchangemarketsprovider.api.BinanceApi
 import com.exchangemarketsprovider.model.Market
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
+import minerva.android.blockchainprovider.model.ExecutedTransaction
+import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
-import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
+import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProvider
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -33,10 +38,12 @@ import kotlin.test.assertEquals
 class TransactionRepositoryTest {
 
     private val walletConfigManager: WalletConfigManager = mock()
-    private val blockchainRepository: BlockchainRepository = mock()
+    private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
     private val binanaceApi: BinanceApi = mock()
     private val localStorage: LocalStorage = mock()
-    private val repository = TransactionRepositoryImpl(blockchainRepository, walletConfigManager, binanaceApi, localStorage)
+    private val webSocketServiceProvider: WebSocketServiceProvider = mock()
+    private val repository =
+        TransactionRepositoryImpl(blockchainRegularAccountRepository, walletConfigManager, binanaceApi, localStorage, webSocketServiceProvider)
 
     @get:Rule
     val rule
@@ -46,7 +53,7 @@ class TransactionRepositoryTest {
     fun setupRxSchedulers() {
         RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
-        whenever(walletConfigManager.getWalletConfig()) doReturn  DataProvider.walletConfig
+        whenever(walletConfigManager.getWalletConfig()) doReturn DataProvider.walletConfig
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 
@@ -58,7 +65,7 @@ class TransactionRepositoryTest {
 
     @Test
     fun `refresh balances test success`() {
-        whenever(blockchainRepository.refreshBalances(any())).thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
+        whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
         whenever(binanaceApi.fetchExchangeRate(any())).thenReturn(Single.just(Market("ETHEUR", "12.21")))
         repository.refreshBalances().test()
             .assertComplete()
@@ -70,7 +77,7 @@ class TransactionRepositoryTest {
     @Test
     fun `refresh balances test error`() {
         val error = Throwable()
-        whenever(blockchainRepository.refreshBalances(any())).thenReturn(Single.error(error))
+        whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(Single.error(error))
         whenever(binanaceApi.fetchExchangeRate(any())).thenReturn(Single.error(error))
         repository.refreshBalances().test()
             .assertError(error)
@@ -78,18 +85,30 @@ class TransactionRepositoryTest {
 
     @Test
     fun `send transaction success with resolved ENS test`() {
-        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
-        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
-        repository.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+        whenever(
+            blockchainRegularAccountRepository.transferNativeCoin(
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash")))
+        whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
+        repository.transferNativeCoin("", 1, Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
             .test()
             .assertComplete()
     }
 
     @Test
     fun `send transaction success with not resolved ENS test`() {
-        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
-        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable("No ENS")))
-        repository.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+        whenever(
+            blockchainRegularAccountRepository.transferNativeCoin(
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash")))
+        whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable("No ENS")))
+        repository.transferNativeCoin("", 1, Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
             .test()
             .assertComplete()
     }
@@ -97,26 +116,26 @@ class TransactionRepositoryTest {
     @Test
     fun `send transaction error test`() {
         val error = Throwable()
-        whenever(blockchainRepository.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
-        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
-        repository.transferNativeCoin("", Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+        whenever(blockchainRegularAccountRepository.transferNativeCoin(any(), any(), any())).thenReturn(Single.error(error))
+        whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
+        repository.transferNativeCoin("", 1, Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
             .test()
             .assertError(error)
     }
 
     @Test
     fun `calculate transaction cost success`() {
-        whenever(blockchainRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.ONE)
+        whenever(blockchainRegularAccountRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.ONE)
         val result = repository.calculateTransactionCost(BigDecimal.ONE, BigInteger.ONE)
         result shouldBeEqualTo BigDecimal.ONE
     }
 
     @Test
     fun `get assets balances complete test`() {
-        whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any())).thenReturn(
+        whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())).thenReturn(
             Observable.just(Pair("privateKey1", BigDecimal.TEN))
         )
-        NetworkManager.initialize(listOf(Network(short = "tats1", url = "some"), Network(short = "rin", url = "some1")))
+        NetworkManager.initialize(listOf(Network(short = "tats1", https = "some"), Network(short = "rin", https = "some1")))
         repository.apply {
             refreshAssetBalance()
                 .test()
@@ -128,7 +147,7 @@ class TransactionRepositoryTest {
     fun `get asset balances when values are empty and there are no assets needed test`() {
         val error = Throwable()
         whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(0, accounts = emptyList())
-        whenever(blockchainRepository.refreshAssetBalance(any(), any(), any(), any())) doReturn Observable.error(error)
+        whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())) doReturn Observable.error(error)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed())
         repository.apply {
             refreshAssetBalance()
@@ -142,8 +161,8 @@ class TransactionRepositoryTest {
 
     @Test
     fun `make ERC20 transfer with ENS resolved success test`() {
-        whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
-        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
+        whenever(blockchainRegularAccountRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
         repository.transferERC20Token("", Transaction())
             .test()
             .assertComplete()
@@ -151,22 +170,22 @@ class TransactionRepositoryTest {
 
     @Test
     fun `make ERC20 transfer with not ENS resolved success test`() {
-        whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
-        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
+        whenever(blockchainRegularAccountRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
         repository.transferERC20Token("", Transaction()).test().assertComplete()
     }
 
     @Test
     fun `make ERC20 transfer error test`() {
         val error = Throwable()
-        whenever(blockchainRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
-        whenever(blockchainRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
+        whenever(blockchainRegularAccountRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
+        whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
         repository.transferERC20Token("", Transaction()).test().assertError(error)
     }
 
     @Test
     fun `resolve ens test`() {
-        whenever(blockchainRepository.resolveENS(any())) doReturn Single.just("tom")
+        whenever(blockchainRegularAccountRepository.resolveENS(any())) doReturn Single.just("tom")
         repository.resolveENS("tom.eth")
             .test()
             .assertComplete()
@@ -179,7 +198,7 @@ class TransactionRepositoryTest {
     @Test
     fun `resolve ens error test`() {
         val error = Throwable()
-        whenever(blockchainRepository.resolveENS(any())) doReturn Single.error(error)
+        whenever(blockchainRegularAccountRepository.resolveENS(any())) doReturn Single.error(error)
         repository.resolveENS("tom.eth")
             .test()
             .assertError(error)
@@ -187,14 +206,14 @@ class TransactionRepositoryTest {
 
     @Test
     fun `load recipients test`() {
-        whenever(localStorage.loadRecipients()) doReturn listOf(Recipient(ensName = "tom"))
+        whenever(localStorage.getRecipients()) doReturn listOf(Recipient(ensName = "tom"))
         val result = repository.loadRecipients()
         assertEquals(result, listOf(Recipient(ensName = "tom")))
     }
 
     @Test
     fun `get transfer costs test`() {
-        whenever(blockchainRepository.getTransactionCosts(any(), any(), any())) doReturn TransactionCostPayload(
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any())) doReturn TransactionCostPayload(
             BigDecimal.ONE,
             BigInteger.ONE,
             BigDecimal.ONE
@@ -204,9 +223,57 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    fun `get value test`(){
-        whenever(walletConfigManager.getAccount(any(), any())) doReturn Account(index = 2)
-        val result = repository.getAccount(2, 2)
+    fun `get value test`() {
+        whenever(walletConfigManager.getAccount(any())) doReturn Account(index = 2)
+        val result = repository.getAccount(2)
         assertEquals(result?.index, 2)
+    }
+
+    @Test
+    fun `get transactions success test`() {
+        whenever(blockchainRegularAccountRepository.getTransactions(any())).thenReturn(Single.just(listOf(Pair("123", "hash"))))
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, txHash = "123")))
+        repository.getTransactions()
+            .test()
+            .assertNoErrors()
+            .assertValue {
+                it[0].blockHash == "hash"
+            }
+    }
+
+    @Test
+    fun `get transactions error test`() {
+        val error = Throwable()
+        whenever(blockchainRegularAccountRepository.getTransactions(any())).thenReturn(Single.error(error))
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, txHash = "123")))
+        repository.getTransactions()
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `subscribe to pending transactions success test`() {
+        val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
+        doNothing().whenever(webSocketServiceProvider).openConnection(any())
+        whenever(webSocketServiceProvider.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(ExecutedTransaction("hash", "sender")))
+        repository.subscribeToExecutedTransactions(1)
+            .test()
+            .assertNoErrors()
+            .assertValue {
+                it.txHash == "hash"
+            }
+    }
+
+    @Test
+    fun `subscribe to pending transactions error test`() {
+        val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
+        val error = Throwable()
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
+        doNothing().whenever(webSocketServiceProvider).openConnection(any())
+        whenever(webSocketServiceProvider.subscribeToExecutedTransactions(any())).thenReturn(Flowable.error(error))
+        repository.subscribeToExecutedTransactions(1)
+            .test()
+            .assertError(error)
     }
 }

@@ -254,7 +254,7 @@ class MapperTest : WalletConfigTestValues() {
         val response = TransactionMapper.map(input)
         response.contractAddress shouldBeEqualTo input.contractAddress
         response.privateKey shouldBeEqualTo input.privateKey
-        response.receiverKey shouldBeEqualTo input.receiverKey
+        response.receiverAddress shouldBeEqualTo input.receiverKey
     }
 
     @Test
@@ -263,7 +263,7 @@ class MapperTest : WalletConfigTestValues() {
         val response = TransactionToTransactionPayloadMapper.map(input)
         response.contractAddress shouldBeEqualTo input.contractAddress
         response.privateKey shouldBeEqualTo input.privateKey
-        response.receiverKey shouldBeEqualTo input.receiverKey
+        response.receiverAddress shouldBeEqualTo input.receiverKey
     }
 
     @Test

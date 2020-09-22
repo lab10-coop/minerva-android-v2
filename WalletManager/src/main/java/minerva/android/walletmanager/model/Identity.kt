@@ -42,6 +42,9 @@ open class Identity(
     val profileImageName: String
         get() = address
 
+    val identityTitle: String
+        get() = personalData[IdentityField.NAME] ?: name
+
     override fun equals(other: Any?): Boolean = (other is Identity)
             && index == other.index
             && name == other.name

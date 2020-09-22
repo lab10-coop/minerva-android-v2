@@ -11,13 +11,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.refreshable_recycler_view_layout.*
 import minerva.android.R
+import minerva.android.accounts.adapter.AccountAdapter
+import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.listener.FragmentInteractorListener
-import minerva.android.accounts.adapter.AccountAdapter
-import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -25,7 +25,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
 
     private val viewModel: AccountsViewModel by viewModel()
-    private val accountAdapter = AccountAdapter(this)
+    private val accountAdapter by lazy { AccountAdapter(this) }
     private lateinit var listener: FragmentInteractorListener
 
     override fun onCreateView(
@@ -46,6 +46,18 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
             refreshBalances()
             refreshAssetBalance()
         }
+
+        if (viewModel.arePendingAccountsEmpty()) {
+            accountAdapter.stopPendingTransactions()
+        }
+    }
+
+    fun refreshBalances() {
+        viewModel.refreshBalances()
+    }
+
+    fun stopPendingTransactions() {
+        accountAdapter.stopPendingTransactions()
     }
 
     override fun onAttach(context: Context) {

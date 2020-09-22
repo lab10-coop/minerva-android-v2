@@ -3,7 +3,7 @@ package minerva.android.widget.clubCard
 import android.content.Context
 import com.google.gson.annotations.SerializedName
 import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.kotlinUtils.DateUtils
 import kotlin.reflect.full.declaredMemberProperties
 
 class OamtcClubCard(context: Context, private val credential: Credential) : ClubCard(context, credential.cardUrl) {
