@@ -23,7 +23,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SEN
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -58,8 +58,11 @@ class TransactionsViewModel(
     private val _sendTransactionLiveData = MutableLiveData<Event<Pair<String, Int>>>()
     val sendTransactionLiveData: LiveData<Event<Pair<String, Int>>> get() = _sendTransactionLiveData
 
+    private val _transactionCompletedLiveData = MutableLiveData<Event<Any>>()
+    val transactionCompletedLiveData: LiveData<Event<Any>> get() = _transactionCompletedLiveData
+
     fun getAccount(accountIndex: Int, assetIndex: Int) {
-        transactionRepository.getAccount(accountIndex, assetIndex)?.let {
+        transactionRepository.getAccount(accountIndex)?.let {
             account = it
             this.assetIndex = assetIndex
         }
@@ -117,13 +120,14 @@ class TransactionsViewModel(
     private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             val ownerPrivateKey = account.masterOwnerAddress.let { smartContractRepository.getSafeAccountMasterOwnerPrivateKey(it) }
-            transactionRepository.resolveENS(receiverKey).flatMap { resolvedENS ->
-                getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
-                    .flatMap {
-                        transaction = it
-                        smartContractRepository.transferNativeCoin(network, it).toSingleDefault(it)
-                    }
-            }
+            transactionRepository.resolveENS(receiverKey)
+                .flatMap { resolvedENS ->
+                    getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
+                        .flatMap {
+                            transaction = it
+                            smartContractRepository.transferNativeCoin(network, it).toSingleDefault(it)
+                        }
+                }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
@@ -166,19 +170,16 @@ class TransactionsViewModel(
             resolveENS(receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it
-                    transactionRepository.transferNativeCoin(network, it)
+                    transactionRepository.transferNativeCoin(network, account.index, it).toSingleDefault(it)
                 }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
-                .flatMap { saveWalletAction(SENT, transaction).toSingleDefault(it) }
+                .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onSuccess = {
-                        transactionRepository.currentTransactionHash(it)
-                        _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
-                    },
+                    onComplete = { _transactionCompletedLiveData.value = Event(Any()) },
                     onError = {
                         Timber.e("Send transaction error: ${it.message}")
                         _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))

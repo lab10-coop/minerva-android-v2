@@ -61,7 +61,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         else setLogo(getDrawable(getNetworkIcon(NetworkManager.getNetwork(viewModel.account.network))))
     }
 
-    override fun onTransactionAccepted(message: String) {
+    override fun onTransactionAccepted(message: String?) {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(ACCOUNT_INDEX, viewModel.account.index)
             putExtra(IS_TRANSACTION_SUCCESS, true)

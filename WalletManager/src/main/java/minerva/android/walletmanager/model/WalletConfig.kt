@@ -12,9 +12,6 @@ data class WalletConfig(
     val newIndex: Int
         get() = identities.size + accounts.size
 
-    val newCredentialIndex: Int
-        get() = credentials.size + 1
-
     val updateVersion: Int
         get() = version + 1
 

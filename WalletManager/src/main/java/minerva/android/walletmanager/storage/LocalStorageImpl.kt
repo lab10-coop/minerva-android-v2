@@ -5,7 +5,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.NO_DATA
+import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.Recipient
+import timber.log.Timber
 
 
 class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : LocalStorage {
@@ -16,7 +18,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
 
     override fun isMnemonicRemembered(): Boolean = sharedPreferences.getBoolean(IS_MNEMONIC_REMEMBERED, false)
 
-    override fun loadRecipients(): List<Recipient> {
+    override fun getRecipients(): List<Recipient> {
         sharedPreferences.getString(RECIPIENTS, String.NO_DATA).let { raw ->
             return if (raw == String.NO_DATA) listOf()
             else Gson().fromJson(raw, object : TypeToken<List<Recipient>>() {}.type)
@@ -24,7 +26,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
     }
 
     override fun saveRecipient(recipient: Recipient) {
-        loadRecipients().toMutableList().let {
+        getRecipients().toMutableList().let {
             findRecipient(it, recipient).let { index ->
                 if (index != Int.InvalidIndex) it[index] = recipient
                 else it.add(recipient)
@@ -33,10 +35,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         }
     }
 
-    override fun loadProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
-
-    override fun saveProfileImage(name: String, image: String) = sharedPreferences.edit().putString(name, image).apply()
-
     private fun findRecipient(list: List<Recipient>, recipient: Recipient): Int {
         list.forEachIndexed { index, it ->
             if (it.address.equals(recipient.address, true)) return index
@@ -44,8 +42,38 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         return Int.InvalidIndex
     }
 
+    override fun savePendingAccount(pendingAccount: PendingAccount) {
+        getPendingAccounts().toMutableList().let {
+            it.add(pendingAccount)
+            sharedPreferences.edit().putString(PENDING_ACCOUNTS, Gson().toJson(it)).apply()
+        }
+    }
+
+    override fun getPendingAccounts(): List<PendingAccount> {
+        sharedPreferences.getString(PENDING_ACCOUNTS, String.NO_DATA).let { raw ->
+            return if (raw == String.NO_DATA) listOf()
+            else Gson().fromJson(raw, object : TypeToken<List<PendingAccount>>() {}.type)
+        }
+    }
+
+    override fun removePendingAccount(pendingAccount: PendingAccount) {
+        getPendingAccounts().toMutableList().let { list ->
+            list.removeAt(list.indexOf(pendingAccount))
+            sharedPreferences.edit().putString(PENDING_ACCOUNTS, Gson().toJson(list)).apply()
+        }
+    }
+
+    override fun clearPendingAccounts() {
+        sharedPreferences.edit().remove(PENDING_ACCOUNTS).apply()
+    }
+
+    override fun getProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
+
+    override fun saveProfileImage(name: String, image: String) = sharedPreferences.edit().putString(name, image).apply()
+
     companion object {
         private const val IS_MNEMONIC_REMEMBERED = "is_mnemonic_remembered"
         private const val RECIPIENTS = "recipients"
+        private const val PENDING_ACCOUNTS = "pending_accounts"
     }
 }

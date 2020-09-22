@@ -32,31 +32,34 @@ class TransactionViewModelTest : BaseViewModelTest() {
     private val sendTransactionObserver: Observer<Event<Pair<String, Int>>> = mock()
     private val sendTransactionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
 
+    private val transactionCompletedObserver: Observer<Event<Any>> = mock()
+    private val transactionCompletedCaptor: KArgumentCaptor<Event<Any>> = argumentCaptor()
+
     private val saveActionFailedCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
 
     @Test
     fun `send main transaction test success and wallet action succeed`() {
-        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
+        whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = "aaa"))
-        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
-        viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
+        NetworkManager.initialize(listOf(Network(short = "aaa", https = "some")))
+        viewModel.transactionCompletedLiveData.observeForever(transactionCompletedObserver)
         viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
-        sendTransactionCaptor.run {
-            verify(sendTransactionObserver).onChanged(capture())
+        transactionCompletedCaptor.run {
+            verify(transactionCompletedObserver).onChanged(capture())
         }
     }
 
     @Test
     fun `send main transaction test success and wallet action failed`() {
         val error = Throwable()
-        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
+        whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = "aaa"))
-        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
+        NetworkManager.initialize(listOf(Network(short = "aaa", https = "some")))
         viewModel.saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
         viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
@@ -67,26 +70,14 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `send main transaction test error and send wallet action succeed`() {
-        val error = Throwable()
-        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
+        whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
+        viewModel.transactionCompletedLiveData.observeForever(transactionCompletedObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
-        sendTransactionCaptor.run {
-            verify(sendTransactionObserver).onChanged(capture())
+        transactionCompletedCaptor.run {
+            verify(transactionCompletedObserver).onChanged(capture())
         }
-    }
-
-    @Test
-    fun `send main transaction test error and send wallet action failed`() {
-        val error = Throwable()
-        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.error(error))
-        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
-        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
-        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
-        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }
 
     @Test
@@ -99,17 +90,17 @@ class TransactionViewModelTest : BaseViewModelTest() {
             address = "address",
             contractAddress = "aa"
         )
-        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
+        whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
-        whenever(transactionRepository.getAccount(any(), any())).thenReturn(Account(0, network = "aaa"))
-        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
-        viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
+        NetworkManager.initialize(listOf(Network(short = "aaa", https = "some")))
+        viewModel.transactionCompletedLiveData.observeForever(transactionCompletedObserver)
         viewModel.getAccount(0, -1)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
-        sendTransactionCaptor.run {
-            verify(sendTransactionObserver).onChanged(capture())
+        transactionCompletedCaptor.run {
+            verify(transactionCompletedObserver).onChanged(capture())
         }
     }
 
@@ -125,7 +116,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             contractAddress = "aa",
             bindedOwner = "binded"
         )
-        whenever(transactionRepository.transferNativeCoin(any(), any())).thenReturn(Single.just("hash"))
+        whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"

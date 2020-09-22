@@ -9,7 +9,7 @@ object TransactionMapper : Mapper<Transaction, TransactionPayload> {
         TransactionPayload(
             contractAddress = input.contractAddress,
             privateKey = input.privateKey,
-            receiverKey = input.receiverKey,
+            receiverAddress = input.receiverKey,
             amount = input.amount,
             gasLimit = input.gasLimit,
             gasPrice = input.gasPrice

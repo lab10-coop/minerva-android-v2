@@ -8,7 +8,7 @@ import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.ServiceName
 import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.model.defs.VerifiableCredentialType
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.kotlinUtils.DateUtils
 
 const val CALLBACK = "callback"
 const val ISS = "iss"

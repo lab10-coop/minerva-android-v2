@@ -6,7 +6,7 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
+import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
@@ -28,8 +28,8 @@ class AccountManagerTest : RxTest() {
 
     private val walletConfigManager: WalletConfigManager = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
-    private val blockchainRepository: BlockchainRepository = mock()
-    private val repository = AccountManagerImpl(walletConfigManager, cryptographyRepository, blockchainRepository)
+    private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
+    private val repository = AccountManagerImpl(walletConfigManager, cryptographyRepository, blockchainRegularAccountRepository)
 
     @Before
     override fun setupRxSchedulers() {
@@ -77,7 +77,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
         repository.removeAccount(2).test()
         val removedValue = repository.loadAccount(0)
         val notRemovedValue = repository.loadAccount(1)
@@ -93,7 +93,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(300))
+        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigInteger.valueOf(300))
         doNothing().whenever(walletConfigManager).initWalletConfig()
         repository.removeAccount(2).test()
         val removedValue = repository.loadAccount(0)
@@ -110,7 +110,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
         repository.removeAccount(5).test()
         repository.removeAccount(6).test()
         repository.loadAccount(2).apply {
@@ -131,7 +131,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        whenever(blockchainRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
         doNothing().whenever(walletConfigManager).initWalletConfig()
         repository.removeAccount(5).test()
         repository.removeAccount(6).test()

@@ -102,7 +102,7 @@ class WalletConfigRepositoryImpl(
 
     private fun completeIdentitiesProfileImages(identities: List<Identity>): List<Identity> {
         identities.forEach {
-            it.profileImageBitmap = BitmapMapper.fromBase64(localStorage.loadProfileImage(it.profileImageName))
+            it.profileImageBitmap = BitmapMapper.fromBase64(localStorage.getProfileImage(it.profileImageName))
         }
         return identities
     }

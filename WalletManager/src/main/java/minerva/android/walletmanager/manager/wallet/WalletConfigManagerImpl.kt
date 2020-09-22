@@ -19,7 +19,7 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.ResponseState
 import minerva.android.walletmanager.model.mappers.WalletConfigToWalletPayloadMapper
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
 import timber.log.Timber
 
@@ -161,7 +161,7 @@ class WalletConfigManagerImpl(
             .orElse { return String.Empty }
     }
 
-    override fun getLoggedInIdentityByPyblicKey(publicKey: String): Identity? {
+    override fun getLoggedInIdentityByPublicKey(publicKey: String): Identity? {
         getWalletConfig()?.identities?.find { it.publicKey == publicKey }
             ?.let { return it }
             .orElse { return null }
@@ -193,12 +193,15 @@ class WalletConfigManagerImpl(
         services.forEach { if (it == service) it.lastUsed = DateUtils.timestamp }
     }
 
-    override fun getAccount(valueIndex: Int, assetIndex: Int): Account? {
+    override fun getAccount(accountIndex: Int): Account? {
         getWalletConfig()?.accounts?.forEach {
-            if (it.index == valueIndex) return  it
+            if (it.index == accountIndex) return it
         }
         return null
     }
+
+    override fun findIdentityByDid(did: String): Identity? =
+        getWalletConfig()?.let { config -> config.identities.find { it.did == did } }
 
     companion object {
         private const val DEFAULT_SAFE_ACCOUNT_NUMBER = 1

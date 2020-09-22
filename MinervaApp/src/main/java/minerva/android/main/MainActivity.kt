@@ -27,7 +27,9 @@ import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
 
@@ -44,6 +46,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         prepareSettingsIcon()
         prepareObservers()
         painlessLogin(intent)
+        /*pending transactions are cleared in order to maintain the core flow,
+         here should be implemented mechanism for restoring pending accounts after the app was killed, see MNR-276
+          - get pending accounts from local storage and check the status on the blockchain*/
+        viewModel.clearPending()
     }
 
     override fun onResume() {
@@ -81,7 +87,45 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             updateCredentialErrorLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(false, null)
             })
+            updatePendingAccountLiveData.observe(this@MainActivity, EventObserver {
+                showFlashbar(getString(R.string.transaction_success_title), getString(R.string.transaction_success_message, it.amount))
+                (getCurrentFragment() as AccountsFragment).apply { updateAccountFragment() { setProgressAccount(it.index, false) } }
+                viewModel.disposeWebSocketSubscription()
+            })
+            updatePendingTransactionErrorLiveData.observe(this@MainActivity, EventObserver {
+                showFlashbar(getString(R.string.error_header), getString(R.string.pending_accout_error_message))
+                (getCurrentFragment() as AccountsFragment).apply { updateAccountFragment() { stopPendingTransactions() } }
+                viewModel.clearWebSocketSubscription()
+            })
+
+            handleTimeoutOnPendingTransactionsLiveData.observe(this@MainActivity, EventObserver {
+                it.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
+                (getCurrentFragment() as AccountsFragment).apply { updateAccountFragment() { stopPendingTransactions() } }
+            })
         }
+    }
+
+    private fun handlePendingAccountsResults(pendingAccount: PendingAccount) {
+        if (pendingAccount.blockHash != null) {
+            showFlashbar(
+                getString(R.string.transaction_success_title),
+                getString(R.string.transaction_success_message, pendingAccount.amount)
+            )
+        } else {
+            showFlashbar(
+                getString(R.string.transaction_error_title),
+                getString(R.string.transaction_error_details_message, pendingAccount.amount, pendingAccount.network)
+            )
+        }
+    }
+
+    private fun showFlashbar(title: String, message: String) {
+        MinervaFlashbar.show(this@MainActivity, title, message)
+    }
+
+    private fun AccountsFragment.updateAccountFragment(updatePending: () -> Unit) {
+        updatePending()
+        refreshBalances()
     }
 
     private fun painlessLogin(intent: Intent?) {
@@ -148,13 +192,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     private fun handlePreparedTransaction(data: Intent?) {
         data?.apply {
-            handleTransactionResult(data)
-            return
-            //TODO Pending UI - skipped for now (logic needs to be implemented)
             getIntExtra(ACCOUNT_INDEX, Int.InvalidValue).let {
+                viewModel.subscribeToExecutedTransactions(it)
                 if (it != Int.InvalidValue) {
                     (getCurrentFragment() as AccountsFragment).setProgressAccount(it, true)
-                    //TODO add transaction stage 2!
                 }
             }
         }
@@ -166,9 +207,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         }
     }
 
-    override fun showSendAssetTransactionScreen(valueIndex: Int, assetIndex: Int) {
+    override fun showSendAssetTransactionScreen(accountIndex: Int, assetIndex: Int) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
-            putExtra(ACCOUNT_INDEX, valueIndex)
+            putExtra(ACCOUNT_INDEX, accountIndex)
             putExtra(ASSET_INDEX, assetIndex)
         }
     }

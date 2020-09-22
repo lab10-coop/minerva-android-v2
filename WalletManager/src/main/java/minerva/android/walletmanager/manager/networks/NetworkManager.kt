@@ -17,32 +17,33 @@ object NetworkManager {
 
     lateinit var networks: List<Network>
     private val networkMap: Map<String, Network> get() = networks.associateBy { it.short }
-    val urlMap: Map<String, String> by lazy { networks.associate { it.short to it.url } }
+    val httpsUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.https } }
+    val wssUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.wss } }
     val gasPriceMap: Map<String, BigInteger> by lazy { networks.associate { it.short to it.gasPrice } }
 
     fun initialize(networks: List<Network>) {
-        if (noActiveNetworks(networks)) throw NoActiveNetworkThrowable()
+        if (areThereActiveNetworks(networks)) throw NoActiveNetworkThrowable()
         this.networks = networks.filter { isActiveNetwork(it) } + networks.filter { !isActiveNetwork(it) }
     }
 
-    fun getNetwork(type: String) = networkMap.value(type)
+    fun getNetwork(type: String): Network = networkMap.value(type)
 
     fun getAssetsAddresses(type: String): List<String> = getNetwork(type).assets.map { it.address }
 
     fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<AccountAsset> =
         assetList.map { getAssetFromPair(it) }
 
-    fun isSafeAccountAvailable(type: String) = getNetwork(type).isSafeAccountAvailable
+    fun isSafeAccountAvailable(type: String): Boolean = getNetwork(type).isSafeAccountAvailable
 
-    fun getColor(type: String, opacity: Boolean = false) = Color.parseColor(getStringColor(type, opacity))
+    fun getColor(type: String, opacity: Boolean = false): Int = Color.parseColor(getStringColor(type, opacity))
 
-    fun firstDefaultValueNetwork() = networks[FIRST_NETWORK]
+    fun firstDefaultValueNetwork(): Network = networks[FIRST_NETWORK]
 
     fun secondDefaultValueNetwork(): Network =
         if (networks.size > ONE_ELEMENT && isActiveNetwork(networks[SECOND_NETWORK])) networks[SECOND_NETWORK]
         else firstDefaultValueNetwork()
 
-    fun isAvailable(type: String) = getNetwork(type).url != String.Empty
+    fun isAvailable(type: String): Boolean = getNetwork(type).https != String.Empty
 
     @VisibleForTesting
     fun getStringColor(type: String, opacity: Boolean): String {
@@ -60,9 +61,9 @@ object NetworkManager {
     @VisibleForTesting
     fun getAllAsset(): List<Asset> = mutableListOf<Asset>().apply { networks.forEach { addAll(it.assets) } }
 
-    private fun isActiveNetwork(network: Network) = network.url != String.Empty
+    private fun isActiveNetwork(network: Network): Boolean = network.https != String.Empty
 
-    private fun noActiveNetworks(list: List<Network>) = list.none { isActiveNetwork(it) }
+    private fun areThereActiveNetworks(list: List<Network>): Boolean = list.none { isActiveNetwork(it) }
 }
 
 private const val ONE_ELEMENT = 1

@@ -37,7 +37,7 @@ class LocalStorageTest {
 
     @Test
     fun `load recipients test`() {
-        localStorage.loadRecipients()
+        localStorage.getRecipients()
         verify {
             sharedPref.getString(any(), any())
         }
@@ -48,7 +48,7 @@ class LocalStorageTest {
     fun `save recipient test`() {
         val recipient = Recipient("name", "address")
         localStorage.saveRecipient(recipient)
-        every { localStorage.loadRecipients() } returns listOf(recipient)
+        every { localStorage.getRecipients() } returns listOf(recipient)
         verify {
             sharedPref.edit().putString(any(), any()).apply()
             sharedPref.getString(any(), any())
@@ -60,7 +60,7 @@ class LocalStorageTest {
     fun `save profile image test`() {
         val imageInBase64 = "imageInBase64"
         localStorage.saveProfileImage("name", imageInBase64)
-        every { localStorage.loadProfileImage(any()) } returns imageInBase64
+        every { localStorage.getProfileImage(any()) } returns imageInBase64
         verify {
             sharedPref.edit().putString(any(), any()).apply()
         }
@@ -69,7 +69,7 @@ class LocalStorageTest {
 
     @Test
     fun `load profile image test`() {
-        localStorage.loadProfileImage("name")
+        localStorage.getProfileImage("name")
         verify {
             sharedPref.getString(any(), any())
         }

@@ -58,7 +58,7 @@ class WalletConfigRepositoryTest {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(2)))
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
 
-        whenever(localStorage.loadProfileImage(any())).thenReturn(String.Empty)
+        whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
 
         val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, online)
         val observable = walletConfigRepository.loadWalletConfig(MasterSeed())
@@ -76,7 +76,7 @@ class WalletConfigRepositoryTest {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), eq(2)))
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
 
-        whenever(localStorage.loadProfileImage(any())).thenReturn(String.Empty)
+        whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
 
         val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, onlineLikeLocal)
         val observable = walletConfigRepository.loadWalletConfig(MasterSeed())
@@ -86,7 +86,7 @@ class WalletConfigRepositoryTest {
     @Test
     fun `create default walletConfig should return success`() {
         whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.complete())
-        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
+        NetworkManager.initialize(listOf(Network(short = "aaa", https = "some")))
         val test = repository.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertNoErrors()
     }
@@ -95,7 +95,7 @@ class WalletConfigRepositoryTest {
     fun `create default walletConfig should return error`() {
         val throwable = Throwable()
         val repository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, api)
-        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
+        NetworkManager.initialize(listOf(Network(short = "aaa", https = "some")))
         whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.error(throwable))
         val test = repository.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertError(throwable)

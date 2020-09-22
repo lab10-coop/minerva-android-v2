@@ -8,11 +8,11 @@ import kotlinx.android.synthetic.main.wallet_action_list_row.view.*
 import minerva.android.R
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.WalletActionClustered
-import minerva.android.walletmanager.utils.DateUtils
-import minerva.android.walletmanager.utils.DateUtils.getDateFromTimestamp
-import minerva.android.walletmanager.utils.DateUtils.isTheDayAfterTomorrow
-import minerva.android.walletmanager.utils.DateUtils.isTheSameDay
-import minerva.android.walletmanager.utils.DateUtils.timestamp
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.DateUtils.getDateFromTimestamp
+import minerva.android.kotlinUtils.DateUtils.isTheDayAfterTomorrow
+import minerva.android.kotlinUtils.DateUtils.isTheSameDay
+import minerva.android.kotlinUtils.DateUtils.timestamp
 import minerva.android.widget.WalletActionView
 
 class WalletActionsAdapter : RecyclerView.Adapter<WalletActionsViewHolder>() {

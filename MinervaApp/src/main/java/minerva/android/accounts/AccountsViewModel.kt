@@ -21,7 +21,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAF
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -59,13 +59,17 @@ class AccountsViewModel(
     private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
     val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
 
+    fun arePendingAccountsEmpty() =
+        transactionRepository.getPendingAccounts().isEmpty()
+
     fun refreshBalances() =
         launchDisposable {
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _balanceLiveData.value = it },
+                    onSuccess = {
+                        _balanceLiveData.value = it },
                     onError = {
                         _errorLiveData.value = Event(it)
                         Timber.d("Refresh balance error: ${it.message}")
@@ -95,7 +99,7 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onComplete = { _accountRemovedLiveData.value = Event(Unit)},
+                    onComplete = { _accountRemovedLiveData.value = Event(Unit) },
                     onError = {
                         Timber.e("Removing account with index ${account.index} failure")
                         when (it) {

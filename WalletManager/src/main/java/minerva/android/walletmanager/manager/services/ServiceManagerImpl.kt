@@ -9,6 +9,7 @@ import minerva.android.servicesApiProvider.model.TokenPayload
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 import minerva.android.walletmanager.model.mappers.PaymentMapper
 import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
 
@@ -48,7 +49,7 @@ class ServiceManagerImpl(
 
     override fun getLoggedInIdentityPublicKey(issuer: String): String = walletConfigManager.getLoggedInIdentityPublicKey(issuer)
 
-    override fun getLoggedInIdentity(publicKey: String): Identity? = walletConfigManager.getLoggedInIdentityByPyblicKey(publicKey)
+    override fun getLoggedInIdentity(publicKey: String): Identity? = walletConfigManager.getLoggedInIdentityByPublicKey(publicKey)
 
     override fun removeService(type: String): Completable {
         walletConfigManager.getWalletConfig()?.apply {
@@ -61,5 +62,24 @@ class ServiceManagerImpl(
             }
         }
         throw NotInitializedWalletConfigThrowable()
+    }
+
+    override fun updateBindedCredential(qrCode: CredentialQrCode): Single<String> {
+        walletConfigManager.getWalletConfig()?.apply {
+            val updatedCredential = CredentialQrCodeToCredentialMapper.map(qrCode)
+            val newCredentials = credentials.toMutableList().apply {
+                this[getPositionForCredential(updatedCredential)] = updatedCredential
+            }
+            return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, services, newCredentials))
+                .toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
+        }
+        throw  NotInitializedWalletConfigThrowable()
+    }
+
+    private fun WalletConfig.getPositionForCredential(credential: Credential): Int {
+        credentials.forEachIndexed { position, item ->
+            if (item.loggedInIdentityDid == credential.loggedInIdentityDid && item.type == credential.type && item.issuer == credential.issuer) return position
+        }
+        return identities.size
     }
 }
