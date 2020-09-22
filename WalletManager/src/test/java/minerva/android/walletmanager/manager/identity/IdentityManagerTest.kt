@@ -18,6 +18,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
+import org.amshove.kluent.that
 import org.junit.Before
 import org.junit.Test
 
@@ -147,6 +148,7 @@ class IdentityManagerTest : RxTest() {
     @Test
     fun `bind credential to identity success test`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
         manager.bindCredentialToIdentity(CredentialQrCode("iss", "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertNoErrors()
@@ -160,6 +162,7 @@ class IdentityManagerTest : RxTest() {
     fun `bind credential to identity error test`() {
         val error = NoBindedCredentialThrowable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
         manager.bindCredentialToIdentity(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertError {
@@ -181,27 +184,6 @@ class IdentityManagerTest : RxTest() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         manager.removeBindedCredentialFromIdentity(Credential("test", "type", loggedInIdentityDid = "did:ethr:address"))
-            .test()
-            .assertError(error)
-    }
-
-    @Test
-    fun `update credential success test`() {
-        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        manager.updateBindedCredential(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
-            .test()
-            .assertNoErrors()
-            .assertComplete()
-            .assertValue {
-                it == "identityName1"
-            }
-    }
-
-    @Test
-    fun `update credential success error`() {
-        val error = Throwable()
-        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        manager.updateBindedCredential(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertError(error)
     }

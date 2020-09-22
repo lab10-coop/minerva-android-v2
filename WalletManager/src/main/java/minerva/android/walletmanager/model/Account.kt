@@ -17,7 +17,7 @@ data class Account(
     var fiatBalance: BigDecimal = BigDecimal.ZERO,
     var owners: List<String>? = null,
     var contractAddress: String = String.Empty,
-    var pending: Boolean = false,
+    var isPending: Boolean = false,
     override val bindedOwner: String = String.Empty
 ): MinervaPrimitive(address, name, isDeleted, bindedOwner, network) {
     constructor(account: Account, isDeleted: Boolean) : this(
@@ -29,7 +29,7 @@ data class Account(
         account.network,
         isDeleted,
         owners = account.owners,
-        pending = false
+        isPending = false
     )
 
     val masterOwnerAddress: String

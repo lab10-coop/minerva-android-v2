@@ -13,8 +13,8 @@ import minerva.android.walletmanager.model.WalletActionClustered
 import minerva.android.walletmanager.model.mappers.WalletActionsMapper
 import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
-import minerva.android.walletmanager.utils.DateUtils
-import minerva.android.walletmanager.utils.DateUtils.isTheSameDay
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.DateUtils.isTheSameDay
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 
 class WalletActionsRepositoryImpl(

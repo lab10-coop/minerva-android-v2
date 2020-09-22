@@ -1,4 +1,4 @@
-package minerva.android.blockchainprovider.repository.contract
+package minerva.android.blockchainprovider.repository.smartContract
 
 // don't remove this commented import, please
 //import kotlin.Pair
@@ -8,24 +8,24 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toFlowable
 import io.reactivex.rxkotlin.zipWith
-import minerva.android.blockchainprovider.contract.ERC20
-import minerva.android.blockchainprovider.contract.GnosisSafe
-import minerva.android.blockchainprovider.contract.ProxyFactory
+import minerva.android.blockchainprovider.smartContracts.ERC20
+import minerva.android.blockchainprovider.smartContracts.GnosisSafe
+import minerva.android.blockchainprovider.smartContracts.ProxyFactory
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.GNOSIS_SETUP_DATA
 import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.MASTER_COPY_KEY
 import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.PROXY_ADDRESS
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.baseGas
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.data
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.gasToken
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.noFunds
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.noGasPrice
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.operation
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.refund
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeSentinelAddress
-import minerva.android.blockchainprovider.repository.contract.GnosisSafeHelper.safeTxGas
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.baseGas
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.data
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.gasToken
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.noFunds
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.noGasPrice
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.operation
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.refund
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.safeSentinelAddress
+import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.safeTxGas
 import minerva.android.kotlinUtils.map.value
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
@@ -44,10 +44,10 @@ import java.math.BigInteger
 import java.util.*
 
 
-class BlockchainContractRepositoryImpl(
+class BlockchainSafeAccountRepositoryImpl(
     private val web3j: Map<String, Web3j>,
     private val gasPrice: Map<String, BigInteger>
-) : BlockchainContractRepository {
+) : BlockchainSafeAccountRepository {
 
     override fun deployGnosisSafeContract(privateKey: String, address: String, network: String): Single<String> =
         getProxyFactory(network, privateKey)
@@ -60,7 +60,7 @@ class BlockchainContractRepositoryImpl(
     override fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable {
         return performTransaction(
             getGnosisSafe(transactionPayload, network),
-            transactionPayload.receiverKey, data, network, transactionPayload,
+            transactionPayload.receiverAddress, data, network, transactionPayload,
             Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger()
         )
     }
@@ -207,7 +207,7 @@ class BlockchainContractRepositoryImpl(
     private fun getSafeTxData(transactionPayload: TransactionPayload): String? {
         Function(
             ERC20.FUNC_TRANSFER, listOf<Type<*>>(
-                Address(transactionPayload.receiverKey),
+                Address(transactionPayload.receiverAddress),
                 Uint256(Convert.toWei(transactionPayload.amount, Convert.Unit.ETHER).toBigInteger())
             ), emptyList()
         ).let { innerFn ->

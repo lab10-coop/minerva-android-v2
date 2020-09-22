@@ -26,8 +26,11 @@ import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.LoginScannerActivity
+import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
 
@@ -43,12 +46,32 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         replaceFragment(IdentitiesFragment())
         prepareSettingsIcon()
         prepareObservers()
-        painlessLogin(intent)
+        viewModel.run {
+            loginFromNotification(intent?.getStringExtra(JWT))
+            restorePendingTransactions()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         shouldShowLoadingScreen(false)
+        handleExecutedAccounts()
+    }
+
+    private fun handleExecutedAccounts() {
+        with(viewModel.executedAccounts) {
+            if (isNotEmpty()) {
+                forEach {
+                    showFlashbar(
+                        getString(R.string.transaction_success_title),
+                        getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
+                    )
+                }
+                stopPendingAccounts()
+                clear()
+                viewModel.clearAndUnsubscribe()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -58,7 +81,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        painlessLogin(intent)
+        viewModel.loginFromNotification(intent?.getStringExtra(JWT))
     }
 
     private fun prepareObservers() {
@@ -73,7 +96,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
                 Toast.makeText(this@MainActivity, getString(R.string.unexpected_error), Toast.LENGTH_LONG).show()
             })
             loadingLiveData.observe(this@MainActivity, EventObserver {
-                (getCurrentFragment() as AccountsFragment).setProgressAccount(it.first, it.second)
+                (getCurrentFragment() as? AccountsFragment)?.setProgressAccount(it.first, it.second)
             })
             updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(true, it)
@@ -81,11 +104,52 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             updateCredentialErrorLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(false, null)
             })
+            updatePendingAccountLiveData.observe(this@MainActivity, EventObserver {
+                showFlashbar(
+                    getString(R.string.transaction_success_title),
+                    getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
+                )
+                (getCurrentFragment() as? AccountsFragment)?.apply { updateAccountFragment() { setProgressAccount(it.index, false) } }
+                viewModel.clearWebSocketSubscription()
+            })
+            updatePendingTransactionErrorLiveData.observe(this@MainActivity, EventObserver {
+                showFlashbar(getString(R.string.error_header), getString(R.string.pending_account_error_message))
+                stopPendingAccounts()
+                viewModel.clearPendingAccounts()
+            })
+
+            handleTimeoutOnPendingTransactionsLiveData.observe(this@MainActivity, EventObserver {
+                it.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
+                stopPendingAccounts()
+            })
         }
     }
 
-    private fun painlessLogin(intent: Intent?) {
-        viewModel.loginFromNotification(intent?.getStringExtra(JWT))
+    private fun stopPendingAccounts() {
+        (getCurrentFragment() as? AccountsFragment)?.apply { updateAccountFragment() { stopPendingTransactions() } }
+    }
+
+    private fun handlePendingAccountsResults(account: PendingAccount) {
+        if (account.blockHash != null) {
+            showFlashbar(
+                getString(R.string.transaction_success_title),
+                getString(R.string.transaction_success_message, account.amount, getNetwork(account.network).token)
+            )
+        } else {
+            showFlashbar(
+                getString(R.string.transaction_error_title),
+                getString(R.string.transaction_error_details_message, account.amount, account.network)
+            )
+        }
+    }
+
+    private fun showFlashbar(title: String, message: String) {
+        MinervaFlashbar.show(this@MainActivity, title, message)
+    }
+
+    private fun AccountsFragment.updateAccountFragment(updatePending: () -> Unit) {
+        updatePending()
+        refreshBalances()
     }
 
     private fun prepareSettingsIcon() {
@@ -113,9 +177,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
                     isEnabled = !shouldDisableAddButton
                 }
                 findItem(R.id.editServiceOrder)?.isVisible = isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
-                findItem(R.id.editCredentialsOrder)?.isVisible =
-                    getCurrentChildFragment() is CredentialsFragment && isOrderEditAvailable(WalletActionType.CREDENTIAL)
-                findItem(R.id.qrCodeScanner)?.isVisible = isServicesTabSelected() || getCurrentChildFragment() is CredentialsFragment
+                findItem(R.id.editCredentialsOrder)?.isVisible = isIdentitiesTabSelected() &&
+                        getCurrentChildFragment() is CredentialsFragment && isOrderEditAvailable(WalletActionType.CREDENTIAL)
+                findItem(R.id.qrCodeScanner)?.isVisible = isServicesTabSelected() ||
+                        (isIdentitiesTabSelected() && getCurrentChildFragment() is CredentialsFragment)
             }
         }
         return super.onPrepareOptionsMenu(menu)
@@ -147,13 +212,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     private fun handlePreparedTransaction(data: Intent?) {
         data?.apply {
-            handleTransactionResult(data)
-            return
-            //TODO Pending UI - skipped for now (logic needs to be implemented)
             getIntExtra(ACCOUNT_INDEX, Int.InvalidValue).let {
+                viewModel.subscribeToExecutedTransactions(it)
                 if (it != Int.InvalidValue) {
-                    (getCurrentFragment() as AccountsFragment).setProgressAccount(it, true)
-                    //TODO add transaction stage 2!
+                    (getCurrentFragment() as? AccountsFragment)?.setProgressAccount(it, true)
                 }
             }
         }
@@ -165,9 +227,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         }
     }
 
-    override fun showSendAssetTransactionScreen(valueIndex: Int, assetIndex: Int) {
+    override fun showSendAssetTransactionScreen(accountIndex: Int, assetIndex: Int) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
-            putExtra(ACCOUNT_INDEX, valueIndex)
+            putExtra(ACCOUNT_INDEX, accountIndex)
             putExtra(ASSET_INDEX, assetIndex)
         }
     }

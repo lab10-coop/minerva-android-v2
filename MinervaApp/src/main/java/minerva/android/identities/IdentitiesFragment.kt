@@ -5,7 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.google.android.material.tabs.TabLayoutMediator
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.identities_fragment_layout.*
 import minerva.android.R
 import minerva.android.extension.onTabSelected
@@ -13,36 +14,55 @@ import minerva.android.identities.adapter.IdentitiesPagerAdapter
 import minerva.android.identities.contacts.ContactsFragment
 import minerva.android.identities.credentials.CredentialsFragment
 import minerva.android.identities.myIdentities.MyIdentitiesFragment
-import timber.log.Timber
 
 class IdentitiesFragment : Fragment() {
 
-    private val fragments = listOf(MyIdentitiesFragment.newInstance(), ContactsFragment.newInstance(), CredentialsFragment.newInstance())
-    var currentFragment: Fragment = fragments[MY_IDENTITIES_POSITION]
+    var currentFragment: Fragment = getFragment(MY_IDENTITIES_POSITION)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.identities_fragment_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewPager.adapter = IdentitiesPagerAdapter(this, fragments)
-        TabLayoutMediator(identityTabs, identityViewPager) { tab, position ->
-            when (position) {
-                MY_IDENTITIES_POSITION -> tab.text = getString(R.string.my_identities_label)
-                CONTACTS_POSITION -> tab.text = getString(R.string.contacts_label)
-                CREDENTIALS_POSITION -> tab.text = getString(R.string.credentials_label)
-            }
-        }.attach()
 
-        identityTabs.onTabSelected {
-            currentFragment = fragments[it]
-            activity?.invalidateOptionsMenu()
+        identityViewPager.apply {
+            adapter = IdentitiesPagerAdapter(this@IdentitiesFragment, ::getFragment)
+            setCurrentItem(START_VIEW_PAGER_POSITION, false)
+
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    identityTabs.selectTab(identityTabs.getTabAt(position % CARD_NUMBER))
+                }
+            })
+
+            addTab(identityTabs, R.string.my_identities_label)
+            addTab(identityTabs, R.string.contacts_label)
+            addTab(identityTabs, R.string.credentials_label)
+
+            identityTabs.onTabSelected {
+                currentFragment = getFragment(it)
+                activity?.invalidateOptionsMenu()
+                setCurrentItem(it + START_VIEW_PAGER_POSITION, true)
+            }
         }
+    }
+
+    private fun getFragment(position: Int) =
+        when (position % CARD_NUMBER) {
+            MY_IDENTITIES_POSITION -> MyIdentitiesFragment.newInstance()
+            CONTACTS_POSITION -> ContactsFragment.newInstance()
+            else -> CredentialsFragment.newInstance()
+        }
+
+    private fun addTab(tabLayout: TabLayout, titleRes: Int) {
+        tabLayout.addTab(tabLayout.newTab().setText(getString(titleRes)))
     }
 
     companion object {
         const val MY_IDENTITIES_POSITION = 0
         const val CONTACTS_POSITION = 1
-        const val CREDENTIALS_POSITION = 2
+        const val CARD_NUMBER = 3
+        private const val START_VIEW_PAGER_POSITION = 150
+
     }
 }

@@ -21,7 +21,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SEN
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.kotlinUtils.DateUtils
 
 class WalletActionView(context: Context) : ConstraintLayout(context) {
 

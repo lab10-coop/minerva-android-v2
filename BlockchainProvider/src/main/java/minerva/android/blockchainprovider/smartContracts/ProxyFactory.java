@@ -1,4 +1,4 @@
-package minerva.android.blockchainprovider.contract;
+package minerva.android.blockchainprovider.smartContracts;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.TypeReference;

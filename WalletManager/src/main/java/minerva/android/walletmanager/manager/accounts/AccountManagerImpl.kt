@@ -2,7 +2,7 @@ package minerva.android.walletmanager.manager.accounts
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
-import minerva.android.blockchainprovider.repository.blockchain.BlockchainRepository
+import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
@@ -23,7 +23,7 @@ import java.math.BigInteger
 class AccountManagerImpl(
     private val walletConfigManager: WalletConfigManager,
     private val cryptographyRepository: CryptographyRepository,
-    private val blockchainRepository: BlockchainRepository
+    private val blockchainRepository: BlockchainRegularAccountRepository
 ) : AccountManager {
 
     override val walletConfigLiveData: LiveData<WalletConfig>

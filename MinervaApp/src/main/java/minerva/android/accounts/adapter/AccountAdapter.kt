@@ -27,8 +27,7 @@ import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.wrapped.startAccountAddressWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 
-class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
-    RecyclerView.Adapter<AccountViewHolder>(),
+class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : RecyclerView.Adapter<AccountViewHolder>(),
     AccountViewHolder.AccountsAdapterListener {
 
     private var activeAccounts = listOf<Account>()
@@ -81,13 +80,20 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         activeAccounts.forEach { account -> accountAssetBalances[account.privateKey]?.let { account.accountAssets = it } }
     }
 
-    fun setPending(index: Int, pending: Boolean) {
+    fun setPending(index: Int, isPending: Boolean) {
         rawAccounts.forEachIndexed { position, account ->
             if (account.index == index) {
-                account.pending = pending
+                account.isPending = isPending
                 notifyItemChanged(position)
             }
         }
+    }
+
+    fun stopPendingTransactions() {
+        rawAccounts.forEach {
+            it.isPending = false
+        }
+        notifyDataSetChanged()
     }
 
     private fun getPositionInRaw(index: Int): Int {
@@ -133,12 +139,12 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun View.bindData(account: Account) {
         with(account) {
             NetworkManager.getColor(network).let { networkColor ->
-                card.setCardBackgroundColor(NetworkManager.getColor(network, pending))
+                card.setCardBackgroundColor(NetworkManager.getColor(network, isPending))
                 progress.apply {
-                    visibleOrGone(pending)
+                    visibleOrGone(isPending)
                     DrawableCompat.setTint(indeterminateDrawable, networkColor)
                 }
-                pendingMask.visibleOrGone(pending)
+                pendingMask.visibleOrGone(isPending)
                 icon.setImageResource(getNetworkIcon(NetworkManager.getNetwork(network)))
                 accountName.text = name
                 cryptoTokenName.run {

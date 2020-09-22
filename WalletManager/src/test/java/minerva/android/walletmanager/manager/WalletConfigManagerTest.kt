@@ -67,7 +67,7 @@ class WalletConfigManagerTest {
     @Test
     fun `Create default walletConfig should return success`() {
         whenever(walletConfigRepository.createWalletConfig(any())).thenReturn(Completable.complete())
-        NetworkManager.initialize(listOf(Network(short = "aaa", url = "some")))
+        NetworkManager.initialize(listOf(Network(short = "aaa", https = "some")))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertComplete()
     }
@@ -176,7 +176,7 @@ class WalletConfigManagerTest {
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.apply {
             initWalletConfig()
-            val result = getAccount(2, 2)
+            val result = getAccount(2)
             assertEquals(result?.index, 2)
         }
     }

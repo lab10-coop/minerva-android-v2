@@ -20,7 +20,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.model.defs.ServiceName.Companion.M27_NAME
 import minerva.android.walletmanager.model.defs.ServiceType
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 
 class PaymentRequestViewModel(

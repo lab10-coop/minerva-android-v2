@@ -1,15 +1,17 @@
-package minerva.android.blockchainprovider.repository.blockchain
+package minerva.android.blockchainprovider.repository.regularAccont
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
-import minerva.android.blockchainprovider.contract.ERC20
 import minerva.android.blockchainprovider.defs.Operation
+import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
+import minerva.android.blockchainprovider.smartContracts.ERC20
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.map.value
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
@@ -17,7 +19,6 @@ import org.web3j.crypto.TransactionEncoder
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.methods.response.EthSendTransaction
 import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.Transfer
@@ -29,11 +30,46 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
 
-class BlockchainRepositoryImpl(
+class BlockchainRegularAccountRepositoryImpl(
     private val web3j: Map<String, Web3j>,
     private val gasPrice: Map<String, BigInteger>,
     private val ensResolver: EnsResolver
-) : BlockchainRepository {
+) : BlockchainRegularAccountRepository {
+
+    override fun getTransactions(pendingHashes: List<Pair<String, String>>): Single<List<Pair<String, String?>>> =
+        Observable.range(START, pendingHashes.size)
+            .flatMapSingle { position ->
+                getTransaction(pendingHashes[position].first, pendingHashes[position].second)
+            }
+            .toList()
+
+    private fun getTransaction(network: String, txHash: String): Single<Pair<String, String?>> =
+        web3j.value(network).ethGetTransactionByHash(txHash)
+            .flowable()
+            .map { ethTransaction ->
+                var blockHash: String? = null
+                ethTransaction.transaction.ifPresent { blockHash = it.blockHash }
+                Pair(txHash, blockHash)
+            }.firstOrError()
+
+    override fun transferNativeCoin(network: String, accountIndex: Int, transactionPayload: TransactionPayload): Single<PendingTransaction> =
+        web3j.value(network).ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .zipWith(getChainId(network))
+            .flatMap {
+                web3j.value(network)
+                    .ethSendRawTransaction(getSignedTransaction(it.first.transactionCount, transactionPayload, it.second.netVersion.toLong()))
+                    .flowable()
+                    .flatMapSingle { response ->
+                        if (response.error == null) {
+                            val pendingTx = PendingTransaction(
+                                accountIndex, response.transactionHash,
+                                network, transactionPayload.senderAddress, String.Empty, transactionPayload.amount
+                            )
+                            Single.just(pendingTx)
+                        } else Single.error(Throwable(response.error.message))
+                    }
+            }.firstOrError()
 
     /**
      * List arguments: first - network short name, second - wallet address (public)
@@ -43,8 +79,18 @@ class BlockchainRepositoryImpl(
             .flatMapSingle { position -> getBalance(networkAddress[position].first, networkAddress[position].second) }
             .toList()
 
-    override fun refreshAssetBalance(privateKey: String, network: String, contractAddress: String, safeAccountAddress: String):
-            Observable<Pair<String, BigDecimal>> =
+    private fun getBalance(network: String, address: String): Single<Pair<String, BigDecimal>> =
+        web3j.value(network).ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
+            .firstOrError()
+
+    override fun refreshAssetBalance(
+        privateKey: String,
+        network: String,
+        contractAddress: String,
+        safeAccountAddress: String
+    ): Observable<Pair<String, BigDecimal>> =
         if (safeAccountAddress.isEmpty()) getERC20Balance(contractAddress, network, privateKey, Credentials.create(privateKey).address)
         else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
 
@@ -84,29 +130,13 @@ class BlockchainRepositoryImpl(
                         RawTransactionManager(web3j.value(network), this, it.netVersion.toLong()),
                         ContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit)
                     )
-                        .transfer(payload.receiverKey, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
+                        .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
                         .flowable()
                         .ignoreElements()
                 }
             }
 
-    override fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Single<String> =
-        web3j.value(network).ethGetTransactionCount(transactionPayload.address, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .zipWith(getChainId(network))
-            .flatMap {
-                web3j.value(network)
-                    .ethSendRawTransaction(getSignedTransaction(it.first.transactionCount, transactionPayload, it.second.netVersion.toLong()))
-                    .flowable()
-                    .flatMapSingle { response -> handleTransactionResponse(response) }
-            }.firstOrError()
-
     private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
-
-    private fun handleTransactionResponse(response: EthSendTransaction): Single<String> {
-        return if (response.error == null) Single.just(response.transactionHash)
-        else Single.error(Throwable(response.error.message))
-    }
 
     override fun getTransactionCosts(network: String, assetIndex: Int, operation: Operation): TransactionCostPayload =
         prepareTransactionCosts(gasPrice.value(network), operation.gasLimit)
@@ -133,7 +163,7 @@ class BlockchainRepositoryImpl(
                 count,
                 toWei(gasPrice, Convert.Unit.GWEI).toBigInteger(),
                 gasLimit,
-                receiverKey,
+                receiverAddress,
                 toWei(amount, Convert.Unit.ETHER).toBigInteger()
             )
         }
@@ -144,12 +174,6 @@ class BlockchainRepositoryImpl(
             gasLimit,
             getTransactionCostInEth(BigDecimal(gasPrice), BigDecimal(gasLimit))
         )
-
-    private fun getBalance(network: String, address: String): Single<Pair<String, BigDecimal>> =
-        web3j.value(network).ethGetBalance(address, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
-            .firstOrError()
 
     companion object {
         private const val START = 0
