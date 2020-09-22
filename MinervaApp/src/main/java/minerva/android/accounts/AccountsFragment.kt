@@ -47,7 +47,7 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
             refreshAssetBalance()
         }
 
-        if (viewModel.arePendingAccountsEmpty()){
+        if (viewModel.arePendingAccountsEmpty()) {
             accountAdapter.stopPendingTransactions()
         }
     }
@@ -56,7 +56,7 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
         viewModel.refreshBalances()
     }
 
-    fun stopPendingTransactions(){
+    fun stopPendingTransactions() {
         accountAdapter.stopPendingTransactions()
     }
 

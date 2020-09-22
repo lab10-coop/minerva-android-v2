@@ -26,6 +26,7 @@ import minerva.android.main.handler.*
 import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.LoginScannerActivity
+import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -45,16 +46,32 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         replaceFragment(IdentitiesFragment())
         prepareSettingsIcon()
         prepareObservers()
-        painlessLogin(intent)
-        /*pending transactions are cleared in order to maintain the core flow,
-         here should be implemented mechanism for restoring pending accounts after the app was killed, see MNR-276
-          - get pending accounts from local storage and check the status on the blockchain*/
-        viewModel.clearPending()
+        viewModel.run {
+            loginFromNotification(intent?.getStringExtra(JWT))
+            restorePendingTransactions()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         shouldShowLoadingScreen(false)
+        handleExecutedAccounts()
+    }
+
+    private fun handleExecutedAccounts() {
+        with(viewModel.executedAccounts) {
+            if (isNotEmpty()) {
+                forEach {
+                    showFlashbar(
+                        getString(R.string.transaction_success_title),
+                        getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
+                    )
+                }
+                stopPendingAccounts()
+                clear()
+                viewModel.clearAndUnsubscribe()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -64,7 +81,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        painlessLogin(intent)
+        viewModel.loginFromNotification(intent?.getStringExtra(JWT))
     }
 
     private fun prepareObservers() {
@@ -79,7 +96,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
                 Toast.makeText(this@MainActivity, getString(R.string.unexpected_error), Toast.LENGTH_LONG).show()
             })
             loadingLiveData.observe(this@MainActivity, EventObserver {
-                (getCurrentFragment() as AccountsFragment).setProgressAccount(it.first, it.second)
+                (getCurrentFragment() as? AccountsFragment)?.setProgressAccount(it.first, it.second)
             })
             updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(true, it)
@@ -88,33 +105,40 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
                 showBindCredentialFlashbar(false, null)
             })
             updatePendingAccountLiveData.observe(this@MainActivity, EventObserver {
-                showFlashbar(getString(R.string.transaction_success_title), getString(R.string.transaction_success_message, it.amount))
-                (getCurrentFragment() as AccountsFragment).apply { updateAccountFragment() { setProgressAccount(it.index, false) } }
-                viewModel.disposeWebSocketSubscription()
+                showFlashbar(
+                    getString(R.string.transaction_success_title),
+                    getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
+                )
+                (getCurrentFragment() as? AccountsFragment)?.apply { updateAccountFragment() { setProgressAccount(it.index, false) } }
+                viewModel.clearWebSocketSubscription()
             })
             updatePendingTransactionErrorLiveData.observe(this@MainActivity, EventObserver {
-                showFlashbar(getString(R.string.error_header), getString(R.string.pending_accout_error_message))
-                (getCurrentFragment() as AccountsFragment).apply { updateAccountFragment() { stopPendingTransactions() } }
-                viewModel.clearWebSocketSubscription()
+                showFlashbar(getString(R.string.error_header), getString(R.string.pending_account_error_message))
+                stopPendingAccounts()
+                viewModel.clearPendingAccounts()
             })
 
             handleTimeoutOnPendingTransactionsLiveData.observe(this@MainActivity, EventObserver {
                 it.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
-                (getCurrentFragment() as AccountsFragment).apply { updateAccountFragment() { stopPendingTransactions() } }
+                stopPendingAccounts()
             })
         }
     }
 
-    private fun handlePendingAccountsResults(pendingAccount: PendingAccount) {
-        if (pendingAccount.blockHash != null) {
+    private fun stopPendingAccounts() {
+        (getCurrentFragment() as? AccountsFragment)?.apply { updateAccountFragment() { stopPendingTransactions() } }
+    }
+
+    private fun handlePendingAccountsResults(account: PendingAccount) {
+        if (account.blockHash != null) {
             showFlashbar(
                 getString(R.string.transaction_success_title),
-                getString(R.string.transaction_success_message, pendingAccount.amount)
+                getString(R.string.transaction_success_message, account.amount, getNetwork(account.network).token)
             )
         } else {
             showFlashbar(
                 getString(R.string.transaction_error_title),
-                getString(R.string.transaction_error_details_message, pendingAccount.amount, pendingAccount.network)
+                getString(R.string.transaction_error_details_message, account.amount, account.network)
             )
         }
     }
@@ -126,10 +150,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     private fun AccountsFragment.updateAccountFragment(updatePending: () -> Unit) {
         updatePending()
         refreshBalances()
-    }
-
-    private fun painlessLogin(intent: Intent?) {
-        viewModel.loginFromNotification(intent?.getStringExtra(JWT))
     }
 
     private fun prepareSettingsIcon() {
@@ -195,7 +215,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
             getIntExtra(ACCOUNT_INDEX, Int.InvalidValue).let {
                 viewModel.subscribeToExecutedTransactions(it)
                 if (it != Int.InvalidValue) {
-                    (getCurrentFragment() as AccountsFragment).setProgressAccount(it, true)
+                    (getCurrentFragment() as? AccountsFragment)?.setProgressAccount(it, true)
                 }
             }
         }

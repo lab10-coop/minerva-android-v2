@@ -18,27 +18,6 @@ import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.widget.MinervaFlashBarWithButtons
 import minerva.android.widget.MinervaFlashbar
 
-internal fun MainActivity.handleTransactionResult(data: Intent?) {
-    data?.apply {
-        val isTransactionSuccess = getBooleanExtra(TransactionActivity.IS_TRANSACTION_SUCCESS, false)
-        val transactionMessage = getStringExtra(TransactionActivity.TRANSACTION_MESSAGE)
-
-        if (isTransactionSuccess) {
-            MinervaFlashbar.show(
-                this@handleTransactionResult,
-                getString(R.string.transaction_success_title),
-                getString(R.string.transaction_success_message, transactionMessage)
-            )
-        } else {
-            MinervaFlashbar.show(
-                this@handleTransactionResult,
-                getString(R.string.transaction_error_title),
-                getString(R.string.transaction_error_message, transactionMessage)
-            )
-        }
-    }
-}
-
 internal fun MainActivity.handleLoginScannerResult(data: Intent?) {
     data?.let { intent ->
         (intent.getParcelableExtra(LoginScannerActivity.LOGIN_PAYLOAD) as? LoginPayload)?.let {

@@ -226,4 +226,35 @@ class MainViewModelTest : BaseViewModelTest() {
             verify(errorObserver).onChanged(capture())
         }
     }
+
+
+    @Test
+    fun `restore pending transactions success`() {
+        whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
+        whenever(transactionRepository.getTransactions()).thenReturn(Single.just(listOf(PendingAccount(1, "123"))))
+        viewModel.run {
+            handleTimeoutOnPendingTransactionsLiveData.observeForever(timeoutPendingAccountObserver)
+            restorePendingTransactions()
+
+        }
+        timeoutPendingAccountCaptor.run {
+            verify(timeoutPendingAccountObserver).onChanged(capture())
+            firstValue.peekContent()[0].txHash == "123"
+        }
+    }
+
+    @Test
+    fun `restore pending transactions error`() {
+        val error = Throwable()
+        whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
+        whenever(transactionRepository.getTransactions()).thenReturn(Single.error(error))
+        viewModel.run {
+            updatePendingTransactionErrorLiveData.observeForever(errorObserver)
+            restorePendingTransactions()
+
+        }
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+        }
+    }
 }

@@ -65,13 +65,12 @@ class MainViewModel(
     private val _handleTimeoutOnPendingTransactionsLiveData = MutableLiveData<Event<List<PendingAccount>>>()
     val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
 
+    val executedAccounts = mutableListOf<PendingAccount>()
+    private var webSocketSubscription = CompositeDisposable()
+
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
-
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
-
     fun dispose() = masterSeedRepository.dispose()
-
-    private var webSocketSubscription: CompositeDisposable = CompositeDisposable()
 
     private fun shouldOpenNewConnection(accountIndex: Int) = transactionRepository.getPendingAccounts().size == ONE_PENDING_ACCOUNT ||
             transactionRepository.getPendingAccounts().size > ONE_PENDING_ACCOUNT && !isSubscribeToTheNetwork(accountIndex)
@@ -86,27 +85,38 @@ class MainViewModel(
 
     fun subscribeToExecutedTransactions(accountIndex: Int) {
         if (shouldOpenNewConnection(accountIndex)) {
-            webSocketSubscription.add(
-                transactionRepository.subscribeToExecutedTransactions(accountIndex)
-                    .subscribeOn(Schedulers.io())
-                    .doOnNext { transactionRepository.removePendingAccount(it) }
-                    .doOnComplete { handleTransactionsTimeout() }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = { _updatePendingAccountLiveData.value = Event(it) },
-                        onError = {
-                            Timber.e("WebSocket subscription error: $it")
-                            _updatePendingTransactionErrorLiveData.value = Event(it)
-                        }
-                    )
+            webSocketSubscription.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)
+                .subscribeOn(Schedulers.io())
+                .doOnComplete { restorePendingTransactions() }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = { handleExecutedAccounts(it) },
+                    onError = {
+                        Timber.e("WebSocket subscription error: $it")
+                        _updatePendingTransactionErrorLiveData.value = Event(it)
+                    }
+                )
             )
         }
     }
 
-    private fun handleTransactionsTimeout() {
+
+    private fun handleExecutedAccounts(it: PendingAccount) {
+        if (_updatePendingAccountLiveData.hasActiveObservers()) {
+            transactionRepository.removePendingAccount(it)
+            _updatePendingAccountLiveData.value = Event(it)
+        } else executedAccounts.add(it)
+    }
+
+    fun clearWebSocketSubscription() {
+        if (transactionRepository.getPendingAccounts().isEmpty())
+            webSocketSubscription.clear()
+    }
+
+    fun restorePendingTransactions() {
         launchDisposable {
             transactionRepository.getTransactions()
-                .doOnSuccess { clearWebSocketSubscription() }
+                .doOnSuccess { clearPendingAccounts() }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -119,19 +129,8 @@ class MainViewModel(
         }
     }
 
-    fun clearPending() {
+    fun clearPendingAccounts() {
         transactionRepository.clearPendingAccounts()
-    }
-
-    fun clearWebSocketSubscription() {
-        transactionRepository.clearPendingAccounts()
-        webSocketSubscription.clear()
-    }
-
-    fun disposeWebSocketSubscription() {
-        if (transactionRepository.getPendingAccounts().isEmpty()) {
-            webSocketSubscription.clear()
-        }
     }
 
     fun loginFromNotification(jwtToken: String?) {
@@ -234,6 +233,11 @@ class MainViewModel(
             lastUsed,
             hashMapOf(WalletActionFields.CREDENTIAL_NAME to name)
         )
+
+    fun clearAndUnsubscribe() {
+        clearPendingAccounts()
+        clearWebSocketSubscription()
+    }
 
     companion object {
         const val ONE_PENDING_ACCOUNT = 1
