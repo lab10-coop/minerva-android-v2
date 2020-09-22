@@ -17,4 +17,5 @@ interface ServiceManager : Manager {
     fun getLoggedInIdentityPublicKey(issuer: String): String
     fun getLoggedInIdentity(publicKey: String): Identity?
     fun removeService(@ServiceType type: String): Completable
+    fun updateBindedCredential(qrCode: CredentialQrCode): Single<String>
 }

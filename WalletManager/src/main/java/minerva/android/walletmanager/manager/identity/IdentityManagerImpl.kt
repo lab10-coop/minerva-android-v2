@@ -116,7 +116,7 @@ class IdentityManagerImpl(
                             services,
                             credentials + CredentialQrCodeToCredentialMapper.map(qrCode)
                         )
-                    ).toSingleDefault(findIdentityByDid(qrCode.loggedInDid)?.name)
+                    ).toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
                 } else Single.error(NoLoggedInIdentityThrowable())
             }
         }
@@ -124,22 +124,7 @@ class IdentityManagerImpl(
     }
 
     private fun doesIdentityExist(did: String): Boolean =
-        findIdentityByDid(did) != null
-
-    private fun findIdentityByDid(did: String) =
-        walletConfigManager.getWalletConfig()?.let { config -> config.identities.find { it.did == did } }
-
-    override fun updateBindedCredential(qrCode: CredentialQrCode): Single<String> {
-        walletConfigManager.getWalletConfig()?.apply {
-            val updatedCredential = CredentialQrCodeToCredentialMapper.map(qrCode)
-            val newCredentials = credentials.toMutableList().apply {
-                this[getPositionForCredential(updatedCredential)] = updatedCredential
-            }
-            return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, services, newCredentials))
-                .toSingleDefault(findIdentityByDid(qrCode.loggedInDid)?.name)
-        }
-        throw  NotInitializedWalletConfigThrowable()
-    }
+        walletConfigManager.findIdentityByDid(did) != null
 
     override fun isCredentialLoggedIn(qrCode: CredentialQrCode): Boolean {
         walletConfigManager.getWalletConfig()?.credentials?.let { credentials ->
@@ -179,13 +164,6 @@ class IdentityManagerImpl(
             if (newIdentity.index == identity.index) return position
         }
         return walletConfig.identities.size
-    }
-
-    private fun WalletConfig.getPositionForCredential(credential: Credential): Int {
-        credentials.forEachIndexed { position, item ->
-            if (item.loggedInIdentityDid == credential.loggedInIdentityDid && item.type == credential.type && item.issuer == credential.issuer) return position
-        }
-        return identities.size
     }
 
     companion object {

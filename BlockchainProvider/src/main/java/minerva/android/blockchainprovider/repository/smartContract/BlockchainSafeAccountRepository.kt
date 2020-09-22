@@ -1,10 +1,10 @@
-package minerva.android.blockchainprovider.repository.contract
+package minerva.android.blockchainprovider.repository.smartContract
 
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.model.TransactionPayload
 
-interface BlockchainContractRepository {
+interface BlockchainSafeAccountRepository {
     fun deployGnosisSafeContract(privateKey: String, address: String, network: String): Single<String>
     fun getGnosisSafeOwners(contractAddress: String, network: String, privateKey: String): Single<List<String>>
     fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable

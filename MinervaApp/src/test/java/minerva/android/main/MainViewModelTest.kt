@@ -3,16 +3,17 @@ package minerva.android.main
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
-import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
@@ -24,8 +25,8 @@ class MainViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
-    private val identityManager: IdentityManager = mock()
-    private val viewModel = MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager, identityManager)
+    private val transactionRepository: TransactionRepository = mock()
+    private val viewModel = MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager, transactionRepository)
 
     private val notExistedIdentityObserver: Observer<Event<Unit>> = mock()
     private val notExistedIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -38,6 +39,12 @@ class MainViewModelTest : BaseViewModelTest() {
 
     private val updateCredentialObserver: Observer<Event<String>> = mock()
     private val updateCredentialCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
+
+    private val updatePendingAccountObserver: Observer<Event<PendingAccount>> = mock()
+    private val updatePendingAccountCaptor: KArgumentCaptor<Event<PendingAccount>> = argumentCaptor()
+
+    private val timeoutPendingAccountObserver: Observer<Event<List<PendingAccount>>> = mock()
+    private val timeoutPendingAccountCaptor: KArgumentCaptor<Event<List<PendingAccount>>> = argumentCaptor()
 
     @Test
     fun `test known user login when there is no identity`() {
@@ -115,22 +122,22 @@ class MainViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `Should show edit order icon` () {
+    fun `Should show edit order icon`() {
         whenever(orderManager.isOrderAvailable(any())).thenReturn(true)
         val isEditIconVisible = viewModel.isOrderEditAvailable(WalletActionType.IDENTITY)
         isEditIconVisible shouldBeEqualTo true
     }
 
     @Test
-    fun `Should not show edit order icon` () {
+    fun `Should not show edit order icon`() {
         whenever(orderManager.isOrderAvailable(any())).thenReturn(false)
         val isEditIconVisible = viewModel.isOrderEditAvailable(WalletActionType.IDENTITY)
         isEditIconVisible shouldBeEqualTo false
     }
 
     @Test
-    fun `update binded credential test`(){
-        whenever(identityManager.updateBindedCredential(any())).doReturn(Single.just("name"))
+    fun `update binded credential test`() {
+        whenever(serviceManager.updateBindedCredential(any())).doReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
             qrCode = CredentialQrCode("name", "type")
@@ -144,14 +151,76 @@ class MainViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `update binded credential test error`(){
+    fun `update binded credential test error`() {
         val error = Throwable()
-        whenever(identityManager.updateBindedCredential(any())).doReturn(Single.error(error))
+        whenever(serviceManager.updateBindedCredential(any())).doReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
             qrCode = CredentialQrCode("name", "type")
             updateCredentialErrorLiveData.observeForever(errorObserver)
             updateBindedCredential()
+        }
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `subscribe to executed transactions success`() {
+        whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
+        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")))
+        viewModel.run {
+            updatePendingAccountLiveData.observeForever(updatePendingAccountObserver)
+            subscribeToExecutedTransactions(1)
+
+        }
+        updatePendingAccountCaptor.run {
+            verify(updatePendingAccountObserver).onChanged(capture())
+            firstValue.peekContent().txHash == "123"
+        }
+    }
+
+    @Test
+    fun `subscribe to executed transactions error`() {
+        val error = Throwable()
+        whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
+        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.error(error))
+        viewModel.run {
+            updatePendingTransactionErrorLiveData.observeForever(errorObserver)
+            subscribeToExecutedTransactions(1)
+
+        }
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `subscribe to executed transactions on complete`() {
+        whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
+        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")).take(0))
+        whenever(transactionRepository.getTransactions()).thenReturn(Single.just(listOf(PendingAccount(1, "123"))))
+        viewModel.run {
+            handleTimeoutOnPendingTransactionsLiveData.observeForever(timeoutPendingAccountObserver)
+            subscribeToExecutedTransactions(1)
+
+        }
+        timeoutPendingAccountCaptor.run {
+            verify(timeoutPendingAccountObserver).onChanged(capture())
+            firstValue.peekContent()[0].txHash == "123"
+        }
+    }
+
+    @Test
+    fun `subscribe to executed transactions on complete and error occurs`() {
+        val error = Throwable()
+        whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
+        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")).take(0))
+        whenever(transactionRepository.getTransactions()).thenReturn(Single.error(error))
+        viewModel.run {
+            updatePendingTransactionErrorLiveData.observeForever(errorObserver)
+            subscribeToExecutedTransactions(1)
+
         }
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())

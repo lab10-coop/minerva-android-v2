@@ -16,7 +16,7 @@ import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.utils.DateUtils
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.widget.repository.getServiceIcon
 
 class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) : RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {

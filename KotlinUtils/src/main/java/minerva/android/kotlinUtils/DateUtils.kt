@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.utils
+package minerva.android.kotlinUtils
 
 import minerva.android.kotlinUtils.extension.toMilliseconds
 import org.joda.time.DateTimeConstants
@@ -25,7 +25,7 @@ object DateUtils {
             Locale.getDefault()
         ).format(Date(timestamp.toMilliseconds()))
 
-    fun getTimeFromTimeStamp(time: Long): String =
+    fun getTimeFromTimeStamp(time: Long = timestamp): String =
         SimpleDateFormat(
             TIME_FORMAT,
             Locale.getDefault()

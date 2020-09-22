@@ -20,7 +20,6 @@ import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.manager.services.ServiceManagerImpl
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -45,7 +44,14 @@ fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, binanceUrl: St
     .plus(createCryptographyModules())
     .plus(createWalletConfigProviderModule(isDebug, baseUrl))
     .plus(createServicesApiProviderModule(isDebug, baseUrl))
-    .plus(createBlockchainProviderModule(NetworkManager.urlMap, BuildConfig.ENS_ADDRESS, NetworkManager.gasPriceMap))
+    .plus(
+        createBlockchainProviderModule(
+            NetworkManager.httpsUrlMap,
+            BuildConfig.ENS_ADDRESS,
+            NetworkManager.gasPriceMap,
+            NetworkManager.wssUrlMap
+        )
+    )
     .plus(createExchangeRateProviderModule(isDebug, binanceUrl))
 
 fun createWalletModules() = module {
@@ -55,16 +61,16 @@ fun createWalletModules() = module {
     factory<KeystoreRepository> { KeystoreRepositoryImpl(get(named(minervaSharedPrefs)), get()) }
     factory<LocalStorage> { LocalStorageImpl(get(named(localSharedPrefs))) }
     factory<LocalWalletConfigProvider> { LocalWalletConfigProviderImpl(get(named(localSharedPrefs))) }
+    factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
     factory<WalletConfigRepository> { WalletConfigRepositoryImpl(get(), get(), get(), get()) }
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
     factory<AccountManager> { AccountManagerImpl(get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get(), get()) }
-    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get()) }
+    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get()) }
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
-    factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
     factory<OrderManager> { OrderManagerImpl(get()) }
 }
 

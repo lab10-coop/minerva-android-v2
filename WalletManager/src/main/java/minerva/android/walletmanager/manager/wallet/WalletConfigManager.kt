@@ -27,7 +27,9 @@ interface WalletConfigManager : Manager {
     fun getValueIterator(): Int
     fun isAlreadyLoggedIn(issuer: String): Boolean
     fun getLoggedInIdentityPublicKey(issuer: String): String
-    fun getLoggedInIdentityByPyblicKey(publicKey: String): Identity?
+    fun getLoggedInIdentityByPublicKey(publicKey: String): Identity?
     fun saveService(service: Service): Completable
-    fun getAccount(valueIndex: Int, assetIndex: Int): Account?
+    fun getAccount(accountIndex: Int): Account?
+
+    fun findIdentityByDid(did: String): Identity?
 }

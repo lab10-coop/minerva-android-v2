@@ -97,6 +97,7 @@
     <string name="transaction_success_message">You successfully transferred %s</string>
     <string name="transaction_error_title">Error: Transaction failed</string>
     <string name="transaction_error_message"><b>Error cause:</b> %s</string>
+    <string name="transaction_error_details_message">Transfer of %1$s %2$s failed.</string>
     <string name="receiver">Receiver</string>
     <string name="gas_price_gwei">Gas Price (Gwei)</string>
     <string name="gas_limit">Gas Limit</string>
@@ -190,4 +191,5 @@
     <string name="permission_error">Permission Error</string>
     <string name="permission_error_message">Can not change profile photo without necessary permissions</string>
     <string name="clear_text">Clear text</string>
+    <string name="pending_accout_error_message">Something went wrong, please check your balances.</string>
 </resources>
