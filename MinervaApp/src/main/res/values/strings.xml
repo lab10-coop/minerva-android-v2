@@ -94,7 +94,7 @@
     <string name="networks">Networks</string>
     <string name="creating_account_error">Creating new account failed</string>
     <string name="transaction_success_title">Transaction Successful</string>
-    <string name="transaction_success_message">You successfully transferred %s</string>
+    <string name="transaction_success_message">You successfully transferred  %1$s %2$s</string>
     <string name="transaction_error_title">Error: Transaction failed</string>
     <string name="transaction_error_message"><b>Error cause:</b> %s</string>
     <string name="transaction_error_details_message">Transfer of %1$s %2$s failed.</string>
@@ -191,5 +191,5 @@
     <string name="permission_error">Permission Error</string>
     <string name="permission_error_message">Can not change profile photo without necessary permissions</string>
     <string name="clear_text">Clear text</string>
-    <string name="pending_accout_error_message">Something went wrong, please check your balances.</string>
+    <string name="pending_account_error_message">Something went wrong, please check your balances.</string>
 </resources>

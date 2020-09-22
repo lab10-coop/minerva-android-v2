@@ -7,8 +7,6 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.NO_DATA
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.Recipient
-import timber.log.Timber
-
 
 class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : LocalStorage {
 
