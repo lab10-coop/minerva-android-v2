@@ -10,6 +10,7 @@ import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
+import minerva.android.walletmanager.model.NewIdentity
 import minerva.android.widget.ProfileImage
 
 class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(),
@@ -27,14 +28,6 @@ class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(),
         holder.bindView(identities[position])
     }
 
-    fun updateList(identities: MutableList<Identity>) {
-        identities.add(IncognitoIdentity())
-        this.identities = identities.filter { !it.isDeleted }
-        notifyDataSetChanged()
-    }
-
-    fun getSelectedIdentity() = identities.find { it.isSelected }
-
     override fun onIdentityClicked(identity: Identity) {
         this.identities.forEach {
             if (it != identity) {
@@ -43,6 +36,17 @@ class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(),
         }
         notifyDataSetChanged()
     }
+
+    fun updateList(identities: MutableList<Identity>) {
+        identities.apply {
+            add(NewIdentity())
+            add(IncognitoIdentity())
+        }
+        this.identities = identities.filter { !it.isDeleted }
+        notifyDataSetChanged()
+    }
+
+    fun getSelectedIdentity() = identities.find { it.isSelected }
 }
 
 class ItemViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {

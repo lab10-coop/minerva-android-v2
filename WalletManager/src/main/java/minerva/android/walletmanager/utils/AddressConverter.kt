@@ -3,7 +3,8 @@ package minerva.android.walletmanager.utils
 object AddressConverter {
 
     fun getShortAddress(type: AddressType, address: String) = address.let {
-        String.format(SHORT_FORMAT, it.substring(START, getPrefixSize(type)), it.substring(it.length - SHORT_SUFFIX_SIZE, it.length))
+        if (it.length < SHORT_DID_PREFIX_SIZE) it
+        else String.format(SHORT_FORMAT, it.substring(START, getPrefixSize(type)), it.substring(it.length - SHORT_SUFFIX_SIZE, it.length))
     }
 
     private fun getPrefixSize(type: AddressType) =
@@ -17,7 +18,6 @@ object AddressConverter {
     private const val SHORT_NORMAL_PREFIX_SIZE = 6
     private const val SHORT_DID_PREFIX_SIZE = 15
     private const val SHORT_SUFFIX_SIZE = 4
-
 }
 
 enum class AddressType {

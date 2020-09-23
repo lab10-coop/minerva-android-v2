@@ -19,5 +19,8 @@ annotation class DefaultWalletConfigFields {
         const val INCOGNITO_PRIVATE_KEY = "0x123000000000"
         const val INCOGNITO_PUBLIC_KEY = "0x456000000000"
         const val INCOGNITO_EMAIL = "incognito@email.com"
+        const val NEW_IDENTITY = "New Identity"
+        const val NEW_IDENTITY_PUBLIC_KEY = "0x0000000000"
+        const val NEW_IDENTITY_LOGO_LETTER = "+"
     }
 }

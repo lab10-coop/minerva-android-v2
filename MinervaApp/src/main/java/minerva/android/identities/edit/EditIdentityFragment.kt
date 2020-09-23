@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -24,8 +25,10 @@ import minerva.android.extension.isEmail
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.ADDRESS_1
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.ADDRESS_2
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.BIRTH_DATE
@@ -36,10 +39,16 @@ import minerva.android.walletmanager.model.defs.IdentityField.Companion.NAME
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.PHONE_NUMBER
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.POSTCODE
 import minerva.android.walletmanager.model.defs.WalletActionStatus
+import minerva.android.walletmanager.utils.AddressConverter
+import minerva.android.walletmanager.utils.AddressType
 import minerva.android.widget.LetterLogo
 import minerva.android.widget.ProfileImage
 import minerva.android.widget.ProfileImageDialog
 import minerva.android.widget.ProfileImageDialog.Companion.TAKE_PHOTO_REQUEST
+import minerva.android.widget.dialog.ConfirmDataDialog
+import minerva.android.wrapped.WrappedActivity.Companion.INDEX
+import minerva.android.wrapped.WrappedActivity.Companion.POSITION
+import minerva.android.wrapped.WrappedActivity.Companion.SERVICE_QR_CODE
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import java.util.*
@@ -47,6 +56,7 @@ import java.util.*
 
 class EditIdentityFragment : Fragment() {
     private var index: Int = Int.InvalidIndex
+    private var serviceQrCode: ServiceQrCode? = null
     private lateinit var identity: Identity
     private lateinit var profileImageDialog: ProfileImageDialog
     private val viewModel: EditIdentityViewModel by viewModel()
@@ -101,7 +111,33 @@ class EditIdentityFragment : Fragment() {
         }
     }
 
+    private fun showConfirmDialog() {
+        ConfirmDataDialog.Builder(requireContext())
+            .title(getString(R.string.provide_following_data))
+            .data(prepareRequestedDataMap())
+            .positiveAction { saveIdentity() }
+            .show()
+    }
+
+    private fun prepareRequestedDataMap(): Map<String, String> =
+        mutableMapOf<String, String>().apply {
+            this[DID] = AddressConverter.getShortAddress(AddressType.DID_ADDRESS, identity.did)
+            prepareFormData().let { currentData ->
+                serviceQrCode?.requestedData?.let {
+                    it.forEach { key ->
+                        this[key.capitalize()] = currentData[key] ?: String.Empty
+                    }
+                }
+            }
+        }
+
+    private fun isConfirmDialogRequested() : Boolean = serviceQrCode?.requestedData != null
+
     private fun onConfirmButtonClicked() {
+        if (!checkRequestedData()) {
+            showErrorMessage(getString(R.string.missing_required_data))
+            return
+        }
         email.text.toString().apply {
             if (isNotEmailAndIsNotEmpty(this)) {
                 showErrorMessage(getString(R.string.wrong_email))
@@ -112,7 +148,8 @@ class EditIdentityFragment : Fragment() {
             showErrorMessage(getString(R.string.empty_identity_name))
             return
         }
-        saveIdentity()
+        if(isConfirmDialogRequested()) showConfirmDialog()
+        else saveIdentity()
     }
 
     private fun getEmailErrorMessage(text: String): String? =
@@ -208,15 +245,50 @@ class EditIdentityFragment : Fragment() {
         return map as LinkedHashMap<String, String>
     }
 
+    private fun checkRequestedData(): Boolean {
+        serviceQrCode?.requestedData?.let { requestedData ->
+            prepareFormData().let { data ->
+                requestedData.forEach {
+                    if (data[it] == null) return false
+                }
+            }
+        }
+        return true
+    }
+
+    //TODO change for dynamic label generation
+    private fun getTextInputLayout(key: String): Pair<TextInputLayout, TextInputEditText> =
+        when (key) {
+            NAME -> Pair(nameLayout, accountName)
+            EMAIL -> Pair(emailLayout, email)
+            PHONE_NUMBER -> Pair(phoneNumberLayout, phoneNumber)
+            BIRTH_DATE -> Pair(birthDateLayout, birthDate)
+            ADDRESS_1 -> Pair(addressLine1Layout, addressLine1)
+            ADDRESS_2 -> Pair(addressLine2Layout, addressLine2)
+            CITY -> Pair(cityLayout, city)
+            POSTCODE -> Pair(postcodeLayout, postcode)
+            COUNTRY -> Pair(countryLayout, country)
+            else -> Pair(nameLayout, accountName)
+        }
+
+
     private fun initializeFragment() {
         viewModel.apply {
             editIdentityLiveData.observe(viewLifecycleOwner, EventObserver { initializeView(it) })
-            saveCompletedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.onBackPressed() })
+            saveCompletedLiveData.observe(viewLifecycleOwner, EventObserver {
+                activity?.setResult(Activity.RESULT_OK, Intent().apply {
+                    putExtra(INDEX, it.index)
+                    putExtra(SERVICE_QR_CODE, serviceQrCode)
+                })
+                activity?.onBackPressed()
+            })
             saveErrorLiveData.observe(viewLifecycleOwner, EventObserver { showErrorMessage(it.message) })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
         }
         arguments?.let {
-            index = it.getInt(INDEX)
+            index = it.getInt(POSITION)
+            serviceQrCode = it.getParcelable(SERVICE_QR_CODE)
+            highlightRequestedData(serviceQrCode)
             viewModel.loadIdentity(index, getString(R.string.identity))
         }
 
@@ -239,6 +311,18 @@ class EditIdentityFragment : Fragment() {
             }
         }
     }
+
+    private fun highlightRequestedData(serviceQrCode: ServiceQrCode?) =
+        serviceQrCode?.requestedData?.let {
+            it.forEach {
+                getTextInputLayout(it).apply {
+                    first.hint = String.format(REQUIRED_HINT_FORMAT, first.hint, getString(R.string.required))
+                    first.error = String.Space
+                    first.errorIconDrawable = null
+                    checkEditTextInput(first, second) { isBlank(second.text.toString()) }
+                }
+            }
+        }
 
     private fun checkEditTextInput(layout: TextInputLayout, editText: TextInputEditText, prepareErrorMessage: (String) -> String?) {
         editText.setOnFocusChangeListener { _, hasFocus ->
@@ -292,14 +376,18 @@ class EditIdentityFragment : Fragment() {
     }
 
     companion object {
-        private const val INDEX = "index"
         private const val DATE_FORMAT = "%d.%d.%d"
+        private const val DID = "DID"
+        private const val REQUIRED_HINT_FORMAT = "%s (%s)"
 
         @JvmStatic
-        fun newInstance(index: Int) =
+        fun newInstance(position: Int, serviceQrCode: ServiceQrCode? = null) =
             EditIdentityFragment().apply {
                 arguments = Bundle().apply {
-                    putInt(INDEX, index)
+                    putInt(POSITION, position)
+                    serviceQrCode?.let {
+                        putParcelable(SERVICE_QR_CODE, serviceQrCode)
+                    }
                 }
             }
     }
