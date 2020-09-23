@@ -31,7 +31,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-abstract class ClubCard(context: Context, private val path: String?) : Dialog(context, R.style.CardDialog) {
+abstract class ClubCard(context: Context, private val path: String?) : Dialog(context, R.style.DataDialog) {
 
     abstract fun getAsHashMap(): HashMap<String, String>
     private val propertyMap: HashMap<String, String> by lazy {

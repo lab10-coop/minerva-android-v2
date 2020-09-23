@@ -112,7 +112,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     fun setActionStatus(walletAction: WalletAction) {
         val lastUsed = DateUtils.getTimeFromTimeStamp(walletAction.lastUsed)
         context.run {
-            header.text = when (walletAction.status) {
+            title.text = when (walletAction.status) {
                 REMOVED, SAFE_ACCOUNT_REMOVED -> getString(R.string.wallet_action_header, getString(R.string.removed), lastUsed)
                 CHANGED -> getString(R.string.wallet_action_header, getString(R.string.changed), lastUsed)
                 ADDED, SAFE_ACCOUNT_ADDED -> getString(R.string.wallet_action_header, getString(R.string.added), lastUsed)

@@ -153,11 +153,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     }
 
     private fun prepareSettingsIcon() {
-        if (!viewModel.isMnemonicRemembered()) {
-            bottomNavigation.getOrCreateBadge(R.id.settings)
-        } else {
-            removeSettingsBadgeIcon()
-        }
+        if (!viewModel.isMnemonicRemembered()) bottomNavigation.getOrCreateBadge(R.id.settings)
+        else removeSettingsBadgeIcon()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -297,6 +294,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         private const val NEW_VALUE_TITLE_PATTERN = "%s #%d"
         const val LOGIN_SCANNER_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
+        const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
         const val JWT = "jwt"
     }
 }

@@ -1,11 +1,40 @@
 package minerva.android.wrapped
 
+import android.app.Activity
 import android.content.Context
 import minerva.android.extension.launchActivity
+import minerva.android.extension.launchActivityForResult
+import minerva.android.main.MainActivity.Companion.EDIT_IDENTITY_RESULT_REQUEST_CODE
+import minerva.android.walletmanager.model.ServiceQrCode
 
 fun startNewIdentityWrappedActivity(context: Context) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.IDENTITY)
+    }
+}
+
+fun startNewIdentityOnResultWrappedActivity(activity: Activity?, serviceQrCode: ServiceQrCode? = null) {
+    activity?.launchActivityForResult<WrappedActivity>(EDIT_IDENTITY_RESULT_REQUEST_CODE) {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.IDENTITY)
+        serviceQrCode?.let {
+            putExtra(WrappedActivity.SERVICE_QR_CODE, serviceQrCode)
+        }
+    }
+}
+
+fun startEditIdentityOnResultWrappedActivity(
+    activity: Activity?,
+    position: Int,
+    title: String,
+    serviceQrCode: ServiceQrCode?
+) {
+    activity?.launchActivityForResult<WrappedActivity>(EDIT_IDENTITY_RESULT_REQUEST_CODE) {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.IDENTITY)
+        putExtra(WrappedActivity.INDEX, position)
+        putExtra(WrappedActivity.TITLE, title)
+        serviceQrCode?.let {
+            putExtra(WrappedActivity.SERVICE_QR_CODE, serviceQrCode)
+        }
     }
 }
 

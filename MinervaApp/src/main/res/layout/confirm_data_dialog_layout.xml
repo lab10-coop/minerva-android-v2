@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/rounded_white_background"
+    android:orientation="vertical"
+    android:padding="@dimen/margin_normal">
+
+    <TextView
+        android:id="@+id/title"
+        android:fontFamily="@font/rubik_medium"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_normal"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:layout_marginLeft="@dimen/margin_xsmall"
+        android:layout_marginRight="@dimen/margin_xsmall"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Some example title" />
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_xsmall"
+        android:layout_marginRight="@dimen/margin_xsmall"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:orientation="vertical" />
+
+    <TextView
+        android:id="@+id/sendButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/container"
+        android:layout_marginRight="@dimen/margin_xsmall"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/send"
+        style="@style/AlertTitle"
+        android:textSize="@dimen/text_small"
+        android:textAllCaps="true"
+        android:textColor="@color/colorSecondary" />
+
+    <TextView
+        android:id="@+id/cancelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:textSize="@dimen/text_small"
+        app:layout_constraintRight_toLeftOf="@id/sendButton"
+        android:layout_marginRight="@dimen/confirm_dialog_button_margin"
+        app:layout_constraintBottom_toBottomOf="@id/sendButton"
+        android:textAllCaps="true"
+        android:textColor="@color/colorSecondary"
+        style="@style/AlertTitle" />
+</androidx.constraintlayout.widget.ConstraintLayout>

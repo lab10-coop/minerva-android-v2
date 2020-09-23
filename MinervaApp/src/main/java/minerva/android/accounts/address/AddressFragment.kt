@@ -75,7 +75,7 @@ class AddressFragment : Fragment() {
     }
 
     private fun prepareHeader(minervaPrimitive: MinervaPrimitive) {
-        header.apply {
+        title.apply {
             (minervaPrimitive as? Identity)?.let {
                 text = it.identityTitle
             }

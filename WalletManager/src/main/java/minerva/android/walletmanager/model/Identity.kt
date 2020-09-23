@@ -9,6 +9,8 @@ import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Compan
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PHONE
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PRIVATE_KEY
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PUBLIC_KEY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.NEW_IDENTITY
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.NEW_IDENTITY_PUBLIC_KEY
 import minerva.android.walletmanager.model.defs.IdentityField
 
 open class Identity(
@@ -45,6 +47,9 @@ open class Identity(
     val identityTitle: String
         get() = personalData[IdentityField.NAME] ?: name
 
+    val isNewIdentity: Boolean
+        get() = publicKey == NEW_IDENTITY_PUBLIC_KEY
+
     override fun equals(other: Any?): Boolean = (other is Identity)
             && index == other.index
             && name == other.name
@@ -68,4 +73,9 @@ data class IncognitoIdentity(
     ),
     override var privateKey: String = INCOGNITO_PRIVATE_KEY,
     override var publicKey: String = INCOGNITO_PUBLIC_KEY
+) : Identity(index = Int.InvalidIndex)
+
+data class NewIdentity(
+    override var name: String = NEW_IDENTITY,
+    override var publicKey: String = NEW_IDENTITY_PUBLIC_KEY
 ) : Identity(index = Int.InvalidIndex)

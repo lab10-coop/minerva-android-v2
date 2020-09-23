@@ -18,7 +18,7 @@
         tools:ignore="ContentDescription" />
 
     <TextView
-        android:id="@+id/header"
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_xsmall"
@@ -43,6 +43,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/icon"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header"
+        app:layout_constraintTop_toBottomOf="@+id/title"
         tools:text="idetity" />
 </androidx.constraintlayout.widget.ConstraintLayout>

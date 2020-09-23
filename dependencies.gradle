@@ -59,6 +59,8 @@ ext {
 
     jsoupVersion = '1.13.1'
 
+    flexboxVersion = '2.0.1'
+
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
             rxbindingCore: "com.jakewharton.rxbinding3:rxbinding-core:$rxbindingVersion"
@@ -138,7 +140,8 @@ ext {
             spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion",
             biometric      : "androidx.biometric:biometric:$biometricVersion",
             waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion",
-            glidetoVector  : "com.github.corouteam:GlideToVectorYou:$glideToVector"
+            glidetoVector  : "com.github.corouteam:GlideToVectorYou:$glideToVector",
+            flexbox        : "com.google.android:flexbox:$flexboxVersion"
     ]
 
     blockChainDependencies = [

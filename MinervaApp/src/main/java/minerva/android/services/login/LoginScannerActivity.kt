@@ -11,11 +11,15 @@ import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.replaceFragment
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.main.handler.isIdentityPrepared
 import minerva.android.services.login.identity.ChooseIdentityFragment
 import minerva.android.services.login.scanner.LoginScannerFragment
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.wrapped.WrappedActivity.Companion.INDEX
+import minerva.android.wrapped.WrappedActivity.Companion.SERVICE_QR_CODE
 
 class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
 
@@ -64,6 +68,19 @@ class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
             onBackPressed()
         }
         return super.onOptionsItemSelected(menuItem)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when {
+            isIdentityPrepared(requestCode, resultCode) -> {
+                data?.getIntExtra(INDEX, Int.InvalidIndex)?.let { index ->
+                    data.getParcelableExtra<ServiceQrCode>(SERVICE_QR_CODE)?.let { serviceQrCode ->
+                        (getCurrentFragment() as? ChooseIdentityFragment)?.handleLogin(index, serviceQrCode)
+                    }
+                }
+            }
+        }
     }
 
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
