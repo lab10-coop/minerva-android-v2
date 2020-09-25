@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
+import minerva.android.kotlinUtils.Empty
 import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
@@ -21,6 +22,7 @@ abstract class MinervaPrimitiveListFragment : Fragment(), MinervaPrimitiveClickL
     open fun onRemoveCredential(credential: Credential) {}
     open fun onRemoveService(service: Service) {}
     open fun onCredentialContainerClick(credential: Credential) {}
+    open fun getLoggedIdentityName(loggedInIdentityDid: String): String = String.Empty
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.recycler_view_layout, container, false)
@@ -51,4 +53,10 @@ abstract class MinervaPrimitiveListFragment : Fragment(), MinervaPrimitiveClickL
             is Credential -> onCredentialContainerClick(minervaPrimitive)
         }
     }
+
+    override fun getLoggedIdentityName(minervaPrimitive: MinervaPrimitive): String =
+        when (minervaPrimitive) {
+            is Credential -> getLoggedIdentityName(minervaPrimitive.loggedInIdentityDid)
+            else -> String.Empty
+        }
 }

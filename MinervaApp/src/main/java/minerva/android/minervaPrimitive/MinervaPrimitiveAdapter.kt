@@ -12,11 +12,11 @@ import kotlinx.android.synthetic.main.minerva_primitive_list_row.view.*
 import minerva.android.R
 import minerva.android.extension.visible
 import minerva.android.extensions.loadImageUrl
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
-import minerva.android.kotlinUtils.DateUtils
 import minerva.android.widget.repository.getServiceIcon
 
 class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) : RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {
@@ -55,7 +55,9 @@ class MinervaPrimitiveViewHolder(
                     minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl)
                     identityName.apply {
                         visible()
-                        text = String.format(context.getString(R.string.identity_label, minervaPrimitive.memberName))
+                        listener.getLoggedIdentityName(minervaPrimitive).let { identityName ->
+                            text = String.format(context.getString(R.string.identity_label, identityName))
+                        }
                     }
                 }
                 is Service -> showIcon(getServiceIcon(minervaPrimitive.type))

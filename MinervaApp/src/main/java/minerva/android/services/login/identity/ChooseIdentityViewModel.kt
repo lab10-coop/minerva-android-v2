@@ -7,6 +7,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_QUICK_USER
@@ -51,6 +52,15 @@ class ChooseIdentityViewModel(
             _requestedFieldsLiveData.value = Event(Any())
         }
     }
+
+    fun handleLogin(identityIndex: Int, serviceQrCode: ServiceQrCode) {
+        handleLogin(getIdentity(identityIndex), serviceQrCode)
+    }
+
+    fun getIdentityPosition(identityIndex: Int): Int = getIdentities()?.find { it.index == identityIndex }?.index ?: Int.InvalidIndex
+
+    private fun getIdentity(identityIndex: Int): Identity =
+        getIdentities()?.find { it.index == identityIndex } ?: Identity(index = Int.InvalidIndex)
 
     private fun minervaLogin(identity: Identity, qrCode: ServiceQrCode) {
         if (handleNoKeysError(identity)) return

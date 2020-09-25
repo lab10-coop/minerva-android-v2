@@ -35,10 +35,10 @@
                     android:layout_height="@dimen/big_letter_logo_size" />
 
                 <ImageView
-                    android:layout_width="@dimen/small_logo_size"
-                    android:layout_height="@dimen/small_logo_size"
+                    android:layout_width="@dimen/camera_logo_icon_size"
+                    android:layout_height="@dimen/camera_logo_icon_size"
                     android:layout_margin="@dimen/margin_xxsmall"
-                    android:layout_gravity="bottom|end"
+                    android:layout_gravity="top|end"
                     tools:ignore="ContentDescription"
                     android:src="@drawable/camera_icon" />
 
@@ -107,6 +107,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/phoneNumberLayout"
                 style="@style/FormTextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -122,6 +123,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/birthDateLayout"
                 style="@style/FormTextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

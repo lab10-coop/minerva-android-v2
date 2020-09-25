@@ -10,6 +10,7 @@ object CredentialQrCodeToCredentialMapper: Mapper<CredentialQrCode, Credential> 
             name = input.name,
             type = input.type,
             issuer = input.issuer,
+            token = input.token,
             creationDate = input.creationDate,
             expirationDate = input.expirationDate,
             coverage = input.coverage,

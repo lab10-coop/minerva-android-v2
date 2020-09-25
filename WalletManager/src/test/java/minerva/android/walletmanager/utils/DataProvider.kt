@@ -14,9 +14,9 @@ object DataProvider {
 
     val walletConfig = WalletConfig(
         0, listOf(
-            Identity(0, "identityName1", "11", "privateKey", "address", data),
-            Identity(1, "identityName2", "", "privateKey", "address", data),
-            Identity(3, "identityName3", "", "privateKey", "address", data)
+            Identity(0, "identityName1", "11", "privateKey", "address1", data),
+            Identity(1, "identityName2", "", "privateKey", "address2", data),
+            Identity(3, "identityName3", "", "privateKey", "address3", data)
         ),
         listOf(
             Account(2, "publicKey1", "privateKey1", "address", network = NetworkShortName.ETH_RIN),

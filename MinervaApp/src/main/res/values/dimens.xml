@@ -23,6 +23,9 @@
     <dimen name="badge_logo_size">16dp</dimen>
     <dimen name="form_box_stroke_width">2dp</dimen>
     <dimen name="circle_icon_background">48dp</dimen>
+    <dimen name="confirm_dialog_button_margin">24dp</dimen>
+    <dimen name="camera_logo_icon_size">24dp</dimen>
+    <dimen name="qr_code_margin">6dp</dimen>
 
     <dimen name="clickable_area">32dp</dimen>
     <dimen name="large_letter_logo_size">128dp</dimen>
@@ -38,4 +41,7 @@
     <dimen name="card_width">384dp</dimen>
     <dimen name="tab_height">30dp</dimen>
     <dimen name="elevation_small">2dp</dimen>
+    <dimen name="divider_height">2dp</dimen>
+    <dimen name="scrollbar_size">3dp</dimen>
+    <dimen name="check_box_offset">6dp</dimen>
 </resources>

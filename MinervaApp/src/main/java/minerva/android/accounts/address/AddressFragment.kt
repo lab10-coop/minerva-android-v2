@@ -51,7 +51,6 @@ class AddressFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_address, container, false)
     }
 
-
     private fun initializeView(minervaPrimitive: MinervaPrimitive) {
         with(minervaPrimitive) {
             prepareLogo(this)
@@ -75,7 +74,7 @@ class AddressFragment : Fragment() {
     }
 
     private fun prepareHeader(minervaPrimitive: MinervaPrimitive) {
-        header.apply {
+        title.apply {
             (minervaPrimitive as? Identity)?.let {
                 text = it.identityTitle
             }

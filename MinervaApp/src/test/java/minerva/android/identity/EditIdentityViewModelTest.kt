@@ -19,8 +19,8 @@ class EditIdentityViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val viewModel = EditIdentityViewModel(identityManager, walletActionsRepository)
 
-    private val saveIdentityObserver: Observer<Event<Unit>> = mock()
-    private val saveIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+    private val saveIdentityObserver: Observer<Event<Identity>> = mock()
+    private val saveIdentityCaptor: KArgumentCaptor<Event<Identity>> = argumentCaptor()
 
     @Test
     fun `save identity success`() {

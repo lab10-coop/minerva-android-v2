@@ -23,8 +23,8 @@ class EditIdentityViewModel(
     private val _editIdentityLiveData = MutableLiveData<Event<Identity>>()
     val editIdentityLiveData: LiveData<Event<Identity>> get() = _editIdentityLiveData
 
-    private val _saveCompletedLiveData = MutableLiveData<Event<Unit>>()
-    val saveCompletedLiveData: LiveData<Event<Unit>> get() = _saveCompletedLiveData
+    private val _saveCompletedLiveData = MutableLiveData<Event<Identity>>()
+    val saveCompletedLiveData: LiveData<Event<Identity>> get() = _saveCompletedLiveData
 
     private val _saveErrorLiveData = MutableLiveData<Event<Throwable>>()
     val saveErrorLiveData: LiveData<Event<Throwable>> get() = _saveErrorLiveData
@@ -46,7 +46,7 @@ class EditIdentityViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _saveCompletedLiveData.value = Event(Unit) },
+                    onComplete = { _saveCompletedLiveData.value = Event(identity) },
                     onError = {
                         //Panic Button. Uncomment code below to save manually - not recommended
                         //_saveCompletedLiveData.value = Event(Unit)

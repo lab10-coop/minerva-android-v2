@@ -18,6 +18,8 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.services.login.LoginScannerListener
 import minerva.android.walletmanager.model.QrCode
 import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.wrapped.startEditIdentityOnResultWrappedActivity
+import minerva.android.wrapped.startNewIdentityOnResultWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ChooseIdentityFragment : Fragment() {
@@ -43,6 +45,7 @@ class ChooseIdentityFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         prepareObservers()
         setLoginButtonOnClickListener()
+        setupServiceData()
     }
 
     override fun onAttach(context: Context) {
@@ -52,10 +55,11 @@ class ChooseIdentityFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        setupServiceData()
         setupRecycleView()
         setupIdentitiesList()
     }
+
+    fun handleLogin(index: Int, serviceQrCode: ServiceQrCode) = viewModel.handleLogin(index, serviceQrCode)
 
     private fun hideLoader() {
         loginButton.visible()
@@ -69,7 +73,7 @@ class ChooseIdentityFragment : Fragment() {
 
     private fun setupServiceData() {
         minervaPrimitiveName.text = serviceQrCode.serviceName
-        requestedFields.text = serviceQrCode.identityFields
+        requestedData.prepareChain(serviceQrCode.requestedData, getString(R.string.requested_data))
     }
 
     private fun setupIdentitiesList() {
@@ -105,7 +109,15 @@ class ChooseIdentityFragment : Fragment() {
             errorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false) })
             loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(true, payload = it) })
             requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver {
-                Toast.makeText(context, getString(R.string.requested_data_message), Toast.LENGTH_LONG).show()
+                identitiesAdapter.getSelectedIdentity()?.let {
+                    if (it.isNewIdentity) startNewIdentityOnResultWrappedActivity(activity, serviceQrCode)
+                    else startEditIdentityOnResultWrappedActivity(
+                        activity,
+                        viewModel.getIdentityPosition(it.index),
+                        it.name,
+                        serviceQrCode
+                    )
+                }
             })
         }
     }

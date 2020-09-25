@@ -108,9 +108,14 @@
         <item name="android:fontFamily">@font/rubik_medium</item>
     </style>
 
-    <style name="CardDialog" parent="Base.Theme.AppCompat.Dialog">
+    <style name="DataDialog" parent="Base.Theme.AppCompat.Dialog">
         <item name="android:windowMinWidthMajor">90%</item>
         <item name="android:windowMinWidthMinor">90%</item>
+    </style>
+
+    <style name="ConfirmDialog" parent="Base.Theme.AppCompat.Dialog">
+        <item name="android:windowMinWidthMajor">82%</item>
+        <item name="android:windowMinWidthMinor">82%</item>
     </style>
 
     <style name="TabLayoutStyle" parent="Widget.MaterialComponents.TabLayout">

@@ -20,7 +20,7 @@ import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.Event
 
-class ProfileImageDialog(private val fragment: Fragment) : Dialog(fragment.requireContext(), R.style.CardDialog) {
+class ProfileImageDialog(private val fragment: Fragment) : Dialog(fragment.requireContext(), R.style.DataDialog) {
 
     var imageUri: Uri? = null
 

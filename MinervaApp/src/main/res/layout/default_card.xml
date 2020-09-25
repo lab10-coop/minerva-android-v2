@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@drawable/rounded_white_background"
     android:padding="@dimen/margin_normal">
 
@@ -130,14 +130,4 @@
         app:layout_constraintBottom_toBottomOf="@id/coverageLabel"
         app:layout_constraintLeft_toLeftOf="@id/centerHorizontal"
         tools:text="Touring" />
-
-    <TextView
-        android:id="@+id/ok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorSecondary"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/coverageLabel"
-        android:layout_marginTop="@dimen/margin_xsmall"
-        android:text="@string/ok"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

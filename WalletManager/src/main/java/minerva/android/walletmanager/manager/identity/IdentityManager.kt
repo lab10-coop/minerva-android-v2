@@ -10,6 +10,7 @@ import minerva.android.walletmanager.model.Identity
 
 interface IdentityManager : Manager {
     fun loadIdentity(position: Int, defaultName: String = String.Empty): Identity
+    fun loadIdentityByDID(did: String): Identity
     fun saveIdentity(identity: Identity): Completable
     fun removeIdentity(identity: Identity): Completable
     fun bindCredentialToIdentity(qrCode: CredentialQrCode): Single<String>

@@ -51,6 +51,7 @@
     <string name="unexpected_error">Unexpected error occurred. Please try again later</string>
     <string name="update_identity">Update identity</string>
     <string name="empty_identity_name">Identity name is empty</string>
+    <string name="missing_required_data">Missing required data</string>
     <string name="backup">Backup</string>
     <string name="account_backup">Account Backup</string>
     <string name="i_will_safety_remember">I stored them safely</string>
@@ -64,8 +65,9 @@
     <string name="close">Close</string>
     <string name="camera_error">Camera initialization error:</string>
     <string name="login">Login</string>
-    <string name="painless_login">Painless Login</string>
+    <string name="authentication">Authentication</string>
     <string name="requested_data">Requested data: </string>
+    <string name="required_field">This field is required</string>
     <string name="choose_an_identity">Choose an identity</string>
     <string name="remove_identity_dialog_message">Do you really want to delete this identity?</string>
     <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
@@ -157,10 +159,11 @@
     <string name="login_notification_title">Painless Login Request by Charging Station Dashboard</string>
     <string name="login_reqeust_message">Please double tap to confirm login</string>
     <string name="cannot_remove_safe_account_title">You can\'t remove a safe account with other owners and funds</string>
-    <string name="cannot_remove_safe_account_message">Please remove other owners first and then\n transfer yours funds to another account</string>
+    <string name="cannot_remove_safe_account_message">Please remove other owners first and then transfer your funds to another account</string>
     <string name="safe_account_removal_error">You can not remove this Safe Account</string>
     <string name="safe_accounts_count_format">+%d Safe Accounts</string>
     <string name="did">DID</string>
+    <string name="required">Required</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="show_identity">Show identity</string>
@@ -192,4 +195,5 @@
     <string name="permission_error_message">Can not change profile photo without necessary permissions</string>
     <string name="clear_text">Clear text</string>
     <string name="pending_account_error_message">Something went wrong, please check your balances.</string>
+    <string name="provide_following_data">You are about to provide the following data</string>
 </resources>

@@ -6,9 +6,9 @@ import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
+import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScanner
-import minerva.android.accounts.listener.AddressScannerListener
 
 class AddressScannerFragment : BaseScanner() {
 

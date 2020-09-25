@@ -24,7 +24,7 @@ class ServiceManagerImpl(
 
     override fun decodeJwtToken(token: String): Single<QrCode> =
         cryptographyRepository.decodeJwtToken(token)
-            .map { mapHashMapToQrCodeResponse(it) }
+            .map { mapHashMapToQrCodeResponse(it, token) }
 
     override fun decodePaymentRequestToken(token: String): Single<Pair<Payment, List<Service>?>> =
         cryptographyRepository.decodeJwtToken(token)

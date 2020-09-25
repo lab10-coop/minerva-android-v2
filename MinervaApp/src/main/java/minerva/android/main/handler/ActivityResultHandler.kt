@@ -6,6 +6,7 @@ import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.MainActivity
+import minerva.android.main.MainActivity.Companion.EDIT_IDENTITY_RESULT_REQUEST_CODE
 import minerva.android.main.MainActivity.Companion.LOGIN_SCANNER_RESULT_REQUEST_CODE
 import minerva.android.main.MainActivity.Companion.TRANSACTION_RESULT_REQUEST_CODE
 import minerva.android.services.login.LoginScannerActivity
@@ -101,3 +102,6 @@ internal fun isTransactionPrepared(requestCode: Int, resultCode: Int) =
 
 internal fun isLoginScannerResult(requestCode: Int, resultCode: Int) =
     requestCode == LOGIN_SCANNER_RESULT_REQUEST_CODE && resultCode == Activity.RESULT_OK
+
+internal fun isIdentityPrepared(requestCode: Int, resultCode: Int) =
+    requestCode == EDIT_IDENTITY_RESULT_REQUEST_CODE && resultCode == Activity.RESULT_OK

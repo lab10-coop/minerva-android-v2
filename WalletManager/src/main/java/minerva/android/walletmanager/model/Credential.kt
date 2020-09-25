@@ -10,6 +10,7 @@ data class Credential(
     override var name: String = String.Empty,
     override val type: String = String.Empty,
     val issuer: String = String.Empty,
+    val token: String = String.Empty,
     @SerializedName(NAME)
     val memberName: String = String.Empty,
     @SerializedName(MEMBER_ID)

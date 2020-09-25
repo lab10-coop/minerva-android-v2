@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -7,19 +8,55 @@
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:indeterminate="true"
-        android:indeterminateTint="@color/oamtc"
-        android:layout_gravity="center" />
+        android:indeterminateTint="@color/oamtc" />
 
-    <WebView
-        android:id="@+id/webView"
-        android:layout_margin="@dimen/margin_xsmall"
+    <ViewSwitcher
+        android:id="@+id/viewSwitcher"
+        android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
+        android:layout_height="wrap_content">
 
-    <include
-        android:id="@+id/defaultCard"
-        layout="@layout/default_card"
-        android:visibility="gone"/>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/margin_xsmall" />
+
+            <include
+                android:id="@+id/defaultCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                layout="@layout/default_card"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="@dimen/margin_xxsmall"
+            android:paddingRight="@dimen/margin_xxsmall"
+            android:paddingTop="@dimen/qr_code_margin"
+            android:paddingBottom="@dimen/qr_code_margin"
+            android:background="@drawable/rounded_white_background">
+
+            <ImageView
+                android:id="@+id/qrCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                tools:ignore="ContentDescription"
+                tools:src="@drawable/ic_artis" />
+
+        </FrameLayout>
+    </ViewSwitcher>
+
 </FrameLayout>
