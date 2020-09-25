@@ -32,6 +32,7 @@ class CredentialsFragment : MinervaPrimitiveListFragment() {
 
     override fun onCredentialContainerClick(credential: Credential) = OamtcClubCard(requireContext(), credential).show()
 
+    override fun getLoggedIdentityName(loggedInIdentityDid: String): String = viewModel.getLoggedIdentityName(loggedInIdentityDid)
 
     companion object {
         @JvmStatic

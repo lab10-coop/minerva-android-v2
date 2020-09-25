@@ -17,8 +17,8 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
+import minerva.android.walletmanager.storage.LocalStorage
 
 class IdentityManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -62,6 +62,9 @@ class IdentityManagerImpl(
         }
         return getDefaultIdentity(defaultName)
     }
+
+    override fun loadIdentityByDID(did: String): Identity =
+        walletConfigManager.findIdentityByDid(did) ?: Identity(index = Int.InvalidIndex)
 
     private fun getDefaultIdentity(defaultName: String) = Identity(getNewIndex(), prepareDefaultIdentityName(defaultName))
 

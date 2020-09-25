@@ -97,7 +97,7 @@
     "wss": "ws://sokol.poa.network:8546",
     "gasPrice": "1000000000",
     "assets": [],
-    "color": "#FF5C34A2"
+    "color": "#FF5CBEAB"
   },
   {
     "full": "LUKSO (L14 Testnet)",

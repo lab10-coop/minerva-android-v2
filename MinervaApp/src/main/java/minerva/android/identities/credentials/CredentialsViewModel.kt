@@ -68,4 +68,6 @@ open class CredentialsViewModel(
             hashMapOf(Pair(field, name))
         )
 
+    fun getLoggedIdentityName(loggedInIdentityDid: String): String = identityManager.loadIdentityByDID(loggedInIdentityDid).name
+
 }

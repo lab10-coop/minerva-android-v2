@@ -30,6 +30,9 @@
                 android:id="@+id/networks"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                android:scrollbarThumbVertical="@drawable/scrollbar_thumb"
+                android:scrollbarSize="@dimen/scrollbar_size"
                 android:layout_marginTop="@dimen/margin_normal" />
         </LinearLayout>
 
