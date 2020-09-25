@@ -51,7 +51,6 @@ class AddressFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_address, container, false)
     }
 
-
     private fun initializeView(minervaPrimitive: MinervaPrimitive) {
         with(minervaPrimitive) {
             prepareLogo(this)

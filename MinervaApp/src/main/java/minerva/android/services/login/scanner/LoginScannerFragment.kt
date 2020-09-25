@@ -54,7 +54,9 @@ class LoginScannerFragment : BaseScanner() {
     private fun prepareObserver() {
         viewModel.apply {
             handleServiceQrCodeLiveData.observe(viewLifecycleOwner, EventObserver { goToChooseIdentityFragment(it) })
-            scannerErrorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(false, getString(R.string.invalid_signature_error_message)) })
+            scannerErrorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { listener.onScannerResult(false, getString(R.string.invalid_signature_error_message)) })
             knownUserLoginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false, payload = it) })
             bindCredentialSuccessLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(true, it) })
             bindCredentialErrorLiveData.observe(
