@@ -24,6 +24,7 @@
     <dimen name="form_box_stroke_width">2dp</dimen>
     <dimen name="circle_icon_background">48dp</dimen>
     <dimen name="confirm_dialog_button_margin">24dp</dimen>
+    <dimen name="camera_logo_icon_size">24dp</dimen>
 
     <dimen name="clickable_area">32dp</dimen>
     <dimen name="large_letter_logo_size">128dp</dimen>
