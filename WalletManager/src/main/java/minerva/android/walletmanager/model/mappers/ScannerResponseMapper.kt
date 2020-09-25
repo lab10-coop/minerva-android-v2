@@ -30,7 +30,7 @@ const val ICON_URL = "iconImage"
 const val URL = "/"
 const val GATEWAY = "http://ipfs-gateway.lab10.io"
 
-fun mapHashMapToQrCodeResponse(map: Map<String, Any?>): QrCode {
+fun mapHashMapToQrCodeResponse(map: Map<String, Any?>, token: String): QrCode {
     if (isVerifiableCredential(map)) {
         return when (getVCType(map)) {
             VerifiableCredentialType.AUTOMOTIVE_CLUB ->
@@ -39,6 +39,7 @@ fun mapHashMapToQrCodeResponse(map: Map<String, Any?>): QrCode {
                     cardUrl = getImageUrl(map, CARD_URL),
                     iconUrl = getImageUrl(map, ICON_URL),
                     issuer = map[ISS] as String,
+                    token = token,
                     type = VerifiableCredentialType.AUTOMOTIVE_CLUB,
                     memberName = getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[NAME] as String,
                     memberId = getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[MEMBER_ID] as String,

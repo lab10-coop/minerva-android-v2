@@ -282,12 +282,13 @@ class MapperTest : WalletConfigTestValues() {
 
     @Test
     fun `map qr code result to credential qr code response`() {
-        val result = mapHashMapToQrCodeResponse(credentialQrCodeResult)
+        val result = mapHashMapToQrCodeResponse(credentialQrCodeResult, "token")
         assert(result is CredentialQrCode)
         (result as CredentialQrCode).run {
             memberName == "name" &&
                     name == "card" &&
                     issuer == "did:ethr:01016a194e4d5beee3a634edb156f84d03354a03" &&
+                    token == "token" &&
                     type == "AutomotiveMembershipCardCredential" &&
                     memberId == "123456" &&
                     creationDate == "2018" &&
@@ -299,7 +300,7 @@ class MapperTest : WalletConfigTestValues() {
 
     @Test
     fun `map qr code result to credential qr code response with no vc type`() {
-        val result = mapHashMapToQrCodeResponse(credentialQrCodeResultWithDifferentVCType)
+        val result = mapHashMapToQrCodeResponse(credentialQrCodeResultWithDifferentVCType, "token")
         assert(result is CredentialQrCode)
         (result as CredentialQrCode).run {
             name == "" &&
@@ -311,7 +312,7 @@ class MapperTest : WalletConfigTestValues() {
 
     @Test
     fun `map qr code result to service qr code response`() {
-        val result = mapHashMapToQrCodeResponse(serviceQrCodeResult)
+        val result = mapHashMapToQrCodeResponse(serviceQrCodeResult, "token")
         assert(result is ServiceQrCode)
         (result as ServiceQrCode).run {
             serviceName == "Demo Web Page Login" &&
@@ -319,6 +320,7 @@ class MapperTest : WalletConfigTestValues() {
                     requestedData[0] == "test1" &&
                     identityFields == "test1 test2" &&
                     issuer == "did:ethr:0x95b200870916377a74fc65d628a735d58bc22c98" &&
+                    token == "token" &&
                     identityFields == "touring"
         }
     }

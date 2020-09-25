@@ -7,6 +7,8 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.Window
+import com.bumptech.glide.Glide
+import com.google.zxing.EncodeHintType
 import io.reactivex.Observable
 import io.reactivex.ObservableOnSubscribe
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -20,7 +22,9 @@ import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.mappers.*
+import net.glxn.qrgen.android.QRCode
 import org.jsoup.Jsoup
 import org.w3c.dom.Document
 import timber.log.Timber
@@ -31,7 +35,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-abstract class ClubCard(context: Context, private val path: String?) : Dialog(context, R.style.DataDialog) {
+abstract class ClubCard(context: Context, private val credential: Credential) : Dialog(context, R.style.DataDialog) {
 
     abstract fun getAsHashMap(): HashMap<String, String>
     private val propertyMap: HashMap<String, String> by lazy {
@@ -40,7 +44,9 @@ abstract class ClubCard(context: Context, private val path: String?) : Dialog(co
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        prepareQrCode()
         prepareWebView()
+        viewSwitcher.setOnClickListener { viewSwitcher.showNext() }
         val disposable = downloadWebPageSource().firstOrError()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -96,7 +102,6 @@ abstract class ClubCard(context: Context, private val path: String?) : Dialog(co
         memberName.text = propertyMap[NAME]
         since.text = propertyMap[SINCE]
         coverage.text = propertyMap[COVERAGE]
-        ok.setOnClickListener { dismiss() }
     }
 
     private fun toString(doc: Document): String {
@@ -113,12 +118,21 @@ abstract class ClubCard(context: Context, private val path: String?) : Dialog(co
     }
 
     private fun downloadWebPageSource() = Observable.create(ObservableOnSubscribe<String> { observable ->
-        Jsoup.connect(path).ignoreContentType(true).get().let {
+        Jsoup.connect(credential.cardUrl).ignoreContentType(true).get().let {
             it.outerHtml().let { html ->
                 observable.onNext(html)
             }
         }
     })
+
+    private fun prepareQrCode() {
+        context?.resources.getDimensionPixelSize(R.dimen.qr_code_size).let { qrCodeSize ->
+            QRCode.from(credential.token).withSize(qrCodeSize, qrCodeSize)
+                .withHint(EncodeHintType.MARGIN, QR_MARGIN)
+                .file()
+                .let { qr -> Glide.with(context).load(qr).into(qrCode) }
+        }
+    }
 
     private fun prepareWebView() {
         webView.apply {
@@ -150,6 +164,7 @@ abstract class ClubCard(context: Context, private val path: String?) : Dialog(co
         private const val XML = "xml"
         private const val UTF8 = "UTF-8"
         private const val MIME_TYPE = "text/html"
+        private const val QR_MARGIN = 1
     }
 }
 

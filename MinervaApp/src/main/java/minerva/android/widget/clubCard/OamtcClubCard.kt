@@ -6,7 +6,7 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.kotlinUtils.DateUtils
 import kotlin.reflect.full.declaredMemberProperties
 
-class OamtcClubCard(context: Context, private val credential: Credential) : ClubCard(context, credential.cardUrl) {
+class OamtcClubCard(context: Context, private val credential: Credential) : ClubCard(context, credential) {
 
     override fun getAsHashMap(): HashMap<String, String> =
         HashMap<String, String>().apply {

@@ -7,7 +7,8 @@ import minerva.android.kotlinUtils.InvalidValue
 
 @Parcelize
 open class QrCode(
-    open var issuer: String = String.Empty
+    open var issuer: String = String.Empty,
+    open var token: String = String.Empty
 ) : Parcelable
 
 @Parcelize
@@ -22,6 +23,7 @@ data class ServiceQrCode(
 @Parcelize
 data class CredentialQrCode(
     override var issuer: String = String.Empty,
+    override var token: String = String.Empty,
     val name: String = String.Empty,
     val type: String = String.Empty,
     val memberName: String = String.Empty,

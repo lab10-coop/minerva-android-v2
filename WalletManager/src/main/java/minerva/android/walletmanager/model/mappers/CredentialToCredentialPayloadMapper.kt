@@ -10,6 +10,7 @@ object CredentialToCredentialPayloadMapper : Mapper<Credential, CredentialsPaylo
             input.name,
             input.type,
             input.issuer,
+            input.token,
             input.memberName,
             input.memberId,
             input.coverage,
