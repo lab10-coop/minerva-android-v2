@@ -27,6 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:visibility="gone"
                 android:layout_margin="@dimen/margin_xsmall" />
 
             <include
@@ -42,6 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_margin="@dimen/margin_normal"
             android:paddingLeft="@dimen/margin_xxsmall"
             android:paddingRight="@dimen/margin_xxsmall"
             android:paddingTop="@dimen/qr_code_margin"
@@ -55,8 +57,6 @@
                 android:layout_gravity="center"
                 tools:ignore="ContentDescription"
                 tools:src="@drawable/ic_artis" />
-
         </FrameLayout>
     </ViewSwitcher>
-
 </FrameLayout>

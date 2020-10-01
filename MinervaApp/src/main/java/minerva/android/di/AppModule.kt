@@ -1,5 +1,6 @@
 package minerva.android.di
 
+import android.content.Context
 import minerva.android.BuildConfig
 import minerva.android.accounts.AccountsViewModel
 import minerva.android.accounts.address.AddressViewModel
@@ -8,8 +9,8 @@ import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.edit.EditOrderViewModel
 import minerva.android.identities.credentials.CredentialsViewModel
-import minerva.android.identities.myIdentities.MyIdentitiesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
+import minerva.android.identities.myIdentities.MyIdentitiesViewModel
 import minerva.android.main.MainViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
@@ -22,6 +23,10 @@ import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletmanager.createWalletManagerModules
+import minerva.android.widget.clubCard.CacheStorage
+import minerva.android.widget.clubCard.CacheStorageImpl
+import minerva.android.widget.clubCard.ClubCardViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -32,6 +37,9 @@ fun createAppModule() = mutableListOf<Module>().apply {
 }
 
 private val appModules = module {
+    factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
+    factory<CacheStorage> { CacheStorageImpl(get()) }
+    viewModel { ClubCardViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get()) }
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
@@ -53,3 +61,5 @@ private val appModules = module {
     viewModel { PaymentRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
 }
+
+private const val MinervaCache = "MinervaCache"
