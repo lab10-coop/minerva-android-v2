@@ -7,7 +7,7 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.showRemoveDialog
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
 import minerva.android.walletmanager.model.Credential
-import minerva.android.widget.clubCard.OamtcClubCard
+import minerva.android.widget.clubCard.ClubCard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CredentialsFragment : MinervaPrimitiveListFragment() {
@@ -30,7 +30,7 @@ class CredentialsFragment : MinervaPrimitiveListFragment() {
         showRemoveDialog(getString(R.string.remove_credential_dialog_title), R.string.remove_credential_dialog_message)
         { viewModel.removeCredential(credential) }
 
-    override fun onCredentialContainerClick(credential: Credential) = OamtcClubCard(requireContext(), credential).show()
+    override fun onCredentialContainerClick(credential: Credential) = ClubCard(requireContext(), credential).show()
 
     override fun getLoggedIdentityName(loggedInIdentityDid: String): String = viewModel.getLoggedIdentityName(loggedInIdentityDid)
 
