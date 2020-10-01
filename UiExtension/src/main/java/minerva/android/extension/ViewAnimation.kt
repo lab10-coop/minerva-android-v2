@@ -12,5 +12,6 @@ fun View.rotate180back() {
 }
 
 fun View.fadeIn() {
+    visible()
     startAnimation(AnimationUtils.loadAnimation(context, R.anim.fade_in))
 }

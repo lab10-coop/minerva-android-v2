@@ -57,7 +57,7 @@ class ChooseIdentityViewModel(
         handleLogin(getIdentity(identityIndex), serviceQrCode)
     }
 
-    fun getIdentityPosition(identityIndex: Int): Int = getIdentities()?.find { it.index == identityIndex }?.index ?: Int.InvalidIndex
+    fun getIdentityPosition(identityIndex: Int): Int = getIdentities()?.indexOfFirst { it.index == identityIndex } ?: Int.InvalidIndex
 
     private fun getIdentity(identityIndex: Int): Identity =
         getIdentities()?.find { it.index == identityIndex } ?: Identity(index = Int.InvalidIndex)

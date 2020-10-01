@@ -18,7 +18,6 @@ import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
-import org.amshove.kluent.that
 import org.junit.Before
 import org.junit.Test
 

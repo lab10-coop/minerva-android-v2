@@ -19,7 +19,7 @@ import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.DateUtils.DATE_FORMAT
-import minerva.android.widget.clubCard.OamtcClubCard
+import minerva.android.widget.clubCard.ClubCard
 
 class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
@@ -65,7 +65,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
                 it.setIconUrl(credential.iconUrl)
                 it.setDateAndName(credential.name, DateUtils.getDateFromTimestamp(credential.lastUsed, DATE_FORMAT))
                 it.popupMenu.setOnClickListener { item -> showMenu(item.popupMenu, credential) }
-                it.setOnItemClickListener { OamtcClubCard(context, credential).show() }
+                it.setOnItemClickListener { ClubCard(context, credential).show() }
                 views.add(it)
                 addView(it)
             }
