@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.utils
 
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.model.defs.ServiceType
 
@@ -34,6 +35,6 @@ object DataProvider {
         , listOf(
             Service(ServiceType.CHARGING_STATION, "name")
         ),
-        listOf(Credential(loggedInIdentityDid = "did:ethr:address", type = "type", issuer = "iss"))
+        listOf(Credential(loggedInIdentityDid = "did:ethr:address", type = CredentialType.VERIFIABLE_CREDENTIAL.type, membershipType = CredentialType.AUTOMOTIVE_CLUB.type, issuer = "iss"))
     )
 }

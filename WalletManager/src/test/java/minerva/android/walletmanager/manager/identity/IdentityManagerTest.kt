@@ -162,7 +162,7 @@ class IdentityManagerTest : RxTest() {
         val error = NoBindedCredentialThrowable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
-        manager.bindCredentialToIdentity(CredentialQrCode(issuer = "iss", type = "type", loggedInDid = "did:ethr:address"))
+        manager.bindCredentialToIdentity(CredentialQrCode(issuer = "iss", loggedInDid = "did:ethr:address"))
             .test()
             .assertError {
                 it is NoBindedCredentialThrowable

@@ -12,7 +12,9 @@ data class ServicePayload(
     @SerializedName("lastUsed")
     private val _lastUsed: Long? = Long.InvalidValue,
     @SerializedName("loggedInIdentityPublicKey")
-    private val _loggedInIdentityPublicKey: String? = String.Empty
+    private val _loggedInIdentityPublicKey: String? = String.Empty,
+    @SerializedName("iconUrl")
+    private val _iconUrl: String? = String.Empty
 ) {
     val type: String
         get() = _type ?: String.Empty
@@ -22,4 +24,6 @@ data class ServicePayload(
         get() = _lastUsed ?: Long.InvalidValue
     val loggedInIdentityPublicKey: String
         get() = _loggedInIdentityPublicKey ?: String.Empty
+    val iconUrl: String
+        get() = _iconUrl ?: String.Empty
 }

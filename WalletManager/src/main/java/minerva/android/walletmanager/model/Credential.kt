@@ -9,6 +9,7 @@ data class Credential(
     @SerializedName(CREDENTIAL_NAME)
     override var name: String = String.Empty,
     override val type: String = String.Empty,
+    val membershipType: String = String.Empty,
     val issuer: String = String.Empty,
     val token: String = String.Empty,
     @SerializedName(NAME)
@@ -24,5 +25,5 @@ data class Credential(
     val loggedInIdentityDid: String = String.Empty,
     override var lastUsed: Long = Long.InvalidValue,
     val cardUrl: String? = String.Empty,
-    val iconUrl: String? = String.Empty
+    override val iconUrl: String? = String.Empty
 ) : MinervaPrimitive(name = name, type = type, lastUsed = lastUsed)

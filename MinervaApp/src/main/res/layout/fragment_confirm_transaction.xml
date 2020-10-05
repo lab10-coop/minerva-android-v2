@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightGray"
-    tools:context="minerva.android.payment.fragment.ConfirmTransactionFragment">
+    tools:context="minerva.android.integration.fragment.ConfirmTransactionFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/connectionRequestView"

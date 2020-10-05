@@ -8,6 +8,7 @@
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">12dp</dimen>
     <dimen name="margin_xsmall">8dp</dimen>
+    <dimen name="padding_xsmall">8dp</dimen>
     <dimen name="margin_xxsmall">4dp</dimen>
     <dimen name="margin_xxxsmall">2dp</dimen>
     <dimen name="text_big">20sp</dimen>

@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.minerva_primitive_list_row.view.*
 import kotlinx.android.synthetic.main.order_list_row.view.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
@@ -13,6 +14,7 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.walletmanager.model.Service
 import minerva.android.widget.LetterLogo
 import minerva.android.widget.ProfileImage
 import minerva.android.widget.repository.getNetworkIcon
@@ -82,8 +84,8 @@ class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         view.apply {
             when {
                 element.network != String.Empty -> icon.setImageResource(getNetworkIcon(NetworkManager.getNetwork(element.network)))
-                element.type != String.Empty && element !is Credential -> icon.setImageResource(getServiceIcon(element.type))
-                element is Credential -> icon.loadImageUrl(element.iconUrl)
+                element is Service -> icon.loadImageUrl(element.iconUrl, R.drawable.ic_services)
+                element is Credential -> icon.loadImageUrl(element.iconUrl, R.drawable.ic_default_credential)
                 else -> ProfileImage.load(icon, element as Identity)
             }
         }

@@ -9,6 +9,8 @@ data class CredentialsPayload(
     private val _name: String? = String.Empty,
     @SerializedName("type")
     private val _type: String? = String.Empty,
+    @SerializedName("membershipType")
+    private val _membershipType: String? = String.Empty,
     @SerializedName("issuer")
     private val _issuer: String? = String.Empty,
     @SerializedName("token")
@@ -36,6 +38,8 @@ data class CredentialsPayload(
         get() = _name ?: String.Empty
     val type: String
         get() = _type ?: String.Empty
+    val membershipType: String
+        get() = _membershipType ?: String.Empty
     val issuer: String
         get() = _issuer ?: String.Empty
     val token: String

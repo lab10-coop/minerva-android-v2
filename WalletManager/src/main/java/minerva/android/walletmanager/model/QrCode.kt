@@ -4,6 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.model.defs.CredentialType
 
 @Parcelize
 open class QrCode(
@@ -25,7 +26,8 @@ data class CredentialQrCode(
     override var issuer: String = String.Empty,
     override var token: String = String.Empty,
     val name: String = String.Empty,
-    val type: String = String.Empty,
+    val membershipType: CredentialType = CredentialType.DEFAULT,
+    val type: CredentialType = CredentialType.DEFAULT,
     val memberName: String = String.Empty,
     val memberId: String = String.Empty,
     val coverage: String = String.Empty,
