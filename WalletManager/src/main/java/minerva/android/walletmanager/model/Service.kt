@@ -7,5 +7,6 @@ open class Service(
     override val type: String = String.Empty,
     override var name: String = String.Empty,
     override var lastUsed: Long = Long.InvalidValue,
-    val loggedInIdentityPublicKey: String = String.Empty
+    val loggedInIdentityPublicKey: String = String.Empty,
+    override val iconUrl: String = String.Empty
 ) : MinervaPrimitive(name = name, type = type, lastUsed = lastUsed)

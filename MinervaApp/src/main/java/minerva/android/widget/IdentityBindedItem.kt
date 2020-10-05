@@ -21,7 +21,7 @@ class IdentityBindedItem @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun setIconUrl(url: String?) {
-        iconImageView.loadImageUrl(url)
+        iconImageView.loadImageUrl(url, R.drawable.ic_default_credential)
     }
 
     fun setDateAndName(name: String, lastUsed: String) {

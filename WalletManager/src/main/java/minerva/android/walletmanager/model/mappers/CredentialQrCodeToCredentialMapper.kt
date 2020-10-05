@@ -4,11 +4,12 @@ import minerva.android.kotlinUtils.Mapper
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
 
-object CredentialQrCodeToCredentialMapper: Mapper<CredentialQrCode, Credential> {
+object CredentialQrCodeToCredentialMapper : Mapper<CredentialQrCode, Credential> {
     override fun map(input: CredentialQrCode): Credential =
         Credential(
             name = input.name,
-            type = input.type,
+            type = input.type.type,
+            membershipType = input.membershipType.type,
             issuer = input.issuer,
             token = input.token,
             creationDate = input.creationDate,

@@ -121,7 +121,6 @@ class MapperTest : WalletConfigTestValues() {
 
         input.name shouldBeEqualTo response.name
         input.issuer shouldBeEqualTo response.issuer
-        input.type shouldBeEqualTo response.type
     }
 
     @Test
@@ -289,7 +288,6 @@ class MapperTest : WalletConfigTestValues() {
                     name == "card" &&
                     issuer == "did:ethr:01016a194e4d5beee3a634edb156f84d03354a03" &&
                     token == "token" &&
-                    type == "AutomotiveMembershipCardCredential" &&
                     memberId == "123456" &&
                     creationDate == "2018" &&
                     coverage == "touring" &&

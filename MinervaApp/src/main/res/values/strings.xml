@@ -196,4 +196,6 @@
     <string name="clear_text">Clear text</string>
     <string name="pending_account_error_message">Something went wrong, please check your balances.</string>
     <string name="provide_following_data">You are about to provide the following data</string>
+    <string name="don_t_ask_me_again">Don\'t ask me again</string>
+    <string name="do_not_ask_me_again_manual">This will automate this request. You can undo this by removing this service in your Minerva Service screen.</string>
 </resources>

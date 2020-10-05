@@ -5,27 +5,31 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
+import minerva.android.integration.ThirdPartyRequestViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.services.ServiceManager
+import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.CredentialRequest
 import minerva.android.walletmanager.model.Payment
 import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.state.VCRequestState
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Test
 
-class PaymentRequestViewModelTest : BaseViewModelTest() {
+class ThirdPartyRequestViewModelTest : BaseViewModelTest() {
 
     private val serviceManager: ServiceManager = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val masterSeedRepository: MasterSeedRepository = mock()
-    private val viewModel = PaymentRequestViewModel(serviceManager, walletActionsRepository, masterSeedRepository)
+    private val viewModel = ThirdPartyRequestViewModel(serviceManager, walletActionsRepository, masterSeedRepository)
 
     private val showPaymentConfirmationObserver: Observer<Event<Unit>> = mock()
     private val showPaymentConfirmationCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
-    private val showConnectionRequestObserver: Observer<Event<String?>> = mock()
-    private val showConnectionRequestCaptor: KArgumentCaptor<Event<String?>> = argumentCaptor()
+    private val showConnectionRequestObserver: Observer<Event<VCRequestState<Pair<Credential, CredentialRequest>>>> = mock()
+    private val showConnectionRequestCaptor: KArgumentCaptor<Event<VCRequestState<Pair<Credential, CredentialRequest>>>> = argumentCaptor()
 
     private val confirmPaymentObserver: Observer<Event<String>> = mock()
     private val confirmPaymentCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
@@ -38,40 +42,21 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `decode token success when service is not connected`() {
-        whenever(serviceManager.decodePaymentRequestToken(any())).thenReturn(Single.just(Pair(Payment("12", serviceName = "test"), listOf())))
+        whenever(serviceManager.decodeThirdPartyRequestToken(any())).thenReturn(Single.just(VCRequestState.Found(Pair(Credential(), CredentialRequest()))))
         viewModel.run {
-            showConnectionRequestLiveData.observeForever(showConnectionRequestObserver)
+            showServiceConnectionRequestLiveData.observeForever(showConnectionRequestObserver)
             decodeJwtToken("token")
         }
         showConnectionRequestCaptor.run {
             verify(showConnectionRequestObserver).onChanged(capture())
-            firstValue.peekContent() == "test"
-        }
-    }
-
-    @Test
-    fun `decode token success when service is connected`() {
-        whenever(serviceManager.decodePaymentRequestToken(any())).thenReturn(
-            Single.just(
-                Pair(
-                    Payment("12"),
-                    listOf(Service(type = "1", name = "M27"))
-                )
-            )
-        )
-        viewModel.run {
-            showPaymentConfirmationLiveData.observeForever(showPaymentConfirmationObserver)
-            decodeJwtToken("token")
-        }
-        showPaymentConfirmationCaptor.run {
-            verify(showPaymentConfirmationObserver).onChanged(capture())
+            firstValue.peekContent() is VCRequestState.Found
         }
     }
 
     @Test
     fun `decode token error`() {
         val error = Throwable()
-        whenever(serviceManager.decodePaymentRequestToken(any())).thenReturn(Single.error(error))
+        whenever(serviceManager.decodeThirdPartyRequestToken(any())).thenReturn(Single.error(error))
         viewModel.run {
             showPaymentConfirmationLiveData.observeForever(showPaymentConfirmationObserver)
             decodeJwtToken("token")
@@ -82,7 +67,7 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
     @Test
     fun `token is null test error`() {
         val error = Throwable()
-        whenever(serviceManager.decodePaymentRequestToken(any())).thenReturn(Single.error(error))
+        whenever(serviceManager.decodeThirdPartyRequestToken(any())).thenReturn(Single.error(error))
         viewModel.run {
             errorLiveData.observeForever(errorObserver)
             decodeJwtToken(null)
@@ -97,7 +82,8 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
         whenever(serviceManager.saveService(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.run {
-            newServiceLiveData.observeForever(newServiceObserver)
+            credentialRequest = Pair(Credential(), CredentialRequest())
+            addedNewServiceLiveData.observeForever(newServiceObserver)
             payment = Payment("1", serviceName = "test")
             connectToService()
         }
@@ -112,7 +98,8 @@ class PaymentRequestViewModelTest : BaseViewModelTest() {
         whenever(serviceManager.saveService(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         viewModel.apply {
-            newServiceLiveData.observeForever(newServiceObserver)
+            credentialRequest = Pair(Credential(), CredentialRequest())
+            addedNewServiceLiveData.observeForever(newServiceObserver)
             payment = Payment("1", serviceName = "test")
             connectToService()
             errorLiveData.observeLiveDataEvent(Event(error))

@@ -16,6 +16,7 @@ object CredentialPayloadToCredentialMapper : Mapper<CredentialsPayload, Credenti
         Credential(
             input.name,
             input.type,
+            input.membershipType,
             input.issuer,
             input.token,
             input.memberName,

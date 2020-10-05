@@ -9,9 +9,9 @@ import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener
 import minerva.android.R
 
-fun ImageView.loadImageUrl(url: String?) {
+fun ImageView.loadImageUrl(url: String?, defaultIcon: Int) {
     if (url.isNullOrEmpty()) {
-        Glide.with(context).load(R.drawable.ic_default_credential).into(this)
+        Glide.with(context).load(defaultIcon).into(this)
         return
     }
     GlideToVectorYou.init().with(context)
@@ -19,10 +19,10 @@ fun ImageView.loadImageUrl(url: String?) {
             object : GlideToVectorYouListener {
                 override fun onLoadFailed() {
                     Handler(Looper.getMainLooper()).post {
-                        Glide.with(context).load(R.drawable.ic_default_credential).into(this@loadImageUrl)
+                        Glide.with(context).load(defaultIcon).into(this@loadImageUrl)
                     }
                 }
                 override fun onResourceReady() { }
             })
-        .setPlaceHolder(R.drawable.ic_default_credential, R.drawable.ic_default_credential).load(Uri.parse(url), this)
+        .setPlaceHolder(defaultIcon, defaultIcon).load(Uri.parse(url), this)
 }

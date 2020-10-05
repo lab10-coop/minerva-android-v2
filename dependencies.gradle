@@ -58,7 +58,7 @@ ext {
     startupVersion = '1.0.0-alpha01'
 
     jsoupVersion = '1.13.1'
-
+    jsonLogicVersion = '0.9.6'
     flexboxVersion = '2.0.1'
 
     rxbinding = [
@@ -149,19 +149,9 @@ ext {
             w3jContract: "org.web3j:contracts:$w3jVersion"
     ]
 
-    firebaseDepenedencies = [
-            cloudMassaging: "com.google.firebase:firebase-messaging:$cloudMassagingVersion"
-    ]
-
-    startupDependencies = [
-            startup: "androidx.startup:startup-runtime:$startupVersion"
-    ]
-
-    kotlinReflect = [
-            kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect"
-    ]
-
-    jsoup = [
-            jsoup: "org.jsoup:jsoup:$jsoupVersion"
-    ]
+    firebaseDepenedencies = [cloudMassaging: "com.google.firebase:firebase-messaging:$cloudMassagingVersion"]
+    startupDependencies = [startup: "androidx.startup:startup-runtime:$startupVersion"]
+    kotlinReflect = [kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect"]
+    jsoup = [jsoup: "org.jsoup:jsoup:$jsoupVersion"]
+    jsonLogicDependencies = [jsonLogic : "eu.afse:eu.afse.jsonlogic:$jsonLogicVersion"]
 }

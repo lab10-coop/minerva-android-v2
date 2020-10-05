@@ -2,13 +2,13 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.ServiceName
 import minerva.android.walletmanager.model.defs.ServiceType
-import minerva.android.walletmanager.model.defs.VerifiableCredentialType
-import minerva.android.kotlinUtils.DateUtils
 
 const val CALLBACK = "callback"
 const val ISS = "iss"
@@ -33,14 +33,15 @@ const val GATEWAY = "http://ipfs-gateway.lab10.io"
 fun mapHashMapToQrCodeResponse(map: Map<String, Any?>, token: String): QrCode {
     if (isVerifiableCredential(map)) {
         return when (getVCType(map)) {
-            VerifiableCredentialType.AUTOMOTIVE_CLUB ->
+            CredentialType.AUTOMOTIVE_CLUB.type ->
                 CredentialQrCode(
                     name = getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[CREDENTIAL_NAME] as String,
                     cardUrl = getImageUrl(map, CARD_URL),
                     iconUrl = getImageUrl(map, ICON_URL),
                     issuer = map[ISS] as String,
                     token = token,
-                    type = VerifiableCredentialType.AUTOMOTIVE_CLUB,
+                    membershipType = CredentialType.AUTOMOTIVE_CLUB,
+                    type = CredentialType.VERIFIABLE_CREDENTIAL,
                     memberName = getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[NAME] as String,
                     memberId = getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[MEMBER_ID] as String,
                     coverage = getVerifiableCredentialsData(map, AUTOMOTIVE_MEMBERSHIP_CARD)[COVERAGE] as String,
@@ -52,7 +53,7 @@ fun mapHashMapToQrCodeResponse(map: Map<String, Any?>, token: String): QrCode {
             else -> CredentialQrCode() //todo should return Credential object instead of CredentialQrCode() ?
         }
     } else {
-        //todo should check if it is service qr code response type?
+        //todo change it to get service name and icon from Qr Code
         return ServiceQrCode(
             issuer = map[ISS] as String,
             serviceName = getServiceName(map[ISS] as String),
