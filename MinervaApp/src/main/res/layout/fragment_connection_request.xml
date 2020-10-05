@@ -4,9 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightGray"
-    tools:context="minerva.android.payment.fragment.ConnectionRequestFragment">
+    tools:context="minerva.android.integration.fragment.ConnectionRequestFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <TextView
+        android:id="@+id/manualLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_big"
+        android:layout_marginTop="@dimen/margin_large"
+        android:layout_marginRight="@dimen/margin_big"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="testetststet" />
+
+    <minerva.android.widget.ConnectionRequestCard
         android:id="@+id/connectionRequestView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,95 +29,13 @@
         android:elevation="@dimen/cardview_default_elevation"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="PrivateResource">
+        app:layout_constraintTop_toBottomOf="@+id/manualLabel" />
 
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="0dp"
-            android:src="@drawable/minerva_card_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/connectionIcon"
-            android:layout_width="@dimen/circle_icon_size"
-            android:layout_height="@dimen/circle_icon_size"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="40dp"
-            android:src="@drawable/ic_settings_in_circle"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/checkboxIcon"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginTop="70dp"
-            android:background="@color/separatorColor"
-            app:layout_constraintLeft_toRightOf="@+id/connectionIcon"
-            app:layout_constraintRight_toLeftOf="@+id/checkboxIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/checkboxIcon"
-            android:layout_width="@dimen/small_logo_size"
-            android:layout_height="@dimen/small_logo_size"
-            android:layout_marginTop="55dp"
-            android:src="@drawable/ic_check"
-            app:layout_constraintLeft_toRightOf="@+id/connectionIcon"
-            app:layout_constraintRight_toLeftOf="@+id/logo"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginTop="70dp"
-            android:background="@color/separatorColor"
-            app:layout_constraintLeft_toRightOf="@+id/checkboxIcon"
-            app:layout_constraintRight_toLeftOf="@+id/logo"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="@dimen/circle_icon_size"
-            android:layout_height="@dimen/circle_icon_size"
-            android:layout_marginTop="40dp"
-            android:layout_marginEnd="40dp"
-            android:src="@drawable/ic_minerva_in_circle"
-            app:layout_constraintLeft_toRightOf="@+id/checkboxIcon"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/connectionLabel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginTop="@dimen/margin_large"
-            android:layout_marginRight="@dimen/margin_normal"
-            android:layout_marginBottom="@dimen/margin_normal"
-            android:fontFamily="@font/rubik_regular"
-            android:gravity="center"
-            android:textColor="@color/gray"
-            android:textSize="@dimen/text_normal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/logo"
-            tools:text="wants connect to Minedasdasdsadsarva" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="@dimen/margin_large"
         android:layout_marginTop="@dimen/margin_large"
         android:background="@drawable/rounded_light_purple_background"
         android:elevation="3dp"
@@ -120,7 +50,49 @@
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintBottom_toTopOf="@+id/connectionRequestView"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/manualLabel" />
+
+    <TextView
+        android:id="@+id/doNotAskMeAgainCB"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
+        android:layout_marginTop="@dimen/margin_large"
+        android:background="@drawable/rectangle_check_button_selector"
+        android:enabled="false"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/doNotAskMeAgainLabel"
+        app:layout_constraintTop_toBottomOf="@+id/connectionRequestView"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/doNotAskMeAgainLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_small"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:fontFamily="@font/rubik_medium"
+        android:text="@string/don_t_ask_me_again"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintLeft_toRightOf="@+id/doNotAskMeAgainCB"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/doNotAskMeAgainCB" />
+
+    <TextView
+        android:id="@+id/doNotAskMeAgainManual"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_big"
+        android:layout_marginTop="@dimen/margin_big"
+        android:layout_marginEnd="@dimen/margin_big"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center"
+        android:padding="@dimen/padding_xsmall"
+        android:text="@string/do_not_ask_me_again_manual"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/doNotAskMeAgainCB" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/denyButton"

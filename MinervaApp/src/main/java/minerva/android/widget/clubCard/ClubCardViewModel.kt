@@ -42,7 +42,7 @@ class ClubCardViewModel(private val cacheStorage: CacheStorage) : BaseViewModel(
                 .doOnEvent { _, _ -> stateCallback.onLoading(false) }
                 .subscribeBy(
                     onSuccess = {
-                        correctXML(it)
+                        correctXML(it, cardUrl)
                     },
                     onError = {
                         Timber.e("Creating card preview error: ${it.message}")

@@ -17,7 +17,6 @@ import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
-import minerva.android.widget.repository.getServiceIcon
 
 class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) : RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {
 
@@ -52,7 +51,7 @@ class MinervaPrimitiveViewHolder(
 
             when (minervaPrimitive) {
                 is Credential -> {
-                    minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl)
+                    minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl, R.drawable.ic_default_credential)
                     identityName.apply {
                         visible()
                         listener.getLoggedIdentityName(minervaPrimitive).let { identityName ->
@@ -60,7 +59,7 @@ class MinervaPrimitiveViewHolder(
                         }
                     }
                 }
-                is Service -> showIcon(getServiceIcon(minervaPrimitive.type))
+                is Service -> minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl, R.drawable.ic_services)
             }
 
             minervaPrimitiveName.text = minervaPrimitive.name

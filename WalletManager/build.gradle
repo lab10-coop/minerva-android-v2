@@ -53,6 +53,6 @@ dependencies {
     implementation coreDependencies.values()
     implementation rxDependencies.values()
     implementation startupDependencies.values()
-    
+    implementation jsonLogicDependencies.values()
     testImplementation testDependencies.values()
 }

@@ -81,13 +81,13 @@ class ChooseIdentityViewModelTest : BaseViewModelTest() {
         whenever(serviceManager.painlessLogin(any(), any(), any(), any())).thenReturn(Completable.complete())
         whenever(serviceManager.createJwtToken(any(), any())).thenReturn(Single.just("token"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        viewModel.errorLiveData.observeForever(errorObserver)
+        viewModel.requestedFieldsLiveData.observeForever(requestFieldObserver)
         viewModel.handleLogin(
             Identity(1, personalData = linkedMapOf("name" to "Witek", "phone_number" to "123"), privateKey = "", publicKey = ""),
             ServiceQrCode("Minerva", "callback")
         )
-        errorCaptor.run {
-            verify(errorObserver).onChanged(capture())
+        requestFieldCaptor.run {
+            verify(requestFieldObserver).onChanged(capture())
         }
     }
 }

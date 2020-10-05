@@ -71,7 +71,7 @@ dependencies {
     implementation project(':WalletManager')
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
-
+    
     implementation firebaseDepenedencies.values()
     implementation crashlyticsDependencies.values()
     implementation qrDependency.values()

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/lightGray"
     android:orientation="vertical"
-    tools:context=".payment.PaymentRequestActivity">
+    tools:context=".integration.ThirdPartyIntegrationActivity">
 
     <ImageView
         android:id="@+id/logo"

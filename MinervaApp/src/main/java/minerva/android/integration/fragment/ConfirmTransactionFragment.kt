@@ -1,4 +1,4 @@
-package minerva.android.payment.fragment
+package minerva.android.integration.fragment
 
 
 import android.content.Context
@@ -12,13 +12,13 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_confirm_transaction.*
 import minerva.android.R
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.payment.PaymentRequestViewModel
-import minerva.android.payment.listener.PaymentCommunicationListener
+import minerva.android.integration.ThirdPartyRequestViewModel
+import minerva.android.integration.listener.PaymentCommunicationListener
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class ConfirmTransactionFragment : Fragment() {
 
-    private val viewModel: PaymentRequestViewModel by sharedViewModel()
+    private val viewModel: ThirdPartyRequestViewModel by sharedViewModel()
     private lateinit var listener: PaymentCommunicationListener
     private lateinit var biometricPrompt: BiometricPrompt
 
