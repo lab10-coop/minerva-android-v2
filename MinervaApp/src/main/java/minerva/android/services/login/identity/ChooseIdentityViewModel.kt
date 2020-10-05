@@ -63,7 +63,6 @@ class ChooseIdentityViewModel(
         getIdentities()?.find { it.index == identityIndex } ?: Identity(index = Int.InvalidIndex)
 
     private fun minervaLogin(identity: Identity, qrCode: ServiceQrCode) {
-        if (handleNoKeysError(identity)) return
         qrCode.callback?.let { callback ->
             serviceManager.createJwtToken(createLoginPayload(identity, qrCode), identity.privateKey)
                 .flatMapCompletable { jwtToken -> serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity)) }
@@ -80,20 +79,8 @@ class ChooseIdentityViewModel(
                         _errorLiveData.value = Event(Throwable(it.message))
                     }
                 )
-
         }
     }
-
-    private fun handleNoKeysError(identity: Identity): Boolean {
-        if (doesIdentityHaveKeys(identity)) {
-            _errorLiveData.value = Event(MissingKeysThrowable())
-            return true
-        }
-        return false
-    }
-
-    private fun doesIdentityHaveKeys(identity: Identity) =
-        identity != IncognitoIdentity() && (identity.publicKey == String.Empty || identity.privateKey == String.Empty)
 
     private fun getLoginStatus(serviceQrCode: ServiceQrCode): Int =
         if (serviceQrCode.requestedData.contains(FCM_ID)) NEW_QUICK_USER

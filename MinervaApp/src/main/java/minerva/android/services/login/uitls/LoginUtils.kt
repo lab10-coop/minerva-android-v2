@@ -1,15 +1,13 @@
 package minerva.android.services.login.uitls
 
 import com.google.firebase.iid.FirebaseInstanceId
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.identity.ChooseIdentityViewModel
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.ServiceQrCode
-import minerva.android.walletmanager.model.WalletAction
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.kotlinUtils.DateUtils
 
 object LoginUtils {
     fun isIdentityValid(identity: Identity, requiredData: List<String>): Boolean {
@@ -17,7 +15,7 @@ object LoginUtils {
             requiredData.forEach {
                 if (!personalData.containsKey(it)) return false
             }
-            return true
+            return identity.privateKey != String.Empty && identity != IncognitoIdentity()
         }
     }
 
