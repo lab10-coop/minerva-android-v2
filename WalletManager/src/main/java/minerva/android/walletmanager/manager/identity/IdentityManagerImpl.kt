@@ -131,15 +131,14 @@ class IdentityManagerImpl(
 
     override fun isCredentialLoggedIn(qrCode: CredentialQrCode): Boolean {
         walletConfigManager.getWalletConfig()?.credentials?.let { credentials ->
-            if (credentials.isNotEmpty()) {
-                credentials.filter { !it.isDeleted }.forEach { credential -> return isCredentialBinded(qrCode, credential) }
-            } else return false
+            credentials.filter { !it.isDeleted }.forEach { credential -> if (isCredentialBinded(qrCode, credential)) return true }
+            return false
         }
         throw  NotInitializedWalletConfigThrowable()
     }
 
-    private fun isCredentialBinded(qrCode: CredentialQrCode, credential: Credential) =
-        qrCode.loggedInDid == credential.loggedInIdentityDid && qrCode.type == credential.type && qrCode.issuer == credential.issuer
+    //TODO this metric needs to be confirmed with Thomas and Peter
+    private fun isCredentialBinded(qrCode: CredentialQrCode, credential: Credential) = qrCode.token == credential.token
 
     override fun removeBindedCredentialFromIdentity(credential: Credential): Completable {
         walletConfigManager.getWalletConfig()?.apply {
