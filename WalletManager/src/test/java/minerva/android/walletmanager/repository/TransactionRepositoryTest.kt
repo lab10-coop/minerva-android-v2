@@ -135,7 +135,7 @@ class TransactionRepositoryTest {
         whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())).thenReturn(
             Observable.just(Pair("privateKey1", BigDecimal.TEN))
         )
-        NetworkManager.initialize(listOf(Network(short = "tats1", https = "some"), Network(short = "rin", https = "some1")))
+        NetworkManager.initialize(listOf(Network(short = "artis_tau1", httpRpc = "some"), Network(short = "eth_rinkeby", httpRpc = "some1")))
         repository.apply {
             refreshAssetBalance()
                 .test()
