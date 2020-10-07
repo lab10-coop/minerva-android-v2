@@ -9,20 +9,18 @@ import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_R
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.RSK_TRSK
 
 @Retention(AnnotationRetention.SOURCE)
-@StringDef(ATS_TAU, ETH_ROP, RSK_TRSK, ETH_RIN, ETH_KOV, ETH_GOR, ETH_CLASSIC_KOTTI, POA_SKL, LUKSO_14)
+@StringDef(ATS_TAU, ETH_ROP, ETH_RIN, ETH_KOV, ETH_GOR, ETH_CLASSIC_KOTTI, POA_SKL, LUKSO_14)
 annotation class NetworkShortName {
     companion object {
-        const val ATS_TAU = "tats1"
-        const val ETH_ROP = "rop"
-        const val RSK_TRSK = "trsk"
-        const val ETH_RIN = "rin"
-        const val ETH_KOV = "kov"
-        const val ETH_GOR = "gor"
+        const val ATS_TAU = "artis_tau1"
+        const val ETH_ROP = "eth_ropsten"
+        const val ETH_RIN = "eth_rinkeby"
+        const val ETH_KOV = "eth_kovan"
+        const val ETH_GOR = "eth_goerli"
         const val ETH_CLASSIC_KOTTI = "kot"
-        const val POA_SKL = "skl"
-        const val LUKSO_14 = "l14"
+        const val POA_SKL = "poa_sokol"
+        const val LUKSO_14 = "lukso_l14"
     }
 }

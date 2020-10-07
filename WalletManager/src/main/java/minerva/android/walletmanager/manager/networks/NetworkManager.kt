@@ -17,8 +17,8 @@ object NetworkManager {
 
     lateinit var networks: List<Network>
     private val networkMap: Map<String, Network> get() = networks.associateBy { it.short }
-    val httpsUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.https } }
-    val wssUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.wss } }
+    val httpsUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.httpRpc } }
+    val wssUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.wsRpc } }
     val gasPriceMap: Map<String, BigInteger> by lazy { networks.associate { it.short to it.gasPrice } }
 
     fun initialize(networks: List<Network>) {
@@ -43,7 +43,7 @@ object NetworkManager {
         if (networks.size > ONE_ELEMENT && isActiveNetwork(networks[SECOND_NETWORK])) networks[SECOND_NETWORK]
         else firstDefaultValueNetwork()
 
-    fun isAvailable(type: String): Boolean = getNetwork(type).https != String.Empty
+    fun isAvailable(type: String): Boolean = getNetwork(type).httpRpc != String.Empty
 
     @VisibleForTesting
     fun getStringColor(type: String, opacity: Boolean): String {
@@ -61,7 +61,7 @@ object NetworkManager {
     @VisibleForTesting
     fun getAllAsset(): List<Asset> = mutableListOf<Asset>().apply { networks.forEach { addAll(it.assets) } }
 
-    private fun isActiveNetwork(network: Network): Boolean = network.https != String.Empty
+    private fun isActiveNetwork(network: Network): Boolean = network.httpRpc != String.Empty
 
     private fun areThereActiveNetworks(list: List<Network>): Boolean = list.none { isActiveNetwork(it) }
 }

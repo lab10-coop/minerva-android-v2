@@ -7,7 +7,6 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener
-import minerva.android.R
 
 fun ImageView.loadImageUrl(url: String?, defaultIcon: Int) {
     if (url.isNullOrEmpty()) {

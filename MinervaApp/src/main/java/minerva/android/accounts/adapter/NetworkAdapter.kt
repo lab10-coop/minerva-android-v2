@@ -46,7 +46,7 @@ class NetworkViewHolder(private val view: View) : RecyclerView.ViewHolder(view) 
     }
 
     private fun View.setNetworkName(network: Network) {
-        networkName.text = if (network.https.isEmpty())
+        networkName.text = if (network.httpRpc.isEmpty())
             setDisabledNetwork(network) else network.full
     }
 
