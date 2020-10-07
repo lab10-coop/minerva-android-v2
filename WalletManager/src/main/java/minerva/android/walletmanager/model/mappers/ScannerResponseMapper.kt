@@ -30,6 +30,7 @@ const val ICON_URL = "iconImage"
 const val URL = "/"
 const val GATEWAY = "http://ipfs-gateway.lab10.io"
 
+//TODO parsing data from qr code should be refactored. JSONObject with Gson should be used.
 fun mapHashMapToQrCodeResponse(map: Map<String, Any?>, token: String): QrCode {
     if (isVerifiableCredential(map)) {
         return when (getVCType(map)) {

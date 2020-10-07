@@ -8,12 +8,16 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_third_party_integration.*
 import minerva.android.R
 import minerva.android.extension.addFragment
+import minerva.android.extension.gone
 import minerva.android.extension.replaceFragment
+import minerva.android.extension.visible
 import minerva.android.integration.fragment.ConfirmTransactionFragment
 import minerva.android.integration.fragment.ConnectionRequestFragment
 import minerva.android.integration.listener.PaymentCommunicationListener
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.CredentialRequest
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.SIGNED_PAYLOAD
 import minerva.android.walletmanager.model.state.VCRequestState
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -45,21 +49,25 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
         viewModel.apply {
             showServiceConnectionRequestLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver {
                 when (it) {
-                    is VCRequestState.Found -> {
-                        minervaPrimitiveName.text = it.data.second.service.name
-                        addFragment(
-                            R.id.container,
-                            ConnectionRequestFragment.newInstance(),
-                            R.animator.slide_in_left,
-                            R.animator.slide_out_right
-                        )
-                    }
+                    is VCRequestState.Found -> handleVCFound(it)
                     is VCRequestState.NotFound -> sendResult(ON_CREDENTIAL_NOT_FOUND)
                 }
             })
             showPaymentConfirmationLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { showConfirmTransactionScreen() })
             errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { finish() }) //todo send proper error message to demo app
         }
+    }
+
+    private fun handleVCFound(it: VCRequestState.Found<Pair<Credential, CredentialRequest>>) {
+        container.visible()
+        loader.gone()
+        minervaPrimitiveName.text = it.data.second.service.name
+        addFragment(
+            R.id.container,
+            ConnectionRequestFragment.newInstance(),
+            R.animator.slide_in_left,
+            R.animator.slide_out_right
+        )
     }
 
     private fun setupActionBar() {
@@ -78,8 +86,8 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
         sendResult(ON_DENY_REQUEST)
     }
 
-    override fun onNewServicesConnected() {
-        sendResult(ON_NEW_SERVICE_CONNECTED)
+    override fun onNewServicesConnected(token: String) {
+        sendResult(ON_NEW_SERVICE_CONNECTED, Intent().apply { putExtra(JWT_TOKEN, token) })
     }
 
     override fun onResultOk(signedData: String) {
@@ -87,8 +95,8 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
         finish()
     }
 
-    private fun sendResult(resultCode: Int) {
-        setResult(resultCode)
+    private fun sendResult(resultCode: Int, intent: Intent? = null) {
+        setResult(resultCode, intent)
         finish()
     }
 
@@ -99,5 +107,6 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
         private const val ON_CREDENTIAL_NOT_FOUND = 998
         private const val ON_DENY_REQUEST = 999
         private const val ON_NEW_SERVICE_CONNECTED = 1000
+        private const val JWT_TOKEN = "jwtToken"
     }
 }

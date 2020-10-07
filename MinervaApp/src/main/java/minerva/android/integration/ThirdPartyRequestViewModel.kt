@@ -36,8 +36,8 @@ class ThirdPartyRequestViewModel(
     private val _showPaymentConfirmationLiveData = MutableLiveData<Event<Unit>>()
     val showPaymentConfirmationLiveData: LiveData<Event<Unit>> get() = _showPaymentConfirmationLiveData
 
-    private val _addedNewServiceLiveData = MutableLiveData<Event<Unit>>()
-    val addedNewServiceLiveData: LiveData<Event<Unit>> get() = _addedNewServiceLiveData
+    private val _addedNewServiceLiveData = MutableLiveData<Event<String>>()
+    val addedNewServiceLiveData: LiveData<Event<String>> get() = _addedNewServiceLiveData
 
     private val _confirmPaymentLiveData = MutableLiveData<Event<String>>()
     val confirmPaymentLiveData: LiveData<Event<String>> get() = _confirmPaymentLiveData
@@ -102,7 +102,7 @@ class ThirdPartyRequestViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _addedNewServiceLiveData.value = Event(Unit) },
+                    onComplete = { _addedNewServiceLiveData.value = Event(credentialRequest.first.token) },
                     onError = { _errorLiveData.value = Event(it) }
                 )
         }
