@@ -15,11 +15,11 @@ class NetworkManagerTest {
     @Test
     fun `Check initialization done with correct order`() {
         NetworkManager.initialize(testNetworks1)
-        NetworkManager.networks[0].https shouldBeEqualTo "someAddress1"
-        NetworkManager.networks[1].https shouldBeEqualTo "someAddress3"
-        NetworkManager.networks[2].https shouldBeEqualTo "someAddress5"
-        NetworkManager.networks[3].https shouldBeEqualTo ""
-        NetworkManager.networks[4].https shouldBeEqualTo ""
+        NetworkManager.networks[0].httpRpc shouldBeEqualTo "someAddress1"
+        NetworkManager.networks[1].httpRpc shouldBeEqualTo "someAddress3"
+        NetworkManager.networks[2].httpRpc shouldBeEqualTo "someAddress5"
+        NetworkManager.networks[3].httpRpc shouldBeEqualTo ""
+        NetworkManager.networks[4].httpRpc shouldBeEqualTo ""
     }
 
     @Test

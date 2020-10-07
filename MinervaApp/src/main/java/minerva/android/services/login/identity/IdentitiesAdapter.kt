@@ -13,8 +13,7 @@ import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.NewIdentity
 import minerva.android.widget.ProfileImage
 
-class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(),
-    ItemViewHolder.IdentitiesAdapterListener {
+class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(), ItemViewHolder.IdentitiesAdapterListener {
 
     private var identities = listOf<Identity>()
 

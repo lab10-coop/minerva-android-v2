@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.minerva_primitive_list_row.view.*
 import minerva.android.R
 import minerva.android.extension.visible
@@ -24,7 +23,7 @@ class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListene
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MinervaPrimitiveViewHolder =
         MinervaPrimitiveViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.minerva_primitive_list_row, parent, false), parent, listener
+            LayoutInflater.from(parent.context).inflate(R.layout.minerva_primitive_list_row, parent, false), listener
         )
 
     override fun getItemCount(): Int = primitives.size
@@ -41,7 +40,6 @@ class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListene
 
 class MinervaPrimitiveViewHolder(
     private val view: View,
-    private val viewGroup: ViewGroup,
     private val listener: MinervaPrimitiveClickListener
 ) : RecyclerView.ViewHolder(view) {
 
@@ -77,9 +75,5 @@ class MinervaPrimitiveViewHolder(
                 }
             }
         }
-    }
-
-    private fun View.showIcon(icon: Int) {
-        Glide.with(viewGroup.context).load(icon).into(minervaPrimitiveLogo)
     }
 }
