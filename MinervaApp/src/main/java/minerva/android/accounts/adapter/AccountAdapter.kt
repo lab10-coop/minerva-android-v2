@@ -16,6 +16,7 @@ import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.utils.BalanceUtils.getCryptoBalance
 import minerva.android.utils.BalanceUtils.getFiatBalance
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -153,7 +154,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 }
                 with(amountView) {
                     setCrypto(getCryptoBalance(cryptoBalance))
-                    setFiat(getFiatBalance(fiatBalance))
+                    (if (NetworkManager.getNetwork(account.network).testnet) Int.InvalidValue.toBigDecimal()
+                    else account.fiatBalance).let { setFiat(getFiatBalance(it)) }
                 }
                 sendButton.text =
                     String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), NetworkManager.getNetwork(network).token)
