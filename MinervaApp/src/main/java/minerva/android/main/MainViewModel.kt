@@ -7,6 +7,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.R
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
@@ -196,9 +197,9 @@ class MainViewModel(
 
     fun getIdentityName(): String? = serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.name
 
-    fun updateBindedCredential() {
+    fun updateBindedCredentials(replace: Boolean) {
         launchDisposable {
-            serviceManager.updateBindedCredential(qrCode)
+            serviceManager.updateBindedCredential(qrCode, replace)
                 .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED)) } }
                 .doOnSuccess { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, UPDATED)) }
                 .observeOn(AndroidSchedulers.mainThread())
@@ -208,6 +209,10 @@ class MainViewModel(
                 )
         }
     }
+
+    fun getReplaceLabelRes(qrCode: CredentialQrCode): Int =
+        if (serviceManager.isMoreCredentialToBind(qrCode)) R.string.replace_all
+        else R.string.replace
 
     private fun saveWalletAction(walletAction: WalletAction) {
         launchDisposable {

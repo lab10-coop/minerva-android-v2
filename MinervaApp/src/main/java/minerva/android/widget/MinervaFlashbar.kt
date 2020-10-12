@@ -23,7 +23,7 @@ object MinervaFlashbar {
     }
 }
 
-object MinervaFlashBarWithButtons {
+object MinervaFlashBarWithTwoButtons {
     fun show(
         activity: Activity,
         message: String,
@@ -44,6 +44,51 @@ object MinervaFlashBarWithButtons {
                 override fun onActionTapped(bar: Flashbar) {
                     bar.dismiss()
                     positiveAction()
+                }
+            })
+            .negativeActionTapListener(object : Flashbar.OnActionTapListener {
+                override fun onActionTapped(bar: Flashbar) {
+                    bar.dismiss()
+                    negativeAction()
+                }
+            })
+            .build()
+            .show()
+    }
+}
+
+object MinervaFlashBarWithThreeButtons {
+    fun show(
+        activity: Activity,
+        message: String,
+        positiveButton: Int,
+        primaryButton: Int,
+        negativeButton: Int,
+        positiveAction: () -> Unit,
+        primaryAction: () -> Unit,
+        negativeAction: () -> Unit = {},
+        title: String = activity.getString(R.string.message)
+    ) {
+        getDefaultFlashBar(activity, title, message)
+            .positiveActionTextSizeInSp(FONT_SIZE)
+            .positiveActionTextColorRes(R.color.colorPrimary)
+            .alternativeActionTextSizeInSp(FONT_SIZE)
+            .alternativeActionTextColorRes(R.color.colorPrimary)
+            .negativeActionTextSizeInSp(FONT_SIZE)
+            .negativeActionTextColorRes(R.color.colorPrimary)
+            .positiveActionText(activity.getString(positiveButton))
+            .alternativeActionText(activity.getString(primaryButton))
+            .negativeActionText(activity.getString(negativeButton))
+            .positiveActionTapListener(object : Flashbar.OnActionTapListener {
+                override fun onActionTapped(bar: Flashbar) {
+                    bar.dismiss()
+                    positiveAction()
+                }
+            })
+            .alternativeActionTapListener(object: Flashbar.OnActionTapListener {
+                override fun onActionTapped(bar: Flashbar) {
+                    bar.dismiss()
+                    primaryAction()
                 }
             })
             .negativeActionTapListener(object : Flashbar.OnActionTapListener {

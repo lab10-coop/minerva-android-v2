@@ -14,6 +14,7 @@ interface ServiceManager : Manager {
     fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable
     fun getLoggedInIdentity(publicKey: String): Identity?
     fun removeService(issuer: String): Completable
-    fun updateBindedCredential(qrCode: CredentialQrCode): Single<String>
+    fun updateBindedCredential(qrCode: CredentialQrCode, replace: Boolean): Single<String>
+    fun isMoreCredentialToBind(qrCode: CredentialQrCode): Boolean
     fun decodeThirdPartyRequestToken(token: String): Single<ConnectionRequest<Pair<Credential, CredentialRequest>>>
 }

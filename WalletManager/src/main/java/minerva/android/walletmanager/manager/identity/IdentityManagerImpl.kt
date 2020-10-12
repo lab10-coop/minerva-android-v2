@@ -126,8 +126,7 @@ class IdentityManagerImpl(
         throw  NotInitializedWalletConfigThrowable()
     }
 
-    private fun doesIdentityExist(did: String): Boolean =
-        walletConfigManager.findIdentityByDid(did) != null
+    private fun doesIdentityExist(did: String): Boolean = walletConfigManager.findIdentityByDid(did) != null
 
     override fun isCredentialLoggedIn(qrCode: CredentialQrCode): Boolean {
         walletConfigManager.getWalletConfig()?.credentials?.let { credentials ->
@@ -137,8 +136,8 @@ class IdentityManagerImpl(
         throw  NotInitializedWalletConfigThrowable()
     }
 
-    //TODO this metric needs to be confirmed with Thomas and Peter
-    private fun isCredentialBinded(qrCode: CredentialQrCode, credential: Credential) = qrCode.token == credential.token
+    private fun isCredentialBinded(qrCode: CredentialQrCode, credential: Credential) =
+        qrCode.issuer == credential.issuer && qrCode.type.type == credential.type && qrCode.loggedInDid == credential.loggedInIdentityDid
 
     override fun removeBindedCredentialFromIdentity(credential: Credential): Completable {
         walletConfigManager.getWalletConfig()?.apply {

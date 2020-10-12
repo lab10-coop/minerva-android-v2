@@ -204,8 +204,15 @@ class ServiceManagerTest : RxTest() {
     @Test
     fun `update credential success test`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
-        repository.updateBindedCredential(CredentialQrCode(issuer = "iss", loggedInDid = "did:ethr:address", type = CredentialType.VERIFIABLE_CREDENTIAL, membershipType = CredentialType.AUTOMOTIVE_CLUB))
+        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        repository.updateBindedCredential(
+            CredentialQrCode(
+                issuer = "iss",
+                loggedInDid = "did:ethr:address",
+                type = CredentialType.VERIFIABLE_CREDENTIAL,
+                membershipType = CredentialType.AUTOMOTIVE_CLUB
+            ), false
+        )
             .test()
             .assertNoErrors()
             .assertComplete()
@@ -218,8 +225,15 @@ class ServiceManagerTest : RxTest() {
     fun `update credential success error`() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
-        repository.updateBindedCredential(CredentialQrCode(issuer = "iss", loggedInDid = "did:ethr:address", type = CredentialType.VERIFIABLE_CREDENTIAL, membershipType = CredentialType.AUTOMOTIVE_CLUB))
+        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        repository.updateBindedCredential(
+            CredentialQrCode(
+                issuer = "iss",
+                loggedInDid = "did:ethr:address",
+                type = CredentialType.VERIFIABLE_CREDENTIAL,
+                membershipType = CredentialType.AUTOMOTIVE_CLUB
+            ), false
+        )
             .test()
             .assertError(error)
     }

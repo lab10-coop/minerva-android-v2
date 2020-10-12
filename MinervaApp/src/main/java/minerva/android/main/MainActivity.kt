@@ -267,10 +267,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         viewModel.painlessLogin()
     }
 
-    fun updateCredential() {
-        viewModel.updateBindedCredential()
-    }
-
     fun onAllowNotifications(shouldLogin: Boolean) {
         if (shouldLogin) viewModel.painlessLogin()
         else Toast.makeText(this, "Allow push notifications, will be added soon", Toast.LENGTH_SHORT).show()

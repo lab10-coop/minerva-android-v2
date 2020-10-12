@@ -73,7 +73,7 @@ class ChooseIdentityFragment : Fragment() {
 
     private fun setupServiceData() {
         minervaPrimitiveName.text = serviceQrCode.serviceName
-        requestedData.prepareChain(serviceQrCode.requestedData, getString(R.string.requested_data))
+        requestedData.prepareChain(serviceQrCode.requestedData, getString(R.string.requested_data), getString(R.string.did))
     }
 
     private fun setupIdentitiesList() {
