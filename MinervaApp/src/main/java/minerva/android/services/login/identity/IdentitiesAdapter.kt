@@ -39,7 +39,6 @@ class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(), ItemViewHolder
     fun updateList(identities: MutableList<Identity>) {
         identities.apply {
             add(NewIdentity())
-            add(IncognitoIdentity())
         }
         this.identities = identities.filter { !it.isDeleted }
         notifyDataSetChanged()
