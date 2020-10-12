@@ -59,7 +59,7 @@ class ServiceManagerImpl(
         requirements.type.find { it == type } != null
 
     private fun isIssValid(credentialRequest: CredentialRequirements, iss: String): Boolean =
-        if (credentialRequest.constraints.isEmpty())  false
+        if (credentialRequest.constraints.isEmpty()) false
         else JsonLogic().apply(credentialRequest.constraints[0], iss).toBoolean() //JsonLogic in constraints is check against the iss
 
     override fun createJwtToken(payload: Map<String, Any?>, privateKey: String?): Single<String> =

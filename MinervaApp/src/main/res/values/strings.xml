@@ -65,6 +65,7 @@
     <string name="close">Close</string>
     <string name="camera_error">Camera initialization error:</string>
     <string name="login">Login</string>
+    <string name="next">Next</string>
     <string name="authentication">Authentication</string>
     <string name="requested_data">Requested data: </string>
     <string name="required_field">This field is required</string>

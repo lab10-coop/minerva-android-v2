@@ -3,7 +3,6 @@ package minerva.android.main.handler
 import android.app.Activity
 import android.content.Intent
 import minerva.android.R
-import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.MainActivity
 import minerva.android.main.MainActivity.Companion.EDIT_IDENTITY_RESULT_REQUEST_CODE
@@ -80,9 +79,19 @@ private fun MainActivity.showKnownUserFlashbar() {
 
 private fun MainActivity.handleSuccessLoginStatuses(loginAction: Int) {
     when (loginAction) {
-        NEW_USER -> MinervaFlashbar.show(this, getString(R.string.login_success_title), getString(R.string.login_success_message))
+        NEW_USER -> showSuccessFlashbar()
         NEW_QUICK_USER -> showQuickUserFlashbar(false)
     }
+}
+
+private fun MainActivity.showSuccessFlashbar() {
+    //TODO showing Flashbar according to service name looks poor. Refactor?
+    if (viewModel.loginPayload.qrCode?.serviceName?.isNotEmpty() == true)
+        MinervaFlashbar.show(
+            this,
+            getString(R.string.login_success_title),
+            getString(R.string.login_success_message)
+        )
 }
 
 private fun MainActivity.showQuickUserFlashbar(shouldLogin: Boolean) {
