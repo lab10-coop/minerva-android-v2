@@ -112,12 +112,12 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `update binded credential test`() {
-        whenever(serviceManager.updateBindedCredential(any())).doReturn(Single.just("name"))
+        whenever(serviceManager.updateBindedCredential(any(), any())).doReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
             qrCode = CredentialQrCode("name", "type")
             updateCredentialSuccessLiveData.observeForever(updateCredentialObserver)
-            updateBindedCredential()
+            updateBindedCredentials(false)
         }
         updateCredentialCaptor.run {
             verify(updateCredentialObserver).onChanged(capture())
@@ -128,12 +128,12 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `update binded credential test error`() {
         val error = Throwable()
-        whenever(serviceManager.updateBindedCredential(any())).doReturn(Single.error(error))
+        whenever(serviceManager.updateBindedCredential(any(), any())).doReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
             qrCode = CredentialQrCode("name", "type")
             updateCredentialErrorLiveData.observeForever(errorObserver)
-            updateBindedCredential()
+            updateBindedCredentials(false)
         }
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())

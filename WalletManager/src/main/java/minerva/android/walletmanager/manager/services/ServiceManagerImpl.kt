@@ -25,8 +25,7 @@ class ServiceManagerImpl(
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletConfigManager.walletConfigLiveData
 
-    override fun decodeJwtToken(token: String): Single<QrCode> =
-        cryptographyRepository.decodeJwtToken(token)
+    override fun decodeJwtToken(token: String): Single<QrCode> = cryptographyRepository.decodeJwtToken(token)
             .map { mapHashMapToQrCodeResponse(it, token) }
 
     override fun decodeThirdPartyRequestToken(token: String): Single<ConnectionRequest<Pair<Credential, CredentialRequest>>> =
@@ -121,23 +120,32 @@ class ServiceManagerImpl(
         throw NotInitializedWalletConfigThrowable()
     }
 
-    override fun updateBindedCredential(qrCode: CredentialQrCode): Single<String> {
+    override fun isMoreCredentialToBind(qrCode: CredentialQrCode): Boolean {
+        walletConfigManager.getWalletConfig()?.apply {
+            return credentials.filter { !filterCredential(it, CredentialQrCodeToCredentialMapper.map(qrCode)) }.size > ONE_ELEMENT
+        }
+        throw NotInitializedWalletConfigThrowable()
+    }
+
+    override fun updateBindedCredential(qrCode: CredentialQrCode, replace: Boolean): Single<String> {
         walletConfigManager.getWalletConfig()?.apply {
             val updatedCredential = CredentialQrCodeToCredentialMapper.map(qrCode)
-            val newCredentials = credentials.toMutableList().apply {
-                this[getPositionForCredential(updatedCredential)] = updatedCredential
+            credentials.apply {
+                val newCredentials = if (replace) filter { filterCredential(it, updatedCredential) }.toMutableList()
+                else toMutableList()
+                newCredentials.add(updatedCredential)
+                return walletConfigManager.updateWalletConfig(copy(version = updateVersion, credentials = newCredentials))
+                    .toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
             }
-            return walletConfigManager.updateWalletConfig(WalletConfig().copy(version = updateVersion, credentials = newCredentials))
-                .toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
         }
         throw  NotInitializedWalletConfigThrowable()
     }
 
-    private fun WalletConfig.getPositionForCredential(credential: Credential): Int {
-        credentials.forEachIndexed { position, item ->
-            if (isCredentialAvailable(item, credential)) return position
-        }
-        return identities.size
+    private fun filterCredential(item: Credential, credential: Credential) =
+        item.loggedInIdentityDid != credential.loggedInIdentityDid && item.type != credential.type && item.issuer != credential.issuer
+
+    companion object {
+        private const val ONE_ELEMENT = 1
     }
 
     private fun isCredentialAvailable(item: Credential, credential: Credential) =
