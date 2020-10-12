@@ -7,6 +7,6 @@ import minerva.android.walletmanager.model.Service
 object ServicesResponseToServicesMapper : Mapper<List<ServicePayload>, List<Service>> {
     override fun map(input: List<ServicePayload>): List<Service> =
         mutableListOf<Service>().apply {
-            input.forEach { add(Service(it.type, it.name, it.lastUsed, it.loggedInIdentityPublicKey, it.iconUrl)) }
+            input.forEach { add(Service(it.issuer, it.name, it.lastUsed, it.loggedInIdentityPublicKey, it.iconUrl)) }
         }
 }

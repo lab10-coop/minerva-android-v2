@@ -29,7 +29,7 @@ class ServicesFragment : MinervaPrimitiveListFragment() {
     }
 
     override fun onRemoveService(service: Service) {
-        showRemoveDialog(service.name, R.string.remove_service_dialog_message) { viewModel.removeService(service.type, service.name) }
+        showRemoveDialog(service.name, R.string.remove_service_dialog_message) { viewModel.removeService(service.issuer, service.name) }
     }
 
     companion object {

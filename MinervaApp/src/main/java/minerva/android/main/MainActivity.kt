@@ -46,10 +46,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         replaceFragment(IdentitiesFragment())
         prepareSettingsIcon()
         prepareObservers()
-        viewModel.run {
-            loginFromNotification(intent?.getStringExtra(JWT))
-            restorePendingTransactions()
-        }
+        viewModel.restorePendingTransactions()
     }
 
     override fun onResume() {
@@ -77,11 +74,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     override fun onDestroy() {
         super.onDestroy()
         viewModel.dispose()
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        viewModel.loginFromNotification(intent?.getStringExtra(JWT))
     }
 
     private fun prepareObservers() {

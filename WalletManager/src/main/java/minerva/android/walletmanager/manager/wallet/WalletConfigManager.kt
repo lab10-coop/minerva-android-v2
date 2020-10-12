@@ -25,8 +25,6 @@ interface WalletConfigManager : Manager {
     fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>>
 
     fun getValueIterator(): Int
-    fun isAlreadyLoggedIn(issuer: String): Boolean
-    fun getLoggedInIdentityPublicKey(issuer: String): String
     fun getLoggedInIdentityByPublicKey(publicKey: String): Identity?
     fun saveService(service: Service): Completable
     fun getAccount(accountIndex: Int): Account?

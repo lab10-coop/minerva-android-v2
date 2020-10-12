@@ -32,7 +32,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
         whenever(servicesManager.removeService(any())) doReturn Completable.error(error)
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.complete()
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.removeService(ServiceType.CHARGING_STATION, "name")
+        viewModel.removeService("1", "name")
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -42,7 +42,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
     fun `Remove service success`() {
         whenever(servicesManager.removeService(any())) doReturn Completable.complete()
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.complete()
-        viewModel.removeService(ServiceType.CHARGING_STATION, "name")
+        viewModel.removeService("1", "name")
         viewModel.serviceRemovedLiveData.observeLiveDataEvent(Event(Unit))
     }
 }

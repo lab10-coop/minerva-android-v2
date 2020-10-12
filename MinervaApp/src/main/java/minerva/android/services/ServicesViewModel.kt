@@ -13,7 +13,6 @@ import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 
@@ -30,9 +29,9 @@ class ServicesViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
-    fun removeService(@ServiceType type: String, name: String) {
+    fun removeService(issuer: String, name: String) {
         launchDisposable {
-            serviceManager.removeService(type)
+            serviceManager.removeService(issuer)
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(getWalletAction(name)))
                 .observeOn(AndroidSchedulers.mainThread())

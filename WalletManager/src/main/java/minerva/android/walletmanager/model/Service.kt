@@ -4,9 +4,9 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 
 open class Service(
-    override val type: String = String.Empty,
+    val issuer: String = String.Empty,
     override var name: String = String.Empty,
     override var lastUsed: Long = Long.InvalidValue,
     val loggedInIdentityPublicKey: String = String.Empty,
     override val iconUrl: String = String.Empty
-) : MinervaPrimitive(name = name, type = type, lastUsed = lastUsed)
+) : MinervaPrimitive(name = name, lastUsed = lastUsed)
