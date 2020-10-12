@@ -33,7 +33,7 @@ object DataProvider {
             Account(7, "publicKey5", "privateKey5", "address", network = NetworkShortName.ATS_TAU)
         )
         , listOf(
-            Service(ServiceType.CHARGING_STATION, "name")
+            Service("1", "name")
         ),
         listOf(Credential(loggedInIdentityDid = "did:ethr:address", type = CredentialType.VERIFIABLE_CREDENTIAL.type, membershipType = CredentialType.AUTOMOTIVE_CLUB.type, issuer = "iss"))
     )

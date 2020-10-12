@@ -6,5 +6,5 @@ import minerva.android.walletmanager.model.Service
 
 object ServiceToServicePayloadMapper : Mapper<Service, ServicePayload> {
     override fun map(input: Service): ServicePayload =
-        with(input) { ServicePayload(type, name, lastUsed, loggedInIdentityPublicKey, iconUrl) }
+        with(input) { ServicePayload(issuer, name, lastUsed, loggedInIdentityPublicKey, iconUrl) }
 }

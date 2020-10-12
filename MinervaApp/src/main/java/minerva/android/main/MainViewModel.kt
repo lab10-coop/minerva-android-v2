@@ -11,7 +11,6 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils
-import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
@@ -132,33 +131,33 @@ class MainViewModel(
     fun clearPendingAccounts() {
         transactionRepository.clearPendingAccounts()
     }
+//todo remove when Charging Station Dashboard is not needed anymore, or prepare this service for integration
+//    fun loginFromNotification(jwtToken: String?) {
+//        jwtToken?.let {
+//            launchDisposable {
+//                serviceManager.decodeJwtToken(it)
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribeBy(
+//                        onSuccess = { handleQrCodeResponse(it) },
+//                        onError = {
+//                            Timber.e(it)
+//                            _errorLiveData.value = Event(it)
+//                        }
+//                    )
+//            }
+//        }
+//    }
 
-    fun loginFromNotification(jwtToken: String?) {
-        jwtToken?.let {
-            launchDisposable {
-                serviceManager.decodeJwtToken(it)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onSuccess = { handleQrCodeResponse(it) },
-                        onError = {
-                            Timber.e(it)
-                            _errorLiveData.value = Event(it)
-                        }
-                    )
-            }
-        }
-    }
+//    private fun handleQrCodeResponse(response: QrCode) {
+//        (response as? ServiceQrCode)?.apply {
+//            loginPayload =
+//                LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.), response)
+//            painlessLogin()
+//        }
+//    }
 
     fun isOrderEditAvailable(type: Int) = orderManager.isOrderAvailable(type)
-
-    private fun handleQrCodeResponse(response: QrCode) {
-        (response as? ServiceQrCode)?.apply {
-            loginPayload =
-                LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.issuer), response)
-            painlessLogin()
-        }
-    }
 
     fun painlessLogin() {
         serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.let { identity ->

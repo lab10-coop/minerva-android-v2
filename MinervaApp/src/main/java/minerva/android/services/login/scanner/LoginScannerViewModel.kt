@@ -66,7 +66,7 @@ class LoginScannerViewModel(
 
     private fun handleQrCodeResponse(qrCode: QrCode) {
         when (qrCode) {
-            is ServiceQrCode -> handleServiceQrCodeResponse(qrCode)
+            is ServiceQrCode -> _handleServiceQrCodeLiveData.value = Event(qrCode)
             is CredentialQrCode -> handleCredentialQrCodeResponse(qrCode)
         }
     }
@@ -111,15 +111,4 @@ class LoginScannerViewModel(
             lastUsed,
             hashMapOf(WalletActionFields.CREDENTIAL_NAME to name)
         )
-
-    private fun handleServiceQrCodeResponse(serviceQrCode: ServiceQrCode) {
-        if (isLoggedInToChargingCarStation(serviceQrCode)) _knownUserLoginLiveData.value = Event(getLoginPayload(serviceQrCode))
-        else _handleServiceQrCodeLiveData.value = Event(serviceQrCode)
-    }
-
-    private fun isLoggedInToChargingCarStation(qrCode: ServiceQrCode) =
-        qrCode.issuer == ServiceType.CHARGING_STATION && serviceManager.isAlreadyLoggedIn(qrCode.issuer)
-
-    private fun getLoginPayload(qrCode: ServiceQrCode) =
-        LoginPayload(getLoginStatus(qrCode), serviceManager.getLoggedInIdentityPublicKey(qrCode.issuer), qrCode)
 }

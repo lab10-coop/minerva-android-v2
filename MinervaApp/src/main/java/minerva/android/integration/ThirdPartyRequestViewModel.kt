@@ -12,14 +12,14 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.PaymentRequest
-import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.mappers.GATEWAY
-import minerva.android.walletmanager.model.state.VCRequestState
+import minerva.android.walletmanager.model.state.ConnectionRequest
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import timber.log.Timber
 
 class ThirdPartyRequestViewModel(
     private val serviceManager: ServiceManager,
@@ -30,8 +30,8 @@ class ThirdPartyRequestViewModel(
     lateinit var payment: Payment
     lateinit var credentialRequest: Pair<Credential, CredentialRequest>
 
-    private val _showConnectionRequestLiveData = MutableLiveData<Event<VCRequestState<Pair<Credential, CredentialRequest>>>>()
-    val showServiceConnectionRequestLiveData: LiveData<Event<VCRequestState<Pair<Credential, CredentialRequest>>>> get() = _showConnectionRequestLiveData
+    private val _showConnectionRequestLiveData = MutableLiveData<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>>()
+    val showServiceConnectionRequestLiveData: LiveData<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>> get() = _showConnectionRequestLiveData
 
     private val _showPaymentConfirmationLiveData = MutableLiveData<Event<Unit>>()
     val showPaymentConfirmationLiveData: LiveData<Event<Unit>> get() = _showPaymentConfirmationLiveData
@@ -57,6 +57,9 @@ class ThirdPartyRequestViewModel(
     private val serviceName: String
         get() = credentialRequest.second.service.name
 
+    private val issuer: String
+        get() = credentialRequest.second.service.issuer
+
     private val serviceIconUrl: String
         get() = GATEWAY + credentialRequest.second.service.iconUrl.url
 
@@ -64,7 +67,7 @@ class ThirdPartyRequestViewModel(
         token?.let {
             launchDisposable {
                 serviceManager.decodeThirdPartyRequestToken(token)
-                    .doOnSuccess { if (it is VCRequestState.Found) credentialRequest = it.data }
+                    .doOnSuccess { if (it is ConnectionRequest.ServiceNotConnected) credentialRequest = it.data }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
@@ -94,7 +97,7 @@ class ThirdPartyRequestViewModel(
 
     fun connectToService() {
         launchDisposable {
-            serviceManager.saveService(Service(ServiceType.OAMTC, serviceName, DateUtils.timestamp, iconUrl = serviceIconUrl))
+            serviceManager.saveService(Service(issuer, serviceName, DateUtils.timestamp, iconUrl = serviceIconUrl))
                 .observeOn(Schedulers.io())
 //                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED))) //todo add and when handling activity logs
                 .subscribeOn(Schedulers.io())

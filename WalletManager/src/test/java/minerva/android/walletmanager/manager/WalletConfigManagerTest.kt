@@ -14,7 +14,6 @@ import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.utils.DataProvider.walletConfig
 import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
 import org.amshove.kluent.mock
@@ -107,26 +106,6 @@ class WalletConfigManagerTest {
     }
 
     @Test
-    fun `get logged in identity public key error test`() {
-        walletManager.run {
-            val result = getLoggedInIdentityPublicKey("iss")
-            assertEquals(result, "")
-        }
-    }
-
-    @Test
-    fun `is already logged in test`() {
-        val expected = Service(type = ServiceType.CHARGING_STATION)
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, services = listOf(expected))))
-        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
-        walletManager.run {
-            initWalletConfig()
-            val result = isAlreadyLoggedIn(ServiceType.CHARGING_STATION)
-            assertEquals(result, true)
-        }
-    }
-
-    @Test
     fun `save service test`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
@@ -144,30 +123,6 @@ class WalletConfigManagerTest {
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
         walletManager.saveService(Service()).test().assertError(error)
-    }
-
-    @Test
-    fun `get logged in identity public key test`() {
-        val expected = Service("iss", name = "tom", loggedInIdentityPublicKey = "key")
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, services = listOf(expected))))
-        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
-        walletManager.run {
-            initWalletConfig()
-            val result = getLoggedInIdentityPublicKey("iss")
-            assertEquals(result, expected.loggedInIdentityPublicKey)
-        }
-    }
-
-    @Test
-    fun `is already logged in error test`() {
-        val expected = Service(type = ServiceType.CHARGING_STATION)
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, services = listOf(expected))))
-        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
-        walletManager.run {
-            initWalletConfig()
-            val result = isAlreadyLoggedIn("issuer")
-            assertEquals(result, false)
-        }
     }
 
     @Test

@@ -147,20 +147,6 @@ class WalletConfigManagerImpl(
         }
         return Int.InvalidValue
     }
-
-    override fun isAlreadyLoggedIn(issuer: String): Boolean {
-        getWalletConfig()?.services?.forEach {
-            if (it.type == issuer) return true
-        }
-        return false
-    }
-
-    override fun getLoggedInIdentityPublicKey(issuer: String): String {
-        getWalletConfig()?.services?.find { it.type == issuer }
-            ?.let { return it.loggedInIdentityPublicKey }
-            .orElse { return String.Empty }
-    }
-
     override fun getLoggedInIdentityByPublicKey(publicKey: String): Identity? {
         getWalletConfig()?.identities?.find { it.publicKey == publicKey }
             ?.let { return it }
@@ -187,7 +173,7 @@ class WalletConfigManagerImpl(
     }
 
     private fun WalletConfig.isServiceIsAlreadyConnected(newService: Service) =
-        services.find { service -> service.type == newService.type }
+        services.find { service -> service.issuer == newService.issuer }
 
     private fun WalletConfig.updateService(service: Service) {
         services.forEach { if (it == service) it.lastUsed = DateUtils.timestamp }

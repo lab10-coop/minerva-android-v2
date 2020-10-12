@@ -19,7 +19,7 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialRequest
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.SIGNED_PAYLOAD
-import minerva.android.walletmanager.model.state.VCRequestState
+import minerva.android.walletmanager.model.state.ConnectionRequest
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationListener {
@@ -49,8 +49,9 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
         viewModel.apply {
             showServiceConnectionRequestLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver {
                 when (it) {
-                    is VCRequestState.Found -> handleVCFound(it)
-                    is VCRequestState.NotFound -> sendResult(ON_CREDENTIAL_NOT_FOUND)
+                    is ConnectionRequest.ServiceNotConnected -> connectService(it)
+                    is ConnectionRequest.VCNotFound -> sendResult(ON_CREDENTIAL_NOT_FOUND)
+                    is ConnectionRequest.ServiceConnected -> onNewServicesConnected(it.data.first.token)
                 }
             })
             showPaymentConfirmationLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { showConfirmTransactionScreen() })
@@ -58,7 +59,7 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
         }
     }
 
-    private fun handleVCFound(it: VCRequestState.Found<Pair<Credential, CredentialRequest>>) {
+    private fun connectService(it: ConnectionRequest.ServiceNotConnected<Pair<Credential, CredentialRequest>>) {
         container.visible()
         loader.gone()
         minervaPrimitiveName.text = it.data.second.service.name
