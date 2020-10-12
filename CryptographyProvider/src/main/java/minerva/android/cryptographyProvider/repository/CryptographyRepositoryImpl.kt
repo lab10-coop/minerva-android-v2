@@ -1,5 +1,6 @@
 package minerva.android.cryptographyProvider.repository
 
+import android.util.Log
 import io.reactivex.Single
 import kotlinx.coroutines.rx2.rxSingle
 import me.uport.sdk.core.hexToByteArray
@@ -75,9 +76,13 @@ class CryptographyRepositoryImpl : CryptographyRepository {
                 /*JWTTools().decodeRaw(jwtToken).second is used for decoding payload from jwtToken, because JwtPayload, which is automatically
                 * generated from JWTTools().verify(jwtToken, resolver) is missing essential fields, hence this object is omitted*/
 
+
+
                 if (payload != null) {
+                    Log.e("klop", "payload is not null")
                     JWTTools().decodeRaw(jwtToken).second
                 } else {
+                    Log.e("klop", "Payload is NULL")
                     error(Throwable("JWT Payload is null"))
                 }
             } catch (exception: InvalidJWTException) {

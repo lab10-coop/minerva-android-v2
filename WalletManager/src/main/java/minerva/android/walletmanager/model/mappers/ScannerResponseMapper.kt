@@ -62,7 +62,7 @@ fun mapHashMapToQrCodeResponse(map: Map<String, Any?>, token: String): QrCode {
         * */
         return ServiceQrCode(
             issuer = map[ISS] as String,
-            serviceName = map[NAME] as String,
+            serviceName = (map[NAME] as? String) ?: String.Empty,
             callback = map[CALLBACK] as String?,
             iconUrl = getServiceIconUrl(map),
             requestedData = getRequestedData(map),
