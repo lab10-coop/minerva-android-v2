@@ -15,10 +15,8 @@ import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
-import minerva.android.widget.LetterLogo
 import minerva.android.widget.ProfileImage
 import minerva.android.widget.repository.getNetworkIcon
-import minerva.android.widget.repository.getServiceIcon
 
 class OrderAdapter : RecyclerView.Adapter<OrderViewHolder>() {
 

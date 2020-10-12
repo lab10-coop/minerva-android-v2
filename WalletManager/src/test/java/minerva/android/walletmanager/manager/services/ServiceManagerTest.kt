@@ -14,7 +14,6 @@ import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.CredentialType
-import minerva.android.walletmanager.model.defs.PaymentRequest
 import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
@@ -69,6 +68,7 @@ class ServiceManagerTest : RxTest() {
         whenever(cryptographyRepository.decodeJwtToken(any())).thenReturn(
             Single.just(
                 hashMapOf(
+                    Pair("name", "test"),
                     Pair("callback", "test"),
                     Pair("iss", "test"),
                     Pair("requested", "test")
@@ -101,20 +101,6 @@ class ServiceManagerTest : RxTest() {
         repository.saveService(Service()).test().assertError(error)
     }
 
-//    @Test
-//    fun `decode payment token success test`() {
-//        val jwtData = mapOf<String, Any?>(
-//            PaymentRequest.AMOUNT to "amount", PaymentRequest.IBAN to "iban",
-//            PaymentRequest.RECIPIENT to "recipient", PaymentRequest.SERVICE_NAME to "name", PaymentRequest.SERVICE_SHORT_NAME to "short",
-//            PaymentRequest.URL to "url"
-//        )
-//        whenever(cryptographyRepository.decodeJwtToken(any())) doReturn Single.just(jwtData)
-//        repository.decodeThirdPartyRequestToken("jwtToken")
-//            .test()
-//            .assertComplete()
-//            .assertNoErrors()
-//    }
-
     @Test
     fun `decode payment token error test`() {
         val error = Throwable()
@@ -128,14 +114,22 @@ class ServiceManagerTest : RxTest() {
 
     @Test
     fun `decode qr code response success test`() {
-        val jwtData = mapOf<String, Any?>(PaymentRequest.URL to "url", "iss" to "123", "requested" to arrayListOf<String>("test"))
-        whenever(cryptographyRepository.decodeJwtToken(any())) doReturn Single.just(jwtData)
+        whenever(cryptographyRepository.decodeJwtToken(any())).thenReturn(
+            Single.just(
+                hashMapOf(
+                    Pair("name", "test"),
+                    Pair("callback", "test"),
+                    Pair("iss", "test"),
+                    Pair("requested", "test")
+                )
+            )
+        )
         repository.decodeJwtToken("token")
             .test()
             .assertNoErrors()
             .assertComplete()
             .assertValue {
-                it.issuer == "123"
+                it.issuer == "test"
             }
     }
 
@@ -169,42 +163,6 @@ class ServiceManagerTest : RxTest() {
     }
 
     @Test
-    fun `get logged in identity public key test`() {
-        whenever(walletConfigManager.getLoggedInIdentityPublicKey(any())) doReturn "iss"
-        repository.run {
-            val result = getLoggedInIdentityPublicKey("iss")
-            assertEquals(result, "iss")
-        }
-    }
-
-    @Test
-    fun `get logged in identity public key error test`() {
-        whenever(walletConfigManager.getLoggedInIdentityPublicKey(any())) doReturn ""
-        repository.run {
-            val result = getLoggedInIdentityPublicKey("iss")
-            assertEquals(result, "")
-        }
-    }
-
-    @Test
-    fun `is already logged in test`() {
-        whenever(walletConfigManager.isAlreadyLoggedIn(any())) doReturn true
-        repository.run {
-            val result = isAlreadyLoggedIn(ServiceType.CHARGING_STATION)
-            assertEquals(result, true)
-        }
-    }
-
-    @Test
-    fun `is already logged in error test`() {
-        whenever(walletConfigManager.isAlreadyLoggedIn(any())) doReturn false
-        repository.run {
-            val result = isAlreadyLoggedIn("issuer")
-            assertEquals(result, false)
-        }
-    }
-
-    @Test
     fun `create jwtToken success test`() {
         whenever(cryptographyRepository.createJwtToken(any(), any())) doReturn Single.just("token")
         repository.createJwtToken(mapOf("name" to "tom"))
@@ -228,7 +186,7 @@ class ServiceManagerTest : RxTest() {
     @Test
     fun `remove service success test`() {
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.complete()
-        repository.removeService(ServiceType.CHARGING_STATION)
+        repository.removeService("1")
             .test()
             .assertComplete()
             .assertNoErrors()
@@ -238,7 +196,7 @@ class ServiceManagerTest : RxTest() {
     fun `remove service error test`() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.error(error)
-        repository.removeService(ServiceType.CHARGING_STATION)
+        repository.removeService("1")
             .test()
             .assertError(error)
     }
@@ -246,8 +204,15 @@ class ServiceManagerTest : RxTest() {
     @Test
     fun `update credential success test`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
-        repository.updateBindedCredential(CredentialQrCode(issuer = "iss", loggedInDid = "did:ethr:address", type = CredentialType.VERIFIABLE_CREDENTIAL, membershipType = CredentialType.AUTOMOTIVE_CLUB))
+        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        repository.updateBindedCredential(
+            CredentialQrCode(
+                issuer = "iss",
+                loggedInDid = "did:ethr:address",
+                type = CredentialType.VERIFIABLE_CREDENTIAL,
+                membershipType = CredentialType.AUTOMOTIVE_CLUB
+            ), false
+        )
             .test()
             .assertNoErrors()
             .assertComplete()
@@ -260,8 +225,15 @@ class ServiceManagerTest : RxTest() {
     fun `update credential success error`() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
-        repository.updateBindedCredential(CredentialQrCode(issuer = "iss", loggedInDid = "did:ethr:address", type = CredentialType.VERIFIABLE_CREDENTIAL, membershipType = CredentialType.AUTOMOTIVE_CLUB))
+        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        repository.updateBindedCredential(
+            CredentialQrCode(
+                issuer = "iss",
+                loggedInDid = "did:ethr:address",
+                type = CredentialType.VERIFIABLE_CREDENTIAL,
+                membershipType = CredentialType.AUTOMOTIVE_CLUB
+            ), false
+        )
             .test()
             .assertError(error)
     }

@@ -8,7 +8,7 @@ import minerva.android.walletmanager.model.mappers.*
 data class Credential(
     @SerializedName(CREDENTIAL_NAME)
     override var name: String = String.Empty,
-    override val type: String = String.Empty,
+    val type: String = String.Empty,
     val membershipType: String = String.Empty,
     val issuer: String = String.Empty,
     val token: String = String.Empty,
@@ -26,4 +26,4 @@ data class Credential(
     override var lastUsed: Long = Long.InvalidValue,
     val cardUrl: String? = String.Empty,
     override val iconUrl: String? = String.Empty
-) : MinervaPrimitive(name = name, type = type, lastUsed = lastUsed)
+) : MinervaPrimitive(name = name, lastUsed = lastUsed)

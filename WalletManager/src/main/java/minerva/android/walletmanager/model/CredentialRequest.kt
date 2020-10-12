@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
 
 data class CredentialRequest(
+    @SerializedName("issuer")
+    val issuer: String = String.Empty,
     @SerializedName("callbackURL")
     val callbackUrl: String = String.Empty,
     @SerializedName("credentialRequirements")

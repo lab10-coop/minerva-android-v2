@@ -14,8 +14,9 @@ import minerva.android.kotlinUtils.Empty
 
 class HighlightedTextChain(context: Context, attrs: AttributeSet? = null) : FlexboxLayout(context, attrs) {
 
-    fun prepareChain(chainData: List<String>, title: String = String.Empty) {
+    fun prepareChain(chainData: List<String>, title: String = String.Empty, defaultData: String? = null) {
         header.text = title
+        if(chainData.isEmpty() && defaultData != null) addView(prepareCell(defaultData))
         chainData.forEach {
             addView(prepareCell(it))
         }

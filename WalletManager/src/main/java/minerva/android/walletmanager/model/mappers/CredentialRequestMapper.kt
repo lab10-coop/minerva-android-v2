@@ -10,6 +10,7 @@ object CredentialRequestMapper : Mapper<Map<String, Any?>, CredentialRequest> {
     override fun map(input: Map<String, Any?>): CredentialRequest {
         val requirements = input["credentialRequirements"] as ArrayList<*>
         return CredentialRequest(
+            issuer = input["iss"] as String,
             callbackUrl = input["callbackURL"] as String,
             credentialRequirements = Gson().fromJson(requirements[0] as String, CredentialRequirements::class.java),
             service = Gson().fromJson(input["service"] as String, RequestedService::class.java),

@@ -97,31 +97,6 @@ class MainViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `login from notification error`() {
-        val error = Throwable()
-        viewModel.loginPayload = LoginPayload(qrCode = ServiceQrCode(callback = "url"), loginStatus = 0)
-        whenever(serviceManager.decodeJwtToken(any())) doReturn Single.just(ServiceQrCode() as QrCode)
-        whenever(serviceManager.getLoggedInIdentityPublicKey(any())) doReturn "publicKey"
-        whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(
-            Identity(
-                1, personalData = linkedMapOf("name" to "tom", "phone_number" to "123"),
-                privateKey = "1", publicKey = "2"
-            )
-        )
-        whenever(serviceManager.createJwtToken(any(), any())) doReturn Single.error(error)
-        whenever(serviceManager.painlessLogin(any(), any(), any(), any())) doReturn Completable.error(error)
-        whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.error(error)
-        viewModel.run {
-            errorLiveData.observeForever(errorObserver)
-            loginFromNotification("token")
-        }
-
-        errorCaptor.run {
-            verify(errorObserver).onChanged(capture())
-        }
-    }
-
-    @Test
     fun `Should show edit order icon`() {
         whenever(orderManager.isOrderAvailable(any())).thenReturn(true)
         val isEditIconVisible = viewModel.isOrderEditAvailable(WalletActionType.IDENTITY)
@@ -137,12 +112,12 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `update binded credential test`() {
-        whenever(serviceManager.updateBindedCredential(any())).doReturn(Single.just("name"))
+        whenever(serviceManager.updateBindedCredential(any(), any())).doReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
             qrCode = CredentialQrCode("name", "type")
             updateCredentialSuccessLiveData.observeForever(updateCredentialObserver)
-            updateBindedCredential()
+            updateBindedCredentials(false)
         }
         updateCredentialCaptor.run {
             verify(updateCredentialObserver).onChanged(capture())
@@ -153,12 +128,12 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `update binded credential test error`() {
         val error = Throwable()
-        whenever(serviceManager.updateBindedCredential(any())).doReturn(Single.error(error))
+        whenever(serviceManager.updateBindedCredential(any(), any())).doReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
             qrCode = CredentialQrCode("name", "type")
             updateCredentialErrorLiveData.observeForever(errorObserver)
-            updateBindedCredential()
+            updateBindedCredentials(false)
         }
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())

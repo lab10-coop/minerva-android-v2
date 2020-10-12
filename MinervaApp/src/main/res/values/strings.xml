@@ -65,6 +65,7 @@
     <string name="close">Close</string>
     <string name="camera_error">Camera initialization error:</string>
     <string name="login">Login</string>
+    <string name="next">Next</string>
     <string name="authentication">Authentication</string>
     <string name="requested_data">Requested data: </string>
     <string name="required_field">This field is required</string>
@@ -76,6 +77,9 @@
     <string name="remove_owner">Remove owner</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="replace">Replace</string>
+    <string name="replace_all">Replace all</string>
+    <string name="add_as_new">Add as new</string>
     <string name="identity">Identity</string>
     <string name="select_identity_message">Please select identity</string>
     <string name="invalid_qr_code_message">Invalid QR code, please try again</string>
@@ -196,6 +200,5 @@
     <string name="clear_text">Clear text</string>
     <string name="pending_account_error_message">Something went wrong, please check your balances.</string>
     <string name="provide_following_data">You are about to provide the following data</string>
-    <string name="don_t_ask_me_again">Don\'t ask me again</string>
-    <string name="do_not_ask_me_again_manual">This will automate this request. You can undo this by removing this service in your Minerva Service screen.</string>
+    <string name="connection_request_manual">This service will be added to the Minerva - Services and future requests will be done automatically. If you want to turn the automation off, you only need to remove it from there.</string>
 </resources>

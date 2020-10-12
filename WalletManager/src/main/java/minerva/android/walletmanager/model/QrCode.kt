@@ -9,7 +9,8 @@ import minerva.android.walletmanager.model.defs.CredentialType
 @Parcelize
 open class QrCode(
     open var issuer: String = String.Empty,
-    open var token: String = String.Empty
+    open var token: String = String.Empty,
+    open val iconUrl: String? = String.Empty
 ) : Parcelable
 
 @Parcelize
@@ -18,7 +19,8 @@ data class ServiceQrCode(
     var serviceName: String = String.Empty,
     var callback: String? = String.Empty,
     var requestedData: List<String> = listOf(),
-    var identityFields: String = String.Empty
+    var identityFields: String = String.Empty,
+    override val iconUrl: String? = String.Empty
 ) : QrCode(issuer = issuer)
 
 @Parcelize
@@ -36,5 +38,5 @@ data class CredentialQrCode(
     val loggedInDid: String = String.Empty,
     val lastUsed: Long = Long.InvalidValue,
     val cardUrl: String? = String.Empty,
-    val iconUrl: String? = String.Empty
+    override val iconUrl: String? = String.Empty
 ) : QrCode(issuer = issuer)

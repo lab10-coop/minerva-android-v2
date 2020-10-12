@@ -12,8 +12,7 @@ import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialRequest
 import minerva.android.walletmanager.model.Payment
-import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.state.VCRequestState
+import minerva.android.walletmanager.model.state.ConnectionRequest
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Test
@@ -28,8 +27,8 @@ class ThirdPartyRequestViewModelTest : BaseViewModelTest() {
     private val showPaymentConfirmationObserver: Observer<Event<Unit>> = mock()
     private val showPaymentConfirmationCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
-    private val showConnectionRequestObserver: Observer<Event<VCRequestState<Pair<Credential, CredentialRequest>>>> = mock()
-    private val showConnectionRequestCaptor: KArgumentCaptor<Event<VCRequestState<Pair<Credential, CredentialRequest>>>> = argumentCaptor()
+    private val showConnectionRequestObserver: Observer<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>> = mock()
+    private val showConnectionRequestCaptor: KArgumentCaptor<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>> = argumentCaptor()
 
     private val confirmPaymentObserver: Observer<Event<String>> = mock()
     private val confirmPaymentCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
@@ -42,14 +41,14 @@ class ThirdPartyRequestViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `decode token success when service is not connected`() {
-        whenever(serviceManager.decodeThirdPartyRequestToken(any())).thenReturn(Single.just(VCRequestState.Found(Pair(Credential(), CredentialRequest()))))
+        whenever(serviceManager.decodeThirdPartyRequestToken(any())).thenReturn(Single.just(ConnectionRequest.ServiceNotConnected(Pair(Credential(), CredentialRequest()))))
         viewModel.run {
             showServiceConnectionRequestLiveData.observeForever(showConnectionRequestObserver)
             decodeJwtToken("token")
         }
         showConnectionRequestCaptor.run {
             verify(showConnectionRequestObserver).onChanged(capture())
-            firstValue.peekContent() is VCRequestState.Found
+            firstValue.peekContent() is ConnectionRequest.ServiceNotConnected
         }
     }
 

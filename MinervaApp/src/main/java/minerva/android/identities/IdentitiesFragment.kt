@@ -27,7 +27,7 @@ class IdentitiesFragment : Fragment() {
 
         identityViewPager.apply {
             adapter = IdentitiesPagerAdapter(this@IdentitiesFragment, ::getFragment)
-            setCurrentItem(START_VIEW_PAGER_POSITION, false)
+            setCurrentItem(FIRST_PAGE, false)
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
@@ -36,13 +36,13 @@ class IdentitiesFragment : Fragment() {
             })
 
             addTab(identityTabs, R.string.my_identities_label)
-            addTab(identityTabs, R.string.contacts_label)
             addTab(identityTabs, R.string.credentials_label)
+            addTab(identityTabs, R.string.contacts_label)
 
             identityTabs.onTabSelected {
                 currentFragment = getFragment(it)
                 activity?.invalidateOptionsMenu()
-                setCurrentItem(it + START_VIEW_PAGER_POSITION, true)
+                setCurrentItem(it, true)
             }
         }
     }
@@ -50,8 +50,8 @@ class IdentitiesFragment : Fragment() {
     private fun getFragment(position: Int) =
         when (position % CARD_NUMBER) {
             MY_IDENTITIES_POSITION -> MyIdentitiesFragment.newInstance()
-            CONTACTS_POSITION -> ContactsFragment.newInstance()
-            else -> CredentialsFragment.newInstance()
+            CREDENTIALS_POSITION -> CredentialsFragment.newInstance()
+            else -> ContactsFragment.newInstance()
         }
 
     private fun addTab(tabLayout: TabLayout, titleRes: Int) {
@@ -60,9 +60,8 @@ class IdentitiesFragment : Fragment() {
 
     companion object {
         const val MY_IDENTITIES_POSITION = 0
-        const val CONTACTS_POSITION = 1
+        const val CREDENTIALS_POSITION = 1
         const val CARD_NUMBER = 3
-        private const val START_VIEW_PAGER_POSITION = 150
-
+        private const val FIRST_PAGE = 0
     }
 }

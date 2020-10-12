@@ -5,6 +5,7 @@ import eu.afse.jsonlogic.JsonLogic
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.TokenPayload
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
@@ -13,7 +14,7 @@ import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 import minerva.android.walletmanager.model.mappers.CredentialRequestMapper
 import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
-import minerva.android.walletmanager.model.state.VCRequestState
+import minerva.android.walletmanager.model.state.ConnectionRequest
 
 class ServiceManagerImpl(
     private val walletConfigManager: WalletConfigManager,
@@ -24,31 +25,57 @@ class ServiceManagerImpl(
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletConfigManager.walletConfigLiveData
 
-    override fun decodeJwtToken(token: String): Single<QrCode> =
-        cryptographyRepository.decodeJwtToken(token)
+    override fun decodeJwtToken(token: String): Single<QrCode> = cryptographyRepository.decodeJwtToken(token)
             .map { mapHashMapToQrCodeResponse(it, token) }
 
-    override fun decodeThirdPartyRequestToken(token: String): Single<VCRequestState<Pair<Credential, CredentialRequest>>> =
+    override fun decodeThirdPartyRequestToken(token: String): Single<ConnectionRequest<Pair<Credential, CredentialRequest>>> =
         cryptographyRepository.decodeJwtToken(token)
             .map { handleCredentialRequest(it) }//todo handle different request types
+            .flatMap {
+                when (it) {
+                    is ConnectionRequest.ServiceConnected -> updateService(it)
+                    else -> Single.just(it)
+                }
+            }
 
-    private fun handleCredentialRequest(map: Map<String, Any?>): VCRequestState<Pair<Credential, CredentialRequest>> {
+    private fun updateService(it: ConnectionRequest.ServiceConnected<Pair<Credential, CredentialRequest>>) =
+        it.data.second.service.run { saveService(Service(issuer, name, DateUtils.timestamp, iconUrl.url)).toSingleDefault(it) }
+
+    private fun handleCredentialRequest(map: Map<String, Any?>): ConnectionRequest<Pair<Credential, CredentialRequest>> {
         walletConfigManager.getWalletConfig()?.credentials?.let { credentials ->
-            if (credentials.isEmpty()) {
-                return VCRequestState.NotFound
+            return if (credentials.isEmpty()) {
+                ConnectionRequest.VCNotFound
             } else {
-                val credentialRequest = CredentialRequestMapper.map(map)
-                credentialRequest.credentialRequirements?.let {
-                    credentials.forEach { credential ->
-                        if (isRequestedCredentialAvailable(credential, it)) {
-                            return VCRequestState.Found(Pair(credential, credentialRequest))
-                        }
-                    }
+                findCredential(map, credentials)
+            }
+        }
+        throw NotInitializedWalletConfigThrowable()
+    }
+
+    private fun findCredential(map: Map<String, Any?>, credentials: List<Credential>): ConnectionRequest<Pair<Credential, CredentialRequest>> {
+        CredentialRequestMapper.map(map).apply {
+            service.copy(issuer = issuer)
+            credentialRequirements?.let {
+                credentials.forEach { credential ->
+                    if (isRequestedCredentialAvailable(credential, it)) return findRequestedService(this, credential)
                 }
             }
         }
-        return VCRequestState.NotFound
+        return ConnectionRequest.VCNotFound
     }
+
+    private fun findRequestedService(
+        credentialRequest: CredentialRequest,
+        credential: Credential
+    ): ConnectionRequest<Pair<Credential, CredentialRequest>> =
+        if (isServiceConnected(credentialRequest)) {
+            ConnectionRequest.ServiceConnected(Pair(credential, credentialRequest))
+        } else {
+            ConnectionRequest.ServiceNotConnected(Pair(credential, credentialRequest))
+        }
+
+    private fun isServiceConnected(credentialRequest: CredentialRequest) =
+        walletConfigManager.getWalletConfig()?.services?.find { it.issuer == credentialRequest.service.issuer } != null
 
     private fun isRequestedCredentialAvailable(credential: Credential, requirements: CredentialRequirements) =
         isIssValid(requirements, credential.issuer) &&
@@ -59,7 +86,7 @@ class ServiceManagerImpl(
         requirements.type.find { it == type } != null
 
     private fun isIssValid(credentialRequest: CredentialRequirements, iss: String): Boolean =
-        if (credentialRequest.constraints.isEmpty())  false
+        if (credentialRequest.constraints.isEmpty()) false
         else JsonLogic().apply(credentialRequest.constraints[0], iss).toBoolean() //JsonLogic in constraints is check against the iss
 
     override fun createJwtToken(payload: Map<String, Any?>, privateKey: String?): Single<String> =
@@ -78,41 +105,49 @@ class ServiceManagerImpl(
 
     override fun saveService(service: Service): Completable = walletConfigManager.saveService(service)
 
-    override fun isAlreadyLoggedIn(issuer: String): Boolean = walletConfigManager.isAlreadyLoggedIn(issuer)
-
-    override fun getLoggedInIdentityPublicKey(issuer: String): String = walletConfigManager.getLoggedInIdentityPublicKey(issuer)
-
     override fun getLoggedInIdentity(publicKey: String): Identity? = walletConfigManager.getLoggedInIdentityByPublicKey(publicKey)
 
-    override fun removeService(type: String): Completable {
+    override fun removeService(issuer: String): Completable {
         walletConfigManager.getWalletConfig()?.apply {
             val newServices = services.toMutableList()
             services.forEach {
-                if (it.type == type) {
+                if (it.issuer == issuer) {
                     newServices.remove(it)
-                    return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, newServices, credentials))
+                    return walletConfigManager.updateWalletConfig(WalletConfig().copy(version = updateVersion, services = newServices))
                 }
             }
         }
         throw NotInitializedWalletConfigThrowable()
     }
 
-    override fun updateBindedCredential(qrCode: CredentialQrCode): Single<String> {
+    override fun isMoreCredentialToBind(qrCode: CredentialQrCode): Boolean {
+        walletConfigManager.getWalletConfig()?.apply {
+            return credentials.filter { !filterCredential(it, CredentialQrCodeToCredentialMapper.map(qrCode)) }.size > ONE_ELEMENT
+        }
+        throw NotInitializedWalletConfigThrowable()
+    }
+
+    override fun updateBindedCredential(qrCode: CredentialQrCode, replace: Boolean): Single<String> {
         walletConfigManager.getWalletConfig()?.apply {
             val updatedCredential = CredentialQrCodeToCredentialMapper.map(qrCode)
-            val newCredentials = credentials.toMutableList().apply {
-                this[getPositionForCredential(updatedCredential)] = updatedCredential
+            credentials.apply {
+                val newCredentials = if (replace) filter { filterCredential(it, updatedCredential) }.toMutableList()
+                else toMutableList()
+                newCredentials.add(updatedCredential)
+                return walletConfigManager.updateWalletConfig(copy(version = updateVersion, credentials = newCredentials))
+                    .toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
             }
-            return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, services, newCredentials))
-                .toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
         }
         throw  NotInitializedWalletConfigThrowable()
     }
 
-    private fun WalletConfig.getPositionForCredential(credential: Credential): Int {
-        credentials.forEachIndexed { position, item ->
-            if (item.loggedInIdentityDid == credential.loggedInIdentityDid && item.type == credential.type && item.issuer == credential.issuer) return position
-        }
-        return identities.size
+    private fun filterCredential(item: Credential, credential: Credential) =
+        item.loggedInIdentityDid != credential.loggedInIdentityDid && item.type != credential.type && item.issuer != credential.issuer
+
+    companion object {
+        private const val ONE_ELEMENT = 1
     }
+
+    private fun isCredentialAvailable(item: Credential, credential: Credential) =
+        item.loggedInIdentityDid == credential.loggedInIdentityDid && item.type == credential.type && item.issuer == credential.issuer
 }

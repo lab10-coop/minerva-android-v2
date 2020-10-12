@@ -43,7 +43,6 @@ ext {
     qrGeneratorVersion = '2.6.0'
 
     glideVersion = '4.11.0'
-    flashVersion = '1.0.3'
     jodaVersion = '2.10.5'
     waitingDotsVersion = '0.6.1'
     glideToVector = 'v2.0.0'
@@ -60,6 +59,7 @@ ext {
     jsoupVersion = '1.13.1'
     jsonLogicVersion = '0.9.6'
     flexboxVersion = '2.0.1'
+    cookieFlashbarVersion = '1.0.2'
 
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
@@ -136,7 +136,7 @@ ext {
 
     uiDependencies = [
             glide          : "com.github.bumptech.glide:glide:$glideVersion",
-            flashbar       : "com.andrognito.flashbar:flashbar:$flashVersion",
+            flashbar       : "com.andrognito.flashbar:CookieFlashbar:$cookieFlashbarVersion",
             spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion",
             biometric      : "androidx.biometric:biometric:$biometricVersion",
             waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion",

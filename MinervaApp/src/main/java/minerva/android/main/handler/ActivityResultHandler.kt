@@ -3,7 +3,6 @@ package minerva.android.main.handler
 import android.app.Activity
 import android.content.Intent
 import minerva.android.R
-import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.MainActivity
 import minerva.android.main.MainActivity.Companion.EDIT_IDENTITY_RESULT_REQUEST_CODE
@@ -16,7 +15,8 @@ import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_QUICK_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_USER
 import minerva.android.walletmanager.model.CredentialQrCode
-import minerva.android.widget.MinervaFlashBarWithButtons
+import minerva.android.widget.MinervaFlashBarWithThreeButtons
+import minerva.android.widget.MinervaFlashBarWithTwoButtons
 import minerva.android.widget.MinervaFlashbar
 
 internal fun MainActivity.handleLoginScannerResult(data: Intent?) {
@@ -38,12 +38,15 @@ private fun MainActivity.handleServiceLogin(loginPayload: LoginPayload, intent: 
 private fun MainActivity.handleCredentialLogin(intent: Intent) {
     (intent.getParcelableExtra(LoginScannerActivity.CREDENTIAL_QR_CODE) as? CredentialQrCode)?.let {
         viewModel.qrCode = it
-        MinervaFlashBarWithButtons.show(
+        MinervaFlashBarWithThreeButtons.show(
             this,
             getString(R.string.update_credential_message),
-            R.string.yes,
+            viewModel.getReplaceLabelRes(it),
+            R.string.add_as_new,
             R.string.cancel,
-            { this.updateCredential() })
+            { viewModel.updateBindedCredentials(true) },
+            { viewModel.updateBindedCredentials(false) }
+        )
     }.orElse {
         showBindCredentialFlashbar(
             intent.getBooleanExtra(LoginScannerActivity.IS_RESULT_SUCCEED, false),
@@ -69,7 +72,7 @@ fun MainActivity.handleLoginStatuses(loginAction: Int) {
 }
 
 private fun MainActivity.showKnownUserFlashbar() {
-    MinervaFlashBarWithButtons.show(
+    MinervaFlashBarWithTwoButtons.show(
         this,
         getString(R.string.known_user_login_message, viewModel.getIdentityName()),
         R.string.login,
@@ -80,13 +83,23 @@ private fun MainActivity.showKnownUserFlashbar() {
 
 private fun MainActivity.handleSuccessLoginStatuses(loginAction: Int) {
     when (loginAction) {
-        NEW_USER -> MinervaFlashbar.show(this, getString(R.string.login_success_title), getString(R.string.login_success_message))
+        NEW_USER -> showSuccessFlashbar()
         NEW_QUICK_USER -> showQuickUserFlashbar(false)
     }
 }
 
+private fun MainActivity.showSuccessFlashbar() {
+    //TODO showing Flashbar according to service name looks poor. Refactor?
+    if (viewModel.loginPayload.qrCode?.serviceName?.isNotEmpty() == true)
+        MinervaFlashbar.show(
+            this,
+            getString(R.string.login_success_title),
+            getString(R.string.login_success_message)
+        )
+}
+
 private fun MainActivity.showQuickUserFlashbar(shouldLogin: Boolean) {
-    MinervaFlashBarWithButtons.show(
+    MinervaFlashBarWithTwoButtons.show(
         this,
         getString(R.string.quick_login_success_message),
         R.string.allow,

@@ -7,11 +7,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.R
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils
-import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
@@ -132,33 +132,33 @@ class MainViewModel(
     fun clearPendingAccounts() {
         transactionRepository.clearPendingAccounts()
     }
+//todo remove when Charging Station Dashboard is not needed anymore, or prepare this service for integration
+//    fun loginFromNotification(jwtToken: String?) {
+//        jwtToken?.let {
+//            launchDisposable {
+//                serviceManager.decodeJwtToken(it)
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribeBy(
+//                        onSuccess = { handleQrCodeResponse(it) },
+//                        onError = {
+//                            Timber.e(it)
+//                            _errorLiveData.value = Event(it)
+//                        }
+//                    )
+//            }
+//        }
+//    }
 
-    fun loginFromNotification(jwtToken: String?) {
-        jwtToken?.let {
-            launchDisposable {
-                serviceManager.decodeJwtToken(it)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onSuccess = { handleQrCodeResponse(it) },
-                        onError = {
-                            Timber.e(it)
-                            _errorLiveData.value = Event(it)
-                        }
-                    )
-            }
-        }
-    }
+//    private fun handleQrCodeResponse(response: QrCode) {
+//        (response as? ServiceQrCode)?.apply {
+//            loginPayload =
+//                LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.), response)
+//            painlessLogin()
+//        }
+//    }
 
     fun isOrderEditAvailable(type: Int) = orderManager.isOrderAvailable(type)
-
-    private fun handleQrCodeResponse(response: QrCode) {
-        (response as? ServiceQrCode)?.apply {
-            loginPayload =
-                LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.issuer), response)
-            painlessLogin()
-        }
-    }
 
     fun painlessLogin() {
         serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.let { identity ->
@@ -197,9 +197,9 @@ class MainViewModel(
 
     fun getIdentityName(): String? = serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.name
 
-    fun updateBindedCredential() {
+    fun updateBindedCredentials(replace: Boolean) {
         launchDisposable {
-            serviceManager.updateBindedCredential(qrCode)
+            serviceManager.updateBindedCredential(qrCode, replace)
                 .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED)) } }
                 .doOnSuccess { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, UPDATED)) }
                 .observeOn(AndroidSchedulers.mainThread())
@@ -209,6 +209,10 @@ class MainViewModel(
                 )
         }
     }
+
+    fun getReplaceLabelRes(qrCode: CredentialQrCode): Int =
+        if (serviceManager.isMoreCredentialToBind(qrCode)) R.string.replace_all
+        else R.string.replace
 
     private fun saveWalletAction(walletAction: WalletAction) {
         launchDisposable {

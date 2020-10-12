@@ -56,7 +56,9 @@ class MapperTest : WalletConfigTestValues() {
         "exp" to 1234L,
         "sub" to "loggedDid",
         "requested" to arrayListOf("test1", "test2"),
-        "callback" to "callback"
+        "callback" to "callback",
+        "iconImage" to mapOf("/" to "urlIcon"),
+        "name" to "name"
     )
 
     @Test
@@ -191,7 +193,7 @@ class MapperTest : WalletConfigTestValues() {
     fun `map service response to service Test`() {
         val input = listOf(
             ServicePayload(
-                "type",
+                "1",
                 "name",
                 123
             )
@@ -199,7 +201,7 @@ class MapperTest : WalletConfigTestValues() {
 
         val response = ServicesResponseToServicesMapper.map(input)
 
-        response[0].type shouldBeEqualTo input[0].type
+        response[0].issuer shouldBeEqualTo input[0].issuer
         response[0].name shouldBeEqualTo input[0].name
         response[0].lastUsed shouldBeEqualTo input[0].lastUsed
     }
@@ -208,7 +210,7 @@ class MapperTest : WalletConfigTestValues() {
     fun `map services to services payload Test`() {
         val input = listOf(
             Service(
-                "type",
+                "1",
                 "name",
                 123
             )
@@ -216,7 +218,7 @@ class MapperTest : WalletConfigTestValues() {
 
         val response = ServicesToServicesPayloadMapper.map(input)
 
-        response[0].type shouldBeEqualTo input[0].type
+        response[0].issuer shouldBeEqualTo input[0].issuer
         response[0].name shouldBeEqualTo input[0].name
         response[0].lastUsed shouldBeEqualTo input[0].lastUsed
     }
@@ -224,14 +226,14 @@ class MapperTest : WalletConfigTestValues() {
     @Test
     fun `map service to service payload Test`() {
         val input = Service(
-                "type",
+            "1",
                 "name",
                 123
             )
 
         val response = ServiceToServicePayloadMapper.map(input)
 
-        response.type shouldBeEqualTo input.type
+        response.issuer shouldBeEqualTo input.issuer
         response.name shouldBeEqualTo input.name
         response.lastUsed shouldBeEqualTo input.lastUsed
     }
