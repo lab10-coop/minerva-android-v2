@@ -75,7 +75,7 @@ class WalletActionsRepositoryTest {
         doNothing().whenever(localWalletActionsConfigProvider).saveWalletActionsConfig(WalletActionsConfigPayload(1, actions))
         whenever(minervaApi.saveWalletActions(any(), any(), any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.masterSeed) doReturn masterSeed
-        val test = repository.saveWalletActions(WalletAction(1, 2, 1234L)).test()
+        val test = repository.saveWalletActions(listOf(WalletAction(1, 2, 1234L))).test()
         test.apply {
             assertNoErrors()
             assertComplete()
@@ -88,7 +88,7 @@ class WalletActionsRepositoryTest {
         doNothing().whenever(localWalletActionsConfigProvider).saveWalletActionsConfig(WalletActionsConfigPayload(1, actions))
         whenever(minervaApi.saveWalletActions(any(), any(), any())).thenReturn(Completable.error(error))
         whenever(walletConfigManager.masterSeed) doReturn masterSeed
-        val test = repository.saveWalletActions(WalletAction(1, 2, 1234L)).test()
+        val test = repository.saveWalletActions(listOf(WalletAction(1, 2, 1234L))).test()
         test.assertError(error)
     }
 }

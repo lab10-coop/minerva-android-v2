@@ -201,4 +201,10 @@
     <string name="pending_account_error_message">Something went wrong, please check your balances.</string>
     <string name="provide_following_data">You are about to provide the following data</string>
     <string name="connection_request_manual">This service will be added to the Minerva - Services and future requests will be done automatically. If you want to turn the automation off, you only need to remove it from there.</string>
+    <string name="connection_request">Connection request by %s</string>
+    <string name="service_added">Service: %s</string>
+    <string name="background_service_added">Background-Service: %s</string>
+    <string name="service_sent">Credential %1$s to Service %2$s</string>
+    <string name="rejected">Rejected</string>
+    <string name="accepted">Accepted</string>
 </resources>

@@ -4,7 +4,6 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.model.state.ConnectionRequest
 
 interface ServiceManager : Manager {

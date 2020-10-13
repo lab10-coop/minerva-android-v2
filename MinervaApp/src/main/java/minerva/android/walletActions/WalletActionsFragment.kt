@@ -19,7 +19,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class WalletActionsFragment : Fragment() {
 
     private val viewModel: WalletActionsViewModel by viewModel()
-    private val walletActionsAdapter = WalletActionsAdapter()
+    private val walletActionsAdapter by lazy { WalletActionsAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

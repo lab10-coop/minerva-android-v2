@@ -51,15 +51,17 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
                 when (it) {
                     is ConnectionRequest.ServiceNotConnected -> connectService(it)
                     is ConnectionRequest.VCNotFound -> sendResult(ON_CREDENTIAL_NOT_FOUND)
-                    is ConnectionRequest.ServiceConnected -> onNewServicesConnected(it.data.first.token)
+                    is ConnectionRequest.ServiceConnected -> onNewServicesConnected(it.data)
                 }
             })
             showPaymentConfirmationLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { showConfirmTransactionScreen() })
             errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { finish() }) //todo send proper error message to demo app
+            onDenyConnectionSuccessLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { sendResult(ON_DENY_REQUEST) })
         }
     }
 
     private fun connectService(it: ConnectionRequest.ServiceNotConnected<Pair<Credential, CredentialRequest>>) {
+        viewModel.credentialRequest = it.data
         container.visible()
         loader.gone()
         minervaPrimitiveName.text = it.data.second.service.name
@@ -84,11 +86,11 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
     }
 
     override fun onDeny() {
-        sendResult(ON_DENY_REQUEST)
+        viewModel.saveDenyConnectionWalletAction()
     }
 
-    override fun onNewServicesConnected(token: String) {
-        sendResult(ON_NEW_SERVICE_CONNECTED, Intent().apply { putExtra(JWT_TOKEN, token) })
+    override fun onNewServicesConnected(credentialRequest: Pair<Credential, CredentialRequest>) {
+        sendResult(ON_NEW_SERVICE_CONNECTED, Intent().apply { putExtra(JWT_TOKEN, credentialRequest.first.token) })
     }
 
     override fun onResultOk(signedData: String) {
