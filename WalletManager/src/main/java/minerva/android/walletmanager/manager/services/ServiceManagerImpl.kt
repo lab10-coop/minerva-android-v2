@@ -31,15 +31,16 @@ class ServiceManagerImpl(
     override fun decodeThirdPartyRequestToken(token: String): Single<ConnectionRequest<Pair<Credential, CredentialRequest>>> =
         cryptographyRepository.decodeJwtToken(token)
             .map { handleCredentialRequest(it) }//todo handle different request types
-            .flatMap {
-                when (it) {
-                    is ConnectionRequest.ServiceConnected -> updateService(it)
-                    else -> Single.just(it)
-                }
-            }
+            .flatMap { updateConnectedService(it) }
+
+    private fun updateConnectedService(it: ConnectionRequest<Pair<Credential, CredentialRequest>>) =
+        when (it) {
+            is ConnectionRequest.ServiceConnected -> updateService(it)
+            else -> Single.just(it)
+        }
 
     private fun updateService(it: ConnectionRequest.ServiceConnected<Pair<Credential, CredentialRequest>>) =
-        it.data.second.service.run { saveService(Service(issuer, name, DateUtils.timestamp, iconUrl.url)).toSingleDefault(it) }
+        requestedService(it).run { saveService(Service(issuer, name, DateUtils.timestamp, iconUrl.url)).toSingleDefault(it) }
 
     private fun handleCredentialRequest(map: Map<String, Any?>): ConnectionRequest<Pair<Credential, CredentialRequest>> {
         walletConfigManager.getWalletConfig()?.credentials?.let { credentials ->
@@ -64,10 +65,8 @@ class ServiceManagerImpl(
         return ConnectionRequest.VCNotFound
     }
 
-    private fun findRequestedService(
-        credentialRequest: CredentialRequest,
-        credential: Credential
-    ): ConnectionRequest<Pair<Credential, CredentialRequest>> =
+    private fun findRequestedService(credentialRequest: CredentialRequest, credential: Credential):
+            ConnectionRequest<Pair<Credential, CredentialRequest>> =
         if (isServiceConnected(credentialRequest)) {
             ConnectionRequest.ServiceConnected(Pair(credential, credentialRequest))
         } else {
@@ -95,7 +94,7 @@ class ServiceManagerImpl(
     override fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable =
         servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
             .flatMapCompletable {
-                //TODO should be provided the dynamic mechanism for retrieving names and icons from services
+                //TODO should be provided the dynamic mechanism for retrieving names and icons from every services
                 if (shouldSafeService(identity, service)) saveService(service)
                 else Completable.complete()
             }
@@ -113,7 +112,7 @@ class ServiceManagerImpl(
             services.forEach {
                 if (it.issuer == issuer) {
                     newServices.remove(it)
-                    return walletConfigManager.updateWalletConfig(WalletConfig().copy(version = updateVersion, services = newServices))
+                    return walletConfigManager.updateWalletConfig(copy(version = updateVersion, services = newServices))
                 }
             }
         }
@@ -144,10 +143,10 @@ class ServiceManagerImpl(
     private fun filterCredential(item: Credential, credential: Credential) =
         item.loggedInIdentityDid != credential.loggedInIdentityDid && item.type != credential.type && item.issuer != credential.issuer
 
+    private fun requestedService(serviceConnected: ConnectionRequest.ServiceConnected<Pair<Credential, CredentialRequest>>) =
+        serviceConnected.data.second.service
+
     companion object {
         private const val ONE_ELEMENT = 1
     }
-
-    private fun isCredentialAvailable(item: Credential, credential: Credential) =
-        item.loggedInIdentityDid == credential.loggedInIdentityDid && item.type == credential.type && item.issuer == credential.issuer
 }

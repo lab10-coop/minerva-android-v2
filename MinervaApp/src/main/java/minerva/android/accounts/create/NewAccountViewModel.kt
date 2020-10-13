@@ -39,7 +39,7 @@ class NewAccountViewModel(
         launchDisposable {
             accountManager.createAccount(network, accountName)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction()))
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction())))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

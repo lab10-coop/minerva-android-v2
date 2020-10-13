@@ -40,7 +40,7 @@ class EditIdentityViewModel(
         launchDisposable {
             identityManager.saveIdentity(identity)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(status, identity.name)))
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(status, identity.name))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

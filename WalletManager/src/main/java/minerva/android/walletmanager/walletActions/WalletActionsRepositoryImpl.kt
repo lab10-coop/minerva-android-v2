@@ -4,17 +4,18 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
+import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.DateUtils.isTheSameDay
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.WalletActionClustered
-import minerva.android.walletmanager.model.mappers.WalletActionsMapper
 import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
+import minerva.android.walletmanager.model.mappers.WalletActionsMapper
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
-import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.DateUtils.isTheSameDay
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 
 class WalletActionsRepositoryImpl(
@@ -29,9 +30,7 @@ class WalletActionsRepositoryImpl(
         Observable.mergeDelayError(
             Observable.just(localWalletActionsConfigProvider.loadWalletActionsConfig())
                 .doOnNext { currentWalletActionsConfigVersion = it.version }
-                .flatMap {
-                    Observable.just(WalletActionsMapper.map(it.actions).sortedByDescending { action -> action.lastUsed })
-                },
+                .flatMap { Observable.just(WalletActionsMapper.map(it.actions).sortedByDescending { action -> action.lastUsed }) },
             minervaApi.getWalletActions(publicKey = encodePublicKey(walletConfigManager.masterSeed.publicKey))
                 .filter { it.walletActionsConfigPayload.version > currentWalletActionsConfigVersion }
                 .doOnNext {
@@ -44,20 +43,24 @@ class WalletActionsRepositoryImpl(
                 }
         )
 
-    override fun saveWalletActions(walletAction: WalletAction): Completable {
-        val walletActionPayload = WalletActionPayloadMapper.map(walletAction)
+    override fun saveWalletActions(walletActions: List<WalletAction>): Completable {
+        val payloads: MutableList<WalletActionPayload> = mutableListOf()
+        walletActions.forEach {
+            payloads.add(WalletActionPayloadMapper.map(it))
+        }
+
         var newActions: WalletActionClusteredPayload? = null
 
         localWalletActionsConfigProvider.loadWalletActionsConfig().run {
             if (actions.isEmpty()) {
-                actions.add(WalletActionClusteredPayload(DateUtils.timestamp, mutableListOf(walletActionPayload)))
+                actions.add(WalletActionClusteredPayload(DateUtils.timestamp, payloads))
             } else {
                 actions.forEach { clusteredActionPayload ->
-                    if (isTheSameDay(clusteredActionPayload.lastUsed, walletActionPayload.lastUsed)) {
-                        clusteredActionPayload.clusteredActions.add(walletActionPayload)
+                    if (isTheSameDay(clusteredActionPayload.lastUsed, payloads.first().lastUsed)) {
+                        clusteredActionPayload.clusteredActions.addAll(payloads)
                         return updateWalletActionsConfig(this, walletConfigManager.masterSeed)
                     } else {
-                        newActions = WalletActionClusteredPayload(DateUtils.timestamp, mutableListOf(walletActionPayload))
+                        newActions = WalletActionClusteredPayload(DateUtils.timestamp, payloads)
                     }
                 }
             }

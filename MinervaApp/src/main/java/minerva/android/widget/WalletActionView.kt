@@ -5,15 +5,19 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.wallet_action_item_list_row.view.*
 import minerva.android.R
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.UNDEFINED
 import minerva.android.walletmanager.model.defs.WalletActionFields
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ACCEPTED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.AUTHORISED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.BACKGROUND_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.CHANGED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.LOG_IN
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.RECEIVED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REJECTED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
@@ -21,7 +25,6 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SEN
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.kotlinUtils.DateUtils
 
 class WalletActionView(context: Context) : ConstraintLayout(context) {
 
@@ -81,6 +84,13 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
 
     private fun showServices(walletAction: WalletAction) {
         type.text = when (walletAction.status) {
+            ADDED -> context.getString(R.string.service_added, walletAction.fields[WalletActionFields.SERVICE_NAME])
+            BACKGROUND_ADDED -> context.getString(R.string.background_service_added, walletAction.fields[WalletActionFields.SERVICE_NAME])
+            SENT -> context.getString(
+                R.string.service_sent,
+                walletAction.fields[WalletActionFields.CREDENTIAL_NAME],
+                walletAction.fields[WalletActionFields.SERVICE_NAME]
+            )
             AUTHORISED, SIGNED ->
                 context.getString(R.string.service_action_label, "${walletAction.fields[WalletActionFields.SERVICE_NAME]}")
             LOG_IN ->
@@ -90,6 +100,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
                     "${walletAction.fields[WalletActionFields.SERVICE_NAME]}"
                 )
             REMOVED -> walletAction.fields[WalletActionFields.SERVICE_NAME]
+            REJECTED, ACCEPTED -> context.getString(R.string.connection_request, walletAction.fields[WalletActionFields.SERVICE_NAME])
             else -> UNDEFINED
         }
         showIcon(R.drawable.ic_services)
@@ -115,7 +126,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
             title.text = when (walletAction.status) {
                 REMOVED, SAFE_ACCOUNT_REMOVED -> getString(R.string.wallet_action_header, getString(R.string.removed), lastUsed)
                 CHANGED -> getString(R.string.wallet_action_header, getString(R.string.changed), lastUsed)
-                ADDED, SAFE_ACCOUNT_ADDED -> getString(R.string.wallet_action_header, getString(R.string.added), lastUsed)
+                ADDED, SAFE_ACCOUNT_ADDED, BACKGROUND_ADDED -> getString(R.string.wallet_action_header, getString(R.string.added), lastUsed)
                 RECEIVED -> getString(R.string.wallet_action_header, getString(R.string.received), lastUsed)
                 SENT -> getString(R.string.wallet_action_header, getString(R.string.sent), lastUsed)
                 FAILED -> getString(R.string.wallet_action_header, getString(R.string.failed), lastUsed)
@@ -123,6 +134,8 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
                 AUTHORISED -> getString(R.string.wallet_action_header, getString(R.string.authorised), lastUsed)
                 SIGNED -> getString(R.string.wallet_action_header, getString(R.string.signed), lastUsed)
                 UPDATED -> getString(R.string.wallet_action_header, getString(R.string.updated), lastUsed)
+                REJECTED -> getString(R.string.wallet_action_header, getString(R.string.rejected), lastUsed)
+                ACCEPTED -> getString(R.string.wallet_action_header, getString(R.string.accepted), lastUsed)
                 else -> UNDEFINED
             }
         }

@@ -2,6 +2,7 @@ package minerva.android.integration
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -12,9 +13,14 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.PaymentRequest
-import minerva.android.walletmanager.model.defs.WalletActionFields
-import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
-import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.CREDENTIAL_NAME
+import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.SERVICE_NAME
+import minerva.android.walletmanager.model.defs.WalletActionStatus
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ACCEPTED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REJECTED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
+import minerva.android.walletmanager.model.defs.WalletActionType.Companion.SERVICE
 import minerva.android.walletmanager.model.mappers.GATEWAY
 import minerva.android.walletmanager.model.state.ConnectionRequest
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
@@ -23,8 +29,8 @@ import timber.log.Timber
 
 class ThirdPartyRequestViewModel(
     private val serviceManager: ServiceManager,
-    private val walletActionsRepository: WalletActionsRepository,
-    private val masterSeedRepository: MasterSeedRepository
+    private val masterSeedRepository: MasterSeedRepository,
+    private val walletActionsRepository: WalletActionsRepository
 ) : BaseViewModel() {
 
     lateinit var payment: Payment
@@ -36,11 +42,14 @@ class ThirdPartyRequestViewModel(
     private val _showPaymentConfirmationLiveData = MutableLiveData<Event<Unit>>()
     val showPaymentConfirmationLiveData: LiveData<Event<Unit>> get() = _showPaymentConfirmationLiveData
 
-    private val _addedNewServiceLiveData = MutableLiveData<Event<String>>()
-    val addedNewServiceLiveData: LiveData<Event<String>> get() = _addedNewServiceLiveData
+    private val _addedNewServiceLiveData = MutableLiveData<Event<Pair<Credential, CredentialRequest>>>()
+    val addedNewServiceLiveData: LiveData<Event<Pair<Credential, CredentialRequest>>> get() = _addedNewServiceLiveData
 
     private val _confirmPaymentLiveData = MutableLiveData<Event<String>>()
     val confirmPaymentLiveData: LiveData<Event<String>> get() = _confirmPaymentLiveData
+
+    private val _onDenyConnectionSuccessLiveData = MutableLiveData<Event<Unit>>()
+    val onDenyConnectionSuccessLiveData: LiveData<Event<Unit>> get() = _onDenyConnectionSuccessLiveData
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -67,7 +76,13 @@ class ThirdPartyRequestViewModel(
         token?.let {
             launchDisposable {
                 serviceManager.decodeThirdPartyRequestToken(token)
-                    .doOnSuccess { if (it is ConnectionRequest.ServiceNotConnected) credentialRequest = it.data }
+                    .observeOn(Schedulers.io())
+                    .flatMap {
+                        when (it) {
+                            is ConnectionRequest.ServiceConnected -> saveWalletActions(it)
+                            else -> Single.just(it)
+                        }
+                    }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
@@ -79,6 +94,64 @@ class ThirdPartyRequestViewModel(
             _errorLiveData.value = Event(Throwable())
         }
     }
+
+    fun connectToService() {
+        launchDisposable {
+            serviceManager.saveService(Service(issuer, serviceName, DateUtils.timestamp, iconUrl = serviceIconUrl))
+                .observeOn(Schedulers.io())
+                .andThen(walletActionsRepository.saveWalletActions(saveServiceWalletActions))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onComplete = { _addedNewServiceLiveData.value = Event(credentialRequest) },
+                    onError = { _errorLiveData.value = Event(it) }
+                )
+        }
+    }
+
+    fun saveDenyConnectionWalletAction() {
+        launchDisposable {
+            walletActionsRepository.saveWalletActions(listOf(rejectedConnectionWalletAction))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = { _onDenyConnectionSuccessLiveData.value = Event(Unit) },
+                    onError = {
+                        Timber.e("Service wallet action error $it")
+                        _errorLiveData.value = Event(it)
+                    }
+                )
+        }
+    }
+
+    private val rejectedConnectionWalletAction
+        get() = getWalletAction(REJECTED, hashMapOf(SERVICE_NAME to credentialRequest.second.service.name))
+
+    private val saveServiceWalletActions
+        get() = listOf(
+            getWalletAction(SENT, sentCredentialMap),
+            getWalletAction(ADDED, hashMapOf(SERVICE_NAME to serviceName)),
+            getWalletAction(ACCEPTED, hashMapOf(SERVICE_NAME to serviceName))
+        )
+
+    private val sentCredentialMap
+        get() = hashMapOf(SERVICE_NAME to credentialRequest.second.service.name, CREDENTIAL_NAME to credentialRequest.first.name)
+
+    private fun saveWalletActions(it: ConnectionRequest.ServiceConnected<Pair<Credential, CredentialRequest>>) =
+        walletActionsRepository.saveWalletActions(
+            listOf(
+                getWalletAction(SENT, sentCredentialMap(it)),
+                getWalletAction(WalletActionStatus.BACKGROUND_ADDED, hashMapOf(SERVICE_NAME to it.data.second.service.name))
+            )
+        ).toSingleDefault(it)
+
+    private fun sentCredentialMap(it: ConnectionRequest.ServiceConnected<Pair<Credential, CredentialRequest>>) =
+        hashMapOf(SERVICE_NAME to it.data.second.service.name, CREDENTIAL_NAME to it.data.first.name)
+
+    private fun getWalletAction(status: Int, payload: HashMap<String, String>): WalletAction =
+        WalletAction(SERVICE, status, DateUtils.timestamp, payload)
 
     //todo should be handle when services request is ready on m27 app
 //    private fun handleDecodeResult(payment: Payment, services: List<Service>?) {
@@ -95,26 +168,9 @@ class ThirdPartyRequestViewModel(
 //    private fun isM27Connected(services: List<Service>?) =
 //        services?.find { service -> service.name == M27_NAME } != null
 
-    fun connectToService() {
-        launchDisposable {
-            serviceManager.saveService(Service(issuer, serviceName, DateUtils.timestamp, iconUrl = serviceIconUrl))
-                .observeOn(Schedulers.io())
-//                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(AUTHORISED))) //todo add and when handling activity logs
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = { _addedNewServiceLiveData.value = Event(credentialRequest.first.token) },
-                    onError = { _errorLiveData.value = Event(it) }
-                )
-        }
-    }
-
     fun confirmTransaction() {
         launchDisposable {
             serviceManager.createJwtToken(encodedData())
-                .flatMap { walletActionsRepository.saveWalletActions(getWalletAction(SIGNED)).toSingleDefault(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -131,15 +187,6 @@ class ThirdPartyRequestViewModel(
             PaymentRequest.SERVICE_NAME to payment.serviceName,
             PaymentRequest.RECIPIENT to payment.recipient
         )
-
-    private fun getWalletAction(status: Int): WalletAction {
-        return WalletAction(
-            WalletActionType.SERVICE,
-            status,
-            DateUtils.timestamp,
-            hashMapOf(Pair(WalletActionFields.SERVICE_NAME, payment.shortName))
-        )
-    }
 
     fun isMasterSeedAvailable() = masterSeedRepository.isMasterSeedAvailable()
     fun initWalletConfig() = masterSeedRepository.initWalletConfig()

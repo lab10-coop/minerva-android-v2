@@ -51,7 +51,7 @@ open class CredentialsViewModel(
 
     fun saveWalletAction(walletAction: WalletAction) {
         launchDisposable {
-            walletActionsRepository.saveWalletActions(walletAction)
+            walletActionsRepository.saveWalletActions(listOf(walletAction))
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(
                     onComplete = { Timber.d("Removed item wallet action saved successfully.") },
