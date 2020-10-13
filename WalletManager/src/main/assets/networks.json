@@ -36,15 +36,27 @@
     "testnet": true
   },
   {
-    "full": "Ethereum (Ropsten)",
-    "short": "eth_ropsten",
-    "token": "rETH",
+    "full": "POA Network (Sokol)",
+    "short": "poa_sokol",
+    "token": "tPOA",
     "isSafeAccountAvailable": "false",
-    "httpRpc": "https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
-    "wsRpc": "wss://ropsten.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
+    "httpRpc": "https://sokol.poa.network",
+    "wsRpc": "ws://sokol.poa.network:8546",
+    "gasPrice": "1000000000",
+    "assets": [],
+    "color": "#FF5CBEAB",
+    "testnet": true
+  },
+  {
+    "full": "LUKSO (L14 Testnet)",
+    "short": "lukso_l14",
+    "token": "tLYX",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://rpc.l14.lukso.network",
+    "wsRpc": "",
     "gasPrice": "10000000000",
     "assets": [],
-    "color": "#FF486FFF",
+    "color": "#FFFBCDC5",
     "testnet": true
   },
   {
@@ -72,27 +84,15 @@
     "testnet": true
   },
   {
-    "full": "POA Network (Sokol)",
-    "short": "poa_sokol",
-    "token": "tPOA",
+    "full": "Ethereum (Ropsten)",
+    "short": "eth_ropsten",
+    "token": "rETH",
     "isSafeAccountAvailable": "false",
-    "httpRpc": "https://sokol.poa.network",
-    "wsRpc": "ws://sokol.poa.network:8546",
-    "gasPrice": "1000000000",
-    "assets": [],
-    "color": "#FF5CBEAB",
-    "testnet": true
-  },
-  {
-    "full": "LUKSO (L14 Testnet)",
-    "short": "lukso_l14",
-    "token": "tLYX",
-    "isSafeAccountAvailable": "false",
-    "httpRpc": "https://rpc.l14.lukso.network",
-    "wsRpc": "",
+    "httpRpc": "https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
+    "wsRpc": "wss://ropsten.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPrice": "10000000000",
     "assets": [],
-    "color": "#FFFBCDC5",
+    "color": "#FF486FFF",
     "testnet": true
   }
 ]
