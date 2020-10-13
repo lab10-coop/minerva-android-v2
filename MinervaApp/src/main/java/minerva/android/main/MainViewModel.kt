@@ -182,7 +182,7 @@ class MainViewModel(
                         serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
                     }
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(identity.name, qrCode.serviceName)))
+                    .andThen(walletActionsRepository.saveWalletActions(listOf(getValuesWalletAction(identity.name, qrCode.serviceName))))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
@@ -216,7 +216,7 @@ class MainViewModel(
 
     private fun saveWalletAction(walletAction: WalletAction) {
         launchDisposable {
-            walletActionsRepository.saveWalletActions(walletAction)
+            walletActionsRepository.saveWalletActions(listOf(walletAction))
                 .toSingleDefault(walletAction.status)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
