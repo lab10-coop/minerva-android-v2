@@ -90,7 +90,7 @@ class LoginScannerViewModel(
 
     private fun saveWalletAction(walletAction: WalletAction) {
         launchDisposable {
-            walletActionsRepository.saveWalletActions(walletAction)
+            walletActionsRepository.saveWalletActions(listOf(walletAction))
                 .toSingleDefault(walletAction.status)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

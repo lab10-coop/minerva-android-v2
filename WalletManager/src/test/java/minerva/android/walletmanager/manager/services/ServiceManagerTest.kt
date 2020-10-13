@@ -16,6 +16,7 @@ import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test

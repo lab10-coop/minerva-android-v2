@@ -6,7 +6,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
@@ -16,10 +15,8 @@ import minerva.android.services.login.uitls.LoginUtils.createLoginPayload
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.services.login.uitls.LoginUtils.isIdentityValid
-import minerva.android.walletmanager.exception.MissingKeysThrowable
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -67,7 +64,7 @@ class ChooseIdentityViewModel(
             serviceManager.createJwtToken(createLoginPayload(identity, qrCode), identity.privateKey)
                 .flatMapCompletable { jwtToken -> serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity)) }
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getValuesWalletAction(identity.name, qrCode.serviceName)))
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getValuesWalletAction(identity.name, qrCode.serviceName))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

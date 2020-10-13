@@ -251,9 +251,7 @@ class TransactionsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = {
-                        _sendTransactionLiveData.value = Event(Pair("${transaction.amount} ${account.network}", FAILED))
-                    },
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("${transaction.amount} ${account.network}", FAILED)) },
                     onError = {
                         Timber.e("Save wallet action error $it")
                         _errorLiveData.value = Event(it)
@@ -269,7 +267,7 @@ class TransactionsViewModel(
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(getAccountsWalletAction(transaction, network, status))
+        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network, status)))
 
     private fun prepareTransaction(
         receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger, contractAddress: String = String.Empty

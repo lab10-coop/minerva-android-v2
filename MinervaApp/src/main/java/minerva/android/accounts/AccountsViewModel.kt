@@ -95,7 +95,7 @@ class AccountsViewModel(
         launchDisposable {
             accountManager.removeAccount(account.index)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getRemovedAccountAction(account)))
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -126,7 +126,7 @@ class AccountsViewModel(
                 smartContractRepository.createSafeAccount(account)
                     .flatMapCompletable { smartContractAddress -> createAccount(account, smartContractAddress) }
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(getWalletAction(SAFE_ACCOUNT_ADDED, createSafeAccountName(account))))
+                    .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(SAFE_ACCOUNT_ADDED, createSafeAccountName(account)))))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe { _loadingLiveData.value = Event(true) }

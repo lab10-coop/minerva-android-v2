@@ -22,7 +22,7 @@ class ThirdPartyRequestViewModelTest : BaseViewModelTest() {
     private val serviceManager: ServiceManager = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val masterSeedRepository: MasterSeedRepository = mock()
-    private val viewModel = ThirdPartyRequestViewModel(serviceManager, walletActionsRepository, masterSeedRepository)
+    private val viewModel = ThirdPartyRequestViewModel(serviceManager, masterSeedRepository, walletActionsRepository)
 
     private val showPaymentConfirmationObserver: Observer<Event<Unit>> = mock()
     private val showPaymentConfirmationCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -33,15 +33,24 @@ class ThirdPartyRequestViewModelTest : BaseViewModelTest() {
     private val confirmPaymentObserver: Observer<Event<String>> = mock()
     private val confirmPaymentCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
 
-    private val newServiceObserver: Observer<Event<String>> = mock()
-    private val newServiceCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
+    private val newServiceObserver: Observer<Event<Pair<Credential, CredentialRequest>>> = mock()
+    private val newServiceCaptor: KArgumentCaptor<Event<Pair<Credential, CredentialRequest>>> = argumentCaptor()
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
 
     @Test
     fun `decode token success when service is not connected`() {
-        whenever(serviceManager.decodeThirdPartyRequestToken(any())).thenReturn(Single.just(ConnectionRequest.ServiceNotConnected(Pair(Credential(), CredentialRequest()))))
+        whenever(serviceManager.decodeThirdPartyRequestToken(any())).thenReturn(
+            Single.just(
+                ConnectionRequest.ServiceNotConnected(
+                    Pair(
+                        Credential(),
+                        CredentialRequest()
+                    )
+                )
+            )
+        )
         viewModel.run {
             showServiceConnectionRequestLiveData.observeForever(showConnectionRequestObserver)
             decodeJwtToken("token")

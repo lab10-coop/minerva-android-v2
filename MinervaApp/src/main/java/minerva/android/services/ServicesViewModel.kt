@@ -33,7 +33,7 @@ class ServicesViewModel(
         launchDisposable {
             serviceManager.removeService(issuer)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(getWalletAction(name)))
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(name))))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = { _serviceRemovedLiveData.value = Event(Unit) },
