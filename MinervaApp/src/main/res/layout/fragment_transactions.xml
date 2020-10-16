@@ -66,9 +66,24 @@
                 android:id="@+id/transactionCostLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/margin_xxsmall"
                 android:fontFamily="@font/rubik_regular"
-                android:text="@string/transaction_cost"
+                android:text="@string/transaction_cost_label"
                 android:textColor="@color/gray" />
+
+            <TextView
+                android:id="@+id/transactionCostAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/rubik_regular"
+                android:text="@string/transaction_cost_amount"
+                android:textColor="@color/gray" />
+
+            <ProgressBar
+                android:id="@+id/transactionCostProgressBar"
+                android:layout_width="@dimen/progressbar_size"
+                android:layout_height="@dimen/progressbar_size"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/arrow"

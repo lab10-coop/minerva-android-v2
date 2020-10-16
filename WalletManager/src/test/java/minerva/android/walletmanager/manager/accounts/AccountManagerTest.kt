@@ -21,6 +21,7 @@ import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
+import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.test.assertEquals
 
@@ -77,7 +78,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         repository.removeAccount(2).test()
         val removedValue = repository.loadAccount(0)
         val notRemovedValue = repository.loadAccount(1)
@@ -93,7 +94,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigInteger.valueOf(300))
+        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
         doNothing().whenever(walletConfigManager).initWalletConfig()
         repository.removeAccount(2).test()
         val removedValue = repository.loadAccount(0)
@@ -110,7 +111,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         repository.removeAccount(5).test()
         repository.removeAccount(6).test()
         repository.loadAccount(2).apply {
@@ -131,7 +132,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigInteger.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         doNothing().whenever(walletConfigManager).initWalletConfig()
         repository.removeAccount(5).test()
         repository.removeAccount(6).test()
