@@ -9,11 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Function5
+import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Function3
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_transactions.*
 import minerva.android.R
@@ -23,7 +25,6 @@ import minerva.android.accounts.transaction.fragment.adapter.RecipientAdapter
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.model.TransactionCost
 import minerva.android.walletmanager.model.defs.WalletActionStatus
@@ -35,6 +36,7 @@ import java.math.BigInteger
 class TransactionsFragment : Fragment() {
 
     private var areTransactionCostsOpen = false
+    private var shouldOverrideTransactionCost = true
     private lateinit var listener: TransactionListener
     private val viewModel: TransactionsViewModel by sharedViewModel()
     private var validationDisposable: Disposable? = null
@@ -46,10 +48,9 @@ class TransactionsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupTexts()
         setupListeners()
-        viewModel.getTransactionCosts()
+        transactionCostAmount.text = getString(R.string.transaction_cost_amount, "0", viewModel.token)
         prepareRecipients()
         prepareObservers()
-        calculateTransactionCost()
     }
 
     override fun onResume() {
@@ -72,14 +73,40 @@ class TransactionsFragment : Fragment() {
         viewModel.apply {
             transactionCompletedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onTransactionAccepted() })
             sendTransactionLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionStatus(it) })
-            transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { setTransactionsCosts(it) })
-            errorLiveData.observe(viewLifecycleOwner, Observer { showErrorFlashBar() })
-            loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
-            saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver {
-                listener.onError(it.first)
+            errorLiveData.observe(viewLifecycleOwner, Observer {
+                it.peekContent().message?.let { message -> showErrorFlashBar(message) } ?: showErrorFlashBar()
             })
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
+            saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onError(it.first) })
+            transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { handleSettingTransactionCosts(it) })
+            transactionCostLoadingLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCostLoader(it) })
         }
     }
+
+    private fun handleSettingTransactionCosts(it: TransactionCost) {
+        if (shouldSetTransactionCosts(it.gasLimit.toString())) {
+            handleGasLimitDefaultValue(it)
+            setTransactionsCosts(it)
+        }
+    }
+
+    private fun handleGasLimitDefaultValue(it: TransactionCost) {
+        if (it.isGasLimitDefaultValue) {
+            Toast.makeText(context, getString(R.string.estimate_transaction_cost_error), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun handleTransactionCostLoader(showLoader: Boolean) {
+        if (showLoader) {
+            transactionCostProgressBar.visible()
+            transactionCostAmount.gone()
+        } else {
+            transactionCostProgressBar.gone()
+            transactionCostAmount.visible()
+        }
+    }
+
+    private fun shouldSetTransactionCosts(it: String) = gasLimitEditText.text.toString() != it
 
     private fun handleTransactionStatus(status: Pair<String, Int>) {
         when (status.second) {
@@ -93,19 +120,28 @@ class TransactionsFragment : Fragment() {
             amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
             receiver.getValidationObservable(receiverInputLayout) { Validator.validateIsFilled(it) },
             receiver.getValidationObservable(receiverInputLayout) { Validator.validateReceiverAddress(it) },
-            gasLimitEditText.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },
-            gasPriceEditText.getValidationObservable(gasPriceInputLayout) { Validator.validateIsFilled(it) },
-            Function5<Boolean, Boolean, Boolean, Boolean, Boolean, Boolean> { isAmountValid, isFilled, isReceiverValid, isGasLimitValid, isGasPriceValid ->
-                isAmountValid && isFilled && isReceiverValid && isGasLimitValid && isGasPriceValid
+            Function3<Boolean, Boolean, Boolean, Boolean> { isAmountValid, isFilled, isReceiverValid ->
+                isAmountValid && isFilled && isReceiverValid
+            })
+            .map {
+                if (it) {
+                    viewModel.getTransactionCosts(receiver.text.toString(), getAmount())
+                }
+                it
+            }.flatMap {
+                Observable.combineLatest(
+                    gasLimitEditText.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },
+                    gasPriceEditText.getValidationObservable(gasPriceInputLayout) { Validator.validateIsFilled(it) },
+                    BiFunction<Boolean, Boolean, Boolean> { isGasLimitValid, isGasPriceValid ->
+                        isGasLimitValid && isGasPriceValid && it
+                    }
+                )
+
             }
-        ).subscribeBy(
-            onNext = {
-                sendButton.isEnabled = it
-            },
-            onError = {
-                sendButton.isEnabled = false
-            }
-        )
+            .subscribeBy(
+                onNext = { sendButton.isEnabled = it },
+                onError = { sendButton.isEnabled = false }
+            )
     }
 
     private fun prepareRecipients() {
@@ -132,22 +168,19 @@ class TransactionsFragment : Fragment() {
         sendButton.invisible()
     }
 
-    private fun showErrorFlashBar() {
-        MinervaFlashbar.show(
-            requireActivity(),
-            getString(R.string.transactions_error_title),
-            getString(R.string.transactions_error_message)
-        )
+    private fun showErrorFlashBar(message: String = getString(R.string.transactions_error_message)) {
+        MinervaFlashbar.show(requireActivity(), getString(R.string.transactions_error_title), message)
     }
 
-    @SuppressLint("SetTextI18n")
     private fun setTransactionsCosts(transactionCost: TransactionCost) {
+        transactionCostLayout.isEnabled = true
         transactionCost.let {
             gasPriceEditText.setText(it.gasPrice.toPlainString())
             gasLimitEditText.setText(it.gasLimit.toString())
-            transactionCostLabel.text =
-                getString(R.string.transaction_cost, it.cost.toPlainString(), NetworkManager.getNetwork(viewModel.network).token)
+            transactionCostAmount.text =
+                getString(R.string.transaction_cost_amount, it.cost.toPlainString(), viewModel.token)
         }
+        calculateTransactionCost()
     }
 
     private fun calculateTransactionCost() {
@@ -158,7 +191,19 @@ class TransactionsFragment : Fragment() {
     private fun setGasLimitOnTextChangedListener() {
         gasLimitEditText.afterTextChanged { gasLimit ->
             if (canCalculateTransactionCost(gasLimit, gasPriceEditText)) {
-                setTransactionCost(getGasPrice(), gasLimit.toBigInteger())
+                shouldOverrideTransactionCost = false
+                calculateTransactionCost(getGasPrice(), gasLimit.toBigInteger())
+            } else {
+                clearTransactionCost()
+            }
+        }
+    }
+
+    private fun setGasPriceOnTextChangedListener() {
+        gasPriceEditText.afterTextChanged { gasPrice ->
+            if (canCalculateTransactionCost(gasPrice, gasLimitEditText)) {
+                shouldOverrideTransactionCost = false
+                calculateTransactionCost(gasPrice.toBigDecimal(), getGasLimit())
             } else {
                 clearTransactionCost()
             }
@@ -168,25 +213,15 @@ class TransactionsFragment : Fragment() {
     private fun canCalculateTransactionCost(input: String, editText: EditText) =
         input.isNotEmpty() && editText.text?.isNotEmpty() == true
 
-    private fun setGasPriceOnTextChangedListener() {
-        gasPriceEditText.afterTextChanged { gasPrice ->
-            if (canCalculateTransactionCost(gasPrice, gasLimitEditText)) {
-                setTransactionCost(gasPrice.toBigDecimal(), getGasLimit())
-            } else {
-                clearTransactionCost()
-            }
-        }
-    }
-
     private fun clearTransactionCost() {
-        transactionCostLabel.text = getString(R.string.transaction_cost, ZER0, NetworkManager.getNetwork(viewModel.network).token)
+        transactionCostAmount.text = getString(R.string.transaction_cost_amount, ZER0, viewModel.token)
     }
 
-    private fun setTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger) {
-        transactionCostLabel.text = getString(
-            R.string.transaction_cost,
+    private fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger) {
+        transactionCostAmount.text = getString(
+            R.string.transaction_cost_amount,
             viewModel.calculateTransactionCost(gasPrice, gasLimit),
-            NetworkManager.getNetwork(viewModel.network).token
+            viewModel.token
         )
     }
 
@@ -196,6 +231,7 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setupListeners() {
+        transactionCostLayout.isEnabled = false
         setSendButtonOnClickListener()
         setOnTransactionCostOnClickListener()
         setGetAllBalanceListener()

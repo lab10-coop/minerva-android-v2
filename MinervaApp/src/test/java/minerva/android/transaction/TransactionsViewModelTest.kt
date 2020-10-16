@@ -9,10 +9,7 @@ import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.AccountAsset
-import minerva.android.walletmanager.model.Asset
-import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -35,6 +32,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
     private val transactionCompletedObserver: Observer<Event<Any>> = mock()
     private val transactionCompletedCaptor: KArgumentCaptor<Event<Any>> = argumentCaptor()
 
+    private val getGasLimitObserver: Observer<Event<TransactionCost>> = mock()
+    private val getGasLimitCaptor: KArgumentCaptor<Event<TransactionCost>> = argumentCaptor()
+
     private val saveActionFailedCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
 
     @Test
@@ -44,9 +44,11 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
-        viewModel.transactionCompletedLiveData.observeForever(transactionCompletedObserver)
-        viewModel.getAccount(0, -1)
-        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        viewModel.run {
+            transactionCompletedLiveData.observeForever(transactionCompletedObserver)
+            getAccount(0, -1)
+            sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        }
         transactionCompletedCaptor.run {
             verify(transactionCompletedObserver).onChanged(capture())
         }
@@ -60,9 +62,11 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
-        viewModel.saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
-        viewModel.getAccount(0, -1)
-        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        viewModel.run {
+            saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
+            getAccount(0, -1)
+            sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        }
         saveActionFailedCaptor.run {
             verify(sendTransactionObserver).onChanged(capture())
         }
@@ -73,8 +77,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        viewModel.transactionCompletedLiveData.observeForever(transactionCompletedObserver)
-        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        viewModel.run {
+            transactionCompletedLiveData.observeForever(transactionCompletedObserver)
+            sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        }
         transactionCompletedCaptor.run {
             verify(transactionCompletedObserver).onChanged(capture())
         }
@@ -96,9 +102,11 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
-        viewModel.transactionCompletedLiveData.observeForever(transactionCompletedObserver)
-        viewModel.getAccount(0, -1)
-        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        viewModel.run {
+            transactionCompletedLiveData.observeForever(transactionCompletedObserver)
+            getAccount(0, -1)
+            sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        }
         transactionCompletedCaptor.run {
             verify(transactionCompletedObserver).onChanged(capture())
         }
@@ -120,9 +128,11 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
-        viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
-        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
-        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
+        viewModel.run {
+            sendTransactionLiveData.observeForever(sendTransactionObserver)
+            sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+            errorLiveData.observeLiveDataEvent(Event(error))
+        }
     }
 
     @Test
@@ -140,8 +150,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
         }
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
-        viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
-        viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        viewModel.run {
+            sendTransactionLiveData.observeForever(sendTransactionObserver)
+            sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
+        }
         sendTransactionCaptor.run {
             verify(sendTransactionObserver).onChanged(capture())
         }
@@ -235,5 +247,28 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.account = Account(0, name = "prefixName")
         val result = viewModel.isCorrectNetwork("prefix")
         assertEquals(result, true)
+    }
+
+    @Test
+    fun `fetch gas limit success`() {
+        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(Single.just(TransactionCost(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
+        viewModel.run {
+            transactionCostLiveData.observeForever(getGasLimitObserver)
+            getTransactionCosts("address", BigDecimal.TEN)
+        }
+        getGasLimitCaptor.run {
+            verify(getGasLimitObserver).onChanged(capture())
+            firstValue.peekContent().gasPrice == BigDecimal.TEN
+        }
+    }
+
+    @Test
+    fun `fetch gas limit error`() {
+        val error = Throwable()
+        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(Single.error(error))
+        viewModel.run {
+            getTransactionCosts("address", BigDecimal.TEN)
+            errorLiveData.observeLiveDataEvent(Event(error))
+        }
     }
 }
