@@ -18,13 +18,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.methods.response.EthGetBalance
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount
-import org.web3j.protocol.core.methods.response.EthSendTransaction
-import org.web3j.protocol.core.methods.response.NetVersion
+import org.web3j.protocol.core.methods.response.*
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.math.RoundingMode
 import kotlin.test.assertEquals
 
 
@@ -40,8 +36,8 @@ class BlockchainRegularAccountRepositoryImplTest {
     private val web3Js: Map<String, Web3j> = mapOf(Pair(ETH, web3J))
     private val gasPrice: Map<String, BigInteger> = mapOf(Pair(ETH, EthGasPrice), Pair(ATS, AtsGasPrice))
 
-
-    private val blockchainRegularAccountRepository: BlockchainRegularAccountRepositoryImpl = BlockchainRegularAccountRepositoryImpl(web3Js, gasPrice, ensResolver)
+    private val blockchainRegularAccountRepository: BlockchainRegularAccountRepositoryImpl =
+        BlockchainRegularAccountRepositoryImpl(web3Js, gasPrice, ensResolver)
 
     @get:Rule
 
@@ -86,16 +82,30 @@ class BlockchainRegularAccountRepositoryImplTest {
     }
 
     @Test
-    fun `get transaction costs success test`() {
-        val ethCostPayload = blockchainRegularAccountRepository.getTransactionCosts(ETH, Int.InvalidIndex, Operation.TRANSFER_NATIVE)
-        val atsCostPayload = blockchainRegularAccountRepository.getTransactionCosts(ATS, Int.InvalidIndex, Operation.TRANSFER_ERC20)
-        val atsCostPayload2 = blockchainRegularAccountRepository.getTransactionCosts(ATS, Int.InvalidIndex, Operation.SAFE_ACCOUNT_TXS)
-        ethCostPayload.gasPrice shouldBeEqualTo BigDecimal.valueOf(20)
-        ethCostPayload.gasLimit shouldBeEqualTo BigInteger.valueOf(50000)
-        atsCostPayload.gasPrice shouldBeEqualTo BigDecimal.valueOf(100)
-        atsCostPayload.gasLimit shouldBeEqualTo BigInteger.valueOf(200000)
-        atsCostPayload2.gasPrice shouldBeEqualTo BigDecimal.valueOf(100)
-        atsCostPayload2.gasLimit shouldBeEqualTo BigInteger.valueOf(350000)
+    fun `get transaction for main tx costs success test`() {
+        val transactionCount = EthGetTransactionCount()
+        transactionCount.result = "0x1"
+        val ethEstimateGas = EthEstimateGas()
+        ethEstimateGas.result = "0x1"
+        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
+        every { web3J.ethEstimateGas(any()).flowable() } returns Flowable.just(ethEstimateGas)
+        val ethCostPayload = blockchainRegularAccountRepository.getTransactionCosts(ETH, Int.InvalidIndex, "from", "to", BigDecimal.TEN)
+        ethCostPayload.test()
+            .assertComplete()
+            .assertValue {
+            it.gasPrice == BigDecimal(20)
+
+            }
+    }
+
+    @Test
+    fun `get transaction costs for asset tx success test`() {
+        val ethCostPayload = blockchainRegularAccountRepository.getTransactionCosts(ETH, 1, "from", "to", BigDecimal.TEN)
+        ethCostPayload.test()
+            .assertComplete()
+            .assertValue {
+                it.gasLimit == Operation.TRANSFER_ERC20.gasLimit
+            }
     }
 
     @Test
@@ -155,7 +165,7 @@ class BlockchainRegularAccountRepositoryImplTest {
     }
 
     @Test
-    fun `reverse resolver ens`(){
+    fun `reverse resolver ens`() {
         every { ensResolver.reverseResolve(any()) } returns "tom.eth"
         blockchainRegularAccountRepository.reverseResolveENS("0x12332423")
             .test()
@@ -167,14 +177,8 @@ class BlockchainRegularAccountRepositoryImplTest {
     }
 
     @Test
-    fun `to gwei conversion test`(){
+    fun `to gwei conversion test`() {
         val result = blockchainRegularAccountRepository.toGwei(BigDecimal.ONE)
-        assertEquals(result, BigInteger.valueOf(1000000000))
-    }
-
-    @Test
-    fun `calculate transaction cost test`(){
-        val result = blockchainRegularAccountRepository.calculateTransactionCost(BigDecimal.valueOf(2000000000), BigInteger.ONE)
-        assertEquals(result, BigDecimal.valueOf(2.0000000000000000).setScale(8, RoundingMode.HALF_EVEN))
+        assertEquals(result, BigDecimal.valueOf(1000000000))
     }
 }

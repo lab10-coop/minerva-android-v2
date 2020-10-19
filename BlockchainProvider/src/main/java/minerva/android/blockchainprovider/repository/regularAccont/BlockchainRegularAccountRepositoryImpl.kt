@@ -1,9 +1,6 @@
 package minerva.android.blockchainprovider.repository.regularAccont
 
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.Single
+import io.reactivex.*
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.PendingTransaction
@@ -12,6 +9,7 @@ import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.RawTransaction
@@ -19,9 +17,11 @@ import org.web3j.crypto.TransactionEncoder
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
+import org.web3j.protocol.core.methods.request.Transaction
+import org.web3j.protocol.core.methods.response.EthEstimateGas
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount
 import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.tx.RawTransactionManager
-import org.web3j.tx.Transfer
 import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
@@ -29,6 +29,7 @@ import org.web3j.utils.Numeric
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.util.concurrent.TimeUnit
 
 class BlockchainRegularAccountRepositoryImpl(
     private val web3j: Map<String, Web3j>,
@@ -128,7 +129,7 @@ class BlockchainRegularAccountRepositoryImpl(
                         payload.contractAddress,
                         web3j.value(network),
                         RawTransactionManager(web3j.value(network), this, it.netVersion.toLong()),
-                        ContractGasProvider(toGwei(payload.gasPrice), payload.gasLimit)
+                        ContractGasProvider(toGwei(payload.gasPrice).toBigInteger(), payload.gasLimit)
                     )
                         .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
                         .flowable()
@@ -138,15 +139,61 @@ class BlockchainRegularAccountRepositoryImpl(
 
     private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
 
-    override fun getTransactionCosts(network: String, assetIndex: Int, operation: Operation): TransactionCostPayload =
-        prepareTransactionCosts(gasPrice.value(network), operation.gasLimit)
+    override fun getTransactionCosts(
+        network: String,
+        assetIndex: Int,
+        from: String,
+        to: String,
+        amount: BigDecimal
+    ): Single<TransactionCostPayload> {
+        return if (assetIndex == Int.InvalidIndex) {
+            web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
+                .flowable()
+                .flatMap { count ->
+                    web3j.value(network)
+                        .ethEstimateGas(getTransaction(from, count, to, amount))
+                        .flowable()
+                        .flatMapSingle { handleGasLimit(network, it) }
+                }
+                .firstOrError()
+                .timeout(5, TimeUnit.SECONDS, calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit))
 
-    override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
-        getTransactionCostInEth(toWei(gasPrice, Convert.Unit.GWEI), BigDecimal(gasLimit))
+        } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit)
+    }
 
-    override fun toGwei(balance: BigDecimal): BigInteger = toWei(balance, Convert.Unit.GWEI).toBigInteger()
+    private fun getTransaction(from: String, count: EthGetTransactionCount, to: String, amount: BigDecimal) =
+        Transaction(
+            from,
+            count.transactionCount,
+            BigInteger.ZERO,
+            BigInteger.ZERO,
+            to,
+            toWei(amount, Convert.Unit.ETHER).toBigInteger(),
+            String.Empty
+        )
 
-    private fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal) =
+    private fun handleGasLimit(network: String, it: EthEstimateGas): Single<TransactionCostPayload> {
+        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: increaseGasLimitByTenPercent(it.amountUsed)
+        return calculateTransactionCosts(network, gasLimit)
+    }
+
+    private fun increaseGasLimitByTenPercent(gasLimit: BigInteger) =
+        gasLimit.add(getBuffer(gasLimit))
+
+    private fun getBuffer(gasLimit: BigInteger) = gasLimit.multiply(BigInteger.valueOf(10)).divide(BigInteger.valueOf(100))
+
+    private fun calculateTransactionCosts(network: String, gasLimit: BigInteger): Single<TransactionCostPayload> =
+        Single.just(
+            TransactionCostPayload(
+                fromWei(BigDecimal(gasPrice.value(network)), Convert.Unit.GWEI),
+                gasLimit,
+                getTransactionCostInEth(BigDecimal(gasPrice.value(network)), BigDecimal(gasLimit))
+            )
+        )
+
+    override fun toGwei(balance: BigDecimal): BigDecimal = toWei(balance, Convert.Unit.GWEI)
+
+    override fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal =
         fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)
 
     private fun getSignedTransaction(count: BigInteger, transactionPayload: TransactionPayload, chainId: Long): String? =
@@ -167,13 +214,6 @@ class BlockchainRegularAccountRepositoryImpl(
                 toWei(amount, Convert.Unit.ETHER).toBigInteger()
             )
         }
-
-    private fun prepareTransactionCosts(gasPrice: BigInteger, gasLimit: BigInteger = Transfer.GAS_LIMIT): TransactionCostPayload =
-        TransactionCostPayload(
-            fromWei(BigDecimal(gasPrice), Convert.Unit.GWEI),
-            gasLimit,
-            getTransactionCostInEth(BigDecimal(gasPrice), BigDecimal(gasLimit))
-        )
 
     companion object {
         private const val START = 0
