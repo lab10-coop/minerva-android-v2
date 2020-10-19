@@ -107,7 +107,8 @@
     <string name="receiver">Receiver</string>
     <string name="gas_price_gwei">Gas Price (Gwei)</string>
     <string name="gas_limit">Gas Limit</string>
-    <string name="transaction_cost">Transaction cost: %1$s %2$s</string>
+    <string name="transaction_cost_label">Transaction cost:</string>
+    <string name="transaction_cost_amount">%1$s %2$s</string>
     <string name="transactions_error_title">Transaction error occurs</string>
     <string name="transactions_error_message">Unexpected error occurred while making transaction actions</string>
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>
@@ -207,4 +208,5 @@
     <string name="service_sent">Credential %1$s to Service %2$s</string>
     <string name="rejected">Rejected</string>
     <string name="accepted">Accepted</string>
+    <string name="estimate_transaction_cost_error">Transaction cost couldn\'t be estimated, but you can adjust the standard values if you like.</string>
 </resources>

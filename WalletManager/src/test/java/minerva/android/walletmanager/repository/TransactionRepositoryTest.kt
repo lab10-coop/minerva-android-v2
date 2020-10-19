@@ -26,7 +26,6 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -124,13 +123,6 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    fun `calculate transaction cost success`() {
-        whenever(blockchainRegularAccountRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.ONE)
-        val result = repository.calculateTransactionCost(BigDecimal.ONE, BigInteger.ONE)
-        result shouldBeEqualTo BigDecimal.ONE
-    }
-
-    @Test
     fun `get assets balances complete test`() {
         whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())).thenReturn(
             Observable.just(Pair("privateKey1", BigDecimal.TEN))
@@ -212,17 +204,6 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    fun `get transfer costs test`() {
-        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any())) doReturn TransactionCostPayload(
-            BigDecimal.ONE,
-            BigInteger.ONE,
-            BigDecimal.ONE
-        )
-        val result = repository.getTransferCosts("network", 1)
-        assertEquals(result, TransactionCost(BigDecimal.ONE, BigInteger.ONE, BigDecimal.ONE))
-    }
-
-    @Test
     fun `get value test`() {
         whenever(walletConfigManager.getAccount(any())) doReturn Account(index = 2)
         val result = repository.getAccount(2)
@@ -256,7 +237,14 @@ class TransactionRepositoryTest {
         val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
         whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
         doNothing().whenever(webSocketServiceProvider).openConnection(any())
-        whenever(webSocketServiceProvider.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(ExecutedTransaction("hash", "sender")))
+        whenever(webSocketServiceProvider.subscribeToExecutedTransactions(any())).thenReturn(
+            Flowable.just(
+                ExecutedTransaction(
+                    "hash",
+                    "sender"
+                )
+            )
+        )
         repository.subscribeToExecutedTransactions(1)
             .test()
             .assertNoErrors()
@@ -273,6 +261,30 @@ class TransactionRepositoryTest {
         doNothing().whenever(webSocketServiceProvider).openConnection(any())
         whenever(webSocketServiceProvider.subscribeToExecutedTransactions(any())).thenReturn(Flowable.error(error))
         repository.subscribeToExecutedTransactions(1)
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `get transaction costs success`() {
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(
+            Single.just(
+                TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
+            )
+        )
+        repository.getTransactionCosts("network", 1, "from", "to", BigDecimal.TEN)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.gasPrice == BigDecimal.TEN
+            }
+    }
+
+    @Test
+    fun `get transaction costs error`() {
+        val error = Throwable()
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(Single.error(error))
+        repository.getTransactionCosts("network", 1, "from", "to", BigDecimal.TEN)
             .test()
             .assertError(error)
     }
