@@ -9,6 +9,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
@@ -23,11 +24,11 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SEN
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
-import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.util.concurrent.TimeoutException
 
 class TransactionsViewModel(
     private val walletActionsRepository: WalletActionsRepository,
@@ -49,17 +50,32 @@ class TransactionsViewModel(
     private val _saveWalletActionFailedLiveData = MutableLiveData<Event<Pair<String, Int>>>()
     val saveWalletActionFailedLiveData: LiveData<Event<Pair<String, Int>>> get() = _saveWalletActionFailedLiveData
 
-    private val _transactionCostLiveData = MutableLiveData<Event<TransactionCost>>()
-    val transactionCostLiveData: MutableLiveData<Event<TransactionCost>> get() = _transactionCostLiveData
-
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
+
+    private val _transactionCostLoadingLiveData = MutableLiveData<Event<Boolean>>()
+    val transactionCostLoadingLiveData: LiveData<Event<Boolean>> get() = _transactionCostLoadingLiveData
 
     private val _sendTransactionLiveData = MutableLiveData<Event<Pair<String, Int>>>()
     val sendTransactionLiveData: LiveData<Event<Pair<String, Int>>> get() = _sendTransactionLiveData
 
     private val _transactionCompletedLiveData = MutableLiveData<Event<Any>>()
     val transactionCompletedLiveData: LiveData<Event<Any>> get() = _transactionCompletedLiveData
+
+    private val _transactionCostLiveData = MutableLiveData<Event<TransactionCost>>()
+    val transactionCostLiveData: LiveData<Event<TransactionCost>> get() = _transactionCostLiveData
+
+    private val isMainTransaction
+        get() = assetIndex == Int.InvalidIndex && !account.isSafeAccount
+
+    private val isSafeAccountMainTransaction
+        get() = assetIndex == Int.InvalidIndex && account.isSafeAccount
+
+    private val isAssetTransaction
+        get() = assetIndex != Int.InvalidIndex && !account.isSafeAccount
+
+    private val isSafeAccountAssetTransaction
+        get() = assetIndex != Int.InvalidIndex && account.isSafeAccount
 
     fun getAccount(accountIndex: Int, assetIndex: Int) {
         transactionRepository.getAccount(accountIndex)?.let {
@@ -72,19 +88,29 @@ class TransactionsViewModel(
         recipients = transactionRepository.loadRecipients()
     }
 
-    fun getTransactionCosts() {
-        transactionRepository.getTransferCosts(network, assetIndex).let {
-            transactionCost = it.cost
-            _transactionCostLiveData.value = Event(it)
+    fun getTransactionCosts(to: String, amount: BigDecimal) {
+        launchDisposable {
+            transactionRepository.getTransactionCosts(network, assetIndex, account.address, to, amount)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _transactionCostLoadingLiveData.value = Event(true) }
+                .doOnEvent { _, _ -> _transactionCostLoadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onSuccess = {
+                        transactionCost = it.cost
+                        _transactionCostLiveData.value = Event(it)
+                    },
+                    onError = { _errorLiveData.value = Event(it) }
+                )
         }
     }
 
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         when {
-            assetIndex == Int.InvalidIndex && !account.isSafeAccount -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-            assetIndex == Int.InvalidIndex && account.isSafeAccount -> sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-            assetIndex != Int.InvalidIndex && !account.isSafeAccount -> sendAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
-            assetIndex != Int.InvalidIndex && account.isSafeAccount -> sendSafeAccountAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
+            isMainTransaction -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            isSafeAccountMainTransaction -> sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            isAssetTransaction -> sendAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
+            isSafeAccountAssetTransaction -> sendSafeAccountAssetTransaction(receiverKey, amount, gasPrice, gasLimit)
         }
     }
 
@@ -200,9 +226,7 @@ class TransactionsViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
-                    onError = {
-                        _errorLiveData.value = Event(it)
-                    }
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
@@ -275,6 +299,9 @@ class TransactionsViewModel(
 
     val network
         get() = account.network
+
+    val token
+        get() = NetworkManager.getNetwork(network).token
 
     fun preparePrefixAddress(prefixAddress: String, prefix: String): String =
         prefixAddress.removePrefix(prefix).replace(META_ADDRESS_SEPARATOR, String.Empty)

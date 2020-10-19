@@ -108,9 +108,9 @@ class AccountManagerImpl(
 
     private fun areFundsOnValue(balance: BigDecimal, accountAssets: List<AccountAsset>): Boolean {
         accountAssets.forEach {
-            if (blockchainRepository.toGwei(it.balance) >= MAX_GWEI_TO_REMOVE_VALUE) return true
+            if (blockchainRepository.toGwei(it.balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
-        return blockchainRepository.toGwei(balance) >= MAX_GWEI_TO_REMOVE_VALUE
+        return blockchainRepository.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
     }
 
     override fun getSafeAccountCount(ownerAddress: String): Int =

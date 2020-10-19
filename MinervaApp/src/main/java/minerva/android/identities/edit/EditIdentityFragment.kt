@@ -130,7 +130,7 @@ class EditIdentityFragment : Fragment() {
             }
         }
 
-    private fun isConfirmDialogRequested() : Boolean = serviceQrCode?.requestedData != null
+    private fun isConfirmDialogRequested(): Boolean = serviceQrCode?.requestedData != null
 
     private fun onConfirmButtonClicked() {
         if (!checkRequestedData()) {
@@ -147,7 +147,7 @@ class EditIdentityFragment : Fragment() {
             showErrorMessage(getString(R.string.empty_identity_name))
             return
         }
-        if(isConfirmDialogRequested()) showConfirmDialog()
+        if (isConfirmDialogRequested()) showConfirmDialog()
         else saveIdentity()
     }
 

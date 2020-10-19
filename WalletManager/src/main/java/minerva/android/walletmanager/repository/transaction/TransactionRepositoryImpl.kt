@@ -6,7 +6,6 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
-import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProvider
@@ -23,7 +22,6 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -56,6 +54,10 @@ class TransactionRepositoryImpl(
     override fun getTransactions(): Single<List<PendingAccount>> =
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
+
+    override fun getTransactionCosts(network: String, assetIndex: Int, from: String, to: String, amount: BigDecimal): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(network, assetIndex, from, to, amount)
+            .map { TransactionCostPayloadToTransactionCost.map(it) }
 
     private fun getPendingAccountsWithBlockHashes(it: List<Pair<String, String?>>): MutableList<PendingAccount> {
         val pendingList = mutableListOf<PendingAccount>()
@@ -116,13 +118,8 @@ class TransactionRepositoryImpl(
 
     override fun resolveENS(ensName: String): Single<String> = blockchainRepository.resolveENS(ensName)
 
-    override fun getTransferCosts(network: String, assetIndex: Int): TransactionCost {
-        val operation = if (assetIndex == Int.InvalidIndex) Operation.TRANSFER_NATIVE else Operation.TRANSFER_ERC20
-        return TransactionCostPayloadToTransactionCost.map(blockchainRepository.getTransactionCosts(network, assetIndex, operation))
-    }
-
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
-        blockchainRepository.calculateTransactionCost(gasPrice, gasLimit)
+        blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
 
     override fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>> {
         walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
