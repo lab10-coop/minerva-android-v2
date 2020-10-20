@@ -1,51 +1,79 @@
 package minerva.android.settings
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_settings.*
+import minerva.android.BuildConfig
 import minerva.android.R
-import minerva.android.extension.gone
 import minerva.android.extension.launchActivity
-import minerva.android.main.listener.BottomNavigationMenuListener
+import minerva.android.extension.openApp
+import minerva.android.main.base.BaseFragment
+import minerva.android.settings.adapter.SettingsAdapter
 import minerva.android.settings.backup.BackupActivity
+import minerva.android.settings.model.SettingsRowType
+import minerva.android.settings.model.SettingsRowType.*
+import minerva.android.settings.model.propagateSettings
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
-class SettingsFragment : Fragment() {
 
-    private lateinit var listener: BottomNavigationMenuListener
+class SettingsFragment : BaseFragment() {
+
     val viewModel: SettingsViewModel by viewModel()
+
+    private val settingsAdapter by lazy {
+        SettingsAdapter(
+            { onSettingsRowClicked(it) },
+            { onUseMainNetworkCheckedChange(it) }).apply { updateList(viewModel.isMnemonicRemembered(), propagateSettings()) }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_settings, container, false)
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupRecycleView()
+    }
+
     override fun onResume() {
         super.onResume()
+        interactor.changeActionBarColor(R.color.white)
         hideReminder()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        backupItem.setOnClickListener { showBackupActivity() }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = context as BottomNavigationMenuListener
+    private fun setupRecycleView() {
+        settingsList.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = settingsAdapter
+        }
     }
 
     private fun hideReminder() {
         if (viewModel.isMnemonicRemembered()) {
-            listener.removeSettingsBadgeIcon()
-            reminderView.gone()
-            alertIcon.gone()
+            interactor.removeSettingsBadgeIcon()
+            settingsAdapter.updateList(viewModel.isMnemonicRemembered(), propagateSettings())
         }
     }
 
     private fun showBackupActivity() {
         context?.launchActivity<BackupActivity>()
+    }
+
+    private fun onSettingsRowClicked(type: SettingsRowType) {
+        when (type) {
+            BACKUP -> showBackupActivity()
+            TWITTER -> context?.openApp(BuildConfig.TWITTER_APP, BuildConfig.TWITTER_WEB)
+            COMMUNITY -> context?.openApp(BuildConfig.TELEGRAM_APP, BuildConfig.TELEGRAM_WEB)
+            else -> Timber.d(type.toString()) // todo implement the rest of the setting interactions
+        }
+    }
+
+    private fun onUseMainNetworkCheckedChange(isChecked: Boolean) {
+        //todo add setting main networks
+        if (isChecked) Toast.makeText(context, "This option will be enabled soon", Toast.LENGTH_LONG).show()
     }
 }

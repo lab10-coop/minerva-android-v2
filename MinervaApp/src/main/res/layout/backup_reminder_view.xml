@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_small"
+    tools:ignore="PrivateResource">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|top"
+        android:layout_marginTop="@dimen/margin_small"
+        android:src="@drawable/ic_alert"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/alertTitle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_medium"
+        android:padding="@dimen/margin_xxsmall"
+        android:text="@string/alert_title"
+        android:textColor="@color/alert_red"
+        android:textSize="@dimen/text_normal" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_regular"
+        android:padding="@dimen/margin_xxsmall"
+        android:text="@string/alert_message"
+        android:textColor="@color/gray"
+        android:textSize="@dimen/text_normal" />
+</merge>

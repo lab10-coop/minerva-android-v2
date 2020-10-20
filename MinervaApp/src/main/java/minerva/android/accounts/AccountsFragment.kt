@@ -1,11 +1,9 @@
 package minerva.android.accounts
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -17,16 +15,15 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.main.listener.FragmentInteractorListener
+import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
+class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
 
     private val viewModel: AccountsViewModel by viewModel()
     private val accountAdapter by lazy { AccountAdapter(this) }
-    private lateinit var listener: FragmentInteractorListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +38,7 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
 
     override fun onResume() {
         super.onResume()
+        interactor.changeActionBarColor(R.color.lightGray)
         viewModel.apply {
             onResume()
             refreshBalances()
@@ -60,15 +58,10 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
         accountAdapter.stopPendingTransactions()
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = context as FragmentInteractorListener
-    }
-
-    override fun onSendTransaction(account: Account) = listener.showSendTransactionScreen(account)
+    override fun onSendTransaction(account: Account) = interactor.showSendTransactionScreen(account)
 
     override fun onSendAssetTransaction(accountIndex: Int, assetIndex: Int) {
-        listener.showSendAssetTransactionScreen(accountIndex, assetIndex)
+        interactor.showSendAssetTransactionScreen(accountIndex, assetIndex)
     }
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
@@ -119,7 +112,7 @@ class AccountsFragment : Fragment(), AccountsFragmentToAdapterListener {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.no_funds), getString(R.string.no_funds_message))
             })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver {
-                listener.shouldShowLoadingScreen(it)
+                interactor.shouldShowLoadingScreen(it)
             })
             balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.cannot_remove_safe_account_title), getString(R.string.cannot_remove_safe_account_message))

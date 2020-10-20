@@ -13,6 +13,7 @@ import minerva.android.kotlinUtils.DateUtils.getDateFromTimestamp
 import minerva.android.kotlinUtils.DateUtils.isTheDayAfterTomorrow
 import minerva.android.kotlinUtils.DateUtils.isTheSameDay
 import minerva.android.kotlinUtils.DateUtils.timestamp
+import minerva.android.widget.InstructionItem
 import minerva.android.widget.WalletActionView
 
 class WalletActionsAdapter : RecyclerView.Adapter<WalletActionsViewHolder>() {
