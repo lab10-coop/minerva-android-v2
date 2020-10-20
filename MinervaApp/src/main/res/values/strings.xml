@@ -208,6 +208,7 @@
     <string name="service_sent">Credential %1$s to Service %2$s</string>
     <string name="rejected">Rejected</string>
     <string name="accepted">Accepted</string>
+    <string name="estimate_transaction_cost_error">Transaction cost couldn\'t be estimated, but you can adjust the standard values if you like.</string>
     <string name="security">Security</string>
     <string name="your_preferences">Your preferences</string>
     <string name="info">Info</string>
