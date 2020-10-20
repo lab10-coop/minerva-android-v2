@@ -218,5 +218,4 @@
     <string name="join_community">Join Minerva\'s community</string>
     <string name="version">App Version</string>
     <string name="licence">Licence</string>
-    <string name="estimate_transaction_cost_error">Transaction cost couldn\'t be estimated, but you can adjust the standard values if you like.</string>
 </resources>
