@@ -78,7 +78,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
             val bindedService = IdentityBindedItem(context)
             bindedService.setDateAndName(service.name, DateUtils.getDateFromTimestamp(service.lastUsed, DATE_FORMAT))
             //TODO change to adding proper icon based on the service type
-            bindedService.setIcon(R.drawable.ic_backup_icon)
+            bindedService.setIcon(R.drawable.ic_backup)
             bindedService.popupMenu.setOnClickListener { showMenu(bindedService.popupMenu, service) }
             views.add(bindedService)
             addView(bindedService)

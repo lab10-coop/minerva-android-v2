@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
 import minerva.android.accounts.AccountsFragment
@@ -22,8 +23,8 @@ import minerva.android.identities.myIdentities.MyIdentitiesFragment
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.main.base.BaseFragment
 import minerva.android.main.handler.*
-import minerva.android.main.listener.BottomNavigationMenuListener
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
@@ -34,7 +35,7 @@ import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
 
-class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, FragmentInteractorListener {
+class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     internal val viewModel: MainViewModel by inject()
     private var shouldDisableAddButton = false
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         prepareBottomNavMenu()
         replaceFragment(IdentitiesFragment())
         prepareSettingsIcon()
+        prepareSettingsIcon()
         prepareObservers()
         viewModel.restorePendingTransactions()
     }
@@ -53,6 +55,12 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         super.onResume()
         shouldShowLoadingScreen(false)
         handleExecutedAccounts()
+    }
+
+    override fun onAttachFragment(fragment: Fragment) {
+        if (fragment is BaseFragment) {
+            fragment.setListener(this)
+        }
     }
 
     private fun handleExecutedAccounts() {
@@ -233,8 +241,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
     }
 
     private fun toggleLoadingActionBar(isLoading: Boolean) {
-        if (isLoading) setLoadingActionBar(R.color.loadingScreenBackground)
-        else setLoadingActionBar(R.color.lightGray)
+        if (isLoading) changeActionBarColor(R.color.loadingScreenBackground)
+        else changeActionBarColor(R.color.lightGray)
     }
 
     private fun toggleAddValueButton(isLoading: Boolean) {
@@ -242,7 +250,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationMenuListener, Fragment
         invalidateOptionsMenu()
     }
 
-    private fun setLoadingActionBar(color: Int) {
+    override fun changeActionBarColor(color: Int) {
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(color)))
         window.statusBarColor = getColor(color)
     }
