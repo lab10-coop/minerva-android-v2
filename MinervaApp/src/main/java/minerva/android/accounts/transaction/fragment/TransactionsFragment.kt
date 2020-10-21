@@ -30,6 +30,7 @@ import minerva.android.walletmanager.model.TransactionCost
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -48,7 +49,7 @@ class TransactionsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupTexts()
         setupListeners()
-        transactionCostAmount.text = getString(R.string.transaction_cost_amount, "0", viewModel.token)
+        transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
         prepareRecipients()
         prepareObservers()
     }
@@ -78,13 +79,15 @@ class TransactionsFragment : Fragment() {
             })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
             saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onError(it.first) })
-            transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { handleSettingTransactionCosts(it) })
+            transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCosts(it) })
             transactionCostLoadingLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCostLoader(it) })
         }
     }
 
-    private fun handleSettingTransactionCosts(it: TransactionCost) {
-        if (shouldSetTransactionCosts(it.gasLimit.toString())) {
+    private fun handleTransactionCosts(it: TransactionCost) {
+        transactionCostLayout.isEnabled = true
+        arrow.visible()
+        if (shouldSetTransactionCosts(it.cost.toString())) {
             handleGasLimitDefaultValue(it)
             setTransactionsCosts(it)
         }
@@ -106,7 +109,7 @@ class TransactionsFragment : Fragment() {
         }
     }
 
-    private fun shouldSetTransactionCosts(it: String) = gasLimitEditText.text.toString() != it
+    private fun shouldSetTransactionCosts(it: String) = transactionCostAmount.text.toString() != it
 
     private fun handleTransactionStatus(status: Pair<String, Int>) {
         when (status.second) {
@@ -118,14 +121,20 @@ class TransactionsFragment : Fragment() {
     private fun prepareTextListeners() {
         validationDisposable = Observable.combineLatest(
             amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
-            receiver.getValidationObservable(receiverInputLayout) { Validator.validateIsFilled(it) },
             receiver.getValidationObservable(receiverInputLayout) { Validator.validateReceiverAddress(it) },
-            Function3<Boolean, Boolean, Boolean, Boolean> { isAmountValid, isFilled, isReceiverValid ->
-                isAmountValid && isFilled && isReceiverValid
+            BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isFilled ->
+                isAmountValid && isFilled
             })
             .map {
                 if (it) {
                     viewModel.getTransactionCosts(receiver.text.toString(), getAmount())
+                } else {
+                    arrow.gone()
+                    clearTransactionCost()
+                    transactionCostLayout.isEnabled = false
+                    if (areTransactionCostsOpen) {
+                        closeTransactionCost()
+                    }
                 }
                 it
             }.flatMap {
@@ -214,7 +223,7 @@ class TransactionsFragment : Fragment() {
         input.isNotEmpty() && editText.text?.isNotEmpty() == true
 
     private fun clearTransactionCost() {
-        transactionCostAmount.text = getString(R.string.transaction_cost_amount, ZER0, viewModel.token)
+        transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
     }
 
     private fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger) {
@@ -299,7 +308,7 @@ class TransactionsFragment : Fragment() {
         @JvmStatic
         fun newInstance() = TransactionsFragment()
 
-        private const val ZER0 = "0"
+        private const val EMPTY_VALUE = "-.--"
         private const val DROP_DOWN_VERTICAL_OFFSET = 8
         private const val MIN_SIGN_TO_FILTER = 3
     }
