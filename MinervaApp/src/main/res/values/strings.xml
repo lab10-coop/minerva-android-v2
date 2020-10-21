@@ -209,4 +209,13 @@
     <string name="rejected">Rejected</string>
     <string name="accepted">Accepted</string>
     <string name="estimate_transaction_cost_error">Transaction cost couldn\'t be estimated, but you can adjust the standard values if you like.</string>
+    <string name="security">Security</string>
+    <string name="your_preferences">Your preferences</string>
+    <string name="info">Info</string>
+    <string name="legal">Legal</string>
+    <string name="use_main_networks">Use Main Networks</string>
+    <string name="follow_on_twitter">Follow us on Twitter</string>
+    <string name="join_community">Join Minerva\'s community</string>
+    <string name="version">App Version</string>
+    <string name="licence">Licence</string>
 </resources>

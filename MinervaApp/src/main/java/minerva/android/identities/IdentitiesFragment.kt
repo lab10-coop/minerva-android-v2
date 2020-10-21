@@ -14,8 +14,9 @@ import minerva.android.identities.adapter.IdentitiesPagerAdapter
 import minerva.android.identities.contacts.ContactsFragment
 import minerva.android.identities.credentials.CredentialsFragment
 import minerva.android.identities.myIdentities.MyIdentitiesFragment
+import minerva.android.main.base.BaseFragment
 
-class IdentitiesFragment : Fragment() {
+class IdentitiesFragment : BaseFragment() {
 
     var currentFragment: Fragment = getFragment(MY_IDENTITIES_POSITION)
 
@@ -45,6 +46,11 @@ class IdentitiesFragment : Fragment() {
                 setCurrentItem(it, true)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        interactor.changeActionBarColor(R.color.lightGray)
     }
 
     private fun getFragment(position: Int) =

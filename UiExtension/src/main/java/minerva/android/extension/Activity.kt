@@ -7,7 +7,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
-
 fun AppCompatActivity.addFragment(containerId: Int, fragment: Fragment, slideIn: Int = 0, slideOut: Int = 0) {
     supportFragmentManager.beginTransaction().apply {
         setCustomAnimations(slideIn, 0, 0, slideOut)
