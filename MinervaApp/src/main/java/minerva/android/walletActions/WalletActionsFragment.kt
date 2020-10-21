@@ -11,12 +11,13 @@ import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.main.base.BaseFragment
 import minerva.android.walletActions.adapter.WalletActionsAdapter
 import minerva.android.walletmanager.model.WalletActionClustered
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class WalletActionsFragment : Fragment() {
+class WalletActionsFragment : BaseFragment() {
 
     private val viewModel: WalletActionsViewModel by viewModel()
     private val walletActionsAdapter by lazy { WalletActionsAdapter() }
@@ -44,6 +45,7 @@ class WalletActionsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        interactor.changeActionBarColor(R.color.lightGray)
         viewModel.fetchWalletActions()
     }
 

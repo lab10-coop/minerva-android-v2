@@ -4,17 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.kotlinUtils.Empty
+import minerva.android.main.base.BaseFragment
 import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 
-abstract class MinervaPrimitiveListFragment : Fragment(), MinervaPrimitiveClickListener {
+abstract class MinervaPrimitiveListFragment : BaseFragment(), MinervaPrimitiveClickListener {
 
     lateinit var primitivesAdapter: MinervaPrimitiveAdapter
     abstract fun prepareObservers()

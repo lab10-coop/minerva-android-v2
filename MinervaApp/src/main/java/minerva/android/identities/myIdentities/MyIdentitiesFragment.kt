@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.recycler_view_layout.*
@@ -14,6 +13,7 @@ import minerva.android.extensions.showRemoveDialog
 import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MinervaPrimitive
@@ -22,7 +22,7 @@ import minerva.android.wrapped.startEditIdentityWrappedActivity
 import minerva.android.wrapped.startIdentityAddressWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MyIdentitiesFragment : Fragment(), IdentityFragmentListener {
+class MyIdentitiesFragment : BaseFragment(), IdentityFragmentListener {
 
     private val viewModel: MyIdentitiesViewModel by viewModel()
     private val identityAdapter = IdentityAdapter(this)
@@ -49,7 +49,9 @@ class MyIdentitiesFragment : Fragment(), IdentityFragmentListener {
 
     private fun setupLiveData() {
         viewModel.apply {
-            walletConfigLiveData.observe(viewLifecycleOwner, Observer { identityAdapter.updateList(it.identities.toMutableList(), it.credentials) })
+            walletConfigLiveData.observe(
+                viewLifecycleOwner,
+                Observer { identityAdapter.updateList(it.identities.toMutableList(), it.credentials) })
             identityRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
             errorLiveData.observe(viewLifecycleOwner, EventObserver { showError(it) })
         }

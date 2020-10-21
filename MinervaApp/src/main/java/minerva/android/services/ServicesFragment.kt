@@ -15,6 +15,11 @@ class ServicesFragment : MinervaPrimitiveListFragment() {
 
     private val viewModel: ServicesViewModel by viewModel()
 
+    override fun onResume() {
+        super.onResume()
+        interactor.changeActionBarColor(R.color.lightGray)
+    }
+
     override fun prepareObservers() {
         viewModel.apply {
             walletConfigLiveData.observe(viewLifecycleOwner, Observer {
