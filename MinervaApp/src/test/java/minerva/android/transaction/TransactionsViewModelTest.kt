@@ -42,7 +42,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = Network(short = "aaa")))
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
@@ -60,7 +60,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = Network(short = "aaa")))
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
         viewModel.run {
             saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
@@ -100,7 +100,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = "aaa"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, network = Network(short = "aaa")))
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)

@@ -60,12 +60,13 @@ fun startIdentityAddressWrappedActivity(context: Context, title: String, positio
     }
 }
 
-fun startAccountAddressWrappedActivity(context: Context, title: String, position: Int, logoRes: Int) {
+fun startAccountAddressWrappedActivity(context: Context, title: String, position: Int, networkShort: String, isSafeAccount: Boolean) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT_ADDRESS)
         putExtra(WrappedActivity.INDEX, position)
         putExtra(WrappedActivity.TITLE, title)
-        putExtra(WrappedActivity.LOGO, logoRes)
+        putExtra(WrappedActivity.NETWORK, networkShort)
+        putExtra(WrappedActivity.IS_SAFE_ACCOUNT, isSafeAccount)
     }
 }
 
@@ -89,12 +90,13 @@ fun startEditCredentialOrderWrappedActivity(context: Context) {
     }
 }
 
-fun startSafeAccountWrappedActivity(context: Context, subtitle: String, position: Int, logoRes: Int) {
+fun startSafeAccountWrappedActivity(context: Context, subtitle: String, position: Int, networkShort: String, isSafeAccount: Boolean) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.SAFE_ACCOUNT_SETTINGS)
         putExtra(WrappedActivity.SUBTITLE, subtitle)
         putExtra(WrappedActivity.INDEX, position)
-        putExtra(WrappedActivity.LOGO, logoRes)
+        putExtra(WrappedActivity.NETWORK, networkShort)
+        putExtra(WrappedActivity.IS_SAFE_ACCOUNT, isSafeAccount)
     }
 }
 

@@ -149,7 +149,12 @@ ext {
             w3jContract: "org.web3j:contracts:$w3jVersion"
     ]
 
-    firebaseDepenedencies = [cloudMassaging: "com.google.firebase:firebase-messaging:$cloudMassagingVersion"]
+    firebaseDepenedencies = [
+            cloudMassaging: "com.google.firebase:firebase-messaging:$cloudMassagingVersion",
+            crashlytics   : "com.google.firebase:firebase-crashlytics",
+            analytics     : "com.google.firebase:firebase-analytics"
+    ]
+
     startupDependencies = [startup: "androidx.startup:startup-runtime:$startupVersion"]
     kotlinReflect = [kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect"]
     jsoup = [jsoup: "org.jsoup:jsoup:$jsoupVersion"]

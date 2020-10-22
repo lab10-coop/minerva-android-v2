@@ -4,6 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".identities.IdentitiesFragment">
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/margin_large"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:textSize="@dimen/text_xsmall"
+        android:gravity="center_vertical"
+        android:fontFamily="@font/rubik_medium"
+        android:textAllCaps="true"
+        android:textColor="@color/networks_type_header"
+        android:text="@string/test_networks" />
 
     <TextView
         android:id="@+id/noDataMessage"
@@ -17,7 +28,8 @@
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/margin_xbig">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
