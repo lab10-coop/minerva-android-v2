@@ -20,7 +20,7 @@ class SmartContractRepositoryImpl(
 ) : SmartContractRepository {
 
     override fun createSafeAccount(account: Account) =
-        blockchainSafeAccountRepository.deployGnosisSafeContract(account.privateKey, account.address, account.network)
+        blockchainSafeAccountRepository.deployGnosisSafeContract(account.privateKey, account.address, account.network.short)
 
     override fun getSafeAccountOwners(contractAddress: String, network: String, privateKey: String, account: Account): Single<List<String>> =
         blockchainSafeAccountRepository.getGnosisSafeOwners(contractAddress, network, privateKey)

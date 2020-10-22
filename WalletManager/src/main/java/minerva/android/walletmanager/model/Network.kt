@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import java.math.BigInteger
 
 data class Network(
@@ -14,4 +15,8 @@ data class Network(
     val assets: List<Asset> = emptyList(),
     val color: String = String.Empty,
     val testnet: Boolean = true
-)
+) {
+    fun isAvailable(): Boolean = httpRpc != String.Empty
+
+    fun getAssetsAddresses(): List<String> = assets.map { it.address }
+}

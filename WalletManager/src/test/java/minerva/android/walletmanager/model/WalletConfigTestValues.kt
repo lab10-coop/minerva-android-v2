@@ -36,13 +36,18 @@ open class WalletConfigTestValues {
         Identity(3, "pubicKey", "privateKey", "IdentityName2", "address", identityData, true)
     )
 
-    val values = listOf(
-        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", "ATS"),
-        Account(2, "publicKey", "privateKey", "address", "ValuePayload2", "RIN")
+    val networks = listOf(
+        Network(short = "ATS", httpRpc = "httpRpc"),
+        Network(short = "RIN", httpRpc = "httpRpc")
     )
 
-    val valuesResponse = listOf(
-        AccountPayload(1, "ValuePayload1", "ATS", false),
-        AccountPayload(2, "ValuePayload2", "RIN", false)
+    val accounts = listOf(
+        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", networks[0]),
+        Account(2, "publicKey", "privateKey", "address", "ValuePayload2", networks[1])
+    )
+
+    val accountsResponse = listOf(
+        AccountPayload(1, "ValuePayload1", networks[0].short, false),
+        AccountPayload(2, "ValuePayload2", networks[1].short, false)
     )
 }

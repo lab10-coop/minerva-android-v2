@@ -34,7 +34,7 @@ class SafeAccountSettingsViewModel(
     fun loadAccount(index: Int) {
         account = accountManager.loadAccount(index)
         _ownersLiveData.value = account.owners?.reversed()
-        getOwners(account.address, account.network, account.privateKey)
+        getOwners(account.address, account.network.short, account.privateKey)
         account.masterOwnerAddress.let {
             smartContractRepository.getSafeAccountMasterOwnerPrivateKey(it).apply {
                 masterOwnerPrivateKey = this
@@ -48,7 +48,7 @@ class SafeAccountSettingsViewModel(
             return
         }
         launchDisposable {
-            smartContractRepository.addSafeAccountOwner(owner, account.address, account.network, masterOwnerPrivateKey, account)
+            smartContractRepository.addSafeAccountOwner(owner, account.address, account.network.short, masterOwnerPrivateKey, account)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -72,7 +72,7 @@ class SafeAccountSettingsViewModel(
         }
 
         launchDisposable {
-            smartContractRepository.removeSafeAccountOwner(removeAddress, account.address, account.network, masterOwnerPrivateKey, account)
+            smartContractRepository.removeSafeAccountOwner(removeAddress, account.address, account.network.short, masterOwnerPrivateKey, account)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(

@@ -32,7 +32,7 @@ class AccountManagerImpl(
     override fun createAccount(network: Network, accountName: String, ownerAddress: String, contract: String): Completable {
         with(walletConfigManager) {
             getWalletConfig()?.let { config ->
-                val newAccount = Account(config.newIndex, name = accountName, network = network.short, bindedOwner = ownerAddress)
+                val newAccount = Account(config.newIndex, name = accountName, network = network, bindedOwner = ownerAddress)
                 return cryptographyRepository.computeDeliveredKeys(masterSeed.seed, newAccount.index)
                     .map { createUpdatedWalletConfig(config, newAccount, it, ownerAddress, contract) }
                     .flatMapCompletable { updateWalletConfig(it) }

@@ -16,9 +16,9 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.replaceFragment
 import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.widget.repository.getNetworkIcon
 import java.util.*
 
 class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListener {
@@ -104,12 +104,13 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
                 subtitle = "   $it" //hacks for padding between logo and title
             }
 
-            val logoRes = intent.getIntExtra(LOGO, Int.InvalidId)
+            val isSafeAccount = intent.getBooleanExtra(IS_SAFE_ACCOUNT, false)
+
             setDisplayHomeAsUpEnabled(true)
-            if (logoRes != Int.InvalidId) {
+            intent.getStringExtra(NETWORK)?.let {
                 setDisplayShowHomeEnabled(true)
                 setDisplayUseLogoEnabled(true)
-                setLogo(getDrawable(logoRes))
+                setLogo(getNetworkIcon(this@WrappedActivity, it, isSafeAccount))
             }
         }
     }
@@ -123,9 +124,10 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
         const val INDEX = "index"
         const val POSITION = "position"
         const val FRAGMENT = "fragment"
-        const val LOGO = "logo"
+        const val NETWORK = "logo"
         const val FRAGMENT_TYPE = "type"
         const val SERVICE_QR_CODE = "service_qr_code"
+        const val IS_SAFE_ACCOUNT = "is_safe_account"
     }
 }
 

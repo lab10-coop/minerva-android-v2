@@ -1,6 +1,7 @@
 package minerva.android.accounts.adapter
 
 import android.content.Context
+import android.graphics.Color
 import android.transition.TransitionManager
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -16,7 +17,6 @@ import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.utils.BalanceUtils.getCryptoBalance
 import minerva.android.utils.BalanceUtils.getFiatBalance
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -27,6 +27,7 @@ import minerva.android.widget.AssetView
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.wrapped.startAccountAddressWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
+import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : RecyclerView.Adapter<AccountViewHolder>(),
     AccountViewHolder.AccountsAdapterListener {
@@ -68,11 +69,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     fun updateBalances(balances: HashMap<String, Balance>) {
         activeAccounts.forEachIndexed { index, account ->
             account.apply {
-                if (cryptoBalance != balances[address]?.cryptoBalance) {
                     cryptoBalance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
                     fiatBalance = balances[address]?.fiatBalance ?: Int.InvalidId.toBigDecimal()
                     notifyItemChanged(index)
-                }
             }
         }
     }
@@ -139,27 +138,24 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.bindData(account: Account) {
         with(account) {
-            NetworkManager.getColor(network).let { networkColor ->
-                card.setCardBackgroundColor(NetworkManager.getColor(network, isPending))
-                progress.apply {
-                    visibleOrGone(isPending)
-                    DrawableCompat.setTint(indeterminateDrawable, networkColor)
-                }
-                pendingMask.visibleOrGone(isPending)
-                icon.setImageResource(getNetworkIcon(NetworkManager.getNetwork(network)))
-                accountName.text = name
-                cryptoTokenName.run {
-                    text = NetworkManager.getNetwork(network).token
-                    setTextColor(networkColor)
-                }
-                with(amountView) {
-                    setCrypto(getCryptoBalance(cryptoBalance))
-                    (if (NetworkManager.getNetwork(account.network).testnet) Int.InvalidValue.toBigDecimal()
-                    else account.fiatBalance).let { setFiat(getFiatBalance(it)) }
-                }
-                sendButton.text =
-                    String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), NetworkManager.getNetwork(network).token)
+            card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
+            progress.apply {
+                visibleOrGone(isPending)
+                DrawableCompat.setTint(indeterminateDrawable, Color.parseColor(network.color))
             }
+            pendingMask.visibleOrGone(isPending)
+            icon.setImageDrawable(getNetworkIcon(context, network.short, isSafeAccount))
+            accountName.text = name
+            cryptoTokenName.run {
+                text = network.token
+                setTextColor(Color.parseColor(network.color))
+            }
+            with(amountView) {
+                setCrypto(getCryptoBalance(cryptoBalance))
+                (if (network.testnet) BigDecimal.ZERO
+                else account.fiatBalance).let { setFiat(getFiatBalance(it)) }
+            }
+            sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), network.token)
         }
     }
 
@@ -176,7 +172,6 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
             margin(NO_FRAME, FRAME_TOP_WIDTH, NO_FRAME, NO_FRAME)
             setBackgroundResource(R.drawable.identity_background)
         }
-        safeAccountBadge.gone()
     }
 
     private fun View.prepareSafeAccountView() {
@@ -184,7 +179,6 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
             margin(FRAME_WIDTH, FRAME_TOP_WIDTH, FRAME_WIDTH, FRAME_WIDTH)
             setBackgroundResource(R.drawable.safe_account_background)
         }
-        safeAccountBadge.visible()
     }
 
     private fun View.setOnSendButtonClickListener(account: Account) {
@@ -246,12 +240,10 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.showAddress -> startAccountAddressWrappedActivity(
-                    view.context, account.name, position,
-                    getNetworkIcon(NetworkManager.getNetwork(account.network))
+                    view.context, account.name, position, account.network.short, account.isSafeAccount
                 )
                 R.id.safeAccountSettings -> startSafeAccountWrappedActivity(
-                    view.context, account.name, position,
-                    R.drawable.ic_safe_account_single_owner
+                    view.context, account.name, position, account.network.short, account.isSafeAccount
                 )
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
                 R.id.remove -> listener.onAccountRemoved(position)
@@ -260,11 +252,9 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun isCreatingSafeAccountAvailable(account: Account) =
-        NetworkManager.isSafeAccountAvailable(account.network) && !account.isSafeAccount
+    private fun isCreatingSafeAccountAvailable(account: Account) = account.network.isAvailable() && !account.isSafeAccount
 
-    private fun isSafeAccount(account: Account) =
-        NetworkManager.isSafeAccountAvailable(account.network) && account.isSafeAccount
+    private fun isSafeAccount(account: Account) = account.network.isAvailable() && account.isSafeAccount
 
     companion object {
         private const val SEND_BUTTON_FORMAT = "%s %s"

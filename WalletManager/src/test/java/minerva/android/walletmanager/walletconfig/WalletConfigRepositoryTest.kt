@@ -16,6 +16,7 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepositoryImpl
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.WalletConfigTestValues
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import org.amshove.kluent.mock
@@ -24,7 +25,7 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class WalletConfigRepositoryTest {
+class WalletConfigRepositoryTest : WalletConfigTestValues() {
 
     private val local = LocalMock()
     private val online = OnlineMock()
@@ -78,6 +79,8 @@ class WalletConfigRepositoryTest {
 
         whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
 
+
+        NetworkManager.initialize(networks)
         val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, onlineLikeLocal)
         val observable = walletConfigRepository.loadWalletConfig(MasterSeed())
         observable.test().assertValueSequence(listOf(local.prepareWalletConfig()))

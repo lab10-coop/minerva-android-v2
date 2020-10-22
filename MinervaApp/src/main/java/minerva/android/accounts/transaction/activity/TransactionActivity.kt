@@ -57,8 +57,9 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     }
 
     private fun ActionBar.setLogo() {
-        if (viewModel.account.isSafeAccount) setLogo(getDrawable(R.drawable.ic_artis_safe_account))
-        else setLogo(getDrawable(getNetworkIcon(NetworkManager.getNetwork(viewModel.account.network))))
+        viewModel.account.let {
+            setLogo(getNetworkIcon(this@TransactionActivity, it.network.short, it.isSafeAccount))
+        }
     }
 
     override fun onTransactionAccepted(message: String?) {

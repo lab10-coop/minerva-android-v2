@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.manager.networks
 
-import android.graphics.Color
 import androidx.annotation.VisibleForTesting
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.map.value
@@ -28,14 +27,7 @@ object NetworkManager {
 
     fun getNetwork(type: String): Network = networkMap.value(type)
 
-    fun getAssetsAddresses(type: String): List<String> = getNetwork(type).assets.map { it.address }
-
-    fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<AccountAsset> =
-        assetList.map { getAssetFromPair(it) }
-
-    fun isSafeAccountAvailable(type: String): Boolean = getNetwork(type).isSafeAccountAvailable
-
-    fun getColor(type: String, opacity: Boolean = false): Int = Color.parseColor(getStringColor(type, opacity))
+    fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<AccountAsset> = assetList.map { getAssetFromPair(it) }
 
     fun firstDefaultValueNetwork(): Network = networks[FIRST_NETWORK]
 
@@ -43,11 +35,8 @@ object NetworkManager {
         if (networks.size > ONE_ELEMENT && isActiveNetwork(networks[SECOND_NETWORK])) networks[SECOND_NETWORK]
         else firstDefaultValueNetwork()
 
-    fun isAvailable(type: String): Boolean = getNetwork(type).httpRpc != String.Empty
-
-    @VisibleForTesting
-    fun getStringColor(type: String, opacity: Boolean): String {
-        getNetwork(type).color.let { color ->
+    fun getStringColor(network: Network, opacity: Boolean): String {
+        network.color.let { color ->
             return if (opacity) OPACITY_PREFIX + color.substring(color.length - COLOR_LENGTH, color.length)
             else color
         }
