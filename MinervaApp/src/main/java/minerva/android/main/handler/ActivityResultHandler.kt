@@ -57,9 +57,9 @@ private fun MainActivity.handleCredentialLogin(intent: Intent) {
 
 fun MainActivity.showBindCredentialFlashbar(isLoginSuccess: Boolean, message: String?) {
     if (isLoginSuccess) MinervaFlashbar.show(this, getString(R.string.success), getString(R.string.attached_credential_success, message))
-    else message?.let { MinervaFlashbar.show(this, getString(R.string.error_importing_credential), it) }
+    else message?.let { MinervaFlashbar.show(this, getString(R.string.auth_error_title), it) }
         .orElse {
-            MinervaFlashbar.show(this, getString(R.string.error_importing_credential), getString(R.string.unexpected_error))
+            MinervaFlashbar.show(this, getString(R.string.auth_error_title), getString(R.string.unexpected_error))
         }
 }
 
