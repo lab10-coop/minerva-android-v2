@@ -13,7 +13,7 @@ interface ServicesApi {
     fun painlessLogin(@Header(CONTENT_TYPE) content: String = APPLICATION_JSON, @Url url: String, @Body tokenPayload: TokenPayload): Single<LoginResponse>
 
     companion object {
-        const val CONTENT_TYPE = "Content-typex"
+        const val CONTENT_TYPE = "Content-type"
         const val APPLICATION_JSON = "application/json"
     }
 }
