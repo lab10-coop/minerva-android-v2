@@ -68,10 +68,10 @@ class NetworkManagerTest {
     @Test
     fun `Getting correct color`() {
         NetworkManager.initialize(testNetworks1)
-        NetworkManager.getStringColor("SN1", false) shouldBeEqualTo "#FF223344"
-        NetworkManager.getStringColor("SN1", true) shouldBeEqualTo "#29223344"
-        NetworkManager.getStringColor("SN2", false) shouldBeEqualTo "#223344"
-        NetworkManager.getStringColor("SN2", true) shouldBeEqualTo "#29223344"
+        NetworkManager.getStringColor(testNetworks1[0], false) shouldBeEqualTo "#FF223344"
+        NetworkManager.getStringColor(testNetworks1[0], true) shouldBeEqualTo "#29223344"
+        NetworkManager.getStringColor(testNetworks1[1], false) shouldBeEqualTo "#223344"
+        NetworkManager.getStringColor(testNetworks1[1], true) shouldBeEqualTo "#29223344"
     }
 
     @Test

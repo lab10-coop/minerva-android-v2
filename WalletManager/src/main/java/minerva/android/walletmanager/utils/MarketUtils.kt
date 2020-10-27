@@ -23,7 +23,7 @@ object MarketUtils {
         hashMapOf<String, Balance>().apply {
             cryptoBalances.forEachIndexed { index, cryptoBalance ->
                 if (cryptoBalance.first == accounts?.get(index)?.address) {
-                    getBalance(this, cryptoBalance, getRate(accounts[index].network, markets))
+                    getBalance(this, cryptoBalance, getRate(accounts[index].network.short, markets))
                 }
             }
         }
@@ -62,7 +62,7 @@ object MarketUtils {
         return hashMapOf(Pair(Markets.ETH_EUR, ethEuroRate), Pair(Markets.POA_EUR, poaEuroRate))
     }
 
-    fun getAddresses(accounts: List<Account>): List<Pair<String, String>> = accounts.map { it.network to it.address }
+    fun getAddresses(accounts: List<Account>): List<Pair<String, String>> = accounts.map { it.network.short to it.address }
 
     private const val SCALE = 2
 }

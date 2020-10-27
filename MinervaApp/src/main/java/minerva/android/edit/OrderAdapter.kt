@@ -81,7 +81,7 @@ class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
     private fun prepareIcon(element: MinervaPrimitive) {
         view.apply {
             when {
-                element.network != String.Empty -> icon.setImageResource(getNetworkIcon(NetworkManager.getNetwork(element.network)))
+                element.network.short != String.Empty -> icon.setImageDrawable(getNetworkIcon(context, element.network.short))
                 element is Service -> icon.loadImageUrl(element.iconUrl, R.drawable.ic_services)
                 element is Credential -> icon.loadImageUrl(element.iconUrl, R.drawable.ic_default_credential)
                 else -> ProfileImage.load(icon, element as Identity)

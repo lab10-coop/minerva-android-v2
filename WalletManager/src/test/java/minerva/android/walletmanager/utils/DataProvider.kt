@@ -20,17 +20,17 @@ object DataProvider {
             Identity(3, "identityName3", "", "privateKey", "address3", data)
         ),
         listOf(
-            Account(2, "publicKey1", "privateKey1", "address", network = NetworkShortName.ETH_RIN),
-            Account(4, "publicKey2", "privateKey2", "address", network = NetworkShortName.ATS_TAU),
+            Account(2, "publicKey1", "privateKey1", "address", network = Network(short = NetworkShortName.ETH_RIN)),
+            Account(4, "publicKey2", "privateKey2", "address", network = Network(short = NetworkShortName.ATS_TAU)),
             Account(
-                5, "publicKey3", "privateKey3", "address", network = NetworkShortName.ATS_TAU,
+                5, "publicKey3", "privateKey3", "address", network = Network(short = NetworkShortName.ATS_TAU),
                 owners = listOf("masterOwner")
             ),
             Account(
-                6, "publicKey4", "privateKey4", "address", network = NetworkShortName.ATS_TAU,
+                6, "publicKey4", "privateKey4", "address", network = Network(short = NetworkShortName.ATS_TAU),
                 owners = listOf("notMasterOwner", "masterOwner")
             ),
-            Account(7, "publicKey5", "privateKey5", "address", network = NetworkShortName.ATS_TAU)
+            Account(7, "publicKey5", "privateKey5", "address", network = Network(short = NetworkShortName.ATS_TAU))
         )
         , listOf(
             Service("1", "name")

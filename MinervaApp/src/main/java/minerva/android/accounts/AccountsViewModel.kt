@@ -144,7 +144,7 @@ class AccountsViewModel(
 
     private fun createAccount(account: Account, smartContractAddress: String): Completable {
         return accountManager.createAccount(
-            NetworkManager.getNetwork(account.network),
+            account.network,
             createSafeAccountName(account),
             account.address,
             smartContractAddress

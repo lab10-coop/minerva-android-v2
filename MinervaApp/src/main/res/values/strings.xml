@@ -175,7 +175,8 @@
     <string name="credentials">Credentials</string>
     <string name="connected_services">Connected services</string>
     <string name="success">Success</string>
-    <string name="error_importing_credential">Error importing credential</string>
+    <string name="error_title">Error occurs</string>
+    <string name="auth_error_title">Error during authentication</string>
     <string name="attached_credential_success">Your credential was successfully attached to your identity %s</string>
     <string name="attached_credential_failure">The imported credential could not be attached to any of your identities</string>
     <string name="remove_credential_dialog_title">Remove Credential?</string>
@@ -218,4 +219,5 @@
     <string name="join_community">Join Minerva\'s community</string>
     <string name="version">App Version</string>
     <string name="licence">Licence</string>
+    <string name="test_networks">Test networks</string>
 </resources>

@@ -49,4 +49,5 @@
     <color name="black">#000000</color>
     <color name="separatorColor">#EAEAEE</color>
     <color name="loadingScreenBackground">#70000000</color>
+    <color name="networks_type_header">#40404C</color>
 </resources>

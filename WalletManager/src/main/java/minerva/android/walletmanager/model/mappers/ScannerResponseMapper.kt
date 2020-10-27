@@ -6,6 +6,7 @@ import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.CredentialType
 
@@ -136,7 +137,7 @@ fun mapAccountResponseToAccount(
         privateKey,
         address,
         response.name,
-        response.network,
+        NetworkManager.getNetwork(response.network),
         response.isDeleted,
         owners = response.owners,
         contractAddress = response.contractAddress,
