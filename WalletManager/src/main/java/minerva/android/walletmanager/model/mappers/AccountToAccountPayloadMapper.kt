@@ -9,7 +9,7 @@ object AccountToAccountPayloadMapper : Mapper<Account, AccountPayload> {
         AccountPayload(
             input.index,
             input.name,
-            input.network,
+            input.network.short,
             input.isDeleted,
             input.owners,
             input.contractAddress,

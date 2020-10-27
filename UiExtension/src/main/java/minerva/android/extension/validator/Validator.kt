@@ -21,8 +21,9 @@ object Validator {
         }
     }
 
-    fun validateReceiverAddress(address: String): ValidationResult {
+    fun validateReceiverAddress(address: String?): ValidationResult {
         return when {
+            address.isNullOrBlank() -> ValidationResult.error(R.string.field_cannot_be_empty)
             isHexAddress(address) -> ValidationResult(true)
             isEnsName(address) -> ValidationResult(true)
             isNetworkPrefix(address) -> ValidationResult.error(R.string.different_network_address)

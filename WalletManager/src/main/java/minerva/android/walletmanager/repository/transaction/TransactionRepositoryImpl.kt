@@ -125,7 +125,7 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
             return Observable.range(START, accounts.size)
                 .filter { position -> !accounts[position].isDeleted && !accounts[position].isPending }
-                .filter { position -> NetworkManager.isAvailable(accounts[position].network) }
+                .filter { position -> accounts[position].network.isAvailable() }
                 .flatMapSingle { position -> refreshAssetsBalance(accounts[position]) }
                 .toList()
                 .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
@@ -140,12 +140,12 @@ class TransactionRepositoryImpl(
      *
      */
     private fun refreshAssetsBalance(account: Account): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
-        Observable.range(START, NetworkManager.getAssetsAddresses(account.network).size)
+        Observable.range(START, account.network.assets.size)
             .flatMap {
                 blockchainRepository.refreshAssetBalance(
                     account.privateKey,
-                    account.network,
-                    NetworkManager.getAssetsAddresses(account.network)[it],
+                    account.network.short,
+                    account.network.getAssetsAddresses()[it],
                     account.address
                 )
             }

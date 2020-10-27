@@ -90,7 +90,7 @@ class TransactionsViewModel(
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {
-            transactionRepository.getTransactionCosts(network, assetIndex, account.address, to, amount)
+            transactionRepository.getTransactionCosts(network.short, assetIndex, account.address, to, amount)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _transactionCostLoadingLiveData.value = Event(true) }
@@ -122,7 +122,7 @@ class TransactionsViewModel(
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferERC20Token(network, it, account.accountAssets[assetIndex].asset.address)
+                            smartContractRepository.transferERC20Token(network.short, it, account.accountAssets[assetIndex].asset.address)
                                 .toSingleDefault(it)
                         }
                 }
@@ -151,7 +151,7 @@ class TransactionsViewModel(
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferNativeCoin(network, it).toSingleDefault(it)
+                            smartContractRepository.transferNativeCoin(network.short, it).toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
@@ -196,7 +196,7 @@ class TransactionsViewModel(
             resolveENS(receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it
-                    transactionRepository.transferNativeCoin(network, account.index, it).toSingleDefault(it)
+                    transactionRepository.transferNativeCoin(network.short, account.index, it).toSingleDefault(it)
                 }
                 .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
@@ -218,7 +218,7 @@ class TransactionsViewModel(
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, account.accountAssets[assetIndex].asset.address)
                 .flatMapCompletable {
-                    transactionRepository.transferERC20Token(account.network, it)
+                    transactionRepository.transferERC20Token(account.network.short, it)
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -254,7 +254,7 @@ class TransactionsViewModel(
     }
 
     fun prepareCurrency() =
-        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.nameShort else NetworkManager.getNetwork(account.network).token
+        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.nameShort else account.network.token
 
     private fun getAccountsWalletAction(transaction: Transaction, network: String, status: Int): WalletAction =
         WalletAction(
@@ -291,7 +291,7 @@ class TransactionsViewModel(
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network, status)))
+        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network.short, status)))
 
     private fun prepareTransaction(
         receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger, contractAddress: String = String.Empty
@@ -301,13 +301,13 @@ class TransactionsViewModel(
         get() = account.network
 
     val token
-        get() = NetworkManager.getNetwork(network).token
+        get() = network.token
 
     fun preparePrefixAddress(prefixAddress: String, prefix: String): String =
         prefixAddress.removePrefix(prefix).replace(META_ADDRESS_SEPARATOR, String.Empty)
 
     fun prepareTitle() =
-        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.name else NetworkManager.getNetwork(account.network).token
+        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.name else network.token
 
     fun isCorrectNetwork(prefixAddress: String) = account.name.contains(prefixAddress, true)
 

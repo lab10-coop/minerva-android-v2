@@ -40,20 +40,9 @@
             android:textSize="@dimen/text_normal"
             app:layout_constraintBottom_toBottomOf="@id/profileImage"
             app:layout_constraintLeft_toRightOf="@id/profileImage"
-            app:layout_constraintRight_toLeftOf="@id/arrow"
-            app:layout_constraintTop_toTopOf="@id/profileImage"
-            tools:text="@string/app_name" />
-
-        <ImageView
-            android:id="@+id/arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_down_arrow"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/profileImage"
             app:layout_constraintRight_toLeftOf="@id/menu"
             app:layout_constraintTop_toTopOf="@id/profileImage"
-            tools:ignore="ContentDescription" />
+            tools:text="@string/app_name" />
 
         <ImageView
             android:id="@+id/menu"
@@ -74,6 +63,18 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/profileImage"/>
+
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_down_arrow"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/identityDid"
+            app:layout_constraintRight_toRightOf="@id/menu"
+            app:layout_constraintLeft_toLeftOf="@id/menu"
+            app:layout_constraintTop_toTopOf="@id/identityDid"
+            tools:ignore="ContentDescription" />
 
         <minerva.android.widget.IdentityDataContent
             android:id="@+id/dataContainer"

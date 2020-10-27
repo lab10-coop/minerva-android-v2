@@ -1,10 +1,10 @@
 package minerva.android.walletmanager.mappers
 
 import minerva.android.blockchainprovider.model.TransactionCostPayload
-import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.mappers.*
 import org.amshove.kluent.shouldBeEqualTo
@@ -176,17 +176,14 @@ class MapperTest : WalletConfigTestValues() {
 
     @Test
     fun `Mapping ValueResponse to Value Test`() {
-        val valueResponse = AccountPayload(
-            0,
-            "ValueResponseTest",
-            "ValueNetworkTest"
-        )
+        accountsResponse[0].let {
+            NetworkManager.initialize(networks)
+            val value = mapAccountResponseToAccount(it)
 
-        val value = mapAccountResponseToAccount(valueResponse)
-
-        value.index shouldBeEqualTo valueResponse.index
-        value.name shouldBeEqualTo valueResponse.name
-        value.network shouldBeEqualTo value.network
+            value.index shouldBeEqualTo it.index
+            value.name shouldBeEqualTo it.name
+            value.network shouldBeEqualTo value.network
+        }
     }
 
     @Test
@@ -227,9 +224,9 @@ class MapperTest : WalletConfigTestValues() {
     fun `map service to service payload Test`() {
         val input = Service(
             "1",
-                "name",
-                123
-            )
+            "name",
+            123
+        )
 
         val response = ServiceToServicePayloadMapper.map(input)
 
@@ -272,7 +269,7 @@ class MapperTest : WalletConfigTestValues() {
         val walletConfig = WalletConfig(
             0,
             identities,
-            values
+            accounts
         )
         val walletPayload = WalletConfigToWalletPayloadMapper.map(walletConfig)
 

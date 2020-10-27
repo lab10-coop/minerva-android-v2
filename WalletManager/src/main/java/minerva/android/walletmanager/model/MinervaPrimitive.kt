@@ -8,7 +8,7 @@ open class MinervaPrimitive(
     open var name: String = String.Empty,
     open var isDeleted: Boolean = false,
     open val bindedOwner: String = String.Empty,
-    open val network: String = String.Empty,
+    open val network: Network = Network(),
     open var lastUsed: Long = Long.InvalidValue,
     open val iconUrl: String? = String.Empty
 ) {

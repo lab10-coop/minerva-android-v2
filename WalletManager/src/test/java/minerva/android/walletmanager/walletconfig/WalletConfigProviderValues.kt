@@ -8,20 +8,18 @@ import minerva.android.configProvider.model.walletActions.WalletActionsConfigPay
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.WalletConfigTestValues
 import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
 
 class LocalMock : LocalWalletConfigProvider, WalletConfigTestValues() {
     override fun loadWalletConfig(): Single<WalletConfigPayload> = Single.just(prepareWalletConfigPayload())
-    override fun saveWalletConfig(walletConfig: WalletConfigPayload) {
-    }
+    override fun saveWalletConfig(walletConfig: WalletConfigPayload) { }
 
-    private fun prepareWalletConfigPayload(): WalletConfigPayload =
-        WalletConfigPayload(1, identityResponse, valuesResponse)
+    private fun prepareWalletConfigPayload(): WalletConfigPayload = WalletConfigPayload(1, identityResponse, accountsResponse)
 
-    fun prepareWalletConfig(): WalletConfig =
-        WalletConfig(1, identity, values)
+    fun prepareWalletConfig(): WalletConfig = WalletConfig(1, identity, accounts)
 }
 
 class OnlineMock : MinervaApi, WalletConfigTestValues() {
@@ -40,10 +38,10 @@ class OnlineMock : MinervaApi, WalletConfigTestValues() {
         Completable.complete()
 
     private fun prepareData(): WalletConfigPayload =
-        WalletConfigPayload(2, onlineIdentityResponse, valuesResponse)
+        WalletConfigPayload(2, onlineIdentityResponse, accountsResponse)
 
     fun prepareWalletConfig(): WalletConfig =
-        WalletConfig(2, onlineIdentity, values)
+        WalletConfig(2, onlineIdentity, accounts)
 }
 
 class OnlineLikeLocalMock : MinervaApi, WalletConfigTestValues() {
@@ -60,5 +58,5 @@ class OnlineLikeLocalMock : MinervaApi, WalletConfigTestValues() {
         Completable.complete()
 
     private fun prepareData(): WalletConfigPayload =
-        WalletConfigPayload(1, identityResponse, valuesResponse)
+        WalletConfigPayload(1, identityResponse, accountsResponse)
 }

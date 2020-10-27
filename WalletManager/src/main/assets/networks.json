@@ -1,6 +1,6 @@
 [
   {
-    "full": "ARTIS (Tau1)",
+    "full": "ARTIS (τ1)",
     "short": "artis_tau1",
     "token": "tATS",
     "isSafeAccountAvailable": "true",
@@ -10,7 +10,7 @@
     "assets": [
       {
         "name": "FaucetToken",
-        "shortName": "SFAU",
+        "shortName": "tATS",
         "address": "0xf6ef10e21166cf2e33db070affe262f90365e8d4"
       }
     ],
