@@ -3,14 +3,12 @@ package minerva.android.blockchainprovider.repository.smartContract
 // don't remove this commented import, please
 //import kotlin.Pair
 import kotlin.Pair
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toFlowable
 import io.reactivex.rxkotlin.zipWith
-import minerva.android.blockchainprovider.smartContracts.ERC20
-import minerva.android.blockchainprovider.smartContracts.GnosisSafe
-import minerva.android.blockchainprovider.smartContracts.ProxyFactory
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.GNOSIS_SETUP_DATA
 import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.MASTER_COPY_KEY
@@ -26,6 +24,9 @@ import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHel
 import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.refund
 import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.safeSentinelAddress
 import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.safeTxGas
+import minerva.android.blockchainprovider.smartContracts.ERC20
+import minerva.android.blockchainprovider.smartContracts.GnosisSafe
+import minerva.android.blockchainprovider.smartContracts.ProxyFactory
 import minerva.android.kotlinUtils.map.value
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
@@ -40,6 +41,7 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionCount
 import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
+import java.lang.NumberFormatException
 import java.math.BigInteger
 import java.util.*
 
@@ -72,16 +74,16 @@ class BlockchainSafeAccountRepositoryImpl(
 
 
     override fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable =
-        getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
-            gnosisSafe.addOwnerWithThreshold(owner, BigInteger.valueOf(1)).encodeFunctionCall()
-                .let { result ->
-                    Numeric.hexStringToByteArray(result).let { data ->
-                        return performTransaction(
-                            gnosisSafe, gnosisAddress, data, network,
-                            TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
-                        )
-                    }
-                }
+        try {
+            val gnosisSafe = getGnosisSafe(gnosisAddress, network, privateKey)
+            val result = gnosisSafe.addOwnerWithThreshold(owner, BigInteger.valueOf(1)).encodeFunctionCall()
+            val data = Numeric.hexStringToByteArray(result)
+            performTransaction(
+                gnosisSafe, gnosisAddress, data, network,
+                TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
+            )
+        } catch (ex: NumberFormatException) {
+            Completable.error(ex)
         }
 
     override fun removeSafeAccountOwner(removeAddress: String, gnosisAddress: String, network: String, privateKey: String): Completable =
