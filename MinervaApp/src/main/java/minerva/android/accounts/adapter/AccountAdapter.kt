@@ -25,8 +25,6 @@ import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Balance
 import minerva.android.widget.AssetView
 import minerva.android.widget.repository.getNetworkIcon
-import minerva.android.wrapped.startAccountAddressWrappedActivity
-import minerva.android.wrapped.startSafeAccountWrappedActivity
 import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : RecyclerView.Adapter<AccountViewHolder>(),
@@ -50,16 +48,6 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         }
     }
 
-    override fun onSendAccountClicked(account: Account) = listener.onSendTransaction(account)
-
-    override fun onSendAssetClicked(accountIndex: Int, assetIndex: Int) = listener.onSendAssetTransaction(accountIndex, assetIndex)
-
-    override fun onAccountRemoved(position: Int) = listener.onAccountRemove(rawAccounts[position])
-
-    override fun refreshAssets(rawPosition: Int): List<AccountAsset> = rawAccounts[rawPosition].accountAssets
-
-    override fun onCreateSafeAccountClicked(account: Account) = listener.onCreateSafeAccount(account)
-
     fun updateList(data: List<Account>) {
         rawAccounts = data
         activeAccounts = data.filter { !it.isDeleted }
@@ -69,9 +57,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     fun updateBalances(balances: HashMap<String, Balance>) {
         activeAccounts.forEachIndexed { index, account ->
             account.apply {
-                    cryptoBalance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
-                    fiatBalance = balances[address]?.fiatBalance ?: Int.InvalidId.toBigDecimal()
-                    notifyItemChanged(index)
+                cryptoBalance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
+                fiatBalance = balances[address]?.fiatBalance ?: Int.InvalidId.toBigDecimal()
+                notifyItemChanged(index)
             }
         }
     }
@@ -103,6 +91,30 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
             }
         }
         return Int.InvalidIndex
+    }
+
+    override fun onSendAccountClicked(account: Account) {
+        listener.onSendTransaction(account)
+    }
+
+    override fun onSendAssetClicked(accountIndex: Int, assetIndex: Int) {
+        listener.onSendAssetTransaction(accountIndex, assetIndex)
+    }
+
+    override fun onAccountRemoved(position: Int) {
+        listener.onAccountRemove(rawAccounts[position])
+    }
+
+    override fun onCreateSafeAccountClicked(account: Account) {
+        listener.onCreateSafeAccount(account)
+    }
+
+    override fun onShowAddress(account: Account, position: Int) {
+        listener.onShowAddress(account, position)
+    }
+
+    override fun onShowSafeAccountSettings(account: Account, position: Int) {
+        listener.onShowSafeAccountSettings(account, position)
     }
 }
 
@@ -239,12 +251,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun PopupMenu.setOnItemMenuClickListener(position: Int, account: Account) {
         setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.showAddress -> startAccountAddressWrappedActivity(
-                    view.context, account.name, position, account.network.short, account.isSafeAccount
-                )
-                R.id.safeAccountSettings -> startSafeAccountWrappedActivity(
-                    view.context, account.name, position, account.network.short, account.isSafeAccount
-                )
+                R.id.showAddress -> listener.onShowAddress(account, position)
+                R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, position)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
                 R.id.remove -> listener.onAccountRemoved(position)
             }
@@ -252,7 +260,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun isCreatingSafeAccountAvailable(account: Account) = account.network.isAvailable() && !account.isSafeAccount
+    private fun isCreatingSafeAccountAvailable(account: Account) = !isSafeAccount(account) && account.network.isSafeAccountAvailable
 
     private fun isSafeAccount(account: Account) = account.network.isAvailable() && account.isSafeAccount
 
@@ -267,7 +275,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         fun onSendAccountClicked(account: Account)
         fun onSendAssetClicked(accountIndex: Int, assetIndex: Int)
         fun onAccountRemoved(position: Int)
-        fun refreshAssets(rawPosition: Int): List<AccountAsset>
         fun onCreateSafeAccountClicked(account: Account)
+        fun onShowAddress(account: Account, position: Int)
+        fun onShowSafeAccountSettings(account: Account, position: Int)
     }
 }
