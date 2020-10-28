@@ -54,7 +54,7 @@ class SafeAccountSettingsViewModel(
                 .subscribeBy(
                     onSuccess = { _ownersLiveData.value = it.reversed() },
                     onError = {
-                        Timber.e("Owners list download error: ${it.message}")
+                        Timber.e("Add owner error: ${it.message}")
                         _errorLiveData.value = Event(it)
                     }
                 )
@@ -78,7 +78,7 @@ class SafeAccountSettingsViewModel(
                 .subscribeBy(
                     onSuccess = { _ownersLiveData.value = it.reversed() },
                     onError = {
-                        Timber.e("Owners list download error: ${it.message}")
+                        Timber.e("Remove owner error: ${it.message}")
                         _errorLiveData.value = Event(it)
                     }
                 )
