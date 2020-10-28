@@ -18,6 +18,8 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.wrapped.startAccountAddressWrappedActivity
+import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
@@ -67,6 +69,14 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
     override fun onAccountRemove(account: Account) = showRemoveDialog(account)
+
+    override fun onShowAddress(account: Account, position: Int) {
+        startAccountAddressWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
+    }
+
+    override fun onShowSafeAccountSettings(account: Account, position: Int) {
+        startSafeAccountWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
+    }
 
     fun setProgressAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending)

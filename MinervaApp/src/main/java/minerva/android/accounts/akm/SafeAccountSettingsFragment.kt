@@ -10,19 +10,17 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_safe_account_settings.*
 import minerva.android.R
+import minerva.android.accounts.adapter.OwnerAdapter
+import minerva.android.accounts.listener.AddressScannerListener
+import minerva.android.accounts.listener.OnOwnerRemovedListener
 import minerva.android.extension.getValidationObservable
 import minerva.android.extension.onRightDrawableClicked
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.accounts.adapter.OwnerAdapter
-import minerva.android.accounts.listener.OnOwnerRemovedListener
-import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -107,14 +105,11 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
 
 
     private fun prepareTextValidator() {
-        safeAccountDisposable = Observable.combineLatest(
-            newOwner.getValidationObservable(ownerAddressInputLayout) { Validator.validateIsFilled(it) },
-            newOwner.getValidationObservable(ownerAddressInputLayout) { Validator.validateReceiverAddress(it) },
-            BiFunction<Boolean, Boolean, Boolean> { isFilled, isAddressValid -> isFilled && isAddressValid }
-        ).subscribeBy(
-            onNext = { addOwnerButton.isEnabled = it },
-            onError = { addOwnerButton.isEnabled = false }
-        )
+        safeAccountDisposable = newOwner.getValidationObservable(ownerAddressInputLayout) { Validator.validateReceiverAddress(it) }
+            .subscribeBy(
+                onNext = { addOwnerButton.isEnabled = it },
+                onError = { addOwnerButton.isEnabled = false }
+            )
     }
 
     private fun setupRecycleView() {
