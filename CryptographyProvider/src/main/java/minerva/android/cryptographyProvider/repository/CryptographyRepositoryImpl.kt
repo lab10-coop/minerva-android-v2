@@ -75,8 +75,6 @@ class CryptographyRepositoryImpl : CryptographyRepository {
                 /*JWTTools().decodeRaw(jwtToken).second is used for decoding payload from jwtToken, because JwtPayload, which is automatically
                 * generated from JWTTools().verify(jwtToken, resolver) is missing essential fields, hence this object is omitted*/
 
-
-
                 if (payload != null) {
                     JWTTools().decodeRaw(jwtToken).second
                 } else {

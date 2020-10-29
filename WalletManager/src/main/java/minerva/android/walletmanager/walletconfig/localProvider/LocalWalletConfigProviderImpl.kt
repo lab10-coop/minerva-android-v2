@@ -7,7 +7,7 @@ import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.kotlinUtils.NO_DATA
 
 class LocalWalletConfigProviderImpl(private val sharedPreferences: SharedPreferences) : LocalWalletConfigProvider {
-    override fun loadWalletConfig(): Single<WalletConfigPayload> =
+    override fun getWalletConfig(): Single<WalletConfigPayload> =
         Single.just(sharedPreferences.getString(WALLET_CONFIG, String.NO_DATA)).map { makeWalletConfig(it) }
 
     override fun saveWalletConfig(walletConfig: WalletConfigPayload) =

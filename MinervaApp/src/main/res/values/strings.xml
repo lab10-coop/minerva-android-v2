@@ -114,6 +114,8 @@
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>
     <string name="identity_saved_to_clipboard">Identity saved to clipboard</string>
     <string name="error_header">An error occurred</string>
+    <string name="refresh_balances_error">Error while refreshing balances</string>
+    <string name="refresh_asset_balances_error">Error while refreshing assets balances</string>
     <string name="activities_error">Error while fetching activities</string>
     <string name="removed">Removed</string>
     <string name="changed">Changed</string>

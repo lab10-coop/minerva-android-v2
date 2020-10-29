@@ -2,6 +2,7 @@ package minerva.android.walletmanager.walletconfig.repository
 
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Observer
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import minerva.android.configProvider.api.MinervaApi
@@ -30,11 +31,12 @@ class WalletConfigRepositoryImpl(
     private val localStorage: LocalStorage,
     private val minervaApi: MinervaApi
 ) : WalletConfigRepository {
+
     private var currentWalletConfigVersion = Int.InvalidIndex
 
-    override fun loadWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig> =
+    override fun getWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig> =
         Observable.mergeDelayError(
-            localWalletProvider.loadWalletConfig()
+            localWalletProvider.getWalletConfig()
                 .toObservable()
                 .doOnNext { currentWalletConfigVersion = it.version }
                 .flatMap { completeKeys(masterSeed, it) },
@@ -46,22 +48,20 @@ class WalletConfigRepositoryImpl(
                     saveWalletConfigLocally(it.walletPayload)
                 }
                 .flatMap { completeKeys(masterSeed, it.walletPayload) }
-        )
+        ).onErrorResumeNext { _: Observer<in WalletConfig> ->
+            localWalletProvider.getWalletConfig()
+                .toObservable()
+                .flatMap { completeKeys(masterSeed, it) }
+        }
 
-    override fun getWalletConfig(masterSeed: MasterSeed): Single<WalletConfigResponse> =
+    override fun restoreWalletConfig(masterSeed: MasterSeed): Single<WalletConfigResponse> =
         minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
 
+    override fun updateWalletConfig(masterSeed: MasterSeed, walletConfigPayload: WalletConfigPayload): Completable =
+        minervaApi.saveWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey), walletConfigPayload = walletConfigPayload)
 
     override fun saveWalletConfigLocally(walletConfigPayload: WalletConfigPayload) =
         localWalletProvider.saveWalletConfig(walletConfigPayload)
-
-    override fun updateWalletConfig(masterSeed: MasterSeed, walletConfigPayload: WalletConfigPayload): Completable =
-        minervaApi.saveWalletConfig(
-            publicKey = encodePublicKey(masterSeed.publicKey),
-            walletConfigPayload = walletConfigPayload
-        )
-
-    override fun createWalletConfig(masterSeed: MasterSeed) = updateWalletConfig(masterSeed)
 
     private fun completeKeys(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> =
         payload.identityResponse.let { identitiesResponse ->

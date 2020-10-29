@@ -14,7 +14,6 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.NETWORK
@@ -28,7 +27,6 @@ import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.util.concurrent.TimeoutException
 
 class TransactionsViewModel(
     private val walletActionsRepository: WalletActionsRepository,
@@ -178,8 +176,8 @@ class TransactionsViewModel(
         amount: BigDecimal,
         gasPrice: BigDecimal,
         gasLimit: BigInteger
-    ): Single<Transaction> {
-        return Single.just(
+    ): Single<Transaction> =
+        Single.just(
             Transaction(
                 privateKey = ownerPrivateKey,
                 receiverKey = receiverKey,
@@ -189,7 +187,6 @@ class TransactionsViewModel(
                 contractAddress = account.address
             )
         )
-    }
 
     private fun sendMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {

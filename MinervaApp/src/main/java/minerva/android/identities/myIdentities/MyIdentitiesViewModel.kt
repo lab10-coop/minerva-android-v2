@@ -11,6 +11,7 @@ import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.IDENTITY_NAME
 import minerva.android.walletmanager.model.defs.WalletActionType.Companion.IDENTITY
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import timber.log.Timber
 
 class MyIdentitiesViewModel(
     private val identityManager: IdentityManager,
@@ -23,11 +24,11 @@ class MyIdentitiesViewModel(
     fun removeIdentity(identity: Identity) {
         launchDisposable {
             identityManager.removeIdentity(identity)
-                .doOnComplete { saveWalletAction(getRemovedItemWalletAction(IDENTITY, identity.name, IDENTITY_NAME)) }
+                .andThen(saveWalletAction(getRemovedItemWalletAction(IDENTITY, identity.name, IDENTITY_NAME)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = { _identityRemovedLiveData.value = Event(Unit) },
-                    onError = { errorMutableLiveData.value = Event(it) }
+                    onError = { Timber.e(it) }
                 )
         }
     }

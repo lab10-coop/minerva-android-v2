@@ -6,14 +6,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import timber.log.Timber
 
 class EditIdentityViewModel(
     private val identityManager: IdentityManager,
@@ -25,9 +26,6 @@ class EditIdentityViewModel(
 
     private val _saveCompletedLiveData = MutableLiveData<Event<Identity>>()
     val saveCompletedLiveData: LiveData<Event<Identity>> get() = _saveCompletedLiveData
-
-    private val _saveErrorLiveData = MutableLiveData<Event<Throwable>>()
-    val saveErrorLiveData: LiveData<Event<Throwable>> get() = _saveErrorLiveData
 
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
@@ -41,17 +39,12 @@ class EditIdentityViewModel(
             identityManager.saveIdentity(identity)
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(status, identity.name))))
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = { _saveCompletedLiveData.value = Event(identity) },
-                    onError = {
-                        //Panic Button. Uncomment code below to save manually - not recommended
-                        //_saveCompletedLiveData.value = Event(Unit)
-                        _saveErrorLiveData.value = Event(it)
-                    }
+                    onError = { Timber.e(it) }
                 )
         }
     }

@@ -43,7 +43,7 @@ class WalletConfigManagerTest {
     fun setupRxSchedulers() {
         RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(walletConfig))
     }
 
     @After
@@ -65,7 +65,7 @@ class WalletConfigManagerTest {
 
     @Test
     fun `Create default walletConfig should return success`() {
-        whenever(walletConfigRepository.createWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.complete())
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertComplete()
@@ -74,18 +74,18 @@ class WalletConfigManagerTest {
     @Test
     fun `Create default walletConfig should return error`() {
         val throwable = Throwable()
-        whenever(walletConfigRepository.createWalletConfig(any())).thenReturn(Completable.error(throwable))
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(throwable))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertError(throwable)
     }
 
     @Test
     fun `get wallet config success test`() {
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
-        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Single.just(WalletConfigResponse(_message = "success")))
+        whenever(walletConfigRepository.restoreWalletConfig(any())).thenReturn(Single.just(WalletConfigResponse(_message = "success")))
         walletManager.initWalletConfig()
-        walletManager.getWalletConfig(MasterSeed("123", "567"))
+        walletManager.restoreWalletConfig(MasterSeed("123", "567"))
             .test()
             .assertComplete()
             .assertValue {
@@ -96,11 +96,11 @@ class WalletConfigManagerTest {
     @Test
     fun `get wallet config error test`() {
         val error = Throwable()
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
-        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Single.error(error))
+        whenever(walletConfigRepository.restoreWalletConfig(any())).thenReturn(Single.error(error))
         walletManager.initWalletConfig()
-        walletManager.getWalletConfig(MasterSeed("123", "567"))
+        walletManager.restoreWalletConfig(MasterSeed("123", "567"))
             .test()
             .assertError(error)
     }
@@ -122,12 +122,12 @@ class WalletConfigManagerTest {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())).thenReturn(Completable.error(error))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.initWalletConfig()
-        walletManager.saveService(Service()).test().assertError(error)
+        walletManager.saveService(Service()).test().assertComplete()
     }
 
     @Test
     fun `get value test`() {
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.apply {
             initWalletConfig()
@@ -139,7 +139,7 @@ class WalletConfigManagerTest {
     @Test
     fun `get safe account master owner key test`() {
         val expected = Account(0, address = "address", privateKey = "key")
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, accounts = listOf(expected))))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, accounts = listOf(expected))))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.run {
             initWalletConfig()
@@ -151,7 +151,7 @@ class WalletConfigManagerTest {
     @Test
     fun `get safe account master owner key error test`() {
         val expected = Account(0, address = "123", privateKey = "key")
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, accounts = listOf(expected))))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(WalletConfig(0, accounts = listOf(expected))))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.run {
             initWalletConfig()
@@ -163,7 +163,7 @@ class WalletConfigManagerTest {
     @Test
     fun `update safe account owners test`(){
         whenever(walletConfigRepository.updateWalletConfig(any(), any())) doReturn Completable.complete()
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.apply {
             initWalletConfig()
@@ -178,13 +178,13 @@ class WalletConfigManagerTest {
     fun `update safe account owners error test`(){
         val error = Throwable()
         whenever(walletConfigRepository.updateWalletConfig(any(), any())) doReturn Completable.error(error)
-        whenever(walletConfigRepository.loadWalletConfig(any())).thenReturn(Observable.just(walletConfig))
+        whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         walletManager.apply {
             initWalletConfig()
             updateSafeAccountOwners(0, listOf("owner"))
                 .test()
-                .assertError(error)
+                .assertComplete()
         }
     }
 }

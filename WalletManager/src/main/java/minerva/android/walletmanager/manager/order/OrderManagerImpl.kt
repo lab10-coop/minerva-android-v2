@@ -17,21 +17,21 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
         getWalletConfig()?.let {
             return when (type) {
                 WalletActionType.IDENTITY -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, (newOrderList as List<Identity>), it.accounts, it.services, it.credentials)
+                    it.copy(version = it.updateVersion, identities = (newOrderList as List<Identity>))
                 )
                 WalletActionType.ACCOUNT -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, it.identities, (newOrderList as List<Account>), it.services, it.credentials)
+                    it.copy(version = it.updateVersion, accounts = (newOrderList as List<Account>))
                 )
                 WalletActionType.SERVICE -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, it.identities, it.accounts, (newOrderList as List<Service>), it.credentials)
+                    it.copy(version = it.updateVersion, services = (newOrderList as List<Service>))
                 )
                 WalletActionType.CREDENTIAL -> walletConfigManager.updateWalletConfig(
-                    WalletConfig(it.updateVersion, it.identities, it.accounts, it.services, (newOrderList as List<Credential>))
+                    it.copy(version = it.updateVersion, credentials = (newOrderList as List<Credential>))
                 )
                 else -> Completable.error(NotSupportedAccountThrowable())
             }
         }
-        return Completable.error(NotInitializedWalletConfigThrowable())
+        throw NotInitializedWalletConfigThrowable()
     }
 
     override fun prepareList(type: Int): List<MinervaPrimitive> =
