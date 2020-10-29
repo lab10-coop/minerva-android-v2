@@ -17,6 +17,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.utils.CryptoUtils
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import timber.log.Timber
 
 class NewAccountViewModel(
     private val accountManager: AccountManager,
@@ -27,9 +28,6 @@ class NewAccountViewModel(
 
     private val _createAccountLiveData = MutableLiveData<Event<Unit>>()
     val createAccountLiveData: LiveData<Event<Unit>> get() = _createAccountLiveData
-
-    private val _saveErrorLiveData = MutableLiveData<Event<Throwable>>()
-    val saveErrorLiveData: LiveData<Event<Throwable>> get() = _saveErrorLiveData
 
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
@@ -46,11 +44,7 @@ class NewAccountViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = { _createAccountLiveData.value = Event(Unit) },
-                    onError = {
-                        //Panic Button. Uncomment code below to save manually - not recommended
-                        _saveErrorLiveData.value = Event(it)
-//                        _createAccountLiveData.value = Event(Unit)
-                    }
+                    onError = { Timber.e(it) }
                 )
         }
     }

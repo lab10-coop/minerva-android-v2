@@ -10,6 +10,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.refreshable_recycler_view_layout.*
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
+import minerva.android.accounts.enum.ErrorCode
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
@@ -131,6 +132,19 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
                 showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
             })
             accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
+            refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver {
+                swipeRefresh.isRefreshing = false
+                when (it) {
+                    ErrorCode.BALANCE_ERROR -> showErrorFlashbar(
+                        getString(R.string.error_header),
+                        getString(R.string.refresh_balances_error)
+                    )
+                    ErrorCode.ASSET_BALANCE_ERROR -> showErrorFlashbar(
+                        getString(R.string.error_header),
+                        getString(R.string.refresh_asset_balances_error)
+                    )
+                }
+            })
         }
     }
 

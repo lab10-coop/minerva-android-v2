@@ -281,7 +281,6 @@ class EditIdentityFragment : Fragment() {
                 })
                 activity?.onBackPressed()
             })
-            saveErrorLiveData.observe(viewLifecycleOwner, EventObserver { showErrorMessage(it.message) })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
         }
         arguments?.let {

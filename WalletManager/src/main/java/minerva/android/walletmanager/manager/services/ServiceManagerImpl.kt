@@ -100,7 +100,7 @@ class ServiceManagerImpl(
             }
 
     private fun shouldSafeService(identity: Identity, service: Service) =
-        identity !is IncognitoIdentity && service.name.isNotEmpty()
+        identity !is IncognitoIdentity && service.name.isNotEmpty() //todo probably different indicator to display service or not will be better
 
     override fun saveService(service: Service): Completable = walletConfigManager.saveService(service)
 

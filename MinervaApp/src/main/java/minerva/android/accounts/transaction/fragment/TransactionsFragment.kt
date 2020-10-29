@@ -122,8 +122,8 @@ class TransactionsFragment : Fragment() {
         validationDisposable = Observable.combineLatest(
             amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
             receiver.getValidationObservable(receiverInputLayout) { Validator.validateReceiverAddress(it) },
-            BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isFilled ->
-                isAmountValid && isFilled
+            BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid ->
+                isAmountValid && isAddressValid
             })
             .map {
                 if (it) {

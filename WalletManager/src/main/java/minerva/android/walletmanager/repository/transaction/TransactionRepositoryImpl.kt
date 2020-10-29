@@ -41,7 +41,7 @@ class TransactionRepositoryImpl(
                     .map { MarketUtils.calculateFiatBalances(it.first, values, it.second) }
             }
         }
-        return Single.error(NotInitializedWalletConfigThrowable())
+        throw NotInitializedWalletConfigThrowable()
     }
 
     override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
@@ -122,15 +122,16 @@ class TransactionRepositoryImpl(
         blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
 
     override fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>> {
-        walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
-            return Observable.range(START, accounts.size)
-                .filter { position -> !accounts[position].isDeleted && !accounts[position].isPending }
-                .filter { position -> accounts[position].network.isAvailable() }
-                .flatMapSingle { position -> refreshAssetsBalance(accounts[position]) }
+        walletConfigManager.getWalletConfig()?.let { config ->
+            return Observable.range(START, config.accounts.size)
+                .filter { position -> !config.accounts[position].isDeleted && !config.accounts[position].isPending }
+                .filter { position -> config.accounts[position].network.isAvailable() }
+                .filter { position -> config.accounts[position].network.assets.isEmpty() }
+                .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
                 .toList()
                 .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
         }
-        return Single.error(NotInitializedWalletConfigThrowable())
+        throw NotInitializedWalletConfigThrowable()
     }
 
     /**

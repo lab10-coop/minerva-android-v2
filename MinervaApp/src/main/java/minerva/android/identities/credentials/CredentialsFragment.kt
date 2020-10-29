@@ -20,7 +20,7 @@ class CredentialsFragment : MinervaPrimitiveListFragment() {
                 noDataMessage.visibleOrGone(config.credentials.isEmpty())
                 primitivesAdapter.updateList(config.credentials)
             })
-            removeCredentialMutableLiveData.observe(viewLifecycleOwner, Observer {
+            removeCredentialLiveData.observe(viewLifecycleOwner, Observer {
                 activity?.invalidateOptionsMenu()
             })
         }

@@ -44,7 +44,6 @@ class NewAccountFragment : Fragment() {
         viewModel.apply {
             createAccountLiveData.observe(viewLifecycleOwner, EventObserver { activity?.finish() })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
-            saveErrorLiveData.observe(viewLifecycleOwner, EventObserver { showError(it) })
         }
         arguments?.let {
             position = it.getInt(POSITION)
@@ -72,11 +71,6 @@ class NewAccountFragment : Fragment() {
         createButton.setOnClickListener {
             viewModel.createNewAccount(networkAdapter.getSelectedNetwork(), position)
         }
-    }
-
-    private fun showError(throwable: Throwable) {
-        Timber.e(throwable)
-        MinervaFlashbar.show(requireActivity(), getString(R.string.creating_account_error), getString(R.string.unexpected_error))
     }
 
     companion object {

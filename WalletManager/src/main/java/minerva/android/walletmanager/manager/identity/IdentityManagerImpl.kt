@@ -30,22 +30,12 @@ class IdentityManagerImpl(
         get() = walletConfigManager.walletConfigLiveData
 
     override fun saveIdentity(identity: Identity): Completable {
-        with(walletConfigManager) {
-            getWalletConfig()?.let {
-                return cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identity.index)
-                    .map { keys ->
-                        WalletConfig(
-                            it.updateVersion,
-                            prepareIdentities(getIdentity(identity, keys), it),
-                            it.accounts,
-                            it.services,
-                            it.credentials
-                        )
-                    }
-                    .flatMapCompletable { updateWalletConfig(it) }
-            }
-            throw NotInitializedWalletConfigThrowable()
+        walletConfigManager.getWalletConfig()?.let {
+            return cryptographyRepository.computeDeliveredKeys(walletConfigManager.masterSeed.seed, identity.index)
+                .map { keys -> it.copy(version = it.updateVersion, identities = prepareIdentities(getIdentity(identity, keys), it)) }
+                .flatMapCompletable { walletConfigManager.updateWalletConfig(it) }
         }
+        throw NotInitializedWalletConfigThrowable()
     }
 
     private fun getIdentity(identity: Identity, keys: DerivedKeys): Identity =
@@ -109,19 +99,14 @@ class IdentityManagerImpl(
 
     override fun bindCredentialToIdentity(qrCode: CredentialQrCode): Single<String> {
         walletConfigManager.getWalletConfig()?.let {
-            with(it) {
-                return if (doesIdentityExist(qrCode.loggedInDid)) {
-                    walletConfigManager.updateWalletConfig(
-                        WalletConfig(
-                            updateVersion,
-                            identities,
-                            accounts,
-                            services,
-                            credentials + CredentialQrCodeToCredentialMapper.map(qrCode)
-                        )
-                    ).toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
-                } else Single.error(NoLoggedInIdentityThrowable())
-            }
+            return if (doesIdentityExist(qrCode.loggedInDid)) {
+                walletConfigManager.updateWalletConfig(
+                    it.copy(
+                        version = it.updateVersion,
+                        credentials = it.credentials + CredentialQrCodeToCredentialMapper.map(qrCode)
+                    )
+                ).toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
+            } else Single.error(NoLoggedInIdentityThrowable())
         }
         throw  NotInitializedWalletConfigThrowable()
     }
@@ -143,7 +128,7 @@ class IdentityManagerImpl(
         walletConfigManager.getWalletConfig()?.apply {
             val newCredentials = credentials.toMutableList()
             newCredentials.remove(credential)
-            return walletConfigManager.updateWalletConfig(WalletConfig(updateVersion, identities, accounts, services, newCredentials))
+            return walletConfigManager.updateWalletConfig(copy(version = updateVersion, credentials = newCredentials))
         }
         throw  NotInitializedWalletConfigThrowable()
     }

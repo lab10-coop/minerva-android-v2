@@ -2,6 +2,7 @@ package minerva.android.walletmanager.walletActions
 
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Observer
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
@@ -17,6 +18,7 @@ import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
 import minerva.android.walletmanager.model.mappers.WalletActionsMapper
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
+import timber.log.Timber
 
 class WalletActionsRepositoryImpl(
     private val minervaApi: MinervaApi,
@@ -41,9 +43,15 @@ class WalletActionsRepositoryImpl(
                     Observable.just(
                         WalletActionsMapper.map(it.walletActionsConfigPayload.actions).sortedByDescending { action -> action.lastUsed })
                 }
-        )
+        ).onErrorResumeNext { _: Observer<in List<WalletActionClustered>> ->
+            Observable.just(localWalletActionsConfigProvider.loadWalletActionsConfig())
+                .flatMap { Observable.just(WalletActionsMapper.map(it.actions).sortedByDescending { action -> action.lastUsed }) }
+
+        }
 
     override fun saveWalletActions(walletActions: List<WalletAction>): Completable {
+        Timber.tag("kobe").d("save wallet action")
+
         val payloads: MutableList<WalletActionPayload> = mutableListOf()
         walletActions.forEach {
             payloads.add(WalletActionPayloadMapper.map(it))
@@ -72,8 +80,10 @@ class WalletActionsRepositoryImpl(
     }
 
     private fun updateWalletActionsConfig(walletActionsConfig: WalletActionsConfigPayload, masterSeed: MasterSeed): Completable =
-        WalletActionsConfigPayload(_version = walletActionsConfig.updateVersion, _actions = walletActionsConfig.actions).run {
-            return minervaApi.saveWalletActions(walletActionsConfigPayload = this, publicKey = encodePublicKey(masterSeed.publicKey))
-                .doOnComplete { localWalletActionsConfigProvider.saveWalletActionsConfig(this) }
-        }
+        minervaApi.saveWalletActions(walletActionsConfigPayload = walletActionsConfig, publicKey = encodePublicKey(masterSeed.publicKey))
+            .doOnTerminate {
+                Timber.tag("kobe").d("save wallet action on terminate")
+                localWalletActionsConfigProvider.saveWalletActionsConfig(walletActionsConfig)
+            }
+            .onErrorComplete()
 }

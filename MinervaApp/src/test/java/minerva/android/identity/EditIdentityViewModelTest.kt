@@ -34,15 +34,4 @@ class EditIdentityViewModelTest : BaseViewModelTest() {
             }
         }
     }
-
-    @Test
-    fun `save identity error`() {
-        val error = Throwable()
-        whenever(identityManager.saveIdentity(any())).thenReturn(Completable.error(error))
-        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        viewModel.apply {
-            saveIdentity(Identity(1), ADDED)
-            saveErrorLiveData.observeLiveDataEvent(Event(error))
-        }
-    }
 }

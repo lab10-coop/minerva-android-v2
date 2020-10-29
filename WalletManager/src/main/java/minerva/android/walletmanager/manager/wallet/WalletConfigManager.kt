@@ -16,7 +16,7 @@ interface WalletConfigManager : Manager {
     fun initWalletConfig()
     fun getWalletConfig(): WalletConfig?
     fun createWalletConfig(masterSeed: MasterSeed): Completable
-    fun getWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse>
+    fun restoreWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse>
     fun updateWalletConfig(walletConfig: WalletConfig): Completable
 
     fun getSafeAccountNumber(ownerAddress: String): Int

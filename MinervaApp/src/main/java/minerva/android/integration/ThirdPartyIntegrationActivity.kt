@@ -55,7 +55,7 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
                 }
             })
             showPaymentConfirmationLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { showConfirmTransactionScreen() })
-            errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { finish() }) //todo send proper error message to demo app
+            errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { finish() })
             onDenyConnectionSuccessLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { sendResult(ON_DENY_REQUEST) })
         }
     }

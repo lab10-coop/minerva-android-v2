@@ -15,14 +15,13 @@ import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.utils.CryptoUtils
 
 interface WalletConfigRepository {
-    fun loadWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig>
-    fun getWalletConfig(masterSeed: MasterSeed): Single<WalletConfigResponse>
+    fun getWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig>
+    fun restoreWalletConfig(masterSeed: MasterSeed): Single<WalletConfigResponse>
     fun updateWalletConfig(masterSeed: MasterSeed, walletConfigPayload: WalletConfigPayload = createDefaultWalletConfig()): Completable
     fun saveWalletConfigLocally(walletConfigPayload: WalletConfigPayload = createDefaultWalletConfig())
-    fun createWalletConfig(masterSeed: MasterSeed): Completable
 }
 
-fun createDefaultWalletConfig() =
+fun createDefaultWalletConfig(): WalletConfigPayload =
     WalletConfigPayload(
         DefaultWalletConfigIndexes.DEFAULT_VERSION,
         listOf(IdentityPayload(DefaultWalletConfigIndexes.FIRST_IDENTITY_INDEX, DefaultWalletConfigFields.DEFAULT_IDENTITY_NAME)),
@@ -35,10 +34,11 @@ fun createDefaultWalletConfig() =
                 )
             },
             with(NetworkManager.secondDefaultValueNetwork()) {
-            AccountPayload(
-                DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX,
-                CryptoUtils.prepareName(this, DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX),
-                short
-            )}
+                AccountPayload(
+                    DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX,
+                    CryptoUtils.prepareName(this, DefaultWalletConfigIndexes.SECOND_ACCOUNTS_INDEX),
+                    short
+                )
+            }
         )
     )
