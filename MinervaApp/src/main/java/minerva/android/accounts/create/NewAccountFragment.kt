@@ -4,21 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_new_account.*
 import minerva.android.R
+import minerva.android.accounts.adapter.NetworkAdapter
 import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.accounts.adapter.NetworkAdapter
-import minerva.android.widget.MinervaFlashbar
+import minerva.android.main.base.BaseFragment
 import minerva.android.wrapped.WrappedActivity.Companion.POSITION
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
-class NewAccountFragment : Fragment() {
+class NewAccountFragment : BaseFragment() {
 
     private val viewModel: NewAccountViewModel by viewModel()
     private val networkAdapter = NetworkAdapter()
@@ -44,6 +42,10 @@ class NewAccountFragment : Fragment() {
         viewModel.apply {
             createAccountLiveData.observe(viewLifecycleOwner, EventObserver { activity?.finish() })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver {
+                handleAutomaticBackupError(it)
+                activity?.finish()
+            })
         }
         arguments?.let {
             position = it.getInt(POSITION)

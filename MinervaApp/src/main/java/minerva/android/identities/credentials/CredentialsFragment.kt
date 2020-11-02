@@ -5,6 +5,7 @@ import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.showRemoveDialog
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
 import minerva.android.walletmanager.model.Credential
 import minerva.android.widget.clubCard.ClubCard
@@ -23,6 +24,7 @@ class CredentialsFragment : MinervaPrimitiveListFragment() {
             removeCredentialLiveData.observe(viewLifecycleOwner, Observer {
                 activity?.invalidateOptionsMenu()
             })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
         }
     }
 

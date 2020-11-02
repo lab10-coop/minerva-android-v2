@@ -16,6 +16,10 @@ import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.services.login.LoginScannerListener
+import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.services.login.uitls.LoginStatus.Companion.BACKUP_FAILURE
+import minerva.android.services.login.uitls.LoginStatus.Companion.DEFAULT_STATUS
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.model.QrCode
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.wrapped.startEditIdentityOnResultWrappedActivity
@@ -106,7 +110,7 @@ class ChooseIdentityFragment : Fragment() {
     private fun prepareObservers() {
         viewModel.apply {
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { handleError(it) })
             loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(true, payload = it) })
             requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver {
                 identitiesAdapter.getSelectedIdentity()?.let {
@@ -120,6 +124,15 @@ class ChooseIdentityFragment : Fragment() {
                 }
             })
         }
+    }
+
+    private fun handleError(it: Throwable) {
+        val status: Int = if (it is AutomaticBackupFailedThrowable) {
+            BACKUP_FAILURE
+        } else {
+            DEFAULT_STATUS
+        }
+        listener.onPainlessLoginResult(false, payload = LoginPayload(status))
     }
 
     companion object {

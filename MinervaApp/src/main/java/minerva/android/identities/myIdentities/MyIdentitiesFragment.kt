@@ -14,6 +14,7 @@ import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MinervaPrimitive
@@ -43,17 +44,13 @@ class MyIdentitiesFragment : BaseFragment(), IdentityFragmentListener {
         }
     }
 
-    private fun showError(error: Throwable) {
-        Toast.makeText(this.context, error.message, Toast.LENGTH_SHORT).show()
-    }
-
     private fun setupLiveData() {
         viewModel.apply {
             walletConfigLiveData.observe(
                 viewLifecycleOwner,
                 Observer { identityAdapter.updateList(it.identities.toMutableList(), it.credentials) })
             identityRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver { showError(it) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
         }
     }
 

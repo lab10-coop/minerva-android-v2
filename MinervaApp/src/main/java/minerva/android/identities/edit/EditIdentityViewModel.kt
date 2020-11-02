@@ -30,6 +30,10 @@ class EditIdentityViewModel(
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
+
+
     fun loadIdentity(position: Int, defaultName: String) {
         _editIdentityLiveData.value = Event(identityManager.loadIdentity(position, defaultName))
     }
@@ -44,7 +48,10 @@ class EditIdentityViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = { _saveCompletedLiveData.value = Event(identity) },
-                    onError = { Timber.e(it) }
+                    onError = {
+                        Timber.e(it)
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }

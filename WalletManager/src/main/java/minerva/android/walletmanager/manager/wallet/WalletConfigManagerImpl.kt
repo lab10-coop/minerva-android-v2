@@ -9,16 +9,19 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.configProvider.repository.HttpBadRequestException
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.ResponseState
 import minerva.android.walletmanager.model.mappers.WalletConfigToWalletPayloadMapper
+import minerva.android.walletmanager.utils.handleAutomaticBackupFailedError
 import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
 import timber.log.Timber
 
@@ -65,15 +68,17 @@ class WalletConfigManagerImpl(
             }
 
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable {
-        val walletConfigPayload = WalletConfigToWalletPayloadMapper.map(walletConfig)
-        return walletConfigRepository.updateWalletConfig(masterSeed, walletConfigPayload)
+        val pair = Pair(walletConfig, WalletConfigToWalletPayloadMapper.map(walletConfig))
+        return walletConfigRepository.updateWalletConfig(masterSeed, pair.second)
+            .toSingleDefault(Pair(walletConfig, pair.second))
+            .handleAutomaticBackupFailedError(pair)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnTerminate {
-                _walletConfigLiveData.value = walletConfig
-                walletConfigRepository.saveWalletConfigLocally(walletConfigPayload)
-            }
-            .onErrorComplete()
+            .doOnSuccess { (config, payload) ->
+                _walletConfigLiveData.value = config
+                walletConfigRepository.saveWalletConfigLocally(payload)
+            }.ignoreElement()
+
     }
 
     override fun restoreWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse> =
@@ -147,7 +152,7 @@ class WalletConfigManagerImpl(
             }
             return updateWalletConfig(getWalletConfigWithUpdatedService(service))
         }
-        return Completable.error(NotInitializedWalletConfigThrowable())
+        throw NotInitializedWalletConfigThrowable()
     }
 
     private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_third_party_integration.*
 import minerva.android.R
@@ -16,6 +17,7 @@ import minerva.android.integration.fragment.ConnectionRequestFragment
 import minerva.android.integration.listener.PaymentCommunicationListener
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialRequest
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.SIGNED_PAYLOAD
@@ -55,7 +57,14 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
                 }
             })
             showPaymentConfirmationLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { showConfirmTransactionScreen() })
-            errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { finish() })
+            errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver {
+                if (it is AutomaticBackupFailedThrowable)
+                    Toast.makeText(
+                        this@ThirdPartyIntegrationActivity,
+                        getString(R.string.automatic_backup_failed_error), Toast.LENGTH_LONG
+                    ).show()
+                finish()
+            })
             onDenyConnectionSuccessLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { sendResult(ON_DENY_REQUEST) })
         }
     }

@@ -27,7 +27,7 @@ class MyIdentitiesViewModelTest : BaseViewModelTest() {
     private val removeIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
     @Test
-    fun `remove identity success`() {
+    fun `remove identity success test`() {
         whenever(identityManager.removeIdentity(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.identityRemovedLiveData.observeForever(removeIdentityObserver)
@@ -35,6 +35,15 @@ class MyIdentitiesViewModelTest : BaseViewModelTest() {
         removeIdentityCaptor.run {
             verify(removeIdentityObserver).onChanged(capture())
         }
+    }
+
+    @Test
+    fun `remove identity error test`() {
+        val error = Throwable()
+        whenever(identityManager.removeIdentity(any())).thenReturn(Completable.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        viewModel.removeIdentity(Identity(1))
+        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }
 
     @Test
@@ -46,5 +55,14 @@ class MyIdentitiesViewModelTest : BaseViewModelTest() {
         removeCredentialCaptor.run {
             verify(removeCredentialObserver).onChanged(capture())
         }
+    }
+
+    @Test
+    fun `remove credential error test`() {
+        val error = Throwable()
+        whenever(identityManager.removeBindedCredentialFromIdentity(any())).thenReturn(Completable.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        viewModel.removeCredential(Credential("name"))
+        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }
 }

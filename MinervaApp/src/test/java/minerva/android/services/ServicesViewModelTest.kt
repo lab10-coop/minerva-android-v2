@@ -39,7 +39,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `Remove service success`() {
+    fun `remove service success`() {
         whenever(servicesManager.removeService(any())) doReturn Completable.complete()
         whenever(walletActionsRepository.saveWalletActions(any())) doReturn Completable.complete()
         viewModel.removeService("1", "name")

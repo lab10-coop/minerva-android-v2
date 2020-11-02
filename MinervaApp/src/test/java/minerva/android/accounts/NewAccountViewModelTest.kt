@@ -31,4 +31,13 @@ class NewAccountViewModelTest : BaseViewModelTest() {
             verify(createValueObserver).onChanged(capture())
         }
     }
+
+    @Test
+    fun `create wallet action error`() {
+        val error = Throwable()
+        whenever(accountManager.createAccount(any(), any(), any(), any())).thenReturn(Completable.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        viewModel.createNewAccount(Network(), 1)
+        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
+    }
 }

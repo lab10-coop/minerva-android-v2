@@ -7,6 +7,7 @@ import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
+import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.DateUtils.isTheSameDay
 import minerva.android.kotlinUtils.InvalidIndex
@@ -21,7 +22,7 @@ import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActi
 import timber.log.Timber
 
 class WalletActionsRepositoryImpl(
-    private val minervaApi: MinervaApi,
+    private val minervaApi: MinervaApiRepository,
     private val localWalletActionsConfigProvider: LocalWalletActionsConfigProvider,
     private val walletConfigManager: WalletConfigManager
 ) : WalletActionsRepository {
@@ -50,8 +51,6 @@ class WalletActionsRepositoryImpl(
         }
 
     override fun saveWalletActions(walletActions: List<WalletAction>): Completable {
-        Timber.tag("kobe").d("save wallet action")
-
         val payloads: MutableList<WalletActionPayload> = mutableListOf()
         walletActions.forEach {
             payloads.add(WalletActionPayloadMapper.map(it))
@@ -81,9 +80,6 @@ class WalletActionsRepositoryImpl(
 
     private fun updateWalletActionsConfig(walletActionsConfig: WalletActionsConfigPayload, masterSeed: MasterSeed): Completable =
         minervaApi.saveWalletActions(walletActionsConfigPayload = walletActionsConfig, publicKey = encodePublicKey(masterSeed.publicKey))
-            .doOnTerminate {
-                Timber.tag("kobe").d("save wallet action on terminate")
-                localWalletActionsConfigProvider.saveWalletActionsConfig(walletActionsConfig)
-            }
+            .doOnTerminate { localWalletActionsConfigProvider.saveWalletActionsConfig(walletActionsConfig) }
             .onErrorComplete()
 }

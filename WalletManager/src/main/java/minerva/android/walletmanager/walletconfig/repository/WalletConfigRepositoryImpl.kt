@@ -5,9 +5,9 @@ import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
-import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
@@ -29,7 +29,7 @@ class WalletConfigRepositoryImpl(
     private val cryptographyRepository: CryptographyRepository,
     private val localWalletProvider: LocalWalletConfigProvider,
     private val localStorage: LocalStorage,
-    private val minervaApi: MinervaApi
+    private val minervaApi: MinervaApiRepository
 ) : WalletConfigRepository {
 
     private var currentWalletConfigVersion = Int.InvalidIndex

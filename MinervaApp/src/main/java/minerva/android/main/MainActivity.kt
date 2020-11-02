@@ -27,6 +27,7 @@ import minerva.android.main.base.BaseFragment
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.LoginScannerActivity
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.PendingAccount
@@ -101,9 +102,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(true, it)
             })
-            updateCredentialErrorLiveData.observe(this@MainActivity, EventObserver {
-                showBindCredentialFlashbar(false, null)
-            })
+            updateCredentialErrorLiveData.observe(this@MainActivity, EventObserver { handleUpdateCredentialError(it) })
             updatePendingAccountLiveData.observe(this@MainActivity, EventObserver {
                 showFlashbar(
                     getString(R.string.transaction_success_title),
@@ -123,6 +122,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 stopPendingAccounts()
             })
         }
+    }
+
+    private fun handleUpdateCredentialError(it: Throwable) {
+        var message: String? = null
+        if (it is AutomaticBackupFailedThrowable) {
+            message = getString(R.string.automatic_backup_failed_error)
+        }
+        showBindCredentialFlashbar(false, message)
     }
 
     private fun stopPendingAccounts() {

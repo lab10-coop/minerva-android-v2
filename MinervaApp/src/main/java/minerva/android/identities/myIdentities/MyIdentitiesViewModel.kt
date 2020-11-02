@@ -28,7 +28,10 @@ class MyIdentitiesViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = { _identityRemovedLiveData.value = Event(Unit) },
-                    onError = { Timber.e(it) }
+                    onError = {
+                        Timber.e(it)
+                        errorMutableLiveData.value = Event(it)
+                    }
                 )
         }
     }

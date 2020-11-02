@@ -222,4 +222,5 @@
     <string name="version">App Version</string>
     <string name="licence">Licence</string>
     <string name="test_networks">Test networks</string>
+    <string name="automatic_backup_failed_error">Automatic backup failed because this wallet was set up on a new device</string>
 </resources>

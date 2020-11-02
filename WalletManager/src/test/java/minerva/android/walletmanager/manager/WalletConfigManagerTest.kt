@@ -10,6 +10,8 @@ import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.configProvider.repository.HttpBadRequestException
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
@@ -161,7 +163,7 @@ class WalletConfigManagerTest {
     }
 
     @Test
-    fun `update safe account owners test`(){
+    fun `update safe account owners test`() {
         whenever(walletConfigRepository.updateWalletConfig(any(), any())) doReturn Completable.complete()
         whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(walletConfig))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
@@ -175,7 +177,7 @@ class WalletConfigManagerTest {
     }
 
     @Test
-    fun `update safe account owners error test`(){
+    fun `update safe account owners error test`() {
         val error = Throwable()
         whenever(walletConfigRepository.updateWalletConfig(any(), any())) doReturn Completable.error(error)
         whenever(walletConfigRepository.getWalletConfig(any())).thenReturn(Observable.just(walletConfig))
@@ -186,5 +188,44 @@ class WalletConfigManagerTest {
                 .test()
                 .assertComplete()
         }
+    }
+
+    @Test
+    fun `update wallet config success`() {
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())) doReturn Completable.complete()
+        walletManager.initWalletConfig()
+        walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
+        walletManager.updateWalletConfig(WalletConfig())
+        walletConfigCaptor.run {
+            verify(walletConfigObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `update wallet config error and walletConfig liveData is updated`() {
+        val error = Throwable()
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())) doReturn Completable.error(error)
+        walletManager.initWalletConfig()
+        walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
+        walletManager.updateWalletConfig(WalletConfig())
+        walletConfigCaptor.run {
+            verify(walletConfigObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `update wallet config 400 error occurs`() {
+        val httpBadRequestException = HttpBadRequestException()
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
+        whenever(walletConfigRepository.updateWalletConfig(any(), any())) doReturn Completable.error(httpBadRequestException)
+        walletManager.initWalletConfig()
+        walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
+        walletManager.updateWalletConfig(WalletConfig())
+            .test()
+            .assertError {
+                it is AutomaticBackupFailedThrowable
+            }
     }
 }
