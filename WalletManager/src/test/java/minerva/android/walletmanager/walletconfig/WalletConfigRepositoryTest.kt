@@ -9,6 +9,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
@@ -33,7 +34,7 @@ class WalletConfigRepositoryTest : WalletConfigTestValues() {
     private val onlineLikeLocal = OnlineLikeLocalMock()
     private val localStorage: LocalStorage = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
-    private val api: MinervaApi = mock()
+    private val api: MinervaApiRepository = mock()
 
     private val repository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, onlineLikeLocal)
 
@@ -91,10 +92,9 @@ class WalletConfigRepositoryTest : WalletConfigTestValues() {
     fun `get wallet config when api error occurs`() {
         val error = Throwable()
         val localProvider: LocalWalletConfigProvider = mock()
-        val api: MinervaApi = mock()
         val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, localProvider, localStorage, api)
         whenever(localProvider.getWalletConfig()).thenReturn(Single.just(WalletConfigPayload(1, listOf(), listOf(), listOf())))
-        whenever(api.getWalletConfig(any(), any())).doReturn(Single.error(error))
+        whenever(api.getWalletConfig(any())).doReturn(Single.error(error))
         walletConfigRepository.getWalletConfig(MasterSeed("seed", "publicKey", "privateKey"))
             .test()
             .assertValue {
@@ -106,10 +106,9 @@ class WalletConfigRepositoryTest : WalletConfigTestValues() {
     fun `get wallet config when fetching from local storage error occurs`() {
         val error = Throwable()
         val localProvider: LocalWalletConfigProvider = mock()
-        val api: MinervaApi = mock()
         val walletConfigRepository = WalletConfigRepositoryImpl(cryptographyRepository, localProvider, localStorage, api)
         whenever(localProvider.getWalletConfig()).thenReturn(Single.error(error))
-        whenever(api.getWalletConfig(any(), any())).doReturn(
+        whenever(api.getWalletConfig(any())).doReturn(
             Single.just(
                 WalletConfigResponse(
                     _walletConfigPayload = WalletConfigPayload(
@@ -130,7 +129,7 @@ class WalletConfigRepositoryTest : WalletConfigTestValues() {
 
     @Test
     fun `create default walletConfig should return success`() {
-        whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.complete())
+        whenever(api.saveWalletConfig(any(), any())).thenReturn(Completable.complete())
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
         val test = repository.updateWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertNoErrors()
@@ -141,7 +140,7 @@ class WalletConfigRepositoryTest : WalletConfigTestValues() {
         val throwable = Throwable()
         val repository = WalletConfigRepositoryImpl(cryptographyRepository, local, localStorage, api)
         NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
-        whenever(api.saveWalletConfig(any(), any(), any())).thenReturn(Completable.error(throwable))
+        whenever(api.saveWalletConfig(any(), any())).thenReturn(Completable.error(throwable))
         val test = repository.updateWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertError(throwable)
     }

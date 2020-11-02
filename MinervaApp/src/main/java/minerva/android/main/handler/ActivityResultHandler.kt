@@ -10,6 +10,7 @@ import minerva.android.main.MainActivity.Companion.LOGIN_SCANNER_RESULT_REQUEST_
 import minerva.android.main.MainActivity.Companion.TRANSACTION_RESULT_REQUEST_CODE
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.services.login.uitls.LoginStatus.Companion.BACKUP_FAILURE
 import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_QUICK_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.KNOWN_USER
 import minerva.android.services.login.uitls.LoginStatus.Companion.NEW_QUICK_USER
@@ -63,10 +64,11 @@ fun MainActivity.showBindCredentialFlashbar(isLoginSuccess: Boolean, message: St
         }
 }
 
-fun MainActivity.handleLoginStatuses(loginAction: Int) {
-    when (loginAction) {
+fun MainActivity.handleLoginStatuses(status: Int) {
+    when (status) {
         KNOWN_USER -> showKnownUserFlashbar()
         KNOWN_QUICK_USER -> showQuickUserFlashbar(true)
+        BACKUP_FAILURE -> MinervaFlashbar.show(this, getString(R.string.login_failure_title), getString(R.string.automatic_backup_failed_error))
         else -> MinervaFlashbar.show(this, getString(R.string.login_failure_title), getString(R.string.login_failure_message))
     }
 }

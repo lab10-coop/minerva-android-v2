@@ -87,7 +87,10 @@ class ThirdPartyRequestViewModel(
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onSuccess = { _showConnectionRequestLiveData.value = Event(it) },
-                        onError = { _errorLiveData.value = Event(it) }
+                        onError = {
+                            Timber.e(it)
+                            _errorLiveData.value = Event(it)
+                        }
                     )
             }
         }.orElse {
@@ -106,7 +109,10 @@ class ThirdPartyRequestViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = { _addedNewServiceLiveData.value = Event(credentialRequest) },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = {
+                        Timber.e(it)
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }
@@ -175,7 +181,10 @@ class ThirdPartyRequestViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = { _confirmPaymentLiveData.value = Event(it) },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = {
+                        Timber.e(it)
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }

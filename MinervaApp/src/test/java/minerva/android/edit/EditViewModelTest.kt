@@ -6,6 +6,7 @@ import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
+import minerva.android.observeWithPredicate
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Service
@@ -19,6 +20,7 @@ class EditViewModelTest : BaseViewModelTest() {
 
     private val orderManager: OrderManager = mock()
     private val viewModel = EditOrderViewModel(orderManager)
+
     private val saveObserver: Observer<Event<Unit>> = mock()
     private val saveCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
@@ -73,7 +75,7 @@ class EditViewModelTest : BaseViewModelTest() {
         whenever(orderManager.updateList(any(), any())).thenReturn(Completable.error(error))
         viewModel.apply {
             saveChanges(0, listOf())
-            saveNewOrderLiveData.observeLiveDataEvent(Event(Unit))
+            errorLiveData.observeLiveDataEvent(Event(error))
         }
     }
 }

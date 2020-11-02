@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -116,9 +117,7 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
                 swipeRefresh.isRefreshing = false
             })
             accountAssetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
-            errorLiveData.observe(viewLifecycleOwner, Observer {
-                showErrorFlashbar(getString(R.string.error_header), it.peekContent().message)
-            })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { showErrorFlashbar(getString(R.string.error_header), it.message) })
             noFundsLiveData.observe(viewLifecycleOwner, Observer {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.no_funds), getString(R.string.no_funds_message))
             })
@@ -130,6 +129,9 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
             })
             isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
+            })
+            automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver {
+                Toast.makeText(requireContext(), getString(R.string.automatic_backup_failed_error), Toast.LENGTH_LONG).show()
             })
             accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
             refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver {

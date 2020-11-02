@@ -14,6 +14,7 @@ import minerva.android.configProvider.model.walletActions.WalletActionClusteredP
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
+import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletAction
@@ -26,7 +27,7 @@ import org.junit.Test
 
 class WalletActionsRepositoryTest {
 
-    private val minervaApi: MinervaApi = mock()
+    private val minervaApi: MinervaApiRepository = mock()
     private val localWalletActionsConfigProvider: LocalWalletActionsConfigProvider = mock()
     private val walletConfigManager: WalletConfigManager = mock()
     private val repository = WalletActionsRepositoryImpl(minervaApi, localWalletActionsConfigProvider, walletConfigManager)
@@ -77,7 +78,7 @@ class WalletActionsRepositoryTest {
     fun `save wallet actions success`() {
         whenever(localWalletActionsConfigProvider.loadWalletActionsConfig()).thenReturn(WalletActionsConfigPayload(1, actions))
         doNothing().whenever(localWalletActionsConfigProvider).saveWalletActionsConfig(WalletActionsConfigPayload(1, actions))
-        whenever(minervaApi.saveWalletActions(any(), any(), any())).thenReturn(Completable.complete())
+        whenever(minervaApi.saveWalletActions(any(), any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.masterSeed) doReturn masterSeed
         repository.saveWalletActions(listOf(WalletAction(1, 2, 1234L)))
             .test()
@@ -89,7 +90,7 @@ class WalletActionsRepositoryTest {
     fun `save wallet actions error`() {
         whenever(localWalletActionsConfigProvider.loadWalletActionsConfig()).thenReturn(WalletActionsConfigPayload(1, actions))
         doNothing().whenever(localWalletActionsConfigProvider).saveWalletActionsConfig(WalletActionsConfigPayload(1, actions))
-        whenever(minervaApi.saveWalletActions(any(), any(), any())).thenReturn(Completable.error(error))
+        whenever(minervaApi.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
         whenever(walletConfigManager.masterSeed) doReturn masterSeed
         repository.saveWalletActions(listOf(WalletAction(1, 2, 1234L)))
             .test()

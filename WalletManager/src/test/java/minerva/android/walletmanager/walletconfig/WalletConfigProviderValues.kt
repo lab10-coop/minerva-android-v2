@@ -8,6 +8,7 @@ import minerva.android.configProvider.model.walletActions.WalletActionsConfigPay
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.model.WalletConfigTestValues
@@ -22,19 +23,19 @@ class LocalMock : LocalWalletConfigProvider, WalletConfigTestValues() {
     fun prepareWalletConfig(): WalletConfig = WalletConfig(1, identity, accounts)
 }
 
-class OnlineMock : MinervaApi, WalletConfigTestValues() {
+class OnlineMock : MinervaApiRepository, WalletConfigTestValues() {
 
-    override fun getWalletConfig(content: String, publicKey: String): Single<WalletConfigResponse> =
+    override fun getWalletConfig(publicKey: String): Single<WalletConfigResponse> =
         Single.just(WalletConfigResponse("", "", prepareData()))
 
-    override fun saveWalletConfig(content: String, publicKey: String, walletPayload: WalletConfigPayload): Completable =
+    override fun saveWalletConfig(publicKey: String, walletPayload: WalletConfigPayload): Completable =
         Completable.complete()
 
-    override fun getWalletActions(content: String, publicKey: String): Observable<WalletActionsResponse> =
+    override fun getWalletActions(publicKey: String): Observable<WalletActionsResponse> =
         Observable.just(WalletActionsResponse())
 
 
-    override fun saveWalletActions(content: String, publicKey: String, walletActionsConfigPayload: WalletActionsConfigPayload): Completable =
+    override fun saveWalletActions( publicKey: String, walletActionsConfigPayload: WalletActionsConfigPayload): Completable =
         Completable.complete()
 
     private fun prepareData(): WalletConfigPayload =
@@ -44,17 +45,17 @@ class OnlineMock : MinervaApi, WalletConfigTestValues() {
         WalletConfig(2, onlineIdentity, accounts)
 }
 
-class OnlineLikeLocalMock : MinervaApi, WalletConfigTestValues() {
-    override fun getWalletConfig(content: String, publicKey: String): Single<WalletConfigResponse> =
+class OnlineLikeLocalMock : MinervaApiRepository, WalletConfigTestValues() {
+    override fun getWalletConfig(publicKey: String): Single<WalletConfigResponse> =
         Single.just(WalletConfigResponse("", "", prepareData()))
 
-    override fun saveWalletConfig(content: String, publicKey: String, walletPayload: WalletConfigPayload): Completable =
+    override fun saveWalletConfig(publicKey: String, walletPayload: WalletConfigPayload): Completable =
         Completable.complete()
 
-    override fun getWalletActions(content: String, publicKey: String): Observable<WalletActionsResponse> =
+    override fun getWalletActions(publicKey: String): Observable<WalletActionsResponse> =
         Observable.just(WalletActionsResponse())
 
-    override fun saveWalletActions(content: String, publicKey: String, walletActionsConfigPayload: WalletActionsConfigPayload): Completable =
+    override fun saveWalletActions(publicKey: String, walletActionsConfigPayload: WalletActionsConfigPayload): Completable =
         Completable.complete()
 
     private fun prepareData(): WalletConfigPayload =

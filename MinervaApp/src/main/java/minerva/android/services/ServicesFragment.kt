@@ -8,7 +8,6 @@ import minerva.android.extensions.showRemoveDialog
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
 import minerva.android.walletmanager.model.Service
-import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ServicesFragment : MinervaPrimitiveListFragment() {
@@ -27,9 +26,7 @@ class ServicesFragment : MinervaPrimitiveListFragment() {
                 primitivesAdapter.updateList(it.services)
             })
             serviceRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
-            errorLiveData.observe(viewLifecycleOwner, Observer {
-                MinervaFlashbar.show(requireActivity(), getString(R.string.error_header), getString(R.string.unexpected_error))
-            })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
         }
     }
 

@@ -20,6 +20,9 @@ class EditOrderViewModel(
     private val _saveNewOrderLiveData = MutableLiveData<Event<Unit>>()
     val saveNewOrderLiveData: LiveData<Event<Unit>> get() = _saveNewOrderLiveData
 
+    private val _errorMutableLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorMutableLiveData
+
     fun prepareList(type: Int): List<MinervaPrimitive> = orderManager.prepareList(type)
 
     fun saveChanges(type: Int, newOrderList: List<MinervaPrimitive>) {
@@ -29,7 +32,7 @@ class EditOrderViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = { _saveNewOrderLiveData.value = Event(Unit) },
-                    onError = { _saveNewOrderLiveData.value = Event(Unit) }
+                    onError = { _errorMutableLiveData.value = Event(it) }
                 )
         }
     }
