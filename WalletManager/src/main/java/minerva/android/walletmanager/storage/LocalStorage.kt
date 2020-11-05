@@ -17,4 +17,7 @@ interface LocalStorage {
     fun getPendingAccounts(): List<PendingAccount>
     fun removePendingAccount(pendingAccount: PendingAccount)
     fun clearPendingAccounts()
+
+    var isBackupAllowed: Boolean
+    var isSynced: Boolean
 }

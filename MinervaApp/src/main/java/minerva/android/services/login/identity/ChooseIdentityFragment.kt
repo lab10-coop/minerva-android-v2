@@ -110,30 +110,25 @@ class ChooseIdentityFragment : Fragment() {
     private fun prepareObservers() {
         viewModel.apply {
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver { handleError(it) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false, LoginPayload(getLoginStatus(it))) })
             loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(true, payload = it) })
-            requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver {
-                identitiesAdapter.getSelectedIdentity()?.let {
-                    if (it.isNewIdentity) startNewIdentityOnResultWrappedActivity(activity, serviceQrCode)
-                    else startEditIdentityOnResultWrappedActivity(
-                        activity,
-                        viewModel.getIdentityPosition(it.index),
-                        it.name,
-                        serviceQrCode
-                    )
-                }
-            })
+            requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver { handleRequestedFields() })
         }
     }
 
-    private fun handleError(it: Throwable) {
-        val status: Int = if (it is AutomaticBackupFailedThrowable) {
+    private fun handleRequestedFields() {
+        identitiesAdapter.getSelectedIdentity()?.let {
+            if (it.isNewIdentity) startNewIdentityOnResultWrappedActivity(activity, serviceQrCode)
+            else startEditIdentityOnResultWrappedActivity(activity, viewModel.getIdentityPosition(it.index), it.name, serviceQrCode)
+        }
+    }
+
+    private fun getLoginStatus(it: Throwable): Int =
+        if (it is AutomaticBackupFailedThrowable) {
             BACKUP_FAILURE
         } else {
             DEFAULT_STATUS
         }
-        listener.onPainlessLoginResult(false, payload = LoginPayload(status))
-    }
 
     companion object {
         @JvmStatic

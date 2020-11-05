@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/margin_small"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:ignore="PrivateResource">
 
     <ImageView
@@ -17,26 +17,27 @@
     <TextView
         android:id="@+id/alertTitle"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_xsmall"
         android:layout_marginRight="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
         android:padding="@dimen/margin_xxsmall"
-        android:text="@string/alert_title"
+        android:text="@string/backup_alert_title"
         android:textColor="@color/alert_red"
         android:textSize="@dimen/text_normal" />
 
     <TextView
+        android:id="@+id/alertMessage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginLeft="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_xsmall"
         android:layout_marginRight="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_normal"
         android:fontFamily="@font/rubik_regular"
         android:padding="@dimen/margin_xxsmall"
-        android:text="@string/alert_message"
+        android:text="@string/backup_alert_message"
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal" />
-</merge>
+</LinearLayout>

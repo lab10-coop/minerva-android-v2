@@ -14,18 +14,31 @@ import minerva.android.identities.adapter.IdentitiesPagerAdapter
 import minerva.android.identities.contacts.ContactsFragment
 import minerva.android.identities.credentials.CredentialsFragment
 import minerva.android.identities.myIdentities.MyIdentitiesFragment
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class IdentitiesFragment : BaseFragment() {
 
     var currentFragment: Fragment = getFragment(MY_IDENTITIES_POSITION)
+    private val viewModel: MinervaPrimitivesViewModel by sharedViewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.identities_fragment_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupLiveData()
+        setupViewPager()
+    }
 
+    private fun setupLiveData() {
+        viewModel.apply {
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
+        }
+    }
+
+    private fun setupViewPager() {
         identityViewPager.apply {
             adapter = IdentitiesPagerAdapter(this@IdentitiesFragment, ::getFragment)
             setCurrentItem(FIRST_PAGE, false)

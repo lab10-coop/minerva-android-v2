@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.graphics.drawable.toBitmap
-import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.textfield.TextInputEditText
@@ -27,7 +26,6 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
-import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.ADDRESS_1
@@ -284,10 +282,9 @@ class EditIdentityFragment : BaseFragment() {
                 activity?.onBackPressed()
             })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver {
-                handleAutomaticBackupError(it)
-                activity?.finish()
-            })
+            errorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { handleAutomaticBackupError(it, noAutomaticBackupErrorAction = { activity?.finish() }) })
         }
         arguments?.let {
             index = it.getInt(POSITION)

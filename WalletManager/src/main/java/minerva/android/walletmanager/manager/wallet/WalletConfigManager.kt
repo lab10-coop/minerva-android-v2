@@ -2,10 +2,14 @@ package minerva.android.walletmanager.manager.wallet
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
+import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
+import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.utils.DefaultWalletConfig
 
 interface WalletConfigManager : Manager {
     val masterSeed: MasterSeed

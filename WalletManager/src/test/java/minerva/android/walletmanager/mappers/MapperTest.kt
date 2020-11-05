@@ -6,13 +6,18 @@ import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.WalletConfigTestValues.accounts
+import minerva.android.walletmanager.model.WalletConfigTestValues.accountsResponse
+import minerva.android.walletmanager.model.WalletConfigTestValues.identities
+import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
+import minerva.android.walletmanager.model.WalletConfigTestValues.networks
 import minerva.android.walletmanager.model.mappers.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class MapperTest : WalletConfigTestValues() {
+class MapperTest {
 
     private val credentialQrCodeResult = mapOf<String, Any?>(
         "vc" to mapOf(

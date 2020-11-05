@@ -10,6 +10,14 @@ import minerva.android.walletmanager.model.Recipient
 
 class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : LocalStorage {
 
+    override var isBackupAllowed: Boolean
+        set(value) = sharedPreferences.edit().putBoolean(IS_BACKUP_ALLOWED, value).apply()
+        get() = sharedPreferences.getBoolean(IS_BACKUP_ALLOWED, true)
+
+    override var isSynced: Boolean
+        set(value) = sharedPreferences.edit().putBoolean(IS_SYNCED, value).apply()
+        get() = sharedPreferences.getBoolean(IS_SYNCED, true)
+
     override fun saveIsMnemonicRemembered(isRemembered: Boolean) {
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()
     }
@@ -71,6 +79,8 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
 
     companion object {
         private const val IS_MNEMONIC_REMEMBERED = "is_mnemonic_remembered"
+        private const val IS_BACKUP_ALLOWED = "is_mnemonic_remembered"
+        private const val IS_SYNCED = "is_synced"
         private const val RECIPIENTS = "recipients"
         private const val PENDING_ACCOUNTS = "pending_accounts"
     }

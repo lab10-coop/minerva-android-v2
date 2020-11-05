@@ -5,6 +5,7 @@ import io.mockk.*
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.storage.LocalStorageImpl
 import org.junit.Test
+import kotlin.test.assertTrue
 
 class LocalStorageTest {
 
@@ -29,6 +30,24 @@ class LocalStorageTest {
     @Test
     fun `save is mnemonic remembered test`() {
         localStorage.saveIsMnemonicRemembered(true)
+        verify {
+            sharedPref.edit().putBoolean(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
+    }
+
+    @Test
+    fun `sync is remembered test`() {
+        localStorage.isSynced = true
+        verify {
+            sharedPref.edit().putBoolean(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
+    }
+
+    @Test
+    fun `is backup allowed test`() {
+        localStorage.isBackupAllowed = true
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
