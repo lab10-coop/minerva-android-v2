@@ -84,6 +84,14 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
         startSafeAccountWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
     }
 
+    override fun onShowAddress(account: Account, position: Int) {
+        startAccountAddressWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
+    }
+
+    override fun onShowSafeAccountSettings(account: Account, position: Int) {
+        startSafeAccountWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
+    }
+
     fun setProgressAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending)
     }
