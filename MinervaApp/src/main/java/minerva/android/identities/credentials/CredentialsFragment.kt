@@ -4,15 +4,16 @@ import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
-import minerva.android.extensions.showRemoveDialog
+import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
+import minerva.android.utils.DialogHandler
 import minerva.android.walletmanager.model.Credential
 import minerva.android.widget.clubCard.ClubCard
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class CredentialsFragment : MinervaPrimitiveListFragment() {
 
-    private val viewModel: CredentialsViewModel by viewModel()
+    private val viewModel: MinervaPrimitivesViewModel by sharedViewModel()
 
     override fun prepareObservers() {
         viewModel.apply {
@@ -20,14 +21,18 @@ class CredentialsFragment : MinervaPrimitiveListFragment() {
                 noDataMessage.visibleOrGone(config.credentials.isEmpty())
                 primitivesAdapter.updateList(config.credentials)
             })
-            removeCredentialMutableLiveData.observe(viewLifecycleOwner, Observer {
+            removeCredentialLiveData.observe(viewLifecycleOwner, Observer {
                 activity?.invalidateOptionsMenu()
             })
         }
     }
 
     override fun onRemoveCredential(credential: Credential) =
-        showRemoveDialog(getString(R.string.remove_credential_dialog_title), R.string.remove_credential_dialog_message)
+        DialogHandler.showRemoveDialog(
+            requireContext(),
+            getString(R.string.remove_credential_dialog_title),
+            getString(R.string.remove_credential_dialog_message)
+        )
         { viewModel.removeCredential(credential) }
 
     override fun onCredentialContainerClick(credential: Credential) = ClubCard(requireContext(), credential).show()

@@ -6,13 +6,15 @@ import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.accounts.enum.ErrorCode
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
@@ -21,7 +23,6 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAF
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
-import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -38,11 +39,17 @@ class AccountsViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
+    private val _refreshBalancesErrorLiveData = MutableLiveData<Event<ErrorCode>>()
+    val refreshBalancesErrorLiveData: LiveData<Event<ErrorCode>> get() = _refreshBalancesErrorLiveData
+
     private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData = MutableLiveData<Event<Throwable>>()
     val balanceIsNotEmptyAndHasMoreOwnersErrorLiveData: LiveData<Event<Throwable>> get() = _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData
 
     private val _isNotSafeAccountMasterOwnerErrorLiveData = MutableLiveData<Event<Throwable>>()
     val isNotSafeAccountMasterOwnerErrorLiveData: LiveData<Event<Throwable>> get() = _isNotSafeAccountMasterOwnerErrorLiveData
+
+    private val _automaticBackupErrorLiveData = MutableLiveData<Event<Throwable>>()
+    val automaticBackupErrorLiveData: LiveData<Event<Throwable>> get() = _automaticBackupErrorLiveData
 
     private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
@@ -68,11 +75,10 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        _balanceLiveData.value = it },
+                    onSuccess = { _balanceLiveData.value = it },
                     onError = {
-                        _errorLiveData.value = Event(it)
                         Timber.d("Refresh balance error: ${it.message}")
+                        _refreshBalancesErrorLiveData.value = Event(ErrorCode.BALANCE_ERROR)
                     }
                 )
         }
@@ -85,8 +91,8 @@ class AccountsViewModel(
                 .subscribeBy(
                     onSuccess = { _assetBalanceLiveData.value = it },
                     onError = {
-                        _errorLiveData.value = Event(it)
                         Timber.e("Refresh asset balance error: ${it.message}")
+                        _refreshBalancesErrorLiveData.value = Event(ErrorCode.ASSET_BALANCE_ERROR)
                     }
                 )
         }
@@ -105,6 +111,7 @@ class AccountsViewModel(
                         when (it) {
                             is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
                             is IsNotSafeAccountMasterOwnerThrowable -> _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
+                            is AutomaticBackupFailedThrowable -> _automaticBackupErrorLiveData.value = Event(it)
                             else -> _errorLiveData.value = Event(Throwable(it.message))
                         }
                     }
@@ -126,7 +133,7 @@ class AccountsViewModel(
                 smartContractRepository.createSafeAccount(account)
                     .flatMapCompletable { smartContractAddress -> createAccount(account, smartContractAddress) }
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(SAFE_ACCOUNT_ADDED, createSafeAccountName(account)))))
+                    .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(SAFE_ACCOUNT_ADDED, getAccountName(account)))))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -142,16 +149,15 @@ class AccountsViewModel(
         }
     }
 
-    private fun createAccount(account: Account, smartContractAddress: String): Completable {
-        return accountManager.createAccount(
+    private fun createAccount(account: Account, smartContractAddress: String): Completable =
+        accountManager.createAccount(
             account.network,
-            createSafeAccountName(account),
+            getAccountName(account),
             account.address,
             smartContractAddress
         )
-    }
 
-    private fun createSafeAccountName(account: Account): String =
+    private fun getAccountName(account: Account): String =
         account.name.replaceFirst(String.Space, " | ${accountManager.getSafeAccountCount(account.address)} ")
 
     private fun getWalletAction(status: Int, name: String) = WalletAction(

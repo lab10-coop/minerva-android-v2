@@ -14,6 +14,7 @@ import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils
 import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
@@ -200,7 +201,7 @@ class MainViewModel(
     fun updateBindedCredentials(replace: Boolean) {
         launchDisposable {
             serviceManager.updateBindedCredential(qrCode, replace)
-                .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED)) } }
+                .onErrorResumeNext { error -> SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED), error) } }
                 .doOnSuccess { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, UPDATED)) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -214,17 +215,21 @@ class MainViewModel(
         if (serviceManager.isMoreCredentialToBind(qrCode)) R.string.replace_all
         else R.string.replace
 
-    private fun saveWalletAction(walletAction: WalletAction) {
+    private fun saveWalletAction(walletAction: WalletAction, error: Throwable? = null) {
         launchDisposable {
             walletActionsRepository.saveWalletActions(listOf(walletAction))
-                .toSingleDefault(walletAction.status)
+                .toSingleDefault(Pair(walletAction.status, error))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        if (it == FAILED)
-                            _updateCredentialErrorLiveData.value = Event(NoBindedCredentialThrowable())
+                    onSuccess = { (status, error) ->
                         Timber.d("Save update binded credential wallet action success")
+                        when {
+                            status == FAILED && error is AutomaticBackupFailedThrowable -> _updateCredentialErrorLiveData.value =
+                                Event(AutomaticBackupFailedThrowable())
+                            status == FAILED -> _updateCredentialErrorLiveData.value = Event(NoBindedCredentialThrowable())
+
+                        }
                     },
                     onError = { Timber.e("Save bind credential error: $it") }
                 )
@@ -242,6 +247,9 @@ class MainViewModel(
         clearPendingAccounts()
         clearWebSocketSubscription()
     }
+
+    val isBackupAllowed: Boolean
+        get() = masterSeedRepository.isBackupAllowed
 
     companion object {
         const val ONE_PENDING_ACCOUNT = 1

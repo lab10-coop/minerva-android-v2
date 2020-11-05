@@ -30,15 +30,13 @@ class AccountManagerImpl(
         get() = walletConfigManager.walletConfigLiveData
 
     override fun createAccount(network: Network, accountName: String, ownerAddress: String, contract: String): Completable {
-        with(walletConfigManager) {
-            getWalletConfig()?.let { config ->
-                val newAccount = Account(config.newIndex, name = accountName, network = network, bindedOwner = ownerAddress)
-                return cryptographyRepository.computeDeliveredKeys(masterSeed.seed, newAccount.index)
-                    .map { createUpdatedWalletConfig(config, newAccount, it, ownerAddress, contract) }
-                    .flatMapCompletable { updateWalletConfig(it) }
-            }
-            return Completable.error(NotInitializedWalletConfigThrowable())
+        walletConfigManager.getWalletConfig()?.let { config ->
+            val newAccount = Account(config.newIndex, name = accountName, network = network, bindedOwner = ownerAddress)
+            return cryptographyRepository.computeDeliveredKeys(walletConfigManager.masterSeed.seed, newAccount.index)
+                .map { createUpdatedWalletConfig(config, newAccount, it, ownerAddress, contract) }
+                .flatMapCompletable { walletConfigManager.updateWalletConfig(it) }
         }
+        throw NotInitializedWalletConfigThrowable()
     }
 
     private fun createUpdatedWalletConfig(
@@ -55,7 +53,7 @@ class AccountManagerImpl(
                     newValuePosition = position + getSafeAccountCount(ownerAddress)
             }
             newAccounts.add(newValuePosition, newAccount)
-            return WalletConfig(updateVersion, identities, newAccounts, services, credentials)
+            return this.copy(version = updateVersion, accounts = newAccounts)
         }
     }
 
@@ -73,7 +71,7 @@ class AccountManagerImpl(
 
     override fun removeAccount(index: Int): Completable {
         walletConfigManager.getWalletConfig()?.let {
-            val newValues = it.accounts.toMutableList()
+            val newAccounts = it.accounts.toMutableList()
             it.accounts.forEachIndexed { position, value ->
                 if (value.index == index) {
                     when {
@@ -82,15 +80,13 @@ class AccountManagerImpl(
                         isNotSafeAccountMasterOwner(it.accounts, value) ->
                             return Completable.error(IsNotSafeAccountMasterOwnerThrowable())
                     }
-                    newValues[position] = Account(value, true)
-                    return walletConfigManager.updateWalletConfig(
-                        WalletConfig(it.updateVersion, it.identities, newValues, it.services, it.credentials)
-                    )
+                    newAccounts[position] = Account(value, true)
+                    return walletConfigManager.updateWalletConfig(it.copy(version = it.updateVersion, accounts = newAccounts))
                 }
             }
             return Completable.error(MissingAccountThrowable())
         }
-        return Completable.error(NotInitializedWalletConfigThrowable())
+        throw NotInitializedWalletConfigThrowable()
     }
 
     private fun isNotSafeAccountMasterOwner(accounts: List<Account>, account: Account): Boolean {

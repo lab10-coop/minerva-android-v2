@@ -36,9 +36,6 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
     private fun prepareObservers() {
         viewModel.apply {
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver {
-                Toast.makeText(context, getString(R.string.creating_wallet_error_message), Toast.LENGTH_LONG).show()
-            })
             createWalletLiveData.observe(viewLifecycleOwner, EventObserver { listener.showMainActivity() })
         }
     }
@@ -55,7 +52,7 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
 
     private fun handleCreateWalletButton() {
         createWalletButton.setOnClickListener {
-            viewModel.createMasterSeed()
+            viewModel.createWalletConfig()
         }
     }
 

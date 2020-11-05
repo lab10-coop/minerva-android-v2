@@ -35,12 +35,9 @@ class ServiceManagerImpl(
 
     private fun updateConnectedService(it: ConnectionRequest<Pair<Credential, CredentialRequest>>) =
         when (it) {
-            is ConnectionRequest.ServiceConnected -> updateService(it)
+            is ConnectionRequest.ServiceConnected -> requestedService(it).run { saveService(Service(issuer, name, DateUtils.timestamp, iconUrl.url)).toSingleDefault(it) }
             else -> Single.just(it)
         }
-
-    private fun updateService(it: ConnectionRequest.ServiceConnected<Pair<Credential, CredentialRequest>>) =
-        requestedService(it).run { saveService(Service(issuer, name, DateUtils.timestamp, iconUrl.url)).toSingleDefault(it) }
 
     private fun handleCredentialRequest(map: Map<String, Any?>): ConnectionRequest<Pair<Credential, CredentialRequest>> {
         walletConfigManager.getWalletConfig()?.credentials?.let { credentials ->
@@ -100,7 +97,7 @@ class ServiceManagerImpl(
             }
 
     private fun shouldSafeService(identity: Identity, service: Service) =
-        identity !is IncognitoIdentity && service.name.isNotEmpty()
+        identity !is IncognitoIdentity && service.name.isNotEmpty() //todo probably different indicator to display service or not will be better
 
     override fun saveService(service: Service): Completable = walletConfigManager.saveService(service)
 

@@ -27,6 +27,8 @@ import minerva.android.main.base.BaseFragment
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.LoginScannerActivity
+import minerva.android.utils.DialogHandler
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.PendingAccount
@@ -34,6 +36,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
@@ -49,6 +52,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         prepareSettingsIcon()
         prepareObservers()
         viewModel.restorePendingTransactions()
+        if (!viewModel.isBackupAllowed){
+            DialogHandler.showDialog(this, getString(R.string.error_header), getString(R.string.outdated_wallet_error_message))
+        }
     }
 
     override fun onResume() {
@@ -102,7 +108,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 showBindCredentialFlashbar(true, it)
             })
             updateCredentialErrorLiveData.observe(this@MainActivity, EventObserver {
-                showBindCredentialFlashbar(false, null)
+                var message: String? = null
+                if (it is AutomaticBackupFailedThrowable) {
+                    message = getString(R.string.automatic_backup_failed_error)
+                }
+                showBindCredentialFlashbar(false, message)
             })
             updatePendingAccountLiveData.observe(this@MainActivity, EventObserver {
                 showFlashbar(

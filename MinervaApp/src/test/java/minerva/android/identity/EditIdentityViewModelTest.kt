@@ -23,7 +23,7 @@ class EditIdentityViewModelTest : BaseViewModelTest() {
     private val saveIdentityCaptor: KArgumentCaptor<Event<Identity>> = argumentCaptor()
 
     @Test
-    fun `save identity success`() {
+    fun `save identity success test`() {
         whenever(identityManager.saveIdentity(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.apply {
@@ -36,13 +36,11 @@ class EditIdentityViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `save identity error`() {
+    fun `save identity error test`() {
         val error = Throwable()
         whenever(identityManager.saveIdentity(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        viewModel.apply {
-            saveIdentity(Identity(1), ADDED)
-            saveErrorLiveData.observeLiveDataEvent(Event(error))
-        }
+        viewModel.saveIdentity(Identity(1), ADDED)
+        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }
 }

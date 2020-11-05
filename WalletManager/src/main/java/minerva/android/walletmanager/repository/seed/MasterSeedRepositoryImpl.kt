@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.repository.seed
 
 import androidx.lifecycle.LiveData
+import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.kotlinUtils.event.Event
@@ -25,8 +26,10 @@ class MasterSeedRepositoryImpl(
     override fun isMasterSeedAvailable(): Boolean = walletConfigManager.isMasterSeedSaved()
 
     override fun restoreMasterSeed(mnemonic: String): Single<RestoreWalletResponse> =
-        cryptographyRepository.restoreMasterSeed(mnemonic).map { it.run { MasterSeed(first, second, third) } }
-            .flatMap { walletConfigManager.getWalletConfig(MasterSeed(it.seed, it.publicKey, it.privateKey)) }
+        cryptographyRepository.restoreMasterSeed(mnemonic)
+            .flatMap { (seed, publicKey, privateKey) ->
+                walletConfigManager.restoreWalletConfig(MasterSeed(seed, publicKey, privateKey))
+            }
 
     override fun saveIsMnemonicRemembered() {
         localStorage.saveIsMnemonicRemembered(true)
@@ -36,11 +39,14 @@ class MasterSeedRepositoryImpl(
 
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
-    override fun createMasterSeed() =
-        cryptographyRepository.createMasterSeed().map { it.run { MasterSeed(first, second, third) } }
-            .flatMapCompletable { walletConfigManager.createWalletConfig(it) }
+    override fun createWalletConfig(): Completable =
+        cryptographyRepository.createMasterSeed()
+            .flatMapCompletable { (seed, publicKey, privateKey) ->
+                walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
+            }
 
-    override fun getMnemonic() = cryptographyRepository.getMnemonicForMasterSeed(walletConfigManager.masterSeed.seed)
+    override fun getMnemonic(): String =
+        cryptographyRepository.getMnemonicForMasterSeed(walletConfigManager.masterSeed.seed)
 
     override fun initWalletConfig() {
         walletConfigManager.initWalletConfig()
@@ -51,4 +57,10 @@ class MasterSeedRepositoryImpl(
     }
 
     override fun getValueIterator(): Int = walletConfigManager.getValueIterator()
+
+    override val isBackupAllowed: Boolean
+        get() = localStorage.isBackupAllowed
+
+    override val isSynced: Boolean
+        get() = localStorage.isSynced
 }

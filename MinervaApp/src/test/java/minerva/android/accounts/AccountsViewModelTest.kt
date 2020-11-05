@@ -5,8 +5,8 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
+import minerva.android.accounts.enum.ErrorCode
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Balance
@@ -39,6 +39,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
 
+    private val refreshBalancesErrorObserver: Observer<Event<ErrorCode>> = mock()
+    private val refreshBalancesErrorCaptor: KArgumentCaptor<Event<ErrorCode>> = argumentCaptor()
+
     private val accountRemoveObserver: Observer<Event<Unit>> = mock()
     private val accountRemoveCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
@@ -59,9 +62,12 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `refresh balances error`() {
         val error = Throwable()
         whenever(transactionRepository.refreshBalances()).thenReturn(Single.error(error))
-        viewModel.balanceLiveData.observeForever(balanceObserver)
+        viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
         viewModel.refreshBalances()
-        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
+        refreshBalancesErrorCaptor.run {
+            verify(refreshBalancesErrorObserver).onChanged(capture())
+            firstValue.peekContent() == ErrorCode.BALANCE_ERROR
+        }
     }
 
     @Test
@@ -79,8 +85,12 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get assets balance error test`() {
         val error = Throwable()
         whenever(transactionRepository.refreshAssetBalance()).thenReturn(Single.error(error))
+        viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
         viewModel.refreshAssetBalance()
-        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
+        refreshBalancesErrorCaptor.run {
+            verify(refreshBalancesErrorObserver).onChanged(capture())
+            firstValue.peekContent() == ErrorCode.ASSET_BALANCE_ERROR
+        }
     }
 
     @Test

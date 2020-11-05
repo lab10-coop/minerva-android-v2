@@ -1,9 +1,13 @@
 package minerva.android.walletmanager.utils
 
+import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
+import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.WalletConfigTestValues.accountsResponse
+import minerva.android.walletmanager.model.WalletConfigTestValues.identityResponse
+import minerva.android.walletmanager.model.WalletConfigTestValues.onlineIdentityResponse
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.NetworkShortName
-import minerva.android.walletmanager.model.defs.ServiceType
 
 object DataProvider {
 
@@ -12,6 +16,10 @@ object DataProvider {
         "key2" to "value2",
         "key3" to "value3"
     )
+
+    val localWalletConfigPayload = WalletConfigPayload(1, identityResponse, accountsResponse)
+
+    val onlineWalletConfigResponse = WalletConfigResponse("", "", WalletConfigPayload(0, onlineIdentityResponse, accountsResponse))
 
     val walletConfig = WalletConfig(
         0, listOf(
@@ -31,10 +39,16 @@ object DataProvider {
                 owners = listOf("notMasterOwner", "masterOwner")
             ),
             Account(7, "publicKey5", "privateKey5", "address", network = Network(short = NetworkShortName.ATS_TAU))
-        )
-        , listOf(
+        ), listOf(
             Service("1", "name")
         ),
-        listOf(Credential(loggedInIdentityDid = "did:ethr:address", type = CredentialType.VERIFIABLE_CREDENTIAL.type, membershipType = CredentialType.AUTOMOTIVE_CLUB.type, issuer = "iss"))
+        listOf(
+            Credential(
+                loggedInIdentityDid = "did:ethr:address",
+                type = CredentialType.VERIFIABLE_CREDENTIAL.type,
+                membershipType = CredentialType.AUTOMOTIVE_CLUB.type,
+                issuer = "iss"
+            )
+        )
     )
 }
