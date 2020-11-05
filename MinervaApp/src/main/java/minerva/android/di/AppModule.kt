@@ -8,9 +8,8 @@ import minerva.android.accounts.akm.SafeAccountSettingsViewModel
 import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.edit.EditOrderViewModel
-import minerva.android.identities.credentials.CredentialsViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
-import minerva.android.identities.myIdentities.MyIdentitiesViewModel
+import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.main.MainViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
@@ -44,7 +43,7 @@ private val appModules = module {
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
-    viewModel { MyIdentitiesViewModel(get(), get()) }
+    viewModel { MinervaPrimitivesViewModel(get(), get()) }
     viewModel { AccountsViewModel(get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
@@ -56,7 +55,6 @@ private val appModules = module {
     viewModel { TransactionsViewModel(get(), get(), get()) }
     viewModel { NewAccountViewModel(get(), get()) }
     viewModel { ServicesViewModel(get(), get()) }
-    viewModel { CredentialsViewModel(get(), get()) }
     viewModel { WalletActionsViewModel(get()) }
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }

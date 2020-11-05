@@ -45,7 +45,8 @@ class MasterSeedRepositoryImpl(
                 walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
             }
 
-    override fun getMnemonic() = cryptographyRepository.getMnemonicForMasterSeed(walletConfigManager.masterSeed.seed)
+    override fun getMnemonic(): String =
+        cryptographyRepository.getMnemonicForMasterSeed(walletConfigManager.masterSeed.seed)
 
     override fun initWalletConfig() {
         walletConfigManager.initWalletConfig()
@@ -56,4 +57,10 @@ class MasterSeedRepositoryImpl(
     }
 
     override fun getValueIterator(): Int = walletConfigManager.getValueIterator()
+
+    override val isBackupAllowed: Boolean
+        get() = localStorage.isBackupAllowed
+
+    override val isSynced: Boolean
+        get() = localStorage.isSynced
 }

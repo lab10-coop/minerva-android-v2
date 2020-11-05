@@ -4,10 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.refreshable_recycler_view_layout.*
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
@@ -18,6 +16,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
+import minerva.android.utils.DialogHandler
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.startAccountAddressWrappedActivity
@@ -70,7 +69,12 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
-    override fun onAccountRemove(account: Account) = showRemoveDialog(account)
+    override fun onAccountRemove(account: Account) =
+        DialogHandler.showRemoveDialog(
+            requireContext(),
+            account.name,
+            getString(R.string.remove_account_dialog_message)
+        ) { viewModel.removeAccount(account) }
 
     override fun onShowAddress(account: Account, position: Int) {
         startAccountAddressWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
@@ -130,23 +134,23 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
             isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
             })
-            automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                Toast.makeText(requireContext(), getString(R.string.automatic_backup_failed_error), Toast.LENGTH_LONG).show()
-            })
+            automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
             accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
-            refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                swipeRefresh.isRefreshing = false
-                when (it) {
-                    ErrorCode.BALANCE_ERROR -> showErrorFlashbar(
-                        getString(R.string.error_header),
-                        getString(R.string.refresh_balances_error)
-                    )
-                    ErrorCode.ASSET_BALANCE_ERROR -> showErrorFlashbar(
-                        getString(R.string.error_header),
-                        getString(R.string.refresh_asset_balances_error)
-                    )
-                }
-            })
+            refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleRefreshBalancesError(it) })
+        }
+    }
+
+    private fun handleRefreshBalancesError(it: ErrorCode) {
+        swipeRefresh.isRefreshing = false
+        when (it) {
+            ErrorCode.BALANCE_ERROR -> showErrorFlashbar(
+                getString(R.string.error_header),
+                getString(R.string.refresh_balances_error)
+            )
+            ErrorCode.ASSET_BALANCE_ERROR -> showErrorFlashbar(
+                getString(R.string.error_header),
+                getString(R.string.refresh_asset_balances_error)
+            )
         }
     }
 
@@ -156,19 +160,4 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
         }.orElse {
             MinervaFlashbar.show(requireActivity(), title, getString(R.string.unexpected_error))
         }
-
-    private fun showRemoveDialog(account: Account) {
-        context?.let { context ->
-            MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
-                .setBackground(context.getDrawable(R.drawable.rounded_white_background))
-                .setTitle(account.name)
-                .setMessage(R.string.remove_account_dialog_message)
-                .setPositiveButton(R.string.remove) { dialog, _ ->
-                    viewModel.removeAccount(account)
-                    dialog.dismiss()
-                }
-                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                .show()
-        }
-    }
 }

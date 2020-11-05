@@ -1,9 +1,9 @@
 package minerva.android.walletmanager.model
 
-import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.AccountPayload
+import minerva.android.configProvider.model.walletConfig.IdentityPayload
 
-open class WalletConfigTestValues {
+object WalletConfigTestValues {
 
     val identityData: LinkedHashMap<String, String> = linkedMapOf(
         "Name" to "Tom Johnson",
@@ -42,12 +42,12 @@ open class WalletConfigTestValues {
     )
 
     val accounts = listOf(
-        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", networks[0]),
+        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", networks[0], contractAddress = "test"),
         Account(2, "publicKey", "privateKey", "address", "ValuePayload2", networks[1])
     )
 
     val accountsResponse = listOf(
-        AccountPayload(1, "ValuePayload1", networks[0].short, false),
-        AccountPayload(2, "ValuePayload2", networks[1].short, false)
+        AccountPayload(1, "ValuePayload1", networks[0].short, false, _contractAddress = "contractAddress"),
+        AccountPayload(2, "ValuePayload2", networks[1].short, false, _contractAddress = "contractAddress")
     )
 }

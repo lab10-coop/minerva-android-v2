@@ -42,10 +42,9 @@ class NewAccountFragment : BaseFragment() {
         viewModel.apply {
             createAccountLiveData.observe(viewLifecycleOwner, EventObserver { activity?.finish() })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver {
-                handleAutomaticBackupError(it)
-                activity?.finish()
-            })
+            errorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { handleAutomaticBackupError(it, noAutomaticBackupErrorAction = { activity?.finish() }) })
         }
         arguments?.let {
             position = it.getInt(POSITION)

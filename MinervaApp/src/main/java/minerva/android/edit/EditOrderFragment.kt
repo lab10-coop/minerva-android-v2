@@ -70,10 +70,9 @@ class EditOrderFragment : BaseFragment() {
         viewModel.apply {
             walletConfigLiveData.observe(viewLifecycleOwner, Observer { orderAdapter.updateList(prepareList(type)) })
             viewModel.saveNewOrderLiveData.observe(viewLifecycleOwner, EventObserver { onBackListener.onBack() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver {
-                handleAutomaticBackupError(it)
-                activity?.finish()
-            })
+            errorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { handleAutomaticBackupError(it, { activity?.finish() }, { activity?.finish() }) })
         }
     }
 

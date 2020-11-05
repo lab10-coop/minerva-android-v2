@@ -4,7 +4,7 @@ import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
-import minerva.android.identities.myIdentities.MyIdentitiesViewModel
+import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.identity.IdentityManager
@@ -13,12 +13,12 @@ import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Test
 
-class MyIdentitiesViewModelTest : BaseViewModelTest() {
+class MinervaPrimitivesViewModelTest : BaseViewModelTest() {
 
     private val identityManager: IdentityManager = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val viewModel =
-        MyIdentitiesViewModel(identityManager, walletActionsRepository)
+        MinervaPrimitivesViewModel(identityManager, walletActionsRepository)
 
     private val removeCredentialObserver: Observer<Event<Any>> = mock()
     private val removeCredentialCaptor: KArgumentCaptor<Event<Any>> = argumentCaptor()

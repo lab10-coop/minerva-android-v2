@@ -20,4 +20,6 @@ interface MasterSeedRepository {
     fun initWalletConfig()
     fun dispose()
     fun getValueIterator(): Int
+    val isBackupAllowed: Boolean
+    val isSynced: Boolean
 }

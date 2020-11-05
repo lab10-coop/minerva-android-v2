@@ -9,7 +9,6 @@ import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_safe_account_settings.*
@@ -21,6 +20,7 @@ import minerva.android.extension.getValidationObservable
 import minerva.android.extension.onRightDrawableClicked
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.utils.DialogHandler
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -89,18 +89,11 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
     }
 
     override fun onOwnerRemoved(removeAddress: String) {
-        context?.let { context ->
-            MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
-                .setBackground(context.getDrawable(R.drawable.rounded_white_background))
-                .setTitle(R.string.remove_owner)
-                .setMessage(getString(R.string.remove_safe_account_dialog_message, removeAddress, viewModel.accountName))
-                .setPositiveButton(R.string.remove) { dialog, _ ->
-                    viewModel.removeOwner(removeAddress)
-                    dialog.dismiss()
-                }
-                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                .show()
-        }
+        DialogHandler.showRemoveDialog(
+            requireContext(),
+            getString(R.string.remove_owner),
+            getString(R.string.remove_safe_account_dialog_message, removeAddress, viewModel.accountName)
+        ) { viewModel.removeOwner(removeAddress) }
     }
 
 

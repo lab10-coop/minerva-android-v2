@@ -34,8 +34,6 @@ import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActi
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProviderImpl
 import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
 import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProviderImpl
-import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepository
-import minerva.android.walletmanager.walletconfig.repository.WalletConfigRepositoryImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -62,8 +60,7 @@ fun createWalletModules() = module {
     factory<LocalStorage> { LocalStorageImpl(get(named(localSharedPrefs))) }
     factory<LocalWalletConfigProvider> { LocalWalletConfigProviderImpl(get(named(localSharedPrefs))) }
     factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
-    factory<WalletConfigRepository> { WalletConfigRepositoryImpl(get(), get(), get(), get()) }
-    single<WalletConfigManager> { WalletConfigManagerImpl(get(), get()) }
+    single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
     factory<AccountManager> { AccountManagerImpl(get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
