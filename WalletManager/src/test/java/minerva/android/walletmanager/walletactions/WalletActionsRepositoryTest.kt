@@ -14,6 +14,7 @@ import minerva.android.configProvider.model.walletActions.WalletActionClusteredP
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
+import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletAction
@@ -26,7 +27,7 @@ import org.junit.Test
 
 class WalletActionsRepositoryTest {
 
-    private val minervaApi: MinervaApi = mock()
+    private val minervaApi: MinervaApiRepository = mock()
     private val localWalletActionsConfigProvider: LocalWalletActionsConfigProvider = mock()
     private val walletConfigManager: WalletConfigManager = mock()
     private val repository = WalletActionsRepositoryImpl(minervaApi, localWalletActionsConfigProvider, walletConfigManager)
@@ -53,42 +54,46 @@ class WalletActionsRepositoryTest {
         whenever(minervaApi.getWalletActions(publicKey = "456")).thenReturn(
             Observable.just(WalletActionsResponse(_walletActionsConfigPayload = WalletActionsConfigPayload(1, actions)))
         )
-        val test = repository.getWalletActions().test()
-        test.assertNoErrors()
-        test.assertValue {
-            it[0].walletActions[0].status == 2
-        }
+        repository.getWalletActions()
+            .test()
+            .assertNoErrors()
+            .assertValue {
+                it[0].walletActions[0].status == 2
+            }
     }
 
     @Test
-    fun `load wallet actions config error`() {
+    fun `load wallet actions when api error occurs`() {
         whenever(localWalletActionsConfigProvider.loadWalletActionsConfig()).thenReturn(WalletActionsConfigPayload(1, actions))
         whenever(walletConfigManager.masterSeed).thenReturn(masterSeed)
         whenever(minervaApi.getWalletActions(publicKey = "456")).thenReturn(Observable.error(error))
-        val test = repository.getWalletActions().test()
-        test.assertError(error)
+        repository.getWalletActions()
+            .test()
+            .assertValue {
+                it[0].lastUsed == 1L
+            }
     }
 
     @Test
     fun `save wallet actions success`() {
         whenever(localWalletActionsConfigProvider.loadWalletActionsConfig()).thenReturn(WalletActionsConfigPayload(1, actions))
         doNothing().whenever(localWalletActionsConfigProvider).saveWalletActionsConfig(WalletActionsConfigPayload(1, actions))
-        whenever(minervaApi.saveWalletActions(any(), any(), any())).thenReturn(Completable.complete())
+        whenever(minervaApi.saveWalletActions(any(), any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.masterSeed) doReturn masterSeed
-        val test = repository.saveWalletActions(listOf(WalletAction(1, 2, 1234L))).test()
-        test.apply {
-            assertNoErrors()
-            assertComplete()
-        }
+        repository.saveWalletActions(listOf(WalletAction(1, 2, 1234L)))
+            .test()
+            .assertNoErrors()
+            .assertComplete()
     }
 
     @Test
     fun `save wallet actions error`() {
         whenever(localWalletActionsConfigProvider.loadWalletActionsConfig()).thenReturn(WalletActionsConfigPayload(1, actions))
         doNothing().whenever(localWalletActionsConfigProvider).saveWalletActionsConfig(WalletActionsConfigPayload(1, actions))
-        whenever(minervaApi.saveWalletActions(any(), any(), any())).thenReturn(Completable.error(error))
+        whenever(minervaApi.saveWalletActions(any(), any())).thenReturn(Completable.error(error))
         whenever(walletConfigManager.masterSeed) doReturn masterSeed
-        val test = repository.saveWalletActions(listOf(WalletAction(1, 2, 1234L))).test()
-        test.assertError(error)
+        repository.saveWalletActions(listOf(WalletAction(1, 2, 1234L)))
+            .test()
+            .assertComplete()
     }
 }

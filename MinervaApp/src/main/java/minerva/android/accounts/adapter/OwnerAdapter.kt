@@ -8,8 +8,8 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.owner_list_row.view.*
 import minerva.android.R
-import minerva.android.extension.visibleOrGone
 import minerva.android.accounts.listener.OnOwnerRemovedListener
+import minerva.android.extension.visibleOrGone
 
 class OwnerAdapter(private val listener: OnOwnerRemovedListener) : RecyclerView.Adapter<OwnerViewHolder>(),
     OwnerViewHolder.OnOwnerRemovedListener {
@@ -25,9 +25,7 @@ class OwnerAdapter(private val listener: OnOwnerRemovedListener) : RecyclerView.
     override fun getItemCount(): Int = owners.size
 
     override fun onBindViewHolder(holder: OwnerViewHolder, position: Int) {
-        holder.apply {
-            setData(position, owners[position])
-        }
+        holder.setData(position, owners[position])
     }
 
     fun updateList(data: List<String>) {
@@ -54,7 +52,7 @@ class OwnerViewHolder(private val view: View, private val onOwnerRemovedListener
         ownerRowMenu.setOnClickListener { showMenu(position, ownerRowMenu) }
     }
 
-    private fun showMenu(position: Int, anchor: View){
+    private fun showMenu(position: Int, anchor: View) {
         PopupMenu(view.context, anchor).apply {
             menuInflater.inflate(R.menu.remove_menu, menu)
             gravity = Gravity.END
@@ -65,7 +63,7 @@ class OwnerViewHolder(private val view: View, private val onOwnerRemovedListener
 
     private fun PopupMenu.setOnItemMenuClickListener(position: Int) {
         setOnMenuItemClickListener {
-            if(it.itemId == R.id.remove) onOwnerRemovedListener.onOwnerRemoved(position)
+            if (it.itemId == R.id.remove) onOwnerRemovedListener.onOwnerRemoved(position)
             true
         }
     }

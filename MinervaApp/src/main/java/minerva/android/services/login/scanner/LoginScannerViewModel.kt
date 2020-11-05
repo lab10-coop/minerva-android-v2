@@ -9,7 +9,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
-import minerva.android.services.login.uitls.LoginUtils.getLoginStatus
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.services.ServiceManager
@@ -17,7 +17,6 @@ import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.QrCode
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.WalletAction
-import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
@@ -77,31 +76,43 @@ class LoginScannerViewModel(
         } else {
             launchDisposable {
                 identityManager.bindCredentialToIdentity(qrCode)
-                    .onErrorResumeNext { SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED)) } }
+                    .onErrorResumeNext { error ->
+                        SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED), error) }
+                    }
                     .doOnSuccess { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, ADDED)) }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onSuccess = { _bindCredentialSuccessLiveData.value = Event(it) },
-                        onError = { _bindCredentialErrorLiveData.value = Event(it) }
+                        onError = {
+                            _bindCredentialErrorLiveData.value = Event(it)
+                        }
                     )
             }
         }
     }
 
-    private fun saveWalletAction(walletAction: WalletAction) {
+    private fun saveWalletAction(walletAction: WalletAction, error: Throwable? = null) {
         launchDisposable {
             walletActionsRepository.saveWalletActions(listOf(walletAction))
-                .toSingleDefault(walletAction.status)
+                .toSingleDefault(Pair(walletAction.status, error))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        if (it == FAILED)
-                            _bindCredentialErrorLiveData.value = Event(NoBindedCredentialThrowable())
+                    onSuccess = { (status, error) ->
                         Timber.d("Save bind credential wallet action success")
+                        handleSavingWalletAction(status, error)
                     },
                     onError = { Timber.e("Save bind credential error: $it") }
                 )
+        }
+    }
+
+    private fun handleSavingWalletAction(status: Int, error: Throwable?) {
+        when {
+            status == FAILED && error is AutomaticBackupFailedThrowable ->
+                _bindCredentialErrorLiveData.value = Event(AutomaticBackupFailedThrowable())
+            status == FAILED -> _bindCredentialErrorLiveData.value = Event(NoBindedCredentialThrowable())
+
         }
     }
 

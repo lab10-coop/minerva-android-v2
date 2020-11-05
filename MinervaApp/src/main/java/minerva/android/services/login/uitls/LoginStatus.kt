@@ -14,5 +14,7 @@ annotation class LoginStatus {
         const val KNOWN_USER = 1
         const val NEW_QUICK_USER = 2
         const val KNOWN_QUICK_USER = 3
+        const val BACKUP_FAILURE = 4
+        const val DEFAULT_STATUS = 5
     }
 }

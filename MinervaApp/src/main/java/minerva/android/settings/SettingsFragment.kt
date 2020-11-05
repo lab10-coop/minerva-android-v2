@@ -28,7 +28,7 @@ class SettingsFragment : BaseFragment() {
     private val settingsAdapter by lazy {
         SettingsAdapter(
             { onSettingsRowClicked(it) },
-            { onUseMainNetworkCheckedChange(it) }).apply { updateList(viewModel.isMnemonicRemembered(), propagateSettings()) }
+            { onUseMainNetworkCheckedChange(it) }).apply { updateList(viewModel.isMnemonicRemembered, propagateSettings()) }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -53,10 +53,10 @@ class SettingsFragment : BaseFragment() {
     }
 
     private fun hideReminder() {
-        if (viewModel.isMnemonicRemembered()) {
+        if (viewModel.isMnemonicRemembered && viewModel.isSynced) {
             interactor.removeSettingsBadgeIcon()
-            settingsAdapter.updateList(viewModel.isMnemonicRemembered(), propagateSettings())
         }
+        settingsAdapter.updateList(viewModel.isMnemonicRemembered, propagateSettings())
     }
 
     private fun showBackupActivity() {

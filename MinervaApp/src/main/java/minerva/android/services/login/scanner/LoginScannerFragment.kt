@@ -12,6 +12,7 @@ import minerva.android.R
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.LoginScannerListener
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.model.ServiceQrCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -59,12 +60,17 @@ class LoginScannerFragment : BaseScanner() {
                 EventObserver { listener.onScannerResult(false, getString(R.string.invalid_signature_error_message)) })
             knownUserLoginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false, payload = it) })
             bindCredentialSuccessLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(true, it) })
-            bindCredentialErrorLiveData.observe(
-                viewLifecycleOwner,
-                EventObserver { listener.onScannerResult(false, getString(R.string.attached_credential_failure)) })
+            bindCredentialErrorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(false, getErrorMessage(it)) })
             updateBindedCredential.observe(viewLifecycleOwner, EventObserver { listener.updateBindedCredential(it) })
         }
     }
+
+    private fun getErrorMessage(it: Throwable): String =
+        if (it is AutomaticBackupFailedThrowable) {
+            getString(R.string.automatic_backup_failed_error)
+        } else {
+            getString(R.string.attached_credential_failure)
+        }
 
     private fun goToChooseIdentityFragment(qrCodeCode: ServiceQrCode) {
         Handler().postDelayed({ listener.showChooseIdentityFragment(qrCodeCode) }, DELAY)

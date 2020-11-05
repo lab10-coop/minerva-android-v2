@@ -11,8 +11,8 @@ import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.settings.model.SettingRow
 import minerva.android.settings.model.Settings
 import minerva.android.settings.model.SettingsRowType
-import minerva.android.settings.model.SettingsType
-import minerva.android.widget.BackupReminderView
+import minerva.android.settings.model.SettingsSection
+import minerva.android.widget.ReminderView
 import minerva.android.widget.SettingItem
 
 class SettingsAdapter(
@@ -50,7 +50,7 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
         view.run {
             sectionTitle.text = settings.sectionTitle
             addSettingRows(settings, isMnemonicRemembered, onSettingPressed, onCheckedChange)
-            settingsSeparator.visibleOrGone(settings.type != SettingsType.LEGAL)
+            settingsSeparator.visibleOrGone(settings.section != SettingsSection.LEGAL)
         }
     }
 
@@ -62,11 +62,15 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
     ) {
         settingRows.removeAllViews()
 
-        if (settings.type == SettingsType.SECURITY && !isMnemonicRemembered) {
-            settingRows.addView(BackupReminderView(context))
+        if (shouldShowAlerts(settings)) {
+            settingRows.addView(
+                ReminderView(
+                    context,
+                    rows = settings.rows.filter { it.rowType == SettingsRowType.REMINDER_VIEW && it.isVisible })
+            )
         }
 
-        settings.rows.forEach { settingRow ->
+        settings.rows.filter { it.rowType != SettingsRowType.REMINDER_VIEW }.forEach { settingRow ->
             settingRows.addView(SettingItem(context).apply {
                 setRow(settingRow)
                 setOnClickListener { onSettingPressed(settingRow.rowType) }
@@ -75,6 +79,9 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
             })
         }
     }
+
+    private fun shouldShowAlerts(settings: Settings) =
+        settings.section == SettingsSection.SECURITY && settings.rows.any { it.rowType == SettingsRowType.REMINDER_VIEW && it.isVisible }
 
     private fun SettingItem.setIcon(settingRow: SettingRow, isMnemonicRemembered: Boolean) {
         if (settingRow.iconId != Int.InvalidValue) {

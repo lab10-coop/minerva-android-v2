@@ -49,12 +49,10 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
             masterSeedRepository.restoreMasterSeed(mnemonic)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onSuccess = { handleGetWalletConfigResponse(it) },
-                    onError = {
-                        _errorLiveData.value = Event(it)
-                        //_restoreWalletMutableLiveData.value = Event(it) uncomment when offline app is needed, test that
-                    }
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }

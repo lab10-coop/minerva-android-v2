@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.graphics.drawable.toBitmap
-import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.textfield.TextInputEditText
@@ -26,6 +25,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.ADDRESS_1
@@ -53,7 +53,7 @@ import timber.log.Timber
 import java.util.*
 
 
-class EditIdentityFragment : Fragment() {
+class EditIdentityFragment : BaseFragment() {
     private var index: Int = Int.InvalidIndex
     private var serviceQrCode: ServiceQrCode? = null
     private lateinit var identity: Identity
@@ -281,8 +281,10 @@ class EditIdentityFragment : Fragment() {
                 })
                 activity?.onBackPressed()
             })
-            saveErrorLiveData.observe(viewLifecycleOwner, EventObserver { showErrorMessage(it.message) })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
+            errorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { handleAutomaticBackupError(it, noAutomaticBackupErrorAction = { activity?.finish() }) })
         }
         arguments?.let {
             index = it.getInt(POSITION)

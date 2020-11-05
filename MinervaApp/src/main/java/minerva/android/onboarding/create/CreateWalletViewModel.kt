@@ -8,37 +8,25 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
+import timber.log.Timber
 
 class CreateWalletViewModel(private val masterSeedRepository: MasterSeedRepository) : BaseViewModel() {
 
     private val _createWalletLiveData = MutableLiveData<Event<Unit>>()
     val createWalletLiveData: LiveData<Event<Unit>> get() = _createWalletLiveData
 
-    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
-    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
-
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
-    fun createMasterSeed() {
+    fun createWalletConfig() {
         launchDisposable {
-            masterSeedRepository.createMasterSeed()
+            masterSeedRepository.createWalletConfig()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = {
-                        masterSeedRepository.initWalletConfig()
-                        _createWalletLiveData.value = Event(Unit)
-                    },
-                    onError = {
-                        _errorLiveData.value = Event(it)
-                        //Panic Button. Uncomment code below to save manually - not recommended
-                        //_createWalletMutableLiveData.value = Event(Unit) //uncomment when offline app is needed
-                    }
-                )
+                .doOnTerminate { _createWalletLiveData.value = Event(Unit) }
+                .subscribeBy(onError = { Timber.e("Create wallet error: $it") })
         }
     }
-
 }

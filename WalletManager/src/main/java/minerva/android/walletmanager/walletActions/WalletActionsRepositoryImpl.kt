@@ -2,10 +2,12 @@ package minerva.android.walletmanager.walletActions
 
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Observer
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
+import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.DateUtils.isTheSameDay
 import minerva.android.kotlinUtils.InvalidIndex
@@ -17,9 +19,10 @@ import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
 import minerva.android.walletmanager.model.mappers.WalletActionsMapper
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
+import timber.log.Timber
 
 class WalletActionsRepositoryImpl(
-    private val minervaApi: MinervaApi,
+    private val minervaApi: MinervaApiRepository,
     private val localWalletActionsConfigProvider: LocalWalletActionsConfigProvider,
     private val walletConfigManager: WalletConfigManager
 ) : WalletActionsRepository {
@@ -41,7 +44,11 @@ class WalletActionsRepositoryImpl(
                     Observable.just(
                         WalletActionsMapper.map(it.walletActionsConfigPayload.actions).sortedByDescending { action -> action.lastUsed })
                 }
-        )
+        ).onErrorResumeNext { _: Observer<in List<WalletActionClustered>> ->
+            Observable.just(localWalletActionsConfigProvider.loadWalletActionsConfig())
+                .flatMap { Observable.just(WalletActionsMapper.map(it.actions).sortedByDescending { action -> action.lastUsed }) }
+
+        }
 
     override fun saveWalletActions(walletActions: List<WalletAction>): Completable {
         val payloads: MutableList<WalletActionPayload> = mutableListOf()
@@ -72,8 +79,7 @@ class WalletActionsRepositoryImpl(
     }
 
     private fun updateWalletActionsConfig(walletActionsConfig: WalletActionsConfigPayload, masterSeed: MasterSeed): Completable =
-        WalletActionsConfigPayload(_version = walletActionsConfig.updateVersion, _actions = walletActionsConfig.actions).run {
-            return minervaApi.saveWalletActions(walletActionsConfigPayload = this, publicKey = encodePublicKey(masterSeed.publicKey))
-                .doOnComplete { localWalletActionsConfigProvider.saveWalletActionsConfig(this) }
-        }
+        minervaApi.saveWalletActions(walletActionsConfigPayload = walletActionsConfig, publicKey = encodePublicKey(masterSeed.publicKey))
+            .doOnTerminate { localWalletActionsConfigProvider.saveWalletActionsConfig(walletActionsConfig) }
+            .onErrorComplete()
 }
