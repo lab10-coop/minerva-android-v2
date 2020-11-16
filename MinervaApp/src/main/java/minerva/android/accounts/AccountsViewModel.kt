@@ -13,6 +13,7 @@ import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
+import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.*
@@ -44,6 +45,9 @@ class AccountsViewModel(
 
     private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData = MutableLiveData<Event<Throwable>>()
     val balanceIsNotEmptyAndHasMoreOwnersErrorLiveData: LiveData<Event<Throwable>> get() = _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData
+
+    private val _balanceIsNotEmptyErrorLiveData = MutableLiveData<Event<Throwable>>()
+    val balanceIsNotEmptyErrorLiveData: LiveData<Event<Throwable>> get() = _balanceIsNotEmptyErrorLiveData
 
     private val _isNotSafeAccountMasterOwnerErrorLiveData = MutableLiveData<Event<Throwable>>()
     val isNotSafeAccountMasterOwnerErrorLiveData: LiveData<Event<Throwable>> get() = _isNotSafeAccountMasterOwnerErrorLiveData
@@ -109,6 +113,7 @@ class AccountsViewModel(
                     onError = {
                         Timber.e("Removing account with index ${account.index} failure")
                         when (it) {
+                            is BalanceIsNotEmptyThrowable -> _balanceIsNotEmptyErrorLiveData.value = Event(it)
                             is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
                             is IsNotSafeAccountMasterOwnerThrowable -> _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
                             is AutomaticBackupFailedThrowable -> _automaticBackupErrorLiveData.value = Event(it)

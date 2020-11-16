@@ -121,7 +121,9 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
                 swipeRefresh.isRefreshing = false
             })
             accountAssetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver { showErrorFlashbar(getString(R.string.error_header), it.message) })
+            errorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { showErrorFlashbar(getString(R.string.error_header), getString(R.string.unexpected_error)) })
             noFundsLiveData.observe(viewLifecycleOwner, Observer {
                 MinervaFlashbar.show(requireActivity(), getString(R.string.no_funds), getString(R.string.no_funds_message))
             })
@@ -130,6 +132,9 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
             })
             balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.cannot_remove_safe_account_title), getString(R.string.cannot_remove_safe_account_message))
+            })
+            balanceIsNotEmptyErrorLiveData.observe(viewLifecycleOwner, EventObserver {
+                showErrorFlashbar(getString(R.string.cannot_remove_account_title), getString(R.string.cannot_remove_account_message))
             })
             isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))

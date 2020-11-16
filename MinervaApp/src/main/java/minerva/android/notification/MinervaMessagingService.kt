@@ -32,7 +32,7 @@ class MinervaMessagingService : FirebaseMessagingService() {
         NotificationCompat.Builder(this, applicationContext.getString(R.string.channel_id))
             .setSmallIcon(R.drawable.ic_minerva_icon)
             .setContentTitle(getString(R.string.login_notification_title))
-            .setContentText(getString(R.string.login_reqeust_message))
+            .setContentText(getString(R.string.login_request_message))
             .setAutoCancel(true)
             .setContentIntent(getPendingIntent(jwt))
 

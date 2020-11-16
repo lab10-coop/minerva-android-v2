@@ -8,10 +8,7 @@ import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
-import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
-import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
-import minerva.android.walletmanager.exception.MissingAccountThrowable
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
+import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountAsset
@@ -72,15 +69,15 @@ class AccountManagerImpl(
     override fun removeAccount(index: Int): Completable {
         walletConfigManager.getWalletConfig()?.let {
             val newAccounts = it.accounts.toMutableList()
-            it.accounts.forEachIndexed { position, value ->
-                if (value.index == index) {
+            it.accounts.forEachIndexed { position, account ->
+                if (account.index == index) {
                     when {
-                        areFundsOnValue(value.cryptoBalance, value.accountAssets) || hasMoreOwners(value) ->
-                            return Completable.error(BalanceIsNotEmptyAndHasMoreOwnersThrowable())
-                        isNotSafeAccountMasterOwner(it.accounts, value) ->
+                        areFundsOnValue(account.cryptoBalance, account.accountAssets) ->
+                            return handleNoFundsError(account)
+                        isNotSafeAccountMasterOwner(it.accounts, account) ->
                             return Completable.error(IsNotSafeAccountMasterOwnerThrowable())
                     }
-                    newAccounts[position] = Account(value, true)
+                    newAccounts[position] = Account(account, true)
                     return walletConfigManager.updateWalletConfig(it.copy(version = it.updateVersion, accounts = newAccounts))
                 }
             }
@@ -89,16 +86,18 @@ class AccountManagerImpl(
         throw NotInitializedWalletConfigThrowable()
     }
 
+    private fun handleNoFundsError(account: Account): Completable =
+        if (account.isSafeAccount) {
+            Completable.error(BalanceIsNotEmptyAndHasMoreOwnersThrowable())
+        } else {
+            Completable.error(BalanceIsNotEmptyThrowable())
+        }
+
     private fun isNotSafeAccountMasterOwner(accounts: List<Account>, account: Account): Boolean {
         account.owners?.let {
             accounts.forEach { if (it.address == account.masterOwnerAddress) return false }
             return true
         }
-        return false
-    }
-
-    private fun hasMoreOwners(account: Account): Boolean {
-        account.owners?.let { return it.size > 1 }
         return false
     }
 
