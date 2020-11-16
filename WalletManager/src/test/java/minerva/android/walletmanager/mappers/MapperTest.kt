@@ -92,7 +92,7 @@ class MapperTest {
             identityData,
             true
         )
-        val identity = mapIdentityPayloadToIdentity(identityResponse)
+        val identity = IdentityPayloadToIdentityMapper.map(identityResponse)
 
         identity.index shouldBeEqualTo identityResponse.index
         identity.name shouldBeEqualTo identityResponse.name
@@ -183,7 +183,7 @@ class MapperTest {
     fun `Mapping ValueResponse to Value Test`() {
         accountsResponse[0].let {
             NetworkManager.initialize(networks)
-            val value = mapAccountResponseToAccount(it)
+            val value = AccountPayloadToAccountMapper.map(it)
 
             value.index shouldBeEqualTo it.index
             value.name shouldBeEqualTo it.name

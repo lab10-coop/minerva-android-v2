@@ -11,11 +11,9 @@ import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
-import io.reactivex.functions.Function3
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_transactions.*
 import minerva.android.R
@@ -30,7 +28,6 @@ import minerva.android.walletmanager.model.TransactionCost
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -74,8 +71,8 @@ class TransactionsFragment : Fragment() {
         viewModel.apply {
             transactionCompletedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onTransactionAccepted() })
             sendTransactionLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionStatus(it) })
-            errorLiveData.observe(viewLifecycleOwner, Observer {
-                it.peekContent().message?.let { message -> showErrorFlashBar(message) } ?: showErrorFlashBar()
+            errorLiveData.observe(viewLifecycleOwner, EventObserver {
+                it.message?.let { message -> showErrorFlashBar(message) } ?: showErrorFlashBar()
             })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
             saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onError(it.first) })
@@ -87,6 +84,11 @@ class TransactionsFragment : Fragment() {
     private fun handleTransactionCosts(it: TransactionCost) {
         transactionCostLayout.isEnabled = true
         arrow.visible()
+
+        if (getAmount() == viewModel.account.cryptoBalance) {
+            amount.setText(viewModel.recalculateAmount(getAmount(), it.cost))
+        }
+
         if (shouldSetTransactionCosts(it.cost.toString())) {
             handleGasLimitDefaultValue(it)
             setTransactionsCosts(it)
@@ -189,10 +191,6 @@ class TransactionsFragment : Fragment() {
             transactionCostAmount.text =
                 getString(R.string.transaction_cost_amount, it.cost.toPlainString(), viewModel.token)
         }
-        calculateTransactionCost()
-    }
-
-    private fun calculateTransactionCost() {
         setGasPriceOnTextChangedListener()
         setGasLimitOnTextChangedListener()
     }
@@ -219,19 +217,25 @@ class TransactionsFragment : Fragment() {
         }
     }
 
-    private fun canCalculateTransactionCost(input: String, editText: EditText) =
-        input.isNotEmpty() && editText.text?.isNotEmpty() == true
-
-    private fun clearTransactionCost() {
-        transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
-    }
-
     private fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger) {
         transactionCostAmount.text = getString(
             R.string.transaction_cost_amount,
             viewModel.calculateTransactionCost(gasPrice, gasLimit),
             viewModel.token
         )
+    }
+
+    private fun setAddressScannerListener() {
+        amount.onRightDrawableClicked {
+            it.setText(viewModel.getAllAvailableFunds())
+        }
+    }
+
+    private fun canCalculateTransactionCost(input: String, editText: EditText) =
+        input.isNotEmpty() && editText.text?.isNotEmpty() == true
+
+    private fun clearTransactionCost() {
+        transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
     }
 
     override fun onAttach(context: Context) {
@@ -245,12 +249,6 @@ class TransactionsFragment : Fragment() {
         setOnTransactionCostOnClickListener()
         setGetAllBalanceListener()
         setAddressScannerListener()
-    }
-
-    private fun setAddressScannerListener() {
-        amount.onRightDrawableClicked {
-            it.setText(viewModel.getAllAvailableFunds())
-        }
     }
 
     private fun setGetAllBalanceListener() {

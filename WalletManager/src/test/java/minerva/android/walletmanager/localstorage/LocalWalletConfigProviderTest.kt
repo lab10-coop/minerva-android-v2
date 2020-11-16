@@ -3,7 +3,7 @@ package minerva.android.walletmanager.localstorage
 import android.content.SharedPreferences
 import io.mockk.*
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProviderImpl
+import minerva.android.configProvider.localProvider.LocalWalletConfigProviderImpl
 import org.junit.Test
 
 class LocalWalletConfigProviderTest {
@@ -20,6 +20,15 @@ class LocalWalletConfigProviderTest {
         localStorage.saveWalletConfig(WalletConfigPayload())
         verify {
             sharedPref.edit().putString(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
+    }
+
+    @Test
+    fun `get wallet config test`() {
+        localStorage.getWalletConfig()
+        verify {
+            sharedPref.getString(any(), "")
         }
         confirmVerified(sharedPref)
     }

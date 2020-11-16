@@ -4,17 +4,22 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.configProvider.api.MinervaApi
+import minerva.android.configProvider.migration.Migration
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import retrofit2.HttpException
 import java.net.HttpURLConnection
 
 class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiRepository {
 
-    override fun getWalletConfig(publicKey: String): Single<WalletConfigResponse> =
+    override fun getWalletConfig(publicKey: String): Single<WalletConfigPayload> =
         api.getWalletConfig(publicKey = publicKey)
+            .map { Migration.migrateIfNeeded(it) }
+
+    override fun getWalletConfigVersion(publicKey: String): Single<Int> =
+        api.getWalletConfigVersion(publicKey = publicKey)
+            .map { it.version }
 
     override fun saveWalletConfig(publicKey: String, walletConfigPayload: WalletConfigPayload): Completable =
         api.saveWalletConfig(publicKey = publicKey, walletConfigPayload = walletConfigPayload)

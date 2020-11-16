@@ -32,8 +32,9 @@ import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepositoryImpl
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProviderImpl
-import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
-import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProviderImpl
+import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
+import minerva.android.configProvider.localProvider.LocalWalletConfigProviderImpl
+import minerva.android.configProvider.localSharedPrefs
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -53,12 +54,11 @@ fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, binanceUrl: St
     .plus(createExchangeRateProviderModule(isDebug, binanceUrl))
 
 fun createWalletModules() = module {
-    factory(named(localSharedPrefs)) { androidContext().getSharedPreferences(LocalStorage, Context.MODE_PRIVATE) }
+    factory(named(localSharedPrefs)) { androidContext().getSharedPreferences(localStorage, Context.MODE_PRIVATE) }
     factory(named(minervaSharedPrefs)) { androidContext().getSharedPreferences(MinervaStorage, Context.MODE_PRIVATE) }
     factory { KeyStoreManager() }
     factory<KeystoreRepository> { KeystoreRepositoryImpl(get(named(minervaSharedPrefs)), get()) }
     factory<LocalStorage> { LocalStorageImpl(get(named(localSharedPrefs))) }
-    factory<LocalWalletConfigProvider> { LocalWalletConfigProviderImpl(get(named(localSharedPrefs))) }
     factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
@@ -71,8 +71,7 @@ fun createWalletModules() = module {
     factory<OrderManager> { OrderManagerImpl(get()) }
 }
 
-private const val LocalStorage = "LocalStorage"
-private const val localSharedPrefs = "local"
-
 private const val MinervaStorage = "MinervaSharedPrefs"
 private const val minervaSharedPrefs = "minerva"
+
+const val localStorage = "LocalStorage"

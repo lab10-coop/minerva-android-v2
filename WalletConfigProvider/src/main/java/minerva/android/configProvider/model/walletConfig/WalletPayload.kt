@@ -2,8 +2,11 @@ package minerva.android.configProvider.model.walletConfig
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidValue
 
 data class WalletConfigPayload(
+    @SerializedName("modelVersion")
+    var modelVersion: Double? = Double.InvalidValue,
     @SerializedName("version")
     private var _version: Int? = Int.InvalidId,
     @SerializedName("identities")
