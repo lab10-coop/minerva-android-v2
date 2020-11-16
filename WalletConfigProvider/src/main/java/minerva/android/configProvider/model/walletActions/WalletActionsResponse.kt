@@ -5,7 +5,7 @@ import minerva.android.kotlinUtils.Empty
 
 data class WalletActionsResponse(
     @SerializedName("state")
-    private val _state: String? = String.Empty,
+    val state: String? = String.Empty,
     @SerializedName("message")
     private val _message: String? = String.Empty,
     @SerializedName("data")

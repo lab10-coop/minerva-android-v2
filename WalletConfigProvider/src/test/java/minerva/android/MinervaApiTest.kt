@@ -12,9 +12,9 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.createWalletConfigProviderModule
+import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.kotlinUtils.Empty
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -75,11 +75,14 @@ class MinervaApiTest : KoinTest {
         mockHttpResponse(
             mockServer = mockServer,
             responseCode = HttpsURLConnection.HTTP_OK,
-            json = "{\"state\": \"success\", \"message\": \"The file has been loaded!\", \"data\": {\"version\": \"1\",\"identities\" : [{\"name\": \"test1\",\"index\": \"1\",\"data\": {\"name\": \"James\",\"email\": \"james@test.pl\" } }],\"values\" : [] } }"
+            json = "{\"version\": \"1\",\"identities\" : [{\"name\": \"test1\",\"index\": \"1\",\"data\": {\"name\": \"James\",\"email\": \"james@test.pl\" } }],\"values\" : [] }"
         )
-        api.getWalletConfig(publicKey = "12345678").test().assertValue {
-            it.state == "success"
-        }
+        api.getWalletConfig(publicKey = "12345678").test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it == "{\"version\": \"1\",\"identities\" : [{\"name\": \"test1\",\"index\": \"1\",\"data\": {\"name\": \"James\",\"email\": \"james@test.pl\" } }],\"values\" : [] }"
+            }
     }
 
     @Test
@@ -89,9 +92,42 @@ class MinervaApiTest : KoinTest {
             responseCode = HttpsURLConnection.HTTP_OK,
             json = "{}"
         )
-        api.getWalletConfig(publicKey = "12345678").test().assertValue {
-            it.state == String.Empty
-        }
+        api.getWalletConfig(publicKey = "12345678")
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it == "{}"
+            }
+    }
+
+    @Test
+    fun `get wallet config version should return success`() {
+        mockHttpResponse(
+            mockServer = mockServer,
+            responseCode = HttpsURLConnection.HTTP_OK,
+            json = "{\"version\": \"1\"}"
+        )
+        api.getWalletConfigVersion(publicKey = "1234")
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it.version == 1
+            }
+    }
+
+    @Test(expected = Throwable::class)
+    fun `get wallet config version should return error`() {
+        mockHttpResponse(
+            mockServer = mockServer,
+            responseCode = HttpsURLConnection.HTTP_BAD_REQUEST,
+            json = "{}"
+        )
+        api.getWalletConfigVersion(publicKey = "1234")
+            .test()
+            .await()
+            .assertError(Throwable())
     }
 
     @Test
@@ -128,6 +164,64 @@ class MinervaApiTest : KoinTest {
                 )
             )
         ).test().await().assertError(Throwable())
+    }
+
+    @Test
+    fun `get wallet actions success test`() {
+        mockHttpResponse(
+            mockServer = mockServer,
+            responseCode = HttpsURLConnection.HTTP_OK,
+            json = "{\"state\": \"success\"}"
+        )
+        api.getWalletActions(publicKey = "1234")
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue {
+                it.state == "success"
+            }
+    }
+
+    @Test(expected = Throwable::class)
+    fun `get wallet actions error test`() {
+        mockHttpResponse(
+            mockServer = mockServer,
+            responseCode = HttpsURLConnection.HTTP_BAD_REQUEST,
+            json = "{\"state\": \"error\"}"
+        )
+        api.getWalletActions(publicKey = "1234")
+            .test()
+            .assertError(Throwable())
+            .assertValue {
+                it.state == "error"
+            }
+    }
+
+    @Test
+    fun `send wallet actions should return success`() {
+        mockHttpResponse(
+            mockServer = mockServer,
+            responseCode = HttpsURLConnection.HTTP_OK,
+            json = "{}"
+        )
+
+        api.saveWalletActions(publicKey = "1234", walletActionsConfigPayload = WalletActionsConfigPayload(_version = 1))
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+    }
+
+    @Test(expected = Throwable::class)
+    fun `send wallet actions should return error`() {
+        mockHttpResponse(
+            mockServer = mockServer,
+            responseCode = HttpsURLConnection.HTTP_BAD_REQUEST,
+            json = "{}"
+        )
+
+        api.saveWalletActions(publicKey = "1234", walletActionsConfigPayload = WalletActionsConfigPayload(_version = 1))
+            .test()
+            .assertError(Throwable())
     }
 
     private fun mockHttpResponse(mockServer: MockWebServer, responseCode: Int, json: String) =

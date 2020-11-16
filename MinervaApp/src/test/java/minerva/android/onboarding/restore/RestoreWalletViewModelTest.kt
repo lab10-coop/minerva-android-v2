@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
+import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
@@ -47,9 +48,9 @@ class RestoreWalletViewModelTest : BaseViewModelTest() {
     @Test
     fun `test restore wallet from mnemonic file not found error`() {
         val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture"
-        whenever(masterSeedRepository.restoreMasterSeed(any())).doReturn(Single.just(RestoreWalletResponse("error", "File fetched error")))
+        val error = Throwable()
+        whenever(masterSeedRepository.restoreMasterSeed(any())).doReturn(Completable.error(error))
         whenever(masterSeedRepository.validateMnemonic(mnemonic)).thenReturn(emptyList())
-        viewModel.invalidMnemonicLiveData.observeForever(invalidMnemonicObserver)
         viewModel.walletConfigNotFoundLiveData.observeForever(walletConfigNotFoundObserver)
         viewModel.validateMnemonic(mnemonic)
         walletConfigNotFoundCaptor.run {
@@ -61,9 +62,9 @@ class RestoreWalletViewModelTest : BaseViewModelTest() {
     fun `test restore wallet from mnemonic error`() {
         val error = Throwable()
         val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture"
-        whenever(masterSeedRepository.restoreMasterSeed(any())).doReturn(Single.error(error))
+        whenever(masterSeedRepository.restoreMasterSeed(any())).doReturn(Completable.error(error))
         viewModel.validateMnemonic(mnemonic)
-        viewModel.errorLiveData.observeLiveDataEvent(Event(error))
+        viewModel.walletConfigNotFoundLiveData.observeLiveDataEvent(Event(Unit))
     }
 
     @Test

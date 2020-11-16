@@ -8,10 +8,9 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.model.RestoreWalletResponse
 import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.walletmanager.model.defs.ResponseState
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
+import timber.log.Timber
 import java.util.*
 
 class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedRepository) : BaseViewModel() {
@@ -49,17 +48,15 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
             masterSeedRepository.restoreMasterSeed(mnemonic)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { _, _ -> _loadingLiveData.value = Event(false) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onSuccess = { handleGetWalletConfigResponse(it) },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onComplete = { masterSeedRepository.initWalletConfig() },
+                    onError = {
+                        Timber.e(it)
+                        _walletConfigNotFoundLiveData.value = Event(Unit)
+                    }
                 )
         }
-    }
-
-    private fun handleGetWalletConfigResponse(response: RestoreWalletResponse) {
-        if (response.state == ResponseState.ERROR) _walletConfigNotFoundLiveData.value = Event(Unit)
-        else masterSeedRepository.initWalletConfig()
     }
 
     companion object {

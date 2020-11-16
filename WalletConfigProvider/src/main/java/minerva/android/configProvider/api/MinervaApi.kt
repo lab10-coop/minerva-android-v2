@@ -6,17 +6,23 @@ import io.reactivex.Single
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.configProvider.model.walletConfig.WalletConfigVersion
 import retrofit2.http.*
 
 interface MinervaApi {
-    @GET("backups/{$PUBLIC_KEY}")
+    @GET("v2/backups/{$PUBLIC_KEY}")
     fun getWalletConfig(
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
         @Path(PUBLIC_KEY) publicKey: String
-    ): Single<WalletConfigResponse>
+    ): Single<String>
 
-    @PUT("backups/{$PUBLIC_KEY}")
+    @GET("v2/backups/{$PUBLIC_KEY}")
+    fun getWalletConfigVersion(
+        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
+        @Path(PUBLIC_KEY) publicKey: String
+    ): Single<WalletConfigVersion>
+
+    @PUT("v2/backups/{$PUBLIC_KEY}")
     fun saveWalletConfig(
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
         @Path(PUBLIC_KEY) publicKey: String, @Body walletConfigPayload: WalletConfigPayload

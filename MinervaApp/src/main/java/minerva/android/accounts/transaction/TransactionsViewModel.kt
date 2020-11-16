@@ -250,6 +250,9 @@ class TransactionsViewModel(
         }
     }
 
+    fun recalculateAmount(amount: BigDecimal, cost: BigDecimal): String =
+        amount.subtract(cost).toPlainString()
+
     fun prepareCurrency() =
         if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.nameShort else account.network.token
 
@@ -272,7 +275,7 @@ class TransactionsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("${transaction.amount} ${account.network}", FAILED)) },
+                    onComplete = { _sendTransactionLiveData.value = Event(Pair("${transaction.amount} ${account.network.token}", FAILED)) },
                     onError = {
                         Timber.e("Save wallet action error $it")
                         _errorLiveData.value = Event(it)

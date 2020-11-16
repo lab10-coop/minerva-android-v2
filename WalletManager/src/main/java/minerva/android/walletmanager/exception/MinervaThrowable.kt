@@ -2,6 +2,7 @@ package minerva.android.walletmanager.exception
 
 class IsNotSafeAccountMasterOwnerThrowable : Throwable()
 class BalanceIsNotEmptyAndHasMoreOwnersThrowable : Throwable()
+class BalanceIsNotEmptyThrowable : Throwable()
 class NotInitializedWalletConfigThrowable : Throwable("Wallet Config was not initialized")
 class NoIdentityToRemoveThrowable : Throwable("Missing identity to remove")
 class CannotRemoveLastIdentityThrowable : Throwable("You can not remove last identity")
@@ -16,3 +17,4 @@ class NoAddressPageFragment : Throwable("This fragment type is not supported!")
 class NoBindedCredentialThrowable : Throwable("There is no such Credential binded to any Identity")
 class NoLoggedInIdentityThrowable : Throwable("The provided did does not match to any existed Identity")
 class AutomaticBackupFailedThrowable : Throwable()
+class MinervaIncompatibleModelThrowable : Throwable("Incompatible model versions exception")

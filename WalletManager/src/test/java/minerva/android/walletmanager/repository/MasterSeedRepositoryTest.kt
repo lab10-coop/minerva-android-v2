@@ -74,14 +74,11 @@ class MasterSeedRepositoryTest {
     @Test
     fun `restore master seed test`() {
         whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn Single.just(Triple("key1", "key2", "key3"))
-        whenever(walletConfigManager.restoreWalletConfig(any())) doReturn Single.just(RestoreWalletResponse(message = "test"))
+        whenever(walletConfigManager.restoreWalletConfig(any())) doReturn Completable.complete()
         repository.restoreMasterSeed("mnemonic")
             .test()
             .assertNoErrors()
             .assertComplete()
-            .assertValue {
-                it.message == "test"
-            }
     }
 
     @Test
