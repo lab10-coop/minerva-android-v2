@@ -2,6 +2,7 @@ package minerva.android.walletmanager.exception
 
 class IsNotSafeAccountMasterOwnerThrowable : Throwable()
 class BalanceIsNotEmptyAndHasMoreOwnersThrowable : Throwable()
+class BalanceIsNotEmptyThrowable : Throwable()
 class NotInitializedWalletConfigThrowable : Throwable("Wallet Config was not initialized")
 class NoIdentityToRemoveThrowable : Throwable("Missing identity to remove")
 class CannotRemoveLastIdentityThrowable : Throwable("You can not remove last identity")

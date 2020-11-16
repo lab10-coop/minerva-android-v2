@@ -57,16 +57,22 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
                 }
             })
             showPaymentConfirmationLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { showConfirmTransactionScreen() })
-            errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver {
-                if (it is AutomaticBackupFailedThrowable)
-                    Toast.makeText(
-                        this@ThirdPartyIntegrationActivity,
-                        getString(R.string.automatic_backup_failed_error), Toast.LENGTH_LONG
-                    ).show()
-                finish()
-            })
+            errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { handleError(it) })
             onDenyConnectionSuccessLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { sendResult(ON_DENY_REQUEST) })
         }
+    }
+
+    private fun handleError(it: Throwable) {
+        if (it is AutomaticBackupFailedThrowable) {
+            showMessage(getString(R.string.automatic_backup_failed_error))
+        } else {
+            showMessage(getString(R.string.unexpected_error))
+        }
+        finish()
+    }
+
+    private fun showMessage(message: String) {
+        Toast.makeText(this@ThirdPartyIntegrationActivity, message, Toast.LENGTH_LONG).show()
     }
 
     private fun connectService(it: ConnectionRequest.ServiceNotConnected<Pair<Credential, CredentialRequest>>) {
