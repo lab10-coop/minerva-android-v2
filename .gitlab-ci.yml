@@ -34,9 +34,11 @@ distributeBuild:
   stage: distribution
   only:
     refs:
-      - develop
-      - debug
-#      - master
+      - master
+  #    check if distribution works only on master, this is what I want
+  #      - develop
+  #      - debug
+
   script:
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
