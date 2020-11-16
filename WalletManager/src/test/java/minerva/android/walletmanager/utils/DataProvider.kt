@@ -1,7 +1,6 @@
 package minerva.android.walletmanager.utils
 
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.WalletConfigTestValues.accountsResponse
 import minerva.android.walletmanager.model.WalletConfigTestValues.identityResponse
@@ -17,9 +16,10 @@ object DataProvider {
         "key3" to "value3"
     )
 
-    val localWalletConfigPayload = WalletConfigPayload(1, identityResponse, accountsResponse)
+    val localWalletConfigPayload = WalletConfigPayload(_version = 1, _identityPayloads = identityResponse, _accountPayloads = accountsResponse)
 
-    val onlineWalletConfigResponse = WalletConfigResponse("", "", WalletConfigPayload(0, onlineIdentityResponse, accountsResponse))
+    val onlineWalletConfigResponse =
+        WalletConfigPayload(_version = 0, _identityPayloads = onlineIdentityResponse, _accountPayloads = accountsResponse)
 
     val walletConfig = WalletConfig(
         0, listOf(

@@ -1,7 +1,5 @@
 package minerva.android.configProvider.retrofit
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.interceptor.HeaderInterceptor
 import okhttp3.OkHttpClient
@@ -39,16 +37,12 @@ object RetrofitProvider {
     ): Retrofit =
         Retrofit.Builder()
             .baseUrl(baseUrl)
-            .addConverterFactory(converterFactory)
             .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(okHttpClient)
             .build()
 
     fun provideMinervaApi(retrofit: Retrofit): MinervaApi = retrofit.create(MinervaApi::class.java)
-
-    private val gson: Gson = GsonBuilder().enableComplexMapKeySerialization().create()
-    private val converterFactory = GsonConverterFactory.create(gson)
-
     private const val TIMEOUT_TIME: Long = 500
 }

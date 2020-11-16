@@ -13,7 +13,7 @@ import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
+import minerva.android.configProvider.model.walletConfig.WalletConfigVersion
 import minerva.android.configProvider.repository.HttpBadRequestException
 import minerva.android.configProvider.repository.MinervaApiRepositoryImpl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -49,13 +49,13 @@ class MinervaApiRepositoryTest {
 
     @Test
     fun `get wallet config success`() {
-        every { api.getWalletConfig(any(), any()) } returns Single.just(WalletConfigResponse(_state = "state"))
+        every { api.getWalletConfig(any(), any()) } returns Single.just("{version:1}")
         repository.getWalletConfig("publicKeys")
             .test()
             .assertComplete()
             .assertNoErrors()
             .assertValue {
-                it.state == "state"
+                it.version == 1
             }
     }
 
@@ -64,6 +64,27 @@ class MinervaApiRepositoryTest {
         val error = Throwable()
         every { api.getWalletConfig(any(), any()) } returns Single.error(error)
         repository.getWalletConfig("publicKeys")
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `get wallet config version success`() {
+        every { api.getWalletConfigVersion(any(), any()) } returns Single.just(WalletConfigVersion(2))
+        repository.getWalletConfigVersion("publicKeys")
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue {
+                it == 2
+            }
+    }
+
+    @Test
+    fun `get wallet config version error`() {
+        val error = Throwable()
+        every { api.getWalletConfigVersion(any(), any()) } returns Single.error(error)
+        repository.getWalletConfigVersion("publicKeys")
             .test()
             .assertError(error)
     }

@@ -8,7 +8,6 @@ import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.configProvider.repository.HttpBadRequestException
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
@@ -26,7 +25,8 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils
 import minerva.android.walletmanager.utils.DataProvider.localWalletConfigPayload
 import minerva.android.walletmanager.utils.DataProvider.onlineWalletConfigResponse
-import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
+import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
+import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -68,6 +68,7 @@ class WalletConfigManagerTest {
 
     private fun mockWallet() {
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(minervaApi.getWalletConfigVersion(any())).doReturn(Single.just(1))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(
             MasterSeed(
                 _seed = "seed",
@@ -122,6 +123,7 @@ class WalletConfigManagerTest {
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
         whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
         whenever(localStorage.isBackupAllowed).thenReturn(true)
+        whenever(minervaApi.getWalletConfigVersion(any())).doReturn(Single.just(1))
         NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc"), Network(short = "RIN", httpRpc = "httpRpc")))
         whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.error(error))
         walletManager.initWalletConfig()
@@ -161,15 +163,12 @@ class WalletConfigManagerTest {
 
     @Test
     fun `restore wallet config success test`() {
-        whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.just(WalletConfigResponse(_message = "success")))
+        whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.just(WalletConfigPayload(_version = 1)))
         doNothing().whenever(keyStoreRepository).encryptMasterSeed(any())
         doNothing().whenever(localWalletConfigProvider).saveWalletConfig(any())
         walletManager.restoreWalletConfig(MasterSeed("123", "567"))
             .test()
             .assertComplete()
-            .assertValue {
-                it.message == "success"
-            }
     }
 
     @Test

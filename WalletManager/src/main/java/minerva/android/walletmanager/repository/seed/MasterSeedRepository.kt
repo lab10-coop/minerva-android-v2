@@ -16,7 +16,7 @@ interface MasterSeedRepository {
     fun isMnemonicRemembered(): Boolean
     fun isMasterSeedAvailable(): Boolean
     fun createWalletConfig(): Completable
-    fun restoreMasterSeed(mnemonic: String): Single<RestoreWalletResponse>
+    fun restoreMasterSeed(mnemonic: String): Completable
     fun initWalletConfig()
     fun dispose()
     fun getValueIterator(): Int

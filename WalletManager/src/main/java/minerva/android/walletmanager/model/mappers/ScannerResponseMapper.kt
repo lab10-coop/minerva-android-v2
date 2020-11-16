@@ -107,39 +107,3 @@ private fun getVerifiableCredentialsData(responseMap: Map<String, Any?>, type: S
 private fun getRequestedData(responseMap: Map<String, Any?>): ArrayList<String> =
     if (responseMap[REQUESTED] is ArrayList<*>?) responseMap[REQUESTED] as ArrayList<String>
     else arrayListOf()
-
-fun mapIdentityPayloadToIdentity(
-    response: IdentityPayload,
-    publicKey: String = String.Empty,
-    privateKey: String = String.Empty,
-    address: String = String.Empty
-): Identity =
-    Identity(
-        response.index,
-        response.name,
-        publicKey,
-        privateKey,
-        address,
-        response.data,
-        response.isDeleted,
-        ServicesResponseToServicesMapper.map(response.services)
-    )
-
-fun mapAccountResponseToAccount(
-    response: AccountPayload,
-    publicKey: String = String.Empty,
-    privateKey: String = String.Empty,
-    address: String = String.Empty
-): Account =
-    Account(
-        response.index,
-        publicKey,
-        privateKey,
-        address,
-        response.name,
-        NetworkManager.getNetwork(response.network),
-        response.isDeleted,
-        owners = response.owners,
-        contractAddress = response.contractAddress,
-        bindedOwner = response.bindedOwner
-    )
