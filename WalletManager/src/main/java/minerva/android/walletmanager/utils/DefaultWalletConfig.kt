@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.utils
 
+import minerva.android.configProvider.BuildConfig
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
@@ -11,9 +12,15 @@ object DefaultWalletConfig {
     val create: WalletConfigPayload
         get() =
             WalletConfigPayload(
-                DefaultWalletConfigIndexes.DEFAULT_VERSION,
-                listOf(IdentityPayload(DefaultWalletConfigIndexes.FIRST_IDENTITY_INDEX, DefaultWalletConfigFields.DEFAULT_IDENTITY_NAME)),
-                listOf(
+                _version = DefaultWalletConfigIndexes.DEFAULT_VERSION,
+                modelVersion = BuildConfig.MODEL_VERSION,
+                _identityPayloads = listOf(
+                    IdentityPayload(
+                        DefaultWalletConfigIndexes.FIRST_IDENTITY_INDEX,
+                        DefaultWalletConfigFields.DEFAULT_IDENTITY_NAME
+                    )
+                ),
+                _accountPayloads = listOf(
                     with(NetworkManager.firstDefaultValueNetwork()) {
                         AccountPayload(
                             DefaultWalletConfigIndexes.FIRST_ACCOUNTS_INDEX,

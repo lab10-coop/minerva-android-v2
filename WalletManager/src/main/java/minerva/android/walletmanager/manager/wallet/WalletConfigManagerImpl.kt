@@ -11,8 +11,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.configProvider.model.walletConfig.WalletConfigResponse
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
@@ -27,13 +27,11 @@ import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.ResponseState
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.utils.DefaultWalletConfig
 import minerva.android.walletmanager.utils.handleAutomaticBackupFailedError
-import minerva.android.walletmanager.walletconfig.localProvider.LocalWalletConfigProvider
 import timber.log.Timber
 
 class WalletConfigManagerImpl(
@@ -75,15 +73,12 @@ class WalletConfigManagerImpl(
             )
     }
 
-    override fun restoreWalletConfig(masterSeed: MasterSeed): Single<RestoreWalletResponse> =
+    override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
         minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
             .map {
-                if (it.state != ResponseState.ERROR) {
-                    keystoreRepository.encryptMasterSeed(masterSeed)
-                    localWalletProvider.saveWalletConfig(it.walletPayload)
-                }
-                RestoreWalletResponse(it.state, it.message)
-            }
+                keystoreRepository.encryptMasterSeed(masterSeed)
+                localWalletProvider.saveWalletConfig(it)
+            }.ignoreElement()
 
     override fun createWalletConfig(masterSeed: MasterSeed): Completable =
         minervaApi.saveWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey), walletConfigPayload = DefaultWalletConfig.create)
@@ -91,7 +86,7 @@ class WalletConfigManagerImpl(
             .doOnError { localStorage.isSynced = false }
             .doOnTerminate {
                 keystoreRepository.encryptMasterSeed(masterSeed)
-                localWalletProvider.saveWalletConfig()
+                localWalletProvider.saveWalletConfig(DefaultWalletConfig.create)
                 initWalletConfig()
             }
 
@@ -193,9 +188,9 @@ class WalletConfigManagerImpl(
                     .toObservable()
                     .doOnNext { localWalletConfigVersion = it.version }
                     .flatMap { completeKeys(masterSeed, it) },
-                minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
+                minervaApi.getWalletConfigVersion(publicKey = encodePublicKey(masterSeed.publicKey))
                     .toObservable()
-                    .flatMap { handleSync(it, masterSeed) }
+                    .flatMap { handleSync(it) }
             ).onErrorResumeNext { _: Observer<in WalletConfig> ->
                 localStorage.isSynced = false
                 getLocalWalletConfig(masterSeed)
@@ -204,13 +199,13 @@ class WalletConfigManagerImpl(
             getLocalWalletConfig(masterSeed)
         }
 
-    private fun handleSync(it: WalletConfigResponse, masterSeed: MasterSeed): Observable<WalletConfig> =
+    private fun handleSync(version: Int): Observable<WalletConfig> =
         when {
-            shouldBlockBackup(it.walletPayload.version) -> {
+            shouldBlockBackup(version) -> {
                 localStorage.isBackupAllowed = false
                 getLocalWalletConfig(masterSeed)
             }
-            shouldSync(it.walletPayload.version) -> syncWalletConfig(masterSeed)
+            shouldSync(version) -> syncWalletConfig(masterSeed)
             else -> {
                 localStorage.isSynced = true
                 getLocalWalletConfig(masterSeed)
@@ -237,38 +232,38 @@ class WalletConfigManagerImpl(
             .toObservable()
             .flatMap { completeKeys(masterSeed, it) }
 
-    private fun completeKeys(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> =
-        payload.identityResponse.let { identitiesResponse ->
-            payload.accountResponse.let { accountsResponse ->
-                Observable.range(START, identitiesResponse.size)
-                    .filter { !identitiesResponse[it].isDeleted }
-                    .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identitiesResponse[it].index) }
-                    .toList()
-                    .map { completeIdentitiesKeys(payload, it) }
-                    .map { completeIdentitiesProfileImages(it) }
-                    .zipWith(Observable.range(START, accountsResponse.size)
-                        .filter { !accountsResponse[it].isDeleted }
-                        .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, accountsResponse[it].index) }
-                        .toList()
-                        .map { completeAccountsKeys(payload, it) },
-                        BiFunction { identity: List<Identity>, account: List<Account> ->
-                            WalletConfig(
-                                payload.version,
-                                identity,
-                                account,
-                                ServicesResponseToServicesMapper.map(payload.serviceResponse),
-                                CredentialsPayloadToCredentials.map(payload.credentialResponse)
-                            )
-                        }
-                    ).toObservable()
-            }
-        }
+    private fun completeKeys(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> {
+        val identitiesResponse = payload.identityResponse
+        val accountsResponse = payload.accountResponse
+
+        return Observable.range(START, identitiesResponse.size)
+            .filter { !identitiesResponse[it].isDeleted }
+            .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identitiesResponse[it].index) }
+            .toList()
+            .map { completeIdentitiesKeys(payload, it) }
+            .map { completeIdentitiesProfileImages(it) }
+            .zipWith(Observable.range(START, accountsResponse.size)
+                .filter { !accountsResponse[it].isDeleted }
+                .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, accountsResponse[it].index) }
+                .toList()
+                .map { completeAccountsKeys(payload, it) },
+                BiFunction { identity: List<Identity>, account: List<Account> ->
+                    WalletConfig(
+                        payload.version,
+                        identity,
+                        account,
+                        ServicesResponseToServicesMapper.map(payload.serviceResponse),
+                        CredentialsPayloadToCredentials.map(payload.credentialResponse)
+                    )
+                }
+            ).toObservable()
+    }
 
     private fun completeIdentitiesKeys(walletConfigPayload: WalletConfigPayload, keys: List<DerivedKeys>): List<Identity> {
         val identities = mutableListOf<Identity>()
         walletConfigPayload.identityResponse.forEach { identityResponse ->
             getKeys(identityResponse.index, keys).let { key ->
-                identities.add(mapIdentityPayloadToIdentity(identityResponse, key.publicKey, key.privateKey, key.address))
+                identities.add(IdentityPayloadToIdentityMapper.map(identityResponse, key.publicKey, key.privateKey, key.address))
             }
         }
         return identities
@@ -286,7 +281,7 @@ class WalletConfigManagerImpl(
         walletConfigPayload.accountResponse.forEach { accountResponse ->
             getKeys(accountResponse.index, keys).let { key ->
                 val address = if (accountResponse.contractAddress.isEmpty()) key.address else accountResponse.contractAddress
-                accounts.add(mapAccountResponseToAccount(accountResponse, key.publicKey, key.privateKey, address))
+                accounts.add(AccountPayloadToAccountMapper.map(accountResponse, key.publicKey, key.privateKey, address))
             }
         }
         return accounts
