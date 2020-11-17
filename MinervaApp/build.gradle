@@ -22,7 +22,6 @@ android {
         applicationId "minerva.android"
         minSdkVersion 23
         targetSdkVersion 29
-        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "REST_API_URL", '"https://minerva-api.dev.lab10.io/"'
         buildConfigField "String", "BINANCE_URL", '"https://api.binance.com"'
@@ -53,14 +52,16 @@ android {
     productFlavors {
         flavorDimensions 'enviroment'
         staging {
-            versionCode Integer.valueOf(System.env.VERSION_CODE_STAGING ?: 1)
+            versionCode 2
+            versionName "1.0.1"
             dimension 'enviroment'
             applicationIdSuffix ".staging"
             versionNameSuffix '-staging'
         }
 
         production {
-            versionCode Integer.valueOf(System.env.VERSION_CODE_PROD ?: 1)
+            versionCode 1
+            versionName "1.0"
             dimension 'enviroment'
             versionNameSuffix '-release'
         }
