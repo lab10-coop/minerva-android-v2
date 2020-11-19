@@ -7,7 +7,6 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.defs.ServiceType
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Before
 import org.junit.Test

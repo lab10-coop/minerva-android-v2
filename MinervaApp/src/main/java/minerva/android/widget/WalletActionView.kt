@@ -19,7 +19,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.LOG
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.RECEIVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REJECTED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
-import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_ADDED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
@@ -74,7 +74,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
                 R.string.account_action_label,
                 R.drawable.ic_values
             )
-            SAFE_ACCOUNT_ADDED, SAFE_ACCOUNT_REMOVED -> showAction(
+            SA_ADDED, SAFE_ACCOUNT_REMOVED -> showAction(
                 walletAction.fields[WalletActionFields.ACCOUNT_NAME],
                 R.string.safe_account_action_label,
                 R.drawable.ic_values
@@ -126,7 +126,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
             title.text = when (walletAction.status) {
                 REMOVED, SAFE_ACCOUNT_REMOVED -> getString(R.string.wallet_action_header, getString(R.string.removed), lastUsed)
                 CHANGED -> getString(R.string.wallet_action_header, getString(R.string.changed), lastUsed)
-                ADDED, SAFE_ACCOUNT_ADDED, BACKGROUND_ADDED -> getString(R.string.wallet_action_header, getString(R.string.added), lastUsed)
+                ADDED, SA_ADDED, BACKGROUND_ADDED -> getString(R.string.wallet_action_header, getString(R.string.added), lastUsed)
                 RECEIVED -> getString(R.string.wallet_action_header, getString(R.string.received), lastUsed)
                 SENT -> getString(R.string.wallet_action_header, getString(R.string.sent), lastUsed)
                 FAILED -> getString(R.string.wallet_action_header, getString(R.string.failed), lastUsed)

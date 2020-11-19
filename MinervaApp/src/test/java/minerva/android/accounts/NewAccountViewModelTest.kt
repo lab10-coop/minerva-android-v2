@@ -23,10 +23,10 @@ class NewAccountViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `create wallet action success`() {
-        whenever(accountManager.createAccount(any(), any(), any(), any())).thenReturn(Completable.complete())
+        whenever(accountManager.createRegularAccount(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.createAccountLiveData.observeForever(createValueObserver)
-        viewModel.createNewAccount(Network(), 1)
+        viewModel.createNewAccount(Network())
         createValueCaptor.run {
             verify(createValueObserver).onChanged(capture())
         }
@@ -35,9 +35,9 @@ class NewAccountViewModelTest : BaseViewModelTest() {
     @Test
     fun `create wallet action error`() {
         val error = Throwable()
-        whenever(accountManager.createAccount(any(), any(), any(), any())).thenReturn(Completable.error(error))
+        whenever(accountManager.createRegularAccount(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        viewModel.createNewAccount(Network(), 1)
+        viewModel.createNewAccount(Network())
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))
     }
 }

@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
-import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -14,6 +14,8 @@ import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.defs.DerivationPath
+import minerva.android.walletmanager.utils.CryptoUtils
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -26,45 +28,75 @@ class AccountManagerImpl(
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletConfigManager.walletConfigLiveData
 
-    override fun createAccount(network: Network, accountName: String, ownerAddress: String, contract: String): Completable {
+    override fun createRegularAccount(network: Network): Completable {
         walletConfigManager.getWalletConfig()?.let { config ->
-            val newAccount = Account(config.newIndex, name = accountName, network = network, bindedOwner = ownerAddress)
-            return cryptographyRepository.computeDeliveredKeys(walletConfigManager.masterSeed.seed, newAccount.index)
-                .map { createUpdatedWalletConfig(config, newAccount, it, ownerAddress, contract) }
+            val (index, derivationPath) = getIndexWithDerivationPath(network, config)
+            return cryptographyRepository.calculateDerivedKeys(walletConfigManager.masterSeed.seed, index, derivationPath)
+                .map { keys ->
+                    val newAccount = Account(
+                        index,
+                        name = CryptoUtils.prepareName(network, index),
+                        network = network,
+                        publicKey = keys.publicKey,
+                        privateKey = keys.privateKey,
+                        address = keys.address
+                    )
+                    addAccount(newAccount, config)
+                }
                 .flatMapCompletable { walletConfigManager.updateWalletConfig(it) }
         }
         throw NotInitializedWalletConfigThrowable()
     }
 
-    private fun createUpdatedWalletConfig(
-        config: WalletConfig, newAccount: Account,
-        derivedKeys: DerivedKeys, ownerAddress: String,
-        contractAddress: String
-    ): WalletConfig {
-        prepareNewValue(newAccount, derivedKeys, ownerAddress, contractAddress)
-        config.run {
-            val newAccounts = accounts.toMutableList()
-            var newValuePosition = accounts.size
-            accounts.forEachIndexed { position, value ->
-                if (value.address == ownerAddress && ownerAddress != String.Empty)
-                    newValuePosition = position + getSafeAccountCount(ownerAddress)
-            }
-            newAccounts.add(newValuePosition, newAccount)
-            return this.copy(version = updateVersion, accounts = newAccounts)
-        }
+    private fun addAccount(newAccount: Account, config: WalletConfig): WalletConfig {
+        val newAccounts = config.accounts.toMutableList()
+        newAccounts.add(config.accounts.size, newAccount)
+        return config.copy(version = config.updateVersion, accounts = newAccounts)
     }
 
-    private fun prepareNewValue(newAccount: Account, derivedKeys: DerivedKeys, ownerAddress: String, contractAddress: String) {
-        newAccount.apply {
-            publicKey = derivedKeys.publicKey
-            privateKey = derivedKeys.privateKey
-            if (ownerAddress.isNotEmpty()) owners = mutableListOf(ownerAddress)
-            address = if (contractAddress.isNotEmpty()) {
-                this.contractAddress = contractAddress
-                contractAddress
-            } else derivedKeys.address
+    override fun createSafeAccount(account: Account, contract: String): Completable {
+        walletConfigManager.getWalletConfig()?.let { config ->
+            val (index, derivationPath) = getIndexWithDerivationPath(account.network, config)
+            return cryptographyRepository.calculateDerivedKeys(walletConfigManager.masterSeed.seed, index, derivationPath)
+                .map { keys ->
+                    val ownerAddress = account.address
+                    val newAccount = Account(
+                        index,
+                        name = getSafeAccountName(account),
+                        network = account.network,
+                        bindedOwner = ownerAddress,
+                        publicKey = keys.publicKey,
+                        privateKey = keys.privateKey,
+                        address = contract,
+                        owners = mutableListOf(ownerAddress)
+                    )
+                    addSafeAccount(config, newAccount, ownerAddress)
+                }
+                .flatMapCompletable { walletConfigManager.updateWalletConfig(it) }
         }
+        throw NotInitializedWalletConfigThrowable()
     }
+
+    private fun getIndexWithDerivationPath(network: Network, config: WalletConfig): Pair<Int, String> =
+        if (network.testNet) {
+            Pair(config.newTestNetworkIndex, DerivationPath.TEST_NET_PATH)
+        } else {
+            Pair(config.newMainNetworkIndex, DerivationPath.MAIN_NET_PATH)
+        }
+
+    private fun addSafeAccount(config: WalletConfig, newAccount: Account, ownerAddress: String): WalletConfig {
+        val newAccounts = config.accounts.toMutableList()
+        var newAccountPosition = config.accounts.size
+        config.accounts.forEachIndexed { position, account ->
+            if (account.address == ownerAddress)
+                newAccountPosition = position + getSafeAccountCount(ownerAddress)
+        }
+        newAccounts.add(newAccountPosition, newAccount)
+        return config.copy(version = config.updateVersion, accounts = newAccounts)
+    }
+
+    override fun getSafeAccountName(account: Account): String =
+        account.name.replaceFirst(String.Space, " | ${getSafeAccountCount(account.address)} ")
 
     override fun removeAccount(index: Int): Completable {
         walletConfigManager.getWalletConfig()?.let {

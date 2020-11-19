@@ -73,7 +73,7 @@ class MasterSeedRepositoryTest {
 
     @Test
     fun `restore master seed test`() {
-        whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn Single.just(Triple("key1", "key2", "key3"))
+        whenever(cryptographyRepository.restoreMasterSeed(any(), any())) doReturn Single.just(Triple("key1", "key2", "key3"))
         whenever(walletConfigManager.restoreWalletConfig(any())) doReturn Completable.complete()
         repository.restoreMasterSeed("mnemonic")
             .test()
@@ -84,7 +84,7 @@ class MasterSeedRepositoryTest {
     @Test
     fun `restore master seed error test`() {
         val error = Throwable()
-        whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn Single.error(error)
+        whenever(cryptographyRepository.restoreMasterSeed(any(), any())) doReturn Single.error(error)
         repository.restoreMasterSeed("mnemonic")
             .test()
             .assertError(error)
@@ -92,7 +92,7 @@ class MasterSeedRepositoryTest {
 
     @Test
     fun `create master seed  test`() {
-        whenever(cryptographyRepository.createMasterSeed()) doReturn Single.just(Triple("key1", "key2", "key3"))
+        whenever(cryptographyRepository.createMasterSeed(any())) doReturn Single.just(Triple("key1", "key2", "key3"))
         whenever(walletConfigManager.createWalletConfig(any())) doReturn Completable.complete()
         repository.createWalletConfig()
             .test()
@@ -103,7 +103,7 @@ class MasterSeedRepositoryTest {
     @Test
     fun `create master seed error test`() {
         val error = Throwable()
-        whenever(cryptographyRepository.createMasterSeed()) doReturn Single.error(error)
+        whenever(cryptographyRepository.createMasterSeed(any())) doReturn Single.error(error)
         repository.createWalletConfig()
             .test()
             .assertError(error)

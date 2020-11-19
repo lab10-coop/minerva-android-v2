@@ -70,7 +70,7 @@ class NewAccountFragment : BaseFragment() {
 
     private fun setupCreateButton() {
         createButton.setOnClickListener {
-            viewModel.createNewAccount(networkAdapter.getSelectedNetwork(), position)
+            viewModel.createNewAccount(networkAdapter.getSelectedNetwork())
         }
     }
 

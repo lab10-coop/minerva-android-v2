@@ -9,11 +9,17 @@ data class WalletConfig(
     val services: List<Service> = listOf(),
     val credentials: List<Credential> = listOf()
 ) {
-    val newIndex: Int
-        get() = identities.size + accounts.size
-
     val updateVersion: Int
         get() = version + 1
+
+    val newIdentityIndex: Int
+        get() = identities.size
+
+    val newTestNetworkIndex: Int
+        get() = accounts.filter { it.network.testNet }.size
+
+    val newMainNetworkIndex: Int
+        get() = accounts.filter { !it.network.testNet }.size
 
     val hasActiveAccount: Boolean
         get() = accounts.none { !it.isDeleted }

@@ -12,6 +12,7 @@ import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
+import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
@@ -26,7 +27,11 @@ import minerva.android.kotlinUtils.mapper.BitmapMapper
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.DerivationPath.Companion.DID_PATH
+import minerva.android.walletmanager.model.defs.DerivationPath.Companion.MAIN_NET_PATH
+import minerva.android.walletmanager.model.defs.DerivationPath.Companion.TEST_NET_PATH
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
@@ -238,15 +243,25 @@ class WalletConfigManagerImpl(
 
         return Observable.range(START, identitiesResponse.size)
             .filter { !identitiesResponse[it].isDeleted }
-            .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, identitiesResponse[it].index) }
+            .flatMapSingle { cryptographyRepository.calculateDerivedKeys(masterSeed.seed, identitiesResponse[it].index, DID_PATH) }
             .toList()
-            .map { completeIdentitiesKeys(payload, it) }
+            .map { keys ->
+                completeIdentitiesKeys(payload, keys)
+            }
             .map { completeIdentitiesProfileImages(it) }
             .zipWith(Observable.range(START, accountsResponse.size)
                 .filter { !accountsResponse[it].isDeleted }
-                .flatMapSingle { cryptographyRepository.computeDeliveredKeys(masterSeed.seed, accountsResponse[it].index) }
+                .flatMapSingle {
+                    if (isTestNet(accountsResponse, it)) {
+                        cryptographyRepository.calculateDerivedKeys(masterSeed.seed, accountsResponse[it].index, TEST_NET_PATH)
+                    } else {
+                        cryptographyRepository.calculateDerivedKeys(masterSeed.seed, accountsResponse[it].index, MAIN_NET_PATH)
+                    }
+                }
                 .toList()
-                .map { completeAccountsKeys(payload, it) },
+                .map { keys ->
+                    completeAccountsKeys(payload, keys)
+                },
                 BiFunction { identity: List<Identity>, account: List<Account> ->
                     WalletConfig(
                         payload.version,
@@ -258,6 +273,9 @@ class WalletConfigManagerImpl(
                 }
             ).toObservable()
     }
+
+    private fun isTestNet(accountsResponse: List<AccountPayload>, index: Int) =
+        NetworkManager.getNetwork(accountsResponse[index].network).testNet
 
     private fun completeIdentitiesKeys(walletConfigPayload: WalletConfigPayload, keys: List<DerivedKeys>): List<Identity> {
         val identities = mutableListOf<Identity>()
