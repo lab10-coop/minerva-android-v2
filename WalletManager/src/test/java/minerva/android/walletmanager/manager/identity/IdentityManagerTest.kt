@@ -43,19 +43,19 @@ class IdentityManagerTest : RxTest() {
             privateKey shouldBeEqualTo "privateKey"
         }
         manager.loadIdentity(3, "Identity").apply {
-            index shouldBeEqualTo walletConfig.newIndex
-            name shouldBeEqualTo "Identity #8"
+            index shouldBeEqualTo walletConfig.newIdentityIndex
+            name shouldBeEqualTo "Identity #4"
         }
         manager.loadIdentity(-1, "Identity").apply {
-            index shouldBeEqualTo walletConfig.newIndex
-            name shouldBeEqualTo "Identity #8"
+            index shouldBeEqualTo walletConfig.newIdentityIndex
+            name shouldBeEqualTo "Identity #4"
         }
     }
 
     @Test
     fun `Check that wallet manager saves new identity`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val newIdentity = Identity(0, "identityName1")
@@ -69,7 +69,7 @@ class IdentityManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager doesn't save when server error`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(Throwable()))
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val newIdentity = Identity(0, "identityName")
@@ -82,7 +82,7 @@ class IdentityManagerTest : RxTest() {
     fun `Check that wallet manager removes correct identity`() {
         val identityToRemove = Identity(0, "identityName2", "", "privateKey", "address", DataProvider.data)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()
@@ -96,7 +96,7 @@ class IdentityManagerTest : RxTest() {
     fun `Check that wallet manager doesn't remove identity when server error`() {
         val identityToRemove = Identity(1)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(Throwable()))
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()
@@ -117,7 +117,7 @@ class IdentityManagerTest : RxTest() {
             )
         )
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()

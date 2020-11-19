@@ -15,7 +15,7 @@
       }
     ],
     "color": "#FFF97599",
-    "testnet": true
+    "testNet": true
   },
   {
     "full": "Ethereum (Rinkeby)",
@@ -33,7 +33,7 @@
       }
     ],
     "color": "#FF486FFF",
-    "testnet": true
+    "testNet": true
   },
   {
     "full": "POA Network (Sokol)",
@@ -45,7 +45,7 @@
     "gasPrice": "1000000000",
     "assets": [],
     "color": "#FF5CBEAB",
-    "testnet": true
+    "testNet": true
   },
   {
     "full": "LUKSO (L14 Testnet)",
@@ -57,7 +57,7 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FFFBCDC5",
-    "testnet": true
+    "testNet": true
   },
   {
     "full": "Ethereum (Kovan)",
@@ -69,7 +69,7 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FF6434C9",
-    "testnet": true
+    "testNet": true
   },
   {
     "full": "Ethereum (Görli)",
@@ -81,7 +81,7 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FFBDAE9B",
-    "testnet": true
+    "testNet": true
   },
   {
     "full": "Ethereum (Ropsten)",
@@ -93,6 +93,6 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FF486FFF",
-    "testnet": true
+    "testNet": true
   }
 ]

@@ -41,4 +41,5 @@ dependencies {
     implementation coroutinesDependencies.values()
     implementation cryptographyDependencies.values()
     testImplementation testDependencies.values()
+    testImplementation 'org.mockito:mockito-inline:3.4.0'
 }

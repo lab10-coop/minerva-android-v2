@@ -17,6 +17,7 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.defs.DerivationPath
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 import minerva.android.walletmanager.storage.LocalStorage
 
@@ -30,9 +31,9 @@ class IdentityManagerImpl(
         get() = walletConfigManager.walletConfigLiveData
 
     override fun saveIdentity(identity: Identity): Completable {
-        walletConfigManager.getWalletConfig()?.let {
-            return cryptographyRepository.computeDeliveredKeys(walletConfigManager.masterSeed.seed, identity.index)
-                .map { keys -> it.copy(version = it.updateVersion, identities = prepareIdentities(getIdentity(identity, keys), it)) }
+        walletConfigManager.getWalletConfig()?.let { config ->
+            return cryptographyRepository.calculateDerivedKeys(walletConfigManager.masterSeed.seed, identity.index, DerivationPath.DID_PATH)
+                .map { config.copy(version = config.updateVersion, identities = prepareIdentities(getIdentity(identity, it), config)) }
                 .flatMapCompletable { walletConfigManager.updateWalletConfig(it) }
         }
         throw NotInitializedWalletConfigThrowable()
@@ -59,34 +60,22 @@ class IdentityManagerImpl(
     private fun getDefaultIdentity(defaultName: String) = Identity(getNewIndex(), prepareDefaultIdentityName(defaultName))
 
     private fun prepareDefaultIdentityName(defaultName: String): String =
-        String.format(NEW_IDENTITY_TITLE_PATTERN, defaultName, getNewIndex())
+        String.format(NEW_IDENTITY_TITLE_PATTERN, defaultName, getNewIndex() + 1)
 
     private fun getNewIndex(): Int {
-        walletConfigManager.getWalletConfig()?.let { return it.newIndex }
+        walletConfigManager.getWalletConfig()?.let { return it.newIdentityIndex }
         return Int.InvalidIndex
     }
 
     override fun removeIdentity(identity: Identity): Completable {
         walletConfigManager.getWalletConfig()?.let {
-            return handleRemovingIdentity(it.identities, getPositionForIdentity(identity, it), identity)
+            val position = getPositionForIdentity(identity, it)
+            if (isOnlyOneElement(it.identities)) return Completable.error(CannotRemoveLastIdentityThrowable())
+            if (!it.identities.inBounds(position)) return Completable.error(NoIdentityToRemoveThrowable())
+            val newIdentities = prepareIdentities(Identity(identity, true), it)
+            return walletConfigManager.updateWalletConfig(it.copy(version = it.updateVersion, identities = newIdentities))
         }
         throw NotInitializedWalletConfigThrowable()
-    }
-
-    private fun handleRemovingIdentity(identities: List<Identity>, currentPosition: Int, identity: Identity): Completable {
-        if (!identities.inBounds(currentPosition)) return Completable.error(NoIdentityToRemoveThrowable())
-        if (isOnlyOneElement(identities)) return Completable.error(CannotRemoveLastIdentityThrowable())
-        return saveIdentity(
-            Identity(
-                identity.index,
-                identity.name,
-                identity.publicKey,
-                identity.privateKey,
-                identity.address,
-                identity.personalData,
-                true
-            )
-        )
     }
 
     private fun isOnlyOneElement(identities: List<Identity>): Boolean {

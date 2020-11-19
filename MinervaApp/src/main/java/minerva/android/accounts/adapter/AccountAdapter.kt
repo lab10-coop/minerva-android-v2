@@ -164,7 +164,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
             }
             with(amountView) {
                 setCrypto(getCryptoBalance(cryptoBalance))
-                (if (network.testnet) BigDecimal.ZERO
+                (if (network.testNet) BigDecimal.ZERO
                 else account.fiatBalance).let { setFiat(getFiatBalance(it)) }
             }
             sendButton.text = String.format(SEND_BUTTON_FORMAT, view.context.getString(R.string.send), network.token)

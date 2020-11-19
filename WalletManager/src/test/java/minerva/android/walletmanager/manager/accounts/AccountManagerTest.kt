@@ -12,9 +12,9 @@ import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
@@ -22,7 +22,6 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
-import java.math.BigInteger
 import kotlin.test.assertEquals
 
 class AccountManagerTest : RxTest() {
@@ -40,12 +39,12 @@ class AccountManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check that wallet manager saves new Value`() {
+    fun `Check that wallet manager creates new regular account`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        val test = repository.createAccount(Network(), "#3 Ethereum").test()
+        val test = repository.createRegularAccount(Network()).test()
         test.assertNoErrors()
         repository.loadAccount(1).apply {
             index shouldBeEqualTo 4
@@ -56,13 +55,13 @@ class AccountManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check that wallet manager don't save new value when server error`() {
+    fun `Check that wallet manager don't save new regular account`() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        val test = repository.createAccount(Network(), "#3 Ethereum").test()
+        val test = repository.createRegularAccount(Network()).test()
         test.assertError(error)
         repository.loadAccount(10).apply {
             index shouldBeEqualTo -1
@@ -75,7 +74,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager removes correct empty value`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
@@ -91,7 +90,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager removes correct not empty value`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
@@ -108,7 +107,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager don't removes correct safe account value`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
@@ -129,7 +128,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager removes correct safe account value`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.computeDeliveredKeys(any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
@@ -168,5 +167,33 @@ class AccountManagerTest : RxTest() {
             val result = getSafeAccountCount("owner")
             assertEquals(result, 1)
         }
+    }
+
+    @Test
+    fun `create safe account success`() {
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        repository.createSafeAccount(Account(1), "contract")
+            .test()
+            .assertComplete()
+    }
+
+    @Test
+    fun `create safe account error`() {
+        val error = Throwable()
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        repository.createSafeAccount(Account(1), "contract")
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `get safe account name test`() {
+        val result =
+            repository.getSafeAccountName(Account(1, address = "masterOwner", name = "test"))
+        assertEquals("test", result)
     }
 }

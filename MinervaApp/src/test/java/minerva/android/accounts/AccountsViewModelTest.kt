@@ -121,7 +121,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("error")
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
-        whenever(accountManager.createAccount(any(), any(), any(), any())).thenReturn(Completable.error(error))
+        whenever(accountManager.createRegularAccount(any())).thenReturn(Completable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.createSafeAccount(Account(index = 1, cryptoBalance = BigDecimal.ONE))
         errorCaptor.run {

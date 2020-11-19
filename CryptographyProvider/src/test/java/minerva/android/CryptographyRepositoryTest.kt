@@ -1,20 +1,36 @@
 package minerva.android
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.runBlocking
+import me.uport.sdk.jwt.InvalidJWTException
+import me.uport.sdk.jwt.JWTTools
+import me.uport.sdk.jwt.model.JwtHeader
+import me.uport.sdk.jwt.model.JwtPayload
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepositoryImpl
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mockito
 import kotlin.test.assertEquals
 
 class CryptographyRepositoryTest {
 
-    private val repository: CryptographyRepository = CryptographyRepositoryImpl()
+    private val jwtTools: JWTTools = Mockito.mock(JWTTools::class.java)
+    private val repository: CryptographyRepository = CryptographyRepositoryImpl(jwtTools)
+
+    private val masterKeysPath = "m/"
+    private val didPath = "m/73'/0'/0'/"
+    private val mainNetPath = "m/44'/60'/0'/0/"
+    private val testNetPath = "m/44'/1'/0'/0/"
+    private val token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJleHAiOjE2MDkzNzI4MDAsInZjIjp7ImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImF1dG9tb3RpdmVNZW1iZXJzaGlwQ2FyZCI6eyJjcmVkZW50aWFsTmFtZSI6IsOWQU1UQyBDbHVia2FydGUiLCJjYXJkSW1hZ2UiOnsiLyI6Ii9pcGZzL1FtWXBaMUxCQlJhZDVpUWZhWm9LQUZBTmg0Z3k0MXozb0J4UUtnd3lRY3hFeXIvIn0sImljb25JbWFnZSI6eyIvIjoiL2lwZnMvUW1TdXlmd1d0Q3d3Y1Jlb1dIVXc0bXJSWEdlelUyS0RSaVBpclNGaDV3ZFVKTi8ifSwibWVtYmVySWQiOiIxMiAzNDUgNjc4IiwibmFtZSI6Ik1zLiBSYW5kb20iLCJzaW5jZSI6IjIwMTAiLCJjb3ZlcmFnZSI6IkF1dG8ifX0sIkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9zY2hlbWEuZGV2LmxhYjEwLmlvL0F1dG9tb3RpdmVNZW1iZXJzaGlwQ2FyZENyZWRlbnRpYWwuanNvbiJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiQXV0b21vdGl2ZU1lbWJlcnNoaXBDYXJkQ3JlZGVudGlhbCJdfSwic3ViIjoiIiwibmJmIjoxNjA1NzA2ODM3LCJpc3MiOiJkaWQ6ZXRocjphcnRpc190MToweDI2MDViZjhjOWI5M2JkMjM5YjYzMGIxMjVjZjk3NzBkYjBlZDU1MDEifQ.Al6FZKfmG2z9hnjgVixOsmpIYJUO-BqYlXfWJyau_oTA-gwOLTZ7ihqb31IAPPJK49Qz8qaw8nR64F-HAJzewQ"
 
     @get:Rule
     val rule
@@ -33,29 +49,46 @@ class CryptographyRepositoryTest {
     }
 
     @Test
-    fun `get mnemonic for master seed`(){
+    fun `get mnemonic for master seed`() {
         val test = repository.getMnemonicForMasterSeed("68a4c6de013faef9b98d7d3e2546ce07")
         assertEquals(test, "hamster change resource act wife lamp tower quick dilemma clay receive attract")
     }
 
     @Test
-    fun `compute derived keys test`(){
-        val test = repository.computeDeliveredKeys("68a4c6de013faef9b98d7d3e2546ce07", 1).test()
+    fun `compute derived keys for identities test`() {
+        val test = repository.calculateDerivedKeys("68a4c6de013faef9b98d7d3e2546ce07", 1, didPath).test()
         test.assertValue {
-            it.index == 1 &&
-            it.address == "0xe82aded79d7af28aa6664d6fc009e3485d0f6d75"
+            it.index == 1 && it.address == "0x94c87a5f423dbe7bbb085a963142cfd12e6c001e"
         }
     }
 
     @Test
-    fun `crate master seed test`(){
-        val test = repository.createMasterSeed().test()
+    fun `compute derived keys for test nets test`() {
+        val test = repository.calculateDerivedKeys("68a4c6de013faef9b98d7d3e2546ce07", 1, testNetPath).test()
+        test.assertValue {
+            it.index == 1 && it.address == "0x4ecc9dbd0494b32bbd77c87f46da92ff5f0c2258"
+        }
+    }
+
+    @Test
+    fun `compute derived keys for main nets test`() {
+        val test = repository.calculateDerivedKeys("68a4c6de013faef9b98d7d3e2546ce07", 1, mainNetPath).test()
+        test.assertValue {
+            it.index == 1 && it.address == "0x1e7cfbf30f2ae071806a78135f0c1280dece8fda"
+        }
+    }
+
+    @Test
+    fun `crate master seed test`() {
+        val test = repository.createMasterSeed(masterKeysPath).test()
         test.assertValue { it.first.isNotEmpty() && it.second.isNotEmpty() && it.third.isNotEmpty() }
     }
 
     @Test
-    fun `restore master seed test`(){
-        val test = repository.restoreMasterSeed("hamster change resource act wife lamp tower quick dilemma clay receive attract").test()
+    fun `restore master seed test`() {
+        val test =
+            repository.restoreMasterSeed("hamster change resource act wife lamp tower quick dilemma clay receive attract", masterKeysPath)
+                .test()
         test.assertValue { it.first == "68a4c6de013faef9b98d7d3e2546ce07" }
     }
 
@@ -92,5 +125,45 @@ class CryptographyRepositoryTest {
         val mnemonic = "vessel error federal aaaaa sibling chat ability kkkkk sun glass valve picture"
         val validation = repository.validateMnemonic(mnemonic)
         assertEquals(validation, listOf("aaaaa", "kkkkk"))
+    }
+
+    @Test
+    fun `create jwt token success test`() {
+        runBlocking { whenever(jwtTools.createJWT(any(), any(), any(), any(), any())).doReturn("token") }
+        repository.createJwtToken(mapOf(), "0x94c87a5f423dbe7bbb085a963142cfd12e6c001e")
+            .test()
+            .await()
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue {
+                it == "token"
+            }
+    }
+
+    @Test
+    fun `decode jwt token success test`() {
+        runBlocking { whenever(jwtTools.verify(any(), any(), any(), any())).doReturn(JwtPayload()) }
+        runBlocking { whenever(jwtTools.decodeRaw(any())).doReturn(Triple(JwtHeader(), mapOf("test" to "key"), ByteArray(1))) }
+        repository.decodeJwtToken(token)
+            .test()
+            .await()
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue {
+                it["test"] == "key"
+            }
+    }
+
+    @Test
+    fun `decode jwt token error test`() {
+        val error = InvalidJWTException("Invalid JWT Exception")
+        runBlocking { whenever(jwtTools.verify(any(), any(), any(), any())).doReturn(JwtPayload()) }
+        runBlocking { whenever(jwtTools.decodeRaw(any())).thenThrow(error) }
+        repository.decodeJwtToken("token")
+            .test()
+            .await()
+            .assertError {
+                it is IllegalStateException
+            }
     }
 }

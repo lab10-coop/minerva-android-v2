@@ -16,8 +16,8 @@ annotation class DefaultWalletConfigIndexes {
     companion object {
         const val DEFAULT_VERSION = 0
         const val FIRST_IDENTITY_INDEX = 0
-        const val FIRST_ACCOUNTS_INDEX = 1
-        const val SECOND_ACCOUNTS_INDEX = 2
+        const val FIRST_ACCOUNTS_INDEX = 0
+        const val SECOND_ACCOUNTS_INDEX = 1
         const val FIRST_NETWORK = 0
         const val SECOND_NETWORK = 1
     }
