@@ -11,7 +11,6 @@ import me.uport.sdk.jsonrpc.JsonRPC
 import me.uport.sdk.jwt.InvalidJWTException
 import me.uport.sdk.jwt.JWTEncodingException
 import me.uport.sdk.jwt.JWTTools
-import me.uport.sdk.jwt.model.JwtPayload
 import me.uport.sdk.signer.KPSigner
 import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
@@ -27,32 +26,33 @@ import timber.log.Timber
 import java.security.SecureRandom
 import java.util.*
 
-/*Derivation path for identities and values "m/99'/n" where n is index of identity and value*/
-class CryptographyRepositoryImpl : CryptographyRepository {
+class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyRepository {
 
-    override fun createMasterSeed(): Single<Triple<String, String, String>> {
+    override fun createMasterSeed(derivationPath: String): Single<Triple<String, String, String>> {
         ByteArray(ENTROPY_SIZE).run {
             SecureRandom().nextBytes(this)
-            getMasterKeys(toNoPrefixHexString()).run { return Single.just(Triple(toNoPrefixHexString(), getPublicKey(), getPrivateKey())) }
+            getMasterKeys(toNoPrefixHexString(), derivationPath).run {
+                return Single.just(Triple(toNoPrefixHexString(), getPublicKey(), getPrivateKey()))
+            }
         }
     }
 
-    private fun getMasterKeys(seed: String): ECKeyPair =
-        MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(MASTER_KEYS_DERIVED_PATH).keyPair
+    private fun getMasterKeys(seed: String, derivationPath: String): ECKeyPair =
+        MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
 
     override fun getMnemonicForMasterSeed(seed: String): String =
         entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
 
-    override fun computeDeliveredKeys(seed: String, index: Int): Single<DerivedKeys> {
-        MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(getDerivedPath(index)).keyPair.run {
-            return Single.just(DerivedKeys(index, getPublicKey(), getPrivateKey(), getAddress()))
-        }
+    override fun calculateDerivedKeys(seed: String, index: Int, derivationPathPrefix: String): Single<DerivedKeys> {
+        val derivationPath = "${derivationPathPrefix}$index"
+        val keyPair = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
+        return Single.just(DerivedKeys(index, keyPair.getPublicKey(), keyPair.getPrivateKey(), keyPair.getAddress()))
     }
 
-    override fun restoreMasterSeed(mnemonic: String): Single<Triple<String, String, String>> {
+    override fun restoreMasterSeed(mnemonic: String, derivationPath: String): Single<Triple<String, String, String>> {
         return try {
             val seed = mnemonicToEntropy(mnemonic, WORDLIST_ENGLISH).toNoPrefixHexString()
-            getMasterKeys(seed).run { Single.just(Triple(seed, getPublicKey(), getPrivateKey())) }
+            getMasterKeys(seed, derivationPath).run { Single.just(Triple(seed, getPublicKey(), getPrivateKey())) }
         } catch (exception: IllegalArgumentException) {
             Timber.e(exception)
             Single.error(exception)
@@ -65,21 +65,13 @@ class CryptographyRepositoryImpl : CryptographyRepository {
 
     private fun ECKeyPair.getAddress(): String = toAddress().hex
 
-    private fun getDerivedPath(index: Int) = "${DERIVED_PATH_PREFIX}$index"
-
     override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> =
         rxSingle {
             try {
-                val payload: JwtPayload? = JWTTools().verify(jwtToken, getResolver())
-
                 /*JWTTools().decodeRaw(jwtToken).second is used for decoding payload from jwtToken, because JwtPayload, which is automatically
                 * generated from JWTTools().verify(jwtToken, resolver) is missing essential fields, hence this object is omitted*/
-
-                if (payload != null) {
-                    JWTTools().decodeRaw(jwtToken).second
-                } else {
-                    error(Throwable("JWT Payload is null"))
-                }
+                jwtTools.verify(jwtToken, getResolver())
+                jwtTools.decodeRaw(jwtToken).second
             } catch (exception: InvalidJWTException) {
                 error(InvalidJWTException("Invalid JWT Exception: ${exception.message}"))
             } catch (exception: JWTEncodingException) {
@@ -93,7 +85,7 @@ class CryptographyRepositoryImpl : CryptographyRepository {
             .build()
 
     override fun createJwtToken(payload: Map<String, Any?>, privateKey: String): Single<String> =
-        rxSingle { JWTTools().createJWT(payload, getDIDKey(privateKey), KPSigner(privateKey)) }
+        rxSingle { jwtTools.createJWT(payload, getDIDKey(privateKey), KPSigner(privateKey)) }
 
     private fun getDIDKey(key: String) = "$DID_PREFIX${KPSigner(key).getAddress()}"
 
@@ -114,8 +106,7 @@ class CryptographyRepositoryImpl : CryptographyRepository {
     }
 
     companion object {
-        private const val DERIVED_PATH_PREFIX = "m/99'/"
-        private const val MASTER_KEYS_DERIVED_PATH = "m/"
+
         private const val ENTROPY_SIZE = 128 / 8
         private const val RADIX = 16
         private const val DID_PREFIX = "did:ethr:"

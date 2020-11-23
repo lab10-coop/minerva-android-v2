@@ -60,6 +60,7 @@ ext {
     jsonLogicVersion = '0.9.6'
     flexboxVersion = '2.0.1'
     cookieFlashbarVersion = '1.0.2'
+    mockitoInline = '3.4.0'
 
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
@@ -115,7 +116,8 @@ ext {
             koinTest     : "org.koin:koin-test:$koinVersion",
             mockk        : "io.mockk:mockk:$mockkVersion",
             kluent       : "org.amshove.kluent:kluent-android:$kluentVersion",
-            androidxCore : "androidx.arch.core:core-testing:$androidxCoreTestingVersion"
+            androidxCore : "androidx.arch.core:core-testing:$androidxCoreTestingVersion",
+            mockitoInline: "org.mockito:mockito-inline:$mockitoInline"
     ]
 
     cryptographyDependencies = [
@@ -158,5 +160,5 @@ ext {
     startupDependencies = [startup: "androidx.startup:startup-runtime:$startupVersion"]
     kotlinReflect = [kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect"]
     jsoup = [jsoup: "org.jsoup:jsoup:$jsoupVersion"]
-    jsonLogicDependencies = [jsonLogic : "eu.afse:eu.afse.jsonlogic:$jsonLogicVersion"]
+    jsonLogicDependencies = [jsonLogic: "eu.afse:eu.afse.jsonlogic:$jsonLogicVersion"]
 }

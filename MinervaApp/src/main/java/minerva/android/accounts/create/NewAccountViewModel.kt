@@ -15,7 +15,6 @@ import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.utils.CryptoUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -35,10 +34,9 @@ class NewAccountViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> = _errorLiveData
 
-    fun createNewAccount(network: Network, position: Int) {
-        accountName = CryptoUtils.prepareName(network, position)
+    fun createNewAccount(network: Network) {
         launchDisposable {
-            accountManager.createAccount(network, accountName)
+            accountManager.createRegularAccount(network)
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction())))
                 .observeOn(AndroidSchedulers.mainThread())

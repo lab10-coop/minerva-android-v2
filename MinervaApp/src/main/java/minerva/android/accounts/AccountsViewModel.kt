@@ -2,14 +2,12 @@ package minerva.android.accounts
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.enum.ErrorCode
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
@@ -19,7 +17,7 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
-import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_ADDED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -136,9 +134,9 @@ class AccountsViewModel(
         } else {
             launchDisposable {
                 smartContractRepository.createSafeAccount(account)
-                    .flatMapCompletable { smartContractAddress -> createAccount(account, smartContractAddress) }
+                    .flatMapCompletable { smartContractAddress -> accountManager.createSafeAccount(account, smartContractAddress)}
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(SAFE_ACCOUNT_ADDED, getAccountName(account)))))
+                    .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(SA_ADDED, accountManager.getSafeAccountName(account)))))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -154,21 +152,11 @@ class AccountsViewModel(
         }
     }
 
-    private fun createAccount(account: Account, smartContractAddress: String): Completable =
-        accountManager.createAccount(
-            account.network,
-            getAccountName(account),
-            account.address,
-            smartContractAddress
+    private fun getWalletAction(status: Int, name: String) =
+        WalletAction(
+            WalletActionType.ACCOUNT,
+            status,
+            DateUtils.timestamp,
+            hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
-
-    private fun getAccountName(account: Account): String =
-        account.name.replaceFirst(String.Space, " | ${accountManager.getSafeAccountCount(account.address)} ")
-
-    private fun getWalletAction(status: Int, name: String) = WalletAction(
-        WalletActionType.ACCOUNT,
-        status,
-        DateUtils.timestamp,
-        hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
-    )
 }

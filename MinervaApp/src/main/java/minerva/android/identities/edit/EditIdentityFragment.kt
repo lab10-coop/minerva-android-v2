@@ -162,7 +162,7 @@ class EditIdentityFragment : BaseFragment() {
     private fun isNotEmailAndIsNotEmpty(text: String): Boolean = !text.isEmail() && text.isNotEmpty()
 
     private fun initializeView(identity: Identity) {
-        this.identity = Identity(identity.index, identity)
+        this.identity = Identity(identity)
         setIdentityData(this.identity)
         confirmButton.text = if (index == Int.InvalidIndex) getString(R.string.create_new_identity)
         else getString(R.string.update_identity)

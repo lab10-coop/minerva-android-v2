@@ -14,7 +14,7 @@ data class Network(
     val gasPrice: BigInteger = BigInteger.TEN,
     val assets: List<Asset> = emptyList(),
     val color: String = String.Empty,
-    val testnet: Boolean = true
+    val testNet: Boolean = true
 ) {
     fun isAvailable(): Boolean = httpRpc != String.Empty
 

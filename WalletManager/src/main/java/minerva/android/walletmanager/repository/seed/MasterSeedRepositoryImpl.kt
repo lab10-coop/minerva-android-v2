@@ -7,6 +7,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.defs.DerivationPath
 import minerva.android.walletmanager.storage.LocalStorage
 
 class MasterSeedRepositoryImpl(
@@ -24,7 +25,7 @@ class MasterSeedRepositoryImpl(
     override fun isMasterSeedAvailable(): Boolean = walletConfigManager.isMasterSeedSaved()
 
     override fun restoreMasterSeed(mnemonic: String): Completable =
-        cryptographyRepository.restoreMasterSeed(mnemonic)
+        cryptographyRepository.restoreMasterSeed(mnemonic, DerivationPath.MASTER_KEYS_PATH)
             .flatMapCompletable { (seed, publicKey, privateKey) ->
                 walletConfigManager.restoreWalletConfig(MasterSeed(seed, publicKey, privateKey))
             }
@@ -38,7 +39,7 @@ class MasterSeedRepositoryImpl(
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
     override fun createWalletConfig(): Completable =
-        cryptographyRepository.createMasterSeed()
+        cryptographyRepository.createMasterSeed(DerivationPath.MASTER_KEYS_PATH)
             .flatMapCompletable { (seed, publicKey, privateKey) ->
                 walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
             }
