@@ -10,6 +10,7 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
 
@@ -142,5 +143,19 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
             removeOwner("tom")
             errorLiveData.observeLiveDataEvent(Event(error))
         }
+    }
+
+    @Test
+    fun `is address valid success`() {
+        whenever(accountManager.isAddressValid(any())).thenReturn(true)
+        val result = viewModel.isAddressValid("0x12345")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `is address valid false`() {
+        whenever(accountManager.isAddressValid(any())).thenReturn(false)
+        val result = viewModel.isAddressValid("eeee")
+        assertEquals(false, result)
     }
 }

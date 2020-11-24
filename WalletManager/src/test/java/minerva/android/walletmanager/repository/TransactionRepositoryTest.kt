@@ -288,4 +288,18 @@ class TransactionRepositoryTest {
             .test()
             .assertError(error)
     }
+
+    @Test
+    fun `is address valid success`() {
+        whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(true)
+        val result = repository.isAddressValid("0x12345")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `is address valid false`() {
+        whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(false)
+        val result = repository.isAddressValid("123455")
+        assertEquals(false, result)
+    }
 }

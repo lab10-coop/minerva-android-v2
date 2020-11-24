@@ -12,4 +12,5 @@ interface AccountManager : Manager {
     fun removeAccount(index: Int): Completable
     fun getSafeAccountCount(ownerAddress: String): Int
     fun getSafeAccountName(account: Account): String
+    fun isAddressValid(address: String): Boolean
 }
