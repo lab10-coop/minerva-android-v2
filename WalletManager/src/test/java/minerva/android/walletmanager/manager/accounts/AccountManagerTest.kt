@@ -29,7 +29,11 @@ class AccountManagerTest : RxTest() {
     private val walletConfigManager: WalletConfigManager = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
     private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
-    private val repository = AccountManagerImpl(walletConfigManager, cryptographyRepository, blockchainRegularAccountRepository)
+    private val repository = AccountManagerImpl(
+        walletConfigManager,
+        cryptographyRepository,
+        blockchainRegularAccountRepository
+    )
 
     @Before
     override fun setupRxSchedulers() {
@@ -150,7 +154,11 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `get safe account number test`() {
         val expected = Account(0, address = "123", privateKey = "key", owners = listOf("owner"))
-        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(accounts = listOf(expected))
+        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(
+            accounts = listOf(
+                expected
+            )
+        )
         whenever(walletConfigManager.getSafeAccountNumber(any())) doReturn 2
         repository.run {
             val result = getSafeAccountCount("owner")
@@ -160,8 +168,13 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `get safe account number error test`() {
-        val expected = Account(0, address = "123", privateKey = "key", owners = listOf("ownerAddress"))
-        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(accounts = listOf(expected))
+        val expected =
+            Account(0, address = "123", privateKey = "key", owners = listOf("ownerAddress"))
+        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(
+            accounts = listOf(
+                expected
+            )
+        )
         whenever(walletConfigManager.getSafeAccountNumber(any())) doReturn 1
         repository.run {
             val result = getSafeAccountCount("owner")
@@ -195,5 +208,19 @@ class AccountManagerTest : RxTest() {
         val result =
             repository.getSafeAccountName(Account(1, address = "masterOwner", name = "test"))
         assertEquals("test", result)
+    }
+
+    @Test
+    fun `is address valid success`() {
+        whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(true)
+        val result = repository.isAddressValid("0x12345")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `is address valid false`() {
+        whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(false)
+        val result = repository.isAddressValid("2342343")
+        assertEquals(false, result)
     }
 }

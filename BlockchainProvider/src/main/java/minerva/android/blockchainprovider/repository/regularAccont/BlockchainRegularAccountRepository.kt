@@ -27,4 +27,5 @@ interface BlockchainRegularAccountRepository {
     fun resolveENS(ensName: String): Single<String>
     fun getTransactions(pendingHashes: List<Pair<String, String>>): Single<List<Pair<String, String?>>>
     fun getTransactionCosts(network: String, assetIndex: Int, from: String, to: String, amount: BigDecimal): Single<TransactionCostPayload>
+    fun isAddressValid(address: String): Boolean
 }

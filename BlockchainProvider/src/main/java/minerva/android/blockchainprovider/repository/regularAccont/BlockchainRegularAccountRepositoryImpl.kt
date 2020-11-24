@@ -7,19 +7,20 @@ import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
+import minerva.android.blockchainprovider.provider.Web3jProvider
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
-import org.web3j.crypto.Credentials
-import org.web3j.crypto.RawTransaction
-import org.web3j.crypto.TransactionEncoder
+import org.web3j.abi.Utils
+import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.EthEstimateGas
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
+import org.web3j.protocol.core.methods.response.EthLog
 import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.tx.RawTransactionManager
 import org.web3j.utils.Convert
@@ -30,6 +31,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
 import java.util.concurrent.TimeUnit
+import kotlin.Pair
 
 class BlockchainRegularAccountRepositoryImpl(
     private val web3j: Map<String, Web3j>,
@@ -53,13 +55,23 @@ class BlockchainRegularAccountRepositoryImpl(
                 Pair(txHash, blockHash)
             }.firstOrError()
 
-    override fun transferNativeCoin(network: String, accountIndex: Int, transactionPayload: TransactionPayload): Single<PendingTransaction> =
+    override fun transferNativeCoin(
+        network: String,
+        accountIndex: Int,
+        transactionPayload: TransactionPayload
+    ): Single<PendingTransaction> =
         web3j.value(network).ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
             .flowable()
             .zipWith(getChainId(network))
             .flatMap {
                 web3j.value(network)
-                    .ethSendRawTransaction(getSignedTransaction(it.first.transactionCount, transactionPayload, it.second.netVersion.toLong()))
+                    .ethSendRawTransaction(
+                        getSignedTransaction(
+                            it.first.transactionCount,
+                            transactionPayload,
+                            it.second.netVersion.toLong()
+                        )
+                    )
                     .flowable()
                     .flatMapSingle { response ->
                         if (response.error == null) {
@@ -86,13 +98,21 @@ class BlockchainRegularAccountRepositoryImpl(
             .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
             .firstOrError()
 
+    override fun isAddressValid(address: String): Boolean =
+        WalletUtils.isValidAddress(address)
+
     override fun refreshAssetBalance(
         privateKey: String,
         network: String,
         contractAddress: String,
         safeAccountAddress: String
     ): Observable<Pair<String, BigDecimal>> =
-        if (safeAccountAddress.isEmpty()) getERC20Balance(contractAddress, network, privateKey, Credentials.create(privateKey).address)
+        if (safeAccountAddress.isEmpty()) getERC20Balance(
+            contractAddress,
+            network,
+            privateKey,
+            Credentials.create(privateKey).address
+        )
         else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
 
     private fun getERC20Balance(
