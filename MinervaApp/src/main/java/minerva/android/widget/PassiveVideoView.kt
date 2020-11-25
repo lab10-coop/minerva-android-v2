@@ -22,6 +22,7 @@ import androidx.annotation.RawRes
 import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.extension.gone
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.splash.PassiveVideoToActivityInteractor
 
@@ -29,10 +30,10 @@ import minerva.android.splash.PassiveVideoToActivityInteractor
 
 class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, SurfaceTextureListener {
     private lateinit var listener: PassiveVideoToActivityInteractor
-    private lateinit var mediaPlayer: MediaPlayer
+    private var mediaPlayer: MediaPlayer? = null
     private lateinit var videoUri: Uri
 
-    private var isStarted: Boolean = false
+    private var isPrepared: Boolean = false
 
     private var fallbackView: ImageView? = null
     private var loadingView: ImageView? = null
@@ -47,13 +48,13 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
         }
 
     private val onPreparedListener: OnPreparedListener = OnPreparedListener {
-        isStarted = true
+        isPrepared = true
         start()
         listener.initWalletConfig()
     }
 
     private val onCompletionListener: OnCompletionListener = OnCompletionListener { mediaPlayer ->
-        isStarted = false
+        isPrepared = false
         mediaPlayer.release()
         listener.onAnimationEnd()
     }
@@ -66,7 +67,11 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
         init(attrs, 0)
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
         init(attrs, defStyleAttr)
     }
 
@@ -93,15 +98,16 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
         addView(fallbackView)
         addView(textureView)
 
-        context.theme.obtainStyledAttributes(attrs, R.styleable.PassiveVideoView, defStyleAttr, 0).apply {
-            val video = getResourceId(R.styleable.PassiveVideoView_video, 0)
-            val fallback = getResourceId(R.styleable.PassiveVideoView_fallbackImage, 0)
-            val loading = getResourceId(R.styleable.PassiveVideoView_loadingImage, 0)
+        context.theme.obtainStyledAttributes(attrs, R.styleable.PassiveVideoView, defStyleAttr, 0)
+            .apply {
+                val video = getResourceId(R.styleable.PassiveVideoView_video, 0)
+                val fallback = getResourceId(R.styleable.PassiveVideoView_fallbackImage, 0)
+                val loading = getResourceId(R.styleable.PassiveVideoView_loadingImage, 0)
 
-            if (video != 0 && fallback != 0 && loading != 0) {
-                setVideoResource(video, fallback, loading)
+                if (video != 0 && fallback != 0 && loading != 0) {
+                    setVideoResource(video, fallback, loading)
+                }
             }
-        }
     }
 
     fun onCreate(activity: Activity) {
@@ -115,13 +121,13 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
     }
 
     fun onDestroy() {
-        mediaPlayer.release()
+        mediaPlayer?.release()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var aspectRatio: Float = -1f
         try {
-            mediaPlayer.apply { aspectRatio = videoHeight / videoWidth.toFloat() }
+            mediaPlayer?.apply { aspectRatio = videoHeight / videoWidth.toFloat() }
         } catch (exception: Exception) {
             fallbackView?.drawable?.let {
                 aspectRatio = it.intrinsicHeight / it.intrinsicWidth.toFloat()
@@ -139,18 +145,32 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
 
     private fun setVideoUri(uri: Uri, @DrawableRes fallback: Int, @DrawableRes loading: Int) {
         videoUri = uri
-        fallbackView?.let { Glide.with(context).asBitmap().override(BITMAP_WIDTH, BITMAP_HEIGHT).fitCenter().load(fallback).into(it) }
-        loadingView?.let { Glide.with(context).asBitmap().override(BITMAP_WIDTH, BITMAP_HEIGHT).fitCenter().load(loading).into(it) }
+        fallbackView?.let {
+            Glide.with(context).asBitmap().override(BITMAP_WIDTH, BITMAP_HEIGHT).fitCenter()
+                .load(fallback).into(it)
+        }
+        loadingView?.let {
+            Glide.with(context).asBitmap().override(BITMAP_WIDTH, BITMAP_HEIGHT).fitCenter()
+                .load(loading).into(it)
+        }
     }
 
-    private fun setVideoResource(@RawRes resource: Int, @DrawableRes fallback: Int, @DrawableRes loading: Int) {
-        setVideoUri(Uri.parse("android.resource://" + context.packageName + "/" + resource), fallback, loading)
+    private fun setVideoResource(
+        @RawRes resource: Int,
+        @DrawableRes fallback: Int,
+        @DrawableRes loading: Int
+    ) {
+        setVideoUri(
+            Uri.parse("android.resource://" + context.packageName + "/" + resource),
+            fallback,
+            loading
+        )
     }
 
     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, i: Int, i1: Int) {
         try {
             mediaPlayer = MediaPlayer()
-            mediaPlayer.apply {
+            mediaPlayer?.apply {
                 setDataSource(context, videoUri)
                 setSurface(Surface(textureView?.surfaceTexture))
                 setOnErrorListener(onErrorListener)
@@ -174,29 +194,31 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
     }
 
     override fun start() {
-        if (isStarted) {
-            mediaPlayer.start()
+        if (isPrepared) {
+            mediaPlayer?.start()
             textureView?.animate()?.alpha(ALPHA)?.setStartDelay(STARTUP_DELAY)?.start();
             requestLayout()
         }
     }
 
     override fun pause() {
-        if (isStarted && mediaPlayer.isPlaying) mediaPlayer.pause()
+        mediaPlayer?.let {
+            if (isPrepared && it.isPlaying) it.pause()
+        }
     }
 
-    override fun getDuration(): Int = mediaPlayer.duration
-    override fun getCurrentPosition(): Int = mediaPlayer.currentPosition
+    override fun getDuration(): Int = mediaPlayer?.duration ?: Int.InvalidId
+    override fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: Int.InvalidId
     override fun seekTo(i: Int) {
-        mediaPlayer.seekTo(i)
+        mediaPlayer?.seekTo(i)
     }
 
-    override fun isPlaying(): Boolean = mediaPlayer.isPlaying
+    override fun isPlaying(): Boolean = mediaPlayer?.isPlaying ?: false
     override fun getBufferPercentage(): Int = 0
     override fun canPause(): Boolean = false
     override fun canSeekBackward(): Boolean = false
     override fun canSeekForward(): Boolean = false
-    override fun getAudioSessionId(): Int = mediaPlayer.audioSessionId
+    override fun getAudioSessionId(): Int = mediaPlayer?.audioSessionId ?: Int.InvalidId
 
     companion object {
         const val BITMAP_HEIGHT = 1080

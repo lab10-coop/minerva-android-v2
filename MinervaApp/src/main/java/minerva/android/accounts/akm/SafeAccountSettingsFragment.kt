@@ -33,7 +33,11 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
     private var safeAccountDisposable: Disposable? = null
     private lateinit var listener: AddressScannerListener
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? =
         inflater.inflate(R.layout.fragment_safe_account_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -64,7 +68,12 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
         viewModel.apply {
             ownersLiveData.observe(viewLifecycleOwner, Observer { ownerAdapter.updateList(it) })
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
-                MinervaFlashbar.show(requireActivity(), getString(R.string.error_header), getString(R.string.unexpected_error))
+                val message = it.message ?: getString(R.string.unexpected_error)
+                MinervaFlashbar.show(
+                    requireActivity(),
+                    getString(R.string.error_header),
+                    message
+                )
                 Timber.e(it)
             })
             arguments?.let { loadAccount(it.getInt(INDEX)) }
@@ -92,13 +101,19 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
         DialogHandler.showRemoveDialog(
             requireContext(),
             getString(R.string.remove_owner),
-            getString(R.string.remove_safe_account_dialog_message, removeAddress, viewModel.accountName)
+            getString(
+                R.string.remove_safe_account_dialog_message,
+                removeAddress,
+                viewModel.accountName
+            )
         ) { viewModel.removeOwner(removeAddress) }
     }
 
 
     private fun prepareTextValidator() {
-        safeAccountDisposable = newOwner.getValidationObservable(ownerAddressInputLayout) { Validator.validateReceiverAddress(it) }
+        safeAccountDisposable = newOwner.getValidationObservable(ownerAddressInputLayout) {
+            Validator.validateAddress(it, viewModel.isAddressValid(it))
+        }
             .subscribeBy(
                 onNext = { addOwnerButton.isEnabled = it },
                 onError = { addOwnerButton.isEnabled = false }

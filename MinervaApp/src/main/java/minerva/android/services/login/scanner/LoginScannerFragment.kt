@@ -13,8 +13,11 @@ import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.LoginScannerListener
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
+import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
+import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.model.ServiceQrCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.net.UnknownHostException
 
 class LoginScannerFragment : BaseScanner() {
 
@@ -55,21 +58,29 @@ class LoginScannerFragment : BaseScanner() {
     private fun prepareObserver() {
         viewModel.apply {
             handleServiceQrCodeLiveData.observe(viewLifecycleOwner, EventObserver { goToChooseIdentityFragment(it) })
+            bindCredentialSuccessLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(true, it) })
+            knownUserLoginLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { listener.onPainlessLoginResult(false, payload = it) })
             scannerErrorLiveData.observe(
                 viewLifecycleOwner,
-                EventObserver { listener.onScannerResult(false, getString(R.string.invalid_signature_error_message)) })
-            knownUserLoginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false, payload = it) })
-            bindCredentialSuccessLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(true, it) })
-            bindCredentialErrorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onScannerResult(false, getErrorMessage(it)) })
-            updateBindedCredential.observe(viewLifecycleOwner, EventObserver { listener.updateBindedCredential(it) })
+                EventObserver { listener.onScannerResult(false, getErrorMessage(it)) })
+            bindCredentialErrorLiveData.observe(viewLifecycleOwner, EventObserver {
+                listener.onScannerResult(false, getErrorMessage(it))
+            })
+            updateBindedCredential.observe(
+                viewLifecycleOwner,
+                EventObserver { listener.updateBindedCredential(it) })
         }
     }
 
     private fun getErrorMessage(it: Throwable): String =
-        if (it is AutomaticBackupFailedThrowable) {
-            getString(R.string.automatic_backup_failed_error)
-        } else {
-            getString(R.string.attached_credential_failure)
+        when (it) {
+            is NoBindedCredentialThrowable -> getString(R.string.attached_credential_failure)
+            is AutomaticBackupFailedThrowable -> getString(R.string.automatic_backup_failed_error)
+            is EncodingJwtFailedThrowable -> getString(R.string.invalid_signature_error_message)
+            else -> getString(R.string.unexpected_error)
+
         }
 
     private fun goToChooseIdentityFragment(qrCodeCode: ServiceQrCode) {

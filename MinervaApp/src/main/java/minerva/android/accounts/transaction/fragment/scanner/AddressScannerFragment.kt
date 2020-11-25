@@ -26,7 +26,7 @@ class AddressScannerFragment : BaseScanner() {
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
                         scannerProgressBar.visible()
-                        listener.setScanResult(it.text)
+                        listener.setScanResult(AddressParser.parse(it.text))
                         shouldScan = false
                     }
                 }

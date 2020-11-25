@@ -237,19 +237,6 @@ class TransactionViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `prepare prefix address test`() {
-        val result = viewModel.preparePrefixAddress("prefixAddress", "prefix")
-        assertEquals(result, "Address")
-    }
-
-    @Test
-    fun `is correct network test`() {
-        viewModel.account = Account(0, name = "prefixName")
-        val result = viewModel.isCorrectNetwork("prefix")
-        assertEquals(result, true)
-    }
-
-    @Test
     fun `fetch gas limit success`() {
         whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(Single.just(TransactionCost(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
         viewModel.run {
@@ -270,5 +257,19 @@ class TransactionViewModelTest : BaseViewModelTest() {
             getTransactionCosts("address", BigDecimal.TEN)
             errorLiveData.observeLiveDataEvent(Event(error))
         }
+    }
+
+    @Test
+    fun `is address valid success`() {
+        whenever(transactionRepository.isAddressValid(any())).thenReturn(true)
+        val result = viewModel.isAddressValid("0x12345")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `is address valid false`() {
+        whenever(transactionRepository.isAddressValid(any())).thenReturn(false)
+        val result = viewModel.isAddressValid("eeee")
+        assertEquals(false, result)
     }
 }

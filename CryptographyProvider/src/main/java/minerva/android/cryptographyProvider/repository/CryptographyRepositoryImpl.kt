@@ -14,6 +14,7 @@ import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
 import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import org.kethereum.bip39.entropyToMnemonic
 import org.kethereum.bip39.mnemonicToEntropy
 import org.kethereum.bip39.model.MnemonicWords
@@ -73,9 +74,11 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
                 jwtTools.verify(jwtToken, getResolver())
                 jwtTools.decodeRaw(jwtToken).second
             } catch (exception: InvalidJWTException) {
-                error(InvalidJWTException("Invalid JWT Exception: ${exception.message}"))
+                throw InvalidJwtThrowable("Invalid JWT Exception: ${exception.message}")
             } catch (exception: JWTEncodingException) {
-                error(JWTEncodingException("JWT Encoding Exception: ${exception.message}"))
+                throw InvalidJwtThrowable("JWT Encoding Exception: ${exception.message}")
+            } catch (exception: IllegalArgumentException){
+                throw InvalidJwtThrowable("Illegal argument exception: ${exception.message}")
             }
         }
 
