@@ -107,6 +107,13 @@ class TransactionsViewModel(
         }
     }
 
+    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String =
+        transactionRepository.calculateTransactionCost(gasPrice, gasLimit).let {
+            transactionCost = it
+            transactionCost.toPlainString()
+        }
+
+
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         when {
             isMainTransaction -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
@@ -128,7 +135,7 @@ class TransactionsViewModel(
                                             .toSingleDefault(it)
                                 }
                     }
-                    .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
+                    .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
                     .flatMapCompletable { saveWalletAction(SENT, it) }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -156,7 +163,7 @@ class TransactionsViewModel(
                                     smartContractRepository.transferNativeCoin(network.short, it).toSingleDefault(it)
                                 }
                     }
-                    .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
+                    .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
                     .flatMapCompletable { saveWalletAction(SENT, it) }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -199,7 +206,7 @@ class TransactionsViewModel(
                         transaction = it
                         transactionRepository.transferNativeCoin(network.short, account.index, it).toSingleDefault(it)
                     }
-                    .onErrorResumeNext { SingleSource { saveTransferFailedWalletAction() } }
+                    .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
                     .flatMapCompletable { saveWalletAction(SENT, it) }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -229,13 +236,6 @@ class TransactionsViewModel(
                             onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
                             onError = { _errorLiveData.value = Event(it) }
                     )
-        }
-    }
-
-    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String {
-        transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply {
-            transactionCost = this
-            return transactionCost.toPlainString()
         }
     }
 
@@ -272,14 +272,18 @@ class TransactionsViewModel(
                     )
             )
 
-    private fun saveTransferFailedWalletAction() {
+    private fun saveTransferFailedWalletAction(message: String?) {
         launchDisposable {
             saveWalletAction(FAILED, transaction)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnEvent { _loadingLiveData.value = Event(false) }
                     .subscribeBy(
-                            onComplete = { _sendTransactionLiveData.value = Event(Pair("${transaction.amount} ${account.network.token}", FAILED)) },
+                            onComplete = {
+                                Timber.e(message)
+                                _sendTransactionLiveData.value = Event(Pair(message
+                                        ?: "${transaction.amount} ${account.network.token}", FAILED))
+                            },
                             onError = {
                                 Timber.e("Save wallet action error $it")
                                 _errorLiveData.value = Event(it)
@@ -288,9 +292,7 @@ class TransactionsViewModel(
         }
     }
 
-    private fun resolveENS(
-            receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger, contractAddress: String = String.Empty
-    ): Single<Transaction> =
+    private fun resolveENS(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger, contractAddress: String = String.Empty): Single<Transaction> =
             transactionRepository.resolveENS(receiverKey)
                     .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
