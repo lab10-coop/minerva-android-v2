@@ -7,9 +7,11 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.LoginResponse
 import minerva.android.servicesApiProvider.model.Profile
+import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -142,6 +144,17 @@ class ServiceManagerTest : RxTest() {
     }
 
     @Test
+    fun `decode qr code response invalid jwt token error test`() {
+        val error = InvalidJwtThrowable("invalid token")
+        whenever(cryptographyRepository.decodeJwtToken(any())) doReturn Single.error(error)
+        repository.decodeJwtToken("token")
+            .test()
+            .assertError {
+                it is EncodingJwtFailedThrowable
+            }
+    }
+
+    @Test
     fun `get logged in identity test`() {
         val expected = Identity(0, name = "tom", publicKey = "publicKey")
         whenever(walletConfigManager.getLoggedInIdentityByPublicKey(any())) doReturn expected
@@ -203,7 +216,13 @@ class ServiceManagerTest : RxTest() {
     @Test
     fun `update credential success test`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(
+            Identity(
+                1,
+                address = "address",
+                name = "identityName1"
+            )
+        )
         repository.updateBindedCredential(
             CredentialQrCode(
                 issuer = "iss",
@@ -224,7 +243,13 @@ class ServiceManagerTest : RxTest() {
     fun `update credential success error`() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(
+            Identity(
+                1,
+                address = "address",
+                name = "identityName1"
+            )
+        )
         repository.updateBindedCredential(
             CredentialQrCode(
                 issuer = "iss",

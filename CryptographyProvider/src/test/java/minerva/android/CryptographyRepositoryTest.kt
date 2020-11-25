@@ -14,6 +14,7 @@ import me.uport.sdk.jwt.model.JwtHeader
 import me.uport.sdk.jwt.model.JwtPayload
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepositoryImpl
+import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -163,7 +164,21 @@ class CryptographyRepositoryTest {
             .test()
             .await()
             .assertError {
-                it is IllegalStateException
+                it is InvalidJwtThrowable
+            }
+    }
+
+    @Test
+    fun `decode jwt token invalid argument error test`() {
+        val invalidJwt = "invalidJWT"
+        val error = IllegalArgumentException("Invalid JWT Exception")
+        runBlocking { whenever(jwtTools.verify(any(), any(), any(), any())).doReturn(JwtPayload()) }
+        runBlocking { whenever(jwtTools.decodeRaw(any())).thenThrow(error) }
+        repository.decodeJwtToken(invalidJwt)
+            .test()
+            .await()
+            .assertError {
+                it is InvalidJwtThrowable
             }
     }
 }

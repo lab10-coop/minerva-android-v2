@@ -8,6 +8,9 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.services.login.scanner.LoginScannerViewModel
+import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
+import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
+import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.CredentialQrCode
@@ -79,6 +82,34 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
     }
 
     @Test
+    fun `test bind credential qr code to identity and auto backup error occurs`() {
+        val error = AutomaticBackupFailedThrowable()
+        whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
+        whenever(identityManager.bindCredentialToIdentity(any())).thenReturn(Single.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        viewModel.validateResult("token")
+        viewModel.bindCredentialErrorLiveData.observeForever(handleQrCodeResponseErrorObserver)
+        handleQrCodeResponseErrorCaptor.run {
+            verify(handleQrCodeResponseErrorObserver).onChanged(capture())
+            firstValue.peekContent() is AutomaticBackupFailedThrowable
+        }
+    }
+
+    @Test
+    fun `test bind credential qr code to identity and no attached throwable occurs`() {
+        val error = NoBindedCredentialThrowable()
+        whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
+        whenever(identityManager.bindCredentialToIdentity(any())).thenReturn(Single.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        viewModel.validateResult("token")
+        viewModel.bindCredentialErrorLiveData.observeForever(handleQrCodeResponseErrorObserver)
+        handleQrCodeResponseErrorCaptor.run {
+            verify(handleQrCodeResponseErrorObserver).onChanged(capture())
+            firstValue.peekContent() is NoBindedCredentialThrowable
+        }
+    }
+
+    @Test
     fun `test update credential qr code success`() {
         whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.just(CredentialQrCode("Minerva App", loggedInDid = "did")))
         whenever(identityManager.isCredentialLoggedIn(any())).doReturn(true)
@@ -92,6 +123,15 @@ class LoginScannerViewModelTest : BaseViewModelTest() {
     @Test
     fun `validate qr code result failed`() {
         val error = Throwable()
+        whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.error(error))
+        viewModel.handleServiceQrCodeLiveData.observeForever(scannerResultObserver)
+        viewModel.validateResult("token")
+        viewModel.scannerErrorLiveData.observeLiveDataEvent(Event(error))
+    }
+
+    @Test
+    fun `validate qr code invalid jwt token result test`() {
+        val error = EncodingJwtFailedThrowable()
         whenever(serviceManager.decodeJwtToken(any())).thenReturn(Single.error(error))
         viewModel.handleServiceQrCodeLiveData.observeForever(scannerResultObserver)
         viewModel.validateResult("token")
