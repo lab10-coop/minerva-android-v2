@@ -4,10 +4,13 @@ import androidx.lifecycle.LiveData
 import eu.afse.jsonlogic.JsonLogic
 import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.SingleSource
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.servicesApiProvider.api.ServicesApi
 import minerva.android.servicesApiProvider.model.TokenPayload
+import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -25,7 +28,9 @@ class ServiceManagerImpl(
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletConfigManager.walletConfigLiveData
 
-    override fun decodeJwtToken(token: String): Single<QrCode> = cryptographyRepository.decodeJwtToken(token)
+    override fun decodeJwtToken(token: String): Single<QrCode> =
+        cryptographyRepository.decodeJwtToken(token)
+            .onErrorResumeNext { error -> Single.error(getError(error)) }
             .map { mapHashMapToQrCodeResponse(it, token) }
 
     override fun decodeThirdPartyRequestToken(token: String): Single<ConnectionRequest<Pair<Credential, CredentialRequest>>> =
@@ -33,9 +38,20 @@ class ServiceManagerImpl(
             .map { handleCredentialRequest(it) }//todo handle different request types
             .flatMap { updateConnectedService(it) }
 
+    private fun getError(error: Throwable) =
+        if (error is InvalidJwtThrowable) {
+            EncodingJwtFailedThrowable()
+        } else {
+            error
+        }
+
     private fun updateConnectedService(it: ConnectionRequest<Pair<Credential, CredentialRequest>>) =
         when (it) {
-            is ConnectionRequest.ServiceConnected -> requestedService(it).run { saveService(Service(issuer, name, DateUtils.timestamp, iconUrl.url)).toSingleDefault(it) }
+            is ConnectionRequest.ServiceConnected ->
+                requestedService(it).run {
+                    saveService(Service(issuer, name, DateUtils.timestamp, iconUrl.url))
+                        .toSingleDefault(it)
+                }
             else -> Single.just(it)
         }
 
@@ -50,7 +66,10 @@ class ServiceManagerImpl(
         throw NotInitializedWalletConfigThrowable()
     }
 
-    private fun findCredential(map: Map<String, Any?>, credentials: List<Credential>): ConnectionRequest<Pair<Credential, CredentialRequest>> {
+    private fun findCredential(
+        map: Map<String, Any?>,
+        credentials: List<Credential>
+    ): ConnectionRequest<Pair<Credential, CredentialRequest>> {
         CredentialRequestMapper.map(map).apply {
             service.copy(issuer = issuer)
             credentialRequirements?.let {
@@ -83,7 +102,8 @@ class ServiceManagerImpl(
 
     private fun isIssValid(credentialRequest: CredentialRequirements, iss: String): Boolean =
         if (credentialRequest.constraints.isEmpty()) false
-        else JsonLogic().apply(credentialRequest.constraints[0], iss).toBoolean() //JsonLogic in constraints is check against the iss
+        else JsonLogic().apply(credentialRequest.constraints[0], iss)
+            .toBoolean() //JsonLogic in constraints is check against the iss
 
     override fun createJwtToken(payload: Map<String, Any?>, privateKey: String?): Single<String> =
         cryptographyRepository.createJwtToken(payload, privateKey ?: walletConfigManager.masterSeed.privateKey)

@@ -83,9 +83,7 @@ class LoginScannerViewModel(
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onSuccess = { _bindCredentialSuccessLiveData.value = Event(it) },
-                        onError = {
-                            _bindCredentialErrorLiveData.value = Event(it)
-                        }
+                        onError = { _bindCredentialErrorLiveData.value = Event(it) }
                     )
             }
         }
@@ -112,7 +110,6 @@ class LoginScannerViewModel(
             status == FAILED && error is AutomaticBackupFailedThrowable ->
                 _bindCredentialErrorLiveData.value = Event(AutomaticBackupFailedThrowable())
             status == FAILED -> _bindCredentialErrorLiveData.value = Event(NoBindedCredentialThrowable())
-
         }
     }
 
