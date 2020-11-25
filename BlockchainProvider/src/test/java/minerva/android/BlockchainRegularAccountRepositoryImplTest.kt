@@ -121,7 +121,7 @@ class BlockchainRegularAccountRepositoryImplTest {
             .assertValue {
                 it.gasPrice == BigDecimal(20)
 
-            }
+                }
     }
 
     @Test
@@ -244,5 +244,29 @@ class BlockchainRegularAccountRepositoryImplTest {
     fun `is address valid fail test`() {
         val result = repository.isAddressValid("address")
         assertEquals(false, result)
+    }
+
+    @Test
+    fun `get transactions success test`() {
+        val ethTransaction = EthTransaction()
+        val transaction = Transaction()
+        transaction.blockHash = "0x1"
+        transaction.hash = "0x2"
+        ethTransaction.result = transaction
+
+        every { web3J.ethGetTransactionByHash(any()).flowable() } returns Flowable.just(ethTransaction)
+        repository.getTransactions(listOf(Pair(ETH, "address")))
+                .test()
+                .assertNoErrors()
+                .assertComplete()
+    }
+
+    @Test
+    fun `get transactions error test`() {
+        val error = Throwable()
+        every { web3J.ethGetTransactionByHash(any()).flowable() } returns Flowable.error(error)
+        repository.getTransactions(listOf(Pair(ETH, "address")))
+                .test()
+                .assertError(error)
     }
 }

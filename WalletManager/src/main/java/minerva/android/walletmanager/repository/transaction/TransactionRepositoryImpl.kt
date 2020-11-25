@@ -62,6 +62,9 @@ class TransactionRepositoryImpl(
     override fun isAddressValid(address: String): Boolean =
             blockchainRepository.isAddressValid(address)
 
+    override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
+            blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
+
     private fun getPendingAccountsWithBlockHashes(it: List<Pair<String, String?>>): MutableList<PendingAccount> {
         val pendingList = mutableListOf<PendingAccount>()
         it.forEach {
@@ -120,9 +123,6 @@ class TransactionRepositoryImpl(
     override fun loadRecipients(): List<Recipient> = localStorage.getRecipients()
 
     override fun resolveENS(ensName: String): Single<String> = blockchainRepository.resolveENS(ensName)
-
-    override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
-            blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
 
     override fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>> {
         walletConfigManager.getWalletConfig()?.let { config ->
