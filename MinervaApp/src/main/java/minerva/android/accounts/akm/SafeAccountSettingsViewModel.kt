@@ -31,14 +31,17 @@ class SafeAccountSettingsViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
+    fun isAddressValid(address: String) =
+        accountManager.isAddressValid(address)
+
     fun loadAccount(index: Int) {
         account = accountManager.loadAccount(index)
         _ownersLiveData.value = account.owners?.reversed()
         getOwners(account.address, account.network.short, account.privateKey)
-        account.masterOwnerAddress.let {
-            smartContractRepository.getSafeAccountMasterOwnerPrivateKey(it).apply {
-                masterOwnerPrivateKey = this
-            }
+
+        val masterOwnerAddress = account.masterOwnerAddress
+        smartContractRepository.getSafeAccountMasterOwnerPrivateKey(masterOwnerAddress).apply {
+            masterOwnerPrivateKey = this
         }
     }
 
@@ -48,7 +51,13 @@ class SafeAccountSettingsViewModel(
             return
         }
         launchDisposable {
-            smartContractRepository.addSafeAccountOwner(owner, account.address, account.network.short, masterOwnerPrivateKey, account)
+            smartContractRepository.addSafeAccountOwner(
+                owner,
+                account.address,
+                account.network.short,
+                masterOwnerPrivateKey,
+                account
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -72,7 +81,13 @@ class SafeAccountSettingsViewModel(
         }
 
         launchDisposable {
-            smartContractRepository.removeSafeAccountOwner(removeAddress, account.address, account.network.short, masterOwnerPrivateKey, account)
+            smartContractRepository.removeSafeAccountOwner(
+                removeAddress,
+                account.address,
+                account.network.short,
+                masterOwnerPrivateKey,
+                account
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -97,7 +112,12 @@ class SafeAccountSettingsViewModel(
     @VisibleForTesting
     fun getOwners(contractAddress: String, network: String, privateKey: String) {
         launchDisposable {
-            smartContractRepository.getSafeAccountOwners(contractAddress, network, privateKey, account)
+            smartContractRepository.getSafeAccountOwners(
+                contractAddress,
+                network,
+                privateKey,
+                account
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(

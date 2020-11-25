@@ -15,7 +15,6 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.TransactionsViewModel
-import minerva.android.accounts.transaction.TransactionsViewModel.Companion.META_ADDRESS_SEPARATOR
 import minerva.android.accounts.transaction.fragment.TransactionsFragment
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.widget.MinervaFlashbar
@@ -72,9 +71,9 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     override fun onError(message: String) {
         MinervaFlashbar.show(
-            this,
-            getString(R.string.transaction_error_title),
-            getString(R.string.transaction_error_message, message)
+                this,
+                getString(R.string.transaction_error_title),
+                getString(R.string.transaction_error_message, message)
         )
     }
 
@@ -86,14 +85,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     override fun setScanResult(text: String?) {
         onBackPressed()
-        text?.let {
-            (getCurrentFragment() as TransactionsFragment).let { transactionFragment ->
-                text.replace(META_ADDRESS_SEPARATOR, String.Empty).substringBefore(HEX_PREFIX).apply {
-                    if (viewModel.isCorrectNetwork(this)) transactionFragment.setReceiver(viewModel.preparePrefixAddress(it, this))
-                    else transactionFragment.setReceiver(it)
-                }
-            }
-        }
+        (getCurrentFragment() as? TransactionsFragment)?.setReceiver(text)
     }
 
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {

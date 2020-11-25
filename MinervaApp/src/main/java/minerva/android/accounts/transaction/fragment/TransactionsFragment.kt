@@ -21,6 +21,7 @@ import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.accounts.transaction.fragment.adapter.RecipientAdapter
 import minerva.android.extension.*
+import minerva.android.extension.validator.ValidationResult
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Recipient
@@ -85,7 +86,7 @@ class TransactionsFragment : Fragment() {
         transactionCostLayout.isEnabled = true
         arrow.visible()
 
-        if (getAmount() == viewModel.account.cryptoBalance) {
+        if (getAmount() == viewModel.account.cryptoBalance && getAmount() != BigDecimal.ZERO) {
             amount.setText(viewModel.recalculateAmount(getAmount(), it.cost))
         }
 
@@ -123,7 +124,7 @@ class TransactionsFragment : Fragment() {
     private fun prepareTextListeners() {
         validationDisposable = Observable.combineLatest(
             amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
-            receiver.getValidationObservable(receiverInputLayout) { Validator.validateReceiverAddress(it) },
+            receiver.getValidationObservable(receiverInputLayout) { Validator.validateAddress(it, viewModel.isAddressValid(it)) },
             BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid ->
                 isAmountValid && isAddressValid
             })
