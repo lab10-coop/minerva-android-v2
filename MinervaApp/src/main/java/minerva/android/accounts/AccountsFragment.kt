@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.refreshable_recycler_view_layout.*
@@ -84,6 +85,10 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
         startSafeAccountWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
     }
 
+    override fun onWalletConnect() {
+        Toast.makeText(requireContext(), "WalletConnect will be enabled soon", Toast.LENGTH_LONG).show()
+    }
+
     fun setProgressAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending)
     }
@@ -131,10 +136,16 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
                 interactor.shouldShowLoadingScreen(it)
             })
             balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                showErrorFlashbar(getString(R.string.cannot_remove_safe_account_title), getString(R.string.cannot_remove_safe_account_message))
+                showErrorFlashbar(
+                    getString(R.string.cannot_remove_safe_account_title),
+                    getString(R.string.cannot_remove_safe_account_message)
+                )
             })
             balanceIsNotEmptyErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                showErrorFlashbar(getString(R.string.cannot_remove_account_title), getString(R.string.cannot_remove_account_message))
+                showErrorFlashbar(
+                    getString(R.string.cannot_remove_account_title),
+                    getString(R.string.cannot_remove_account_message)
+                )
             })
             isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
