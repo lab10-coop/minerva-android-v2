@@ -89,7 +89,7 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
         Toast.makeText(requireContext(), "WalletConnect will be enabled soon", Toast.LENGTH_LONG).show()
     }
 
-    fun setProgressAccount(index: Int, pending: Boolean) {
+    fun setPendingAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending)
     }
 

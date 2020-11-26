@@ -59,7 +59,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     }
 
     fun updateBalances(balances: HashMap<String, Balance>) {
-        activeAccounts.forEachIndexed { index, account ->
+        activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
             account.apply {
                 cryptoBalance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
                 fiatBalance = balances[address]?.fiatBalance ?: Int.InvalidId.toBigDecimal()
@@ -69,7 +69,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     }
 
     fun updateAssetBalances(accountAssetBalances: Map<String, List<AccountAsset>>) {
-        activeAccounts.forEach { account -> accountAssetBalances[account.privateKey]?.let { account.accountAssets = it } }
+        activeAccounts.filter { !it.isPending }
+            .forEach { account -> accountAssetBalances[account.privateKey]?.let { account.accountAssets = it } }
     }
 
     fun setPending(index: Int, isPending: Boolean) {
