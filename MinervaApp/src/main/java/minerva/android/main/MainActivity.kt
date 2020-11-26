@@ -36,7 +36,6 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
@@ -52,7 +51,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         prepareSettingsIcon()
         prepareObservers()
         viewModel.restorePendingTransactions()
-        if (!viewModel.isBackupAllowed){
+        if (!viewModel.isBackupAllowed) {
             DialogHandler.showDialog(this, getString(R.string.error_header), getString(R.string.outdated_wallet_error_message))
         }
     }
@@ -102,7 +101,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 Toast.makeText(this@MainActivity, getString(R.string.unexpected_error), Toast.LENGTH_LONG).show()
             })
             loadingLiveData.observe(this@MainActivity, EventObserver {
-                (getCurrentFragment() as? AccountsFragment)?.setProgressAccount(it.first, it.second)
+                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(it.first, it.second)
             })
             updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(true, it)
@@ -119,7 +118,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                     getString(R.string.transaction_success_title),
                     getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
                 )
-                (getCurrentFragment() as? AccountsFragment)?.apply { updateAccountFragment() { setProgressAccount(it.index, false) } }
+                (getCurrentFragment() as? AccountsFragment)?.apply {
+                    updateAccountFragment() {
+                        setPendingAccount(
+                            it.index,
+                            false
+                        )
+                    }
+                }
                 viewModel.clearWebSocketSubscription()
             })
             updatePendingTransactionErrorLiveData.observe(this@MainActivity, EventObserver {
@@ -177,13 +183,16 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             menu?.apply {
                 findItem(R.id.editIdentityOrder)?.isVisible =
                     shouldShowAddIdentityIcon() && isOrderEditAvailable(WalletActionType.IDENTITY) && getCurrentChildFragment() is MyIdentitiesFragment
-                findItem(R.id.addIdentity)?.isVisible = shouldShowAddIdentityIcon() && getCurrentChildFragment() is MyIdentitiesFragment
-                findItem(R.id.editAccountOrder)?.isVisible = shouldShowAddValueIcon() && isOrderEditAvailable(WalletActionType.ACCOUNT)
+                findItem(R.id.addIdentity)?.isVisible =
+                    shouldShowAddIdentityIcon() && getCurrentChildFragment() is MyIdentitiesFragment
+                findItem(R.id.editAccountOrder)?.isVisible =
+                    shouldShowAddValueIcon() && isOrderEditAvailable(WalletActionType.ACCOUNT)
                 findItem(R.id.addAccount)?.apply {
                     isVisible = shouldShowAddValueIcon()
                     isEnabled = !shouldDisableAddButton
                 }
-                findItem(R.id.editServiceOrder)?.isVisible = isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
+                findItem(R.id.editServiceOrder)?.isVisible =
+                    isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
                 findItem(R.id.editCredentialsOrder)?.isVisible = isIdentitiesTabSelected() &&
                         getCurrentChildFragment() is CredentialsFragment && isOrderEditAvailable(WalletActionType.CREDENTIAL)
                 findItem(R.id.qrCodeScanner)?.isVisible = isServicesTabSelected() ||
@@ -219,13 +228,13 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     private fun handlePreparedTransaction(data: Intent?) {
         data?.apply {
-            getIntExtra(ACCOUNT_INDEX, Int.InvalidValue).let {
-                viewModel.subscribeToExecutedTransactions(it)
-                if (it != Int.InvalidValue) {
-                    (getCurrentFragment() as? AccountsFragment)?.setProgressAccount(it, true)
-                }
+            val index = getIntExtra(ACCOUNT_INDEX, Int.InvalidValue)
+            viewModel.subscribeToExecutedTransactions(index)
+            if (index != Int.InvalidValue) {
+                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
             }
         }
+
     }
 
     override fun showSendTransactionScreen(account: Account) {
