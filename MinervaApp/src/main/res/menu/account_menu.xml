@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/showAddress"
+        android:id="@+id/walletConnect"
         android:enabled="true"
-        android:title="@string/show_address"
+        android:icon="@drawable/ic_wallet_connect"
+        android:title="@string/walletConnect"
         app:showAsAction="ifRoom" />
 
     <item
@@ -18,6 +19,7 @@
     <item
         android:id="@+id/addSafeAccount"
         android:enabled="true"
+        android:icon="@drawable/ic_lock"
         android:title="@string/add_safe_account"
         android:visible="false"
         app:showAsAction="ifRoom" />
@@ -25,6 +27,7 @@
     <item
         android:id="@+id/remove"
         android:enabled="true"
+        android:icon="@drawable/ic_delete"
         android:title="@string/remove"
         app:showAsAction="ifRoom" />
 </menu>
