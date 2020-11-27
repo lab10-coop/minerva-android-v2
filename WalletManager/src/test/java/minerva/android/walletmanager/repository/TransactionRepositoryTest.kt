@@ -42,7 +42,13 @@ class TransactionRepositoryTest {
     private val localStorage: LocalStorage = mock()
     private val webSocketServiceProvider: WebSocketServiceProvider = mock()
     private val repository =
-        TransactionRepositoryImpl(blockchainRegularAccountRepository, walletConfigManager, binanaceApi, localStorage, webSocketServiceProvider)
+        TransactionRepositoryImpl(
+            blockchainRegularAccountRepository,
+            walletConfigManager,
+            binanaceApi,
+            localStorage,
+            webSocketServiceProvider
+        )
 
     @get:Rule
     val rule
@@ -64,7 +70,16 @@ class TransactionRepositoryTest {
 
     @Test
     fun `refresh balances test success`() {
-        whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
+        whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(
+            Single.just(
+                listOf(
+                    Pair(
+                        "address",
+                        BigDecimal.ONE
+                    )
+                )
+            )
+        )
         whenever(binanaceApi.fetchExchangeRate(any())).thenReturn(Single.just(Market("ETHEUR", "12.21")))
         repository.refreshBalances().test()
             .assertComplete()
@@ -92,7 +107,11 @@ class TransactionRepositoryTest {
             )
         ).thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash")))
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
-        repository.transferNativeCoin("", 1, Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+        repository.transferNativeCoin(
+            "",
+            1,
+            Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE)
+        )
             .test()
             .assertComplete()
     }
@@ -107,7 +126,11 @@ class TransactionRepositoryTest {
             )
         ).thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash")))
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable("No ENS")))
-        repository.transferNativeCoin("", 1, Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+        repository.transferNativeCoin(
+            "",
+            1,
+            Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE)
+        )
             .test()
             .assertComplete()
     }
@@ -117,7 +140,11 @@ class TransactionRepositoryTest {
         val error = Throwable()
         whenever(blockchainRegularAccountRepository.transferNativeCoin(any(), any(), any())).thenReturn(Single.error(error))
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable()))
-        repository.transferNativeCoin("", 1, Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE))
+        repository.transferNativeCoin(
+            "",
+            1,
+            Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE)
+        )
             .test()
             .assertError(error)
     }
@@ -127,7 +154,12 @@ class TransactionRepositoryTest {
         whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())).thenReturn(
             Observable.just(Pair("privateKey1", BigDecimal.TEN))
         )
-        NetworkManager.initialize(listOf(Network(short = "artis_tau1", httpRpc = "some"), Network(short = "eth_rinkeby", httpRpc = "some1")))
+        NetworkManager.initialize(
+            listOf(
+                Network(short = "artis_tau1", httpRpc = "some"),
+                Network(short = "eth_rinkeby", httpRpc = "some1")
+            )
+        )
         repository.apply {
             refreshAssetBalance()
                 .test()
@@ -139,7 +171,9 @@ class TransactionRepositoryTest {
     fun `get asset balances when values are empty and there are no assets needed test`() {
         val error = Throwable()
         whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(0, accounts = emptyList())
-        whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())) doReturn Observable.error(error)
+        whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())) doReturn Observable.error(
+            error
+        )
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed())
         repository.apply {
             refreshAssetBalance()
@@ -266,12 +300,32 @@ class TransactionRepositoryTest {
     }
 
     @Test
+    fun `should open wss connection test success`() {
+        val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
+        val result = repository.shouldOpenNewWssConnection(1)
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `should open wss connection test failed`() {
+        val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
+        val result = repository.shouldOpenNewWssConnection(7)
+         assertEquals(false, result)
+    }
+
+    @Test
+    fun `should open wss connection test failed when no pending accounts`() {
+        whenever(localStorage.getPendingAccounts()).thenReturn(emptyList())
+        val result = repository.shouldOpenNewWssConnection(7)
+        assertEquals(false, result)
+    }
+
+    @Test
     fun `get transaction costs success`() {
         whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(
-            Single.just(
-                TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
-            )
-        )
+            Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
         repository.getTransactionCosts("network", 1, "from", "to", BigDecimal.TEN)
             .test()
             .assertComplete()
@@ -283,7 +337,11 @@ class TransactionRepositoryTest {
     @Test
     fun `get transaction costs error`() {
         val error = Throwable()
-        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(Single.error(error))
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(
+            Single.error(
+                error
+            )
+        )
         repository.getTransactionCosts("network", 1, "from", "to", BigDecimal.TEN)
             .test()
             .assertError(error)

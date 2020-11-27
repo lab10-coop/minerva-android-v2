@@ -53,6 +53,17 @@
             tools:text="#1 ARTIS" />
 
         <ImageView
+            android:id="@+id/qrCode"
+            android:layout_width="@dimen/clickable_area"
+            android:layout_height="@dimen/clickable_area"
+            android:scaleType="center"
+            android:src="@drawable/ic_qr_code"
+            app:layout_constraintBottom_toBottomOf="@id/icon"
+            app:layout_constraintRight_toLeftOf="@+id/menu"
+            app:layout_constraintTop_toTopOf="@id/icon"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
             android:id="@+id/menu"
             android:layout_width="@dimen/clickable_area"
             android:layout_height="@dimen/clickable_area"

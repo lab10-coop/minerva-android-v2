@@ -26,44 +26,50 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 class TransactionRepositoryImpl(
-        private val blockchainRepository: BlockchainRegularAccountRepository,
-        private val walletConfigManager: WalletConfigManager,
-        private val binanceApi: BinanceApi,
-        private val localStorage: LocalStorage,
-        private val webSocketProvider: WebSocketServiceProvider
+    private val blockchainRepository: BlockchainRegularAccountRepository,
+    private val walletConfigManager: WalletConfigManager,
+    private val binanceApi: BinanceApi,
+    private val localStorage: LocalStorage,
+    private val webSocketProvider: WebSocketServiceProvider
 ) : TransactionRepository {
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
         listOf(Markets.ETH_EUR, Markets.POA_ETH).run {
             walletConfigManager.getWalletConfig()?.accounts?.filter { !it.isDeleted && !it.isPending }?.let { values ->
                 return blockchainRepository.refreshBalances(MarketUtils.getAddresses(values))
-                        .zipWith(Observable.range(START, this.size).flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }.toList())
-                        .map { MarketUtils.calculateFiatBalances(it.first, values, it.second) }
+                    .zipWith(Observable.range(START, this.size).flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }.toList())
+                    .map { MarketUtils.calculateFiatBalances(it.first, values, it.second) }
             }
         }
         throw NotInitializedWalletConfigThrowable()
     }
 
     override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
-            blockchainRepository.transferNativeCoin(network, accountIndex, TransactionToTransactionPayloadMapper.map(transaction))
-                    .map { pendingTx -> localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx)) }
-                    .flatMap { blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty } }
-                    .map { saveRecipient(it, transaction.receiverKey) }
-                    .ignoreElement()
+        blockchainRepository.transferNativeCoin(network, accountIndex, TransactionToTransactionPayloadMapper.map(transaction))
+            .map { pendingTx -> localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx)) }
+            .flatMap { blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty } }
+            .map { saveRecipient(it, transaction.receiverKey) }
+            .ignoreElement()
 
     override fun getTransactions(): Single<List<PendingAccount>> =
-            blockchainRepository.getTransactions(getTxHashes())
-                    .map { getPendingAccountsWithBlockHashes(it) }
+        blockchainRepository.getTransactions(getTxHashes())
+            .map { getPendingAccountsWithBlockHashes(it) }
 
-    override fun getTransactionCosts(network: String, assetIndex: Int, from: String, to: String, amount: BigDecimal): Single<TransactionCost> =
-            blockchainRepository.getTransactionCosts(network, assetIndex, from, to, amount)
-                    .map { TransactionCostPayloadToTransactionCost.map(it) }
+    override fun getTransactionCosts(
+        network: String,
+        assetIndex: Int,
+        from: String,
+        to: String,
+        amount: BigDecimal
+    ): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(network, assetIndex, from, to, amount)
+            .map { TransactionCostPayloadToTransactionCost.map(it) }
 
     override fun isAddressValid(address: String): Boolean =
-            blockchainRepository.isAddressValid(address)
+        blockchainRepository.isAddressValid(address)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
-            blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
+        blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
 
     private fun getPendingAccountsWithBlockHashes(it: List<Pair<String, String?>>): MutableList<PendingAccount> {
         val pendingList = mutableListOf<PendingAccount>()
@@ -86,37 +92,47 @@ class TransactionRepositoryImpl(
         return txHashes
     }
 
+    override fun shouldOpenNewWssConnection(accountIndex: Int): Boolean =
+        getPendingAccounts().size == ONE_PENDING_ACCOUNT && getPendingAccounts().find { it.index == accountIndex } != null ||
+                getPendingAccounts().size > ONE_PENDING_ACCOUNT && !isSubscribeToTheNetwork(accountIndex)
+
+    private fun isSubscribeToTheNetwork(accountIndex: Int): Boolean {
+        val network = getPendingAccount(accountIndex).network
+        return getPendingAccounts().find { it.network == network } != null
+    }
+
     override fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount> {
         getPendingAccount(accountIndex).network.apply {
             webSocketProvider.openConnection(this)
             return webSocketProvider.subscribeToExecutedTransactions(this)
-                    .filter { findPendingAccount(it) != null }
-                    .map { findPendingAccount(it) }
+                .filter { findPendingAccount(it) != null }
+                .map { findPendingAccount(it) }
         }
     }
 
     private fun findPendingAccount(transaction: ExecutedTransaction) =
-            localStorage.getPendingAccounts().find { it.txHash == transaction.txHash && it.senderAddress == transaction.senderAddress }
+        localStorage.getPendingAccounts()
+            .find { it.txHash == transaction.txHash && it.senderAddress == transaction.senderAddress }
 
     override fun removePendingAccount(pendingAccount: PendingAccount) {
         localStorage.removePendingAccount(pendingAccount)
     }
 
     override fun getPendingAccount(accountIndex: Int): PendingAccount =
-            localStorage.getPendingAccounts().find { it.index == accountIndex }.orElse { PendingAccount(Int.InvalidIndex) }
+        localStorage.getPendingAccounts().find { it.index == accountIndex }.orElse { PendingAccount(Int.InvalidIndex) }
 
     override fun clearPendingAccounts() {
         localStorage.clearPendingAccounts()
     }
 
     override fun getPendingAccounts(): List<PendingAccount> =
-            localStorage.getPendingAccounts()
+        localStorage.getPendingAccounts()
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
-            blockchainRepository.transferERC20Token(network, TransactionToTransactionPayloadMapper.map(transaction))
-                    .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
-                    .map { saveRecipient(it, transaction.receiverKey) }
-                    .ignoreElement()
+        blockchainRepository.transferERC20Token(network, TransactionToTransactionPayloadMapper.map(transaction))
+            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
+            .map { saveRecipient(it, transaction.receiverKey) }
+            .ignoreElement()
 
     private fun saveRecipient(ensName: String, address: String) = localStorage.saveRecipient(Recipient(ensName, address))
 
@@ -127,12 +143,12 @@ class TransactionRepositoryImpl(
     override fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>> {
         walletConfigManager.getWalletConfig()?.let { config ->
             return Observable.range(START, config.accounts.size)
-                    .filter { position -> !config.accounts[position].isDeleted && !config.accounts[position].isPending }
-                    .filter { position -> config.accounts[position].network.isAvailable() }
-                    .filter { position -> config.accounts[position].network.assets.isEmpty() }
-                    .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
-                    .toList()
-                    .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
+                .filter { position -> !config.accounts[position].isDeleted && !config.accounts[position].isPending }
+                .filter { position -> config.accounts[position].network.isAvailable() }
+                .filter { position -> config.accounts[position].network.assets.isEmpty() }
+                .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
+                .toList()
+                .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
         }
         throw NotInitializedWalletConfigThrowable()
     }
@@ -144,23 +160,25 @@ class TransactionRepositoryImpl(
      *
      */
     private fun refreshAssetsBalance(account: Account): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
-            Observable.range(START, account.network.assets.size)
-                    .flatMap {
-                        blockchainRepository.refreshAssetBalance(
-                                account.privateKey,
-                                account.network.short,
-                                account.network.getAssetsAddresses()[it],
-                                account.address
-                        )
-                    }
-                    .filter { it.second > NO_FUNDS }
-                    .toList()
-                    .map { Pair(account.privateKey, it) }
+        Observable.range(START, account.network.assets.size)
+            .flatMap {
+                blockchainRepository.refreshAssetBalance(
+                    account.privateKey,
+                    account.network.short,
+                    account.network.getAssetsAddresses()[it],
+                    account.address
+                )
+            }
+            .filter { it.second > NO_FUNDS }
+            .toList()
+            .map { Pair(account.privateKey, it) }
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
 
     companion object {
+        private const val ONE_PENDING_ACCOUNT = 1
         private const val START = 0
         private val NO_FUNDS = BigDecimal.valueOf(0)
     }
+
 }

@@ -17,8 +17,7 @@ import minerva.android.utils.BalanceUtils.getCryptoBalance
 import minerva.android.utils.BalanceUtils.getFiatBalance
 import java.math.BigDecimal
 
-class AssetView(callback: AssertViewCallback, account: Account, assetIndex: Int, @DrawableRes logoRes: Int) :
-    RelativeLayout(callback.getContext()) {
+class AssetView(callback: AssertViewCallback, account: Account, assetIndex: Int, @DrawableRes logoRes: Int) : RelativeLayout(callback.context) {
 
     private val isOpen: Boolean
         get() = sendButton.isVisible
@@ -56,7 +55,7 @@ class AssetView(callback: AssertViewCallback, account: Account, assetIndex: Int,
 
     private fun prepareListeners(callback: AssertViewCallback, account: Account, assetIndex: Int) {
         setOnClickListener {
-            TransitionManager.beginDelayedTransition(callback.getViewGroup())
+            TransitionManager.beginDelayedTransition(callback.viewGroup)
             if (isOpen) close() else open()
         }
         sendButton.setOnClickListener { callback.onSendAssetClicked(account.index, assetIndex) }
@@ -69,7 +68,7 @@ class AssetView(callback: AssertViewCallback, account: Account, assetIndex: Int,
 
     interface AssertViewCallback {
         fun onSendAssetClicked(accountIndex: Int, assetIndex: Int)
-        fun getViewGroup(): ViewGroup
-        fun getContext(): Context
+        val viewGroup: ViewGroup
+        val context: Context
     }
 }
