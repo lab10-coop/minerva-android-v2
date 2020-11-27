@@ -25,4 +25,5 @@ interface TransactionRepository {
     fun getTransactions(): Single<List<PendingAccount>>
     fun getTransactionCosts(network: String, assetIndex: Int, from: String, to: String, amount: BigDecimal): Single<TransactionCost>
     fun isAddressValid(address: String): Boolean
+    fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
 }

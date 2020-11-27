@@ -9,4 +9,5 @@ interface AccountsFragmentToAdapterListener {
     fun onAccountRemove(account: Account)
     fun onShowAddress(account: Account, position: Int)
     fun onShowSafeAccountSettings(account: Account, position: Int)
+    fun onWalletConnect()
 }
