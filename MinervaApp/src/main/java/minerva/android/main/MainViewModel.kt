@@ -73,19 +73,8 @@ class MainViewModel(
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
     fun dispose() = masterSeedRepository.dispose()
 
-    private fun shouldOpenNewConnection(accountIndex: Int) = transactionRepository.getPendingAccounts().size == ONE_PENDING_ACCOUNT ||
-            transactionRepository.getPendingAccounts().size > ONE_PENDING_ACCOUNT && !isSubscribeToTheNetwork(accountIndex)
-
-    private fun isSubscribeToTheNetwork(accountIndex: Int): Boolean {
-        val network = transactionRepository.getPendingAccount(accountIndex)?.network
-        transactionRepository.getPendingAccounts().forEach {
-            return it.network == network
-        }
-        return false
-    }
-
     fun subscribeToExecutedTransactions(accountIndex: Int) {
-        if (shouldOpenNewConnection(accountIndex)) {
+        if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {
             webSocketSubscription.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)
                 .subscribeOn(Schedulers.io())
                 .doOnComplete { restorePendingTransactions() }
@@ -183,7 +172,16 @@ class MainViewModel(
                         serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
                     }
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(listOf(getValuesWalletAction(identity.name, qrCode.serviceName))))
+                    .andThen(
+                        walletActionsRepository.saveWalletActions(
+                            listOf(
+                                getValuesWalletAction(
+                                    identity.name,
+                                    qrCode.serviceName
+                                )
+                            )
+                        )
+                    )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
@@ -201,7 +199,17 @@ class MainViewModel(
     fun updateBindedCredentials(replace: Boolean) {
         launchDisposable {
             serviceManager.updateBindedCredential(qrCode, replace)
-                .onErrorResumeNext { error -> SingleSource { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, FAILED), error) } }
+                .onErrorResumeNext { error ->
+                    SingleSource {
+                        saveWalletAction(
+                            getWalletAction(
+                                qrCode.lastUsed,
+                                qrCode.name,
+                                FAILED
+                            ), error
+                        )
+                    }
+                }
                 .doOnSuccess { saveWalletAction(getWalletAction(qrCode.lastUsed, qrCode.name, UPDATED)) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -250,8 +258,4 @@ class MainViewModel(
 
     val isBackupAllowed: Boolean
         get() = masterSeedRepository.isBackupAllowed
-
-    companion object {
-        const val ONE_PENDING_ACCOUNT = 1
-    }
 }

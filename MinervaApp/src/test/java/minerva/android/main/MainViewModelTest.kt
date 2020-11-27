@@ -144,6 +144,7 @@ class MainViewModelTest : BaseViewModelTest() {
     fun `subscribe to executed transactions success`() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
         whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")))
+        whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
             updatePendingAccountLiveData.observeForever(updatePendingAccountObserver)
             subscribeToExecutedTransactions(1)
@@ -160,6 +161,7 @@ class MainViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
         whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.error(error))
+        whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
             updatePendingTransactionErrorLiveData.observeForever(errorObserver)
             subscribeToExecutedTransactions(1)
@@ -175,6 +177,7 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
         whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")).take(0))
         whenever(transactionRepository.getTransactions()).thenReturn(Single.just(listOf(PendingAccount(1, "123"))))
+        whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
             handleTimeoutOnPendingTransactionsLiveData.observeForever(timeoutPendingAccountObserver)
             subscribeToExecutedTransactions(1)
@@ -192,6 +195,7 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
         whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")).take(0))
         whenever(transactionRepository.getTransactions()).thenReturn(Single.error(error))
+        whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
             updatePendingTransactionErrorLiveData.observeForever(errorObserver)
             subscribeToExecutedTransactions(1)
