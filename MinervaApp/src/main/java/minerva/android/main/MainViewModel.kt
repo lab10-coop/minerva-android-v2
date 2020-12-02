@@ -67,7 +67,7 @@ class MainViewModel(
     val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
 
     val executedAccounts = mutableListOf<PendingAccount>()
-    private var webSocketSubscription = CompositeDisposable()
+    private var webSocketSubscriptions = CompositeDisposable()
 
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
@@ -75,7 +75,7 @@ class MainViewModel(
 
     fun subscribeToExecutedTransactions(accountIndex: Int) {
         if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {
-            webSocketSubscription.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)
+            webSocketSubscriptions.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)
                 .subscribeOn(Schedulers.io())
                 .doOnComplete { restorePendingTransactions() }
                 .observeOn(AndroidSchedulers.mainThread())
@@ -99,8 +99,9 @@ class MainViewModel(
     }
 
     fun clearWebSocketSubscription() {
-        if (transactionRepository.getPendingAccounts().isEmpty())
-            webSocketSubscription.clear()
+        if (transactionRepository.getPendingAccounts().isEmpty()) {
+            webSocketSubscriptions.clear()
+        }
     }
 
     fun restorePendingTransactions() {
@@ -174,12 +175,7 @@ class MainViewModel(
                     .observeOn(Schedulers.io())
                     .andThen(
                         walletActionsRepository.saveWalletActions(
-                            listOf(
-                                getValuesWalletAction(
-                                    identity.name,
-                                    qrCode.serviceName
-                                )
-                            )
+                            listOf(getValuesWalletAction(identity.name, qrCode.serviceName))
                         )
                     )
                     .subscribeOn(Schedulers.io())
