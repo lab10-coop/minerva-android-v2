@@ -27,7 +27,7 @@ enum class SettingsSection {
 }
 
 enum class SettingsRowType {
-    BACKUP, REMINDER_VIEW, AUTHENTICATION, EDIT_NETWORKS, MAIN_NETWORKS, CURRENCY, LANGUAGE, TWITTER, COMMUNITY, APP_VERSION, LICENCE
+    BACKUP, REMINDER_VIEW, AUTHENTICATION, EDIT_NETWORKS, MAIN_NETWORKS, CURRENCY, LANGUAGE, TWITTER, COMMUNITY, APP_VERSION, LICENCE, TERMS_OF_SERVICE, PRIVACY_POLICY
 }
 
 fun SettingsFragment.propagateSettings(): List<Settings> =
@@ -78,7 +78,18 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                     detailText = BuildConfig.LICENCE_TYPE,
                     isArrowVisible = false,
                     rowType = SettingsRowType.LICENCE
+                ),
+                SettingRow(
+                    getString(R.string.terms_of_service),
+                    isArrowVisible = true,
+                    rowType = SettingsRowType.TERMS_OF_SERVICE
+                ),
+                SettingRow(
+                    getString(R.string.privacy_policy),
+                    isArrowVisible = true,
+                    rowType = SettingsRowType.PRIVACY_POLICY
                 )
+
             ), SettingsSection.LEGAL
         )
     )
