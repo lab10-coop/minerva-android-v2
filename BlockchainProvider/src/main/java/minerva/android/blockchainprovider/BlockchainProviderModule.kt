@@ -5,6 +5,8 @@ import minerva.android.blockchainprovider.repository.regularAccont.BlockchainReg
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepositoryImpl
+import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
+import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
 import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProvider
 import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProviderImpl
 import org.koin.dsl.module
@@ -20,5 +22,6 @@ fun createBlockchainProviderModule(
     factory { Web3jProvider.provideEnsResolver(ensUrl) }
     factory<BlockchainRegularAccountRepository> { BlockchainRegularAccountRepositoryImpl(get(), gasPrice, get()) }
     factory<BlockchainSafeAccountRepository> { BlockchainSafeAccountRepositoryImpl(get(), gasPrice) }
-    factory<WebSocketServiceProvider> { WebSocketServiceProviderImpl(wssUrls) }
+    factory<WebSocketServiceProvider> { WebSocketServiceProviderImpl() }
+    factory<WebSocketRepository> { WebSocketRepositoryImpl(get(), wssUrls) }
 }

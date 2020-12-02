@@ -8,7 +8,7 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
-import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProvider
+import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
@@ -22,6 +22,7 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -30,7 +31,7 @@ class TransactionRepositoryImpl(
     private val walletConfigManager: WalletConfigManager,
     private val binanceApi: BinanceApi,
     private val localStorage: LocalStorage,
-    private val webSocketProvider: WebSocketServiceProvider
+    private val webSocketRepository: WebSocketRepository
 ) : TransactionRepository {
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
@@ -92,25 +93,31 @@ class TransactionRepositoryImpl(
         return txHashes
     }
 
-    override fun shouldOpenNewWssConnection(accountIndex: Int): Boolean =
-        getPendingAccounts().size == ONE_PENDING_ACCOUNT && getPendingAccounts().find { it.index == accountIndex } != null ||
-                getPendingAccounts().size > ONE_PENDING_ACCOUNT && !isSubscribeToTheNetwork(accountIndex)
-
-    private fun isSubscribeToTheNetwork(accountIndex: Int): Boolean {
+    override fun shouldOpenNewWssConnection(accountIndex: Int): Boolean {
         val network = getPendingAccount(accountIndex).network
-        return getPendingAccounts().find { it.network == network } != null
-    }
-
-    override fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount> {
-        getPendingAccount(accountIndex).network.apply {
-            webSocketProvider.openConnection(this)
-            return webSocketProvider.subscribeToExecutedTransactions(this)
-                .filter { findPendingAccount(it) != null }
-                .map { findPendingAccount(it) }
+        return when {
+            getPendingAccounts().size == ONE_PENDING_ACCOUNT -> isFirstAccountPending(accountIndex, network)
+            getPendingAccounts().size > ONE_PENDING_ACCOUNT -> isNetworkAlreadyPending(network)
+            else -> false
         }
     }
 
-    private fun findPendingAccount(transaction: ExecutedTransaction) =
+    private fun isFirstAccountPending(accountIndex: Int, network: String) =
+        getPendingAccounts().find { it.index == accountIndex && it.network == network } != null
+
+    private fun isNetworkAlreadyPending(network: String) =
+        getPendingAccounts().filter { it.network == network }.size < PENDING_NETWORK_LIMIT &&
+                getPendingAccounts().first().network != network
+
+
+    override fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount> {
+        val pendingAccount = getPendingAccount(accountIndex)
+        return webSocketRepository.subscribeToExecutedTransactions(pendingAccount.network, pendingAccount.blockNumber)
+            .filter { findPendingAccount(it) != null }
+            .map { findPendingAccount(it) }
+    }
+
+    private fun findPendingAccount(transaction: ExecutedTransaction): PendingAccount? =
         localStorage.getPendingAccounts()
             .find { it.txHash == transaction.txHash && it.senderAddress == transaction.senderAddress }
 
@@ -177,6 +184,7 @@ class TransactionRepositoryImpl(
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1
+        private const val PENDING_NETWORK_LIMIT = 2
         private const val START = 0
         private val NO_FUNDS = BigDecimal.valueOf(0)
     }

@@ -1,6 +1,5 @@
 package minerva.android
 
-import android.util.Base64
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.every
 import io.mockk.mockk
@@ -26,7 +25,7 @@ import java.math.BigInteger
 import kotlin.test.assertEquals
 
 
-class BlockchainRegularAccountRepositoryImplTest {
+class BlockchainRegularAccountRepositoryImplTest : RxTest() {
 
     private val AtsGasPrice = BigInteger.valueOf(100_000_000_000)
     private val EthGasPrice = BigInteger.valueOf(20_000_000_000)
@@ -41,24 +40,6 @@ class BlockchainRegularAccountRepositoryImplTest {
 
     private val repository: BlockchainRegularAccountRepositoryImpl =
         BlockchainRegularAccountRepositoryImpl(web3Js, gasPrice, ensResolver)
-
-    @get:Rule
-
-    val rule
-        get() = InstantTaskExecutorRule()
-
-    @Before
-    fun setupRxSchedulers() {
-        mockkStatic(WalletUtils::class)
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
-    }
-
-    @After
-    fun destroyRxSchedulers() {
-        RxJavaPlugins.reset()
-        RxAndroidPlugins.reset()
-    }
 
     @Test
     fun `refresh balance success`() {
@@ -121,7 +102,7 @@ class BlockchainRegularAccountRepositoryImplTest {
             .assertValue {
                 it.gasPrice == BigDecimal(20)
 
-                }
+            }
     }
 
     @Test
@@ -148,18 +129,13 @@ class BlockchainRegularAccountRepositoryImplTest {
         sendTransaction.result = "0x2"
         val netVersion = NetVersion()
         netVersion.result = "124"
-        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(
-            transactionCount
-        )
-        every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.just(
-            sendTransaction
-        )
+        val ethBlockNumber = EthBlockNumber()
+        ethBlockNumber.result = "0x1"
+        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
+        every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.just(sendTransaction)
         every { web3J.netVersion().flowable() } returns Flowable.just(netVersion)
-        repository.transferNativeCoin(
-            ETH,
-            1,
-            TransactionPayload("address", "0x2313")
-        )
+        every { web3J.ethBlockNumber().flowable() } returns Flowable.just(ethBlockNumber)
+        repository.transferNativeCoin(ETH, 1, TransactionPayload("address", "0x2313"))
             .test()
             .assertComplete()
     }
@@ -173,16 +149,13 @@ class BlockchainRegularAccountRepositoryImplTest {
         sendTransaction.result = "0x2"
         val netVersion = NetVersion()
         netVersion.result = "124"
-        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(
-            transactionCount
-        )
+        val ethBlockNumber = EthBlockNumber()
+        ethBlockNumber.result = "0x1"
+        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.error(error)
         every { web3J.netVersion().flowable() } returns Flowable.just(netVersion)
-        repository.transferNativeCoin(
-            ETH,
-            1,
-            TransactionPayload("address", "0x2313")
-        )
+        every { web3J.ethBlockNumber().flowable() } returns Flowable.just(ethBlockNumber)
+        repository.transferNativeCoin(ETH, 1, TransactionPayload("address", "0x2313"))
             .test()
             .assertError(error)
     }
@@ -256,9 +229,9 @@ class BlockchainRegularAccountRepositoryImplTest {
 
         every { web3J.ethGetTransactionByHash(any()).flowable() } returns Flowable.just(ethTransaction)
         repository.getTransactions(listOf(Pair(ETH, "address")))
-                .test()
-                .assertNoErrors()
-                .assertComplete()
+            .test()
+            .assertNoErrors()
+            .assertComplete()
     }
 
     @Test
@@ -266,7 +239,27 @@ class BlockchainRegularAccountRepositoryImplTest {
         val error = Throwable()
         every { web3J.ethGetTransactionByHash(any()).flowable() } returns Flowable.error(error)
         repository.getTransactions(listOf(Pair(ETH, "address")))
-                .test()
-                .assertError(error)
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `get block number success`() {
+        val ethBlockNumber = EthBlockNumber()
+        ethBlockNumber.result = "0x1"
+        every { web3J.ethBlockNumber().flowable() } returns Flowable.just(ethBlockNumber)
+        repository.getCurrentBlockNumber(ETH)
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+    }
+
+    @Test
+    fun `get block number error`() {
+        val error = Throwable()
+        every { web3J.ethBlockNumber().flowable() } returns Flowable.error(error)
+        repository.getCurrentBlockNumber(ETH)
+            .test()
+            .assertError(error)
     }
 }
