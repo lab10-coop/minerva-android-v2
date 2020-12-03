@@ -1,6 +1,7 @@
 package minerva.android.blockchainprovider.repository.regularAccont
 
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.defs.Operation
@@ -19,6 +20,7 @@ interface BlockchainRegularAccountRepository {
         contractAddress: String,
         safeAccountAddress: String = String.Empty
     ): Observable<Pair<String, BigDecimal>>
+
     fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal
     fun transferNativeCoin(network: String, accountIndex: Int, transactionPayload: TransactionPayload): Single<PendingTransaction>
     fun toGwei(balance: BigDecimal): BigDecimal
@@ -26,6 +28,14 @@ interface BlockchainRegularAccountRepository {
     fun reverseResolveENS(ensAddress: String): Single<String>
     fun resolveENS(ensName: String): Single<String>
     fun getTransactions(pendingHashes: List<Pair<String, String>>): Single<List<Pair<String, String?>>>
-    fun getTransactionCosts(network: String, assetIndex: Int, from: String, to: String, amount: BigDecimal): Single<TransactionCostPayload>
+    fun getTransactionCosts(
+        network: String,
+        assetIndex: Int,
+        from: String,
+        to: String,
+        amount: BigDecimal
+    ): Single<TransactionCostPayload>
+
     fun isAddressValid(address: String): Boolean
+    fun getCurrentBlockNumber(network: String): Flowable<BigInteger>
 }

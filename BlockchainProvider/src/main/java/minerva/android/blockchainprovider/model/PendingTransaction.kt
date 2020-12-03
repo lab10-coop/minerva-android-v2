@@ -9,6 +9,7 @@ data class PendingTransaction(
     val txHash: String = String.Empty,
     val network: String = String.Empty,
     val senderAddress: String = String.Empty,
-    val blockNumber: String = String.Empty,
-    val amount: BigDecimal = BigDecimal.ZERO
+    val blockHash: String = String.Empty,
+    val amount: BigDecimal = BigDecimal.ZERO,
+    val blockNumber: BigInteger = BigInteger.ONE
 )
