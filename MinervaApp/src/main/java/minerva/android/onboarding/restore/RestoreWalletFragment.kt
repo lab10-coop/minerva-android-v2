@@ -40,7 +40,6 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
     private fun prepareObservers() {
         viewModel.apply {
             invalidMnemonicLiveData.observe(this@RestoreWalletFragment, EventObserver { handleInvalidMnemonic(it) })
-            errorLiveData.observe(this@RestoreWalletFragment, EventObserver { handleError(R.string.creating_wallet_error_message) })
             restoreWalletLiveData.observe(this@RestoreWalletFragment, Observer { listener.showMainActivity() })
             loadingLiveData.observe(this@RestoreWalletFragment, EventObserver { if (it) showLoader() else hideLoader() })
             walletConfigNotFoundLiveData.observe(this@RestoreWalletFragment, EventObserver { handleError(R.string.no_such_file_error_message) })
