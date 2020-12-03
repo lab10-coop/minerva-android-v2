@@ -17,9 +17,6 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
 
     val restoreWalletLiveData: LiveData<WalletConfig> get() = masterSeedRepository.walletConfigLiveData
 
-    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
-    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
-
     private val _invalidMnemonicLiveData = MutableLiveData<Event<List<String>>>()
     val invalidMnemonicLiveData: LiveData<Event<List<String>>> get() = _invalidMnemonicLiveData
 

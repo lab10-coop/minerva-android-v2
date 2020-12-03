@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.fragment_settings.*
 import minerva.android.BuildConfig
 import minerva.android.R
 import minerva.android.extension.launchActivity
-import minerva.android.extension.openApp
+import minerva.android.extension.openUri
 import minerva.android.main.base.BaseFragment
 import minerva.android.settings.adapter.SettingsAdapter
 import minerva.android.settings.backup.BackupActivity
@@ -66,9 +66,11 @@ class SettingsFragment : BaseFragment() {
     private fun onSettingsRowClicked(type: SettingsRowType) {
         when (type) {
             BACKUP -> showBackupActivity()
-            TWITTER -> context?.openApp(BuildConfig.TWITTER_APP, BuildConfig.TWITTER_WEB)
-            COMMUNITY -> context?.openApp(BuildConfig.TELEGRAM_APP, BuildConfig.TELEGRAM_WEB)
-            else -> Timber.d(type.toString()) // todo implement the rest of the setting interactions
+            TWITTER -> context?.openUri(BuildConfig.TWITTER_APP, BuildConfig.TWITTER_WEB)
+            COMMUNITY -> context?.openUri(BuildConfig.TELEGRAM_APP, BuildConfig.TELEGRAM_WEB)
+            TERMS_OF_SERVICE -> context?.openUri(webUri = BuildConfig.TERMS_OF_SERVICE)
+            PRIVACY_POLICY -> context?.openUri(webUri = BuildConfig.PRIVACY_POLICY)
+            else -> Timber.d(type.toString())
         }
     }
 

@@ -8,9 +8,9 @@ import android.net.Uri
 fun Context.isIntentSafe(intent: Intent) =
     this.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
 
-fun Context.openApp(appUri: String, webUri: String) {
+fun Context.openUri(appUri: String = String.empty, webUri: String) {
     Intent(Intent.ACTION_VIEW, Uri.parse(appUri)).run {
-        if (this@openApp.isIntentSafe(this)) {
+        if (this@openUri.isIntentSafe(this)) {
             startActivity(this)
         } else {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(webUri)))

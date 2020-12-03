@@ -30,6 +30,8 @@ android {
         buildConfigField "String", "TWITTER_WEB", '"https://twitter.com/MinervaWallet"'
         buildConfigField "String", "TELEGRAM_APP", '"tg://resolve?domain=MinervaWallet"'
         buildConfigField "String", "TELEGRAM_WEB", '"https://web.telegram.org/#/im?p=@MinervaWallet"'
+        buildConfigField "String", "PRIVACY_POLICY", '"https://docs.minerva.digital/legal/privacy"'
+        buildConfigField "String", "TERMS_OF_SERVICE", '"https://docs.minerva.digital/legal/terms"'
     }
 
     signingConfigs {
@@ -52,8 +54,8 @@ android {
     productFlavors {
         flavorDimensions 'enviroment'
         staging {
-            versionCode 4
-            versionName "1.0.4"
+            versionCode 5
+            versionName "1.0.5"
             dimension 'enviroment'
             applicationIdSuffix ".staging"
             versionNameSuffix '-staging'

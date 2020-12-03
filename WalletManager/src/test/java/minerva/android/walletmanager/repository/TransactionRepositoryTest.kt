@@ -4,7 +4,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.exchangemarketsprovider.api.BinanceApi
 import com.exchangemarketsprovider.model.Market
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
@@ -18,7 +17,7 @@ import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
-import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProvider
+import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -40,14 +39,14 @@ class TransactionRepositoryTest {
     private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
     private val binanaceApi: BinanceApi = mock()
     private val localStorage: LocalStorage = mock()
-    private val webSocketServiceProvider: WebSocketServiceProvider = mock()
+    private val webSocketRepositoryImpl: WebSocketRepositoryImpl = mock()
     private val repository =
         TransactionRepositoryImpl(
             blockchainRegularAccountRepository,
             walletConfigManager,
             binanaceApi,
             localStorage,
-            webSocketServiceProvider
+            webSocketRepositoryImpl
         )
 
     @get:Rule
@@ -270,8 +269,7 @@ class TransactionRepositoryTest {
     fun `subscribe to pending transactions success test`() {
         val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
         whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
-        doNothing().whenever(webSocketServiceProvider).openConnection(any())
-        whenever(webSocketServiceProvider.subscribeToExecutedTransactions(any())).thenReturn(
+        whenever(webSocketRepositoryImpl.subscribeToExecutedTransactions(any(), any())).thenReturn(
             Flowable.just(
                 ExecutedTransaction(
                     "hash",
@@ -292,27 +290,62 @@ class TransactionRepositoryTest {
         val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
         val error = Throwable()
         whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
-        doNothing().whenever(webSocketServiceProvider).openConnection(any())
-        whenever(webSocketServiceProvider.subscribeToExecutedTransactions(any())).thenReturn(Flowable.error(error))
+        whenever(webSocketRepositoryImpl.subscribeToExecutedTransactions(any(), any())).thenReturn(Flowable.error(error))
         repository.subscribeToExecutedTransactions(1)
             .test()
             .assertError(error)
     }
 
     @Test
-    fun `should open wss connection test success`() {
-        val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
+    fun `should open wss connection when there is only one pending account test success`() {
+        val pendingAccount = PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
         whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
         val result = repository.shouldOpenNewWssConnection(1)
         assertEquals(true, result)
     }
 
     @Test
-    fun `should open wss connection test failed`() {
-        val pendingAccount = PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
-        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
-        val result = repository.shouldOpenNewWssConnection(7)
-         assertEquals(false, result)
+    fun `should open wss connection when there are more than one pending accounts with the same network test success`() {
+        val pendingAccountAts1 = PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+        val pendingAccountAts2 = PendingAccount(2, network = "ats", txHash = "hash", senderAddress = "sender")
+
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccountAts1, pendingAccountAts2))
+        val result = repository.shouldOpenNewWssConnection(2)
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `should open wss connection when there are two pending accounts with the different network test`() {
+        val pendingAccount = PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+        val pendingAccount1 = PendingAccount(2, network = "ats", txHash = "hash", senderAddress = "sender")
+        val pendingAccountPoa = PendingAccount(3, network = "poa", txHash = "hash", senderAddress = "sender")
+
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount, pendingAccount1, pendingAccountPoa))
+        val result = repository.shouldOpenNewWssConnection(3)
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `should not open wss connection when there are two pending accounts with the same network test`() {
+        val pendingAccount = PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+        val pendingAccountPoa1 = PendingAccount(2, network = "poa", txHash = "hash", senderAddress = "sender")
+        val pendingAccountPoa2 = PendingAccount(3, network = "poa", txHash = "hash", senderAddress = "sender")
+
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount, pendingAccountPoa1, pendingAccountPoa2))
+        val result = repository.shouldOpenNewWssConnection(3)
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `should not open wss connection when there are two pending accounts with the same network and the first one is already opened test`() {
+        val pendingAccount = PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+        val pendingAccountPoa1 = PendingAccount(2, network = "poa", txHash = "hash", senderAddress = "sender")
+        val pendingAccountPoa2 = PendingAccount(3, network = "poa", txHash = "hash", senderAddress = "sender")
+        val pendingAccountEth = PendingAccount(4, network = "eth", txHash = "hash", senderAddress = "sender")
+
+        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount, pendingAccountPoa1, pendingAccountPoa2, pendingAccountEth))
+        val result = repository.shouldOpenNewWssConnection(1)
+        assertEquals(false, result)
     }
 
     @Test
@@ -325,7 +358,8 @@ class TransactionRepositoryTest {
     @Test
     fun `get transaction costs success`() {
         whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(
-            Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
+            Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
+        )
         repository.getTransactionCosts("network", 1, "from", "to", BigDecimal.TEN)
             .test()
             .assertComplete()

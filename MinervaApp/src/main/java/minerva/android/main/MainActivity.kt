@@ -113,21 +113,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 }
                 showBindCredentialFlashbar(false, message)
             })
-            updatePendingAccountLiveData.observe(this@MainActivity, EventObserver {
-                showFlashbar(
-                    getString(R.string.transaction_success_title),
-                    getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
-                )
-                (getCurrentFragment() as? AccountsFragment)?.apply {
-                    updateAccountFragment() {
-                        setPendingAccount(
-                            it.index,
-                            false
-                        )
-                    }
-                }
-                viewModel.clearWebSocketSubscription()
-            })
+            updatePendingAccountLiveData.observe(this@MainActivity, EventObserver { updatePendingAccount(it) })
             updatePendingTransactionErrorLiveData.observe(this@MainActivity, EventObserver {
                 showFlashbar(getString(R.string.error_header), getString(R.string.pending_account_error_message))
                 stopPendingAccounts()
@@ -139,6 +125,19 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 stopPendingAccounts()
             })
         }
+    }
+
+    private fun updatePendingAccount(it: PendingAccount) {
+        showFlashbar(
+            getString(R.string.transaction_success_title),
+            getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
+        )
+        (getCurrentFragment() as? AccountsFragment)?.apply {
+            updateAccountFragment() {
+                setPendingAccount(it.index, false)
+            }
+        }
+        viewModel.clearWebSocketSubscription()
     }
 
     private fun stopPendingAccounts() {
