@@ -17,10 +17,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import minerva.android.R
 import minerva.android.databinding.FragmentEditIdentityBinding
-import minerva.android.extension.afterTextChanged
-import minerva.android.extension.gone
-import minerva.android.extension.isEmail
-import minerva.android.extension.visible
+import minerva.android.extension.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
@@ -361,13 +358,8 @@ class EditIdentityFragment : BaseFragment() {
 
     private fun handleLoader(isLoading: Boolean) {
         binding.apply {
-            if (isLoading) {
-                saveIdentityProgressBar.visible()
-                confirmButton.gone()
-            } else {
-                saveIdentityProgressBar.gone()
-                confirmButton.visible()
-            }
+            saveIdentityProgressBar.visibleOrGone(isLoading)
+            confirmButton.visibleOrGone(!isLoading)
         }
     }
 

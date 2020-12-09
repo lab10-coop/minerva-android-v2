@@ -111,13 +111,8 @@ class TransactionsFragment : Fragment() {
 
     private fun handleTransactionCostLoader(showLoader: Boolean) {
         binding.apply {
-            if (showLoader) {
-                transactionCostProgressBar.visible()
-                transactionCostAmount.gone()
-            } else {
-                transactionCostProgressBar.gone()
-                transactionCostAmount.visible()
-            }
+            transactionCostProgressBar.visibleOrGone(showLoader)
+            transactionCostAmount.visibleOrGone(!showLoader)
         }
     }
 

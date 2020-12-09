@@ -190,5 +190,4 @@ class TransactionRepositoryImpl(
         private const val START = 0
         private val NO_FUNDS = BigDecimal.valueOf(0)
     }
-
 }
