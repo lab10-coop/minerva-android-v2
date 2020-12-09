@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/iconImageView"
-        android:layout_width="@dimen/small_logo_size"
-        android:layout_height="@dimen/small_logo_size"
+        android:layout_width="@dimen/xsmall_logo_size"
+        android:layout_height="@dimen/xsmall_logo_size"
         android:layout_marginTop="@dimen/margin_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"

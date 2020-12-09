@@ -8,10 +8,6 @@
     android:layout_margin="@dimen/margin_small"
     android:clipToPadding="false"
     android:orientation="vertical"
-    android:paddingLeft="@dimen/margin_normal"
-    android:paddingTop="@dimen/margin_xsmall"
-    android:paddingRight="@dimen/margin_normal"
-    android:paddingBottom="@dimen/margin_xsmall"
     app:cardCornerRadius="@dimen/card_corner_radius">
 
     <androidx.core.widget.ContentLoadingProgressBar
@@ -23,44 +19,45 @@
         android:scaleY="16" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mainContent"
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
-        android:background="@drawable/identity_background"
-        android:padding="@dimen/margin_normal">
+        android:background="@drawable/identity_background">
 
         <ImageView
-            android:id="@+id/icon"
+            android:id="@+id/main_icon"
             android:layout_width="@dimen/small_logo_size"
             android:layout_height="@dimen/small_logo_size"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal"
             tools:ignore="ContentDescription"
             tools:src="@drawable/ic_artis" />
 
         <TextView
-            android:id="@+id/accountName"
+            android:id="@+id/account_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_xsmall"
+            android:layout_marginLeft="@dimen/margin_small"
             android:fontFamily="@font/rubik_medium"
             android:textSize="@dimen/text_normal"
-            app:layout_constraintBottom_toBottomOf="@id/icon"
-            app:layout_constraintLeft_toRightOf="@id/icon"
-            app:layout_constraintTop_toTopOf="@id/icon"
+            app:layout_constraintBottom_toBottomOf="@id/main_icon"
+            app:layout_constraintLeft_toRightOf="@id/main_icon"
+            app:layout_constraintTop_toTopOf="@id/main_icon"
             tools:ignore="RtlHardcoded"
             tools:text="#1 ARTIS" />
 
         <ImageView
-            android:id="@+id/qrCode"
+            android:id="@+id/qr_code"
             android:layout_width="@dimen/clickable_area"
             android:layout_height="@dimen/clickable_area"
             android:scaleType="center"
             android:src="@drawable/ic_qr_code"
-            app:layout_constraintBottom_toBottomOf="@id/icon"
+            app:layout_constraintBottom_toBottomOf="@id/main_icon"
             app:layout_constraintRight_toLeftOf="@+id/menu"
-            app:layout_constraintTop_toTopOf="@id/icon"
+            app:layout_constraintTop_toTopOf="@id/main_icon"
             tools:ignore="ContentDescription" />
 
         <ImageView
@@ -69,61 +66,31 @@
             android:layout_height="@dimen/clickable_area"
             android:scaleType="center"
             android:src="@drawable/ic_three_dots"
-            app:layout_constraintBottom_toBottomOf="@id/icon"
-            app:layout_constraintLeft_toLeftOf="@id/arrow"
-            app:layout_constraintRight_toRightOf="@id/arrow"
-            app:layout_constraintTop_toTopOf="@id/icon"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_down_arrow"
-            app:layout_constraintBottom_toBottomOf="@id/amountView"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/amountView"
-            tools:ignore="ContentDescription" />
-
-        <minerva.android.widget.CryptoAmountView
-            android:id="@+id/amountView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_small"
             android:layout_marginRight="@dimen/margin_normal"
-            app:layout_constraintRight_toLeftOf="@id/arrow"
-            app:layout_constraintTop_toBottomOf="@id/icon"
-            tools:ignore="RtlHardcoded" />
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/main_icon"
+            app:layout_constraintTop_toTopOf="@id/main_icon"
+            tools:ignore="ContentDescription" />
 
-        <TextView
-            android:id="@+id/cryptoTokenName"
-            android:layout_width="wrap_content"
+        <minerva.android.widget.TokenView
+            android:id="@+id/main_token_view"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_small"
-            android:textSize="@dimen/text_normal"
-            app:layout_constraintBottom_toBottomOf="@id/amountView"
-            app:layout_constraintLeft_toLeftOf="@id/accountName"
-            app:layout_constraintTop_toTopOf="@id/amountView"
-            tools:text="ATS"
-            tools:textColor="@color/artis" />
+            app:layout_constraintLeft_toLeftOf="@id/main_icon"
+            app:layout_constraintRight_toRightOf="@id/menu"
+            app:layout_constraintTop_toBottomOf="@id/main_icon" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/sendButton"
-            style="@style/OutlinedButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="0dp"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginRight="0dp"
-            android:layout_marginBottom="@dimen/margin_xsmall"
-            android:backgroundTint="@android:color/white"
-            android:visibility="gone"
+        <View
+            android:id="@+id/container_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/lightGray"
+            app:layout_constraintBottom_toBottomOf="@id/divider_bottom"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/amountView"
-            app:strokeColor="@color/lightGray"
-            tools:text="Send ATS"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="@id/divider_top" />
 
         <LinearLayout
             android:id="@+id/container"
@@ -131,12 +98,46 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
+            android:paddingLeft="@dimen/margin_normal"
+            android:paddingTop="@dimen/margin_xxsmall"
+            android:paddingRight="@dimen/margin_normal"
+            android:paddingBottom="@dimen/margin_xxsmall"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/sendButton" />
+            app:layout_constraintTop_toTopOf="@id/divider_top" />
+
+        <View
+            android:id="@+id/divider_top"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="@dimen/margin_xxsmall"
+            android:background="@color/separatorColor"
+            app:layout_constraintTop_toBottomOf="@id/main_token_view" />
+
+        <View
+            android:id="@+id/divider_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/separatorColor"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/container" />
+
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/margin_xxsmall"
+            android:src="@drawable/ic_down_arrow"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/container"
+            tools:ignore="ContentDescription" />
 
         <FrameLayout
-            android:id="@+id/pendingMask"
+            android:id="@+id/pending_mask"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:alpha=".3"

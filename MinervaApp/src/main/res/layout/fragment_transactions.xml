@@ -18,7 +18,7 @@
         tools:ignore="PrivateResource">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/amountInputLayout"
+            android:id="@+id/amount_input_layout"
             style="@style/FormTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/receiverInputLayout"
+            android:id="@+id/receiver_input_layout"
             style="@style/FormTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
-            android:id="@+id/transactionCostLayout"
+            android:id="@+id/transaction_cost_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_normal"
@@ -63,7 +63,7 @@
             tools:ignore="UseCompoundDrawables">
 
             <TextView
-                android:id="@+id/transactionCostLabel"
+                android:id="@+id/transaction_cost_label"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/margin_xxsmall"
@@ -73,7 +73,7 @@
                 android:textColor="@color/gray" />
 
             <TextView
-                android:id="@+id/transactionCostAmount"
+                android:id="@+id/transaction_cost_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:fontFamily="@font/rubik_regular"
@@ -82,7 +82,7 @@
                 android:textColor="@color/gray" />
 
             <ProgressBar
-                android:id="@+id/transactionCostProgressBar"
+                android:id="@+id/transaction_cost_progress_bar"
                 android:layout_width="@dimen/progressbar_size"
                 android:layout_height="@dimen/progressbar_size"
                 android:visibility="gone" />
@@ -98,7 +98,7 @@
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/gasPriceInputLayout"
+            android:id="@+id/gas_price_input_layout"
             style="@style/FormTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,7 +108,7 @@
             android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/gasPriceEditText"
+                android:id="@+id/gas_price_edit_text"
                 style="@style/EditTextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -116,7 +116,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/gasLimitInputLayout"
+            android:id="@+id/gas_limit_input_layout"
             style="@style/FormTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -127,7 +127,7 @@
             android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/gasLimitEditText"
+                android:id="@+id/gas_limit_edit_text"
                 style="@style/EditTextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -136,7 +136,7 @@
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/sendButton"
+        android:id="@+id/send_button"
         style="@style/PurpleButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -144,7 +144,7 @@
         android:enabled="false" />
 
     <ProgressBar
-        android:id="@+id/sendTransactionProgressBar"
+        android:id="@+id/send_transaction_progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"

@@ -13,28 +13,29 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.account_list_row.view.*
 import minerva.android.R
 import minerva.android.accounts.listener.AccountsAdapterListener
+import minerva.android.databinding.AccountListRowBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.utils.BalanceUtils
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.widget.AssetView
+import minerva.android.widget.TokenView
 import minerva.android.widget.repository.getNetworkIcon
-import java.math.BigDecimal
 
-class AccountViewHolder(private val view: View, private val parent: ViewGroup) : AssetView.AssertViewCallback,
+class AccountViewHolder(private val view: View, private val parent: ViewGroup) : TokenView.TokenViewCallback,
     RecyclerView.ViewHolder(view) {
+
+    private var binding = AccountListRowBinding.bind(view)
 
     private lateinit var listener: AccountsAdapterListener
     private var rawPosition: Int = Int.InvalidIndex
 
     private val isOpen
-        get() = view.sendButton.isVisible
+        get() = binding.container.isVisible
 
-    override fun onSendAssetClicked(accountIndex: Int, assetIndex: Int) = listener.onSendAssetClicked(accountIndex, assetIndex)
+    override fun onSendTokenAssetClicked(accountIndex: Int, assetIndex: Int) = listener.onSendAssetTokenClicked(accountIndex, assetIndex)
+    override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
     override val viewGroup: ViewGroup
         get() = parent
@@ -48,39 +49,33 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
 
     fun setData(rawPosition: Int, account: Account) {
         this.rawPosition = rawPosition
+
         view.apply {
-            bindData(account)
             prepareView(account)
             prepareAssets(account)
-            setOnSendButtonClickListener(account)
+            bindData(account)
             setOnMenuClickListener(rawPosition, account)
             setOnItemClickListener()
-            qrCode.setOnClickListener {
-                listener.onShowAddress(account, rawPosition)
-            }
+        }
+
+        binding.qrCode.setOnClickListener {
+            listener.onShowAddress(account, rawPosition)
         }
     }
 
     private fun View.bindData(account: Account) {
         with(account) {
-            card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
-            progress.apply {
-                visibleOrGone(isPending)
-                DrawableCompat.setTint(indeterminateDrawable, Color.parseColor(network.color))
+            binding.apply {
+                card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
+                progress.apply {
+                    visibleOrGone(isPending)
+                    DrawableCompat.setTint(indeterminateDrawable, Color.parseColor(network.color))
+                }
+                pendingMask.visibleOrGone(isPending)
+                mainIcon.setImageDrawable(getNetworkIcon(context, network.short, isSafeAccount))
+                accountName.text = name
+                mainTokenView.initView(account, this@AccountViewHolder, logoRes = getNetworkIcon(context, network.short, isSafeAccount))
             }
-            pendingMask.visibleOrGone(isPending)
-            icon.setImageDrawable(getNetworkIcon(context, network.short, isSafeAccount))
-            accountName.text = name
-            cryptoTokenName.run {
-                text = network.token
-                setTextColor(Color.parseColor(network.color))
-            }
-            with(amountView) {
-                setCrypto(BalanceUtils.getCryptoBalance(cryptoBalance))
-                (if (network.testNet) BigDecimal.ZERO
-                else account.fiatBalance).let { setFiat(BalanceUtils.getFiatBalance(it)) }
-            }
-            sendButton.text = String.format(SEND_BUTTON_FORMAT, context.getString(R.string.send), network.token)
         }
     }
 
@@ -93,35 +88,29 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     }
 
     private fun View.prepareView() {
-        mainContent.run {
+        binding.mainContent.run {
             margin(NO_FRAME, FRAME_TOP_WIDTH, NO_FRAME, NO_FRAME)
             setBackgroundResource(R.drawable.identity_background)
         }
     }
 
     private fun View.prepareSafeAccountView() {
-        mainContent.run {
+        binding.mainContent.run {
             margin(FRAME_WIDTH, FRAME_TOP_WIDTH, FRAME_WIDTH, FRAME_WIDTH)
             setBackgroundResource(R.drawable.safe_account_background)
         }
     }
 
-    private fun View.setOnSendButtonClickListener(account: Account) {
-        sendButton.setOnClickListener {
-            listener.onSendAccountClicked(account)
-        }
-    }
-
     @SuppressLint("RestrictedApi")
     private fun View.setOnMenuClickListener(rawPosition: Int, account: Account) {
-        menu.setOnClickListener {
-            PopupMenu(context, menu).apply {
+        binding.menu.setOnClickListener {
+            PopupMenu(context, binding.menu).apply {
                 inflate(R.menu.account_menu)
                 menu.findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
                 menu.findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
                 setOnItemMenuClickListener(rawPosition, account)
             }.also {
-                with(MenuPopupHelper(context, it.menu as MenuBuilder, menu)) {
+                with(MenuPopupHelper(context, it.menu as MenuBuilder, binding.menu)) {
                     setForceShowIcon(true)
                     gravity = Gravity.END
                     show()
@@ -137,19 +126,18 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     }
 
     private fun View.prepareAssets(account: Account) {
-        container.removeAllViews()
+        binding.container.removeAllViews()
         account.accountAssets.forEachIndexed { index, asset ->
-            container.addView(AssetView(this@AccountViewHolder, account, index, R.drawable.ic_asset_sdai).apply {
-                setAmounts(asset.balance)
+            binding.container.addView(TokenView(this.context).apply {
+                initView(account, this@AccountViewHolder, index)
             })
         }
     }
 
     private fun open() {
         TransitionManager.beginDelayedTransition(viewGroup)
-        view.apply {
+        binding.apply {
             arrow.rotate180()
-            sendButton.visible()
             container.visible()
         }
     }
@@ -157,9 +145,8 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     private fun close() {
         TransitionManager.endTransitions(viewGroup)
         TransitionManager.beginDelayedTransition(viewGroup)
-        view.apply {
+        binding.apply {
             arrow.rotate180back()
-            sendButton.gone()
             container.gone()
         }
     }
@@ -182,7 +169,6 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     private fun isSafeAccount(account: Account) = account.network.isAvailable() && account.isSafeAccount
 
     companion object {
-        private const val SEND_BUTTON_FORMAT = "%s %s"
         private const val FRAME_TOP_WIDTH = 3f
         private const val NO_FRAME = 0f
         private const val FRAME_WIDTH = 1.5f

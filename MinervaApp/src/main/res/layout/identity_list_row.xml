@@ -15,7 +15,7 @@
     app:cardCornerRadius="@dimen/card_corner_radius">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mainContent"
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
@@ -23,14 +23,14 @@
         android:padding="16dp">
 
         <ImageView
-            android:id="@+id/profileImage"
-            android:layout_width="@dimen/small_logo_size"
-            android:layout_height="@dimen/small_logo_size"
+            android:id="@+id/profile_image"
+            android:layout_width="@dimen/xsmall_logo_size"
+            android:layout_height="@dimen/xsmall_logo_size"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/identityName"
+            android:id="@+id/identity_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_normal"
@@ -38,10 +38,10 @@
             android:fontFamily="@font/rubik_medium"
             android:singleLine="true"
             android:textSize="@dimen/text_normal"
-            app:layout_constraintBottom_toBottomOf="@id/profileImage"
-            app:layout_constraintLeft_toRightOf="@id/profileImage"
+            app:layout_constraintBottom_toBottomOf="@id/profile_image"
+            app:layout_constraintLeft_toRightOf="@id/profile_image"
             app:layout_constraintRight_toLeftOf="@id/menu"
-            app:layout_constraintTop_toTopOf="@id/profileImage"
+            app:layout_constraintTop_toTopOf="@id/profile_image"
             tools:text="@string/app_name" />
 
         <ImageView
@@ -50,9 +50,9 @@
             android:layout_height="@dimen/clickable_area"
             android:scaleType="center"
             android:src="@drawable/ic_three_dots"
-            app:layout_constraintBottom_toBottomOf="@id/profileImage"
+            app:layout_constraintBottom_toBottomOf="@id/profile_image"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/profileImage"
+            app:layout_constraintTop_toTopOf="@id/profile_image"
             tools:ignore="ContentDescription" />
 
         <minerva.android.widget.TitledTextView
@@ -62,7 +62,7 @@
             android:layout_marginTop="@dimen/margin_normal"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profileImage"/>
+            app:layout_constraintTop_toBottomOf="@id/profile_image" />
 
         <ImageView
             android:id="@+id/arrow"

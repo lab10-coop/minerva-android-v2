@@ -4,10 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.painless_login_item.view.*
 import minerva.android.R
-import minerva.android.extension.invisible
-import minerva.android.extension.visible
+import minerva.android.databinding.PainlessLoginItemBinding
+import minerva.android.extension.visibleOrInvisible
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.IncognitoIdentity
 import minerva.android.walletmanager.model.NewIdentity
@@ -48,7 +47,9 @@ class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(), ItemViewHolder
 }
 
 class ItemViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+
     private lateinit var listener: IdentitiesAdapterListener
+    private var binding = PainlessLoginItemBinding.bind(view)
 
     fun setListener(listener: IdentitiesAdapterListener) {
         this.listener = listener
@@ -56,32 +57,27 @@ class ItemViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
     fun bindView(identity: Identity) {
         identity.apply {
-            view.checkButton.isEnabled = isSelected
-            view.identityName.text = name
+            binding.apply {
+                checkButton.isEnabled = isSelected
+                identityName.text = name
+            }
             setOnItemClickListener()
             loadIdentityLogo(identity)
         }
     }
 
     private fun loadIdentityLogo(identity: Identity) {
-        if (identity is IncognitoIdentity) {
-            view.apply {
-                profileImage.invisible()
-                incognitoLogo.visible()
-            }
-        } else {
-            view.apply {
-                profileImage.visible()
-                incognitoLogo.invisible()
-                ProfileImage.load(profileImage, identity)
-            }
+        binding.apply {
+            profileImage.visibleOrInvisible(identity is IncognitoIdentity)
+            incognitoLogo.visibleOrInvisible(identity is IncognitoIdentity)
+            if (identity !is IncognitoIdentity) ProfileImage.load(profileImage, identity)
         }
     }
 
     private fun Identity.setOnItemClickListener() {
         view.setOnClickListener {
             isSelected = !isSelected
-            view.checkButton.isEnabled = isSelected
+            binding.checkButton.isEnabled = isSelected
             listener.onIdentityClicked(this)
         }
     }

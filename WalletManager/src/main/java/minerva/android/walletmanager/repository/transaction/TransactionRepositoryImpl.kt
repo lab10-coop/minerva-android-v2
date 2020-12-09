@@ -22,7 +22,6 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -152,10 +151,13 @@ class TransactionRepositoryImpl(
             return Observable.range(START, config.accounts.size)
                 .filter { position -> !config.accounts[position].isDeleted && !config.accounts[position].isPending }
                 .filter { position -> config.accounts[position].network.isAvailable() }
-                .filter { position -> config.accounts[position].network.assets.isEmpty() }
+                //TODO commented to force show assets. Will be refactored, according to automatic binding assets.
+                //.filter { position -> config.accounts[position].network.assets.isEmpty() }
                 .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
                 .toList()
-                .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
+                .map { list ->
+                    list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap()
+                }
         }
         throw NotInitializedWalletConfigThrowable()
     }

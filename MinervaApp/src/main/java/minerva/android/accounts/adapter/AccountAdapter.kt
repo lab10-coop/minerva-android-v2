@@ -1,35 +1,17 @@
 package minerva.android.accounts.adapter
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Color
-import android.transition.TransitionManager
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.view.menu.MenuPopupHelper
-import androidx.appcompat.widget.PopupMenu
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.account_list_row.view.*
 import minerva.android.R
 import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.utils.BalanceUtils.getCryptoBalance
-import minerva.android.utils.BalanceUtils.getFiatBalance
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Balance
-import minerva.android.widget.AssetView
-import minerva.android.widget.repository.getNetworkIcon
-import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : RecyclerView.Adapter<AccountViewHolder>(),
     AccountsAdapterListener {
@@ -102,7 +84,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         listener.onSendTransaction(account)
     }
 
-    override fun onSendAssetClicked(accountIndex: Int, assetIndex: Int) {
+    override fun onSendAssetTokenClicked(accountIndex: Int, assetIndex: Int) {
         listener.onSendAssetTransaction(accountIndex, assetIndex)
     }
 
