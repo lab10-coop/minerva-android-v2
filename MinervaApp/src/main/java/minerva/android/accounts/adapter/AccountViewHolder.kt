@@ -55,7 +55,6 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
             prepareAssets(account)
             bindData(account)
             setOnMenuClickListener(rawPosition, account)
-            setOnItemClickListener()
         }
 
         binding.qrCode.setOnClickListener {
@@ -119,18 +118,23 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
         }
     }
 
-    private fun View.setOnItemClickListener() {
-        setOnClickListener {
-            if (isOpen) close() else open()
-        }
-    }
+    private fun View.setOnItemClickListener(isWorking: Boolean) = setOnClickListener { if (isWorking) if (isOpen) close() else open() }
 
     private fun View.prepareAssets(account: Account) {
-        binding.container.removeAllViews()
-        account.accountAssets.forEachIndexed { index, asset ->
-            binding.container.addView(TokenView(this.context).apply {
-                initView(account, this@AccountViewHolder, index)
-            })
+        binding.apply {
+            container.removeAllViews()
+            account.accountAssets.forEachIndexed { index, _ ->
+                container.addView(TokenView(context).apply {
+                    initView(account, this@AccountViewHolder, index)
+                })
+            }
+            account.accountAssets.isNotEmpty().let { visible ->
+                if (visible) setOnItemClickListener(visible)
+                dividerTop.visibleOrInvisible(visible)
+                dividerBottom.visibleOrInvisible(visible)
+                arrow.visibleOrGone(visible)
+                containerBackground.visibleOrGone(visible)
+            }
         }
     }
 

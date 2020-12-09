@@ -107,6 +107,13 @@
             app:layout_constraintTop_toTopOf="@id/divider_top" />
 
         <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/margin_normal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/main_token_view" />
+
+        <View
             android:id="@+id/divider_top"
             android:layout_width="match_parent"
             android:layout_height="1dp"
