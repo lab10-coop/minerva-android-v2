@@ -1,7 +1,6 @@
 package minerva.android.accounts.adapter
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.transition.TransitionManager
 import android.view.Gravity
@@ -34,14 +33,11 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     private val isOpen
         get() = binding.container.isVisible
 
-    override fun onSendTokenAssetClicked(accountIndex: Int, assetIndex: Int) = listener.onSendAssetTokenClicked(accountIndex, assetIndex)
+    override fun onSendTokenAssetClicked(accountIndex: Int, tokenIndex: Int) = listener.onSendAssetTokenClicked(accountIndex, tokenIndex)
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
-    override val viewGroup: ViewGroup
+    val viewGroup: ViewGroup
         get() = parent
-
-    override val context: Context
-        get() = view.context
 
     fun setListener(listener: AccountsAdapterListener) {
         this.listener = listener
@@ -118,7 +114,8 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
         }
     }
 
-    private fun View.setOnItemClickListener(isWorking: Boolean) = setOnClickListener { if (isWorking) if (isOpen) close() else open() }
+    private fun View.setOnItemClickListener(isAssetAreaAvailable: Boolean) =
+        setOnClickListener { if (isAssetAreaAvailable) if (isOpen) close() else open() }
 
     private fun View.prepareAssets(account: Account) {
         binding.apply {

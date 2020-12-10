@@ -65,10 +65,9 @@ class EditIdentityFragment : BaseFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? =
-        inflater.inflate(R.layout.fragment_edit_identity, container, false).let {
-            binding = FragmentEditIdentityBinding.bind(it)
+        inflater.inflate(R.layout.fragment_edit_identity, container, false).apply {
+            binding = FragmentEditIdentityBinding.bind(this)
             viewGroup = container
-            it
         }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

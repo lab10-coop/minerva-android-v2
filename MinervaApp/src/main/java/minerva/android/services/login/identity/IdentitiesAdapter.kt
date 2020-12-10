@@ -68,7 +68,7 @@ class ItemViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
     private fun loadIdentityLogo(identity: Identity) {
         binding.apply {
-            profileImage.visibleOrInvisible(identity is IncognitoIdentity)
+            profileImage.visibleOrInvisible(identity !is IncognitoIdentity)
             incognitoLogo.visibleOrInvisible(identity is IncognitoIdentity)
             if (identity !is IncognitoIdentity) ProfileImage.load(profileImage, identity)
         }

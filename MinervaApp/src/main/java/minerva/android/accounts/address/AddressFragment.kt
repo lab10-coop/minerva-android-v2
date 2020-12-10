@@ -49,10 +49,9 @@ class AddressFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_address, container, false).let {
-            binding = FragmentAddressBinding.bind(it)
+        inflater.inflate(R.layout.fragment_address, container, false).apply {
+            binding = FragmentAddressBinding.bind(this)
             viewGroup = container
-            it
         }
 
     private fun initializeView(minervaPrimitive: MinervaPrimitive) {

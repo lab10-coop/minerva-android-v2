@@ -3,7 +3,6 @@ package minerva.android.widget
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import minerva.android.R
@@ -23,12 +22,12 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     fun initView(
         account: Account,
         callback: TokenViewCallback,
-        assetIndex: Int = Int.InvalidIndex,
+        tokenIndex: Int = Int.InvalidIndex,
         logoRes: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_default_token)
     ) {
-        prepareView(account, assetIndex, logoRes)
-        prepareListeners(callback, account, assetIndex)
-        getTokensValues(account, assetIndex).let { (crypto, fiat) ->
+        prepareView(account, tokenIndex, logoRes)
+        prepareListeners(callback, account, tokenIndex)
+        getTokensValues(account, tokenIndex).let { (crypto, fiat) ->
             with(binding.amountView) {
                 setCrypto(getCryptoBalance(crypto))
                 setFiat(getFiatBalance(fiat))
@@ -36,26 +35,26 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         }
     }
 
-    private fun getTokensValues(account: Account, assetIndex: Int): Pair<BigDecimal, BigDecimal> =
-        if (assetIndex != Int.InvalidIndex) Pair(account.accountAssets[assetIndex].balance, WRONG_CURRENCY_VALUE)
+    private fun getTokensValues(account: Account, tokenIndex: Int): Pair<BigDecimal, BigDecimal> =
+        if (tokenIndex != Int.InvalidIndex) Pair(account.accountAssets[tokenIndex].balance, WRONG_CURRENCY_VALUE)
         else Pair(account.cryptoBalance, prepareFiatBalance(account))
 
     private fun prepareFiatBalance(account: Account) =
         if (account.network.testNet) BigDecimal.ZERO
         else account.fiatBalance
 
-    private fun prepareView(account: Account, assetIndex: Int, logo: Drawable?) {
+    private fun prepareView(account: Account, tokenIndex: Int, logo: Drawable?) {
         binding.apply {
             tokenLogo.setImageDrawable(logo)
-            tokenName.text = if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].let { it.asset.name }
+            tokenName.text = if (tokenIndex != Int.InvalidIndex) account.accountAssets[tokenIndex].asset.name
             else account.network.token
         }
     }
 
 
-    private fun prepareListeners(callback: TokenViewCallback, account: Account, assetIndex: Int) {
-        if (assetIndex != Int.InvalidIndex) this.setOnClickListener { callback.onSendTokenAssetClicked(account.index, assetIndex) }
-        else this.setOnClickListener { callback.onSendTokenClicked(account) }
+    private fun prepareListeners(callback: TokenViewCallback, account: Account, tokenIndex: Int) {
+        if (tokenIndex != Int.InvalidIndex) setOnClickListener { callback.onSendTokenAssetClicked(account.index, tokenIndex) }
+        else setOnClickListener { callback.onSendTokenClicked(account) }
     }
 
     companion object {
@@ -63,9 +62,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     }
 
     interface TokenViewCallback {
-        fun onSendTokenAssetClicked(accountIndex: Int, assetIndex: Int)
+        fun onSendTokenAssetClicked(accountIndex: Int, tokenIndex: Int)
         fun onSendTokenClicked(account: Account)
-        val viewGroup: ViewGroup
-        val context: Context
     }
 }
