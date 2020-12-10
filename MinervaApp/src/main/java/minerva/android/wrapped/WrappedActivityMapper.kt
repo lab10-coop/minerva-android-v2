@@ -60,10 +60,10 @@ fun startIdentityAddressWrappedActivity(context: Context, title: String, positio
     }
 }
 
-fun startAccountAddressWrappedActivity(context: Context, title: String, position: Int, networkShort: String, isSafeAccount: Boolean) {
+fun startAccountAddressWrappedActivity(context: Context, title: String, index: Int, networkShort: String, isSafeAccount: Boolean) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT_ADDRESS)
-        putExtra(WrappedActivity.INDEX, position)
+        putExtra(WrappedActivity.INDEX, index)
         putExtra(WrappedActivity.TITLE, title)
         putExtra(WrappedActivity.NETWORK, networkShort)
         putExtra(WrappedActivity.IS_SAFE_ACCOUNT, isSafeAccount)

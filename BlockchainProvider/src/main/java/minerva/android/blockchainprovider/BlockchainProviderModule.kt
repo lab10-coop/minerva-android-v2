@@ -13,12 +13,12 @@ import org.koin.dsl.module
 import java.math.BigInteger
 
 fun createBlockchainProviderModule(
-    blockchainUrl: Map<String, String>,
+    httpUrls: Map<String, String>,
     ensUrl: String,
     gasPrice: Map<String, BigInteger>,
     wssUrls: Map<String, String>
 ) = module {
-    factory { Web3jProvider.provideWeb3j(blockchainUrl.toMutableMap(), ensUrl) }
+    factory { Web3jProvider.provideWeb3j(httpUrls.toMutableMap(), ensUrl) }
     factory { Web3jProvider.provideEnsResolver(ensUrl) }
     factory<BlockchainRegularAccountRepository> { BlockchainRegularAccountRepositoryImpl(get(), gasPrice, get()) }
     factory<BlockchainSafeAccountRepository> { BlockchainSafeAccountRepositoryImpl(get(), gasPrice) }

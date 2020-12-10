@@ -36,6 +36,36 @@
     "testNet": true
   },
   {
+    "full": "ARTIS Σ1",
+    "short": "artis_sigma1",
+    "token": "ATS",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://rpc.sigma1.artis.network",
+    "wsRpc": "wss://ws.sigma1.artis.network",
+    "gasPrice": "100000000000",
+    "assets": [],
+    "color": "#129c6b",
+    "testNet": false
+  },
+  {
+    "full": "xDai Chain",
+    "short": "xdai",
+    "token": "xDAI",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://rpc.xdaichain.com",
+    "wsRpc": "wss://rpc.xdaichain.com/wss",
+    "gasPrice": "1000000000",
+    "assets": [
+      {
+        "name": "ATS on xdai chain",
+        "shortName": "xATS",
+        "address": "0x85886F6e9458290e7d267cB79A61c0CD7c505447"
+      }
+    ],
+    "color": "#48a9a6",
+    "testNet": false
+  },
+  {
     "full": "POA Network (Sokol)",
     "short": "poa_sokol",
     "token": "tPOA",
@@ -94,5 +124,17 @@
     "assets": [],
     "color": "#FF486FFF",
     "testNet": true
+  },
+  {
+    "full": "POA Core",
+    "short": "poa_core",
+    "token": "POA",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://core.poanetwork.dev",
+    "wsRpc": "",
+    "gasPrice": "10000000000",
+    "assets": [],
+    "color": "#5c34a2",
+    "testNet": false
   }
 ]

@@ -7,8 +7,7 @@ import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
 import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_NETWORK
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_NETWORK
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -29,10 +28,10 @@ object NetworkManager {
 
     fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<AccountAsset> = assetList.map { getAssetFromPair(it) }
 
-    fun firstDefaultValueNetwork(): Network = networks[FIRST_NETWORK]
+    fun firstDefaultValueNetwork(): Network = networks[FIRST_DEFAULT_NETWORK_INDEX]
 
-    fun secondDefaultValueNetwork(): Network =
-        if (networks.size > ONE_ELEMENT && isActiveNetwork(networks[SECOND_NETWORK])) networks[SECOND_NETWORK]
+    fun getNetworkByIndex(index: Int): Network =
+        if (networks.size > ONE_ELEMENT && isActiveNetwork(networks[index])) networks[index]
         else firstDefaultValueNetwork()
 
     fun getStringColor(network: Network, opacity: Boolean): String {

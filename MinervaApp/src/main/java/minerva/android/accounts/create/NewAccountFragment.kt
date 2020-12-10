@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_new_account.*
+import kotlinx.android.synthetic.main.fragment_new_account.networksHeader
 import minerva.android.R
 import minerva.android.accounts.adapter.NetworkAdapter
 import minerva.android.extension.gone
@@ -13,13 +14,16 @@ import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.wrapped.WrappedActivity.Companion.POSITION
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class NewAccountFragment : BaseFragment() {
 
     private val viewModel: NewAccountViewModel by viewModel()
-    private val networkAdapter = NetworkAdapter()
+    private val networkAdapter by lazy {
+        NetworkAdapter(NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled })
+    }
 
     private var position: Int = Int.InvalidIndex
 
@@ -33,12 +37,8 @@ class NewAccountFragment : BaseFragment() {
         setupCreateButton()
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.onResume()
-    }
-
     private fun initializeFragment() {
+        networksHeader.text = getHeader(viewModel.areMainNetsEnabled)
         viewModel.apply {
             createAccountLiveData.observe(viewLifecycleOwner, EventObserver { activity?.finish() })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })

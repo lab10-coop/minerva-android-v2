@@ -19,7 +19,7 @@ class DragManageAdapter(private val adapter: OrderAdapter, dragDirs: Int, swipeD
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
-        viewHolder?.itemView?.alpha = FULL_VISIBLE
+        viewHolder.itemView.alpha = FULL_VISIBLE
     }
 
     //not used

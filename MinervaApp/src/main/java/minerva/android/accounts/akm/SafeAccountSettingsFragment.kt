@@ -20,7 +20,7 @@ import minerva.android.extension.getValidationObservable
 import minerva.android.extension.onRightDrawableClicked
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.utils.DialogHandler
+import minerva.android.utils.AlertDialogHandler
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -98,7 +98,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
     }
 
     override fun onOwnerRemoved(removeAddress: String) {
-        DialogHandler.showRemoveDialog(
+        AlertDialogHandler.showRemoveDialog(
             requireContext(),
             getString(R.string.remove_owner),
             getString(

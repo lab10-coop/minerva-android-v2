@@ -79,19 +79,24 @@ class WalletConfigManagerTest {
         whenever(localWalletConfigProvider.getWalletConfig()).thenReturn(Single.just(localWalletConfigPayload))
         whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.just(onlineWalletConfigResponse))
         whenever(minervaApi.saveWalletActions(any(), any())).doReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(0), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(0), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(1), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(1), any(), any()))
             .thenReturn(Single.just(DerivedKeys(1, "publicKey", "privateKey", "address")))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(2), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(2), any(), com.nhaarman.mockitokotlin2.any()))
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
         whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
         whenever(localStorage.isBackupAllowed).thenReturn(true)
-        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc"), Network(short = "RIN", httpRpc = "httpRpc")))
+        NetworkManager.initialize(
+            listOf(
+                Network(short = "ATS", httpRpc = "httpRpc"),
+                Network(short = "RIN", httpRpc = "httpRpc")
+            )
+        )
     }
 
     @Test
-    fun `fetch wallet config when backup is not allowed`(){
+    fun `fetch wallet config when backup is not allowed`() {
         mockWallet()
         whenever(localStorage.isBackupAllowed).thenReturn(false)
         walletManager.initWalletConfig()
@@ -103,7 +108,7 @@ class WalletConfigManagerTest {
     }
 
     @Test
-    fun `fetch wallet config when api error occurs`(){
+    fun `fetch wallet config when api error occurs`() {
         val error = Throwable()
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.complete())
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(
@@ -115,16 +120,21 @@ class WalletConfigManagerTest {
         )
         whenever(localWalletConfigProvider.getWalletConfig()).thenReturn(Single.just(localWalletConfigPayload))
         whenever(minervaApi.saveWalletActions(any(), any())).doReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(0), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(0), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(1), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(1), any(), any()))
             .thenReturn(Single.just(DerivedKeys(1, "publicKey", "privateKey", "address")))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(2), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(2), any(), any()))
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
         whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
         whenever(localStorage.isBackupAllowed).thenReturn(true)
         whenever(minervaApi.getWalletConfigVersion(any())).doReturn(Single.just(1))
-        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc"), Network(short = "RIN", httpRpc = "httpRpc")))
+        NetworkManager.initialize(
+            listOf(
+                Network(short = "ATS", httpRpc = "httpRpc"),
+                Network(short = "RIN", httpRpc = "httpRpc")
+            )
+        )
         whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.error(error))
         walletManager.initWalletConfig()
         walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
@@ -206,9 +216,9 @@ class WalletConfigManagerTest {
     fun `get value test success`() {
         mockWallet()
         walletManager.apply {
-            initWalletConfig()
-            val result = getAccount(2)
-            assertEquals(result?.index, 2)
+            walletManager.initWalletConfig()
+            val result = getAccount(1)
+            assertEquals(result?.address, "contractAddress")
         }
     }
 
@@ -320,7 +330,10 @@ class WalletConfigManagerTest {
         val publicKey = CryptoUtils.encodePublicKey(
             "BGQKOB5ZvopzLVObuzLtU/ujTMCvTU/CoX4A/DX5Ob1xH8RBAqwtpGoVZETWMMiyTuXtplSNVFeoeY6j8/uLCWA="
         )
-        assertEquals(publicKey, "BGQKOB5ZvopzLVObuzLtU%2FujTMCvTU%2FCoX4A%2FDX5Ob1xH8RBAqwtpGoVZETWMMiyTuXtplSNVFeoeY6j8%2FuLCWA=")
+        assertEquals(
+            publicKey,
+            "BGQKOB5ZvopzLVObuzLtU%2FujTMCvTU%2FCoX4A%2FDX5Ob1xH8RBAqwtpGoVZETWMMiyTuXtplSNVFeoeY6j8%2FuLCWA="
+        )
     }
 
     @Test
@@ -369,5 +382,93 @@ class WalletConfigManagerTest {
         walletManager.initWalletConfig()
         val result = walletManager.getSafeAccountNumber("address")
         assertEquals(result, 1)
+    }
+
+    @Test
+    fun `is mnemonic remembered test`() {
+        whenever(localStorage.isMnemonicRemembered()) doReturn true
+        val result = walletManager.isMnemonicRemembered()
+        assertEquals(result, true)
+    }
+
+    @Test
+    fun `is not mnemonic remembered test`() {
+        whenever(localStorage.isMnemonicRemembered()) doReturn false
+        val result = walletManager.isMnemonicRemembered()
+        assertEquals(result, false)
+    }
+
+    @Test
+    fun `save is mnemonic remembered test`() {
+        doNothing().whenever(localStorage).saveIsMnemonicRemembered(com.nhaarman.mockitokotlin2.any())
+        walletManager.saveIsMnemonicRemembered()
+        verify(localStorage, times(1)).saveIsMnemonicRemembered(true)
+    }
+
+    @Test
+    fun `when setting main nets enabled it, should be set on behavior subject`() {
+        walletManager.toggleMainNetsEnabled = true
+        walletManager.enableMainNetsFlowable
+            .test()
+            .assertValue { it }
+    }
+
+    @Test
+    fun `when setting main nets disabled it, should be set on behavior subject`() {
+        walletManager.toggleMainNetsEnabled = false
+        walletManager.enableMainNetsFlowable
+            .test()
+            .assertValue { !it }
+    }
+
+    @Test
+    fun `when setting enable main nets to null, behavior subject should not emit any items`(){
+        walletManager.toggleMainNetsEnabled = null
+        walletManager.enableMainNetsFlowable
+            .test()
+            .assertNoValues()
+    }
+
+
+    @Test
+    fun `is synced returns true`() {
+        whenever(localStorage.isSynced).thenReturn(true)
+        val result = walletManager.isSynced
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `is synced returns false`() {
+        whenever(localStorage.isSynced).thenReturn(false)
+        val result = walletManager.isSynced
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `is backup allowed returns true`() {
+        whenever(localStorage.isBackupAllowed).thenReturn(true)
+        val result = walletManager.isBackupAllowed
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `is backup allowed returns false`() {
+        whenever(localStorage.isBackupAllowed).thenReturn(false)
+        val result = walletManager.isBackupAllowed
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `are main nets enabled returns true`() {
+        whenever(localStorage.areMainNetsEnabled).thenReturn(true)
+        val result = walletManager.areMainNetworksEnabled
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `are main nets enabled returns false`() {
+        whenever(localStorage.areMainNetsEnabled).thenReturn(false)
+        val result = walletManager.areMainNetworksEnabled
+        assertEquals(false, result)
     }
 }

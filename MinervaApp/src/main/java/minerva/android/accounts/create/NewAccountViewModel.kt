@@ -23,8 +23,6 @@ class NewAccountViewModel(
     private val walletActionsRepository: WalletActionsRepository
 ) : BaseViewModel() {
 
-    private var accountName: String = String.Empty
-
     private val _createAccountLiveData = MutableLiveData<Event<Unit>>()
     val createAccountLiveData: LiveData<Event<Unit>> get() = _createAccountLiveData
 
@@ -38,7 +36,7 @@ class NewAccountViewModel(
         launchDisposable {
             accountManager.createRegularAccount(network)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction())))
+                .flatMapCompletable { walletActionsRepository.saveWalletActions(listOf(getWalletAction(it))) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
@@ -52,11 +50,14 @@ class NewAccountViewModel(
         }
     }
 
-    private fun getWalletAction() =
+    private fun getWalletAction(accountName: String) =
         WalletAction(
             WalletActionType.ACCOUNT,
             WalletActionStatus.ADDED,
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, accountName))
         )
+
+    val areMainNetsEnabled: Boolean
+        get() = accountManager.areMainNetworksEnabled
 }

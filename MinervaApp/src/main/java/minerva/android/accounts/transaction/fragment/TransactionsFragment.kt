@@ -70,7 +70,9 @@ class TransactionsFragment : Fragment() {
 
     private fun prepareObservers() {
         viewModel.apply {
-            transactionCompletedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onTransactionAccepted() })
+            transactionCompletedLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { listener.onTransactionAccepted(getString(R.string.refresh_balance_to_check_transaction_status)) })
             sendTransactionLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionStatus(it) })
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 it.message?.let { message -> showErrorFlashBar(message) } ?: showErrorFlashBar()

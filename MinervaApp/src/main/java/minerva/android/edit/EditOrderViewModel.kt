@@ -23,6 +23,9 @@ class EditOrderViewModel(
     private val _errorMutableLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorMutableLiveData
 
+    val areMainNetsEnabled
+        get() = orderManager.areMainNetsEnabled
+
     fun prepareList(type: Int): List<MinervaPrimitive> = orderManager.prepareList(type)
 
     fun saveChanges(type: Int, newOrderList: List<MinervaPrimitive>) {

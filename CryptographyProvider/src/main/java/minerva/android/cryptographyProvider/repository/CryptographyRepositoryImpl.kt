@@ -13,6 +13,7 @@ import me.uport.sdk.jwt.JWTEncodingException
 import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
 import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
+import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import org.kethereum.bip39.entropyToMnemonic
@@ -44,10 +45,12 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
     override fun getMnemonicForMasterSeed(seed: String): String =
         entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
 
-    override fun calculateDerivedKeys(seed: String, index: Int, derivationPathPrefix: String): Single<DerivedKeys> {
+    override fun calculateDerivedKeys(seed: String, index: Int, derivationPathPrefix: String, isTestNet: Boolean): Single<DerivedKeys> {
         val derivationPath = "${derivationPathPrefix}$index"
-        val keyPair = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
-        return Single.just(DerivedKeys(index, keyPair.getPublicKey(), keyPair.getPrivateKey(), keyPair.getAddress()))
+        val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
+        val derivedKeys =
+            DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)//isTestNet(derivationPathPrefix))
+        return Single.just(derivedKeys)
     }
 
     override fun restoreMasterSeed(mnemonic: String, derivationPath: String): Single<Triple<String, String, String>> {
@@ -77,7 +80,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
                 throw InvalidJwtThrowable("Invalid JWT Exception: ${exception.message}")
             } catch (exception: JWTEncodingException) {
                 throw InvalidJwtThrowable("JWT Encoding Exception: ${exception.message}")
-            } catch (exception: IllegalArgumentException){
+            } catch (exception: IllegalArgumentException) {
                 throw InvalidJwtThrowable("Illegal argument exception: ${exception.message}")
             }
         }

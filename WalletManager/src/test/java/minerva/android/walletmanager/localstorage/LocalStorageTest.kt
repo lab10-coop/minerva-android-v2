@@ -46,6 +46,16 @@ class LocalStorageTest {
     }
 
     @Test
+    fun `areMainNetsEnabled test`() {
+        localStorage.areMainNetsEnabled = true
+        verify {
+            sharedPref.edit().putBoolean(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
+    }
+
+
+    @Test
     fun `is backup allowed test`() {
         localStorage.isBackupAllowed = true
         verify {

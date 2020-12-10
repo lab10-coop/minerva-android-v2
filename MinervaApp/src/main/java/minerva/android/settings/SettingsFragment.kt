@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_settings.*
 import minerva.android.BuildConfig
@@ -26,9 +25,7 @@ class SettingsFragment : BaseFragment() {
     val viewModel: SettingsViewModel by viewModel()
 
     private val settingsAdapter by lazy {
-        SettingsAdapter(
-            { onSettingsRowClicked(it) },
-            { onUseMainNetworkCheckedChange(it) }).apply { updateList(viewModel.isMnemonicRemembered, propagateSettings()) }
+        SettingsAdapter({ onSettingsRowClicked(it) }, { onUseMainNetworkCheckedChange(it) })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -53,10 +50,13 @@ class SettingsFragment : BaseFragment() {
     }
 
     private fun hideReminder() {
-        if (viewModel.isMnemonicRemembered && viewModel.isSynced) {
-            interactor.removeSettingsBadgeIcon()
+        with(viewModel) {
+            if (isMnemonicRemembered && isSynced) {
+                interactor.removeSettingsBadgeIcon()
+            }
+
+            settingsAdapter.updateList(Pair(isMnemonicRemembered, areMainNetsEnabled), propagateSettings())
         }
-        settingsAdapter.updateList(viewModel.isMnemonicRemembered, propagateSettings())
     }
 
     private fun showBackupActivity() {
@@ -75,7 +75,6 @@ class SettingsFragment : BaseFragment() {
     }
 
     private fun onUseMainNetworkCheckedChange(isChecked: Boolean) {
-        //todo add setting main networks
-        if (isChecked) Toast.makeText(context, "This option will be enabled soon", Toast.LENGTH_LONG).show()
+        viewModel.areMainNetworksEnabled(isChecked)
     }
 }
