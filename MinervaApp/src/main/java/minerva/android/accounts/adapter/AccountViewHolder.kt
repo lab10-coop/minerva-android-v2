@@ -36,7 +36,7 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     override fun onSendTokenAssetClicked(accountIndex: Int, tokenIndex: Int) = listener.onSendAssetTokenClicked(accountIndex, tokenIndex)
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
-    val viewGroup: ViewGroup
+    private val viewGroup: ViewGroup
         get() = parent
 
     fun setListener(listener: AccountsAdapterListener) {
@@ -74,7 +74,7 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
         }
     }
 
-    private fun View.prepareView(account: Account) {
+    private fun prepareView(account: Account) {
         if (!account.isSafeAccount) {
             prepareView()
         } else {
@@ -82,14 +82,14 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
         }
     }
 
-    private fun View.prepareView() {
+    private fun prepareView() {
         binding.mainContent.run {
             margin(NO_FRAME, FRAME_TOP_WIDTH, NO_FRAME, NO_FRAME)
             setBackgroundResource(R.drawable.identity_background)
         }
     }
 
-    private fun View.prepareSafeAccountView() {
+    private fun prepareSafeAccountView() {
         binding.mainContent.run {
             margin(FRAME_WIDTH, FRAME_TOP_WIDTH, FRAME_WIDTH, FRAME_WIDTH)
             setBackgroundResource(R.drawable.safe_account_background)
