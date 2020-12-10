@@ -56,7 +56,7 @@ class TransactionRepositoryImpl(
             return Observable.range(START, config.accounts.size)
                 .filter { position -> refreshBalanceFilter(config.accounts[position]) }
                 .filter { position -> config.accounts[position].network.isAvailable() }
-                //TODO klop
+                //TODO checking balance of tokens will be part of another task
                 //.filter { position -> config.accounts[position].network.assets.isEmpty() }
                 .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
                 .toList()

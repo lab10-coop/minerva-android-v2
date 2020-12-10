@@ -8,7 +8,6 @@ import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
-import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Balance
@@ -52,7 +51,12 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
 
     fun updateAssetBalances(accountAssetBalances: Map<String, List<AccountAsset>>) {
         activeAccounts.filter { !it.isPending }
-            .forEach { account -> accountAssetBalances[account.privateKey]?.let { account.accountAssets = it } }
+            .forEachIndexed { index, account ->
+                accountAssetBalances[account.privateKey]?.let {
+                    account.accountAssets = it
+                    notifyItemChanged(index)
+                }
+            }
     }
 
     fun setPending(index: Int, isPending: Boolean, areMainNetsEnabled: Boolean) {
