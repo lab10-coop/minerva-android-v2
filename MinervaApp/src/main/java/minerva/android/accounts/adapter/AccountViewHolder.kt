@@ -36,9 +36,6 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     override fun onSendTokenAssetClicked(accountIndex: Int, tokenIndex: Int) = listener.onSendAssetTokenClicked(accountIndex, tokenIndex)
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
-    private val viewGroup: ViewGroup
-        get() = parent
-
     fun setListener(listener: AccountsAdapterListener) {
         this.listener = listener
     }
@@ -126,7 +123,7 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
                 })
             }
             account.accountAssets.isNotEmpty().let { visible ->
-                if (visible) setOnItemClickListener(visible)
+                setOnItemClickListener(visible)
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
                 arrow.visibleOrGone(visible)
@@ -136,7 +133,7 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     }
 
     private fun open() {
-        TransitionManager.beginDelayedTransition(viewGroup)
+        TransitionManager.beginDelayedTransition(parent)
         binding.apply {
             arrow.rotate180()
             container.visible()
@@ -144,8 +141,8 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     }
 
     private fun close() {
-        TransitionManager.endTransitions(viewGroup)
-        TransitionManager.beginDelayedTransition(viewGroup)
+        TransitionManager.endTransitions(parent)
+        TransitionManager.beginDelayedTransition(parent)
         binding.apply {
             arrow.rotate180back()
             container.gone()
