@@ -13,7 +13,7 @@ import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.utils.DialogHandler
+import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MinervaPrimitive
@@ -57,7 +57,7 @@ class MyIdentitiesFragment : Fragment(), IdentityFragmentListener {
     }
 
     override fun onIdentityRemoved(identity: Identity) {
-        DialogHandler.showRemoveDialog(
+        AlertDialogHandler.showRemoveDialog(
             requireContext(),
             identity.name,
             getString(R.string.remove_identity_dialog_message)
@@ -71,7 +71,7 @@ class MyIdentitiesFragment : Fragment(), IdentityFragmentListener {
     override fun onBindedItemDeleted(minervaPrimitive: MinervaPrimitive) {
         when (minervaPrimitive) {
             is Service -> TODO("Handle deleting binded service")
-            is Credential -> DialogHandler.showRemoveDialog(
+            is Credential -> AlertDialogHandler.showRemoveDialog(
                 requireContext(),
                 getString(R.string.remove_credential_dialog_title),
                 getString(R.string.remove_credential_dialog_message)

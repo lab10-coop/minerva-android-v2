@@ -4,17 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".identities.IdentitiesFragment">
-    
+
     <TextView
+        android:id="@+id/networksHeader"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/margin_large"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:textSize="@dimen/text_xsmall"
-        android:gravity="center_vertical"
+        android:layout_marginStart="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
+        android:gravity="center_vertical"
+        android:text="@string/test_networks"
         android:textAllCaps="true"
         android:textColor="@color/networks_type_header"
-        android:text="@string/test_networks" />
+        android:textSize="@dimen/text_xsmall" />
 
     <TextView
         android:id="@+id/noDataMessage"

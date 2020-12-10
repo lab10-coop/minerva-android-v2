@@ -25,17 +25,22 @@ open class Identity(
     var isSelected: Boolean = false,
     var profileImageBitmap: Bitmap? = null
 ) : MinervaPrimitive(publicKey, name, isDeleted) {
-    constructor(identity: Identity, isDeleted: Boolean = false) : this(
+    constructor(identity: Identity) : this(
         identity.index,
         identity.name,
         identity.publicKey,
         identity.privateKey,
         identity.address,
         identity.personalData,
-        isDeleted,
+        identity.isDeleted,
         identity.services,
         identity.isSelected,
         identity.profileImageBitmap
+    )
+
+    constructor(identity: Identity, isDeleted: Boolean) : this(
+        identity.index,
+        isDeleted = isDeleted
     )
 
     val did: String

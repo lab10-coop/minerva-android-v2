@@ -16,7 +16,7 @@ class ConfirmDataDialog(
     private var data: Map<String, String>?,
     private var positiveAction: () -> Unit,
     private var negativeAction: () -> Unit
-) : Dialog(context, R.style.ConfirmDialog) {
+) : Dialog(context, R.style.DialogStyle) {
 
     private fun initializeView() {
         title.text = titleText ?: String.Empty

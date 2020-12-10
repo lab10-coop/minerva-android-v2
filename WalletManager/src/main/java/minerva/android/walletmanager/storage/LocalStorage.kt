@@ -20,4 +20,5 @@ interface LocalStorage {
 
     var isBackupAllowed: Boolean
     var isSynced: Boolean
+    var areMainNetsEnabled: Boolean
 }

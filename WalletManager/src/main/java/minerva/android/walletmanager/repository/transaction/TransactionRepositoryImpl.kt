@@ -35,19 +35,44 @@ class TransactionRepositoryImpl(
 ) : TransactionRepository {
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
-        listOf(Markets.ETH_EUR, Markets.POA_ETH).run {
-            walletConfigManager.getWalletConfig()?.accounts?.filter { !it.isDeleted && !it.isPending }?.let { values ->
-                return blockchainRepository.refreshBalances(MarketUtils.getAddresses(values))
-                    .zipWith(Observable.range(START, this.size).flatMapSingle { binanceApi.fetchExchangeRate(this[it]) }.toList())
-                    .map { MarketUtils.calculateFiatBalances(it.first, values, it.second) }
+        val exchangeRateList = listOf(Markets.ETH_EUR, Markets.POA_ETH, Markets.ETH_DAI)
+        walletConfigManager.getWalletConfig()?.accounts?.filter { refreshBalanceFilter(it) }
+            ?.let { values ->
+                return blockchainRepository.refreshBalances(getAddresses(values))
+                    .zipWith(Observable.range(START, exchangeRateList.size)
+                        .filter { walletConfigManager.areMainNetworksEnabled }
+                        .flatMapSingle { binanceApi.fetchExchangeRate(exchangeRateList[it]) }.toList()
+                    )
+                    .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, values, markets) }
             }
+        throw NotInitializedWalletConfigThrowable()
+    }
+
+    private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> = accounts.map { it.network.short to it.address }
+
+    private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
+
+    override fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>> {
+        walletConfigManager.getWalletConfig()?.let { config ->
+            return Observable.range(START, config.accounts.size)
+                .filter { position -> refreshBalanceFilter(config.accounts[position]) }
+                .filter { position -> config.accounts[position].network.isAvailable() }
+                .filter { position -> config.accounts[position].network.assets.isEmpty() }
+                .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
+                .toList()
+                .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
         }
         throw NotInitializedWalletConfigThrowable()
     }
 
     override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(network, accountIndex, TransactionToTransactionPayloadMapper.map(transaction))
-            .map { pendingTx -> localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx)) }
+            .map { pendingTx ->
+                /*Subscription to web sockets doesn't work with http rpc, hence pending tsx are not saved*/
+                if (NetworkManager.getNetwork(pendingTx.network).wsRpc != String.Empty) {
+                    localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx))
+                }
+            }
             .flatMap { blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty } }
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
@@ -146,19 +171,6 @@ class TransactionRepositoryImpl(
     override fun loadRecipients(): List<Recipient> = localStorage.getRecipients()
 
     override fun resolveENS(ensName: String): Single<String> = blockchainRepository.resolveENS(ensName)
-
-    override fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>> {
-        walletConfigManager.getWalletConfig()?.let { config ->
-            return Observable.range(START, config.accounts.size)
-                .filter { position -> !config.accounts[position].isDeleted && !config.accounts[position].isPending }
-                .filter { position -> config.accounts[position].network.isAvailable() }
-                .filter { position -> config.accounts[position].network.assets.isEmpty() }
-                .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
-                .toList()
-                .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
-        }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
     /**
      *

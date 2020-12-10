@@ -23,9 +23,8 @@ import kotlin.test.assertEquals
 class MasterSeedRepositoryTest {
 
     private val cryptographyRepository: CryptographyRepository = mock()
-    private val localStorage: LocalStorage = mock()
     private val walletConfigManager: WalletConfigManager = mock()
-    private val repository = MasterSeedRepositoryImpl(walletConfigManager, localStorage, cryptographyRepository)
+    private val repository = MasterSeedRepositoryImpl(walletConfigManager, cryptographyRepository)
 
     @get:Rule
     val rule
@@ -45,23 +44,23 @@ class MasterSeedRepositoryTest {
 
     @Test
     fun `is mnemonic remembered test`() {
-        whenever(localStorage.isMnemonicRemembered()) doReturn true
+        whenever(walletConfigManager.isMnemonicRemembered()) doReturn true
         val result = repository.isMnemonicRemembered()
         assertEquals(result, true)
     }
 
     @Test
     fun `is not mnemonic remembered test`() {
-        whenever(localStorage.isMnemonicRemembered()) doReturn false
+        whenever(walletConfigManager.isMnemonicRemembered()) doReturn false
         val result = repository.isMnemonicRemembered()
         assertEquals(result, false)
     }
 
     @Test
     fun `save is mnemonic remembered test`() {
-        doNothing().whenever(localStorage).saveIsMnemonicRemembered(any())
+        doNothing().whenever(walletConfigManager).saveIsMnemonicRemembered()
         repository.saveIsMnemonicRemembered()
-        verify(localStorage, times(1)).saveIsMnemonicRemembered(true)
+        verify(walletConfigManager, times(1)).saveIsMnemonicRemembered()
     }
 
     @Test
@@ -124,7 +123,7 @@ class MasterSeedRepositoryTest {
     }
 
     @Test
-    fun `get mnemonic test`(){
+    fun `get mnemonic test`() {
         whenever(cryptographyRepository.getMnemonicForMasterSeed(any())) doReturn "mnemonic"
         whenever(walletConfigManager.masterSeed) doReturn MasterSeed(_seed = "seed")
         val result = repository.getMnemonic()
@@ -136,5 +135,54 @@ class MasterSeedRepositoryTest {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         doNothing().whenever(walletConfigManager).initWalletConfig()
         repository.getValueIterator() shouldBeEqualTo 0
+    }
+
+    @Test
+    fun `is backup allowed returns true`() {
+        whenever(walletConfigManager.isBackupAllowed).thenReturn(true)
+        val result = repository.isBackupAllowed
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `is backup allowed returns false`() {
+        whenever(walletConfigManager.isBackupAllowed).thenReturn(false)
+        val result = repository.isBackupAllowed
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `is synced returns true`() {
+        whenever(walletConfigManager.isSynced).thenReturn(true)
+        val result = repository.isSynced
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `is synced returns false`() {
+        whenever(walletConfigManager.isSynced).thenReturn(false)
+        val result = repository.isSynced
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `are main nets enabled returns false`() {
+        whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(false)
+        val result = repository.areMainNetworksEnabled
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `are main nets enabled returns true`() {
+        whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(true)
+        val result = repository.areMainNetworksEnabled
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `toggle main nets enabled returns true`() {
+        whenever(walletConfigManager.toggleMainNetsEnabled).thenReturn(true)
+        val result = repository.toggleMainNetsEnabled
+        assertEquals(true, result)
     }
 }

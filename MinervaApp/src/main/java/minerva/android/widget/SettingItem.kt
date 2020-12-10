@@ -6,6 +6,7 @@ import kotlinx.android.synthetic.main.setting_item_layout.view.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.settings.model.SettingRow
+import timber.log.Timber
 
 class SettingItem(context: Context) : ConstraintLayout(context) {
 
@@ -27,6 +28,12 @@ class SettingItem(context: Context) : ConstraintLayout(context) {
     }
 
     fun toggleSwitch(onCheckedChange: (isChecked: Boolean) -> Unit) {
-        mainNetworksSwitch.setOnCheckedChangeListener { _, isChecked -> onCheckedChange(isChecked) }
+        mainNetworksSwitch.setOnClickListener {
+            onCheckedChange(mainNetworksSwitch.isChecked)
+        }
+    }
+
+    fun setNetworkSwitch(isChecked: Boolean) {
+        mainNetworksSwitch.isChecked = isChecked
     }
 }

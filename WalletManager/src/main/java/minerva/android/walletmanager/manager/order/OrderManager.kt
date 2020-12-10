@@ -8,4 +8,5 @@ interface OrderManager : Manager {
     fun updateList(type: Int, newOrderList: List<MinervaPrimitive>): Completable
     fun prepareList(type: Int): List<MinervaPrimitive>
     fun isOrderAvailable(type: Int): Boolean
+    val areMainNetsEnabled: Boolean
 }
