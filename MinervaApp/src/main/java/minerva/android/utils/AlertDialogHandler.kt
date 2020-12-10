@@ -4,7 +4,7 @@ import android.content.Context
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import minerva.android.R
 
-object DialogHandler {
+object AlertDialogHandler {
     fun showDialog(context: Context, title: String, message: String, positiveAction: () -> Unit = {}) {
         defaultDialog(context, title, message)
             .setCancelable(false)

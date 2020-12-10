@@ -69,16 +69,8 @@ class TransactionRepositoryTest {
 
     @Test
     fun `refresh balances test success`() {
-        whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(
-            Single.just(
-                listOf(
-                    Pair(
-                        "address",
-                        BigDecimal.ONE
-                    )
-                )
-            )
-        )
+        whenever(blockchainRegularAccountRepository.refreshBalances(any()))
+            .thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
         whenever(binanaceApi.fetchExchangeRate(any())).thenReturn(Single.just(Market("ETHEUR", "12.21")))
         repository.refreshBalances().test()
             .assertComplete()
@@ -97,14 +89,10 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    fun `send transaction success with resolved ENS test`() {
-        whenever(
-            blockchainRegularAccountRepository.transferNativeCoin(
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash")))
+    fun `send transaction success with resolved ENS test when there isno  wss uri available`() {
+        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "")))
+        whenever(blockchainRegularAccountRepository.transferNativeCoin(any(), any(), any()))
+            .thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash", network = "ATS")))
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
         repository.transferNativeCoin(
             "",
@@ -116,14 +104,25 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    fun `send transaction success with not resolved ENS test`() {
-        whenever(
-            blockchainRegularAccountRepository.transferNativeCoin(
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash")))
+    fun `send transaction success with resolved ENS test when there is wss uri available`() {
+        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "wssuri")))
+        whenever(blockchainRegularAccountRepository.transferNativeCoin(any(), any(), any()))
+            .thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash", network = "ATS")))
+        whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.just("didi.eth"))
+        repository.transferNativeCoin(
+            "",
+            1,
+            Transaction("address", "privKey", "publicKey", BigDecimal.ONE, BigDecimal.ONE, BigInteger.ONE)
+        )
+            .test()
+            .assertComplete()
+    }
+
+    @Test
+    fun `send transaction success with not resolved ENS test when there is wss uri available`() {
+        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "wssuri")))
+        whenever(blockchainRegularAccountRepository.transferNativeCoin(any(), any(), any()))
+            .thenReturn(Single.just(PendingTransaction(index = 1, txHash = "hash", network = "ATS")))
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())).thenReturn(Single.error(Throwable("No ENS")))
         repository.transferNativeCoin(
             "",
@@ -343,7 +342,14 @@ class TransactionRepositoryTest {
         val pendingAccountPoa2 = PendingAccount(3, network = "poa", txHash = "hash", senderAddress = "sender")
         val pendingAccountEth = PendingAccount(4, network = "eth", txHash = "hash", senderAddress = "sender")
 
-        whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount, pendingAccountPoa1, pendingAccountPoa2, pendingAccountEth))
+        whenever(localStorage.getPendingAccounts()).thenReturn(
+            listOf(
+                pendingAccount,
+                pendingAccountPoa1,
+                pendingAccountPoa2,
+                pendingAccountEth
+            )
+        )
         val result = repository.shouldOpenNewWssConnection(1)
         assertEquals(false, result)
     }

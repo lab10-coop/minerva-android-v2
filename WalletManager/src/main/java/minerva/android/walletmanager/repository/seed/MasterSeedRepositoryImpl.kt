@@ -7,12 +7,10 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.walletmanager.model.defs.DerivationPath
-import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.cryptographyProvider.repository.model.DerivationPath
 
 class MasterSeedRepositoryImpl(
     private val walletConfigManager: WalletConfigManager,
-    private val localStorage: LocalStorage,
     private val cryptographyRepository: CryptographyRepository
 ) : MasterSeedRepository {
 
@@ -31,10 +29,10 @@ class MasterSeedRepositoryImpl(
             }
 
     override fun saveIsMnemonicRemembered() {
-        localStorage.saveIsMnemonicRemembered(true)
+        walletConfigManager.saveIsMnemonicRemembered()
     }
 
-    override fun isMnemonicRemembered(): Boolean = localStorage.isMnemonicRemembered()
+    override fun isMnemonicRemembered(): Boolean = walletConfigManager.isMnemonicRemembered()
 
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
@@ -58,8 +56,17 @@ class MasterSeedRepositoryImpl(
     override fun getValueIterator(): Int = walletConfigManager.getValueIterator()
 
     override val isBackupAllowed: Boolean
-        get() = localStorage.isBackupAllowed
+        get() = walletConfigManager.isBackupAllowed
 
     override val isSynced: Boolean
-        get() = localStorage.isSynced
+        get() = walletConfigManager.isSynced
+
+    override val areMainNetworksEnabled: Boolean
+        get() = walletConfigManager.areMainNetworksEnabled
+
+    override var toggleMainNetsEnabled: Boolean?
+        get() = walletConfigManager.toggleMainNetsEnabled
+        set(value) {
+            walletConfigManager.toggleMainNetsEnabled = value
+        }
 }

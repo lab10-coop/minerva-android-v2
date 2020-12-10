@@ -19,7 +19,7 @@ data class Account(
     var contractAddress: String = String.Empty,
     var isPending: Boolean = false,
     override val bindedOwner: String = String.Empty
-): MinervaPrimitive(address, name, isDeleted, bindedOwner, network) {
+) : MinervaPrimitive(address, name, isDeleted, bindedOwner, network) {
     constructor(account: Account, isDeleted: Boolean) : this(
         account.index,
         account.publicKey,

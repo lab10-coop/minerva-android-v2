@@ -11,9 +11,8 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.widget.repository.getNetworkIcon
 
-class NetworkAdapter : RecyclerView.Adapter<NetworkViewHolder>() {
+class NetworkAdapter(private val networks: List<Network>) : RecyclerView.Adapter<NetworkViewHolder>() {
 
-    private var networks: List<Network> = NetworkManager.networks
     private var selectedPosition: Int = 0
 
     override fun getItemCount(): Int = networks.size

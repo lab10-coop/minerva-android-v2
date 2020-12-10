@@ -60,7 +60,7 @@ class ProfileImageDialog(private val fragment: Fragment) : Dialog(fragment.requi
     }
 
     private fun initializeMenu() {
-        makePhoto.setOnClickListener {
+        takePhoto.setOnClickListener {
             checkRequestPermissions(PICK_IMAGE_REQUEST)
             dismiss()
         }

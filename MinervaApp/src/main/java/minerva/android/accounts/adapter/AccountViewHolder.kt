@@ -40,9 +40,8 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
         this.listener = listener
     }
 
-    fun setData(rawPosition: Int, account: Account) {
-        this.rawPosition = rawPosition
-
+    fun setData(index: Int, account: Account) {
+        this.rawPosition = index
         view.apply {
             prepareView(account)
             prepareAssets(account)
@@ -94,13 +93,13 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     }
 
     @SuppressLint("RestrictedApi")
-    private fun View.setOnMenuClickListener(rawPosition: Int, account: Account) {
+    private fun View.setOnMenuClickListener(index: Int, account: Account) {
         binding.menu.setOnClickListener {
             PopupMenu(context, binding.menu).apply {
                 inflate(R.menu.account_menu)
                 menu.findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
                 menu.findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
-                setOnItemMenuClickListener(rawPosition, account)
+                setOnItemMenuClickListener(index, account)
             }.also {
                 with(MenuPopupHelper(context, it.menu as MenuBuilder, binding.menu)) {
                     setForceShowIcon(true)
@@ -149,13 +148,13 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
         }
     }
 
-    private fun PopupMenu.setOnItemMenuClickListener(position: Int, account: Account) {
+    private fun PopupMenu.setOnItemMenuClickListener(index: Int, account: Account) {
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.walletConnect -> listener.onWalletConnect()
-                R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, position)
+                R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
-                R.id.remove -> listener.onAccountRemoved(position)
+                R.id.remove -> listener.onAccountRemoved(index)
             }
             true
         }

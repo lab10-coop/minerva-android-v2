@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.exception.NoAddressPageFragment
+import minerva.android.walletmanager.exception.NoAddressPageFragmentThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.model.MinervaPrimitive
@@ -19,7 +19,7 @@ class AddressViewModel(private val identityManager: IdentityManager, private val
         _loadMinervaPrimitiveLiveData.value = when (fragmentType) {
             WrappedFragmentType.IDENTITY_ADDRESS -> Event(identityManager.loadIdentity(position))
             WrappedFragmentType.ACCOUNT_ADDRESS -> Event(accountManager.loadAccount(position))
-            else -> throw NoAddressPageFragment()
+            else -> throw NoAddressPageFragmentThrowable()
         }
     }
 }

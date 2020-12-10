@@ -22,5 +22,8 @@ annotation class NetworkShortName {
         const val ETH_CLASSIC_KOTTI = "kot"
         const val POA_SKL = "poa_sokol"
         const val LUKSO_14 = "lukso_l14"
+        const val ATS_SIGMA = "artis_sigma1"
+        const val XDAI = "xdai"
+        const val POA_CORE = "poa_core"
     }
 }

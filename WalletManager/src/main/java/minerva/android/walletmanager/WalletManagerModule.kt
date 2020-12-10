@@ -64,7 +64,7 @@ fun createWalletModules() = module {
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
     factory<AccountManager> { AccountManagerImpl(get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
-    factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get(), get()) }
+    factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
     factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get()) }
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }

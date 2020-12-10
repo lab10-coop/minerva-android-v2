@@ -68,7 +68,7 @@ class EditOrderFragment : BaseFragment() {
 
     private fun setupLiveData() {
         viewModel.apply {
-            walletConfigLiveData.observe(viewLifecycleOwner, Observer { orderAdapter.updateList(prepareList(type)) })
+            walletConfigLiveData.observe(viewLifecycleOwner, Observer { orderAdapter.updateList(prepareList(type), areMainNetsEnabled) })
             viewModel.saveNewOrderLiveData.observe(viewLifecycleOwner, EventObserver { onBackListener.onBack() })
             errorLiveData.observe(
                 viewLifecycleOwner,

@@ -22,19 +22,25 @@ class SettingsAdapter(
 
     var settings: List<Settings> = listOf()
     private var isMnemonicRemembered: Boolean = false
+    private var areMainNetworksEnabled: Boolean = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SettingsViewHolder =
         SettingsViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.settings_section_layout, parent, false))
 
     override fun onBindViewHolder(holder: SettingsViewHolder, position: Int) {
-        holder.bindData(settings[position], isMnemonicRemembered, { onSettingPressed(it) }, { onCheckedChange(it) })
+        holder.bindData(
+            settings[position],
+            Pair(isMnemonicRemembered, areMainNetworksEnabled),
+            { onSettingPressed(it) }) { onCheckedChange(it) }
     }
 
     override fun getItemCount(): Int = settings.size
 
-    fun updateList(isMnemonicRemembered: Boolean, settings: List<Settings>) {
+    fun updateList(flags: Pair<Boolean, Boolean>, settings: List<Settings>) {
+        val (isMnemonicRemembered, areMainNetsEnabled) = flags
         this.settings = settings
         this.isMnemonicRemembered = isMnemonicRemembered
+        this.areMainNetworksEnabled = areMainNetsEnabled
         notifyDataSetChanged()
     }
 }
@@ -43,23 +49,24 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
 
     fun bindData(
         settings: Settings,
-        isMnemonicRemembered: Boolean,
+        flags: Pair<Boolean, Boolean>,
         onSettingPressed: (type: SettingsRowType) -> Unit,
         onCheckedChange: (isChecked: Boolean) -> Unit
     ) {
         view.run {
             sectionTitle.text = settings.sectionTitle
-            addSettingRows(settings, isMnemonicRemembered, onSettingPressed, onCheckedChange)
+            addSettingRows(settings, flags, onSettingPressed, onCheckedChange)
             settingsSeparator.visibleOrGone(settings.section != SettingsSection.LEGAL)
         }
     }
 
     private fun View.addSettingRows(
         settings: Settings,
-        isMnemonicRemembered: Boolean,
+        flags: Pair<Boolean, Boolean>,
         onSettingPressed: (type: SettingsRowType) -> Unit,
         onCheckedChange: (isChecked: Boolean) -> Unit
     ) {
+        val (isMnemonicRemembered, areMainNetsEnabled) = flags
         settingRows.removeAllViews()
 
         if (shouldShowAlerts(settings)) {
@@ -76,6 +83,9 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
                 setOnClickListener { onSettingPressed(settingRow.rowType) }
                 setIcon(settingRow, isMnemonicRemembered)
                 toggleSwitch { onCheckedChange(it) }
+                if (settingRow.isSwitchVisible) {
+                    setNetworkSwitch(areMainNetsEnabled)
+                }
             })
         }
     }
@@ -90,7 +100,10 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
     }
 
     private fun SettingItem.showIcons(settingRow: SettingRow, isMnemonicRemembered: Boolean) {
-        if (settingRow.rowType == SettingsRowType.BACKUP && !isMnemonicRemembered) setIcons(settingRow.iconId, R.drawable.ic_alert)
+        if (settingRow.rowType == SettingsRowType.BACKUP && !isMnemonicRemembered) setIcons(
+            settingRow.iconId,
+            R.drawable.ic_alert
+        )
         else setIcons(settingRow.iconId)
     }
 }

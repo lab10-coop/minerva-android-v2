@@ -26,17 +26,17 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
 
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
         activeAccounts[position].let {
-            val rawPosition = getPositionInRaw(it.index)
+            val index = rawAccounts.indexOf(it)
             holder.apply {
-                setData(rawPosition, it)
+                setData(index, it)
                 setListener(this@AccountAdapter)
             }
         }
     }
 
-    fun updateList(data: List<Account>) {
+    fun updateList(data: List<Account>, areMainNetsEnabled: Boolean) {
         rawAccounts = data
-        activeAccounts = data.filter { !it.isDeleted }
+        activeAccounts = data.filter { !it.isDeleted }.filter { it.network.testNet == !areMainNetsEnabled }
         notifyDataSetChanged()
     }
 
@@ -55,9 +55,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
             .forEach { account -> accountAssetBalances[account.privateKey]?.let { account.accountAssets = it } }
     }
 
-    fun setPending(index: Int, isPending: Boolean) {
+    fun setPending(index: Int, isPending: Boolean, areMainNetsEnabled: Boolean) {
         rawAccounts.forEachIndexed { position, account ->
-            if (account.index == index) {
+            if (account.index == index && account.network.testNet != areMainNetsEnabled) {
                 account.isPending = isPending
                 notifyItemChanged(position)
             }
@@ -71,37 +71,28 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         notifyDataSetChanged()
     }
 
-    private fun getPositionInRaw(index: Int): Int {
-        rawAccounts.forEachIndexed { position, identity ->
-            if (identity.index == index) {
-                return position
-            }
-        }
-        return Int.InvalidIndex
-    }
-
     override fun onSendAccountClicked(account: Account) {
-        listener.onSendTransaction(account)
+        listener.onSendTransaction(rawAccounts.indexOf(account))
     }
 
     override fun onSendAssetTokenClicked(accountIndex: Int, assetIndex: Int) {
         listener.onSendAssetTransaction(accountIndex, assetIndex)
     }
 
-    override fun onAccountRemoved(position: Int) {
-        listener.onAccountRemove(rawAccounts[position])
+    override fun onAccountRemoved(index: Int) {
+        listener.onAccountRemove(rawAccounts[index])
     }
 
     override fun onCreateSafeAccountClicked(account: Account) {
         listener.onCreateSafeAccount(account)
     }
 
-    override fun onShowAddress(account: Account, position: Int) {
-        listener.onShowAddress(account, position)
+    override fun onShowAddress(account: Account, index: Int) {
+        listener.onShowAddress(account, index)
     }
 
-    override fun onShowSafeAccountSettings(account: Account, position: Int) {
-        listener.onShowSafeAccountSettings(account, position)
+    override fun onShowSafeAccountSettings(account: Account, index: Int) {
+        listener.onShowSafeAccountSettings(account, index)
     }
 
     override fun onWalletConnect() {

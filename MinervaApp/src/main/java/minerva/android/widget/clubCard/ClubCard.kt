@@ -58,7 +58,7 @@ class ClubCard(context: Context, private val credential: Credential) : Dialog(co
     }
 
     private fun prepareQrCode() {
-        context?.resources.getDimensionPixelSize(R.dimen.qr_code_size).let { qrCodeSize ->
+        context.resources.getDimensionPixelSize(R.dimen.qr_code_size).let { qrCodeSize ->
             QRCode.from(credential.token).withSize(qrCodeSize, qrCodeSize)
                 .withHint(EncodeHintType.MARGIN, QR_MARGIN)
                 .file()

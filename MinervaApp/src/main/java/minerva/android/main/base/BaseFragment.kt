@@ -1,10 +1,12 @@
 package minerva.android.main.base
 
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
 import minerva.android.main.listener.FragmentInteractorListener
-import minerva.android.utils.DialogHandler
+import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 
 open class BaseFragment : Fragment() {
@@ -20,7 +22,7 @@ open class BaseFragment : Fragment() {
         positiveAction: () -> Unit = { }
     ) {
         if (it is AutomaticBackupFailedThrowable) {
-            DialogHandler.showDialog(
+            AlertDialogHandler.showDialog(
                 requireContext(),
                 getString(R.string.error_header),
                 getString(R.string.automatic_backup_failed_error)
@@ -33,4 +35,11 @@ open class BaseFragment : Fragment() {
     private fun showErrorToast() {
         Toast.makeText(requireContext(), getString(R.string.unexpected_error), Toast.LENGTH_LONG).show()
     }
+
+    fun getHeader(areMainNetworkEnabled: Boolean) =
+        if (areMainNetworkEnabled) {
+            "${getText(R.string.main_networks)} {` ${getString(R.string.beta_funds_at_risk)}` < text-color:#DD2B00 />}".spannify()
+        } else {
+            getString(R.string.test_networks)
+        }
 }

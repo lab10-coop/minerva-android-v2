@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.NO_DATA
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.Recipient
 import timber.log.Timber
@@ -18,6 +19,10 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
     override var isSynced: Boolean
         set(value) = sharedPreferences.edit().putBoolean(IS_SYNCED, value).apply()
         get() = sharedPreferences.getBoolean(IS_SYNCED, true)
+
+    override var areMainNetsEnabled: Boolean
+        set(value) = sharedPreferences.edit().putBoolean(ARE_MAIN_NETS_ENABLED, value).apply()
+        get() = sharedPreferences.getBoolean(ARE_MAIN_NETS_ENABLED, false)
 
     override fun saveIsMnemonicRemembered(isRemembered: Boolean) {
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()
@@ -81,6 +86,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
     companion object {
         private const val IS_MNEMONIC_REMEMBERED = "is_mnemonic_remembered"
         private const val IS_BACKUP_ALLOWED = "is_mnemonic_remembered"
+        private const val ARE_MAIN_NETS_ENABLED = "are_main_nets_enabled"
         private const val IS_SYNCED = "is_synced"
         private const val RECIPIENTS = "recipients"
         private const val PENDING_ACCOUNTS = "pending_accounts"

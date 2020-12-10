@@ -3,6 +3,7 @@ package minerva.android.accounts
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.enum.ErrorCode
@@ -16,8 +17,10 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
+import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
+import kotlin.test.assertEquals
 
 class AccountsViewModelTest : BaseViewModelTest() {
 
@@ -25,7 +28,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val smartContractRepository: SmartContractRepository = mock()
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
-    private val viewModel = AccountsViewModel(accountManager, walletActionsRepository, smartContractRepository, transactionRepository)
+    private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
@@ -44,6 +47,50 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     private val accountRemoveObserver: Observer<Event<Unit>> = mock()
     private val accountRemoveCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+
+    private val shouldShowWarningObserver: Observer<Event<Boolean>> = mock()
+    private val shouldShowWarningCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
+
+
+    @Before
+    fun initViewModel() {
+        whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
+        viewModel = AccountsViewModel(accountManager, walletActionsRepository, smartContractRepository, transactionRepository)
+    }
+
+    @Test
+    fun `should show warning success test`() {
+        viewModel.shouldShowWarringLiveData.observeForever(shouldShowWarningObserver)
+        shouldShowWarningCaptor.run {
+            verify(shouldShowWarningObserver).onChanged(capture())
+            firstValue.peekContent()
+        }
+    }
+
+    @Test
+    fun `should show warning error test`() {
+        val error = Throwable()
+        whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.error(error))
+        viewModel.shouldShowWarringLiveData.observeForever(shouldShowWarningObserver)
+        shouldShowWarningCaptor.run {
+            verify(shouldShowWarningObserver).onChanged(capture())
+            !firstValue.peekContent()
+        }
+    }
+
+    @Test
+    fun `are pending transactions empty`(){
+        whenever(transactionRepository.getPendingAccounts()).thenReturn(emptyList())
+        val result = viewModel.arePendingAccountsEmpty()
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `are main nets enabled test`(){
+        whenever(accountManager.areMainNetworksEnabled).thenReturn(true)
+        val result = viewModel.areMainNetsEnabled
+        assertEquals(true, result)
+    }
 
     @Test
     fun `refresh balances success`() {
@@ -72,7 +119,16 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get assets balance success test`() {
-        whenever(transactionRepository.refreshAssetBalance()).thenReturn(Single.just(mapOf(Pair("test", listOf(AccountAsset(Asset("name")))))))
+        whenever(transactionRepository.refreshAssetBalance()).thenReturn(
+            Single.just(
+                mapOf(
+                    Pair(
+                        "test",
+                        listOf(AccountAsset(Asset("name")))
+                    )
+                )
+            )
+        )
         viewModel.accountAssetBalanceLiveData.observeForever(assetsBalanceObserver)
         viewModel.refreshAssetBalance()
         assetsBalanceCaptor.run {
@@ -121,7 +177,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("error")
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
-        whenever(accountManager.createRegularAccount(any())).thenReturn(Completable.error(error))
+        whenever(accountManager.createRegularAccount(any())).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.createSafeAccount(Account(index = 1, cryptoBalance = BigDecimal.ONE))
         errorCaptor.run {

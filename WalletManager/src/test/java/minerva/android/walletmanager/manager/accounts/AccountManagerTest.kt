@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
@@ -45,7 +46,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager creates new regular account`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val test = repository.createRegularAccount(Network()).test()
@@ -62,7 +63,7 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager don't save new regular account`() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val test = repository.createRegularAccount(Network()).test()
@@ -77,12 +78,13 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `Check that wallet manager removes correct empty value`() {
+        val account = Account(2)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        repository.removeAccount(2).test()
+        repository.removeAccount(account).test()
         val removedValue = repository.loadAccount(0)
         val notRemovedValue = repository.loadAccount(1)
         removedValue.index shouldBeEqualTo 2
@@ -93,13 +95,14 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `Check that wallet manager removes correct not empty value`() {
+        val account = Account(2)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.removeAccount(2).test()
+        repository.removeAccount(account).test()
         val removedValue = repository.loadAccount(0)
         val notRemovedValue = repository.loadAccount(1)
         removedValue.index shouldBeEqualTo 2
@@ -110,13 +113,15 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `Check that wallet manager don't removes correct safe account value`() {
+        val account = Account(5)
+        val account2 = Account(6)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        repository.removeAccount(5).test()
-        repository.removeAccount(6).test()
+        repository.removeAccount(account).test()
+        repository.removeAccount(account2).test()
         repository.loadAccount(2).apply {
             index shouldBeEqualTo 5
             publicKey shouldBeEqualTo "publicKey3"
@@ -131,14 +136,16 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `Check that wallet manager removes correct safe account value`() {
+        val account = Account(5)
+        val account2 = Account(6)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.removeAccount(5).test()
-        repository.removeAccount(6).test()
+        repository.removeAccount(account).test()
+        repository.removeAccount(account2).test()
         repository.loadAccount(2).apply {
             index shouldBeEqualTo 5
             publicKey shouldBeEqualTo "publicKey3"
@@ -184,7 +191,7 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `create safe account success`() {
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         repository.createSafeAccount(Account(1), "contract")
@@ -195,7 +202,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `create safe account error`() {
         val error = Throwable()
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         repository.createSafeAccount(Account(1), "contract")
@@ -222,5 +229,31 @@ class AccountManagerTest : RxTest() {
         whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(false)
         val result = repository.isAddressValid("2342343")
         assertEquals(false, result)
+    }
+
+    @Test
+    fun `are main nets enabled returns true`() {
+        whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(true)
+        val result = repository.areMainNetworksEnabled
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `toggle main nets enabled returns true`() {
+        whenever(walletConfigManager.toggleMainNetsEnabled).thenReturn(true)
+        val result = repository.toggleMainNetsEnabled
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `enable main nets emits true`() {
+        whenever(walletConfigManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
+        val result = repository.enableMainNetsFlowable.test().assertValue { it }
+    }
+
+    @Test
+    fun `enable main nets emits false`() {
+        whenever(walletConfigManager.enableMainNetsFlowable).thenReturn(Flowable.just(false))
+        val result = repository.enableMainNetsFlowable.test().assertValue { !it }
     }
 }

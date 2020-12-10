@@ -6,7 +6,7 @@ import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
-import minerva.android.utils.DialogHandler
+import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.Service
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -31,7 +31,7 @@ class ServicesFragment : MinervaPrimitiveListFragment() {
     }
 
     override fun onRemoveService(service: Service) {
-        DialogHandler.showRemoveDialog(requireContext(), service.name, getString(R.string.remove_service_dialog_message)) {
+        AlertDialogHandler.showRemoveDialog(requireContext(), service.name, getString(R.string.remove_service_dialog_message)) {
             viewModel.removeService(
                 service.issuer,
                 service.name

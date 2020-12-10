@@ -10,13 +10,12 @@ import minerva.android.R
 import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.replaceFragment
-import minerva.android.extension.validator.Validator.HEX_PREFIX
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.accounts.transaction.fragment.TransactionsFragment
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
+import minerva.android.kotlinUtils.Empty
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.repository.getNetworkIcon
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -28,7 +27,10 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transaction)
-        viewModel.getAccount(intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex), intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex))
+        viewModel.getAccount(
+            intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex),
+            intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex)
+        )
         initView()
     }
 
@@ -62,25 +64,38 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     override fun onTransactionAccepted(message: String?) {
         setResult(Activity.RESULT_OK, Intent().apply {
-            putExtra(ACCOUNT_INDEX, viewModel.account.index)
+            putExtra(ACCOUNT_INDEX, getAccountIndex())
             putExtra(IS_TRANSACTION_SUCCESS, true)
             putExtra(TRANSACTION_MESSAGE, message)
         })
         finish()
     }
 
+    private fun getAccountIndex() =
+        /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
+        if (viewModel.wssUri == String.Empty) {
+            Int.InvalidIndex
+        } else {
+            viewModel.account.index
+        }
+
     override fun onError(message: String) {
         MinervaFlashbar.show(
-                this,
-                getString(R.string.transaction_error_title),
-                getString(R.string.transaction_error_message, message)
+            this,
+            getString(R.string.transaction_error_title),
+            getString(R.string.transaction_error_message, message)
         )
     }
 
 
     override fun showScanner() {
         supportActionBar?.hide()
-        replaceFragment(R.id.container, AddressScannerFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
+        replaceFragment(
+            R.id.container,
+            AddressScannerFragment.newInstance(),
+            R.animator.slide_in_left,
+            R.animator.slide_out_right
+        )
     }
 
     override fun setScanResult(text: String?) {

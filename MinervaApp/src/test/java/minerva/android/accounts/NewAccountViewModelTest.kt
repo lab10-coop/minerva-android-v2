@@ -3,6 +3,7 @@ package minerva.android.accounts
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
+import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
@@ -10,6 +11,8 @@ import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import org.amshove.kluent.shouldBe
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
 class NewAccountViewModelTest : BaseViewModelTest() {
@@ -23,7 +26,7 @@ class NewAccountViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `create wallet action success`() {
-        whenever(accountManager.createRegularAccount(any())).thenReturn(Completable.complete())
+        whenever(accountManager.createRegularAccount(any())).thenReturn(Single.just("accountName"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.createAccountLiveData.observeForever(createValueObserver)
         viewModel.createNewAccount(Network())
@@ -35,7 +38,7 @@ class NewAccountViewModelTest : BaseViewModelTest() {
     @Test
     fun `create wallet action error`() {
         val error = Throwable()
-        whenever(accountManager.createRegularAccount(any())).thenReturn(Completable.error(error))
+        whenever(accountManager.createRegularAccount(any())).thenReturn(Single.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         viewModel.createNewAccount(Network())
         viewModel.errorLiveData.observeLiveDataEvent(Event(error))

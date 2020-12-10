@@ -21,6 +21,9 @@ private fun getMainIcon(networkShort: String): Int =
         NetworkShortName.ETH_CLASSIC_KOTTI -> R.drawable.ic_ethereum_classic
         NetworkShortName.ETH_GOR -> R.drawable.ic_gorli
         NetworkShortName.ETH_RIN, NetworkShortName.ETH_ROP, NetworkShortName.ETH_KOV -> R.drawable.ic_ethereum
+        NetworkShortName.XDAI -> R.drawable.ic_xdai
+        NetworkShortName.POA_CORE -> R.drawable.ic_poa_core
+        NetworkShortName.ATS_SIGMA -> R.drawable.ic_artis_sigma
         else -> Int.InvalidId
     }
 

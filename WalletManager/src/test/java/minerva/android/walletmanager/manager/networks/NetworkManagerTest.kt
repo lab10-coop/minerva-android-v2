@@ -52,9 +52,10 @@ class NetworkManagerTest {
     @Test
     fun `Check getting second default Account network correctly`() {
         NetworkManager.initialize(testNetworks1)
-        NetworkManager.secondDefaultValueNetwork().full shouldBeEqualTo "FullName3"
+        NetworkManager.getNetworkByIndex(2).full shouldBeEqualTo "FullName5"
         NetworkManager.initialize(testNetworks2)
-        NetworkManager.secondDefaultValueNetwork().full shouldBeEqualTo "FullName3"
+        NetworkManager.getNetworkByIndex(2).full shouldBeEqualTo "FullName3"
+        NetworkManager.getNetworkByIndex(3).full shouldBeEqualTo "FullName3"
     }
 
     @Test
@@ -98,8 +99,8 @@ class NetworkManagerTest {
         Network("FullName1", "SN1", "WT1", "someAddress1", "someAddress1", false, BigInteger.TEN, assetSet1, "#FF223344"),
         Network("FullName2", "SN2", "WT2", "", "someAddress2", false, BigInteger.TEN, assetSet2, "#223344"),
         Network("FullName3", "SN3", "WT3", "someAddress3", "someAddress3", false, BigInteger.TEN, listOf(), "#FF223344"),
-        Network("FullName4", "SN4", "WT4", "", "someAddress4", true, BigInteger.TEN, listOf(), "#223344"),
-        Network("FullName5", "SN5", "WT5", "someAddress5", "someAddress5", true, BigInteger.TEN, listOf(), "#FF223344")
+        Network("FullName4", "SN4", "WT4", "", "someAddress4", true, BigInteger.TEN, listOf(), "#223344", false),
+        Network("FullName5", "SN5", "WT5", "someAddress5", "someAddress5", true, BigInteger.TEN, listOf(), "#FF223344", false)
     )
 
     private val testNetworks2 = listOf(

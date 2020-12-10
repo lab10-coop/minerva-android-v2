@@ -37,13 +37,13 @@ class AddressViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `Check that viewModel load correct account` () {
-        val account = Account(0, name = "account1")
-        whenever(accountManager.loadAccount(any())).thenReturn(account)
+        val account1 = Account(2, name = "account2")
+        whenever(accountManager.loadAccount(any())).thenReturn(account1)
         viewModel.loadMinervaPrimitiveLiveData.observeForever(loadObserver)
-        viewModel.loadMinervaPrimitive(WrappedFragmentType.ACCOUNT_ADDRESS, 0)
+        viewModel.loadMinervaPrimitive(WrappedFragmentType.ACCOUNT_ADDRESS, 2)
         loadCaptor.run {
             verify(loadObserver).onChanged(capture())
-            (firstValue.peekContent() as Account).name shouldBeEqualTo "account1"
+            (firstValue.peekContent() as Account).name shouldBeEqualTo "account2"
         }
     }
 }
