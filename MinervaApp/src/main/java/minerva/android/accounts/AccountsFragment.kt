@@ -124,7 +124,6 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
                     FundsAtRiskDialog(requireContext()).show()
                 }
             })
-
             walletConfigLiveData.observe(viewLifecycleOwner, Observer { walletConfig ->
                 noDataMessage.visibleOrGone(walletConfig.hasActiveAccount)
                 accountAdapter.updateList(walletConfig.accounts, areMainNetsEnabled)

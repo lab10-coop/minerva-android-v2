@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <minerva.android.widget.CryptoAmountView
+        android:id="@+id/amount_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true" />
+
+    <ImageView
+        android:id="@+id/token_logo"
+        android:layout_width="@dimen/xsmall_logo_size"
+        android:layout_height="@dimen/xsmall_logo_size"
+        android:layout_alignTop="@id/amount_view"
+        android:layout_alignBottom="@id/amount_view"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="@dimen/margin_xxxsmall"
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/ic_default_token" />
+
+    <TextView
+        android:id="@+id/token_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/amount_view"
+        android:layout_alignBottom="@id/amount_view"
+        android:layout_marginStart="@dimen/margin_small"
+        android:layout_toEndOf="@id/token_logo"
+        android:gravity="center"
+        android:textColor="@color/gray"
+        tools:text="sDai" />
+</merge>

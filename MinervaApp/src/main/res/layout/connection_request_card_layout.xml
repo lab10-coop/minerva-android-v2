@@ -39,8 +39,8 @@
 
     <ImageView
         android:id="@+id/checkboxIcon"
-        android:layout_width="@dimen/small_logo_size"
-        android:layout_height="@dimen/small_logo_size"
+        android:layout_width="@dimen/xsmall_logo_size"
+        android:layout_height="@dimen/xsmall_logo_size"
         android:layout_marginTop="55dp"
         android:src="@drawable/ic_check"
         app:layout_constraintLeft_toRightOf="@+id/connectionIcon"

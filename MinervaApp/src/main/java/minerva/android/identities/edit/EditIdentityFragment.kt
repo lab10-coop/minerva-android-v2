@@ -15,12 +15,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.android.synthetic.main.fragment_edit_identity.*
 import minerva.android.R
-import minerva.android.extension.afterTextChanged
-import minerva.android.extension.gone
-import minerva.android.extension.isEmail
-import minerva.android.extension.visible
+import minerva.android.databinding.FragmentEditIdentityBinding
+import minerva.android.extension.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
@@ -63,28 +60,33 @@ class EditIdentityFragment : BaseFragment() {
 
     private var viewGroup: ViewGroup? = null
 
+    private lateinit var binding: FragmentEditIdentityBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
-        viewGroup = container
-        return inflater.inflate(R.layout.fragment_edit_identity, container, false)
-    }
+    ): View? =
+        inflater.inflate(R.layout.fragment_edit_identity, container, false).apply {
+            binding = FragmentEditIdentityBinding.bind(this)
+            viewGroup = container
+        }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initializeFragment()
-        moreFields.setOnClickListener {
-            TransitionManager.beginDelayedTransition(viewGroup)
-            moreFields.gone()
-            addressHeader.visible()
-            addressLine1Layout.visible()
-            addressLine2Layout.visible()
-            cityLayout.visible()
-            postcodeLayout.visible()
-            countryLayout.visible()
+        binding.apply {
+            moreFields.setOnClickListener {
+                TransitionManager.beginDelayedTransition(viewGroup)
+                moreFields.gone()
+                addressHeader.visible()
+                addressLineOneLayout.visible()
+                addressLineTwoLayout.visible()
+                cityLayout.visible()
+                postcodeLayout.visible()
+                countryLayout.visible()
+            }
+            birthDate.setOnClickListener { showDialogPicker() }
+            confirmButton.setOnClickListener { onConfirmButtonClicked() }
         }
-        birthDate.setOnClickListener { showDialogPicker() }
-        confirmButton.setOnClickListener { onConfirmButtonClicked() }
     }
 
     override fun onDestroy() {
@@ -105,7 +107,7 @@ class EditIdentityFragment : BaseFragment() {
         if (resultCode == Activity.RESULT_OK) {
             Glide.with(requireContext())
                 .load(prepareImageUri(requestCode, data))
-                .apply(RequestOptions.circleCropTransform()).into(profileImage)
+                .apply(RequestOptions.circleCropTransform()).into(binding.profileImage)
             wasCustomPhotoSet = true
         }
     }
@@ -137,15 +139,17 @@ class EditIdentityFragment : BaseFragment() {
             showErrorMessage(getString(R.string.missing_required_data))
             return
         }
-        email.text.toString().apply {
-            if (isNotEmailAndIsNotEmpty(this)) {
-                showErrorMessage(getString(R.string.wrong_email))
+        binding.apply {
+            email.text.toString().apply {
+                if (isNotEmailAndIsNotEmpty(this)) {
+                    showErrorMessage(getString(R.string.wrong_email))
+                    return
+                }
+            }
+            if (identityName.text.toString().isEmpty()) {
+                showErrorMessage(getString(R.string.empty_identity_name))
                 return
             }
-        }
-        if (identityName.text.toString().isEmpty()) {
-            showErrorMessage(getString(R.string.empty_identity_name))
-            return
         }
         if (isConfirmDialogRequested()) showConfirmDialog()
         else saveIdentity()
@@ -164,33 +168,37 @@ class EditIdentityFragment : BaseFragment() {
     private fun initializeView(identity: Identity) {
         this.identity = Identity(identity)
         setIdentityData(this.identity)
-        confirmButton.text = if (index == Int.InvalidIndex) getString(R.string.create_new_identity)
+        binding.confirmButton.text = if (index == Int.InvalidIndex) getString(R.string.create_new_identity)
         else getString(R.string.update_identity)
     }
 
     private fun setIdentityData(identity: Identity) {
         with(identity) {
-            identityName.setText(name)
-            accountName.setText(personalData[NAME])
-            this@EditIdentityFragment.did.apply {
-                setTitleAndBody(getString(R.string.did), did)
-                setSingleLine()
-                makeEnabled(false)
+            binding.apply {
+                identityName.setText(name)
+                accountName.setText(personalData[NAME])
+                this@EditIdentityFragment.binding.did.apply {
+                    setTitleAndBody(getString(R.string.did), this@with.did)
+                    setSingleLine()
+                    makeEnabled(false)
+                }
+                email.setText(personalData[EMAIL])
+                phoneNumber.setText(personalData[PHONE_NUMBER])
+                birthDate.setText(personalData[BIRTH_DATE])
+                addressLineOne.setText(personalData[ADDRESS_1])
+                addressLineTwo.setText(personalData[ADDRESS_2])
+                city.setText(personalData[CITY])
+                postcode.setText(personalData[POSTCODE])
+                country.setText(personalData[COUNTRY])
+                ProfileImage.load(profileImage, identity)
             }
-            email.setText(personalData[EMAIL])
-            phoneNumber.setText(personalData[PHONE_NUMBER])
-            birthDate.setText(personalData[BIRTH_DATE])
-            addressLine1.setText(personalData[ADDRESS_1])
-            addressLine2.setText(personalData[ADDRESS_2])
-            city.setText(personalData[CITY])
-            postcode.setText(personalData[POSTCODE])
-            country.setText(personalData[COUNTRY])
-            ProfileImage.load(profileImage, identity)
         }
     }
 
     private fun resetPhoto() {
-        profileImage.setImageDrawable(LetterLogo.createLogo(requireContext(), identityName.text.toString()))
+        binding.apply {
+            profileImage.setImageDrawable(LetterLogo.createLogo(requireContext(), identityName.text.toString()))
+        }
         wasCustomPhotoSet = false
         identity.profileImageBitmap = null
     }
@@ -200,48 +208,52 @@ class EditIdentityFragment : BaseFragment() {
     }
 
     private fun getUpdatedIdentity(): Identity {
-        (if (wasCustomPhotoSet) profileImage.drawable.toBitmap() else identity.profileImageBitmap).let {
-            return Identity(
-                identity.index,
-                identityName.text.toString(),
-                address = identity.address,
-                personalData = prepareFormData(),
-                profileImageBitmap = it
-            )
+        binding.apply {
+            (if (wasCustomPhotoSet) profileImage.drawable.toBitmap() else identity.profileImageBitmap).let {
+                return Identity(
+                    identity.index,
+                    identityName.text.toString(),
+                    address = identity.address,
+                    personalData = prepareFormData(),
+                    profileImageBitmap = it
+                )
+            }
         }
     }
 
     //TODO change for dynamic label generation
     private fun prepareFormData(): LinkedHashMap<String, String> {
         val map = mutableMapOf<String, String>()
-        accountName.text.toString().trim().apply {
-            if (isNotEmpty()) map[NAME] = this
+        binding.apply {
+            accountName.text.toString().trim().apply {
+                if (isNotEmpty()) map[NAME] = this
+            }
+            email.text.toString().trim().apply {
+                if (isNotEmpty()) map[EMAIL] = this
+            }
+            phoneNumber.text.toString().trim().apply {
+                if (isNotEmpty()) map[PHONE_NUMBER] = this
+            }
+            birthDate.text.toString().trim().apply {
+                if (isNotEmpty()) map[BIRTH_DATE] = this
+            }
+            addressLineOne.text.toString().trim().apply {
+                if (isNotEmpty()) map[ADDRESS_1] = this
+            }
+            addressLineTwo.text.toString().trim().apply {
+                if (isNotEmpty()) map[ADDRESS_2] = this
+            }
+            city.text.toString().trim().apply {
+                if (isNotEmpty()) map[CITY] = this
+            }
+            postcode.text.toString().trim().apply {
+                if (isNotEmpty()) map[POSTCODE] = this
+            }
+            country.text.toString().trim().apply {
+                if (isNotEmpty()) map[COUNTRY] = this
+            }
+            return map as LinkedHashMap<String, String>
         }
-        email.text.toString().trim().apply {
-            if (isNotEmpty()) map[EMAIL] = this
-        }
-        phoneNumber.text.toString().trim().apply {
-            if (isNotEmpty()) map[PHONE_NUMBER] = this
-        }
-        birthDate.text.toString().trim().apply {
-            if (isNotEmpty()) map[BIRTH_DATE] = this
-        }
-        addressLine1.text.toString().trim().apply {
-            if (isNotEmpty()) map[ADDRESS_1] = this
-        }
-        addressLine2.text.toString().trim().apply {
-            if (isNotEmpty()) map[ADDRESS_2] = this
-        }
-        city.text.toString().trim().apply {
-            if (isNotEmpty()) map[CITY] = this
-        }
-        postcode.text.toString().trim().apply {
-            if (isNotEmpty()) map[POSTCODE] = this
-        }
-        country.text.toString().trim().apply {
-            if (isNotEmpty()) map[COUNTRY] = this
-        }
-        return map as LinkedHashMap<String, String>
     }
 
     private fun checkRequestedData(): Boolean {
@@ -257,17 +269,19 @@ class EditIdentityFragment : BaseFragment() {
 
     //TODO change for dynamic label generation
     private fun getTextInputLayout(key: String): Pair<TextInputLayout, TextInputEditText> =
-        when (key) {
-            NAME -> Pair(nameLayout, accountName)
-            EMAIL -> Pair(emailLayout, email)
-            PHONE_NUMBER -> Pair(phoneNumberLayout, phoneNumber)
-            BIRTH_DATE -> Pair(birthDateLayout, birthDate)
-            ADDRESS_1 -> Pair(addressLine1Layout, addressLine1)
-            ADDRESS_2 -> Pair(addressLine2Layout, addressLine2)
-            CITY -> Pair(cityLayout, city)
-            POSTCODE -> Pair(postcodeLayout, postcode)
-            COUNTRY -> Pair(countryLayout, country)
-            else -> Pair(nameLayout, accountName)
+        with(binding) {
+            when (key) {
+                NAME -> Pair(nameLayout, accountName)
+                EMAIL -> Pair(emailLayout, email)
+                PHONE_NUMBER -> Pair(phoneNumberLayout, phoneNumber)
+                BIRTH_DATE -> Pair(birthDateLayout, birthDate)
+                ADDRESS_1 -> Pair(addressLineOneLayout, addressLineOne)
+                ADDRESS_2 -> Pair(addressLineTwoLayout, addressLineTwo)
+                CITY -> Pair(cityLayout, city)
+                POSTCODE -> Pair(postcodeLayout, postcode)
+                COUNTRY -> Pair(countryLayout, country)
+                else -> Pair(nameLayout, accountName)
+            }
         }
 
 
@@ -293,22 +307,21 @@ class EditIdentityFragment : BaseFragment() {
             viewModel.loadIdentity(index, getString(R.string.identity))
         }
 
-        identityName.apply {
-            afterTextChanged {
+        binding.apply {
+            identityName.afterTextChanged {
                 if (!wasCustomPhotoSet && identity.profileImageBitmap == null) {
-                    profileImage.setImageDrawable(LetterLogo.createLogo(context, it))
+                    profileImage.setImageDrawable(LetterLogo.createLogo(profileImage.context, it))
                 }
             }
-        }
+            checkEditTextInput(emailLayout, email) { getEmailErrorMessage(it) }
+            checkEditTextInput(identityNameLayout, identityName) { isBlank(it) }
 
-        checkEditTextInput(emailLayout, email) { getEmailErrorMessage(it) }
-        checkEditTextInput(identityNameLayout, identityName) { isBlank(it) }
-
-        profileImage.setOnClickListener {
-            profileImageDialog = ProfileImageDialog(this).apply {
-                resetPhotoLiveData.observe(viewLifecycleOwner, EventObserver { resetPhoto() })
-                showDeleteOption(identity.profileImageBitmap != null)
-                show()
+            profileImage.setOnClickListener {
+                profileImageDialog = ProfileImageDialog(this@EditIdentityFragment).apply {
+                    resetPhotoLiveData.observe(viewLifecycleOwner, EventObserver { resetPhoto() })
+                    showDeleteOption(identity.profileImageBitmap != null)
+                    show()
+                }
             }
         }
     }
@@ -343,12 +356,9 @@ class EditIdentityFragment : BaseFragment() {
         else WalletActionStatus.CHANGED
 
     private fun handleLoader(isLoading: Boolean) {
-        if (isLoading) {
-            saveIdentityProgressBar.visible()
-            confirmButton.gone()
-        } else {
-            saveIdentityProgressBar.gone()
-            confirmButton.visible()
+        binding.apply {
+            saveIdentityProgressBar.visibleOrGone(isLoading)
+            confirmButton.visibleOrGone(!isLoading)
         }
     }
 
@@ -365,7 +375,7 @@ class EditIdentityFragment : BaseFragment() {
             val day = calendar.get(Calendar.DAY_OF_MONTH)
 
             val datePickerDialog = DatePickerDialog(it, { _, birthYear, monthOfYear, dayOfMonth ->
-                birthDate.setText(String.format(DATE_FORMAT, dayOfMonth, monthOfYear + 1, birthYear))
+                binding.birthDate.setText(String.format(DATE_FORMAT, dayOfMonth, monthOfYear + 1, birthYear))
             }, year, month, day)
             datePickerDialog.apply {
                 datePicker.maxDate = System.currentTimeMillis()

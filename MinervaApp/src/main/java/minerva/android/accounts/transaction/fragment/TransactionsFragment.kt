@@ -15,13 +15,12 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
-import kotlinx.android.synthetic.main.fragment_transactions.*
 import minerva.android.R
 import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.accounts.transaction.fragment.adapter.RecipientAdapter
+import minerva.android.databinding.FragmentTransactionsBinding
 import minerva.android.extension.*
-import minerva.android.extension.validator.ValidationResult
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Recipient
@@ -40,14 +39,20 @@ class TransactionsFragment : Fragment() {
     private val viewModel: TransactionsViewModel by sharedViewModel()
     private var validationDisposable: Disposable? = null
 
+    private lateinit var binding: FragmentTransactionsBinding
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_transactions, container, false)
+        inflater.inflate(R.layout.fragment_transactions, container, false).let {
+            binding = FragmentTransactionsBinding.bind(it)
+            it
+        }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupTexts()
         setupListeners()
-        transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
+        binding.transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
         prepareRecipients()
         prepareObservers()
     }
@@ -64,7 +69,7 @@ class TransactionsFragment : Fragment() {
 
     fun setReceiver(result: String?) {
         result?.let {
-            receiver.setText(result)
+            binding.receiver.setText(result)
         }
     }
 
@@ -85,16 +90,18 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun handleTransactionCosts(it: TransactionCost) {
-        transactionCostLayout.isEnabled = true
-        arrow.visible()
+        binding.apply {
+            transactionCostLayout.isEnabled = true
+            arrow.visible()
 
-        if (getAmount() == viewModel.account.cryptoBalance && getAmount() != BigDecimal.ZERO) {
-            amount.setText(viewModel.recalculateAmount(getAmount(), it.cost))
-        }
+            if (getAmount() == viewModel.account.cryptoBalance && getAmount() != BigDecimal.ZERO) {
+                amount.setText(viewModel.recalculateAmount(getAmount(), it.cost))
+            }
 
-        if (shouldSetTransactionCosts(it.cost.toString())) {
-            handleGasLimitDefaultValue(it)
-            setTransactionsCosts(it)
+            if (shouldSetTransactionCosts(it.cost.toString())) {
+                handleGasLimitDefaultValue(it)
+                setTransactionsCosts(it)
+            }
         }
     }
 
@@ -105,16 +112,13 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun handleTransactionCostLoader(showLoader: Boolean) {
-        if (showLoader) {
-            transactionCostProgressBar.visible()
-            transactionCostAmount.gone()
-        } else {
-            transactionCostProgressBar.gone()
-            transactionCostAmount.visible()
+        binding.apply {
+            transactionCostProgressBar.visibleOrGone(showLoader)
+            transactionCostAmount.visibleOrGone(!showLoader)
         }
     }
 
-    private fun shouldSetTransactionCosts(it: String) = transactionCostAmount.text.toString() != it
+    private fun shouldSetTransactionCosts(it: String) = binding.transactionCostAmount.text.toString() != it
 
     private fun handleTransactionStatus(status: Pair<String, Int>) {
         when (status.second) {
@@ -124,47 +128,49 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun prepareTextListeners() {
-        validationDisposable = Observable.combineLatest(
-            amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
-            receiver.getValidationObservable(receiverInputLayout) { Validator.validateAddress(it, viewModel.isAddressValid(it)) },
-            BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid ->
-                isAmountValid && isAddressValid
-            })
-            .map {
-                if (it) {
-                    viewModel.getTransactionCosts(receiver.text.toString(), getAmount())
-                } else {
-                    arrow.gone()
-                    clearTransactionCost()
-                    transactionCostLayout.isEnabled = false
-                    if (areTransactionCostsOpen) {
-                        closeTransactionCost()
+        binding.apply {
+            validationDisposable = Observable.combineLatest(
+                amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
+                receiver.getValidationObservable(receiverInputLayout) { Validator.validateAddress(it, viewModel.isAddressValid(it)) },
+                BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid ->
+                    isAmountValid && isAddressValid
+                })
+                .map {
+                    if (it) {
+                        viewModel.getTransactionCosts(receiver.text.toString(), getAmount())
+                    } else {
+                        arrow.gone()
+                        clearTransactionCost()
+                        transactionCostLayout.isEnabled = false
+                        if (areTransactionCostsOpen) {
+                            closeTransactionCost()
+                        }
                     }
-                }
-                it
-            }.flatMap {
-                Observable.combineLatest(
-                    gasLimitEditText.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },
-                    gasPriceEditText.getValidationObservable(gasPriceInputLayout) { Validator.validateIsFilled(it) },
-                    BiFunction<Boolean, Boolean, Boolean> { isGasLimitValid, isGasPriceValid ->
-                        isGasLimitValid && isGasPriceValid && it
-                    }
-                )
+                    it
+                }.flatMap {
+                    Observable.combineLatest(
+                        gasLimitEditText.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },
+                        gasPriceEditText.getValidationObservable(gasPriceInputLayout) { Validator.validateIsFilled(it) },
+                        BiFunction<Boolean, Boolean, Boolean> { isGasLimitValid, isGasPriceValid ->
+                            isGasLimitValid && isGasPriceValid && it
+                        }
+                    )
 
-            }
-            .subscribeBy(
-                onNext = { sendButton.isEnabled = it },
-                onError = { sendButton.isEnabled = false }
-            )
+                }
+                .subscribeBy(
+                    onNext = { sendButton.isEnabled = it },
+                    onError = { sendButton.isEnabled = false }
+                )
+        }
     }
 
     private fun prepareRecipients() {
         viewModel.loadRecipients()
-        receiver.apply {
+        binding.receiver.apply {
             onItemClickListener = AdapterView.OnItemClickListener { parent, _, position, _ ->
-                (parent.getItemAtPosition(position) as Recipient).let { recipient -> receiver.setText(recipient.getData()) }
+                (parent.getItemAtPosition(position) as Recipient).let { recipient -> setText(recipient.getData()) }
             }
-            onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus -> if (hasFocus) receiver.showDropDown() }
+            onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus -> if (hasFocus) showDropDown() }
             setAdapter(RecipientAdapter(context, R.layout.recipient_list_row, viewModel.recipients))
             setDropDownBackgroundResource(R.drawable.drop_down_menu_background)
             dropDownVerticalOffset = DROP_DOWN_VERTICAL_OFFSET
@@ -173,13 +179,17 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun hideLoader() {
-        sendButton.visible()
-        sendTransactionProgressBar.invisible()
+        binding.apply {
+            sendButton.visible()
+            sendTransactionProgressBar.invisible()
+        }
     }
 
     private fun showLoader() {
-        sendTransactionProgressBar.visible()
-        sendButton.invisible()
+        binding.apply {
+            sendTransactionProgressBar.visible()
+            sendButton.invisible()
+        }
     }
 
     private fun showErrorFlashBar(message: String = getString(R.string.transactions_error_message)) {
@@ -187,41 +197,47 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setTransactionsCosts(transactionCost: TransactionCost) {
-        transactionCostLayout.isEnabled = true
-        transactionCost.let {
-            gasPriceEditText.setText(it.gasPrice.toPlainString())
-            gasLimitEditText.setText(it.gasLimit.toString())
-            transactionCostAmount.text =
-                getString(R.string.transaction_cost_amount, it.cost.toPlainString(), viewModel.token)
+        binding.apply {
+            transactionCostLayout.isEnabled = true
+            transactionCost.let {
+                gasPriceEditText.setText(it.gasPrice.toPlainString())
+                gasLimitEditText.setText(it.gasLimit.toString())
+                transactionCostAmount.text =
+                    getString(R.string.transaction_cost_amount, it.cost.toPlainString(), viewModel.token)
+            }
+            setGasPriceOnTextChangedListener()
+            setGasLimitOnTextChangedListener()
         }
-        setGasPriceOnTextChangedListener()
-        setGasLimitOnTextChangedListener()
     }
 
     private fun setGasLimitOnTextChangedListener() {
-        gasLimitEditText.afterTextChanged { gasLimit ->
-            if (canCalculateTransactionCost(gasLimit, gasPriceEditText)) {
-                shouldOverrideTransactionCost = false
-                calculateTransactionCost(getGasPrice(), gasLimit.toBigInteger())
-            } else {
-                clearTransactionCost()
+        binding.apply {
+            gasLimitEditText.afterTextChanged { gasLimit ->
+                if (canCalculateTransactionCost(gasLimit, gasPriceEditText)) {
+                    shouldOverrideTransactionCost = false
+                    calculateTransactionCost(getGasPrice(), gasLimit.toBigInteger())
+                } else {
+                    clearTransactionCost()
+                }
             }
         }
     }
 
     private fun setGasPriceOnTextChangedListener() {
-        gasPriceEditText.afterTextChanged { gasPrice ->
-            if (canCalculateTransactionCost(gasPrice, gasLimitEditText)) {
-                shouldOverrideTransactionCost = false
-                calculateTransactionCost(gasPrice.toBigDecimal(), getGasLimit())
-            } else {
-                clearTransactionCost()
+        binding.apply {
+            gasPriceEditText.afterTextChanged { gasPrice ->
+                if (canCalculateTransactionCost(gasPrice, gasLimitEditText)) {
+                    shouldOverrideTransactionCost = false
+                    calculateTransactionCost(gasPrice.toBigDecimal(), getGasLimit())
+                } else {
+                    clearTransactionCost()
+                }
             }
         }
     }
 
     private fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger) {
-        transactionCostAmount.text = getString(
+        binding.transactionCostAmount.text = getString(
             R.string.transaction_cost_amount,
             viewModel.calculateTransactionCost(gasPrice, gasLimit),
             viewModel.token
@@ -229,7 +245,7 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setAddressScannerListener() {
-        amount.onRightDrawableClicked {
+        binding.amount.onRightDrawableClicked {
             it.setText(viewModel.getAllAvailableFunds())
         }
     }
@@ -238,7 +254,7 @@ class TransactionsFragment : Fragment() {
         input.isNotEmpty() && editText.text?.isNotEmpty() == true
 
     private fun clearTransactionCost() {
-        transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
+        binding.transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
     }
 
     override fun onAttach(context: Context) {
@@ -247,7 +263,7 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        transactionCostLayout.isEnabled = false
+        binding.transactionCostLayout.isEnabled = false
         setSendButtonOnClickListener()
         setOnTransactionCostOnClickListener()
         setGetAllBalanceListener()
@@ -255,53 +271,63 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setGetAllBalanceListener() {
-        receiver.onRightDrawableClicked {
+        binding.receiver.onRightDrawableClicked {
             listener.showScanner()
         }
     }
 
     private fun setOnTransactionCostOnClickListener() {
-        transactionCostLayout.setOnClickListener {
-            TransitionManager.beginDelayedTransition(transactionView)
-            if (areTransactionCostsOpen) closeTransactionCost() else openTransactionCost()
+        binding.apply {
+            transactionCostLayout.setOnClickListener {
+                TransitionManager.beginDelayedTransition(transactionView)
+                if (areTransactionCostsOpen) closeTransactionCost() else openTransactionCost()
+            }
         }
     }
 
     private fun openTransactionCost() {
         areTransactionCostsOpen = true
-        transactionCostLayout.apply {
-            arrow.rotate180()
-            gasPriceInputLayout.visible()
-            gasLimitInputLayout.visible()
+        binding.apply {
+            transactionCostLayout.apply {
+                arrow.rotate180()
+                gasPriceInputLayout.visible()
+                gasLimitInputLayout.visible()
+            }
         }
     }
 
     private fun closeTransactionCost() {
         areTransactionCostsOpen = false
-        transactionCostLayout.apply {
-            arrow.rotate180back()
-            gasPriceInputLayout.gone()
-            gasLimitInputLayout.gone()
+        binding.apply {
+            transactionCostLayout.apply {
+                arrow.rotate180back()
+                gasPriceInputLayout.gone()
+                gasLimitInputLayout.gone()
+            }
         }
     }
 
     private fun setSendButtonOnClickListener() {
-        sendButton.setOnClickListener {
-            viewModel.sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
+        binding.apply {
+            sendButton.setOnClickListener {
+                viewModel.sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
+            }
         }
     }
 
-    private fun getAmount() = BigDecimal(amount.text.toString())
+    private fun getAmount() = BigDecimal(binding.amount.text.toString())
 
-    private fun getGasLimit() = BigInteger(gasLimitEditText.text.toString())
+    private fun getGasLimit() = BigInteger(binding.gasLimitEditText.text.toString())
 
-    private fun getGasPrice() = BigDecimal(gasPriceEditText.text.toString())
+    private fun getGasPrice() = BigDecimal(binding.gasPriceEditText.text.toString())
 
     @SuppressLint("SetTextI18n")
     private fun setupTexts() {
-        viewModel.prepareCurrency().apply {
-            amountInputLayout.hint = "${getString(R.string.amount)}($this)"
-            sendButton.text = "${getString(R.string.send)} $this"
+        binding.apply {
+            viewModel.prepareCurrency().let {
+                amountInputLayout.hint = "${getString(R.string.amount)}($it)"
+                sendButton.text = "${getString(R.string.send)} $it"
+            }
         }
     }
 

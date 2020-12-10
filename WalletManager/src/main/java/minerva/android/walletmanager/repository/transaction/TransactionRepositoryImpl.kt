@@ -22,7 +22,6 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -57,7 +56,8 @@ class TransactionRepositoryImpl(
             return Observable.range(START, config.accounts.size)
                 .filter { position -> refreshBalanceFilter(config.accounts[position]) }
                 .filter { position -> config.accounts[position].network.isAvailable() }
-                .filter { position -> config.accounts[position].network.assets.isEmpty() }
+                //TODO checking balance of tokens will be part of another task
+                //.filter { position -> config.accounts[position].network.assets.isEmpty() }
                 .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
                 .toList()
                 .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
@@ -200,5 +200,4 @@ class TransactionRepositoryImpl(
         private const val START = 0
         private val NO_FUNDS = BigDecimal.valueOf(0)
     }
-
 }

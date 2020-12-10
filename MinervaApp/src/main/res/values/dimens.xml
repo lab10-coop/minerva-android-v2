@@ -20,14 +20,14 @@
     <dimen name="icon_size">40dp</dimen>
     <dimen name="rounded_background_small">8dp</dimen>
     <dimen name="rounded_background">16dp</dimen>
-    <dimen name="small_logo_size">32dp</dimen>
+    <dimen name="xsmall_logo_size">32dp</dimen>
+    <dimen name="small_logo_size">36dp</dimen>
     <dimen name="badge_logo_size">16dp</dimen>
     <dimen name="form_box_stroke_width">2dp</dimen>
     <dimen name="circle_icon_background">48dp</dimen>
     <dimen name="confirm_dialog_button_margin">24dp</dimen>
     <dimen name="camera_logo_icon_size">24dp</dimen>
     <dimen name="qr_code_margin">6dp</dimen>
-
     <dimen name="clickable_area">32dp</dimen>
     <dimen name="large_letter_logo_size">128dp</dimen>
     <dimen name="big_letter_logo_size">96dp</dimen>

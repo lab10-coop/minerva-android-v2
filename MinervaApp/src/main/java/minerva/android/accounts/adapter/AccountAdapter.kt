@@ -3,7 +3,6 @@ package minerva.android.accounts.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.account_list_row.view.*
 import minerva.android.R
 import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
@@ -52,7 +51,12 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
 
     fun updateAssetBalances(accountAssetBalances: Map<String, List<AccountAsset>>) {
         activeAccounts.filter { !it.isPending }
-            .forEach { account -> accountAssetBalances[account.privateKey]?.let { account.accountAssets = it } }
+            .forEachIndexed { index, account ->
+                accountAssetBalances[account.privateKey]?.let {
+                    account.accountAssets = it
+                    notifyItemChanged(index)
+                }
+            }
     }
 
     fun setPending(index: Int, isPending: Boolean, areMainNetsEnabled: Boolean) {
@@ -75,7 +79,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         listener.onSendTransaction(rawAccounts.indexOf(account))
     }
 
-    override fun onSendAssetClicked(accountIndex: Int, assetIndex: Int) {
+    override fun onSendAssetTokenClicked(accountIndex: Int, assetIndex: Int) {
         listener.onSendAssetTransaction(accountIndex, assetIndex)
     }
 
