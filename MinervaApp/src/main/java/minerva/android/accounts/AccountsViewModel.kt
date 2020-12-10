@@ -33,8 +33,6 @@ class AccountsViewModel(
     private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
 
-    val walletConfigLiveData: LiveData<WalletConfig> = accountManager.walletConfigLiveData
-
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
@@ -68,8 +66,31 @@ class AccountsViewModel(
     private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
     val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
 
+    val walletConfigLiveData: LiveData<WalletConfig> = accountManager.walletConfigLiveData
+
+    private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
+    val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
+
     fun arePendingAccountsEmpty() =
         transactionRepository.getPendingAccounts().isEmpty()
+
+    val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
+
+    init {
+        launchDisposable {
+            accountManager.enableMainNetsFlowable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = { _shouldMainNetsShowWarringLiveData.value = Event(it) },
+                    onError = { _shouldMainNetsShowWarringLiveData.value = Event(false) })
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        accountManager.toggleMainNetsEnabled = null
+    }
 
     fun refreshBalances() =
         launchDisposable {
@@ -101,7 +122,7 @@ class AccountsViewModel(
 
     fun removeAccount(account: Account) {
         launchDisposable {
-            accountManager.removeAccount(account.index)
+            accountManager.removeAccount(account)
                 .observeOn(Schedulers.io())
                 .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
                 .subscribeOn(Schedulers.io())
@@ -112,7 +133,8 @@ class AccountsViewModel(
                         Timber.e("Removing account with index ${account.index} failure")
                         when (it) {
                             is BalanceIsNotEmptyThrowable -> _balanceIsNotEmptyErrorLiveData.value = Event(it)
-                            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
+                            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value =
+                                Event(it)
                             is IsNotSafeAccountMasterOwnerThrowable -> _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
                             is AutomaticBackupFailedThrowable -> _automaticBackupErrorLiveData.value = Event(it)
                             else -> _errorLiveData.value = Event(Throwable(it.message))
@@ -134,9 +156,23 @@ class AccountsViewModel(
         } else {
             launchDisposable {
                 smartContractRepository.createSafeAccount(account)
-                    .flatMapCompletable { smartContractAddress -> accountManager.createSafeAccount(account, smartContractAddress)}
+                    .flatMapCompletable { smartContractAddress ->
+                        accountManager.createSafeAccount(
+                            account,
+                            smartContractAddress
+                        )
+                    }
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(listOf(getWalletAction(SA_ADDED, accountManager.getSafeAccountName(account)))))
+                    .andThen(
+                        walletActionsRepository.saveWalletActions(
+                            listOf(
+                                getWalletAction(
+                                    SA_ADDED,
+                                    accountManager.getSafeAccountName(account)
+                                )
+                            )
+                        )
+                    )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe { _loadingLiveData.value = Event(true) }

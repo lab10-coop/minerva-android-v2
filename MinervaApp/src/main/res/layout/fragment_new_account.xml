@@ -19,6 +19,7 @@
             tools:ignore="PrivateResource">
 
             <TextView
+                android:id="@+id/networksHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/rubik_medium"

@@ -2,10 +2,12 @@ package minerva.android.walletmanager.manager.wallet
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.*
+import kotlin.properties.Delegates
 
 interface WalletConfigManager : Manager {
     val masterSeed: MasterSeed
@@ -30,4 +32,14 @@ interface WalletConfigManager : Manager {
     fun getAccount(accountIndex: Int): Account?
 
     fun findIdentityByDid(did: String): Identity?
+
+    fun saveIsMnemonicRemembered()
+    fun isMnemonicRemembered(): Boolean
+
+    val isBackupAllowed: Boolean
+    val isSynced: Boolean
+
+    val areMainNetworksEnabled: Boolean
+    var toggleMainNetsEnabled: Boolean?
+    val enableMainNetsFlowable: Flowable<Boolean>
 }

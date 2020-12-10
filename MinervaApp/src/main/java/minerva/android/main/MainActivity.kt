@@ -14,6 +14,7 @@ import minerva.android.accounts.AccountsFragment
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ACCOUNT_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivityForResult
 import minerva.android.extension.visibleOrGone
@@ -27,7 +28,7 @@ import minerva.android.main.base.BaseFragment
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.services.login.LoginScannerActivity
-import minerva.android.utils.DialogHandler
+import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.Account
@@ -36,6 +37,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
@@ -52,7 +54,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         prepareObservers()
         viewModel.restorePendingTransactions()
         if (!viewModel.isBackupAllowed) {
-            DialogHandler.showDialog(this, getString(R.string.error_header), getString(R.string.outdated_wallet_error_message))
+            AlertDialogHandler.showDialog(
+                this,
+                getString(R.string.error_header),
+                getString(R.string.outdated_wallet_error_message)
+            )
         }
     }
 
@@ -228,17 +234,21 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun handlePreparedTransaction(data: Intent?) {
         data?.apply {
             val index = getIntExtra(ACCOUNT_INDEX, Int.InvalidValue)
-            viewModel.subscribeToExecutedTransactions(index)
             if (index != Int.InvalidValue) {
+                viewModel.subscribeToExecutedTransactions(index)
                 (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
+            } else {
+                getStringExtra(TRANSACTION_MESSAGE)?.let {
+                    showFlashbar(getString(R.string.transaction_success_title), it)
+                }
             }
         }
 
     }
 
-    override fun showSendTransactionScreen(account: Account) {
+    override fun showSendTransactionScreen(index: Int) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
-            putExtra(ACCOUNT_INDEX, account.index)
+            putExtra(ACCOUNT_INDEX, index)
         }
     }
 

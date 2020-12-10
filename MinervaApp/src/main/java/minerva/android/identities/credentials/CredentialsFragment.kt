@@ -6,7 +6,7 @@ import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
-import minerva.android.utils.DialogHandler
+import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.Credential
 import minerva.android.widget.clubCard.ClubCard
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -28,7 +28,7 @@ class CredentialsFragment : MinervaPrimitiveListFragment() {
     }
 
     override fun onRemoveCredential(credential: Credential) =
-        DialogHandler.showRemoveDialog(
+        AlertDialogHandler.showRemoveDialog(
             requireContext(),
             getString(R.string.remove_credential_dialog_title),
             getString(R.string.remove_credential_dialog_message)

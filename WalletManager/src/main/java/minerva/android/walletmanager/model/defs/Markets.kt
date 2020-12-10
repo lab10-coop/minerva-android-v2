@@ -12,5 +12,7 @@ annotation class Markets {
         const val ETH_EUR = "ETHEUR"
         const val POA_ETH = "POAETH"
         const val POA_EUR = "POAEUR"
+        const val ETH_DAI = "ETHDAI"
+        const val DAI_EUR = "DAIEUR"
     }
 }

@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.manager.identity
+ package minerva.android.walletmanager.manager.identity
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
@@ -17,7 +17,7 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.walletmanager.model.defs.DerivationPath
+import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 import minerva.android.walletmanager.storage.LocalStorage
 

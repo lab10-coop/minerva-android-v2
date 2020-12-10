@@ -17,9 +17,10 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
-import minerva.android.utils.DialogHandler
+import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.wrapped.startAccountAddressWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -62,7 +63,7 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
         accountAdapter.stopPendingTransactions()
     }
 
-    override fun onSendTransaction(account: Account) = interactor.showSendTransactionScreen(account)
+    override fun onSendTransaction(index: Int) = interactor.showSendTransactionScreen(index)
 
     override fun onSendAssetTransaction(accountIndex: Int, assetIndex: Int) {
         interactor.showSendAssetTransactionScreen(accountIndex, assetIndex)
@@ -71,14 +72,14 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
     override fun onAccountRemove(account: Account) =
-        DialogHandler.showRemoveDialog(
+        AlertDialogHandler.showRemoveDialog(
             requireContext(),
             account.name,
             getString(R.string.remove_account_dialog_message)
         ) { viewModel.removeAccount(account) }
 
-    override fun onShowAddress(account: Account, position: Int) {
-        startAccountAddressWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
+    override fun onShowAddress(account: Account, index: Int) {
+        startAccountAddressWrappedActivity(requireContext(), account.name, index, account.network.short, account.isSafeAccount)
     }
 
     override fun onShowSafeAccountSettings(account: Account, position: Int) {
@@ -90,7 +91,7 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
     }
 
     fun setPendingAccount(index: Int, pending: Boolean) {
-        accountAdapter.setPending(index, pending)
+        accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)
     }
 
     private fun setupRecycleView(view: View) {
@@ -117,9 +118,16 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
 
     private fun setupLiveData() {
         viewModel.apply {
-            walletConfigLiveData.observe(viewLifecycleOwner, Observer {
-                noDataMessage.visibleOrGone(it.hasActiveAccount)
-                accountAdapter.updateList(it.accounts)
+            networksHeader.text = getHeader(areMainNetsEnabled)
+            shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
+                if (it) {
+                    FundsAtRiskDialog(requireContext()).show()
+                }
+            })
+
+            walletConfigLiveData.observe(viewLifecycleOwner, Observer { walletConfig ->
+                noDataMessage.visibleOrGone(walletConfig.hasActiveAccount)
+                accountAdapter.updateList(walletConfig.accounts, areMainNetsEnabled)
             })
             balanceLiveData.observe(viewLifecycleOwner, Observer {
                 accountAdapter.updateBalances(it)

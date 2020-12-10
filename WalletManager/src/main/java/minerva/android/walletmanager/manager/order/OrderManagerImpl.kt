@@ -13,6 +13,9 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletConfigManager.walletConfigLiveData
 
+    override val areMainNetsEnabled
+        get() = walletConfigManager.areMainNetworksEnabled
+
     override fun updateList(type: Int, newOrderList: List<MinervaPrimitive>): Completable {
         getWalletConfig()?.let {
             return when (type) {
@@ -47,7 +50,7 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
         walletConfigLiveData.value?.let { config ->
             return when (type) {
                 WalletActionType.IDENTITY -> config.identities.filter { !it.isDeleted }.size > ONE_ELEMENT
-                WalletActionType.ACCOUNT -> config.accounts.filter { !it.isDeleted }.size > ONE_ELEMENT
+                WalletActionType.ACCOUNT -> config.accounts.filter { !it.isDeleted && it.network.testNet != areMainNetsEnabled }.size > ONE_ELEMENT
                 WalletActionType.SERVICE -> config.services.filter { !it.isDeleted }.size > ONE_ELEMENT
                 WalletActionType.CREDENTIAL -> config.credentials.filter { !it.isDeleted }.size > ONE_ELEMENT
                 else -> false

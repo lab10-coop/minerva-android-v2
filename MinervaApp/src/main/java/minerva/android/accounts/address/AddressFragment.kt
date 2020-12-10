@@ -32,7 +32,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class AddressFragment : Fragment() {
 
     private val viewModel: AddressViewModel by viewModel()
-    private val position: Int by lazy {
+    private val index: Int by lazy {
         arguments?.getInt(INDEX) ?: Int.InvalidIndex
     }
     private val fragmentType: WrappedFragmentType by lazy {
@@ -112,7 +112,7 @@ class AddressFragment : Fragment() {
     private fun initializeFragment() {
         with(viewModel) {
             loadMinervaPrimitiveLiveData.observe(this@AddressFragment, EventObserver { initializeView(it) })
-            loadMinervaPrimitive(fragmentType, position)
+            loadMinervaPrimitive(fragmentType, index)
         }
     }
 
