@@ -5,10 +5,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.NO_DATA
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.Recipient
-import timber.log.Timber
 
 class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : LocalStorage {
 

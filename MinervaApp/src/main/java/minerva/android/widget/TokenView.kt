@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import minerva.android.R
-import minerva.android.databinding.TokenViewLayoutBinding
+import minerva.android.databinding.TokenViewBinding
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.utils.BalanceUtils.getCryptoBalance
 import minerva.android.utils.BalanceUtils.getFiatBalance
@@ -15,19 +15,19 @@ import java.math.BigDecimal
 
 class TokenView(context: Context, attributeSet: AttributeSet? = null) : RelativeLayout(context, attributeSet) {
 
-    private var binding: TokenViewLayoutBinding = TokenViewLayoutBinding.bind(
-        inflate(context, R.layout.token_view_layout, this)
+    private var binding: TokenViewBinding = TokenViewBinding.bind(
+        inflate(context, R.layout.token_view, this)
     )
 
     fun initView(
         account: Account,
         callback: TokenViewCallback,
-        tokenIndex: Int = Int.InvalidIndex,
-        logoRes: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_default_token)
+        assetIndex: Int = Int.InvalidIndex,
+        logo: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_default_token)
     ) {
-        prepareView(account, tokenIndex, logoRes)
-        prepareListeners(callback, account, tokenIndex)
-        getTokensValues(account, tokenIndex).let { (crypto, fiat) ->
+        prepareView(account, assetIndex, logo)
+        prepareListeners(callback, account, assetIndex)
+        getTokensValues(account, assetIndex).let { (crypto, fiat) ->
             with(binding.amountView) {
                 setCrypto(getCryptoBalance(crypto))
                 setFiat(getFiatBalance(fiat))
@@ -35,8 +35,8 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         }
     }
 
-    private fun getTokensValues(account: Account, tokenIndex: Int): Pair<BigDecimal, BigDecimal> =
-        if (tokenIndex != Int.InvalidIndex) Pair(account.accountAssets[tokenIndex].balance, WRONG_CURRENCY_VALUE)
+    private fun getTokensValues(account: Account, assetIndex: Int): Pair<BigDecimal, BigDecimal> =
+        if (assetIndex != Int.InvalidIndex) Pair(account.accountAssets[assetIndex].balance, WRONG_CURRENCY_VALUE)
         else Pair(account.cryptoBalance, prepareFiatBalance(account))
 
     private fun prepareFiatBalance(account: Account) =

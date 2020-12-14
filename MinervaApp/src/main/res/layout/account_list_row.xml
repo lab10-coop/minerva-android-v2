@@ -86,13 +86,13 @@
             android:id="@+id/container_background"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/lightGray"
             app:layout_constraintBottom_toBottomOf="@id/divider_bottom"
+            android:background="@color/lightGray"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/divider_top" />
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

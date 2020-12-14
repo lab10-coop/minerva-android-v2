@@ -20,9 +20,11 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.TokenView
+import minerva.android.widget.TokensAndCollectiblesView
 import minerva.android.widget.repository.getNetworkIcon
 
-class AccountViewHolder(private val view: View, private val parent: ViewGroup) : TokenView.TokenViewCallback,
+@SuppressLint("CustomView")
+class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
     RecyclerView.ViewHolder(view) {
 
     private var binding = AccountListRowBinding.bind(view)
@@ -65,7 +67,8 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
                 pendingMask.visibleOrGone(isPending)
                 mainIcon.setImageDrawable(getNetworkIcon(context, network.short, isSafeAccount))
                 accountName.text = name
-                mainTokenView.initView(account, this@AccountViewHolder, logoRes = getNetworkIcon(context, network.short, isSafeAccount))
+                //TODO add correct icon here: logoRes = getNetworkIcon(context, network.short, isSafeAccount)
+                mainTokenView.initView(account, this@AccountViewHolder)
             }
         }
     }
@@ -115,11 +118,9 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
 
     private fun View.prepareAssets(account: Account) {
         binding.apply {
-            container.removeAllViews()
-            account.accountAssets.forEachIndexed { index, _ ->
-                container.addView(TokenView(context).apply {
-                    initView(account, this@AccountViewHolder, index)
-                })
+            with(container) {
+                removeAllViews()
+                addView(TokensAndCollectiblesView(viewGroup, account, this@AccountViewHolder, true))
             }
             account.accountAssets.isNotEmpty().let { visible ->
                 setOnItemClickListener(visible)
@@ -132,7 +133,7 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     }
 
     private fun open() {
-        TransitionManager.beginDelayedTransition(parent)
+        TransitionManager.beginDelayedTransition(viewGroup)
         binding.apply {
             arrow.rotate180()
             container.visible()
@@ -140,8 +141,8 @@ class AccountViewHolder(private val view: View, private val parent: ViewGroup) :
     }
 
     private fun close() {
-        TransitionManager.endTransitions(parent)
-        TransitionManager.beginDelayedTransition(parent)
+        TransitionManager.endTransitions(viewGroup)
+        TransitionManager.beginDelayedTransition(viewGroup)
         binding.apply {
             arrow.rotate180back()
             container.gone()

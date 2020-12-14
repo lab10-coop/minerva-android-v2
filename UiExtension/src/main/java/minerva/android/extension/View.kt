@@ -27,6 +27,11 @@ fun View.visibleOrInvisible(isVisible: Boolean) {
     else invisible()
 }
 
+fun View.toggleVisibleOrGone() {
+    visibility = if (visibility != View.VISIBLE) View.VISIBLE
+    else View.GONE
+}
+
 fun View.margin(left: Float? = null, top: Float? = null, right: Float? = null, bottom: Float? = null) {
     layoutParams<ViewGroup.MarginLayoutParams> {
         left?.run { leftMargin = dpToPx(this) }
