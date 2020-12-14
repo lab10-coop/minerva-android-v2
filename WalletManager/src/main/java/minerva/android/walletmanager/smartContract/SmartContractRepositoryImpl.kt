@@ -24,11 +24,11 @@ class SmartContractRepositoryImpl(
 
     override fun getSafeAccountOwners(contractAddress: String, network: String, privateKey: String, account: Account): Single<List<String>> =
         blockchainSafeAccountRepository.getGnosisSafeOwners(contractAddress, network, privateKey)
-            .flatMap { walletConfigManager.updateSafeAccountOwners(account.index, it) }
+            .flatMap { walletConfigManager.updateSafeAccountOwners(account.id, it) }
 
     override fun addSafeAccountOwner(owner: String, address: String, network: String, privateKey: String, account: Account): Single<List<String>> =
         blockchainSafeAccountRepository.addSafeAccountOwner(owner, address, network, privateKey)
-            .andThen(walletConfigManager.updateSafeAccountOwners(account.index, prepareAddedOwnerList(owner, account)))
+            .andThen(walletConfigManager.updateSafeAccountOwners(account.id, prepareAddedOwnerList(owner, account)))
 
     private fun prepareAddedOwnerList(owner: String, account: Account): List<String> {
         account.owners?.toMutableList()?.let {
@@ -43,7 +43,7 @@ class SmartContractRepositoryImpl(
         network: String, privateKey: String, account: Account
     ): Single<List<String>> =
         blockchainSafeAccountRepository.removeSafeAccountOwner(removeAddress, address, network, privateKey)
-            .andThen(walletConfigManager.updateSafeAccountOwners(account.index, prepareRemovedOwnerList(removeAddress, account)))
+            .andThen(walletConfigManager.updateSafeAccountOwners(account.id, prepareRemovedOwnerList(removeAddress, account)))
 
     private fun prepareRemovedOwnerList(removeAddress: String, account: Account): List<String> {
         account.owners?.toMutableList()?.let {

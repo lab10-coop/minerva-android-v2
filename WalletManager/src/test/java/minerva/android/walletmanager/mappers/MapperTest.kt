@@ -111,7 +111,7 @@ class MapperTest {
 
         val valueResponse = AccountToAccountPayloadMapper.map(value)
 
-        value.index shouldBeEqualTo valueResponse.index
+        value.id shouldBeEqualTo valueResponse.index
         value.name shouldBeEqualTo valueResponse.name
         value.network shouldBeEqualTo value.network
     }
@@ -185,7 +185,7 @@ class MapperTest {
             NetworkManager.initialize(networks)
             val value = AccountPayloadToAccountMapper.map(it)
 
-            value.index shouldBeEqualTo it.index
+            value.id shouldBeEqualTo it.index
             value.name shouldBeEqualTo it.name
             value.network shouldBeEqualTo value.network
         }

@@ -179,7 +179,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
         whenever(accountManager.createRegularAccount(any())).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.createSafeAccount(Account(index = 1, cryptoBalance = BigDecimal.ONE))
+        viewModel.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE))
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -189,7 +189,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `create safe account when balance is 0`() {
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.just("address"))
         viewModel.noFundsLiveData.observeForever(noFundsObserver)
-        viewModel.createSafeAccount(Account(index = 1, cryptoBalance = BigDecimal.ZERO))
+        viewModel.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ZERO))
         noFundsCaptor.run {
             verify(noFundsObserver).onChanged(capture())
         }

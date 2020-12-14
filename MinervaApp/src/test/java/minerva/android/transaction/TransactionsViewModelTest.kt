@@ -89,7 +89,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `send safe account main transaction test success`() {
         viewModel.account = Account(
-            index = 0,
+            id = 0,
             owners = listOf("tom", "beata", "bogdan"),
             publicKey = "12",
             privateKey = "12",
@@ -116,7 +116,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account main transaction test error`() {
         val error = Throwable()
         viewModel.account = Account(
-            index = 0,
+            id = 0,
             owners = listOf("tom", "beata", "bogdan"),
             publicKey = "12",
             privateKey = "12",
@@ -139,7 +139,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send asset main transaction test success`() {
         viewModel.apply {
             account = Account(
-                index = 0,
+                id = 0,
                 publicKey = "12",
                 privateKey = "12",
                 address = "address",
@@ -164,7 +164,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         viewModel.apply {
             account = Account(
-                index = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
+                id = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
                 accountAssets = listOf(AccountAsset(Asset("name")))
             )
             assetIndex = 0
@@ -181,7 +181,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `send safe account asset transaction test success`() {
         viewModel.account = Account(
-            index = 0,
+            id = 0,
             accountAssets = listOf(AccountAsset(Asset("name"))),
             publicKey = "12",
             privateKey = "12",
@@ -204,7 +204,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account asset transaction test error`() {
         val error = Throwable()
         viewModel.account = Account(
-            index = 0,
+            id = 0,
             accountAssets = listOf(AccountAsset(Asset("name"))),
             publicKey = "12",
             privateKey = "12",
@@ -225,7 +225,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `calculate transaction cost test`() {
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal(4))
         val result = viewModel.calculateTransactionCost(BigDecimal(2), BigInteger.valueOf(2))
-        result shouldBeEqualTo BigDecimal(4).toPlainString()
+        result shouldBeEqualTo BigDecimal(4)
     }
 
     @Test

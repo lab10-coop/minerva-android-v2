@@ -30,6 +30,7 @@ import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.properties.Delegates
 
 class TransactionsFragment : Fragment() {
 
@@ -38,13 +39,26 @@ class TransactionsFragment : Fragment() {
     private lateinit var listener: TransactionListener
     private val viewModel: TransactionsViewModel by sharedViewModel()
     private var validationDisposable: Disposable? = null
+    private var allPressed: Boolean = false
+
+    private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
+        binding.transactionCostAmount.text =
+            getString(R.string.transaction_cost_amount, newValue.toPlainString(), viewModel.token)
+        if (allPressed && oldValue != newValue) {
+            val recalculatedAmount = viewModel.recalculateAmount
+            if (recalculatedAmount <= BigDecimal.ZERO) {
+                binding.amount.setText(BigDecimal.ZERO.toPlainString())
+            } else {
+                binding.amount.setText(recalculatedAmount.toPlainString())
+            }
+        }
+    }
 
     private lateinit var binding: FragmentTransactionsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_transactions, container, false).let {
-            binding = FragmentTransactionsBinding.bind(it)
-            it
+        inflater.inflate(R.layout.fragment_transactions, container, false).apply {
+            binding = FragmentTransactionsBinding.bind(this)
         }
 
 
@@ -90,18 +104,15 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun handleTransactionCosts(it: TransactionCost) {
-        binding.apply {
+        with(binding) {
             transactionCostLayout.isEnabled = true
             arrow.visible()
+        }
 
-            if (getAmount() == viewModel.account.cryptoBalance && getAmount() != BigDecimal.ZERO) {
-                amount.setText(viewModel.recalculateAmount(getAmount(), it.cost))
-            }
-
-            if (shouldSetTransactionCosts(it.cost.toString())) {
-                handleGasLimitDefaultValue(it)
-                setTransactionsCosts(it)
-            }
+        handleGasLimitDefaultValue(it)
+        if (shouldOverrideTransactionCost) {
+            txCostObservable = it.cost
+            setTransactionsCosts(it)
         }
     }
 
@@ -118,8 +129,6 @@ class TransactionsFragment : Fragment() {
         }
     }
 
-    private fun shouldSetTransactionCosts(it: String) = binding.transactionCostAmount.text.toString() != it
-
     private fun handleTransactionStatus(status: Pair<String, Int>) {
         when (status.second) {
             WalletActionStatus.SENT -> listener.onTransactionAccepted(status.first)
@@ -128,13 +137,16 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun prepareTextListeners() {
-        binding.apply {
+        with(binding) {
             validationDisposable = Observable.combineLatest(
-                amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.getBalance()) },
-                receiver.getValidationObservable(receiverInputLayout) { Validator.validateAddress(it, viewModel.isAddressValid(it)) },
-                BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid ->
-                    isAmountValid && isAddressValid
-                })
+                amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.cryptoBalance) },
+                receiver.getValidationObservable(receiverInputLayout) {
+                    Validator.validateAddress(
+                        it,
+                        viewModel.isAddressValid(it)
+                    )
+                },
+                BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid -> isAmountValid && isAddressValid })
                 .map {
                     if (it) {
                         viewModel.getTransactionCosts(receiver.text.toString(), getAmount())
@@ -197,13 +209,11 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun setTransactionsCosts(transactionCost: TransactionCost) {
-        binding.apply {
+        with(binding) {
             transactionCostLayout.isEnabled = true
             transactionCost.let {
                 gasPriceEditText.setText(it.gasPrice.toPlainString())
                 gasLimitEditText.setText(it.gasLimit.toString())
-                transactionCostAmount.text =
-                    getString(R.string.transaction_cost_amount, it.cost.toPlainString(), viewModel.token)
             }
             setGasPriceOnTextChangedListener()
             setGasLimitOnTextChangedListener()
@@ -237,15 +247,12 @@ class TransactionsFragment : Fragment() {
     }
 
     private fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger) {
-        binding.transactionCostAmount.text = getString(
-            R.string.transaction_cost_amount,
-            viewModel.calculateTransactionCost(gasPrice, gasLimit),
-            viewModel.token
-        )
+        txCostObservable = viewModel.calculateTransactionCost(gasPrice, gasLimit)
     }
 
     private fun setAddressScannerListener() {
         binding.amount.onRightDrawableClicked {
+            allPressed = true
             it.setText(viewModel.getAllAvailableFunds())
         }
     }
@@ -255,6 +262,9 @@ class TransactionsFragment : Fragment() {
 
     private fun clearTransactionCost() {
         binding.transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
+        viewModel.transactionCost = BigDecimal.ZERO
+        allPressed = false
+        shouldOverrideTransactionCost = true
     }
 
     override fun onAttach(context: Context) {

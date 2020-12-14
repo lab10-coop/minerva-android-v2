@@ -52,7 +52,7 @@ class AccountManagerTest : RxTest() {
         val test = repository.createRegularAccount(Network()).test()
         test.assertNoErrors()
         repository.loadAccount(1).apply {
-            index shouldBeEqualTo 4
+            id shouldBeEqualTo 4
             publicKey shouldBeEqualTo "publicKey2"
             privateKey shouldBeEqualTo "privateKey2"
             address shouldBeEqualTo "address"
@@ -69,7 +69,7 @@ class AccountManagerTest : RxTest() {
         val test = repository.createRegularAccount(Network()).test()
         test.assertError(error)
         repository.loadAccount(10).apply {
-            index shouldBeEqualTo -1
+            id shouldBeEqualTo -1
             privateKey shouldBeEqualTo String.Empty
             publicKey shouldBeEqualTo String.Empty
             address shouldBeEqualTo String.Empty
@@ -87,9 +87,9 @@ class AccountManagerTest : RxTest() {
         repository.removeAccount(account).test()
         val removedValue = repository.loadAccount(0)
         val notRemovedValue = repository.loadAccount(1)
-        removedValue.index shouldBeEqualTo 2
+        removedValue.id shouldBeEqualTo 2
         removedValue.isDeleted shouldBeEqualTo false
-        notRemovedValue.index shouldBeEqualTo 4
+        notRemovedValue.id shouldBeEqualTo 4
         notRemovedValue.isDeleted shouldBeEqualTo false
     }
 
@@ -105,9 +105,9 @@ class AccountManagerTest : RxTest() {
         repository.removeAccount(account).test()
         val removedValue = repository.loadAccount(0)
         val notRemovedValue = repository.loadAccount(1)
-        removedValue.index shouldBeEqualTo 2
+        removedValue.id shouldBeEqualTo 2
         removedValue.isDeleted shouldBeEqualTo false
-        notRemovedValue.index shouldBeEqualTo 4
+        notRemovedValue.id shouldBeEqualTo 4
         notRemovedValue.isDeleted shouldBeEqualTo false
     }
 
@@ -123,12 +123,12 @@ class AccountManagerTest : RxTest() {
         repository.removeAccount(account).test()
         repository.removeAccount(account2).test()
         repository.loadAccount(2).apply {
-            index shouldBeEqualTo 5
+            id shouldBeEqualTo 5
             publicKey shouldBeEqualTo "publicKey3"
             isDeleted shouldBeEqualTo false
         }
         repository.loadAccount(3).apply {
-            index shouldBeEqualTo 6
+            id shouldBeEqualTo 6
             publicKey shouldBeEqualTo "publicKey4"
             isDeleted shouldBeEqualTo false
         }
@@ -147,12 +147,12 @@ class AccountManagerTest : RxTest() {
         repository.removeAccount(account).test()
         repository.removeAccount(account2).test()
         repository.loadAccount(2).apply {
-            index shouldBeEqualTo 5
+            id shouldBeEqualTo 5
             publicKey shouldBeEqualTo "publicKey3"
             isDeleted shouldBeEqualTo false
         }
         repository.loadAccount(3).apply {
-            index shouldBeEqualTo 6
+            id shouldBeEqualTo 6
             publicKey shouldBeEqualTo "publicKey4"
             isDeleted shouldBeEqualTo false
         }

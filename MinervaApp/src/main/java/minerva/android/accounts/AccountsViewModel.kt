@@ -132,7 +132,7 @@ class AccountsViewModel(
                 .subscribeBy(
                     onComplete = { _accountRemovedLiveData.value = Event(Unit) },
                     onError = {
-                        Timber.e("Removing account with index ${account.index} failure")
+                        Timber.e("Removing account with index ${account.id} failure")
                         when (it) {
                             is BalanceIsNotEmptyThrowable -> _balanceIsNotEmptyErrorLiveData.value = Event(it)
                             is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value =

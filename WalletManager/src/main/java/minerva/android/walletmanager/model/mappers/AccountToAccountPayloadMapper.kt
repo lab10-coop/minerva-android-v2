@@ -7,7 +7,7 @@ import minerva.android.walletmanager.model.Account
 object AccountToAccountPayloadMapper : Mapper<Account, AccountPayload> {
     override fun map(input: Account): AccountPayload =
         AccountPayload(
-            input.index,
+            input.id,
             input.name,
             input.network.short,
             input.isDeleted,

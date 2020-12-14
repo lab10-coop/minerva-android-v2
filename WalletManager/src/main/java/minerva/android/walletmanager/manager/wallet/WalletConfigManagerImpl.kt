@@ -168,7 +168,7 @@ class WalletConfigManagerImpl(
 
     override fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>> {
         getWalletConfig()?.let { config ->
-            config.accounts.forEach { if (it.index == position) it.owners = owners }
+            config.accounts.forEach { if (it.id == position) it.owners = owners }
             return updateWalletConfig(config.copy(version = config.updateVersion, accounts = config.accounts))
                 .andThen(Single.just(owners))
         }
