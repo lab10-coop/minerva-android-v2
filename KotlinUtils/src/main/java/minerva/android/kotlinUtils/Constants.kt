@@ -15,6 +15,9 @@ val String.Companion.EmptyBalance: String
 val Int.Companion.InvalidId: Int
     get() = -1
 
+val Int.Companion.NO_PADDING: Int
+    get() = 0
+
 val Int.Companion.InvalidIndex: Int
     get() = -1
 

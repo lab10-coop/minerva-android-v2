@@ -236,4 +236,6 @@
     <string name="experimental">Experimental!</string>
     <string name="i_understand">I understand</string>
     <string name="refresh_balance_to_check_transaction_status">Your transaction was sent to the network and you have to refresh the screen to see the changed balance, once it was processed.</string>
+    <string name="collectibles">Collectibles</string>
+    <string name="tokens">Tokens</string>
 </resources>
