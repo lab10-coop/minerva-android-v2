@@ -76,7 +76,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         if (viewModel.wssUri == String.Empty) {
             Int.InvalidIndex
         } else {
-            viewModel.account.index
+            viewModel.account.id
         }
 
     override fun onError(message: String) {

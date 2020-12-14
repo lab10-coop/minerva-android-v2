@@ -237,9 +237,9 @@ class TransactionRepositoryTest {
 
     @Test
     fun `get value test`() {
-        whenever(walletConfigManager.getAccount(any())) doReturn Account(index = 2)
+        whenever(walletConfigManager.getAccount(any())) doReturn Account(id = 2)
         val result = repository.getAccount(2)
-        assertEquals(result?.index, 2)
+        assertEquals(result?.id, 2)
     }
 
     @Test

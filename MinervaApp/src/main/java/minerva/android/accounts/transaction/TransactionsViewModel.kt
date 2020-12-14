@@ -107,12 +107,6 @@ class TransactionsViewModel(
         }
     }
 
-    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String =
-        transactionRepository.calculateTransactionCost(gasPrice, gasLimit).let {
-            transactionCost = it
-            transactionCost.toPlainString()
-        }
-
 
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         when {
@@ -141,7 +135,8 @@ class TransactionsViewModel(
                                 network.short,
                                 it,
                                 account.accountAssets[assetIndex].asset.address
-                            ).toSingleDefault(it)
+                            )
+                                .toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
@@ -219,7 +214,7 @@ class TransactionsViewModel(
             resolveENS(receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it
-                    transactionRepository.transferNativeCoin(network.short, account.index, it).toSingleDefault(it)
+                    transactionRepository.transferNativeCoin(network.short, account.id, it).toSingleDefault(it)
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
@@ -254,24 +249,26 @@ class TransactionsViewModel(
         }
     }
 
-    fun getBalance(): BigDecimal =
-        if (assetIndex == Int.InvalidIndex) account.cryptoBalance else account.accountAssets[assetIndex].balance
+    val cryptoBalance: BigDecimal
+        get() = if (assetIndex == Int.InvalidIndex) account.cryptoBalance else account.accountAssets[assetIndex].balance
 
     fun getAllAvailableFunds(): String {
         if (assetIndex != Int.InvalidIndex) return account.accountAssets[assetIndex].balance.toPlainString()
         if (account.isSafeAccount) return account.cryptoBalance.toPlainString()
 
-        account.cryptoBalance.minus(transactionCost).apply {
-            return if (this < BigDecimal.ZERO) {
-                String.EmptyBalance
-            } else {
-                this.toPlainString()
-            }
+        val allAvailableFunds = account.cryptoBalance.minus(transactionCost)
+        return if (allAvailableFunds < BigDecimal.ZERO) {
+            String.EmptyBalance
+        } else {
+            allAvailableFunds.toPlainString()
         }
     }
 
-    fun recalculateAmount(amount: BigDecimal, cost: BigDecimal): String =
-        amount.subtract(cost).toPlainString()
+    val recalculateAmount: BigDecimal
+        get() = cryptoBalance.minus(transactionCost)
+
+    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
+        transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
 
     fun prepareCurrency() =
         if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.nameShort else account.network.token
@@ -297,8 +294,12 @@ class TransactionsViewModel(
                 .subscribeBy(
                     onComplete = {
                         Timber.e(message)
-                        _sendTransactionLiveData.value =
-                            Event(Pair(message ?: "${transaction.amount} ${account.network.token}", FAILED))
+                        _sendTransactionLiveData.value = Event(
+                            Pair(
+                                message
+                                    ?: "${transaction.amount} ${account.network.token}", FAILED
+                            )
+                        )
                     },
                     onError = {
                         Timber.e("Save wallet action error $it")

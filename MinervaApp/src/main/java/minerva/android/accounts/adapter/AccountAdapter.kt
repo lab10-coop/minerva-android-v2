@@ -61,7 +61,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
 
     fun setPending(index: Int, isPending: Boolean, areMainNetsEnabled: Boolean) {
         rawAccounts.forEachIndexed { position, account ->
-            if (account.index == index && account.network.testNet != areMainNetsEnabled) {
+            if (account.id == index && account.network.testNet != areMainNetsEnabled) {
                 account.isPending = isPending
                 notifyItemChanged(position)
             }
