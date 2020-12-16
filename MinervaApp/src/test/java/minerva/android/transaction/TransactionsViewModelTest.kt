@@ -5,7 +5,7 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
-import minerva.android.accounts.transaction.TransactionsViewModel
+import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -24,7 +24,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val smartContractRepository: SmartContractRepository = mock()
     private val transactionRepository: TransactionRepository = mock()
-    private val viewModel = TransactionsViewModel(walletActionsRepository, smartContractRepository, transactionRepository)
+    private val viewModel = TransactionViewModel(walletActionsRepository, smartContractRepository, transactionRepository)
 
     private val sendTransactionObserver: Observer<Event<Pair<String, Int>>> = mock()
     private val sendTransactionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()

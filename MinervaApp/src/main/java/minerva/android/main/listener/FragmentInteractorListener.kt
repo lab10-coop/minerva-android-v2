@@ -1,10 +1,9 @@
 package minerva.android.main.listener
 
-import minerva.android.walletmanager.model.Account
+import minerva.android.kotlinUtils.InvalidIndex
 
 interface FragmentInteractorListener {
-    fun showSendTransactionScreen(index:Int)
-    fun showSendAssetTransactionScreen(accountIndex: Int, assetIndex: Int)
+    fun showTransactionScreen(index: Int, asset: Int = Int.InvalidIndex)
     fun shouldShowLoadingScreen(isLoading: Boolean)
     fun changeActionBarColor(color: Int)
     fun removeSettingsBadgeIcon()

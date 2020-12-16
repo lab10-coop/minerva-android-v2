@@ -17,9 +17,9 @@ import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import minerva.android.R
 import minerva.android.accounts.listener.TransactionListener
-import minerva.android.accounts.transaction.TransactionsViewModel
 import minerva.android.accounts.transaction.fragment.adapter.RecipientAdapter
-import minerva.android.databinding.FragmentTransactionsBinding
+import minerva.android.accounts.transaction.fragment.adapter.TokenAdapter
+import minerva.android.databinding.FragmentTransactionSendBinding
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
@@ -32,14 +32,18 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.properties.Delegates
 
-class TransactionsFragment : Fragment() {
+class TransactionSendFragment : Fragment() {
 
     private var areTransactionCostsOpen = false
     private var shouldOverrideTransactionCost = true
     private lateinit var listener: TransactionListener
-    private val viewModel: TransactionsViewModel by sharedViewModel()
+    private val viewModel: TransactionViewModel by sharedViewModel()
     private var validationDisposable: Disposable? = null
     private var allPressed: Boolean = false
+    private lateinit var binding: FragmentTransactionSendBinding
+
+    private val spinnerPosition
+        get() = viewModel.assetIndex + 1
 
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
         binding.transactionCostAmount.text =
@@ -54,16 +58,15 @@ class TransactionsFragment : Fragment() {
         }
     }
 
-    private lateinit var binding: FragmentTransactionsBinding
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_transactions, container, false).apply {
-            binding = FragmentTransactionsBinding.bind(this)
+        inflater.inflate(R.layout.fragment_transaction_send, container, false).apply {
+            binding = FragmentTransactionSendBinding.bind(this)
         }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        prepareTokenDropdown()
         setupTexts()
         setupListeners()
         binding.transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
@@ -163,12 +166,30 @@ class TransactionsFragment : Fragment() {
                             isGasLimitValid && isGasPriceValid && it
                         }
                     )
-
                 }
                 .subscribeBy(
                     onNext = { sendButton.isEnabled = it },
                     onError = { sendButton.isEnabled = false }
                 )
+        }
+    }
+
+    private fun prepareTokenDropdown() {
+        binding.apply {
+            tokenSpinner.apply {
+                adapter = TokenAdapter(context, R.layout.spinner_token, viewModel.tokensList)
+                    .apply { setDropDownViewResource(R.layout.spinner_token) }
+                setSelection(spinnerPosition, false)
+                setPopupBackgroundResource(R.drawable.rounded_white_background)
+                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                        viewModel.assetIndex = position - 1
+                        setupTexts()
+                    }
+
+                    override fun onNothingSelected(adapterView: AdapterView<*>?) = setSelection(spinnerPosition, true)
+                }
+            }
         }
     }
 
@@ -339,7 +360,7 @@ class TransactionsFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() = TransactionsFragment()
+        fun newInstance() = TransactionSendFragment()
 
         private const val EMPTY_VALUE = "-.--"
         private const val DROP_DOWN_VERTICAL_OFFSET = 8
