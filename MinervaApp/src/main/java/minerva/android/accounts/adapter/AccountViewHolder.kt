@@ -118,11 +118,13 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.prepareAssets(account: Account) {
         binding.apply {
-            with(container) {
-                removeAllViews()
-                addView(TokensAndCollectiblesView(viewGroup, account, this@AccountViewHolder, true))
-            }
             account.accountAssets.isNotEmpty().let { visible ->
+                with(container) {
+                    removeAllViews()
+                    addView(TokensAndCollectiblesView(viewGroup, account, this@AccountViewHolder, true).apply {
+                        visibleOrGone(visible)
+                    })
+                }
                 setOnItemClickListener(visible)
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)

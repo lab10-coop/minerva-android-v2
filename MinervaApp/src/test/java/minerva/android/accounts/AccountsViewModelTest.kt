@@ -7,12 +7,13 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.enum.ErrorCode
+import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
-import minerva.android.walletmanager.model.AccountAsset
-import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository

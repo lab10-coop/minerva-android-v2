@@ -1,4 +1,4 @@
-package minerva.android.accounts.transaction
+package minerva.android.accounts.transaction.fragment
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +8,7 @@ import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.accounts.transaction.model.TokenSpinnerElement
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
@@ -28,7 +29,7 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class TransactionsViewModel(
+class TransactionViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository
@@ -64,6 +65,15 @@ class TransactionsViewModel(
     val transactionCostLiveData: LiveData<Event<TransactionCost>> get() = _transactionCostLiveData
 
     val wssUri get() = account.network.wsRpc
+
+    //TODO add logos for tokens
+    val tokensList: List<TokenSpinnerElement>
+        get() = mutableListOf<TokenSpinnerElement>().apply {
+            add(TokenSpinnerElement(account.network.full))
+            account.accountAssets.forEach {
+                add(TokenSpinnerElement(it.asset.name))
+            }
+        }
 
     private val isMainTransaction
         get() = assetIndex == Int.InvalidIndex && !account.isSafeAccount
@@ -268,7 +278,7 @@ class TransactionsViewModel(
 
 
     fun prepareCurrency() =
-        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.nameShort else account.network.token
+        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.shortName else account.network.token
 
     private fun getAccountsWalletAction(transaction: Transaction, network: String, status: Int): WalletAction =
         WalletAction(

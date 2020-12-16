@@ -1,4 +1,4 @@
-package minerva.android.accounts
+package minerva.android.accounts.transaction.fragment
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
