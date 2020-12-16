@@ -4,29 +4,34 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager2.widget.ViewPager2
 import minerva.android.R
-import minerva.android.extension.addFragment
-import minerva.android.extension.getCurrentFragment
-import minerva.android.extension.replaceFragment
-import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.accounts.address.AddressFragment
 import minerva.android.accounts.listener.TransactionListener
-import minerva.android.accounts.transaction.TransactionsViewModel
-import minerva.android.accounts.transaction.fragment.TransactionsFragment
+import minerva.android.accounts.transaction.fragment.TransactionSendFragment
+import minerva.android.accounts.transaction.fragment.TransactionViewModel
+import minerva.android.accounts.transaction.fragment.adapter.TransactionPagerAdapter
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
+import minerva.android.databinding.ActivityTransactionBinding
+import minerva.android.extension.getCurrentFragment
+import minerva.android.extension.onTabSelected
+import minerva.android.extension.replaceFragment
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.widget.MinervaFlashbar
-import minerva.android.widget.repository.getNetworkIcon
+import minerva.android.wrapped.WrappedFragmentType
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TransactionActivity : AppCompatActivity(), TransactionListener {
 
-    private val viewModel: TransactionsViewModel by viewModel()
+    private val viewModel: TransactionViewModel by viewModel()
+    private lateinit var binding: ActivityTransactionBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_transaction)
+        binding = ActivityTransactionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         viewModel.getAccount(
             intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex),
             intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex)
@@ -36,7 +41,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     private fun initView() {
         prepareActionBar()
-        addFragment(R.id.container, TransactionsFragment.newInstance())
+        setupViewPager()
     }
 
     override fun onBackPressed() {
@@ -44,21 +49,45 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         super.onBackPressed()
     }
 
-    private fun prepareActionBar() {
-        supportActionBar?.apply {
-            show()
-            title = " ${getString(R.string.send)} ${viewModel.prepareTitle()}"
-            subtitle = " ${viewModel.account.name}"
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowHomeEnabled(true)
-            setDisplayUseLogoEnabled(true)
-            setLogo()
+    private fun setupViewPager() {
+        with(binding) {
+            transactionViewPager.apply {
+                adapter = TransactionPagerAdapter(this@TransactionActivity, ::getFragment)
+                setCurrentItem(SEND_TRANSACTION_INDEX, false)
+
+                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        transactionTab.let {
+                            it.selectTab(it.getTabAt(position))
+                        }
+                    }
+                })
+            }
+
+            transactionTab.apply {
+                addTab(newTab().setText(getString(R.string.send)))
+                addTab(newTab().setText(getString(R.string.receive)))
+            }
+
+            transactionTab.onTabSelected {
+                invalidateOptionsMenu()
+                transactionViewPager.setCurrentItem(it, true)
+            }
         }
     }
 
-    private fun ActionBar.setLogo() {
-        viewModel.account.let {
-            setLogo(getNetworkIcon(this@TransactionActivity, it.network.short, it.isSafeAccount))
+    private fun getFragment(position: Int) =
+        when (position) {
+            SEND_TRANSACTION_INDEX -> TransactionSendFragment.newInstance()
+            else -> AddressFragment.newInstance(WrappedFragmentType.ACCOUNT_ADDRESS, viewModel.account.id)
+        }
+
+    private fun prepareActionBar() {
+        supportActionBar?.apply {
+            show()
+            title = " ${viewModel.account.name}"
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowHomeEnabled(true)
         }
     }
 
@@ -76,7 +105,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         if (viewModel.wssUri == String.Empty) {
             Int.InvalidIndex
         } else {
-            viewModel.account.index
+            viewModel.account.id
         }
 
     override fun onError(message: String) {
@@ -86,7 +115,6 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
             getString(R.string.transaction_error_message, message)
         )
     }
-
 
     override fun showScanner() {
         supportActionBar?.hide()
@@ -100,7 +128,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     override fun setScanResult(text: String?) {
         onBackPressed()
-        (getCurrentFragment() as? TransactionsFragment)?.setReceiver(text)
+        (getCurrentFragment() as? TransactionSendFragment)?.setReceiver(text)
     }
 
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
@@ -113,6 +141,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
     companion object {
+        private const val SEND_TRANSACTION_INDEX = 0
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val ACCOUNT_INDEX = "account_index"

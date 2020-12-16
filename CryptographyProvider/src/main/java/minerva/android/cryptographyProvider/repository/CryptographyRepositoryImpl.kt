@@ -13,7 +13,6 @@ import me.uport.sdk.jwt.JWTEncodingException
 import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
 import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
-import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import org.kethereum.bip39.entropyToMnemonic
@@ -49,7 +48,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         val derivationPath = "${derivationPathPrefix}$index"
         val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
         val derivedKeys =
-            DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)//isTestNet(derivationPathPrefix))
+            DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
         return Single.just(derivedKeys)
     }
 

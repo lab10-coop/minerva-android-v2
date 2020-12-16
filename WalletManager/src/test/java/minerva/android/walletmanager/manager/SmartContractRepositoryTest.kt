@@ -49,7 +49,7 @@ class SmartContractRepositoryTest {
     @Test
     fun `create safe account success`() {
         whenever(blockchainSafeAccountRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.just("address"))
-        smartContractRepository.createSafeAccount(Account(index = 1, cryptoBalance = BigDecimal.ONE)).test()
+        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE)).test()
             .assertNoErrors()
             .assertComplete()
             .assertValue {
@@ -61,7 +61,7 @@ class SmartContractRepositoryTest {
     fun `create safe account error`() {
         val error = Throwable()
         whenever(blockchainSafeAccountRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.error(error))
-        smartContractRepository.createSafeAccount(Account(index = 1, cryptoBalance = BigDecimal.ONE)).test()
+        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE)).test()
             .assertError(error)
     }
 

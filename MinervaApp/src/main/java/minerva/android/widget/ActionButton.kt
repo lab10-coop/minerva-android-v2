@@ -5,15 +5,16 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.LinearLayout
-import kotlinx.android.synthetic.main.action_button.view.*
 import minerva.android.R
+import minerva.android.databinding.ActionButtonBinding
 import minerva.android.kotlinUtils.InvalidValue
 
 class ActionButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = Int.InvalidValue) :
     LinearLayout(context, attrs, defStyleAttr) {
 
+    private val binding = ActionButtonBinding.bind(LayoutInflater.from(context).inflate(R.layout.action_button, this, true))
+
     init {
-        LayoutInflater.from(context).inflate(R.layout.action_button, this, true)
         val padding = resources.getDimension(R.dimen.margin_small).toInt()
         setBackgroundResource(R.drawable.rounded_white_button)
         setPadding(padding, padding, padding, padding)
@@ -22,10 +23,10 @@ class ActionButton @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     fun setIcon(drawable: Int) {
-        icon.setImageResource(drawable)
+        binding.mainIcon.setImageResource(drawable)
     }
 
     fun setLabel(content: String) {
-        label.text = content
+        binding.label.text = content
     }
 }

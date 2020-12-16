@@ -7,21 +7,17 @@ import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
-import minerva.android.blockchainprovider.provider.Web3jProvider
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
-import org.web3j.abi.Utils
 import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.EthEstimateGas
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
-import org.web3j.protocol.core.methods.response.EthLog
 import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.tx.RawTransactionManager
 import org.web3j.utils.Convert
@@ -37,7 +33,7 @@ import kotlin.Pair
 
 class BlockchainRegularAccountRepositoryImpl(
     private val web3j: Map<String, Web3j>,
-    private val gasPrice: Map<String, BigInteger>,
+    private val gasPrices: Map<String, BigInteger>,
     private val ensResolver: EnsResolver
 ) : BlockchainRegularAccountRepository {
 
@@ -117,8 +113,9 @@ class BlockchainRegularAccountRepositoryImpl(
             .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
             .firstOrError()
 
-    override fun isAddressValid(address: String): Boolean =
-        WalletUtils.isValidAddress(address)
+    override fun isAddressValid(address: String): Boolean = WalletUtils.isValidAddress(address)
+
+    override fun toChecksumAddress(address: String): String = Keys.toChecksumAddress(address)
 
     override fun refreshAssetBalance(
         privateKey: String,
@@ -149,7 +146,7 @@ class BlockchainRegularAccountRepositoryImpl(
                         Credentials.create(privateKey),
                         it.netVersion.toLong()
                     ),
-                    ContractGasProvider(gasPrice.value(network), Operation.TRANSFER_ERC20.gasLimit)
+                    ContractGasProvider(gasPrices.value(network), Operation.TRANSFER_ERC20.gasLimit)
                 )
                     .balanceOf(address).flowable()
                     .map { balance ->
@@ -190,7 +187,8 @@ class BlockchainRegularAccountRepositoryImpl(
         assetIndex: Int,
         from: String,
         to: String,
-        amount: BigDecimal
+        amount: BigDecimal,
+        gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
         return if (assetIndex == Int.InvalidIndex) {
             web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
@@ -199,12 +197,12 @@ class BlockchainRegularAccountRepositoryImpl(
                     web3j.value(network)
                         .ethEstimateGas(getTransaction(from, count, to, amount))
                         .flowable()
-                        .flatMapSingle { handleGasLimit(network, it) }
+                        .flatMapSingle { handleGasLimit(network, it, gasPrice) }
                 }
                 .firstOrError()
-                .timeout(5, TimeUnit.SECONDS, calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit))
+                .timeout(TIMEOUT, TimeUnit.SECONDS, calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice))
 
-        } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit)
+        } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
     }
 
     private fun getTransaction(from: String, count: EthGetTransactionCount, to: String, amount: BigDecimal) =
@@ -218,9 +216,9 @@ class BlockchainRegularAccountRepositoryImpl(
             String.Empty
         )
 
-    private fun handleGasLimit(network: String, it: EthEstimateGas): Single<TransactionCostPayload> {
+    private fun handleGasLimit(network: String, it: EthEstimateGas, gasPrice: BigDecimal?): Single<TransactionCostPayload> {
         val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
-        return calculateTransactionCosts(network, gasLimit)
+        return calculateTransactionCosts(network, gasLimit, gasPrice)
     }
 
     private fun estimateGasLimit(gasLimit: BigInteger): BigInteger {
@@ -236,16 +234,22 @@ class BlockchainRegularAccountRepositoryImpl(
     private fun getBuffer(gasLimit: BigInteger) =
         gasLimit.multiply(BigInteger.valueOf(10)).divide(BigInteger.valueOf(100))
 
-    private fun calculateTransactionCosts(network: String, gasLimit: BigInteger): Single<TransactionCostPayload> =
+    private fun calculateTransactionCosts(
+        network: String,
+        gasLimit: BigInteger,
+        gasPrice: BigDecimal?
+    ): Single<TransactionCostPayload> =
         Single.just(
             TransactionCostPayload(
-                fromWei(BigDecimal(gasPrice.value(network)), Convert.Unit.GWEI),
+                gasPrice ?: fromWei(BigDecimal(gasPrices.value(network)), Convert.Unit.GWEI),
                 gasLimit,
-                getTransactionCostInEth(BigDecimal(gasPrice.value(network)), BigDecimal(gasLimit))
-            )
+                getTransactionCostInEth(getGasPrice(gasPrice, network), BigDecimal(gasLimit)))
         )
 
-    override fun toGwei(balance: BigDecimal): BigDecimal = toWei(balance, Convert.Unit.GWEI)
+    private fun getGasPrice(gasPrice: BigDecimal?, network: String) =
+        gasPrice?.let { toGwei(it) } ?: BigDecimal(gasPrices.value(network))
+
+    override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
 
     override fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal =
         fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)
@@ -272,5 +276,6 @@ class BlockchainRegularAccountRepositoryImpl(
         private const val SCALE = 8
         private const val DOT = "."
         private const val BLOCK_NUMBER_OFFSET = 5L
+        private const val TIMEOUT = 5L
     }
 }

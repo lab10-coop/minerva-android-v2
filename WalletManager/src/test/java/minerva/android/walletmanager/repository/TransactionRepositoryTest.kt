@@ -5,6 +5,7 @@ import com.exchangemarketsprovider.api.BinanceApi
 import com.exchangemarketsprovider.model.Market
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -18,6 +19,8 @@ import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
+import minerva.android.servicesApiProvider.api.ServicesApi
+import minerva.android.servicesApiProvider.model.GasPrice
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -40,13 +43,16 @@ class TransactionRepositoryTest {
     private val binanaceApi: BinanceApi = mock()
     private val localStorage: LocalStorage = mock()
     private val webSocketRepositoryImpl: WebSocketRepositoryImpl = mock()
+    private val servicesApi: ServicesApi = mock()
+
     private val repository =
         TransactionRepositoryImpl(
             blockchainRegularAccountRepository,
             walletConfigManager,
             binanaceApi,
             localStorage,
-            webSocketRepositoryImpl
+            webSocketRepositoryImpl,
+            servicesApi
         )
 
     @get:Rule
@@ -237,9 +243,9 @@ class TransactionRepositoryTest {
 
     @Test
     fun `get value test`() {
-        whenever(walletConfigManager.getAccount(any())) doReturn Account(index = 2)
+        whenever(walletConfigManager.getAccount(any())) doReturn Account(id = 2)
         val result = repository.getAccount(2)
-        assertEquals(result?.index, 2)
+        assertEquals(result?.id, 2)
     }
 
     @Test
@@ -362,11 +368,12 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    fun `get transaction costs success`() {
-        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(
+    fun `get transaction costs success when there is no gas price from oracle`() {
+        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "wssuri", gasPriceOracle = "")))
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any(), eq(null))).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
         )
-        repository.getTransactionCosts("network", 1, "from", "to", BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
             .test()
             .assertComplete()
             .assertValue {
@@ -375,16 +382,43 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    fun `get transaction costs error`() {
+    fun `get transaction costs success when there is gas price from oracle available`() {
+        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "wssuri", gasPriceOracle = "url")))
+        whenever(servicesApi.getGasPrice(any(), any())).thenReturn(Single.just(GasPrice(BigDecimal.TEN)))
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any(), eq(BigDecimal.ONE)))
+            .doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.gasPrice == BigDecimal.TEN
+            }
+    }
+
+    @Test
+    fun `get transaction costs error when there is no gas price from oracle`() {
         val error = Throwable()
-        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(
-            Single.error(
-                error
-            )
-        )
-        repository.getTransactionCosts("network", 1, "from", "to", BigDecimal.TEN)
+        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "wssuri")))
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any(), eq(null)))
+            .doReturn(Single.error(error))
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
             .test()
             .assertError(error)
+    }
+
+    @Test
+    fun `get transaction costs error when there is gas price from oracle available`() {
+        val error = Throwable()
+        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "wssuri", gasPriceOracle = "url")))
+        whenever(servicesApi.getGasPrice(any(), any())).thenReturn(Single.error(error))
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any(), eq(null)))
+            .doReturn(Single.just(TransactionCostPayload(BigDecimal.ONE, BigInteger.ONE, BigDecimal.TEN)))
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.gasPrice == BigDecimal.ONE
+            }
     }
 
     @Test

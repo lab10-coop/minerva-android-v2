@@ -1,4 +1,4 @@
-package minerva.android.accounts
+package minerva.android.accounts.transaction.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -63,10 +63,10 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
         accountAdapter.stopPendingTransactions()
     }
 
-    override fun onSendTransaction(index: Int) = interactor.showSendTransactionScreen(index)
+    override fun onSendTransaction(index: Int) = interactor.showTransactionScreen(index)
 
     override fun onSendAssetTransaction(accountIndex: Int, assetIndex: Int) {
-        interactor.showSendAssetTransactionScreen(accountIndex, assetIndex)
+        interactor.showTransactionScreen(accountIndex, assetIndex)
     }
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
@@ -124,7 +124,6 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
                     FundsAtRiskDialog(requireContext()).show()
                 }
             })
-
             walletConfigLiveData.observe(viewLifecycleOwner, Observer { walletConfig ->
                 noDataMessage.visibleOrGone(walletConfig.hasActiveAccount)
                 accountAdapter.updateList(walletConfig.accounts, areMainNetsEnabled)

@@ -32,11 +32,11 @@
         android:textColor="@color/gray"
         android:layout_marginBottom="@dimen/margin_xxxsmall"
         app:layout_constraintLeft_toRightOf="@+id/minervaPrimitiveLogo"
-        app:layout_constraintBottom_toTopOf="@id/identityName"
+        app:layout_constraintBottom_toTopOf="@id/identity_name"
         tools:text="Minerva Service" />
 
     <TextView
-        android:id="@+id/identityName"
+        android:id="@+id/identity_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/rubik_regular"
@@ -54,7 +54,7 @@
         android:layout_marginTop="@dimen/margin_xxxsmall"
         android:fontFamily="@font/rubik_regular"
         android:textColor="@color/borderGray"
-        app:layout_constraintTop_toBottomOf="@id/identityName"
+        app:layout_constraintTop_toBottomOf="@id/identity_name"
         app:layout_constraintLeft_toLeftOf="@id/minervaPrimitiveName"
         tools:text="@string/last_used" />
 

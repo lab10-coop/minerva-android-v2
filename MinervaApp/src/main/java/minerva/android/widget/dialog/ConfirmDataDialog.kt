@@ -22,7 +22,7 @@ class ConfirmDataDialog(
         title.text = titleText ?: String.Empty
         prepareData()
         cancelButton.setOnClickListener { onNegativeAction() }
-        sendButton.setOnClickListener { onPositiveAction() }
+        send_button.setOnClickListener { onPositiveAction() }
     }
 
     private fun prepareData() =

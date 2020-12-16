@@ -5,7 +5,7 @@ import minerva.android.kotlinUtils.InvalidValue
 import java.math.BigDecimal
 
 data class Account(
-    val index: Int,
+    val id: Int,
     var publicKey: String = String.Empty,
     var privateKey: String = String.Empty,
     override var address: String = String.Empty,
@@ -21,7 +21,7 @@ data class Account(
     override val bindedOwner: String = String.Empty
 ) : MinervaPrimitive(address, name, isDeleted, bindedOwner, network) {
     constructor(account: Account, isDeleted: Boolean) : this(
-        account.index,
+        account.id,
         account.publicKey,
         account.privateKey,
         account.address,

@@ -99,7 +99,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `remove master owner error test`() {
         viewModel.run {
-            account = Account(index = 0, owners = listOf("tom", "beata"))
+            account = Account(id = 0, owners = listOf("tom", "beata"))
             errorLiveData.observeForever(errorObserver)
             removeOwner("beata")
         }
@@ -111,7 +111,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `remove not existing owner error test`() {
         viewModel.run {
-            account = Account(index = 0, owners = listOf("tom", "beata"))
+            account = Account(id = 0, owners = listOf("tom", "beata"))
             errorLiveData.observeForever(errorObserver)
             removeOwner("papiez")
         }
@@ -125,7 +125,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
         whenever(smartContractRepository.removeSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.just(listOf("tom", "beata"))
         viewModel.run {
             ownersLiveData.observeForever(ownersObserver)
-            account = Account(index = 0, owners = listOf("tom", "beata"))
+            account = Account(id = 0, owners = listOf("tom", "beata"))
             removeOwner("tom")
         }
         kArgumentCaptor.run {
@@ -139,7 +139,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
         whenever(smartContractRepository.removeSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.error(error)
         viewModel.run {
             errorLiveData.observeForever(errorObserver)
-            account = Account(index = 0, owners = listOf("tom", "beata"))
+            account = Account(id = 0, owners = listOf("tom", "beata"))
             removeOwner("tom")
             errorLiveData.observeLiveDataEvent(Event(error))
         }

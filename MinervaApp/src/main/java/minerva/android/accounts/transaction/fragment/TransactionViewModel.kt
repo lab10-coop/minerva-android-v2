@@ -1,4 +1,4 @@
-package minerva.android.accounts.transaction
+package minerva.android.accounts.transaction.fragment
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +8,7 @@ import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.accounts.transaction.model.TokenSpinnerElement
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
@@ -28,7 +29,7 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class TransactionsViewModel(
+class TransactionViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository
@@ -64,6 +65,15 @@ class TransactionsViewModel(
     val transactionCostLiveData: LiveData<Event<TransactionCost>> get() = _transactionCostLiveData
 
     val wssUri get() = account.network.wsRpc
+
+    //TODO add logos for tokens
+    val tokensList: List<TokenSpinnerElement>
+        get() = mutableListOf<TokenSpinnerElement>().apply {
+            add(TokenSpinnerElement(account.network.full))
+            account.accountAssets.forEach {
+                add(TokenSpinnerElement(it.asset.name))
+            }
+        }
 
     private val isMainTransaction
         get() = assetIndex == Int.InvalidIndex && !account.isSafeAccount
@@ -107,12 +117,6 @@ class TransactionsViewModel(
         }
     }
 
-    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): String =
-        transactionRepository.calculateTransactionCost(gasPrice, gasLimit).let {
-            transactionCost = it
-            transactionCost.toPlainString()
-        }
-
 
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         when {
@@ -137,11 +141,7 @@ class TransactionsViewModel(
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferERC20Token(
-                                network.short,
-                                it,
-                                account.accountAssets[assetIndex].asset.address
-                            ).toSingleDefault(it)
+                            smartContractRepository.transferERC20Token(network.short, it, assetAddress).toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
@@ -219,7 +219,7 @@ class TransactionsViewModel(
             resolveENS(receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it
-                    transactionRepository.transferNativeCoin(network.short, account.index, it).toSingleDefault(it)
+                    transactionRepository.transferNativeCoin(network.short, account.id, it).toSingleDefault(it)
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
@@ -239,10 +239,8 @@ class TransactionsViewModel(
 
     private fun sendAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
-            resolveENS(receiverKey, amount, gasPrice, gasLimit, account.accountAssets[assetIndex].asset.address)
-                .flatMapCompletable {
-                    transactionRepository.transferERC20Token(account.network.short, it)
-                }
+            resolveENS(receiverKey, amount, gasPrice, gasLimit, assetAddress)
+                .flatMapCompletable { transactionRepository.transferERC20Token(account.network.short, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -254,27 +252,33 @@ class TransactionsViewModel(
         }
     }
 
-    fun getBalance(): BigDecimal =
-        if (assetIndex == Int.InvalidIndex) account.cryptoBalance else account.accountAssets[assetIndex].balance
+    private val assetAddress
+        get() = account.accountAssets[assetIndex].asset.address
+
+    val cryptoBalance: BigDecimal
+        get() = if (assetIndex == Int.InvalidIndex) account.cryptoBalance else account.accountAssets[assetIndex].balance
 
     fun getAllAvailableFunds(): String {
         if (assetIndex != Int.InvalidIndex) return account.accountAssets[assetIndex].balance.toPlainString()
         if (account.isSafeAccount) return account.cryptoBalance.toPlainString()
 
-        account.cryptoBalance.minus(transactionCost).apply {
-            return if (this < BigDecimal.ZERO) {
-                String.EmptyBalance
-            } else {
-                this.toPlainString()
-            }
+        val allAvailableFunds = account.cryptoBalance.minus(transactionCost)
+        return if (allAvailableFunds < BigDecimal.ZERO) {
+            String.EmptyBalance
+        } else {
+            allAvailableFunds.toPlainString()
         }
     }
 
-    fun recalculateAmount(amount: BigDecimal, cost: BigDecimal): String =
-        amount.subtract(cost).toPlainString()
+    val recalculateAmount: BigDecimal
+        get() = cryptoBalance.minus(transactionCost)
+
+    fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
+        transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
+
 
     fun prepareCurrency() =
-        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.nameShort else account.network.token
+        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.shortName else account.network.token
 
     private fun getAccountsWalletAction(transaction: Transaction, network: String, status: Int): WalletAction =
         WalletAction(

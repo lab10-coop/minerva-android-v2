@@ -178,8 +178,10 @@ class AccountManagerImpl(
 
     override fun loadAccount(index: Int): Account {
         walletManager.getWalletConfig()?.accounts?.apply {
-            return if (inBounds(index)) this[index]
-            else Account(Int.InvalidIndex)
+            return if (inBounds(index)) {
+                val account = this[index]
+                account.copy(address = blockchainRepository.toChecksumAddress(account.address))
+            } else Account(Int.InvalidIndex)
         }
         return Account(Int.InvalidIndex)
     }

@@ -55,3 +55,8 @@ Build is done via docker. If you want to build an app and have docker installed 
 - `docker-compose up`
 ### Release
 - `docker-compose run builder ./gradlew assembleRelease`
+
+How to eth gas station api key:
+1. Create a free account at data.defipulse.com to obtain an API-key or go to git and copy value of ETH_GAS_STATION_API_KEY
+2. in local.properties paste: eth.gas.station.api.key="<value of eth gas station api key>"
+3. Sync project

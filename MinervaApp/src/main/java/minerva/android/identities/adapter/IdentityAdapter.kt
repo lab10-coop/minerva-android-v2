@@ -75,9 +75,9 @@ class IdentityViewHolder(
         this.removable = removable
         with(identity) {
             view.apply {
-                identityName.text = name
+                identity_name.text = name
                 card.setCardBackgroundColor(ContextCompat.getColor(context, generateColor(name)))
-                ProfileImage.load(profileImage, identity)
+                ProfileImage.load(profile_image, identity)
                 identityDid.setSingleLineTitleAndBody(DID_LABEL, AddressConverter.getShortAddress(AddressType.DID_ADDRESS, did))
                 dataContainer.apply {
                     prepareDataContainerFields(identity, credentials.filter { it.loggedInIdentityDid == identity.did })

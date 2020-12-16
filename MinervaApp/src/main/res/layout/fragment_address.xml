@@ -24,7 +24,7 @@
             app:layout_constraintGuide_percent="0.5" />
 
         <ImageView
-            android:id="@+id/profileImage"
+            android:id="@+id/profile_image"
             android:layout_width="@dimen/large_letter_logo_size"
             android:layout_height="@dimen/large_letter_logo_size"
             android:layout_marginTop="@dimen/margin_xsmall"
@@ -42,11 +42,11 @@
             android:textSize="@dimen/text_big"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profileImage"
+            app:layout_constraintTop_toBottomOf="@id/profile_image"
             tools:text="Tom Johnson" />
 
         <ImageView
-            android:id="@+id/qrCode"
+            android:id="@+id/qr_code"
             android:layout_width="@dimen/qr_code_size"
             android:layout_height="@dimen/qr_code_size"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -62,7 +62,7 @@
             android:gravity="center_horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/qrCode"
+            app:layout_constraintTop_toBottomOf="@id/qr_code"
             tools:text="0xdaa21bfaa1575e1d725b37ac1efbb7c5f0a32822" />
 
         <minerva.android.widget.LabeledTextView
@@ -73,7 +73,7 @@
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/qrCode"
+            app:layout_constraintTop_toBottomOf="@id/qr_code"
             tools:text="0xdaa21bfaa1575e1d725b37ac1efbb7c5f0a32822" />
 
         <minerva.android.widget.ActionButton

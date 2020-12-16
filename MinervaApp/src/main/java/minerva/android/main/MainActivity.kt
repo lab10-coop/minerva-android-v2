@@ -10,11 +10,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
-import minerva.android.accounts.AccountsFragment
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ACCOUNT_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
+import minerva.android.accounts.transaction.fragment.AccountsFragment
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivityForResult
 import minerva.android.extension.visibleOrGone
@@ -31,13 +31,11 @@ import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
-import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
@@ -246,15 +244,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     }
 
-    override fun showSendTransactionScreen(index: Int) {
+    override fun showTransactionScreen(index: Int, assetIndex: Int) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
             putExtra(ACCOUNT_INDEX, index)
-        }
-    }
-
-    override fun showSendAssetTransactionScreen(accountIndex: Int, assetIndex: Int) {
-        launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
-            putExtra(ACCOUNT_INDEX, accountIndex)
             putExtra(ASSET_INDEX, assetIndex)
         }
     }

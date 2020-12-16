@@ -9,8 +9,8 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.fragment_address.*
 import minerva.android.R
+import minerva.android.databinding.FragmentAddressBinding
 import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
@@ -31,6 +31,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AddressFragment : Fragment() {
 
+    private lateinit var binding: FragmentAddressBinding
+
     private val viewModel: AddressViewModel by viewModel()
     private val index: Int by lazy {
         arguments?.getInt(INDEX) ?: Int.InvalidIndex
@@ -46,10 +48,11 @@ class AddressFragment : Fragment() {
         initializeFragment()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewGroup = container
-        return inflater.inflate(R.layout.fragment_address, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_address, container, false).apply {
+            binding = FragmentAddressBinding.bind(this)
+            viewGroup = container
+        }
 
     private fun initializeView(minervaPrimitive: MinervaPrimitive) {
         with(minervaPrimitive) {
@@ -57,13 +60,13 @@ class AddressFragment : Fragment() {
             prepareHeader(this)
             prepareQR(this)
             prepareAddress(this)
-            setupShareButton(shareButton, prepareTextAddress(this))
-            setupCopyButton(copyButton, prepareTextAddress(this), prepareToastMessage())
+            setupShareButton(binding.shareButton, prepareTextAddress(this))
+            setupCopyButton(binding.copyButton, prepareTextAddress(this), prepareToastMessage())
         }
     }
 
     private fun prepareLogo(minervaPrimitive: MinervaPrimitive) {
-        profileImage.apply {
+        binding.profileImage.apply {
             (minervaPrimitive as? Identity)?.let {
                 ProfileImage.load(this, it)
                 visible()
@@ -74,7 +77,7 @@ class AddressFragment : Fragment() {
     }
 
     private fun prepareHeader(minervaPrimitive: MinervaPrimitive) {
-        title.apply {
+        binding.title.apply {
             (minervaPrimitive as? Identity)?.let {
                 text = it.identityTitle
             }
@@ -91,20 +94,22 @@ class AddressFragment : Fragment() {
                 }
                 val qr = QRCode.from(this).withSize(qrCodeSize, qrCodeSize).file()
                 context?.let {
-                    Glide.with(it).load(qr).into(qrCode)
+                    Glide.with(it).load(qr).into(binding.qrCode)
                 }
             }
         }
     }
 
     private fun prepareAddress(minervaPrimitive: MinervaPrimitive) {
-        textFullAddress.setTitleAndBody(prepareTitleAddress(), prepareTextAddress(minervaPrimitive))
-        textShortAddress.apply {
-            setTitleAndBody(prepareTitleAddress(), prepareTextAddress(minervaPrimitive))
-            setSingleLine()
-            setOnClickListener {
-                TransitionManager.beginDelayedTransition(viewGroup)
-                textFullAddress.visibleOrInvisible(!textFullAddress.isVisible)
+        binding.apply {
+            textFullAddress.setTitleAndBody(prepareTitleAddress(), prepareTextAddress(minervaPrimitive))
+            textShortAddress.apply {
+                setTitleAndBody(prepareTitleAddress(), prepareTextAddress(minervaPrimitive))
+                setSingleLine()
+                setOnClickListener {
+                    TransitionManager.beginDelayedTransition(viewGroup)
+                    textFullAddress.visibleOrInvisible(!textFullAddress.isVisible)
+                }
             }
         }
     }

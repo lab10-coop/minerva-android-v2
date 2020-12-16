@@ -39,7 +39,7 @@ class IdentitiesFragment : BaseFragment() {
     }
 
     private fun setupViewPager() {
-        identityViewPager.apply {
+        transaction_view_pager.apply {
             adapter = IdentitiesPagerAdapter(this@IdentitiesFragment, ::getFragment)
             setCurrentItem(FIRST_PAGE, false)
 

@@ -8,8 +8,19 @@ import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ExchangeRate
+import minerva.android.walletmanager.model.defs.ExchangeRate.Companion.ATS_EURO
 import minerva.android.walletmanager.model.defs.Markets
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_KOV
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_MAIN
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -40,11 +51,10 @@ object MarketUtils {
     private fun getRate(network: String, markets: MutableList<Market>): Double? =
         //TODO make ratings in dynamical way
         when (network) {
-            NetworkShortName.ATS_TAU, NetworkShortName.ATS_SIGMA -> ExchangeRate.ATS_EURO
-            NetworkShortName.POA_SKL, NetworkShortName.POA_CORE -> getRatesMap(markets)[Markets.POA_EUR]
-            NetworkShortName.ETH_RIN, NetworkShortName.ETH_KOV,
-            NetworkShortName.ETH_GOR, NetworkShortName.ETH_ROP -> getRatesMap(markets)[Markets.ETH_EUR]
-            NetworkShortName.XDAI -> getRatesMap(markets)[Markets.DAI_EUR]
+            ATS_TAU, ATS_SIGMA -> ATS_EURO
+            POA_SKL, POA_CORE -> getRatesMap(markets)[Markets.POA_EUR]
+            ETH_RIN, ETH_KOV, ETH_GOR, ETH_ROP, ETH_MAIN  -> getRatesMap(markets)[Markets.ETH_EUR]
+            XDAI -> getRatesMap(markets)[Markets.DAI_EUR]
             else -> null
         }
 

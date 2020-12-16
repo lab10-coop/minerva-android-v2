@@ -62,7 +62,7 @@ class ClubCard(context: Context, private val credential: Credential) : Dialog(co
             QRCode.from(credential.token).withSize(qrCodeSize, qrCodeSize)
                 .withHint(EncodeHintType.MARGIN, QR_MARGIN)
                 .file()
-                .let { qr -> Glide.with(context).load(qr).into(qrCode) }
+                .let { qr -> Glide.with(context).load(qr).into(qr_code) }
         }
     }
 

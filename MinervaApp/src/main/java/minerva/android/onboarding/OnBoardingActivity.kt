@@ -23,7 +23,7 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
         setupActionBar()
-        addFragment(R.id.mainContent, WelcomeFragment.newInstance())
+        addFragment(R.id.main_content, WelcomeFragment.newInstance())
     }
 
     override fun onBackPressed() {
@@ -61,12 +61,12 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
     override fun showRestoreWalletFragment() {
-        replaceFragment(R.id.mainContent, RestoreWalletFragment.newInstance())
+        replaceFragment(R.id.main_content, RestoreWalletFragment.newInstance())
         setToolbarBackButtonVisibility(true)
     }
 
     override fun showCreateWalletFragment() {
-        replaceFragment(R.id.mainContent, CreateWalletFragment.newInstance())
+        replaceFragment(R.id.main_content, CreateWalletFragment.newInstance())
         setToolbarBackButtonVisibility(true)
     }
 

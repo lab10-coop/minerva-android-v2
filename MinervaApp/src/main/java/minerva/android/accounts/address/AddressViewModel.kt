@@ -10,16 +10,18 @@ import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.wrapped.WrappedFragmentType
 
-class AddressViewModel(private val identityManager: IdentityManager, private val accountManager: AccountManager) : BaseViewModel() {
+class AddressViewModel(private val identityManager: IdentityManager, private val accountManager: AccountManager) :
+    BaseViewModel() {
 
     private val _loadMinervaPrimitiveLiveData = MutableLiveData<Event<MinervaPrimitive>>()
     val loadMinervaPrimitiveLiveData: LiveData<Event<MinervaPrimitive>> get() = _loadMinervaPrimitiveLiveData
 
     fun loadMinervaPrimitive(fragmentType: WrappedFragmentType, position: Int) {
-        _loadMinervaPrimitiveLiveData.value = when (fragmentType) {
-            WrappedFragmentType.IDENTITY_ADDRESS -> Event(identityManager.loadIdentity(position))
-            WrappedFragmentType.ACCOUNT_ADDRESS -> Event(accountManager.loadAccount(position))
+        val minervaPrimitive = when (fragmentType) {
+            WrappedFragmentType.IDENTITY_ADDRESS -> identityManager.loadIdentity(position)
+            WrappedFragmentType.ACCOUNT_ADDRESS -> accountManager.loadAccount(position)
             else -> throw NoAddressPageFragmentThrowable()
         }
+        _loadMinervaPrimitiveLiveData.value = Event(minervaPrimitive)
     }
 }

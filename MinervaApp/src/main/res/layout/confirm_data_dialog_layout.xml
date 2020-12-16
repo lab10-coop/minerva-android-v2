@@ -37,7 +37,7 @@
         android:orientation="vertical" />
 
     <TextView
-        android:id="@+id/sendButton"
+        android:id="@+id/send_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintRight_toRightOf="parent"
@@ -56,9 +56,9 @@
         android:layout_height="wrap_content"
         android:text="@string/cancel"
         android:textSize="@dimen/text_small"
-        app:layout_constraintRight_toLeftOf="@id/sendButton"
+        app:layout_constraintBottom_toBottomOf="@id/send_button"
         android:layout_marginRight="@dimen/confirm_dialog_button_margin"
-        app:layout_constraintBottom_toBottomOf="@id/sendButton"
+        app:layout_constraintRight_toLeftOf="@id/send_button"
         android:textAllCaps="true"
         android:textColor="@color/colorSecondary"
         style="@style/AlertTitle" />

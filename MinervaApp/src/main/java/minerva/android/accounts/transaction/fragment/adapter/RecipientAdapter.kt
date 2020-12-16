@@ -26,9 +26,10 @@ class RecipientAdapter(context: Context, @LayoutRes private val layoutResource: 
 
     override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = createViewFromResource(position, parent)
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = convertView ?: createViewFromResource(position, parent)
 
-    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup?): View = createViewFromResource(position, parent)
+    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup?): View =
+        convertView ?: createViewFromResource(position, parent)
 
     override fun getFilter(): Filter {
         return object : Filter() {

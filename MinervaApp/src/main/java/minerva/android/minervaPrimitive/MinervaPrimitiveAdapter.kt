@@ -1,14 +1,15 @@
 package minerva.android.minervaPrimitive
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.minerva_primitive_list_row.view.*
 import minerva.android.R
+import minerva.android.databinding.MinervaPrimitiveListRowBinding
 import minerva.android.extension.visible
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.DateUtils
@@ -43,9 +44,14 @@ class MinervaPrimitiveViewHolder(
     private val listener: MinervaPrimitiveClickListener
 ) : RecyclerView.ViewHolder(view) {
 
+    private var binding = MinervaPrimitiveListRowBinding.bind(view)
+
+    val context: Context
+        get() = view.context
+
     @SuppressLint("SetTextI18n")
     fun bindData(minervaPrimitive: MinervaPrimitive) {
-        view.apply {
+        binding.apply {
 
             when (minervaPrimitive) {
                 is Credential -> {

@@ -3,8 +3,8 @@ package minerva.android.widget
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.wallet_action_item_list_row.view.*
 import minerva.android.R
+import minerva.android.databinding.WalletActionItemListRowBinding
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.UNDEFINED
@@ -19,8 +19,8 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.LOG
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.RECEIVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REJECTED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
-import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
@@ -28,9 +28,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 
 class WalletActionView(context: Context) : ConstraintLayout(context) {
 
-    init {
-        inflate(context, R.layout.wallet_action_item_list_row, this)
-    }
+    private val binding = WalletActionItemListRowBinding.bind(inflate(context, R.layout.wallet_action_item_list_row, this))
 
     fun setActionType(walletAction: WalletAction) {
         when (walletAction.type) {
@@ -61,7 +59,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     }
 
     private fun showAction(name: String?, message: Int, actionIcon: Int) {
-        type.text = context.getString(message, "$name")
+        binding.type.text = context.getString(message, "$name")
         showIcon(actionIcon)
     }
 
@@ -83,7 +81,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     }
 
     private fun showServices(walletAction: WalletAction) {
-        type.text = when (walletAction.status) {
+        binding.type.text = when (walletAction.status) {
             ADDED -> context.getString(R.string.service_added, walletAction.fields[WalletActionFields.SERVICE_NAME])
             BACKGROUND_ADDED -> context.getString(R.string.background_service_added, walletAction.fields[WalletActionFields.SERVICE_NAME])
             SENT -> context.getString(
@@ -107,7 +105,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     }
 
     private fun showSentAction(walletAction: WalletAction, text: Int) {
-        type.text = context.getString(
+        binding.type.text = context.getString(
             text,
             "${walletAction.fields[WalletActionFields.AMOUNT]}",
             "${walletAction.fields[WalletActionFields.NETWORK]}",
@@ -117,13 +115,13 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     }
 
     private fun showIcon(actionIcon: Int) {
-        Glide.with(context).load(actionIcon).into(icon)
+        Glide.with(context).load(actionIcon).into(binding.mainIcon)
     }
 
     fun setActionStatus(walletAction: WalletAction) {
         val lastUsed = DateUtils.getTimeFromTimeStamp(walletAction.lastUsed)
         context.run {
-            title.text = when (walletAction.status) {
+            binding.title.text = when (walletAction.status) {
                 REMOVED, SAFE_ACCOUNT_REMOVED -> getString(R.string.wallet_action_header, getString(R.string.removed), lastUsed)
                 CHANGED -> getString(R.string.wallet_action_header, getString(R.string.changed), lastUsed)
                 ADDED, SA_ADDED, BACKGROUND_ADDED -> getString(R.string.wallet_action_header, getString(R.string.added), lastUsed)
