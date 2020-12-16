@@ -23,7 +23,7 @@ interface BlockchainRegularAccountRepository {
 
     fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal
     fun transferNativeCoin(network: String, accountIndex: Int, transactionPayload: TransactionPayload): Single<PendingTransaction>
-    fun toGwei(balance: BigDecimal): BigDecimal
+    fun toGwei(amount: BigDecimal): BigDecimal
     fun transferERC20Token(network: String, payload: TransactionPayload): Completable
     fun reverseResolveENS(ensAddress: String): Single<String>
     fun resolveENS(ensName: String): Single<String>
@@ -33,7 +33,8 @@ interface BlockchainRegularAccountRepository {
         assetIndex: Int,
         from: String,
         to: String,
-        amount: BigDecimal
+        amount: BigDecimal,
+        gasPrice: BigDecimal? = null
     ): Single<TransactionCostPayload>
 
     fun isAddressValid(address: String): Boolean
