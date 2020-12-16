@@ -117,8 +117,9 @@ class BlockchainRegularAccountRepositoryImpl(
             .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
             .firstOrError()
 
-    override fun isAddressValid(address: String): Boolean =
-        WalletUtils.isValidAddress(address)
+    override fun isAddressValid(address: String): Boolean = WalletUtils.isValidAddress(address)
+
+    override fun toChecksumAddress(address: String): String = Keys.toChecksumAddress(address)
 
     override fun refreshAssetBalance(
         privateKey: String,
@@ -191,8 +192,8 @@ class BlockchainRegularAccountRepositoryImpl(
         from: String,
         to: String,
         amount: BigDecimal
-    ): Single<TransactionCostPayload> {
-        return if (assetIndex == Int.InvalidIndex) {
+    ): Single<TransactionCostPayload> =
+        if (assetIndex == Int.InvalidIndex) {
             web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
                 .flowable()
                 .flatMap { count ->
@@ -205,7 +206,6 @@ class BlockchainRegularAccountRepositoryImpl(
                 .timeout(5, TimeUnit.SECONDS, calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit))
 
         } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit)
-    }
 
     private fun getTransaction(from: String, count: EthGetTransactionCount, to: String, amount: BigDecimal) =
         Transaction(

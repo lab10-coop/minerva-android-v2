@@ -46,6 +46,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager creates new regular account`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
@@ -84,6 +85,7 @@ class AccountManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
         repository.removeAccount(account).test()
         val removedValue = repository.loadAccount(0)
         val notRemovedValue = repository.loadAccount(1)
@@ -101,6 +103,7 @@ class AccountManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
         doNothing().whenever(walletConfigManager).initWalletConfig()
         repository.removeAccount(account).test()
         val removedValue = repository.loadAccount(0)
@@ -120,6 +123,7 @@ class AccountManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
         repository.removeAccount(account).test()
         repository.removeAccount(account2).test()
         repository.loadAccount(2).apply {
@@ -143,6 +147,7 @@ class AccountManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
         doNothing().whenever(walletConfigManager).initWalletConfig()
         repository.removeAccount(account).test()
         repository.removeAccount(account2).test()
