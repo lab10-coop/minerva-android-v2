@@ -131,12 +131,7 @@ class TransactionsViewModel(
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferERC20Token(
-                                network.short,
-                                it,
-                                account.accountAssets[assetIndex].asset.address
-                            )
-                                .toSingleDefault(it)
+                            smartContractRepository.transferERC20Token(network.short, it, assetAddress).toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
@@ -234,10 +229,8 @@ class TransactionsViewModel(
 
     private fun sendAssetTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
-            resolveENS(receiverKey, amount, gasPrice, gasLimit, account.accountAssets[assetIndex].asset.address)
-                .flatMapCompletable {
-                    transactionRepository.transferERC20Token(account.network.short, it)
-                }
+            resolveENS(receiverKey, amount, gasPrice, gasLimit, assetAddress)
+                .flatMapCompletable { transactionRepository.transferERC20Token(account.network.short, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -248,6 +241,9 @@ class TransactionsViewModel(
                 )
         }
     }
+
+    private val assetAddress
+        get() = account.accountAssets[assetIndex].asset.address
 
     val cryptoBalance: BigDecimal
         get() = if (assetIndex == Int.InvalidIndex) account.cryptoBalance else account.accountAssets[assetIndex].balance
@@ -269,6 +265,7 @@ class TransactionsViewModel(
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
+
 
     fun prepareCurrency() =
         if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.nameShort else account.network.token
@@ -294,12 +291,8 @@ class TransactionsViewModel(
                 .subscribeBy(
                     onComplete = {
                         Timber.e(message)
-                        _sendTransactionLiveData.value = Event(
-                            Pair(
-                                message
-                                    ?: "${transaction.amount} ${account.network.token}", FAILED
-                            )
-                        )
+                        _sendTransactionLiveData.value =
+                            Event(Pair(message ?: "${transaction.amount} ${account.network.token}", FAILED))
                     },
                     onError = {
                         Timber.e("Save wallet action error $it")

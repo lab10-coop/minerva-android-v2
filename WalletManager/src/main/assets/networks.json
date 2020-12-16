@@ -6,6 +6,7 @@
     "isSafeAccountAvailable": "true",
     "httpRpc": "https://rpc.tau1.artis.network",
     "wsRpc": "wss://ws.tau1.artis.network",
+    "gasPriceOracle": "",
     "gasPrice": "100000000000",
     "assets": [
       {
@@ -24,6 +25,7 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
     "wsRpc": "wss://rinkeby.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
+    "gasPriceOracle": "",
     "gasPrice": "10000000000",
     "assets": [
       {
@@ -42,6 +44,7 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.sigma1.artis.network",
     "wsRpc": "wss://ws.sigma1.artis.network",
+    "gasPriceOracle": "",
     "gasPrice": "100000000000",
     "assets": [],
     "color": "#129c6b",
@@ -54,6 +57,7 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.xdaichain.com",
     "wsRpc": "wss://rpc.xdaichain.com/wss",
+    "gasPriceOracle": "",
     "gasPrice": "1000000000",
     "assets": [
       {
@@ -72,6 +76,7 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://sokol.poa.network",
     "wsRpc": "ws://sokol.poa.network:8546",
+    "gasPriceOracle": "",
     "gasPrice": "1000000000",
     "assets": [],
     "color": "#FF5CBEAB",
@@ -84,6 +89,7 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.l14.lukso.network",
     "wsRpc": "",
+    "gasPriceOracle": "",
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FFFBCDC5",
@@ -96,6 +102,7 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://kovan.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
     "wsRpc": "wss://kovan.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
+    "gasPriceOracle": "",
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FF6434C9",
@@ -108,6 +115,7 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://goerli.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
     "wsRpc": "wss://goerli.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
+    "gasPriceOracle": "",
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FFBDAE9B",
@@ -120,10 +128,30 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
     "wsRpc": "wss://ropsten.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
+    "gasPriceOracle": "",
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FF486FFF",
     "testNet": true
+  },
+  {
+    "full": "Ethereum",
+    "short": "eth_mainnet",
+    "token": "ETH",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
+    "wsRpc": "wss://mainnet.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
+    "gasPriceOracle": "https://ethgasstation.info/api/ethgasAPI.json?api-key=0175467b9d55284764b8e8338fe476b229ce7950d2dfc9dbed57a739aed2",
+    "gasPrice": "20000000000",
+    "assets": [
+      {
+        "name": "ATS on Ethereum",
+        "shortName": "ATS20",
+        "address": "0xe41dd6e41f8f9962c5103d95d95f5d9b82d90fdf"
+      }
+    ],
+    "color": "#5abbe7",
+    "testNet": false
   },
   {
     "full": "POA Core",

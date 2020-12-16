@@ -140,15 +140,11 @@ class TransactionsFragment : Fragment() {
         with(binding) {
             validationDisposable = Observable.combineLatest(
                 amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.cryptoBalance) },
-                receiver.getValidationObservable(receiverInputLayout) {
-                    Validator.validateAddress(
-                        it,
-                        viewModel.isAddressValid(it)
-                    )
-                },
+                receiver.getValidationObservable(receiverInputLayout)
+                { Validator.validateAddress(it, viewModel.isAddressValid(it)) },
                 BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid -> isAmountValid && isAddressValid })
-                .map {
-                    if (it) {
+                .map { areFieldsValid ->
+                    if (areFieldsValid) {
                         viewModel.getTransactionCosts(receiver.text.toString(), getAmount())
                     } else {
                         arrow.gone()
@@ -158,7 +154,7 @@ class TransactionsFragment : Fragment() {
                             closeTransactionCost()
                         }
                     }
-                    it
+                    areFieldsValid
                 }.flatMap {
                     Observable.combineLatest(
                         gasLimitEditText.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },

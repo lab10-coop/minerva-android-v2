@@ -5,6 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.SingleSource
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
@@ -12,6 +13,8 @@ import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.servicesApiProvider.api.ServicesApi
+import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -22,6 +25,7 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -30,7 +34,8 @@ class TransactionRepositoryImpl(
     private val walletConfigManager: WalletConfigManager,
     private val binanceApi: BinanceApi,
     private val localStorage: LocalStorage,
-    private val webSocketRepository: WebSocketRepository
+    private val webSocketRepository: WebSocketRepository,
+    private val servicesApi: ServicesApi
 ) : TransactionRepository {
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
@@ -47,7 +52,8 @@ class TransactionRepositoryImpl(
         throw NotInitializedWalletConfigThrowable()
     }
 
-    private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> = accounts.map { it.network.short to it.address }
+    private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> =
+        accounts.map { it.network.short to it.address }
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
@@ -88,8 +94,24 @@ class TransactionRepositoryImpl(
         to: String,
         amount: BigDecimal
     ): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(network, assetIndex, from, to, amount)
-            .map { TransactionCostPayloadToTransactionCost.map(it) }
+        if (NetworkManager.getNetwork(network).gasPriceOracle != String.Empty) {
+            servicesApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
+                .flatMap { gasPrice -> getTxCosts(network, assetIndex, from, to, amount, gasPrice.fast.divide(BigDecimal.TEN)) }
+                .onErrorResumeNext { getTxCosts(network, assetIndex, from, to, amount, null) }
+
+        } else {
+            getTxCosts(network, assetIndex, from, to, amount, null)
+        }
+
+    private fun getTxCosts(
+        network: String,
+        assetIndex: Int,
+        from: String,
+        to: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal?
+    ) = blockchainRepository.getTransactionCosts(network, assetIndex, from, to, amount, gasPrice)
+        .map { TransactionCostPayloadToTransactionCost.map(it) }
 
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)

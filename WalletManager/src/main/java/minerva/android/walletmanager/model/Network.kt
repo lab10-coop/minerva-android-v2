@@ -12,6 +12,7 @@ data class Network(
     val wsRpc: String = String.Empty,
     val isSafeAccountAvailable: Boolean = false,
     val gasPrice: BigInteger = BigInteger.TEN,
+    val gasPriceOracle: String = String.Empty,
     val assets: List<Asset> = emptyList(),
     val color: String = String.Empty,
     val testNet: Boolean = true
