@@ -47,12 +47,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         ethBalance.result = "0x1"
         every { web3J.ethGetBalance(any(), any()).flowable() } returns Flowable.just(ethBalance)
         repository.refreshBalances(
-            listOf(
-                Pair(
-                    ETH,
-                    "0x9866208bea68b10f04697c00b891541a305df851"
-                )
-            )
+            listOf(Pair(ETH, "0x9866208bea68b10f04697c00b891541a305df851"))
         )
             .test()
             .await()
@@ -68,12 +63,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         ethBalance.result = "0x1"
         every { web3J.ethGetBalance(any(), any()).flowable() } returns Flowable.error(error)
         repository.refreshBalances(
-            listOf(
-                Pair(
-                    ETH,
-                    "0x9866208bea68b10f04697c00b891541a305df851"
-                )
-            )
+            listOf(Pair(ETH, "0x9866208bea68b10f04697c00b891541a305df851"))
         )
             .test()
             .await()
@@ -86,9 +76,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         transactionCount.result = "0x1"
         val ethEstimateGas = EthEstimateGas()
         ethEstimateGas.result = "0x1"
-        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(
-            transactionCount
-        )
+        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethEstimateGas(any()).flowable() } returns Flowable.just(ethEstimateGas)
         val ethCostPayload = repository.getTransactionCosts(
             ETH,
@@ -261,5 +249,11 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         repository.getCurrentBlockNumber(ETH)
             .test()
             .assertError(error)
+    }
+
+    @Test
+    fun `to address checksum test`() {
+        val result = repository.toChecksumAddress("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359")
+        assertEquals("0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359", result)
     }
 }
