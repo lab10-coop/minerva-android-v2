@@ -15,4 +15,4 @@ class WebSocketServiceProviderImpl : WebSocketServiceProvider {
             .map { ExecutedTransaction(it.hash, it.from) }
 }
 
-private const val TIMEOUT = 120L
+private const val TIMEOUT = 240L
