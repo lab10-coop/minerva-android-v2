@@ -1,22 +1,13 @@
 package minerva.android
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.reactivex.Flowable
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
 import minerva.android.kotlinUtils.InvalidIndex
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.web3j.crypto.WalletUtils
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.methods.response.*
@@ -196,9 +187,15 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     }
 
     @Test
-    fun `is address valid success test`() {
-        val result = repository.isAddressValid("0x9866208bea68b10f04697c00b891541a305df851")
+    fun `is address with checksum valid success test`() {
+        val result = repository.isAddressValid("0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359")
         assertEquals(true, result)
+    }
+
+    @Test
+    fun `is address with no checksum invalid success test`() {
+        val result = repository.isAddressValid("0x9866208bea68b10f04697c00b891541a305df851")
+        assertEquals(false, result)
     }
 
     @Test

@@ -11,6 +11,7 @@ import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
+import org.web3j.abi.Utils
 import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
@@ -113,7 +114,8 @@ class BlockchainRegularAccountRepositoryImpl(
             .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
             .firstOrError()
 
-    override fun isAddressValid(address: String): Boolean = WalletUtils.isValidAddress(address)
+    override fun isAddressValid(address: String): Boolean =
+        WalletUtils.isValidAddress(address) && Keys.toChecksumAddress(address) == address
 
     override fun toChecksumAddress(address: String): String = Keys.toChecksumAddress(address)
 
@@ -200,7 +202,11 @@ class BlockchainRegularAccountRepositoryImpl(
                         .flatMapSingle { handleGasLimit(network, it, gasPrice) }
                 }
                 .firstOrError()
-                .timeout(TIMEOUT, TimeUnit.SECONDS, calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice))
+                .timeout(
+                    TIMEOUT,
+                    TimeUnit.SECONDS,
+                    calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
+                )
 
         } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
     }
@@ -243,7 +249,8 @@ class BlockchainRegularAccountRepositoryImpl(
             TransactionCostPayload(
                 gasPrice ?: fromWei(BigDecimal(gasPrices.value(network)), Convert.Unit.GWEI),
                 gasLimit,
-                getTransactionCostInEth(getGasPrice(gasPrice, network), BigDecimal(gasLimit)))
+                getTransactionCostInEth(getGasPrice(gasPrice, network), BigDecimal(gasLimit))
+            )
         )
 
     private fun getGasPrice(gasPrice: BigDecimal?, network: String) =
