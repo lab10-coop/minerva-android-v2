@@ -2,20 +2,28 @@ package minerva.android.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
-import kotlinx.android.synthetic.main.connection_request_card_layout.view.*
-import minerva.android.R
+import minerva.android.databinding.ConnectionRequestCardLayoutBinding
+import minerva.android.extension.gone
 
 class ConnectionRequestCard
 @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
     ConstraintLayout(context, attrs, defStyleAttr) {
 
-    init {
-        inflate(context, R.layout.connection_request_card_layout, this)
-    }
+    private val binding: ConnectionRequestCardLayoutBinding =
+        ConnectionRequestCardLayoutBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun setRequestedData(data: String) {
-        requested.text = data
+        binding.requested.text = data
     }
 
+    fun hideRequestedData() = with(binding) {
+        requested.gone()
+        requestedDataLabel.gone()
+    }
+
+    fun setConnectionIcon(resId: Int) {
+        binding.connectionView.setConnectionIcon(resId)
+    }
 }

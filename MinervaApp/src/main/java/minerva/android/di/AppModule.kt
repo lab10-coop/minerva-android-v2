@@ -7,6 +7,7 @@ import minerva.android.accounts.akm.SafeAccountSettingsViewModel
 import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
+import minerva.android.accounts.walletconnect.WalletConnectViewModel
 import minerva.android.edit.EditOrderViewModel
 import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
@@ -58,6 +59,7 @@ private val appModules = module {
     viewModel { WalletActionsViewModel(get()) }
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
+    viewModel { WalletConnectViewModel() }
 }
 
 private const val MinervaCache = "MinervaCache"

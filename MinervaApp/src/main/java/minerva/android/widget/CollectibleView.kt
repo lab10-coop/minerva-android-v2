@@ -1,5 +1,6 @@
 package minerva.android.widget
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
 
@@ -8,6 +9,7 @@ import minerva.android.databinding.CollectibleViewBinding
 import minerva.android.walletmanager.model.Collectible
 
 //TODO Collectible is the prototype
+@SuppressLint("ViewConstructor")
 class CollectibleView(context: Context, collectible: Collectible) : ConstraintLayout(context) {
 
     private var binding = CollectibleViewBinding.bind(inflate(context, R.layout.collectible_view, this))

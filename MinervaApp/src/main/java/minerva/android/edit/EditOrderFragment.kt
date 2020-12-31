@@ -2,9 +2,7 @@ package minerva.android.edit
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,17 +14,12 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class EditOrderFragment : BaseFragment() {
+class EditOrderFragment : BaseFragment(R.layout.fragment_edit_order) {
 
     private var type: Int = Int.InvalidIndex
     private lateinit var onBackListener: OnBackListener
     private val viewModel: EditOrderViewModel by viewModel()
     private val orderAdapter = OrderAdapter()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_edit_order, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

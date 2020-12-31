@@ -4,35 +4,37 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.budiyev.android.codescanner.AutoFocusMode
 import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.ScanMode
 import com.google.zxing.BarcodeFormat
-import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
+import minerva.android.databinding.FragmentScannerBinding
 import minerva.android.kotlinUtils.function.orElse
+import java.lang.Exception
 
-abstract class BaseScanner : Fragment() {
+abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
+
+    lateinit var binding: FragmentScannerBinding
     private var isPermissionGranted = false
     var shouldScan = true
     lateinit var codeScanner: CodeScanner
     abstract fun setOnCloseButtonListener()
     abstract fun onPermissionNotGranted()
+    abstract fun setupCallbacks()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentScannerBinding.bind(view)
         setupCodeScanner()
+        setupCallbacks()
         checkCameraPermission()
         setOnCloseButtonListener()
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_scanner, container, false)
 
     override fun onResume() {
         super.onResume()
@@ -45,8 +47,8 @@ abstract class BaseScanner : Fragment() {
         super.onPause()
     }
 
-    open fun setupCodeScanner() {
-        CodeScanner(requireActivity(), scanner).apply {
+    private fun setupCodeScanner() {
+        CodeScanner(requireActivity(), binding.scanner).apply {
             codeScanner = this
             scanMode = ScanMode.CONTINUOUS
             formats = listOf(BarcodeFormat.QR_CODE)
@@ -65,6 +67,13 @@ abstract class BaseScanner : Fragment() {
             }
         }
     }
+
+    fun handleCameraError(it: Exception) {
+        requireActivity().runOnUiThread {
+            Toast.makeText(context, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
 
     private fun startCameraPreview() {
         //delay to wait when camera is active, enables smooth animations

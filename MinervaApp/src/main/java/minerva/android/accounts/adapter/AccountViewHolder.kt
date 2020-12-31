@@ -23,7 +23,6 @@ import minerva.android.widget.TokenView
 import minerva.android.widget.TokensAndCollectiblesView
 import minerva.android.widget.repository.getNetworkIcon
 
-@SuppressLint("CustomView")
 class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
     RecyclerView.ViewHolder(view) {
 

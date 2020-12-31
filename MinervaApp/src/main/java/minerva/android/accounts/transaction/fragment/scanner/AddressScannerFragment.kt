@@ -4,13 +4,14 @@ import android.content.Context
 import android.widget.Toast
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
-import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
 import minerva.android.accounts.listener.AddressScannerListener
+import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
+import minerva.android.accounts.walletconnect.WalletConnectScannerFragment
+import minerva.android.extension.invisible
 import minerva.android.extension.visible
-import minerva.android.services.login.scanner.BaseScanner
 
-class AddressScannerFragment : BaseScanner() {
+class AddressScannerFragment : WalletConnectScannerFragment() {
 
     private lateinit var listener: AddressScannerListener
 
@@ -19,29 +20,33 @@ class AddressScannerFragment : BaseScanner() {
         listener = context as AddressScannerListener
     }
 
-    override fun setupCodeScanner() {
-        super.setupCodeScanner()
+    override fun setupCallbacks() {
         codeScanner.apply {
-            decodeCallback = DecodeCallback {
+            decodeCallback = DecodeCallback { result ->
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
-                        scannerProgressBar.visible()
-                        listener.setScanResult(AddressParser.parse(it.text))
-                        shouldScan = false
+                        binding.scannerProgressBar.visible()
+                        handleScanResult(AddressParser.parse(result.text))
                     }
                 }
             }
 
-            errorCallback = ErrorCallback {
-                requireActivity().runOnUiThread {
-                    Toast.makeText(context, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
-                }
-            }
+            errorCallback = ErrorCallback { handleCameraError(it) }
+        }
+    }
+
+    private fun handleScanResult(parsedResult: String) {
+        if (parsedResult == WALLET_CONNECT) {
+            Toast.makeText(context, getString(R.string.scan_wallet_connect_qr_message), Toast.LENGTH_LONG).show()
+            binding.scannerProgressBar.invisible()
+        } else {
+            listener.setScanResult(parsedResult)
+            shouldScan = false
         }
     }
 
     override fun setOnCloseButtonListener() {
-        closeButton.setOnClickListener {
+        binding.closeButton.setOnClickListener {
             listener.onBackPressed()
         }
     }

@@ -19,6 +19,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.repository.getNetworkIcon
+import timber.log.Timber
 import java.util.*
 
 class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListener {

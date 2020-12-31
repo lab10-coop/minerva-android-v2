@@ -1,10 +1,7 @@
 package minerva.android.accounts.transaction.fragment
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.refreshable_recycler_view_layout.*
@@ -25,15 +22,10 @@ import minerva.android.wrapped.startAccountAddressWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
+class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout), AccountsFragmentToAdapterListener {
 
     private val viewModel: AccountsViewModel by viewModel()
     private val accountAdapter by lazy { AccountAdapter(this) }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.refreshable_recycler_view_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -87,7 +79,7 @@ class AccountsFragment : BaseFragment(), AccountsFragmentToAdapterListener {
     }
 
     override fun onWalletConnect() {
-        Toast.makeText(requireContext(), "WalletConnect will be enabled soon", Toast.LENGTH_LONG).show()
+       interactor.showWalletConnectScanner()
     }
 
     fun setPendingAccount(index: Int, pending: Boolean) {

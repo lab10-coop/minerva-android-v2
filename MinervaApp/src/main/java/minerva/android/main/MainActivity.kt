@@ -8,16 +8,15 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ACCOUNT_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.fragment.AccountsFragment
-import minerva.android.extension.getCurrentFragment
-import minerva.android.extension.launchActivityForResult
-import minerva.android.extension.visibleOrGone
+import minerva.android.accounts.walletconnect.WalletConnectActivity
+import minerva.android.databinding.ActivityMainBinding
+import minerva.android.extension.*
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.identities.credentials.CredentialsFragment
 import minerva.android.identities.myIdentities.MyIdentitiesFragment
@@ -41,10 +40,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     internal val viewModel: MainViewModel by inject()
     private var shouldDisableAddButton = false
+    internal lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         prepareBottomNavMenu()
         replaceFragment(IdentitiesFragment())
         prepareSettingsIcon()
@@ -172,7 +173,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     private fun prepareSettingsIcon() {
-        if (!viewModel.isMnemonicRemembered()) bottomNavigation.getOrCreateBadge(R.id.settings)
+        if (!viewModel.isMnemonicRemembered()) binding.bottomNavigation.getOrCreateBadge(R.id.settings)
         else removeSettingsBadgeIcon()
     }
 
@@ -252,7 +253,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     override fun shouldShowLoadingScreen(isLoading: Boolean) {
-        loadingScreen.apply {
+        binding.loadingScreen.apply {
             visibleOrGone(isLoading)
             startAnimation()
         }
@@ -277,11 +278,15 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     override fun onBackPressed() {
         if (isIdentitiesTabSelected()) super.onBackPressed()
-        else bottomNavigation.selectedItemId = R.id.identities
+        else binding.bottomNavigation.selectedItemId = R.id.identities
     }
 
     override fun removeSettingsBadgeIcon() =
-        bottomNavigation.removeBadge(R.id.settings)
+        binding.bottomNavigation.removeBadge(R.id.settings)
+
+    override fun showWalletConnectScanner() {
+        launchActivity<WalletConnectActivity>()
+    }
 
     private fun startNewAccountActivity() {
         startNewAccountWrappedActivity(

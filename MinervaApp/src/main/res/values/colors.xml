@@ -12,10 +12,10 @@
     <color name="borderGray">#B5B5B5</color>
     <color name="gray">#3F3F4B</color>
     <color name="message_gray">#676879</color>
-    <color name="alert_red">#CC2800</color>
-    <color name="safe_account_background">#F8F8FA</color>
-    <color name="default_check_button_color">#E4E4E8</color>
-    <color name="setting_name_color">#5C5D6D</color>
+    <color name="alertRed">#CC2800</color>
+    <color name="safeAccountBackground">#F8F8FA</color>
+    <color name="defaultCheckButtonColor">#E4E4E8</color>
+    <color name="settingNameColor">#5C5D6D</color>
 
     <color name="colorSetOne">#FFF15161</color>
     <color name="colorSetOneOpacity">#29F15161</color>
@@ -50,5 +50,9 @@
     <color name="black">#000000</color>
     <color name="separatorColor">#EAEAEE</color>
     <color name="loadingScreenBackground">#70000000</color>
-    <color name="networks_type_header">#40404C</color>
+    <color name="networksTypeHeader">#40404C</color>
+    <color name="scannerMaskBlack">#95000000</color>
+    <color name="dappNameBlack">#3f3f4c</color>
+    <color name="dappStatusColorGray">#908d9f</color>
+    <color name="dappDragColorGray">#d8d8d8</color>
 </resources>
