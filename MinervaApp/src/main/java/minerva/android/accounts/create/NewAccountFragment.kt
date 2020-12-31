@@ -18,7 +18,7 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.wrapped.WrappedActivity.Companion.POSITION
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class NewAccountFragment : BaseFragment() {
+class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
 
     private val viewModel: NewAccountViewModel by viewModel()
     private val networkAdapter by lazy {
@@ -26,9 +26,6 @@ class NewAccountFragment : BaseFragment() {
     }
 
     private var position: Int = Int.InvalidIndex
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_new_account, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

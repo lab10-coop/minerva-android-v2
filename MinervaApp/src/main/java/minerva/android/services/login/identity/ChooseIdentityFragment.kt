@@ -26,17 +26,12 @@ import minerva.android.wrapped.startEditIdentityOnResultWrappedActivity
 import minerva.android.wrapped.startNewIdentityOnResultWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ChooseIdentityFragment : Fragment() {
+class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
 
     private val viewModel: ChooseIdentityViewModel by viewModel()
     private val identitiesAdapter = IdentitiesAdapter()
     private lateinit var serviceQrCode: ServiceQrCode
     private lateinit var listener: LoginScannerListener
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_choose_identity, container, false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -17,15 +17,10 @@ import minerva.android.walletmanager.model.WalletActionClustered
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class WalletActionsFragment : BaseFragment() {
+class WalletActionsFragment : BaseFragment(R.layout.recycler_view_layout) {
 
     private val viewModel: WalletActionsViewModel by viewModel()
     private val walletActionsAdapter by lazy { WalletActionsAdapter() }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.recycler_view_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

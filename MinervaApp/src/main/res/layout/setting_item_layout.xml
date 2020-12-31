@@ -16,7 +16,7 @@
         android:fontFamily="@font/rubik_regular"
         android:gravity="center_vertical"
         android:text="@string/backup"
-        android:textColor="@color/setting_name_color"
+        android:textColor="@color/settingNameColor"
         android:textSize="@dimen/text_normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

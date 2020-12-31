@@ -6,9 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionManager
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
@@ -49,33 +47,22 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import java.util.*
 
-
-class EditIdentityFragment : BaseFragment() {
+class EditIdentityFragment : BaseFragment(R.layout.fragment_edit_identity) {
     private var index: Int = Int.InvalidIndex
     private var serviceQrCode: ServiceQrCode? = null
     private lateinit var identity: Identity
     private lateinit var profileImageDialog: ProfileImageDialog
     private val viewModel: EditIdentityViewModel by viewModel()
     private var wasCustomPhotoSet: Boolean = false
-
-    private var viewGroup: ViewGroup? = null
-
     private lateinit var binding: FragmentEditIdentityBinding
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? =
-        inflater.inflate(R.layout.fragment_edit_identity, container, false).apply {
-            binding = FragmentEditIdentityBinding.bind(this)
-            viewGroup = container
-        }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentEditIdentityBinding.bind(view)
         initializeFragment()
         binding.apply {
             moreFields.setOnClickListener {
-                TransitionManager.beginDelayedTransition(viewGroup)
+                TransitionManager.beginDelayedTransition(binding.root)
                 moreFields.gone()
                 addressHeader.visible()
                 addressLineOneLayout.visible()
