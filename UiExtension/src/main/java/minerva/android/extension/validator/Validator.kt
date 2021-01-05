@@ -5,7 +5,7 @@ import java.math.BigDecimal
 
 object Validator {
 
-    const val HEX_PREFIX = "0x"
+    private const val HEX_PREFIX = "0x"
     private const val DOT = "."
     private const val ZERO = "0"
 
@@ -25,10 +25,12 @@ object Validator {
     fun validateAddress(address: String, isAddressValid: Boolean): ValidationResult {
         return when {
             address.isEmpty() -> ValidationResult.error(minerva.android.extension.R.string.field_cannot_be_empty)
-            !address.startsWith(HEX_PREFIX) && address.contains(DOT) -> ValidationResult(true)
+            isEnsName(address) -> ValidationResult(true)
             isAddressValid -> ValidationResult(true)
             !isAddressValid -> ValidationResult.error(R.string.invalid_account_address)
             else -> ValidationResult.error(R.string.invalid_account_address)
         }
     }
+
+    fun isEnsName(name: String) = !name.startsWith(HEX_PREFIX) && name.contains(DOT)
 }

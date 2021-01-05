@@ -193,9 +193,15 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     }
 
     @Test
-    fun `is address with no checksum invalid success test`() {
-        val result = repository.isAddressValid("0x9866208bea68b10f04697c00b891541a305df851")
+    fun `is address with no checksum and with random big letters invalid success test`() {
+        val result = repository.isAddressValid("0x9866208bea68B10f04697c00b891541a305Df851")
         assertEquals(false, result)
+    }
+
+    @Test
+    fun `is address with no checksum but with all small letters success test`() {
+        val result = repository.isAddressValid("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359")
+        assertEquals(true, result)
     }
 
     @Test
