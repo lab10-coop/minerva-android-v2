@@ -18,6 +18,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     private var activeAccounts = listOf<Account>()
     private var rawAccounts = listOf<Account>()
 
+    private var openAccounts = mutableListOf<Boolean>()
+
     override fun getItemCount(): Int = activeAccounts.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
@@ -27,7 +29,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         activeAccounts[position].let {
             val index = rawAccounts.indexOf(it)
             holder.apply {
-                setData(index, it)
+                setData(index, it, openAccounts[position])
                 setListener(this@AccountAdapter)
             }
         }
@@ -36,6 +38,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     fun updateList(data: List<Account>, areMainNetsEnabled: Boolean) {
         rawAccounts = data
         activeAccounts = data.filter { !it.isDeleted }.filter { it.network.testNet == !areMainNetsEnabled }
+        openAccounts = (activeAccounts.map { false }).toMutableList()
         notifyDataSetChanged()
     }
 
@@ -79,8 +82,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         listener.onSendTransaction(rawAccounts.indexOf(account))
     }
 
-    override fun onSendAssetTokenClicked(accountIndex: Int, assetIndex: Int) {
-        listener.onSendAssetTransaction(accountIndex, assetIndex)
+    override fun onSendAssetTokenClicked(account: Account, assetIndex: Int) {
+        listener.onSendAssetTransaction(rawAccounts.indexOf(account), assetIndex)
     }
 
     override fun onAccountRemoved(index: Int) {
@@ -91,8 +94,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         listener.onCreateSafeAccount(account)
     }
 
-    override fun onShowAddress(account: Account, index: Int) {
-        listener.onShowAddress(account, index)
+    override fun onShowAddress(account: Account) {
+        listener.onShowAddress(rawAccounts.indexOf(account))
     }
 
     override fun onShowSafeAccountSettings(account: Account, index: Int) {
@@ -101,6 +104,10 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
 
     override fun onWalletConnect() {
         listener.onWalletConnect()
+    }
+
+    override fun onOpenOrClose(index: Int, isOpen: Boolean) {
+        openAccounts[index] = isOpen
     }
 }
 

@@ -9,6 +9,7 @@ import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
 import minerva.android.accounts.enum.ErrorCode
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.RECEIVE_TRANSACTION_INDEX
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
@@ -18,7 +19,6 @@ import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.FundsAtRiskDialog
-import minerva.android.wrapped.startAccountAddressWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -70,8 +70,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             getString(R.string.remove_account_dialog_message)
         ) { viewModel.removeAccount(account) }
 
-    override fun onShowAddress(account: Account, index: Int) {
-        startAccountAddressWrappedActivity(requireContext(), account.name, index, account.network.short, account.isSafeAccount)
+    override fun onShowAddress(accountIndex: Int) {
+        interactor.showTransactionScreen(accountIndex, screenIndex = RECEIVE_TRANSACTION_INDEX)
     }
 
     override fun onShowSafeAccountSettings(account: Account, position: Int) {
