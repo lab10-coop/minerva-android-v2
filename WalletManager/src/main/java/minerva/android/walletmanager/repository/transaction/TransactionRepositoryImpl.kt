@@ -94,7 +94,7 @@ class TransactionRepositoryImpl(
         to: String,
         amount: BigDecimal
     ): Single<TransactionCost> =
-        if (NetworkManager.getNetwork(network).gasPriceOracle != String.Empty) {
+        if (NetworkManager.getNetwork(network).gasPriceOracle.isNotEmpty()) {
             servicesApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
                 .flatMap { gasPrice -> getTxCosts(network, assetIndex, from, to, amount, gasPrice.fast.divide(BigDecimal.TEN)) }
                 .onErrorResumeNext { getTxCosts(network, assetIndex, from, to, amount, null) }
@@ -111,7 +111,7 @@ class TransactionRepositoryImpl(
         amount: BigDecimal,
         gasPrice: BigDecimal?
     ) = blockchainRepository.getTransactionCosts(network, assetIndex, from, to, amount, gasPrice)
-        .map { TransactionCostPayloadToTransactionCost.map(it) }
+            .map { TransactionCostPayloadToTransactionCost.map(it) }
 
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)

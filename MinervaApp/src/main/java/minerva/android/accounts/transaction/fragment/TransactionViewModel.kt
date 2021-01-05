@@ -10,6 +10,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.transaction.model.TokenSpinnerElement
 import minerva.android.base.BaseViewModel
+import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.EmptyBalance
@@ -45,6 +46,9 @@ class TransactionViewModel(
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
+
+    private val _overrideTxCostLiveData = MutableLiveData<Event<Any>>()
+    val overrideTxCostLiveData: LiveData<Event<Any>> get() = _overrideTxCostLiveData
 
     private val _saveWalletActionFailedLiveData = MutableLiveData<Event<Pair<String, Int>>>()
     val saveWalletActionFailedLiveData: LiveData<Event<Pair<String, Int>>> get() = _saveWalletActionFailedLiveData
@@ -105,14 +109,19 @@ class TransactionViewModel(
             transactionRepository.getTransactionCosts(network.short, assetIndex, account.address, to, amount)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { _transactionCostLoadingLiveData.value = Event(true) }
+                .doOnSubscribe {
+                    _transactionCostLoadingLiveData.value = Event(true)
+                    if (Validator.isEnsName(to)) _overrideTxCostLiveData.value = Event(Any())
+                }
                 .doOnEvent { _, _ -> _transactionCostLoadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onSuccess = {
                         transactionCost = it.cost
                         _transactionCostLiveData.value = Event(it)
                     },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = {
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }
@@ -338,8 +347,4 @@ class TransactionViewModel(
 
     val token
         get() = network.token
-
-
-    fun prepareTitle() =
-        if (assetIndex != Int.InvalidIndex) account.accountAssets[assetIndex].asset.name else network.token
 }

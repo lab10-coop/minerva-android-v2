@@ -13,9 +13,10 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+        buildConfigField "String", "ENS_TEST_URL", '"https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
+        buildConfigField "String", "ENS_MAIN_URL", '"https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
     }
 
     buildTypes {
@@ -29,12 +30,10 @@ android {
         flavorDimensions 'enviroment'
         staging {
             versionCode Integer.valueOf(System.env.VERSION_CODE_STAGING ?: 1)
-            buildConfigField "String", "ENS_ADDRESS", '"https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
         }
 
         production {
             versionCode Integer.valueOf(System.env.VERSION_CODE_PROD ?: 1)
-            buildConfigField "String", "ENS_ADDRESS", '"https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
         }
     }
 }

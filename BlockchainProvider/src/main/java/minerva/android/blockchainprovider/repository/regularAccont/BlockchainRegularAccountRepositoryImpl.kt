@@ -1,6 +1,9 @@
 package minerva.android.blockchainprovider.repository.regularAccont
 
-import io.reactivex.*
+import io.reactivex.Completable
+import io.reactivex.Flowable
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.PendingTransaction
@@ -11,7 +14,6 @@ import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
-import org.web3j.abi.Utils
 import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
@@ -25,10 +27,10 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
 import org.web3j.utils.Numeric
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.Pair
 
@@ -115,7 +117,8 @@ class BlockchainRegularAccountRepositoryImpl(
             .firstOrError()
 
     override fun isAddressValid(address: String): Boolean =
-        WalletUtils.isValidAddress(address) && Keys.toChecksumAddress(address) == address
+        WalletUtils.isValidAddress(address) &&
+                (Keys.toChecksumAddress(address) == address || address.toLowerCase(Locale.ROOT) == address)
 
     override fun toChecksumAddress(address: String): String = Keys.toChecksumAddress(address)
 
@@ -157,12 +160,11 @@ class BlockchainRegularAccountRepositoryImpl(
 
             }.toObservable()
 
-    override fun reverseResolveENS(ensAddress: String): Single<String> {
-        return Single.just(ensAddress).map { ensResolver.reverseResolve(it) }
-    }
+    override fun reverseResolveENS(ensAddress: String): Single<String> =
+        Single.just(ensAddress).map { ensResolver.reverseResolve(it) }
 
     override fun resolveENS(ensName: String): Single<String> =
-        if (ensName.contains(DOT)) Single.just(ensName).map { ensResolver.resolve(it) }
+        if (ensName.contains(DOT)) Single.just(ensName).map { ensResolver.resolve(it) }.onErrorReturnItem(ensName)
         else Single.just(ensName)
 
     override fun transferERC20Token(network: String, payload: TransactionPayload): Completable =
@@ -191,13 +193,14 @@ class BlockchainRegularAccountRepositoryImpl(
         to: String,
         amount: BigDecimal,
         gasPrice: BigDecimal?
-    ): Single<TransactionCostPayload> {
-        return if (assetIndex == Int.InvalidIndex) {
+    ): Single<TransactionCostPayload> =
+        if (assetIndex == Int.InvalidIndex) {
             web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
                 .flowable()
-                .flatMap { count ->
+                .zipWith(resolveENS(to).toFlowable())
+                .flatMap { (count, address) ->
                     web3j.value(network)
-                        .ethEstimateGas(getTransaction(from, count, to, amount))
+                        .ethEstimateGas(getTransaction(from, count, address, amount))
                         .flowable()
                         .flatMapSingle { handleGasLimit(network, it, gasPrice) }
                 }
@@ -209,7 +212,6 @@ class BlockchainRegularAccountRepositoryImpl(
                 )
 
         } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
-    }
 
     private fun getTransaction(from: String, count: EthGetTransactionCount, to: String, amount: BigDecimal) =
         Transaction(
@@ -227,13 +229,12 @@ class BlockchainRegularAccountRepositoryImpl(
         return calculateTransactionCosts(network, gasLimit, gasPrice)
     }
 
-    private fun estimateGasLimit(gasLimit: BigInteger): BigInteger {
-        return if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
+    private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
+        if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
             gasLimit
         } else {
             increaseGasLimitByTenPercent(gasLimit)
         }
-    }
 
     private fun increaseGasLimitByTenPercent(gasLimit: BigInteger) = gasLimit.add(getBuffer(gasLimit))
 

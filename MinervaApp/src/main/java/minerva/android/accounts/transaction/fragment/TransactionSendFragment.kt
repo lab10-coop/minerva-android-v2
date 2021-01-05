@@ -103,6 +103,7 @@ class TransactionSendFragment : Fragment() {
             saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onError(it.first) })
             transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCosts(it) })
             transactionCostLoadingLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCostLoader(it) })
+            overrideTxCostLiveData.observe(viewLifecycleOwner, EventObserver { shouldOverrideTransactionCost = true })
         }
     }
 

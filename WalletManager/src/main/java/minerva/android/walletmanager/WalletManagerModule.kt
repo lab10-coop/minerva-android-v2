@@ -4,6 +4,7 @@ import android.content.Context
 import com.exchangemarketsprovider.createExchangeRateProviderModule
 import minerva.android.blockchainprovider.createBlockchainProviderModule
 import minerva.android.configProvider.createWalletConfigProviderModule
+import minerva.android.configProvider.localSharedPrefs
 import minerva.android.cryptographyProvider.createCryptographyModules
 import minerva.android.servicesApiProvider.createServicesApiProviderModule
 import minerva.android.walletmanager.keystore.KeyStoreManager
@@ -13,7 +14,9 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.AccountManagerImpl
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.identity.IdentityManagerImpl
-import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.manager.networks.NetworkManager.gasPriceMap
+import minerva.android.walletmanager.manager.networks.NetworkManager.httpsUrlMap
+import minerva.android.walletmanager.manager.networks.NetworkManager.wssUrlMap
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.order.OrderManagerImpl
 import minerva.android.walletmanager.manager.services.ServiceManager
@@ -28,13 +31,11 @@ import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.LocalStorageImpl
+import minerva.android.walletmanager.utils.EnsProvider
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepositoryImpl
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProviderImpl
-import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
-import minerva.android.configProvider.localProvider.LocalWalletConfigProviderImpl
-import minerva.android.configProvider.localSharedPrefs
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -43,17 +44,11 @@ fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, binanceUrl: St
     .plus(createCryptographyModules())
     .plus(createWalletConfigProviderModule(isDebug, baseUrl))
     .plus(createServicesApiProviderModule(isDebug, baseUrl))
-    .plus(
-        createBlockchainProviderModule(
-            NetworkManager.httpsUrlMap,
-            BuildConfig.ENS_ADDRESS,
-            NetworkManager.gasPriceMap,
-            NetworkManager.wssUrlMap
-        )
-    )
+    .plus(createBlockchainProviderModule(httpsUrlMap, gasPriceMap, wssUrlMap))
     .plus(createExchangeRateProviderModule(isDebug, binanceUrl))
 
 fun createWalletModules() = module {
+    factory { EnsProvider(get()).ensUrl }
     factory(named(localSharedPrefs)) { androidContext().getSharedPreferences(localStorage, Context.MODE_PRIVATE) }
     factory(named(minervaSharedPrefs)) { androidContext().getSharedPreferences(MinervaStorage, Context.MODE_PRIVATE) }
     factory { KeyStoreManager() }
@@ -73,5 +68,4 @@ fun createWalletModules() = module {
 
 private const val MinervaStorage = "MinervaSharedPrefs"
 private const val minervaSharedPrefs = "minerva"
-
-const val localStorage = "LocalStorage"
+private const val localStorage = "LocalStorage"
