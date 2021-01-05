@@ -49,10 +49,10 @@ class AddressFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_address, container, false).apply {
-            binding = FragmentAddressBinding.bind(this)
-            viewGroup = container
-        }
+            inflater.inflate(R.layout.fragment_address, container, false).apply {
+                binding = FragmentAddressBinding.bind(this)
+                viewGroup = container
+            }
 
     private fun initializeView(minervaPrimitive: MinervaPrimitive) {
         with(minervaPrimitive) {
@@ -124,27 +124,27 @@ class AddressFragment : Fragment() {
     private fun isIdentity() = fragmentType == WrappedFragmentType.IDENTITY_ADDRESS
 
     private fun prepareTextAddress(minervaPrimitive: MinervaPrimitive) =
-        if (isIdentity()) (minervaPrimitive as? Identity)?.did ?: String.Empty
-        else minervaPrimitive.address
+            if (isIdentity()) (minervaPrimitive as? Identity)?.did ?: String.Empty
+            else minervaPrimitive.address
 
     private fun prepareToastMessage() =
-        if (isIdentity()) getString(R.string.identity_saved_to_clipboard)
-        else getString(R.string.address_saved_to_clip_board)
+            if (isIdentity()) getString(R.string.identity_saved_to_clipboard)
+            else getString(R.string.address_saved_to_clip_board)
 
     private fun prepareTitleAddress() =
-        if (isIdentity()) DID_LABEL
-        else String.Empty
+            if (isIdentity()) DID_LABEL
+            else String.Empty
 
     companion object {
         const val DID_LABEL = "DID"
 
         @JvmStatic
         fun newInstance(fragmentType: WrappedFragmentType, index: Int) =
-            AddressFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable(FRAGMENT_TYPE, fragmentType)
-                    putInt(INDEX, index)
+                AddressFragment().apply {
+                    arguments = Bundle().apply {
+                        putSerializable(FRAGMENT_TYPE, fragmentType)
+                        putInt(INDEX, index)
+                    }
                 }
-            }
     }
 }

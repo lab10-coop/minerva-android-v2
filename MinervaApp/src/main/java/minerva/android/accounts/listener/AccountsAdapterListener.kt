@@ -4,10 +4,11 @@ import minerva.android.walletmanager.model.Account
 
 interface AccountsAdapterListener {
     fun onSendAccountClicked(account: Account)
-    fun onSendAssetTokenClicked(accountIndex: Int, assetIndex: Int)
+    fun onSendAssetTokenClicked(account: Account, assetIndex: Int)
     fun onAccountRemoved(index: Int)
     fun onCreateSafeAccountClicked(account: Account)
-    fun onShowAddress(account: Account, index: Int)
+    fun onShowAddress(account: Account)
     fun onShowSafeAccountSettings(account: Account, index: Int)
     fun onWalletConnect()
+    fun onOpenOrClose(index: Int, isOpen: Boolean)
 }

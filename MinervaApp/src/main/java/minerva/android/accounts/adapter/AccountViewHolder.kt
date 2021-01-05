@@ -34,24 +34,25 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private val isOpen
         get() = binding.container.isVisible
 
-    override fun onSendTokenAssetClicked(accountIndex: Int, tokenIndex: Int) = listener.onSendAssetTokenClicked(accountIndex, tokenIndex)
+    override fun onSendTokenAssetClicked(account: Account, tokenIndex: Int) = listener.onSendAssetTokenClicked(account, tokenIndex)
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
     fun setListener(listener: AccountsAdapterListener) {
         this.listener = listener
     }
 
-    fun setData(index: Int, account: Account) {
-        this.rawPosition = index
+    fun setData(index: Int, account: Account, isOpen: Boolean) {
+        rawPosition = index
         view.apply {
             prepareView(account)
             prepareAssets(account)
             bindData(account)
             setOnMenuClickListener(rawPosition, account)
+            if (isOpen) binding.container.visible()
         }
 
         binding.qrCode.setOnClickListener {
-            listener.onShowAddress(account, rawPosition)
+            listener.onShowAddress(account)
         }
     }
 
@@ -134,6 +135,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     }
 
     private fun open() {
+        listener.onOpenOrClose(rawPosition, true)
         TransitionManager.beginDelayedTransition(viewGroup)
         binding.apply {
             arrow.rotate180()
@@ -142,6 +144,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     }
 
     private fun close() {
+        listener.onOpenOrClose(rawPosition, false)
         TransitionManager.endTransitions(viewGroup)
         TransitionManager.beginDelayedTransition(viewGroup)
         binding.apply {

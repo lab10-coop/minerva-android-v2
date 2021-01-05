@@ -38,8 +38,9 @@ class TransactionViewModel(
 
     lateinit var transaction: Transaction
 
-    var account: Account = Account(Int.InvalidIndex)
+    var accountIndex = Int.InvalidIndex
     var assetIndex: Int = Int.InvalidIndex
+    var account: Account = Account(Int.InvalidIndex)
 
     var transactionCost: BigDecimal = BigDecimal.ZERO
     lateinit var recipients: List<Recipient>

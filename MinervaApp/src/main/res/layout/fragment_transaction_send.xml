@@ -63,6 +63,7 @@
                 android:layout_height="wrap_content"
                 android:drawableEnd="@drawable/ic_barcode_scanner"
                 android:inputType="text"
+                android:imeOptions="actionDone"
                 tools:ignore="LabelFor" />
         </com.google.android.material.textfield.TextInputLayout>
 

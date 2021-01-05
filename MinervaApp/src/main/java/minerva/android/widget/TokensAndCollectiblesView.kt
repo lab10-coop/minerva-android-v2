@@ -16,7 +16,7 @@ import minerva.android.kotlinUtils.NO_PADDING
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Collectible
 
-@SuppressLint("CustomView")
+@SuppressLint("ViewConstructor")
 class TokensAndCollectiblesView(
     private val parent: ViewGroup,
     private val account: Account,
@@ -29,9 +29,7 @@ class TokensAndCollectiblesView(
     init {
         initView()
         prepareListeners()
-        initMainToken(account, callback)
         initAssetsList()
-        initCollectiblesList()
     }
 
     private fun initView() {
@@ -41,13 +39,14 @@ class TokensAndCollectiblesView(
         isFocusable = true
     }
 
-    private fun initCollectiblesList() {
+    //TODO this method is not used, because Collectiles are not implemented yet - ready to use UI
+    private fun initCollectiblesList(collectibles: List<Collectible>) {
         //TODO implement adding views to collectibles container
         //TODO list of Collectibles made only for UI purposes
-        val collectibles = listOf(
-            Collectible("POAP", "The Proof of Minerva Protocol", 3),
-            Collectible("POAP #2", "The Proof of Wilc Protocol", 2)
-        )
+//        val collectibles = listOf(
+//            Collectible("POAP", "The Proof of Minerva Protocol", 3),
+//            Collectible("POAP #2", "The Proof of Wilc Protocol", 2)
+//        )
 
         binding.apply {
             collectiblesContainer.apply {
@@ -62,6 +61,7 @@ class TokensAndCollectiblesView(
         }
     }
 
+    //TODO this method is not used, because Asset Manage screen is not implemented yet - ready to use UI
     private fun initMainToken(account: Account, callback: TokenView.TokenViewCallback) {
         binding.apply {
             if (showMainToken) {

@@ -32,16 +32,16 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         super.onCreate(savedInstanceState)
         binding = ActivityTransactionBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel.getAccount(
-            intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex),
-            intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex)
-        )
-        initView()
+        viewModel.apply {
+            accountIndex = intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex)
+            getAccount(accountIndex, intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex))
+        }
+        initView(intent.getIntExtra(TRANSACTION_SCREEN, SEND_TRANSACTION_INDEX))
     }
 
-    private fun initView() {
+    private fun initView(initPageIndex: Int) {
         prepareActionBar()
-        setupViewPager()
+        setupViewPager(initPageIndex)
     }
 
     override fun onBackPressed() {
@@ -49,7 +49,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         super.onBackPressed()
     }
 
-    private fun setupViewPager() {
+    private fun setupViewPager(initPageIndex: Int) {
         with(binding) {
             transactionViewPager.apply {
                 adapter = TransactionPagerAdapter(this@TransactionActivity, ::getFragment)
@@ -73,14 +73,15 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
                 invalidateOptionsMenu()
                 transactionViewPager.setCurrentItem(it, true)
             }
+            transactionViewPager.setCurrentItem(initPageIndex, false)
         }
     }
 
     private fun getFragment(position: Int) =
-        when (position) {
-            SEND_TRANSACTION_INDEX -> TransactionSendFragment.newInstance()
-            else -> AddressFragment.newInstance(WrappedFragmentType.ACCOUNT_ADDRESS, viewModel.account.id)
-        }
+            when (position) {
+                SEND_TRANSACTION_INDEX -> TransactionSendFragment.newInstance()
+                else -> AddressFragment.newInstance(WrappedFragmentType.ACCOUNT_ADDRESS, viewModel.accountIndex)
+            }
 
     private fun prepareActionBar() {
         supportActionBar?.apply {
@@ -101,28 +102,28 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     }
 
     private fun getAccountIndex() =
-        /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
-        if (viewModel.wssUri == String.Empty) {
-            Int.InvalidIndex
-        } else {
-            viewModel.account.id
-        }
+            /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
+            if (viewModel.wssUri == String.Empty) {
+                Int.InvalidIndex
+            } else {
+                viewModel.account.id
+            }
 
     override fun onError(message: String) {
         MinervaFlashbar.show(
-            this,
-            getString(R.string.transaction_error_title),
-            getString(R.string.transaction_error_message, message)
+                this,
+                getString(R.string.transaction_error_title),
+                getString(R.string.transaction_error_message, message)
         )
     }
 
     override fun showScanner() {
         supportActionBar?.hide()
         replaceFragment(
-            R.id.container,
-            AddressScannerFragment.newInstance(),
-            R.animator.slide_in_left,
-            R.animator.slide_out_right
+                R.id.container,
+                AddressScannerFragment.newInstance(),
+                R.animator.slide_in_left,
+                R.animator.slide_out_right
         )
     }
 
@@ -141,10 +142,12 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
     companion object {
-        private const val SEND_TRANSACTION_INDEX = 0
+        const val SEND_TRANSACTION_INDEX = 0
+        const val RECEIVE_TRANSACTION_INDEX = 1
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val ACCOUNT_INDEX = "account_index"
         const val ASSET_INDEX = "asset_index"
+        const val TRANSACTION_SCREEN = "transaction_screen"
     }
 }
