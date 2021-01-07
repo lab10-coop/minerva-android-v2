@@ -60,7 +60,13 @@ fun startIdentityAddressWrappedActivity(context: Context, title: String, positio
     }
 }
 
-fun startAccountAddressWrappedActivity(context: Context, title: String, index: Int, networkShort: String, isSafeAccount: Boolean) {
+fun startAccountAddressWrappedActivity(
+    context: Context,
+    title: String,
+    index: Int,
+    networkShort: String,
+    isSafeAccount: Boolean
+) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT_ADDRESS)
         putExtra(WrappedActivity.INDEX, index)
@@ -90,7 +96,13 @@ fun startEditCredentialOrderWrappedActivity(context: Context) {
     }
 }
 
-fun startSafeAccountWrappedActivity(context: Context, subtitle: String, position: Int, networkShort: String, isSafeAccount: Boolean) {
+fun startSafeAccountWrappedActivity(
+    context: Context,
+    subtitle: String,
+    position: Int,
+    networkShort: String,
+    isSafeAccount: Boolean
+) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.SAFE_ACCOUNT_SETTINGS)
         putExtra(WrappedActivity.SUBTITLE, subtitle)

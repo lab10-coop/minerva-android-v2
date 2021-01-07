@@ -1,7 +1,6 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import java.math.BigInteger
 
 data class Network(

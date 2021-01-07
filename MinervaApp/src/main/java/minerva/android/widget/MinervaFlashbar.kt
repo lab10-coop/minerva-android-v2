@@ -85,7 +85,7 @@ object MinervaFlashBarWithThreeButtons {
                     positiveAction()
                 }
             })
-            .alternativeActionTapListener(object: Flashbar.OnActionTapListener {
+            .alternativeActionTapListener(object : Flashbar.OnActionTapListener {
                 override fun onActionTapped(bar: Flashbar) {
                     bar.dismiss()
                     primaryAction()

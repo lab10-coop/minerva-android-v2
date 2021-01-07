@@ -80,14 +80,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `are pending transactions empty`(){
+    fun `are pending transactions empty`() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(emptyList())
         val result = viewModel.arePendingAccountsEmpty()
         assertEquals(true, result)
     }
 
     @Test
-    fun `are main nets enabled test`(){
+    fun `are main nets enabled test`() {
         whenever(accountManager.areMainNetworksEnabled).thenReturn(true)
         val result = viewModel.areMainNetsEnabled
         assertEquals(true, result)

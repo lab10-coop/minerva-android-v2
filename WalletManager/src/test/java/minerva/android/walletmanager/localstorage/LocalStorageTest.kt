@@ -5,7 +5,6 @@ import io.mockk.*
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.storage.LocalStorageImpl
 import org.junit.Test
-import kotlin.test.assertTrue
 
 class LocalStorageTest {
 

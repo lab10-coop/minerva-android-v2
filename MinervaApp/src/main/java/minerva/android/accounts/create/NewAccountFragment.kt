@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_new_account.*
-import kotlinx.android.synthetic.main.fragment_new_account.networksHeader
 import minerva.android.R
 import minerva.android.accounts.adapter.NetworkAdapter
 import minerva.android.extension.gone

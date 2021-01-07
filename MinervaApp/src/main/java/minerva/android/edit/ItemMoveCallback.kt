@@ -7,7 +7,11 @@ import androidx.recyclerview.widget.RecyclerView
 class DragManageAdapter(private val adapter: OrderAdapter, dragDirs: Int, swipeDirs: Int) :
     ItemTouchHelper.SimpleCallback(dragDirs, swipeDirs) {
 
-    override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+    override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
         adapter.swapItems(viewHolder.adapterPosition, target.adapterPosition)
         return true
     }
@@ -23,7 +27,7 @@ class DragManageAdapter(private val adapter: OrderAdapter, dragDirs: Int, swipeD
     }
 
     //not used
-    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) { }
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
 
     companion object {
         private const val OBJECT_DRAGGED_ALPHA = 0.8f

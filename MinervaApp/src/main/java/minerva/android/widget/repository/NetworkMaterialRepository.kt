@@ -7,7 +7,6 @@ import android.view.Gravity
 import androidx.core.content.ContextCompat
 import minerva.android.R
 import minerva.android.kotlinUtils.InvalidId
-import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_CLASSIC_KOTTI

@@ -52,7 +52,7 @@ class ClubCardViewModel(private val cacheStorage: CacheStorage) : BaseViewModel(
         }
     }
 
-    private fun correctXML(cardSource: String, url: String? = null){
+    private fun correctXML(cardSource: String, url: String? = null) {
         prepareDoc(cardSource)?.let { doc ->
             doc.getElementsByTagName(TEXT).let {
                 for (i in 0..it.length) {

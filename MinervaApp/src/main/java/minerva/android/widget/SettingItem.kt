@@ -6,7 +6,6 @@ import kotlinx.android.synthetic.main.setting_item_layout.view.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.settings.model.SettingRow
-import timber.log.Timber
 
 class SettingItem(context: Context) : ConstraintLayout(context) {
 

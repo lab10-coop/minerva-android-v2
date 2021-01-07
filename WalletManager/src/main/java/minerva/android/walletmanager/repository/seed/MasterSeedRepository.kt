@@ -2,9 +2,7 @@ package minerva.android.walletmanager.repository.seed
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
-import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.model.RestoreWalletResponse
 import minerva.android.walletmanager.model.WalletConfig
 
 interface MasterSeedRepository {

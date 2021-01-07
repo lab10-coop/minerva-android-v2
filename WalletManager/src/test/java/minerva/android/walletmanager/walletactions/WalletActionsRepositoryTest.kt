@@ -9,7 +9,6 @@ import io.reactivex.Observable
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
@@ -31,7 +30,8 @@ class WalletActionsRepositoryTest {
     private val localWalletActionsConfigProvider: LocalWalletActionsConfigProvider = mock()
     private val walletConfigManager: WalletConfigManager = mock()
     private val repository = WalletActionsRepositoryImpl(minervaApi, localWalletActionsConfigProvider, walletConfigManager)
-    private val actions = mutableListOf(WalletActionClusteredPayload(1L, mutableListOf(WalletActionPayload(1, 2, 1234L, hashMapOf()))))
+    private val actions =
+        mutableListOf(WalletActionClusteredPayload(1L, mutableListOf(WalletActionPayload(1, 2, 1234L, hashMapOf()))))
     private val masterSeed = MasterSeed(_privateKey = "123", _publicKey = "456", _seed = "seed")
     private val error = Throwable()
 

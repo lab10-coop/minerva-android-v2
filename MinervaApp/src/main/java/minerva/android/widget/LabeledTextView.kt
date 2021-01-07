@@ -33,7 +33,8 @@ class LabeledTextView(context: Context, attrs: AttributeSet? = null) : FrameLayo
 
     private fun getEnabledTextColor(enabled: Boolean): Int = if (enabled) R.color.bodyColor else R.color.titleColor
 
-    private fun getEnabledResource(enabled: Boolean): Int = if (enabled) R.drawable.rounded_white_frame else R.drawable.rounded_gray_frame
+    private fun getEnabledResource(enabled: Boolean): Int =
+        if (enabled) R.drawable.rounded_white_frame else R.drawable.rounded_gray_frame
 
     init {
         inflate(context, R.layout.labeled_text_view, this)

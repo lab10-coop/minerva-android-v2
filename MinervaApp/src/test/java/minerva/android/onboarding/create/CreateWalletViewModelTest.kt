@@ -5,7 +5,6 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.observeLiveDataEvent
 import minerva.android.observeWithPredicate
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import org.amshove.kluent.shouldBeEqualTo

@@ -105,7 +105,9 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
     private fun prepareObservers() {
         viewModel.apply {
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false, LoginPayload(getLoginStatus(it))) })
+            errorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { listener.onPainlessLoginResult(false, LoginPayload(getLoginStatus(it))) })
             loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(true, payload = it) })
             requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver { handleRequestedFields() })
         }
@@ -114,7 +116,12 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
     private fun handleRequestedFields() {
         identitiesAdapter.getSelectedIdentity()?.let {
             if (it.isNewIdentity) startNewIdentityOnResultWrappedActivity(activity, serviceQrCode)
-            else startEditIdentityOnResultWrappedActivity(activity, viewModel.getIdentityPosition(it.index), it.name, serviceQrCode)
+            else startEditIdentityOnResultWrappedActivity(
+                activity,
+                viewModel.getIdentityPosition(it.index),
+                it.name,
+                serviceQrCode
+            )
         }
     }
 

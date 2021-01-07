@@ -37,7 +37,12 @@ class MinervaMessagingService : FirebaseMessagingService() {
             .setContentIntent(getPendingIntent(jwt))
 
     private fun getPendingIntent(jwt: String?): PendingIntent =
-        PendingIntent.getActivity(this, REQUEST_CODE, getIntent(jwt), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT)
+        PendingIntent.getActivity(
+            this,
+            REQUEST_CODE,
+            getIntent(jwt),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT
+        )
 
     private fun getIntent(jwt: String?) =
         Intent(applicationContext, MainActivity::class.java).apply {

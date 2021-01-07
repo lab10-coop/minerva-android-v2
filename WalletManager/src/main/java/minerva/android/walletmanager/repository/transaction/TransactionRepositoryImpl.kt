@@ -5,7 +5,6 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.SingleSource
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
@@ -14,7 +13,6 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.servicesApiProvider.api.ServicesApi
-import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -25,7 +23,6 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 

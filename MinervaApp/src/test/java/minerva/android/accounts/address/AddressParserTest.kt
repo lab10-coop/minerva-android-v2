@@ -7,28 +7,28 @@ import kotlin.test.assertEquals
 class AddressParserTest {
 
     @Test
-    fun `get address with prefix test`(){
+    fun `get address with prefix test`() {
         val address = "ethereum:0x344423432"
         val result = AddressParser.parse(address)
         assertEquals("0x344423432", result)
     }
 
     @Test
-    fun `get address when no prefix test`(){
+    fun `get address when no prefix test`() {
         val address = "0x344423432"
         val result = AddressParser.parse(address)
         assertEquals("0x344423432", result)
     }
 
     @Test
-    fun `get address when only separator test`(){
+    fun `get address when only separator test`() {
         val address = ":0x344423432"
         val result = AddressParser.parse(address)
         assertEquals("0x344423432", result)
     }
 
     @Test
-    fun `get address when more parts test`(){
+    fun `get address when more parts test`() {
         val address = "test:eth:0x344423432"
         val result = AddressParser.parse(address)
         assertEquals("test:eth:0x344423432", result)

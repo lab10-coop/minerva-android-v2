@@ -54,7 +54,8 @@ class ChooseIdentityViewModel(
         handleLogin(getIdentity(identityIndex), serviceQrCode)
     }
 
-    fun getIdentityPosition(identityIndex: Int): Int = getIdentities()?.indexOfFirst { it.index == identityIndex } ?: Int.InvalidIndex
+    fun getIdentityPosition(identityIndex: Int): Int =
+        getIdentities()?.indexOfFirst { it.index == identityIndex } ?: Int.InvalidIndex
 
     private fun getIdentity(identityIndex: Int): Identity =
         getIdentities()?.find { it.index == identityIndex } ?: Identity(index = Int.InvalidIndex)
@@ -62,9 +63,25 @@ class ChooseIdentityViewModel(
     private fun minervaLogin(identity: Identity, qrCode: ServiceQrCode) {
         qrCode.callback?.let { callback ->
             serviceManager.createJwtToken(createLoginPayload(identity, qrCode), identity.privateKey)
-                .flatMapCompletable { jwtToken -> serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity)) }
+                .flatMapCompletable { jwtToken ->
+                    serviceManager.painlessLogin(
+                        callback,
+                        jwtToken,
+                        identity,
+                        getService(qrCode, identity)
+                    )
+                }
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(listOf(getValuesWalletAction(identity.name, qrCode.serviceName))))
+                .andThen(
+                    walletActionsRepository.saveWalletActions(
+                        listOf(
+                            getValuesWalletAction(
+                                identity.name,
+                                qrCode.serviceName
+                            )
+                        )
+                    )
+                )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

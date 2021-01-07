@@ -3,14 +3,10 @@ package minerva.android.walletmanager.utils
 import com.exchangemarketsprovider.model.Market
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Balance
-import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.defs.ExchangeRate
 import minerva.android.walletmanager.model.defs.ExchangeRate.Companion.ATS_EURO
 import minerva.android.walletmanager.model.defs.Markets
-import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR
@@ -53,7 +49,7 @@ object MarketUtils {
         when (network) {
             ATS_TAU, ATS_SIGMA -> ATS_EURO
             POA_SKL, POA_CORE -> getRatesMap(markets)[Markets.POA_EUR]
-            ETH_RIN, ETH_KOV, ETH_GOR, ETH_ROP, ETH_MAIN  -> getRatesMap(markets)[Markets.ETH_EUR]
+            ETH_RIN, ETH_KOV, ETH_GOR, ETH_ROP, ETH_MAIN -> getRatesMap(markets)[Markets.ETH_EUR]
             XDAI -> getRatesMap(markets)[Markets.DAI_EUR]
             else -> null
         }

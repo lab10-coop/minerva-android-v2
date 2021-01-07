@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import androidx.annotation.IntDef
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.DEFAULT_VERSION
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_MAIN_NETWORK_INDEX
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FOURTH_DEFAULT_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_DEFAULT_MAIN_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_DEFAULT_NETWORK_INDEX

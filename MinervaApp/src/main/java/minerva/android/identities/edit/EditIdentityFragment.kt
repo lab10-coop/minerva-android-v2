@@ -325,7 +325,11 @@ class EditIdentityFragment : BaseFragment(R.layout.fragment_edit_identity) {
             }
         }
 
-    private fun checkEditTextInput(layout: TextInputLayout, editText: TextInputEditText, prepareErrorMessage: (String) -> String?) {
+    private fun checkEditTextInput(
+        layout: TextInputLayout,
+        editText: TextInputEditText,
+        prepareErrorMessage: (String) -> String?
+    ) {
         editText.setOnFocusChangeListener { _, hasFocus ->
             layout.error = if (hasFocus) {
                 if (editText.text.toString().isBlank()) editText.setText(String.Empty)
