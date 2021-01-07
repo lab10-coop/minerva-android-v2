@@ -2,7 +2,6 @@ package minerva.android.servicesApiProvider.model
 
 import com.google.gson.annotations.SerializedName
 import java.math.BigDecimal
-import java.math.BigInteger
 
 data class GasPrice(
     @SerializedName("fast")

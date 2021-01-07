@@ -31,7 +31,8 @@ class CryptographyRepositoryTest {
     private val didPath = "m/73'/0'/0'/"
     private val mainNetPath = "m/44'/60'/0'/0/"
     private val testNetPath = "m/44'/1'/0'/0/"
-    private val token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJleHAiOjE2MDkzNzI4MDAsInZjIjp7ImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImF1dG9tb3RpdmVNZW1iZXJzaGlwQ2FyZCI6eyJjcmVkZW50aWFsTmFtZSI6IsOWQU1UQyBDbHVia2FydGUiLCJjYXJkSW1hZ2UiOnsiLyI6Ii9pcGZzL1FtWXBaMUxCQlJhZDVpUWZhWm9LQUZBTmg0Z3k0MXozb0J4UUtnd3lRY3hFeXIvIn0sImljb25JbWFnZSI6eyIvIjoiL2lwZnMvUW1TdXlmd1d0Q3d3Y1Jlb1dIVXc0bXJSWEdlelUyS0RSaVBpclNGaDV3ZFVKTi8ifSwibWVtYmVySWQiOiIxMiAzNDUgNjc4IiwibmFtZSI6Ik1zLiBSYW5kb20iLCJzaW5jZSI6IjIwMTAiLCJjb3ZlcmFnZSI6IkF1dG8ifX0sIkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9zY2hlbWEuZGV2LmxhYjEwLmlvL0F1dG9tb3RpdmVNZW1iZXJzaGlwQ2FyZENyZWRlbnRpYWwuanNvbiJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiQXV0b21vdGl2ZU1lbWJlcnNoaXBDYXJkQ3JlZGVudGlhbCJdfSwic3ViIjoiIiwibmJmIjoxNjA1NzA2ODM3LCJpc3MiOiJkaWQ6ZXRocjphcnRpc190MToweDI2MDViZjhjOWI5M2JkMjM5YjYzMGIxMjVjZjk3NzBkYjBlZDU1MDEifQ.Al6FZKfmG2z9hnjgVixOsmpIYJUO-BqYlXfWJyau_oTA-gwOLTZ7ihqb31IAPPJK49Qz8qaw8nR64F-HAJzewQ"
+    private val token =
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJleHAiOjE2MDkzNzI4MDAsInZjIjp7ImNyZWRlbnRpYWxTdWJqZWN0Ijp7ImF1dG9tb3RpdmVNZW1iZXJzaGlwQ2FyZCI6eyJjcmVkZW50aWFsTmFtZSI6IsOWQU1UQyBDbHVia2FydGUiLCJjYXJkSW1hZ2UiOnsiLyI6Ii9pcGZzL1FtWXBaMUxCQlJhZDVpUWZhWm9LQUZBTmg0Z3k0MXozb0J4UUtnd3lRY3hFeXIvIn0sImljb25JbWFnZSI6eyIvIjoiL2lwZnMvUW1TdXlmd1d0Q3d3Y1Jlb1dIVXc0bXJSWEdlelUyS0RSaVBpclNGaDV3ZFVKTi8ifSwibWVtYmVySWQiOiIxMiAzNDUgNjc4IiwibmFtZSI6Ik1zLiBSYW5kb20iLCJzaW5jZSI6IjIwMTAiLCJjb3ZlcmFnZSI6IkF1dG8ifX0sIkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly9zY2hlbWEuZGV2LmxhYjEwLmlvL0F1dG9tb3RpdmVNZW1iZXJzaGlwQ2FyZENyZWRlbnRpYWwuanNvbiJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiQXV0b21vdGl2ZU1lbWJlcnNoaXBDYXJkQ3JlZGVudGlhbCJdfSwic3ViIjoiIiwibmJmIjoxNjA1NzA2ODM3LCJpc3MiOiJkaWQ6ZXRocjphcnRpc190MToweDI2MDViZjhjOWI5M2JkMjM5YjYzMGIxMjVjZjk3NzBkYjBlZDU1MDEifQ.Al6FZKfmG2z9hnjgVixOsmpIYJUO-BqYlXfWJyau_oTA-gwOLTZ7ihqb31IAPPJK49Qz8qaw8nR64F-HAJzewQ"
 
     @get:Rule
     val rule
@@ -88,7 +89,10 @@ class CryptographyRepositoryTest {
     @Test
     fun `restore master seed test`() {
         val test =
-            repository.restoreMasterSeed("hamster change resource act wife lamp tower quick dilemma clay receive attract", masterKeysPath)
+            repository.restoreMasterSeed(
+                "hamster change resource act wife lamp tower quick dilemma clay receive attract",
+                masterKeysPath
+            )
                 .test()
         test.assertValue { it.first == "68a4c6de013faef9b98d7d3e2546ce07" }
     }

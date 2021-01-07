@@ -1,9 +1,10 @@
- package minerva.android.walletmanager.manager.identity
+package minerva.android.walletmanager.manager.identity
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.list.inBounds
@@ -17,7 +18,6 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 import minerva.android.walletmanager.storage.LocalStorage
 
@@ -32,8 +32,17 @@ class IdentityManagerImpl(
 
     override fun saveIdentity(identity: Identity): Completable {
         walletConfigManager.getWalletConfig()?.let { config ->
-            return cryptographyRepository.calculateDerivedKeys(walletConfigManager.masterSeed.seed, identity.index, DerivationPath.DID_PATH)
-                .map { config.copy(version = config.updateVersion, identities = prepareIdentities(getIdentity(identity, it), config)) }
+            return cryptographyRepository.calculateDerivedKeys(
+                walletConfigManager.masterSeed.seed,
+                identity.index,
+                DerivationPath.DID_PATH
+            )
+                .map {
+                    config.copy(
+                        version = config.updateVersion,
+                        identities = prepareIdentities(getIdentity(identity, it), config)
+                    )
+                }
                 .flatMapCompletable { walletConfigManager.updateWalletConfig(it) }
         }
         throw NotInitializedWalletConfigThrowable()

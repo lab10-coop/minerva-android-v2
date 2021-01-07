@@ -9,7 +9,11 @@ import minerva.android.R
 import minerva.android.databinding.ActionButtonBinding
 import minerva.android.kotlinUtils.InvalidValue
 
-class ActionButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = Int.InvalidValue) :
+class ActionButton @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = Int.InvalidValue
+) :
     LinearLayout(context, attrs, defStyleAttr) {
 
     private val binding = ActionButtonBinding.bind(LayoutInflater.from(context).inflate(R.layout.action_button, this, true))

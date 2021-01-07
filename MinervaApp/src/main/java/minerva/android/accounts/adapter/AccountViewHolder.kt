@@ -34,7 +34,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private val isOpen
         get() = binding.container.isVisible
 
-    override fun onSendTokenAssetClicked(account: Account, tokenIndex: Int) = listener.onSendAssetTokenClicked(account, tokenIndex)
+    override fun onSendTokenAssetClicked(account: Account, tokenIndex: Int) =
+        listener.onSendAssetTokenClicked(account, tokenIndex)
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
     fun setListener(listener: AccountsAdapterListener) {

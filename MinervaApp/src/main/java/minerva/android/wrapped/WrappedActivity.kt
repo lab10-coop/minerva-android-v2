@@ -49,7 +49,12 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
 
     override fun showScanner() {
         supportActionBar?.hide()
-        replaceFragment(R.id.container, AddressScannerFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
+        replaceFragment(
+            R.id.container,
+            AddressScannerFragment.newInstance(),
+            R.animator.slide_in_left,
+            R.animator.slide_out_right
+        )
     }
 
     override fun onBackPressed() {
@@ -74,10 +79,21 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             )
             WrappedFragmentType.IDENTITY_ORDER -> EditOrderFragment.newInstance(WalletActionType.IDENTITY)
             WrappedFragmentType.ACCOUNT -> NewAccountFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
-            WrappedFragmentType.ACCOUNT_ADDRESS -> AddressFragment.newInstance(fragmentType, intent.getIntExtra(INDEX, Int.InvalidIndex))
-            WrappedFragmentType.IDENTITY_ADDRESS -> AddressFragment.newInstance(fragmentType, intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.ACCOUNT_ADDRESS -> AddressFragment.newInstance(
+                fragmentType,
+                intent.getIntExtra(INDEX, Int.InvalidIndex)
+            )
+            WrappedFragmentType.IDENTITY_ADDRESS -> AddressFragment.newInstance(
+                fragmentType,
+                intent.getIntExtra(INDEX, Int.InvalidIndex)
+            )
             WrappedFragmentType.ACCOUNT_ORDER -> EditOrderFragment.newInstance(WalletActionType.ACCOUNT)
-            WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(
+                intent.getIntExtra(
+                    INDEX,
+                    Int.InvalidIndex
+                )
+            )
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
             WrappedFragmentType.CREDENTIAL_ORDER -> EditOrderFragment.newInstance(WalletActionType.CREDENTIAL)
         }

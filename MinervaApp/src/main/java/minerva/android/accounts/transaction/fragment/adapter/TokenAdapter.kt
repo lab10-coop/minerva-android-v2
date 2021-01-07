@@ -21,13 +21,19 @@ class TokenAdapter(context: Context, @LayoutRes private val layoutResource: Int,
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = convertView ?: createView(position, parent)
 
-    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View = convertView ?: createView(position, parent)
+    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View =
+        convertView ?: createView(position, parent)
 
     private fun createView(position: Int, parent: ViewGroup): View =
         LayoutInflater.from(context).inflate(layoutResource, parent, false).apply {
             SpinnerTokenBinding.bind(this).apply {
                 tokenName.text = tokens[position].name
-                tokenName.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(context, tokens[position].logo), null, null, null)
+                tokenName.setCompoundDrawablesWithIntrinsicBounds(
+                    ContextCompat.getDrawable(context, tokens[position].logo),
+                    null,
+                    null,
+                    null
+                )
             }
         }
 }

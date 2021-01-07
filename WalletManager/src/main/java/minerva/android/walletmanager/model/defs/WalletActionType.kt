@@ -1,9 +1,9 @@
 package minerva.android.walletmanager.model.defs
 
 import androidx.annotation.IntDef
+import minerva.android.walletmanager.model.defs.WalletActionType.Companion.ACCOUNT
 import minerva.android.walletmanager.model.defs.WalletActionType.Companion.IDENTITY
 import minerva.android.walletmanager.model.defs.WalletActionType.Companion.SERVICE
-import minerva.android.walletmanager.model.defs.WalletActionType.Companion.ACCOUNT
 
 @Retention(AnnotationRetention.SOURCE)
 @IntDef(IDENTITY, ACCOUNT, SERVICE)

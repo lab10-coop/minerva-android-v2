@@ -18,7 +18,7 @@ object ProfileImage {
                     .apply(RequestOptions.circleCropTransform()).into(imageView)
                 return
             }
-            val logoText = if(identity.publicKey != NEW_IDENTITY_PUBLIC_KEY) identity.name
+            val logoText = if (identity.publicKey != NEW_IDENTITY_PUBLIC_KEY) identity.name
             else NEW_IDENTITY_LOGO_LETTER
             Glide.with(context).load(LetterLogo.createLogo(context, logoText).toBitmap()).into(imageView)
         }

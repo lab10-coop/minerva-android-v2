@@ -43,7 +43,7 @@ data class CredentialsPayload(
     val issuer: String
         get() = _issuer ?: String.Empty
     val token: String
-    get() = _token ?: String.Empty
+        get() = _token ?: String.Empty
     val memberName: String
         get() = _memberName ?: String.Empty
     val memberId: String

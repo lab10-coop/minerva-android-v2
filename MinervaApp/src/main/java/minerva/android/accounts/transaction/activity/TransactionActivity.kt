@@ -78,10 +78,10 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     }
 
     private fun getFragment(position: Int) =
-            when (position) {
-                SEND_TRANSACTION_INDEX -> TransactionSendFragment.newInstance()
-                else -> AddressFragment.newInstance(WrappedFragmentType.ACCOUNT_ADDRESS, viewModel.accountIndex)
-            }
+        when (position) {
+            SEND_TRANSACTION_INDEX -> TransactionSendFragment.newInstance()
+            else -> AddressFragment.newInstance(WrappedFragmentType.ACCOUNT_ADDRESS, viewModel.accountIndex)
+        }
 
     private fun prepareActionBar() {
         supportActionBar?.apply {
@@ -102,28 +102,28 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     }
 
     private fun getAccountIndex() =
-            /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
-            if (viewModel.wssUri == String.Empty) {
-                Int.InvalidIndex
-            } else {
-                viewModel.account.id
-            }
+        /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
+        if (viewModel.wssUri == String.Empty) {
+            Int.InvalidIndex
+        } else {
+            viewModel.account.id
+        }
 
     override fun onError(message: String) {
         MinervaFlashbar.show(
-                this,
-                getString(R.string.transaction_error_title),
-                getString(R.string.transaction_error_message, message)
+            this,
+            getString(R.string.transaction_error_title),
+            getString(R.string.transaction_error_message, message)
         )
     }
 
     override fun showScanner() {
         supportActionBar?.hide()
         replaceFragment(
-                R.id.container,
-                AddressScannerFragment.newInstance(),
-                R.animator.slide_in_left,
-                R.animator.slide_out_right
+            R.id.container,
+            AddressScannerFragment.newInstance(),
+            R.animator.slide_in_left,
+            R.animator.slide_out_right
         )
     }
 

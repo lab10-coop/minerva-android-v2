@@ -47,7 +47,7 @@ private val oamtcKeywords = listOf(
 
 fun generateColor(value: String, opacity: Boolean = false): Int {
     getCompanyIndexColor(value)?.let {
-        return if(opacity) companyOpacityColor[it]
+        return if (opacity) companyOpacityColor[it]
         else companyColor[it]
     }
     abs(value.hashCode() % color.size).let {
@@ -57,12 +57,12 @@ fun generateColor(value: String, opacity: Boolean = false): Int {
 }
 
 private fun getCompanyIndexColor(value: String): Int? =
-    if(isOamtc(value)) OAMTC_COLOR_INDEX
+    if (isOamtc(value)) OAMTC_COLOR_INDEX
     else null
 
 private fun isOamtc(value: String): Boolean {
     oamtcKeywords.forEach {
-        if(value.equals(it, true)) return true
+        if (value.equals(it, true)) return true
     }
     return false
 }

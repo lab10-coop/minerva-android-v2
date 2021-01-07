@@ -7,7 +7,6 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Network

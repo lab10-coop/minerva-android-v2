@@ -5,16 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.order_list_row.view.*
 import minerva.android.R
 import minerva.android.databinding.OrderListRowBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.*
 import minerva.android.widget.ProfileImage
 import minerva.android.widget.repository.getNetworkIcon

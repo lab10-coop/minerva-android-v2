@@ -1,19 +1,10 @@
 package minerva.android
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.reactivex.Flowable
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProviderImpl
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.methods.response.Transaction
 import java.math.BigInteger

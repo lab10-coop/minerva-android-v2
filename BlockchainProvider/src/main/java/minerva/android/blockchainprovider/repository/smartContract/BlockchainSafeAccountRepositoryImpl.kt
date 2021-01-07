@@ -2,8 +2,6 @@ package minerva.android.blockchainprovider.repository.smartContract
 
 // don't remove this commented import, please
 //import kotlin.Pair
-import kotlin.Pair
-import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
@@ -41,9 +39,9 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionCount
 import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
-import java.lang.NumberFormatException
 import java.math.BigInteger
 import java.util.*
+import kotlin.Pair
 
 
 class BlockchainSafeAccountRepositoryImpl(
@@ -86,11 +84,17 @@ class BlockchainSafeAccountRepositoryImpl(
             Completable.error(ex)
         }
 
-    override fun removeSafeAccountOwner(removeAddress: String, gnosisAddress: String, network: String, privateKey: String): Completable =
+    override fun removeSafeAccountOwner(
+        removeAddress: String,
+        gnosisAddress: String,
+        network: String,
+        privateKey: String
+    ): Completable =
         getGnosisSafeOwners(gnosisAddress, network, privateKey)
             .flatMapCompletable {
                 getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
-                    gnosisSafe.removeOwner(getPreviousOwner(removeAddress, it), removeAddress, BigInteger.valueOf(1)).encodeFunctionCall()
+                    gnosisSafe.removeOwner(getPreviousOwner(removeAddress, it), removeAddress, BigInteger.valueOf(1))
+                        .encodeFunctionCall()
                         .let { data ->
                             performTransaction(
                                 gnosisSafe, gnosisAddress, Numeric.hexStringToByteArray(data), network,
@@ -228,15 +232,35 @@ class BlockchainSafeAccountRepositoryImpl(
             transactionPayload.contractAddress,
             web3j.value(network),
             Credentials.create(transactionPayload.privateKey),
-            ContractGasProvider(Convert.toWei(transactionPayload.gasPrice, Convert.Unit.GWEI).toBigInteger(), transactionPayload.gasLimit)
+            ContractGasProvider(
+                Convert.toWei(transactionPayload.gasPrice, Convert.Unit.GWEI).toBigInteger(),
+                transactionPayload.gasLimit
+            )
         )
 
     private fun getSignatureData(hash: ByteArray, transactionPayload: TransactionPayload): Sign.SignatureData =
         Sign.signMessage(hash, ECKeyPair.create(Numeric.hexStringToByteArray(transactionPayload.privateKey)), false)
 
-    private fun getTransactionHash(receiver: String, gnosisContract: GnosisSafe, amount: BigInteger, nonce: BigInteger, data: ByteArray):
+    private fun getTransactionHash(
+        receiver: String,
+        gnosisContract: GnosisSafe,
+        amount: BigInteger,
+        nonce: BigInteger,
+        data: ByteArray
+    ):
             RemoteCall<ByteArray> =
-        gnosisContract.getTransactionHash(receiver, amount, data, operation, safeTxGas, baseGas, noGasPrice, gasToken, refund, nonce)
+        gnosisContract.getTransactionHash(
+            receiver,
+            amount,
+            data,
+            operation,
+            safeTxGas,
+            baseGas,
+            noGasPrice,
+            gasToken,
+            refund,
+            nonce
+        )
 
 
     private fun getSignedByteArray(signature: Sign.SignatureData): ByteArray = signature.run { r + s + v }

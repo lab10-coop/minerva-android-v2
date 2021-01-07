@@ -56,9 +56,13 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
                     is ConnectionRequest.ServiceConnected -> onNewServicesConnected(it.data)
                 }
             })
-            showPaymentConfirmationLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { showConfirmTransactionScreen() })
+            showPaymentConfirmationLiveData.observe(
+                this@ThirdPartyIntegrationActivity,
+                EventObserver { showConfirmTransactionScreen() })
             errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { handleError(it) })
-            onDenyConnectionSuccessLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { sendResult(ON_DENY_REQUEST) })
+            onDenyConnectionSuccessLiveData.observe(
+                this@ThirdPartyIntegrationActivity,
+                EventObserver { sendResult(ON_DENY_REQUEST) })
         }
     }
 
@@ -97,7 +101,12 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
     }
 
     override fun showConfirmTransactionScreen() {
-        replaceFragment(R.id.container, ConfirmTransactionFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
+        replaceFragment(
+            R.id.container,
+            ConfirmTransactionFragment.newInstance(),
+            R.animator.slide_in_left,
+            R.animator.slide_out_right
+        )
     }
 
     override fun onDeny() {

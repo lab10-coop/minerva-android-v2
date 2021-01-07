@@ -9,8 +9,7 @@
         android:id="@+id/identityTabs"
         android:layout_width="match_parent"
         android:layout_height="@dimen/tab_height"
-        android:background="@color/lightGray">
-    </com.google.android.material.tabs.TabLayout>
+        android:background="@color/lightGray"></com.google.android.material.tabs.TabLayout>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/transaction_view_pager"

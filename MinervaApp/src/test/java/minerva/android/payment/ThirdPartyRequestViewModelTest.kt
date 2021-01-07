@@ -28,7 +28,8 @@ class ThirdPartyRequestViewModelTest : BaseViewModelTest() {
     private val showPaymentConfirmationCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
     private val showConnectionRequestObserver: Observer<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>> = mock()
-    private val showConnectionRequestCaptor: KArgumentCaptor<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>> = argumentCaptor()
+    private val showConnectionRequestCaptor: KArgumentCaptor<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>> =
+        argumentCaptor()
 
     private val confirmPaymentObserver: Observer<Event<String>> = mock()
     private val confirmPaymentCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()

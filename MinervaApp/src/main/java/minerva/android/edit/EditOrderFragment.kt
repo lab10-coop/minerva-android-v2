@@ -52,7 +52,11 @@ class EditOrderFragment : BaseFragment(R.layout.fragment_edit_order) {
         recyclerView.let {
             it.layoutManager = LinearLayoutManager(it.context)
             it.adapter = orderAdapter
-            DragManageAdapter(orderAdapter, ItemTouchHelper.UP.or(ItemTouchHelper.DOWN), ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT))
+            DragManageAdapter(
+                orderAdapter,
+                ItemTouchHelper.UP.or(ItemTouchHelper.DOWN),
+                ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT)
+            )
                 .let { drag ->
                     ItemTouchHelper(drag).apply { attachToRecyclerView(it) }
                 }
@@ -61,7 +65,9 @@ class EditOrderFragment : BaseFragment(R.layout.fragment_edit_order) {
 
     private fun setupLiveData() {
         viewModel.apply {
-            walletConfigLiveData.observe(viewLifecycleOwner, Observer { orderAdapter.updateList(prepareList(type), areMainNetsEnabled) })
+            walletConfigLiveData.observe(
+                viewLifecycleOwner,
+                Observer { orderAdapter.updateList(prepareList(type), areMainNetsEnabled) })
             viewModel.saveNewOrderLiveData.observe(viewLifecycleOwner, EventObserver { onBackListener.onBack() })
             errorLiveData.observe(
                 viewLifecycleOwner,

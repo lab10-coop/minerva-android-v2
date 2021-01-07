@@ -4,7 +4,11 @@ object AddressConverter {
 
     fun getShortAddress(type: AddressType, address: String) = address.let {
         if (it.length < SHORT_DID_PREFIX_SIZE) it
-        else String.format(SHORT_FORMAT, it.substring(START, getPrefixSize(type)), it.substring(it.length - SHORT_SUFFIX_SIZE, it.length))
+        else String.format(
+            SHORT_FORMAT,
+            it.substring(START, getPrefixSize(type)),
+            it.substring(it.length - SHORT_SUFFIX_SIZE, it.length)
+        )
     }
 
     private fun getPrefixSize(type: AddressType) =
