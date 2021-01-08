@@ -2,6 +2,7 @@ package minerva.android.wrapped
 
 import android.app.Activity
 import android.content.Context
+import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.extension.launchActivity
 import minerva.android.extension.launchActivityForResult
 import minerva.android.main.MainActivity.Companion.EDIT_IDENTITY_RESULT_REQUEST_CODE
@@ -67,7 +68,7 @@ fun startAccountAddressWrappedActivity(
     networkShort: String,
     isSafeAccount: Boolean
 ) {
-    context.launchActivity<WrappedActivity> {
+    context.launchActivity<TransactionActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT_ADDRESS)
         putExtra(WrappedActivity.INDEX, index)
         putExtra(WrappedActivity.TITLE, title)
@@ -115,5 +116,12 @@ fun startSafeAccountWrappedActivity(
 fun startEditServiceOrderWrappedActivity(context: Context) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.SERVICE_ORDER)
+    }
+}
+
+fun startManageAssetsWrappedActivity(context: Context, index: Int) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.MANAGE_ASSETS)
+        putExtra(WrappedActivity.INDEX, index)
     }
 }

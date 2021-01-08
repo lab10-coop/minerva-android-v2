@@ -115,7 +115,6 @@
     <string name="transactions_error_message">Unexpected error occurred while making transaction actions</string>
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>
     <string name="identity_saved_to_clipboard">Identity saved to clipboard</string>
-    <string name="error_header">An error occurred</string>
     <string name="refresh_balances_error">Error while refreshing balances</string>
     <string name="refresh_asset_balances_error">Error while refreshing assets balances</string>
     <string name="activities_error">Error while fetching activities</string>
@@ -176,11 +175,11 @@
     <string name="did">DID</string>
     <string name="required">Required</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="show_identity">Show identity</string>
     <string name="credentials">Credentials</string>
     <string name="connected_services">Connected services</string>
     <string name="success">Success</string>
+    <string name="error_header">An error occurred</string>
     <string name="error_title">Error occurs</string>
     <string name="auth_error_title">Error during authentication</string>
     <string name="attached_credential_success">Your credential was successfully attached to your identity %s</string>
@@ -239,6 +238,16 @@
     <string name="refresh_balance_to_check_transaction_status">Your transaction was sent to the network and you have to refresh the screen to see the changed balance, once it was processed.</string>
     <string name="collectibles">Collectibles</string>
     <string name="tokens">Tokens</string>
+    <string name="manage_assets">Manage Assets</string>
+    <string name="rearrange_assets">Rearrange Assets</string>
+    <string name="add_asset">Add Asset</string>
+    <string name="contract_address_or_name">Contract Address or name</string>
+    <string name="minerva_support">Minerva supports all ARTIS ∑1 Tokens. Please enter Token Name or Token Contract Address.</string>
+    <string name="add_token">Add Token</string>
+    <string name="symbol">Symbol</string>
+    <string name="decimals">Decimals</string>
+    <string name="invalid_account_address">Error: Invalid account address</string>
+    <string name="invalid_asset_address">Error: Invalid asset address</string>
     <string name="wc_message">WalletConnect lets you connect to desktop websites by scaning a QR code.</string>
     <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
     <string name="connected">Connected</string>
@@ -246,4 +255,5 @@
     <string name="dapp_connection_manual">By clicking connect, you allow this website to see your account and balance.</string>
     <string name="Connect">Connect</string>
     <string name="connect_to_website">Connect to website</string>
+    <string name="all_my_assets">All my Assets</string>
 </resources>

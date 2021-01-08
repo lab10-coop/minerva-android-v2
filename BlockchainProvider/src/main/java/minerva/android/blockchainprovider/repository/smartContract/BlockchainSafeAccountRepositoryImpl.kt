@@ -2,6 +2,7 @@ package minerva.android.blockchainprovider.repository.smartContract
 
 // don't remove this commented import, please
 //import kotlin.Pair
+import kotlin.Pair
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
@@ -41,7 +42,6 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.*
-import kotlin.Pair
 
 
 class BlockchainSafeAccountRepositoryImpl(
@@ -261,7 +261,6 @@ class BlockchainSafeAccountRepositoryImpl(
             refund,
             nonce
         )
-
 
     private fun getSignedByteArray(signature: Sign.SignatureData): ByteArray = signature.run { r + s + v }
 

@@ -2,6 +2,7 @@ package minerva.android.walletmanager.localstorage
 
 import android.content.SharedPreferences
 import io.mockk.*
+import minerva.android.walletmanager.model.AssetVisibilitySettings
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.storage.LocalStorageImpl
 import org.junit.Test
@@ -98,6 +99,25 @@ class LocalStorageTest {
     @Test
     fun `load profile image test`() {
         localStorage.getProfileImage("name")
+        verify {
+            sharedPref.getString(any(), any())
+        }
+    }
+
+    @Test
+    fun `save asset visibility settings`() {
+        val assetVisibilitySettings = AssetVisibilitySettings()
+        localStorage.saveAssetVisibilitySettings(assetVisibilitySettings)
+        every { localStorage.getAssetVisibilitySettings() } returns assetVisibilitySettings
+        verify {
+            sharedPref.edit().putString(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
+    }
+
+    @Test
+    fun `load asset visibility settings`() {
+        localStorage.getAssetVisibilitySettings()
         verify {
             sharedPref.getString(any(), any())
         }

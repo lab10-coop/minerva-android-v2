@@ -3,26 +3,28 @@ package minerva.android.wrapped
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import minerva.android.R
 import minerva.android.accounts.address.AddressFragment
 import minerva.android.accounts.akm.SafeAccountSettingsFragment
 import minerva.android.accounts.create.NewAccountFragment
 import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.accounts.listener.OnBackListener
+import minerva.android.accounts.listener.ShowFragmentListener
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.edit.EditOrderFragment
 import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
-import minerva.android.extension.replaceFragment
+import minerva.android.extension.addFragmentWithBackStack
 import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.manage.ManageAssetsFragment
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.repository.getNetworkIcon
-import timber.log.Timber
 import java.util.*
 
-class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListener {
+class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListener, ShowFragmentListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +51,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
 
     override fun showScanner() {
         supportActionBar?.hide()
-        replaceFragment(
+        addFragmentWithBackStack(
             R.id.container,
             AddressScannerFragment.newInstance(),
             R.animator.slide_in_left,
@@ -69,6 +71,17 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
     override fun onBack() {
         super.onBackPressed()
         supportActionBar?.show()
+    }
+
+    override fun showFragment(fragment: Fragment, slideIn: Int, slideOut: Int, title: String?) {
+        addFragmentWithBackStack(R.id.container, fragment, slideIn, slideOut)
+        setActionBarTitle(title)
+    }
+
+    override fun setActionBarTitle(title: String?) {
+        title?.let {
+            supportActionBar?.title = String.format(TITLE_FORMAT, title)
+        }
     }
 
     private fun prepareFragment(fragmentType: WrappedFragmentType) {
@@ -96,6 +109,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             )
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
             WrappedFragmentType.CREDENTIAL_ORDER -> EditOrderFragment.newInstance(WalletActionType.CREDENTIAL)
+            WrappedFragmentType.MANAGE_ASSETS -> ManageAssetsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
         }
         addFragment(R.id.container, fragment)
     }
@@ -110,6 +124,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> getString(R.string.settings)
             WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
             WrappedFragmentType.CREDENTIAL_ORDER -> getString(R.string.edit_credentials_order)
+            WrappedFragmentType.MANAGE_ASSETS -> getString(R.string.manage_assets)
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
@@ -136,6 +151,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
         ?: throw MissingFormatArgumentException("No fragment was passed to Activity")
 
     companion object {
+        const val TITLE_FORMAT = "   %s"  //hacks for padding between logo and title
         const val TITLE = "title"
         const val SUBTITLE = "subtitle"
         const val INDEX = "index"
@@ -157,5 +173,6 @@ enum class WrappedFragmentType {
     ACCOUNT_ORDER,
     CREDENTIAL_ORDER,
     SAFE_ACCOUNT_SETTINGS,
-    SERVICE_ORDER
+    SERVICE_ORDER,
+    MANAGE_ASSETS
 }

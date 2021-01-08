@@ -108,7 +108,7 @@ class TransactionRepositoryImpl(
         amount: BigDecimal,
         gasPrice: BigDecimal?
     ) = blockchainRepository.getTransactionCosts(network, assetIndex, from, to, amount, gasPrice)
-            .map { TransactionCostPayloadToTransactionCost.map(it) }
+        .map { TransactionCostPayloadToTransactionCost.map(it) }
 
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)
@@ -207,7 +207,6 @@ class TransactionRepositoryImpl(
                     account.address
                 )
             }
-            .filter { it.second > NO_FUNDS }
             .toList()
             .map { Pair(account.privateKey, it) }
 
@@ -217,6 +216,5 @@ class TransactionRepositoryImpl(
         private const val ONE_PENDING_ACCOUNT = 1
         private const val PENDING_NETWORK_LIMIT = 2
         private const val START = 0
-        private val NO_FUNDS = BigDecimal.valueOf(0)
     }
 }

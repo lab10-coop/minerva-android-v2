@@ -16,6 +16,7 @@ import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Balance
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
 import org.junit.Before
@@ -29,6 +30,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val smartContractRepository: SmartContractRepository = mock()
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
+    private val localStorage: LocalStorage = mock()
     private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
@@ -56,7 +58,13 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Before
     fun initViewModel() {
         whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
-        viewModel = AccountsViewModel(accountManager, walletActionsRepository, smartContractRepository, transactionRepository)
+        viewModel = AccountsViewModel(
+            accountManager,
+            walletActionsRepository,
+            smartContractRepository,
+            transactionRepository,
+            localStorage
+        )
     }
 
     @Test

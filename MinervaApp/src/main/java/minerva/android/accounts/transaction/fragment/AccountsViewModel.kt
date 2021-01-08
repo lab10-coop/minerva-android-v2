@@ -22,6 +22,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -30,7 +31,8 @@ class AccountsViewModel(
     private val accountManager: AccountManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val localStorage: LocalStorage
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -71,6 +73,8 @@ class AccountsViewModel(
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
     val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
 
+    private lateinit var assetVisibilitySettings: AssetVisibilitySettings
+
     fun arePendingAccountsEmpty() =
         transactionRepository.getPendingAccounts().isEmpty()
 
@@ -90,6 +94,11 @@ class AccountsViewModel(
     override fun onCleared() {
         super.onCleared()
         accountManager.toggleMainNetsEnabled = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        assetVisibilitySettings = localStorage.getAssetVisibilitySettings()
     }
 
     fun refreshBalances() =
@@ -188,6 +197,15 @@ class AccountsViewModel(
                     )
             }
         }
+    }
+
+    fun isAssetVisible(networkAddress: String, assetAddress: String) =
+        assetVisibilitySettings.getAssetVisibility(networkAddress, assetAddress)
+
+    fun saveAssetVisible(networkAddress: String, assetAddress: String, visibility: Boolean) {
+        assetVisibilitySettings = localStorage.saveAssetVisibilitySettings(
+            assetVisibilitySettings.updateAssetVisibility(networkAddress, assetAddress, visibility)
+        )
     }
 
     private fun getWalletAction(status: Int, name: String) =

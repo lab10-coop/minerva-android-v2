@@ -13,22 +13,21 @@ object Validator {
         if (content.isNullOrBlank()) ValidationResult.error(R.string.field_cannot_be_empty)
         else ValidationResult(true)
 
-    fun validateAmountField(amount: String?, balance: BigDecimal): ValidationResult {
-        return when {
+    fun validateAmountField(amount: String?, balance: BigDecimal): ValidationResult =
+        when {
             amount.isNullOrBlank() -> ValidationResult.error(R.string.field_cannot_be_empty)
             BigDecimal(amount) > balance -> ValidationResult.error(R.string.not_enough_funds_error)
             amount == ZERO -> ValidationResult.error(R.string.amount_cannot_be_zero_error)
             else -> ValidationResult(true)
         }
-    }
 
-    fun validateAddress(address: String, isAddressValid: Boolean): ValidationResult {
+    fun validateAddress(address: String, isAddressValid: Boolean, validationErrorMessage: Int): ValidationResult {
         return when {
-            address.isEmpty() -> ValidationResult.error(minerva.android.extension.R.string.field_cannot_be_empty)
+            address.isEmpty() -> ValidationResult.error(R.string.field_cannot_be_empty)
             isEnsName(address) -> ValidationResult(true)
             isAddressValid -> ValidationResult(true)
-            !isAddressValid -> ValidationResult.error(R.string.invalid_account_address)
-            else -> ValidationResult.error(R.string.invalid_account_address)
+            !isAddressValid -> ValidationResult.error(validationErrorMessage)
+            else -> ValidationResult.error(validationErrorMessage)
         }
     }
 

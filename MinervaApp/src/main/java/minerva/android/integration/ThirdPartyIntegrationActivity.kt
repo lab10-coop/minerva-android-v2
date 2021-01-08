@@ -10,7 +10,6 @@ import kotlinx.android.synthetic.main.activity_third_party_integration.*
 import minerva.android.R
 import minerva.android.extension.addFragment
 import minerva.android.extension.gone
-import minerva.android.extension.replaceFragment
 import minerva.android.extension.visible
 import minerva.android.integration.fragment.ConfirmTransactionFragment
 import minerva.android.integration.fragment.ConnectionRequestFragment
@@ -101,7 +100,7 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
     }
 
     override fun showConfirmTransactionScreen() {
-        replaceFragment(
+        addFragment(
             R.id.container,
             ConfirmTransactionFragment.newInstance(),
             R.animator.slide_in_left,
