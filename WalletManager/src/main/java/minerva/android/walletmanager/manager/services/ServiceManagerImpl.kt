@@ -7,8 +7,8 @@ import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import minerva.android.kotlinUtils.DateUtils
-import minerva.android.servicesApiProvider.api.ServicesApi
-import minerva.android.servicesApiProvider.model.TokenPayload
+import minerva.android.apiProvider.api.ServicesApi
+import minerva.android.apiProvider.model.TokenPayload
 import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager

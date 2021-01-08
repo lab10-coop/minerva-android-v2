@@ -1,10 +1,12 @@
-package minerva.android.servicesApiProvider.api
+package minerva.android.apiProvider.api
 
 import io.reactivex.Single
-import minerva.android.servicesApiProvider.model.GasPrice
-import minerva.android.servicesApiProvider.model.LoginResponse
-import minerva.android.servicesApiProvider.model.TokenPayload
-import retrofit2.http.*
+import minerva.android.apiProvider.model.LoginResponse
+import minerva.android.apiProvider.model.TokenPayload
+import retrofit2.http.Body
+import retrofit2.http.Header
+import retrofit2.http.POST
+import retrofit2.http.Url
 
 interface ServicesApi {
     @POST
@@ -13,9 +15,6 @@ interface ServicesApi {
         @Url url: String,
         @Body tokenPayload: TokenPayload
     ): Single<LoginResponse>
-
-    @GET
-    fun getGasPrice(@Header(CONTENT_TYPE) content: String = APPLICATION_JSON, @Url url: String): Single<GasPrice>
 
     companion object {
         const val CONTENT_TYPE = "Content-type"

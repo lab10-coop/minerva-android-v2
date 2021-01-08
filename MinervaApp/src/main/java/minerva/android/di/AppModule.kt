@@ -1,6 +1,7 @@
 package minerva.android.di
 
 import android.content.Context
+import android.os.Build
 import minerva.android.BuildConfig
 import minerva.android.accounts.address.AddressViewModel
 import minerva.android.accounts.akm.SafeAccountSettingsViewModel
@@ -34,7 +35,7 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 fun createAppModule() = mutableListOf<Module>().apply {
-    addAll(createWalletManagerModules(BuildConfig.DEBUG, BuildConfig.REST_API_URL, BuildConfig.BINANCE_URL))
+    addAll(createWalletManagerModules(BuildConfig.DEBUG, BuildConfig.REST_API_URL, BuildConfig.MARKETS_API_URL))
     add(appModules)
 }
 

@@ -43,9 +43,8 @@ dependencies {
     implementation project(':CryptographyProvider')
     implementation project(':KotlinUtils')
     implementation project(':WalletConfigProvider')
-    implementation project(':ServicesApiProvider')
+    implementation project(':ApiProvider')
     implementation project(':BlockchainProvider')
-    implementation project(':ExchangeMarketsProvider')
 
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
