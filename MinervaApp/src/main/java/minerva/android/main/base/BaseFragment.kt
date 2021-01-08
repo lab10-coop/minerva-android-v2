@@ -1,7 +1,7 @@
 package minerva.android.main.base
 
-import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
@@ -9,7 +9,7 @@ import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 
-open class BaseFragment : Fragment() {
+open class BaseFragment(@LayoutRes contentLayoutId: Int) : Fragment(contentLayoutId) {
 
     lateinit var interactor: FragmentInteractorListener
     fun setListener(interactor: FragmentInteractorListener) {

@@ -1,56 +1,49 @@
 package minerva.android.walletmanager.repository.transaction
 
-import com.exchangemarketsprovider.api.BinanceApi
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.SingleSource
 import io.reactivex.rxkotlin.zipWith
+import minerva.android.apiProvider.api.CryptoApi
+import minerva.android.apiProvider.model.Markets
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.servicesApiProvider.api.ServicesApi
-import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.defs.Markets
 import minerva.android.walletmanager.model.mappers.PendingTransactionToPendingAccountMapper
 import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTransactionCost
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
 class TransactionRepositoryImpl(
     private val blockchainRepository: BlockchainRegularAccountRepository,
     private val walletConfigManager: WalletConfigManager,
-    private val binanceApi: BinanceApi,
+    private val cryptoApi: CryptoApi,
     private val localStorage: LocalStorage,
-    private val webSocketRepository: WebSocketRepository,
-    private val servicesApi: ServicesApi
+    private val webSocketRepository: WebSocketRepository
 ) : TransactionRepository {
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
-        val exchangeRateList = listOf(Markets.ETH_EUR, Markets.POA_ETH, Markets.ETH_DAI)
-        walletConfigManager.getWalletConfig()?.accounts?.filter { refreshBalanceFilter(it) }
-            ?.let { values ->
-                return blockchainRepository.refreshBalances(getAddresses(values))
-                    .zipWith(Observable.range(START, exchangeRateList.size)
-                        .filter { walletConfigManager.areMainNetworksEnabled }
-                        .flatMapSingle { binanceApi.fetchExchangeRate(exchangeRateList[it]) }.toList()
-                    )
-                    .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, values, markets) }
+        walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
+                return blockchainRepository.refreshBalances(getAddresses(accounts))
+                    .zipWith(cryptoApi.getMarkets(MarketUtils.getMarketsIds(accounts), EUR_CURRENCY).onErrorReturnItem(Markets()))
+                    .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
             }
         throw NotInitializedWalletConfigThrowable()
     }
+
+    private fun accountsFilter(it: Account) =
+        refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
 
     private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> =
         accounts.map { it.network.short to it.address }
@@ -75,7 +68,7 @@ class TransactionRepositoryImpl(
         blockchainRepository.transferNativeCoin(network, accountIndex, TransactionToTransactionPayloadMapper.map(transaction))
             .map { pendingTx ->
                 /*Subscription to web sockets doesn't work with http rpc, hence pending tsx are not saved*/
-                if (NetworkManager.getNetwork(pendingTx.network).wsRpc != String.Empty) {
+                if (NetworkManager.getNetwork(pendingTx.network).wsRpc.isNotEmpty()) {
                     localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx))
                 }
             }
@@ -94,8 +87,8 @@ class TransactionRepositoryImpl(
         to: String,
         amount: BigDecimal
     ): Single<TransactionCost> =
-        if (NetworkManager.getNetwork(network).gasPriceOracle != String.Empty) {
-            servicesApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
+        if (NetworkManager.getNetwork(network).gasPriceOracle.isNotEmpty()) {
+            cryptoApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
                 .flatMap { gasPrice -> getTxCosts(network, assetIndex, from, to, amount, gasPrice.fast.divide(BigDecimal.TEN)) }
                 .onErrorResumeNext { getTxCosts(network, assetIndex, from, to, amount, null) }
 
@@ -210,7 +203,6 @@ class TransactionRepositoryImpl(
                     account.address
                 )
             }
-            .filter { it.second > NO_FUNDS }
             .toList()
             .map { Pair(account.privateKey, it) }
 
@@ -221,5 +213,6 @@ class TransactionRepositoryImpl(
         private const val PENDING_NETWORK_LIMIT = 2
         private const val START = 0
         private val NO_FUNDS = BigDecimal.valueOf(0)
+        private const val EUR_CURRENCY = "eur"
     }
 }

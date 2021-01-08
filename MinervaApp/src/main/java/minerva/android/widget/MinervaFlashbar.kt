@@ -21,6 +21,10 @@ object MinervaFlashbar {
             .build()
             .show()
     }
+
+    //TODO find all implementation of showing error and use below
+    fun showError(activity: Activity, throwable: Throwable, title: String = activity.getString(R.string.error_title)) =
+        show(activity, title, throwable.message ?: activity.getString(R.string.unexpected_error))
 }
 
 object MinervaFlashBarWithTwoButtons {
@@ -85,7 +89,7 @@ object MinervaFlashBarWithThreeButtons {
                     positiveAction()
                 }
             })
-            .alternativeActionTapListener(object: Flashbar.OnActionTapListener {
+            .alternativeActionTapListener(object : Flashbar.OnActionTapListener {
                 override fun onActionTapped(bar: Flashbar) {
                     bar.dismiss()
                     primaryAction()

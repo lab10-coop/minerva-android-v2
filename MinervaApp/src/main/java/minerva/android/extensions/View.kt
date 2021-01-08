@@ -21,7 +21,8 @@ fun ImageView.loadImageUrl(url: String?, defaultIcon: Int) {
                         Glide.with(context).load(defaultIcon).into(this@loadImageUrl)
                     }
                 }
-                override fun onResourceReady() { }
+
+                override fun onResourceReady() {}
             })
         .setPlaceHolder(defaultIcon, defaultIcon).load(Uri.parse(url), this)
 }

@@ -24,7 +24,7 @@
         android:layout_marginTop="@dimen/margin_normal"
         android:fontFamily="@font/rubik_regular"
         android:text="@string/experimental"
-        android:textColor="@color/alert_red"
+        android:textColor="@color/alertRed"
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

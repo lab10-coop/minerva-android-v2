@@ -42,7 +42,9 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
             invalidMnemonicLiveData.observe(this@RestoreWalletFragment, EventObserver { handleInvalidMnemonic(it) })
             restoreWalletLiveData.observe(this@RestoreWalletFragment, Observer { listener.showMainActivity() })
             loadingLiveData.observe(this@RestoreWalletFragment, EventObserver { if (it) showLoader() else hideLoader() })
-            walletConfigNotFoundLiveData.observe(this@RestoreWalletFragment, EventObserver { handleError(R.string.no_such_file_error_message) })
+            walletConfigNotFoundLiveData.observe(
+                this@RestoreWalletFragment,
+                EventObserver { handleError(R.string.no_such_file_error_message) })
         }
     }
 

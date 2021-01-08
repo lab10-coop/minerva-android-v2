@@ -4,21 +4,21 @@
     android:height="48dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-  <path
-      android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"
-      android:strokeWidth="1"
-      android:fillColor="#E5EFFE"
-      android:fillType="evenOdd"
-      android:strokeColor="#00000000"/>
-  <group>
-    <clip-path
-        android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"
-        tools:ignore="VectorRaster" />
     <path
-        android:pathData="M24,34.8L24,28.8L19.2,28.8L24,20.4L24,26.4L28.8,26.4L24,34.8ZM33.6,16.8L31.2,16.8L31.2,12C31.2,10.6728 30.1272,9.6 28.8,9.6C27.4752,9.6 26.4,10.6728 26.4,12L26.4,16.8L21.6,16.8L21.6,12C21.6,10.6728 20.5272,9.6 19.2,9.6C17.8752,9.6 16.8,10.6728 16.8,12L16.8,16.8L14.4,16.8C13.0752,16.8 12,17.8728 12,19.2L12,33.6C12,36.2496 14.1504,38.4 16.8,38.4L31.2,38.4C33.8496,38.4 36,36.2496 36,33.6L36,19.2C36,17.8728 34.9272,16.8 33.6,16.8L33.6,16.8Z"
+        android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"
         android:strokeWidth="1"
-        android:fillColor="#0068FF"
+        android:fillColor="#E5EFFE"
         android:fillType="evenOdd"
-        android:strokeColor="#00000000"/>
-  </group>
+        android:strokeColor="#00000000" />
+    <group>
+        <clip-path
+            android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"
+            tools:ignore="VectorRaster" />
+        <path
+            android:pathData="M24,34.8L24,28.8L19.2,28.8L24,20.4L24,26.4L28.8,26.4L24,34.8ZM33.6,16.8L31.2,16.8L31.2,12C31.2,10.6728 30.1272,9.6 28.8,9.6C27.4752,9.6 26.4,10.6728 26.4,12L26.4,16.8L21.6,16.8L21.6,12C21.6,10.6728 20.5272,9.6 19.2,9.6C17.8752,9.6 16.8,10.6728 16.8,12L16.8,16.8L14.4,16.8C13.0752,16.8 12,17.8728 12,19.2L12,33.6C12,36.2496 14.1504,38.4 16.8,38.4L31.2,38.4C33.8496,38.4 36,36.2496 36,33.6L36,19.2C36,17.8728 34.9272,16.8 33.6,16.8L33.6,16.8Z"
+            android:strokeWidth="1"
+            android:fillColor="#0068FF"
+            android:fillType="evenOdd"
+            android:strokeColor="#00000000" />
+    </group>
 </vector>

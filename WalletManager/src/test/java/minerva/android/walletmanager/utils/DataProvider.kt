@@ -16,7 +16,8 @@ object DataProvider {
         "key3" to "value3"
     )
 
-    val localWalletConfigPayload = WalletConfigPayload(_version = 1, _identityPayloads = identityResponse, _accountPayloads = accountsResponse)
+    val localWalletConfigPayload =
+        WalletConfigPayload(_version = 1, _identityPayloads = identityResponse, _accountPayloads = accountsResponse)
 
     val onlineWalletConfigResponse =
         WalletConfigPayload(_version = 0, _identityPayloads = onlineIdentityResponse, _accountPayloads = accountsResponse)
@@ -39,8 +40,20 @@ object DataProvider {
                 owners = listOf("notMasterOwner", "masterOwner")
             ),
             Account(7, "publicKey5", "privateKey5", "address", network = Network(short = NetworkShortName.ATS_TAU)),
-            Account(1, "publicKey1Main", "privateKey1Main", "address1Main", network = Network(short = NetworkShortName.ATS_SIGMA, testNet = false)),
-            Account(2, "publicKey2Main", "privateKey2Main", "address2Main", network = Network(short = NetworkShortName.POA_CORE, testNet = false))
+            Account(
+                1,
+                "publicKey1Main",
+                "privateKey1Main",
+                "address1Main",
+                network = Network(short = NetworkShortName.ATS_SIGMA, testNet = false)
+            ),
+            Account(
+                2,
+                "publicKey2Main",
+                "privateKey2Main",
+                "address2Main",
+                network = Network(short = NetworkShortName.POA_CORE, testNet = false)
+            )
         ),
         listOf(
             Service("1", "name")

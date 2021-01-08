@@ -4,5 +4,6 @@
     <string name="not_enough_funds_error">Error: Insufficient funds</string>
     <string name="amount_cannot_be_zero_error">Error: Amount cannot be zero</string>
     <string name="invalid_account_address">"Error: Invalid account address"</string>
+    <string name="invalid_ens_name">"Error: Invalid ens name"</string>
     <string name="different_network_address">Error: Wrong network Address</string>
 </resources>

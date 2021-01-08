@@ -1,38 +1,73 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.budiyev.android.codescanner.CodeScannerView
-        android:id="@+id/scanner"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:autoFocusButtonVisible="false"
-        app:flashButtonVisible="false"
-        app:frameCornersRadius="24dp"
-        app:frameThickness="0dp" />
+        android:layout_height="match_parent">
 
-    <ProgressBar
-        android:id="@+id/scannerProgressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <com.budiyev.android.codescanner.CodeScannerView
+            android:id="@+id/scanner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:autoFocusButtonVisible="false"
+            app:flashButtonVisible="false"
+            app:frameCornersRadius="24dp"
+            app:frameThickness="0dp"
+            app:maskColor="@color/scannerMaskBlack" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/closeButton"
-        style="@style/OutlinedButtonStyle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@android:color/transparent"
-        android:text="@string/close"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:strokeColor="@android:color/white" />
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/wallet_connect_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_large"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:background="@drawable/rounded_scanner_toolbar"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_wallet_connect"
+                android:drawablePadding="@dimen/margin_small"
+                android:padding="@dimen/padding_xsmall"
+                android:text="@string/wc_message"
+                android:textColor="@color/white"
+                app:drawableTint="@color/white" />
+        </com.google.android.material.appbar.MaterialToolbar>
+
+        <ProgressBar
+            android:id="@+id/scanner_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/close_button"
+            style="@style/OutlinedButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_large"
+            android:backgroundTint="@android:color/transparent"
+            android:text="@string/close"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:strokeColor="@android:color/white" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/dapps_bottom_sheet"
+        layout="@layout/dapp_list_bottom_sheet" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -6,9 +6,9 @@ import minerva.android.blockchainprovider.repository.regularAccont.BlockchainReg
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.model.Transaction
-import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.mappers.TransactionMapper
 import minerva.android.walletmanager.storage.LocalStorage
 
@@ -22,11 +22,22 @@ class SmartContractRepositoryImpl(
     override fun createSafeAccount(account: Account) =
         blockchainSafeAccountRepository.deployGnosisSafeContract(account.privateKey, account.address, account.network.short)
 
-    override fun getSafeAccountOwners(contractAddress: String, network: String, privateKey: String, account: Account): Single<List<String>> =
+    override fun getSafeAccountOwners(
+        contractAddress: String,
+        network: String,
+        privateKey: String,
+        account: Account
+    ): Single<List<String>> =
         blockchainSafeAccountRepository.getGnosisSafeOwners(contractAddress, network, privateKey)
             .flatMap { walletConfigManager.updateSafeAccountOwners(account.id, it) }
 
-    override fun addSafeAccountOwner(owner: String, address: String, network: String, privateKey: String, account: Account): Single<List<String>> =
+    override fun addSafeAccountOwner(
+        owner: String,
+        address: String,
+        network: String,
+        privateKey: String,
+        account: Account
+    ): Single<List<String>> =
         blockchainSafeAccountRepository.addSafeAccountOwner(owner, address, network, privateKey)
             .andThen(walletConfigManager.updateSafeAccountOwners(account.id, prepareAddedOwnerList(owner, account)))
 

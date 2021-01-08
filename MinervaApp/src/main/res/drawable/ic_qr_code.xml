@@ -3,12 +3,12 @@
     android:height="32dp"
     android:viewportWidth="32"
     android:viewportHeight="32">
-  <group>
-    <path
-        android:pathData="M15,17L15,25L7,25L7,17L15,17ZM25,21L25,25L17,25L17,23L23,23L23,21L25,21ZM13,19L9,19L9,23L13,23L13,19ZM25,17L25,19L19,19L19,21L17,21L17,17L25,17ZM15,7L15,15L7,15L7,7L15,7ZM25,7L25,15L17,15L17,7L25,7ZM13,9L9,9L9,13L13,13L13,9ZM23,9L19,9L19,13L23,13L23,9Z"
-        android:strokeWidth="1"
-        android:fillColor="#908F9D"
-        android:fillType="nonZero"
-        android:strokeColor="#00000000"/>
-  </group>
+    <group>
+        <path
+            android:pathData="M15,17L15,25L7,25L7,17L15,17ZM25,21L25,25L17,25L17,23L23,23L23,21L25,21ZM13,19L9,19L9,23L13,23L13,19ZM25,17L25,19L19,19L19,21L17,21L17,17L25,17ZM15,7L15,15L7,15L7,7L15,7ZM25,7L25,15L17,15L17,7L25,7ZM13,9L9,9L9,13L13,13L13,9ZM23,9L19,9L19,13L23,13L23,9Z"
+            android:strokeWidth="1"
+            android:fillColor="#908F9D"
+            android:fillType="nonZero"
+            android:strokeColor="#00000000" />
+    </group>
 </vector>

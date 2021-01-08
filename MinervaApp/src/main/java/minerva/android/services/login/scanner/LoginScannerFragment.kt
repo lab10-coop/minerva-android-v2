@@ -17,9 +17,9 @@ import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.model.ServiceQrCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.net.UnknownHostException
+import java.lang.Exception
 
-class LoginScannerFragment : BaseScanner() {
+class LoginScannerFragment : BaseScannerFragment() {
 
     private val viewModel: LoginScannerViewModel by viewModel()
     lateinit var listener: LoginScannerListener
@@ -34,24 +34,19 @@ class LoginScannerFragment : BaseScanner() {
         listener = context as LoginScannerListener
     }
 
-    override fun setupCodeScanner() {
-        super.setupCodeScanner()
+    override fun setupCallbacks() {
         codeScanner.apply {
             decodeCallback = DecodeCallback {
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
-                        scannerProgressBar.visible()
+                        scanner_progress_bar.visible()
                         viewModel.validateResult(it.text)
                         shouldScan = false
                     }
                 }
             }
 
-            errorCallback = ErrorCallback {
-                requireActivity().runOnUiThread {
-                    Toast.makeText(context, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
-                }
-            }
+            errorCallback = ErrorCallback { handleCameraError(it) }
         }
     }
 
@@ -88,7 +83,7 @@ class LoginScannerFragment : BaseScanner() {
     }
 
     override fun setOnCloseButtonListener() {
-        closeButton.setOnClickListener {
+        close_button.setOnClickListener {
             listener.onBackPressed()
         }
     }

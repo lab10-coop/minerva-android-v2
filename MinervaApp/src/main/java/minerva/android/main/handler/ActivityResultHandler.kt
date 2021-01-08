@@ -32,7 +32,11 @@ internal fun MainActivity.handleLoginScannerResult(data: Intent?) {
 
 private fun MainActivity.handleServiceLogin(loginPayload: LoginPayload, intent: Intent) {
     viewModel.loginPayload = loginPayload
-    if (intent.getBooleanExtra(LoginScannerActivity.IS_RESULT_SUCCEED, false)) handleSuccessLoginStatuses(loginPayload.loginStatus)
+    if (intent.getBooleanExtra(
+            LoginScannerActivity.IS_RESULT_SUCCEED,
+            false
+        )
+    ) handleSuccessLoginStatuses(loginPayload.loginStatus)
     else handleLoginStatuses(loginPayload.loginStatus)
 }
 
@@ -57,7 +61,11 @@ private fun MainActivity.handleCredentialLogin(intent: Intent) {
 }
 
 fun MainActivity.showBindCredentialFlashbar(isLoginSuccess: Boolean, message: String?) {
-    if (isLoginSuccess) MinervaFlashbar.show(this, getString(R.string.success), getString(R.string.attached_credential_success, message))
+    if (isLoginSuccess) MinervaFlashbar.show(
+        this,
+        getString(R.string.success),
+        getString(R.string.attached_credential_success, message)
+    )
     else message?.let { MinervaFlashbar.show(this, getString(R.string.auth_error_title), it) }
         .orElse {
             MinervaFlashbar.show(this, getString(R.string.auth_error_title), getString(R.string.unexpected_error))
@@ -68,7 +76,11 @@ fun MainActivity.handleLoginStatuses(status: Int) {
     when (status) {
         KNOWN_USER -> showKnownUserFlashbar()
         KNOWN_QUICK_USER -> showQuickUserFlashbar(true)
-        BACKUP_FAILURE -> MinervaFlashbar.show(this, getString(R.string.login_failure_title), getString(R.string.automatic_backup_failed_error))
+        BACKUP_FAILURE -> MinervaFlashbar.show(
+            this,
+            getString(R.string.login_failure_title),
+            getString(R.string.automatic_backup_failed_error)
+        )
         else -> MinervaFlashbar.show(this, getString(R.string.login_failure_title), getString(R.string.login_failure_message))
     }
 }

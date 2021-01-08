@@ -1,13 +1,13 @@
 package minerva.android.walletmanager.model.mappers
 
 import com.google.gson.Gson
-import minerva.android.configProvider.model.walletConfig.AccountPayload
-import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.QrCode
+import minerva.android.walletmanager.model.RequestedService
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.CredentialType
 
 const val CALLBACK = "callback"

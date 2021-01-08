@@ -112,7 +112,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
 
     private fun prepareTextValidator() {
         safeAccountDisposable = newOwner.getValidationObservable(ownerAddressInputLayout) {
-            Validator.validateAddress(it, viewModel.isAddressValid(it))
+            Validator.validateAddress(it, viewModel.isAddressValid(it), R.string.invalid_account_address)
         }
             .subscribeBy(
                 onNext = { addOwnerButton.isEnabled = it },

@@ -8,6 +8,8 @@ import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
+import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
+import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.repository.HttpBadRequestException
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
@@ -25,8 +27,6 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils
 import minerva.android.walletmanager.utils.DataProvider.localWalletConfigPayload
 import minerva.android.walletmanager.utils.DataProvider.onlineWalletConfigResponse
-import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
-import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -422,7 +422,7 @@ class WalletConfigManagerTest {
     }
 
     @Test
-    fun `when setting enable main nets to null, behavior subject should not emit any items`(){
+    fun `when setting enable main nets to null, behavior subject should not emit any items`() {
         walletManager.toggleMainNetsEnabled = null
         walletManager.enableMainNetsFlowable
             .test()

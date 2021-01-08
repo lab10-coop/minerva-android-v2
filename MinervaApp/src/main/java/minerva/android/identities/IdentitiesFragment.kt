@@ -1,9 +1,7 @@
 package minerva.android.identities
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -18,13 +16,10 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-class IdentitiesFragment : BaseFragment() {
+class IdentitiesFragment : BaseFragment(R.layout.identities_fragment_layout) {
 
     var currentFragment: Fragment = getFragment(MY_IDENTITIES_POSITION)
     private val viewModel: MinervaPrimitivesViewModel by sharedViewModel()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.identities_fragment_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

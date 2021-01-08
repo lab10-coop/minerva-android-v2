@@ -7,35 +7,35 @@
     android:clipToPadding="false"
     tools:context=".accounts.create.NewAccountFragment">
 
-        <LinearLayout
-            android:id="@+id/card"
+    <LinearLayout
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/rounded_white_background"
+        android:elevation="@dimen/cardview_default_elevation"
+        android:orientation="vertical"
+        android:layout_marginBottom="@dimen/bottom_button_margin"
+        android:padding="@dimen/margin_normal"
+        tools:ignore="PrivateResource">
+
+        <TextView
+            android:id="@+id/networksHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_medium"
+            android:text="@string/test_networks"
+            android:textAllCaps="true"
+            android:textColor="@color/colorPrimary" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/networks"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/rounded_white_background"
-            android:elevation="@dimen/cardview_default_elevation"
-            android:orientation="vertical"
-            android:layout_marginBottom="@dimen/bottom_button_margin"
-            android:padding="@dimen/margin_normal"
-            tools:ignore="PrivateResource">
-
-            <TextView
-                android:id="@+id/networksHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/rubik_medium"
-                android:text="@string/test_networks"
-                android:textAllCaps="true"
-                android:textColor="@color/colorPrimary" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/networks"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="vertical"
-                android:scrollbarThumbVertical="@drawable/scrollbar_thumb"
-                android:scrollbarSize="@dimen/scrollbar_size"
-                android:layout_marginTop="@dimen/margin_normal" />
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"
+            android:scrollbarThumbVertical="@drawable/scrollbar_thumb"
+            android:scrollbarSize="@dimen/scrollbar_size"
+            android:layout_marginTop="@dimen/margin_normal" />
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/addAccountProgressBar"

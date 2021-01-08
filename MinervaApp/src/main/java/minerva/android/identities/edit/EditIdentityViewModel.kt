@@ -57,5 +57,10 @@ class EditIdentityViewModel(
     }
 
     private fun getWalletAction(status: Int, name: String) =
-        WalletAction(WalletActionType.IDENTITY, status, DateUtils.timestamp, hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, name)))
+        WalletAction(
+            WalletActionType.IDENTITY,
+            status,
+            DateUtils.timestamp,
+            hashMapOf(Pair(WalletActionFields.IDENTITY_NAME, name))
+        )
 }

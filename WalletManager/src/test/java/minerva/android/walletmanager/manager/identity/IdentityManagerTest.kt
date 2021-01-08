@@ -12,9 +12,9 @@ import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.manager.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.DataProvider.walletConfig
-import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
@@ -147,7 +147,13 @@ class IdentityManagerTest : RxTest() {
     @Test
     fun `bind credential to identity success test`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(
+            Identity(
+                1,
+                address = "address",
+                name = "identityName1"
+            )
+        )
         manager.bindCredentialToIdentity(CredentialQrCode("iss", "type", loggedInDid = "did:ethr:address"))
             .test()
             .assertNoErrors()
@@ -161,7 +167,13 @@ class IdentityManagerTest : RxTest() {
     fun `bind credential to identity error test`() {
         val error = NoBindedCredentialThrowable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever( walletConfigManager.findIdentityByDid(any())).thenReturn(Identity(1, address = "address", name = "identityName1"))
+        whenever(walletConfigManager.findIdentityByDid(any())).thenReturn(
+            Identity(
+                1,
+                address = "address",
+                name = "identityName1"
+            )
+        )
         manager.bindCredentialToIdentity(CredentialQrCode(issuer = "iss", loggedInDid = "did:ethr:address"))
             .test()
             .assertError {

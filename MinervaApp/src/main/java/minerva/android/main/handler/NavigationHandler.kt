@@ -2,7 +2,6 @@ package minerva.android.main.handler
 
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity_main.*
 import minerva.android.R
 import minerva.android.accounts.transaction.fragment.AccountsFragment
 import minerva.android.identities.IdentitiesFragment
@@ -15,14 +14,14 @@ internal fun MainActivity.shouldShowAddIdentityIcon() = isIdentitiesTabSelected(
 
 internal fun MainActivity.shouldShowAddValueIcon() = isValuesTabSelected()
 
-internal fun MainActivity.isServicesTabSelected() = bottomNavigation.selectedItemId == R.id.services
+internal fun MainActivity.isServicesTabSelected() = binding.bottomNavigation.selectedItemId == R.id.services
 
-internal fun MainActivity.isValuesTabSelected() = bottomNavigation.selectedItemId == R.id.values
+internal fun MainActivity.isValuesTabSelected() = binding.bottomNavigation.selectedItemId == R.id.values
 
-internal fun MainActivity.isIdentitiesTabSelected() = bottomNavigation.selectedItemId == R.id.identities
+internal fun MainActivity.isIdentitiesTabSelected() = binding.bottomNavigation.selectedItemId == R.id.identities
 
 internal fun MainActivity.prepareBottomNavMenu() {
-    bottomNavigation.setOnNavigationItemSelectedListener { item ->
+    binding.bottomNavigation.setOnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.identities -> replaceFragment(IdentitiesFragment())
             R.id.values -> replaceFragment(AccountsFragment(), R.string.accounts)

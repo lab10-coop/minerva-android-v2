@@ -8,8 +8,8 @@ import org.junit.Test
 class WalletActionMapperTest {
 
     @Test
-    fun `test if wallet action mapper maps wallet action correctly`(){
-        val walletActionPayload = WalletActionPayload(1,2, _fields = hashMapOf(Pair("test", "value")))
+    fun `test if wallet action mapper maps wallet action correctly`() {
+        val walletActionPayload = WalletActionPayload(1, 2, _fields = hashMapOf(Pair("test", "value")))
         WalletActionMapper.map(walletActionPayload).run {
             type shouldBe 1
             status shouldBe 2

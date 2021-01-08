@@ -53,7 +53,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
 
 
     private fun prepareListeners(callback: TokenViewCallback, account: Account, tokenIndex: Int) {
-        if (tokenIndex != Int.InvalidIndex) setOnClickListener { callback.onSendTokenAssetClicked(account.id, tokenIndex) }
+        if (tokenIndex != Int.InvalidIndex) setOnClickListener { callback.onSendTokenAssetClicked(account, tokenIndex) }
         else setOnClickListener { callback.onSendTokenClicked(account) }
     }
 
@@ -62,7 +62,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     }
 
     interface TokenViewCallback {
-        fun onSendTokenAssetClicked(accountIndex: Int, tokenIndex: Int)
+        fun onSendTokenAssetClicked(account: Account, tokenIndex: Int)
         fun onSendTokenClicked(account: Account)
     }
 }

@@ -14,9 +14,9 @@ import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.accounts.transaction.fragment.adapter.TransactionPagerAdapter
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.databinding.ActivityTransactionBinding
+import minerva.android.extension.addFragmentWithBackStack
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.onTabSelected
-import minerva.android.extension.replaceFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.widget.MinervaFlashbar
@@ -32,16 +32,16 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         super.onCreate(savedInstanceState)
         binding = ActivityTransactionBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel.getAccount(
-            intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex),
-            intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex)
-        )
-        initView()
+        viewModel.apply {
+            accountIndex = intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex)
+            getAccount(accountIndex, intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex))
+        }
+        initView(intent.getIntExtra(TRANSACTION_SCREEN, SEND_TRANSACTION_INDEX))
     }
 
-    private fun initView() {
+    private fun initView(initPageIndex: Int) {
         prepareActionBar()
-        setupViewPager()
+        setupViewPager(initPageIndex)
     }
 
     override fun onBackPressed() {
@@ -49,7 +49,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         super.onBackPressed()
     }
 
-    private fun setupViewPager() {
+    private fun setupViewPager(initPageIndex: Int) {
         with(binding) {
             transactionViewPager.apply {
                 adapter = TransactionPagerAdapter(this@TransactionActivity, ::getFragment)
@@ -73,13 +73,14 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
                 invalidateOptionsMenu()
                 transactionViewPager.setCurrentItem(it, true)
             }
+            transactionViewPager.setCurrentItem(initPageIndex, false)
         }
     }
 
     private fun getFragment(position: Int) =
         when (position) {
             SEND_TRANSACTION_INDEX -> TransactionSendFragment.newInstance()
-            else -> AddressFragment.newInstance(WrappedFragmentType.ACCOUNT_ADDRESS, viewModel.account.id)
+            else -> AddressFragment.newInstance(WrappedFragmentType.ACCOUNT_ADDRESS, viewModel.accountIndex)
         }
 
     private fun prepareActionBar() {
@@ -118,7 +119,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     override fun showScanner() {
         supportActionBar?.hide()
-        replaceFragment(
+        addFragmentWithBackStack(
             R.id.container,
             AddressScannerFragment.newInstance(),
             R.animator.slide_in_left,
@@ -141,10 +142,11 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
     companion object {
-        private const val SEND_TRANSACTION_INDEX = 0
+        const val SEND_TRANSACTION_INDEX = 0
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val ACCOUNT_INDEX = "account_index"
         const val ASSET_INDEX = "asset_index"
+        const val TRANSACTION_SCREEN = "transaction_screen"
     }
 }
