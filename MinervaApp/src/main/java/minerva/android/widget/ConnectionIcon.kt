@@ -13,12 +13,23 @@ class ConnectionIcon @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    private val binding: ConnectionIconBinding =
+    internal val binding: ConnectionIconBinding =
         ConnectionIconBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun setIcon(resId: Int) {
         Glide.with(context)
             .load(resId)
             .into(binding.icon)
+    }
+
+    fun setConnectionIconSize() {
+        with(binding.icon.layoutParams) {
+            width = CONNECTION_ICON_SIZE
+            height = CONNECTION_ICON_SIZE
+        }
+    }
+
+    companion object {
+        private const val CONNECTION_ICON_SIZE = 80
     }
 }

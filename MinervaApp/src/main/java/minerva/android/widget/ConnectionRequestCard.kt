@@ -26,4 +26,8 @@ class ConnectionRequestCard
     fun setConnectionIcon(resId: Int) {
         binding.connectionView.setConnectionIcon(resId)
     }
+
+    fun setConnectionIconsSize() {
+        binding.connectionView.setConnectionIconsSize()
+    }
 }

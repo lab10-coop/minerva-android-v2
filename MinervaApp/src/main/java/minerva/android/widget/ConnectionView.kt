@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.bumptech.glide.Glide
 import minerva.android.databinding.ConnectionViewLayoutBinding
 
 class ConnectionView @JvmOverloads constructor(
@@ -18,5 +17,12 @@ class ConnectionView @JvmOverloads constructor(
 
     fun setConnectionIcon(resId: Int) {
         binding.connectionIcon.setIcon(resId)
+    }
+
+    fun setConnectionIconsSize() {
+        with(binding) {
+            connectionIcon.setConnectionIconSize()
+            logo.setConnectionIconSize()
+        }
     }
 }
