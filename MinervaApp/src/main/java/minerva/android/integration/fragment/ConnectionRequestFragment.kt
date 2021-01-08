@@ -27,7 +27,10 @@ class ConnectionRequestFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         manualLabel.text = viewModel.connectionReason
-        connectionRequestView.setRequestedData(viewModel.requestedData)
+        with(connectionRequestView) {
+            setRequestedData(viewModel.requestedData)
+            setConnectionIcon(R.drawable.ic_services)
+        }
         setOnAllowButtonOnClickListener()
         setOnDenyButtonOnClickListener()
         prepareObservers()
