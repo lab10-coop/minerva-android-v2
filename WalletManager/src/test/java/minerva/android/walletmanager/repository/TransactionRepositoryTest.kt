@@ -1,8 +1,6 @@
 package minerva.android.walletmanager.repository
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.exchangemarketsprovider.api.BinanceApi
-import com.exchangemarketsprovider.model.Market
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
@@ -14,13 +12,16 @@ import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
+import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
-import minerva.android.servicesApiProvider.api.ServicesApi
-import minerva.android.servicesApiProvider.model.GasPrice
+import minerva.android.apiProvider.api.ServicesApi
+import minerva.android.apiProvider.model.GasPrice
+import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.Price
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -40,19 +41,17 @@ class TransactionRepositoryTest {
 
     private val walletConfigManager: WalletConfigManager = mock()
     private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
-    private val binanaceApi: BinanceApi = mock()
     private val localStorage: LocalStorage = mock()
     private val webSocketRepositoryImpl: WebSocketRepositoryImpl = mock()
-    private val servicesApi: ServicesApi = mock()
+    private val cryptoApi: CryptoApi = mock()
 
     private val repository =
         TransactionRepositoryImpl(
             blockchainRegularAccountRepository,
             walletConfigManager,
-            binanaceApi,
+            cryptoApi,
             localStorage,
-            webSocketRepositoryImpl,
-            servicesApi
+            webSocketRepositoryImpl
         )
 
     @get:Rule
@@ -77,7 +76,7 @@ class TransactionRepositoryTest {
     fun `refresh balances test success`() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
             .thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
-        whenever(binanaceApi.fetchExchangeRate(any())).thenReturn(Single.just(Market("ETHEUR", "12.21")))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.0))))
         repository.refreshBalances().test()
             .assertComplete()
             .assertValue {
@@ -89,9 +88,22 @@ class TransactionRepositoryTest {
     fun `refresh balances test error`() {
         val error = Throwable()
         whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(Single.error(error))
-        whenever(binanaceApi.fetchExchangeRate(any())).thenReturn(Single.error(error))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
         repository.refreshBalances().test()
             .assertError(error)
+    }
+
+    @Test
+    fun `refresh balances test when crypto api returns error success`() {
+        val error = Throwable()
+        whenever(blockchainRegularAccountRepository.refreshBalances(any()))
+            .thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
+        repository.refreshBalances().test()
+            .assertComplete()
+            .assertValue {
+                it["address"]?.cryptoBalance == BigDecimal.ONE
+            }
     }
 
     @Test
@@ -384,7 +396,7 @@ class TransactionRepositoryTest {
     @Test
     fun `get transaction costs success when there is gas price from oracle available`() {
         NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "wssuri", gasPriceOracle = "url")))
-        whenever(servicesApi.getGasPrice(any(), any())).thenReturn(Single.just(GasPrice(BigDecimal.TEN)))
+        whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(Single.just(GasPrice(BigDecimal.TEN)))
         whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any(), eq(BigDecimal.ONE)))
             .doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
         repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
@@ -410,7 +422,7 @@ class TransactionRepositoryTest {
     fun `get transaction costs error when there is gas price from oracle available`() {
         val error = Throwable()
         NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "wssuri", gasPriceOracle = "url")))
-        whenever(servicesApi.getGasPrice(any(), any())).thenReturn(Single.error(error))
+        whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(Single.error(error))
         whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), any(), any(), any(), any(), eq(null)))
             .doReturn(Single.just(TransactionCostPayload(BigDecimal.ONE, BigInteger.ONE, BigDecimal.TEN)))
         repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)

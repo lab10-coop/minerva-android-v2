@@ -1,12 +1,10 @@
 package minerva.android.walletmanager
 
 import android.content.Context
-import com.exchangemarketsprovider.createExchangeRateProviderModule
 import minerva.android.blockchainprovider.createBlockchainProviderModule
 import minerva.android.configProvider.createWalletConfigProviderModule
-import minerva.android.configProvider.localSharedPrefs
 import minerva.android.cryptographyProvider.createCryptographyModules
-import minerva.android.servicesApiProvider.createServicesApiProviderModule
+import minerva.android.apiProvider.apiProviderModule
 import minerva.android.walletmanager.keystore.KeyStoreManager
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.keystore.KeystoreRepositoryImpl
@@ -14,9 +12,7 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.AccountManagerImpl
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.identity.IdentityManagerImpl
-import minerva.android.walletmanager.manager.networks.NetworkManager.gasPriceMap
-import minerva.android.walletmanager.manager.networks.NetworkManager.httpsUrlMap
-import minerva.android.walletmanager.manager.networks.NetworkManager.wssUrlMap
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.order.OrderManagerImpl
 import minerva.android.walletmanager.manager.services.ServiceManager
@@ -31,21 +27,24 @@ import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.LocalStorageImpl
-import minerva.android.walletmanager.utils.EnsProvider
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepositoryImpl
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProviderImpl
+import minerva.android.configProvider.localSharedPrefs
+import minerva.android.walletmanager.manager.networks.NetworkManager.gasPriceMap
+import minerva.android.walletmanager.manager.networks.NetworkManager.httpsUrlMap
+import minerva.android.walletmanager.manager.networks.NetworkManager.wssUrlMap
+import minerva.android.walletmanager.utils.EnsProvider
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-fun createWalletManagerModules(isDebug: Boolean, baseUrl: String, binanceUrl: String) = createWalletModules()
+fun createWalletManagerModules(isDebug: Boolean, restApiUrl: String, marketsApiUrl: String) = createWalletModules()
     .plus(createCryptographyModules())
-    .plus(createWalletConfigProviderModule(isDebug, baseUrl))
-    .plus(createServicesApiProviderModule(isDebug, baseUrl))
+    .plus(createWalletConfigProviderModule(isDebug, restApiUrl))
+    .plus(apiProviderModule(isDebug, marketsApiUrl))
     .plus(createBlockchainProviderModule(httpsUrlMap, gasPriceMap, wssUrlMap))
-    .plus(createExchangeRateProviderModule(isDebug, binanceUrl))
 
 fun createWalletModules() = module {
     factory { EnsProvider(get()).ensUrl }
@@ -60,7 +59,7 @@ fun createWalletModules() = module {
     factory<AccountManager> { AccountManagerImpl(get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
-    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get()) }
+    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get()) }
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }

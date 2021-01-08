@@ -28,7 +28,7 @@ android {
         targetSdkVersion 29
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "REST_API_URL", '"https://minerva-api.dev.lab10.io/"'
-        buildConfigField "String", "BINANCE_URL", '"https://api.binance.com"'
+        buildConfigField "String", "MARKETS_API_URL", '"https://api.coingecko.com/api/v3/"'
         buildConfigField "String", "LICENCE_TYPE", '"GPLv3"'
         buildConfigField "String", "TWITTER_APP", '"twitter://user?screen_name=MinervaWallet"'
         buildConfigField "String", "TWITTER_WEB", '"https://twitter.com/MinervaWallet"'
