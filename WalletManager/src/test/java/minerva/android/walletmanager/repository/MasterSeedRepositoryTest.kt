@@ -10,9 +10,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.MasterSeed
-import minerva.android.walletmanager.model.RestoreWalletResponse
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
-import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.After
 import org.junit.Before

@@ -8,25 +8,25 @@ import kotlin.test.assertEquals
 class BalanceUtilsTest {
 
     @Test
-    fun `get crypto balance success test`(){
+    fun `get crypto balance success test`() {
         val result = BalanceUtils.getCryptoBalance(BigDecimal.TEN)
         assertEquals(result, "10")
     }
 
     @Test
-    fun `get crypto balance error test`(){
+    fun `get crypto balance error test`() {
         val result = BalanceUtils.getCryptoBalance(Int.InvalidValue.toBigDecimal())
         assertEquals(result, "0")
     }
 
     @Test
-    fun`get fiat balance success test`(){
+    fun `get fiat balance success test`() {
         val result = BalanceUtils.getFiatBalance(BigDecimal.TEN)
         assertEquals(result, "€ 10.00")
     }
 
     @Test
-    fun`get fiat balance error test`(){
+    fun `get fiat balance error test`() {
         val result = BalanceUtils.getFiatBalance(Int.InvalidValue.toBigDecimal())
         assertEquals(result, "€ -.--")
     }

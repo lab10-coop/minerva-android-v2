@@ -1,5 +1,6 @@
 package minerva.android.widget
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
@@ -9,9 +10,10 @@ import minerva.android.R
 import minerva.android.settings.adapter.AlertsPagerAdapter
 import minerva.android.settings.model.SettingRow
 
+@SuppressLint("ViewConstructor")
 class ReminderView(context: Context, attrs: AttributeSet? = null, rows: List<SettingRow>) : LinearLayout(context, attrs) {
 
-    private val adapter: AlertsPagerAdapter = AlertsPagerAdapter()
+    private val adapter: AlertsPagerAdapter by lazy { AlertsPagerAdapter() }
 
     init {
         inflate(context, R.layout.reminder_view, this)

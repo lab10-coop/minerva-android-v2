@@ -44,7 +44,12 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
     override fun getMnemonicForMasterSeed(seed: String): String =
         entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
 
-    override fun calculateDerivedKeys(seed: String, index: Int, derivationPathPrefix: String, isTestNet: Boolean): Single<DerivedKeys> {
+    override fun calculateDerivedKeys(
+        seed: String,
+        index: Int,
+        derivationPathPrefix: String,
+        isTestNet: Boolean
+    ): Single<DerivedKeys> {
         val derivationPath = "${derivationPathPrefix}$index"
         val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
         val derivedKeys =

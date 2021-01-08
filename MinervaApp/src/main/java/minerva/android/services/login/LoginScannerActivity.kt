@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import minerva.android.R
 import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
-import minerva.android.extension.replaceFragment
+import minerva.android.extension.replaceFragmentWithBackStack
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.main.handler.isIdentityPrepared
@@ -90,14 +90,13 @@ class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
         setupActionBar()
     }
 
-    private fun showFragment(qrCodeCodeResponse: ServiceQrCode) {
-        replaceFragment(
+    private fun showFragment(qrCodeCodeResponse: ServiceQrCode) =
+        replaceFragmentWithBackStack(
             R.id.container, ChooseIdentityFragment.newInstance(qrCodeCodeResponse),
             R.animator.slide_in_left, R.animator.slide_out_right
         )
-    }
 
-    private fun setupActionBar() {
+    private fun setupActionBar() =
         supportActionBar?.apply {
             show()
             title = String.Empty
@@ -105,7 +104,6 @@ class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
         }
-    }
 
     companion object {
         const val IS_RESULT_SUCCEED = "is_result_succeed"

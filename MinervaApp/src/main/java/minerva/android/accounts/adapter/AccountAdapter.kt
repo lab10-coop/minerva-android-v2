@@ -8,15 +8,19 @@ import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Balance
+import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : RecyclerView.Adapter<AccountViewHolder>(),
     AccountsAdapterListener {
 
     private var activeAccounts = listOf<Account>()
     private var rawAccounts = listOf<Account>()
+
+    private var openAccounts = mutableListOf<Boolean>()
 
     override fun getItemCount(): Int = activeAccounts.size
 
@@ -27,7 +31,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         activeAccounts[position].let {
             val index = rawAccounts.indexOf(it)
             holder.apply {
-                setData(index, it)
+                setData(index, it, openAccounts[position])
                 setListener(this@AccountAdapter)
             }
         }
@@ -36,6 +40,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     fun updateList(data: List<Account>, areMainNetsEnabled: Boolean) {
         rawAccounts = data
         activeAccounts = data.filter { !it.isDeleted }.filter { it.network.testNet == !areMainNetsEnabled }
+        openAccounts = activeAccounts.map { false }.toMutableList()
         notifyDataSetChanged()
     }
 
@@ -52,8 +57,17 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     fun updateAssetBalances(accountAssetBalances: Map<String, List<AccountAsset>>) {
         activeAccounts.filter { !it.isPending }
             .forEachIndexed { index, account ->
-                accountAssetBalances[account.privateKey]?.let {
-                    account.accountAssets = it
+                accountAssetBalances[account.privateKey]?.let { accountsList ->
+                    account.accountAssets = accountsList
+                        .filter { it.balance > NO_FUNDS }
+                        .filter {
+                            listener.isAssetVisible(account.address, it.asset.address)?.let { visibility ->
+                                visibility
+                            }.orElse {
+                                listener.saveAssetVisibility(account.address, it.asset.address, true)
+                                true
+                            }
+                        }
                     notifyItemChanged(index)
                 }
             }
@@ -75,32 +89,30 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         notifyDataSetChanged()
     }
 
-    override fun onSendAccountClicked(account: Account) {
-        listener.onSendTransaction(rawAccounts.indexOf(account))
+    override fun onSendAccountClicked(account: Account) = listener.onSendTransaction(rawAccounts.indexOf(account))
+
+    override fun onSendAssetTokenClicked(account: Account, assetIndex: Int) {
+        listener.onSendAssetTransaction(rawAccounts.indexOf(account), assetIndex)
     }
 
-    override fun onSendAssetTokenClicked(accountIndex: Int, assetIndex: Int) {
-        listener.onSendAssetTransaction(accountIndex, assetIndex)
+    override fun onAccountRemoved(index: Int) = listener.onAccountRemove(rawAccounts[index])
+
+    override fun onCreateSafeAccountClicked(account: Account) = listener.onCreateSafeAccount(account)
+
+    override fun onShowAddress(account: Account) = listener.onShowAddress(rawAccounts.indexOf(account))
+
+    override fun onShowSafeAccountSettings(account: Account, index: Int) = listener.onShowSafeAccountSettings(account, index)
+
+    override fun onWalletConnect() = listener.onWalletConnect()
+
+    override fun onManageAssets(index: Int) = listener.onManageAssets(index)
+
+    override fun onOpenOrClose(index: Int, isOpen: Boolean) {
+        openAccounts[index] = isOpen
     }
 
-    override fun onAccountRemoved(index: Int) {
-        listener.onAccountRemove(rawAccounts[index])
-    }
-
-    override fun onCreateSafeAccountClicked(account: Account) {
-        listener.onCreateSafeAccount(account)
-    }
-
-    override fun onShowAddress(account: Account, index: Int) {
-        listener.onShowAddress(account, index)
-    }
-
-    override fun onShowSafeAccountSettings(account: Account, index: Int) {
-        listener.onShowSafeAccountSettings(account, index)
-    }
-
-    override fun onWalletConnect() {
-        listener.onWalletConnect()
+    companion object {
+        private val NO_FUNDS = BigDecimal.valueOf(0)
     }
 }
 

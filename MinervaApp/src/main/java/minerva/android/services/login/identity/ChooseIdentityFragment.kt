@@ -3,9 +3,7 @@ package minerva.android.services.login.identity
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,17 +24,12 @@ import minerva.android.wrapped.startEditIdentityOnResultWrappedActivity
 import minerva.android.wrapped.startNewIdentityOnResultWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ChooseIdentityFragment : Fragment() {
+class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
 
     private val viewModel: ChooseIdentityViewModel by viewModel()
     private val identitiesAdapter = IdentitiesAdapter()
     private lateinit var serviceQrCode: ServiceQrCode
     private lateinit var listener: LoginScannerListener
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_choose_identity, container, false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +103,9 @@ class ChooseIdentityFragment : Fragment() {
     private fun prepareObservers() {
         viewModel.apply {
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(false, LoginPayload(getLoginStatus(it))) })
+            errorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { listener.onPainlessLoginResult(false, LoginPayload(getLoginStatus(it))) })
             loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(true, payload = it) })
             requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver { handleRequestedFields() })
         }
@@ -119,7 +114,12 @@ class ChooseIdentityFragment : Fragment() {
     private fun handleRequestedFields() {
         identitiesAdapter.getSelectedIdentity()?.let {
             if (it.isNewIdentity) startNewIdentityOnResultWrappedActivity(activity, serviceQrCode)
-            else startEditIdentityOnResultWrappedActivity(activity, viewModel.getIdentityPosition(it.index), it.name, serviceQrCode)
+            else startEditIdentityOnResultWrappedActivity(
+                activity,
+                viewModel.getIdentityPosition(it.index),
+                it.name,
+                serviceQrCode
+            )
         }
     }
 

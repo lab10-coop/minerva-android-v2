@@ -14,12 +14,11 @@ import java.math.BigInteger
 
 fun createBlockchainProviderModule(
     httpUrls: Map<String, String>,
-    ensUrl: String,
     gasPrice: Map<String, BigInteger>,
     wssUrls: Map<String, String>
 ) = module {
-    factory { Web3jProvider.provideWeb3j(httpUrls.toMutableMap(), ensUrl) }
-    factory { Web3jProvider.provideEnsResolver(ensUrl) }
+    factory { Web3jProvider.provideWeb3j(httpUrls.toMutableMap(), get()) }
+    factory { Web3jProvider.provideEnsResolver(get()) }
     factory<BlockchainRegularAccountRepository> { BlockchainRegularAccountRepositoryImpl(get(), gasPrice, get()) }
     factory<BlockchainSafeAccountRepository> { BlockchainSafeAccountRepositoryImpl(get(), gasPrice) }
     factory<WebSocketServiceProvider> { WebSocketServiceProviderImpl() }

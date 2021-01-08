@@ -10,7 +10,7 @@ import java.io.IOException
 
 class NetworkInitializer : Initializer<NetworkManager> {
     override fun create(context: Context): NetworkManager {
-        initializeNetworkData(context).let{
+        initializeNetworkData(context).let {
             NetworkManager.initialize(it)
         }
         return NetworkManager

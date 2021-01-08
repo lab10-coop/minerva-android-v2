@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/margin_normal">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:padding="@dimen/margin_xxxsmall">
+
+        <LinearLayout
+            android:id="@+id/option_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_white_background"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:orientation="vertical"
+            android:padding="@dimen/margin_normal">
+
+            <TextView
+                android:id="@+id/rearrange_assets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_edit_order_circle"
+                android:drawableRight="@drawable/ic_arrow_right"
+                android:drawablePadding="@dimen/margin_xsmall"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center_vertical"
+                android:text="@string/rearrange_assets"
+                android:textColor="@color/gray" />
+
+            <TextView
+                android:id="@+id/add_asset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_normal"
+                android:drawableLeft="@drawable/ic_add_asset_circle"
+                android:drawableRight="@drawable/ic_arrow_right"
+                android:drawablePadding="@dimen/margin_xsmall"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center_vertical"
+                android:text="@string/add_asset"
+                android:textColor="@color/gray" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_medium"
+            android:text="@string/all_my_assets"
+            android:textAllCaps="true"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_xsmall" />
+
+        <LinearLayout
+            android:id="@+id/asset_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_white_background"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:orientation="vertical"
+            android:padding="@dimen/margin_normal" />
+    </LinearLayout>
+</ScrollView>

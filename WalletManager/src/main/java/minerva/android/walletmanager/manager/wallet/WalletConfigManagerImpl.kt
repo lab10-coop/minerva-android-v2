@@ -14,6 +14,9 @@ import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.DID_PATH
+import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.MAIN_NET_PATH
+import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.TEST_NET_PATH
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
@@ -27,9 +30,6 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
-import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.DID_PATH
-import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.MAIN_NET_PATH
-import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.TEST_NET_PATH
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey

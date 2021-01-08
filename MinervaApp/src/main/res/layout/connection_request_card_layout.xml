@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -15,59 +15,13 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />
 
-    <ImageView
-        android:id="@+id/connectionIcon"
-        android:layout_width="@dimen/circle_icon_size"
-        android:layout_height="@dimen/circle_icon_size"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="40dp"
-        android:src="@drawable/ic_settings_in_circle"
+    <minerva.android.widget.ConnectionView
+        android:id="@+id/connection_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/checkboxIcon"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
-
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="70dp"
-        android:background="@color/separatorColor"
-        app:layout_constraintLeft_toRightOf="@+id/connectionIcon"
-        app:layout_constraintRight_toLeftOf="@+id/checkboxIcon"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/checkboxIcon"
-        android:layout_width="@dimen/xsmall_logo_size"
-        android:layout_height="@dimen/xsmall_logo_size"
-        android:layout_marginTop="55dp"
-        android:src="@drawable/ic_check"
-        app:layout_constraintLeft_toRightOf="@+id/connectionIcon"
-        app:layout_constraintRight_toLeftOf="@+id/logo"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="70dp"
-        android:background="@color/separatorColor"
-        app:layout_constraintLeft_toRightOf="@+id/checkboxIcon"
-        app:layout_constraintRight_toLeftOf="@+id/logo"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="@dimen/circle_icon_size"
-        android:layout_height="@dimen/circle_icon_size"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="40dp"
-        android:src="@drawable/ic_minerva_in_circle"
-        app:layout_constraintLeft_toRightOf="@+id/checkboxIcon"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/requestedDataLabel"
@@ -83,7 +37,7 @@
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logo" />
+        app:layout_constraintTop_toBottomOf="@+id/connection_view" />
 
     <TextView
         android:id="@+id/requested"
@@ -120,4 +74,4 @@
     <!--        app:layout_constraintRight_toRightOf="parent"-->
     <!--        app:layout_constraintTop_toBottomOf="@+id/logo"-->
     <!--        tools:text="wants connect to Minedasdasdsadsarva" />-->
-</merge>
+</androidx.constraintlayout.widget.ConstraintLayout>

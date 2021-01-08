@@ -24,7 +24,7 @@
         android:fontFamily="@font/rubik_medium"
         android:padding="@dimen/margin_xxsmall"
         android:text="@string/backup_alert_title"
-        android:textColor="@color/alert_red"
+        android:textColor="@color/alertRed"
         android:textSize="@dimen/text_normal" />
 
     <TextView

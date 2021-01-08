@@ -14,7 +14,7 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 
-abstract class MinervaPrimitiveListFragment : BaseFragment(), MinervaPrimitiveClickListener {
+abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_view_layout), MinervaPrimitiveClickListener {
 
     lateinit var primitivesAdapter: MinervaPrimitiveAdapter
     abstract fun prepareObservers()
@@ -23,9 +23,6 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(), MinervaPrimitiveCl
     open fun onRemoveService(service: Service) {}
     open fun onCredentialContainerClick(credential: Credential) {}
     open fun getLoggedIdentityName(loggedInIdentityDid: String): String = String.Empty
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.recycler_view_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

@@ -1,9 +1,11 @@
 package minerva.android.extension
 
 import android.content.Context
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 
 fun View.visible() {
     this.visibility = View.VISIBLE
@@ -47,3 +49,6 @@ inline fun <reified T : ViewGroup.LayoutParams> View.layoutParams(block: T.() ->
 
 fun View.dpToPx(dp: Float): Int = context.dpToPx(dp)
 private fun Context.dpToPx(dp: Float): Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics).toInt()
+
+fun View.hideKeyboard() = (context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+        .hideSoftInputFromWindow(windowToken, 0)

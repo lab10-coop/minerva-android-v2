@@ -5,11 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
-import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.walletmanager.model.RestoreWalletResponse
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import org.junit.Before

@@ -22,6 +22,7 @@ import minerva.android.accounts.transaction.fragment.adapter.TokenAdapter
 import minerva.android.databinding.FragmentTransactionSendBinding
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.model.TransactionCost
@@ -43,7 +44,7 @@ class TransactionSendFragment : Fragment() {
     private lateinit var binding: FragmentTransactionSendBinding
 
     private val spinnerPosition
-        get() = viewModel.assetIndex + 1
+        get() = viewModel.assetIndex + ONE_ELEMENT
 
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
         binding.transactionCostAmount.text =
@@ -103,6 +104,7 @@ class TransactionSendFragment : Fragment() {
             saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onError(it.first) })
             transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCosts(it) })
             transactionCostLoadingLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCostLoader(it) })
+            overrideTxCostLiveData.observe(viewLifecycleOwner, EventObserver { shouldOverrideTransactionCost = true })
         }
     }
 
@@ -144,11 +146,13 @@ class TransactionSendFragment : Fragment() {
             validationDisposable = Observable.combineLatest(
                 amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.cryptoBalance) },
                 receiver.getValidationObservable(receiverInputLayout)
-                { Validator.validateAddress(it, viewModel.isAddressValid(it)) },
+                { Validator.validateAddress(it, viewModel.isAddressValid(it), R.string.invalid_account_address) },
                 BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid -> isAmountValid && isAddressValid })
                 .map { areFieldsValid ->
                     if (areFieldsValid) {
                         viewModel.getTransactionCosts(receiver.text.toString(), getAmount())
+                        transactionCostLayout.hideKeyboard()
+                        receiver.dismissDropDown()
                     } else {
                         arrow.gone()
                         clearTransactionCost()
@@ -177,17 +181,20 @@ class TransactionSendFragment : Fragment() {
     private fun prepareTokenDropdown() {
         binding.apply {
             tokenSpinner.apply {
-                adapter = TokenAdapter(context, R.layout.spinner_token, viewModel.tokensList)
-                    .apply { setDropDownViewResource(R.layout.spinner_token) }
-                setSelection(spinnerPosition, false)
-                setPopupBackgroundResource(R.drawable.rounded_white_background)
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                        viewModel.assetIndex = position - 1
-                        setupTexts()
-                    }
+                viewModel.tokensList.let { tokens ->
+                    tokenSpinner.setBackgroundResource(getSpinnerBackground(tokens.size))
+                    adapter = TokenAdapter(context, R.layout.spinner_token, tokens)
+                        .apply { setDropDownViewResource(R.layout.spinner_token) }
+                    setSelection(spinnerPosition, false)
+                    setPopupBackgroundResource(R.drawable.rounded_white_background)
+                    onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                            viewModel.assetIndex = position - ONE_ELEMENT
+                            setupTexts()
+                        }
 
-                    override fun onNothingSelected(adapterView: AdapterView<*>?) = setSelection(spinnerPosition, true)
+                        override fun onNothingSelected(adapterView: AdapterView<*>?) = setSelection(spinnerPosition, true)
+                    }
                 }
             }
         }
@@ -224,6 +231,10 @@ class TransactionSendFragment : Fragment() {
     private fun showErrorFlashBar(message: String = getString(R.string.transactions_error_message)) {
         MinervaFlashbar.show(requireActivity(), getString(R.string.transactions_error_title), message)
     }
+
+    private fun getSpinnerBackground(size: Int) =
+        if (size > ONE_ELEMENT) R.drawable.rounded_spinner_background
+        else R.drawable.rounded_white_background
 
     private fun setTransactionsCosts(transactionCost: TransactionCost) {
         with(binding) {
@@ -339,6 +350,10 @@ class TransactionSendFragment : Fragment() {
             sendButton.setOnClickListener {
                 viewModel.sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
             }
+            receiverInputLayout.setEndIconOnClickListener {
+                receiver.setText(String.Empty)
+                sendButton.isEnabled = false
+            }
         }
     }
 
@@ -352,7 +367,7 @@ class TransactionSendFragment : Fragment() {
     private fun setupTexts() {
         binding.apply {
             viewModel.prepareCurrency().let {
-                amountInputLayout.hint = "${getString(R.string.amount)}($it)"
+                amountInputLayout.hint = "${getString(R.string.amount)} ($it)"
                 sendButton.text = "${getString(R.string.send)} $it"
             }
         }
@@ -365,5 +380,6 @@ class TransactionSendFragment : Fragment() {
         private const val EMPTY_VALUE = "-.--"
         private const val DROP_DOWN_VERTICAL_OFFSET = 8
         private const val MIN_SIGN_TO_FILTER = 3
+        private const val ONE_ELEMENT = 1
     }
 }

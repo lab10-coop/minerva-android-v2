@@ -42,7 +42,7 @@ class ClubCardViewModelTest {
     }
 
     @Test
-    fun `Error when cache data is null` () {
+    fun `Error when cache data is null`() {
         whenever(cacheStorage.load(any())).thenReturn(null)
         viewModel.loadCardData(Credential(), callback)
         verify(callback, times(1)).onError()
@@ -63,20 +63,21 @@ class ClubCardViewModelTest {
     }
 
 
-    private val pageSource = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 242 153\">\n" +
-            "   <defs>\n" +
-            "      <style>.textvalue{font-size:9px;font-family:ArialNarrow,Arial}</style>\n" +
-            "   </defs>\n" +
-            "   <clipPath id=\"card\">\n" +
-            "      <rect class=\"card\" fill=\"#ffdc00\" width=\"242\" height=\"153\" rx=\"10\"/>\n" +
-            "   </clipPath>\n" +
-            "   <g id=\"Labels\">\n" +
-            "      <text id=\"exp\" class=\"textvalue\" transform=\"translate(44.61 105.74)\">2025</text>\n" +
-            "      <text id=\"name\" class=\"textvalue\" transform=\"translate(44.61 117.19)\">Maximilian Musterperson</text>\n" +
-            "      <text id=\"since\" class=\"textvalue\" transform=\"translate(44.61 128.64)\">1970</text>\n" +
-            "      <text id=\"memberId\" class=\"textvalue\" transform=\"translate(44.61 140.09)\">123456789</text>\n" +
-            "      <text id=\"coverage\" class=\"textvalue\" transform=\"translate(100 140.09)\">Something</text>\n" +
-            "   </g>\n" +
-            "</svg>"
+    private val pageSource =
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 242 153\">\n" +
+                "   <defs>\n" +
+                "      <style>.textvalue{font-size:9px;font-family:ArialNarrow,Arial}</style>\n" +
+                "   </defs>\n" +
+                "   <clipPath id=\"card\">\n" +
+                "      <rect class=\"card\" fill=\"#ffdc00\" width=\"242\" height=\"153\" rx=\"10\"/>\n" +
+                "   </clipPath>\n" +
+                "   <g id=\"Labels\">\n" +
+                "      <text id=\"exp\" class=\"textvalue\" transform=\"translate(44.61 105.74)\">2025</text>\n" +
+                "      <text id=\"name\" class=\"textvalue\" transform=\"translate(44.61 117.19)\">Maximilian Musterperson</text>\n" +
+                "      <text id=\"since\" class=\"textvalue\" transform=\"translate(44.61 128.64)\">1970</text>\n" +
+                "      <text id=\"memberId\" class=\"textvalue\" transform=\"translate(44.61 140.09)\">123456789</text>\n" +
+                "      <text id=\"coverage\" class=\"textvalue\" transform=\"translate(100 140.09)\">Something</text>\n" +
+                "   </g>\n" +
+                "</svg>"
 
 }

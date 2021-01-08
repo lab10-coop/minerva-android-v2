@@ -16,7 +16,7 @@ class HighlightedTextChain(context: Context, attrs: AttributeSet? = null) : Flex
 
     fun prepareChain(chainData: List<String>, title: String = String.Empty, defaultData: String? = null) {
         header.text = title
-        if(chainData.isEmpty() && defaultData != null) addView(prepareCell(defaultData))
+        if (chainData.isEmpty() && defaultData != null) addView(prepareCell(defaultData))
         chainData.forEach {
             addView(prepareCell(it))
         }

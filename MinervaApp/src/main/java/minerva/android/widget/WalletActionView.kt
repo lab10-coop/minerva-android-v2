@@ -83,7 +83,10 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
     private fun showServices(walletAction: WalletAction) {
         binding.type.text = when (walletAction.status) {
             ADDED -> context.getString(R.string.service_added, walletAction.fields[WalletActionFields.SERVICE_NAME])
-            BACKGROUND_ADDED -> context.getString(R.string.background_service_added, walletAction.fields[WalletActionFields.SERVICE_NAME])
+            BACKGROUND_ADDED -> context.getString(
+                R.string.background_service_added,
+                walletAction.fields[WalletActionFields.SERVICE_NAME]
+            )
             SENT -> context.getString(
                 R.string.service_sent,
                 walletAction.fields[WalletActionFields.CREDENTIAL_NAME],
@@ -98,7 +101,10 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
                     "${walletAction.fields[WalletActionFields.SERVICE_NAME]}"
                 )
             REMOVED -> walletAction.fields[WalletActionFields.SERVICE_NAME]
-            REJECTED, ACCEPTED -> context.getString(R.string.connection_request, walletAction.fields[WalletActionFields.SERVICE_NAME])
+            REJECTED, ACCEPTED -> context.getString(
+                R.string.connection_request,
+                walletAction.fields[WalletActionFields.SERVICE_NAME]
+            )
             else -> UNDEFINED
         }
         showIcon(R.drawable.ic_services)

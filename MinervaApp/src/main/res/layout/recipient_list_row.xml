@@ -13,8 +13,7 @@
         android:textSize="@dimen/text_normal"
         android:visibility="gone"
         tools:visibility="visible"
-        tools:text="didi.eth"
-        />
+        tools:text="didi.eth" />
 
     <TextView
         android:id="@+id/recipientAddress"

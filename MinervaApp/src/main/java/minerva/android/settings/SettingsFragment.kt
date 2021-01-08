@@ -20,16 +20,13 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
 
-class SettingsFragment : BaseFragment() {
+class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     val viewModel: SettingsViewModel by viewModel()
 
     private val settingsAdapter by lazy {
         SettingsAdapter({ onSettingsRowClicked(it) }, { onUseMainNetworkCheckedChange(it) })
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

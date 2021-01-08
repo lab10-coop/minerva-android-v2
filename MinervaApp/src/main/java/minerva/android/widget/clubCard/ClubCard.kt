@@ -73,7 +73,7 @@ class ClubCard(context: Context, private val credential: Credential) : Dialog(co
             isVerticalScrollBarEnabled = false
             isHorizontalFadingEdgeEnabled = false
             setOnTouchListener { _, motionEvent ->
-                when(motionEvent.action) {
+                when (motionEvent.action) {
                     MotionEvent.ACTION_UP -> viewSwitcher.showNext()
                 }
                 motionEvent.action == MotionEvent.ACTION_MOVE

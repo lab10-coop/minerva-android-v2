@@ -10,7 +10,10 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.PendingAccount
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -26,7 +29,8 @@ class MainViewModelTest : BaseViewModelTest() {
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
     private val transactionRepository: TransactionRepository = mock()
-    private val viewModel = MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager, transactionRepository)
+    private val viewModel =
+        MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager, transactionRepository)
 
     private val notExistedIdentityObserver: Observer<Event<Unit>> = mock()
     private val notExistedIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -175,7 +179,9 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `subscribe to executed transactions on complete`() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
-        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")).take(0))
+        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(
+            Flowable.just(PendingAccount(1, "123")).take(0)
+        )
         whenever(transactionRepository.getTransactions()).thenReturn(Single.just(listOf(PendingAccount(1, "123"))))
         whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
@@ -193,7 +199,9 @@ class MainViewModelTest : BaseViewModelTest() {
     fun `subscribe to executed transactions on complete and error occurs`() {
         val error = Throwable()
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
-        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")).take(0))
+        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(
+            Flowable.just(PendingAccount(1, "123")).take(0)
+        )
         whenever(transactionRepository.getTransactions()).thenReturn(Single.error(error))
         whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
