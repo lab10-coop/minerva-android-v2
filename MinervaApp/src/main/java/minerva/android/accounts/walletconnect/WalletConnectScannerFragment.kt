@@ -2,7 +2,6 @@ package minerva.android.accounts.walletconnect
 
 import android.content.Context
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -15,7 +14,6 @@ import minerva.android.extension.margin
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import timber.log.Timber
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
