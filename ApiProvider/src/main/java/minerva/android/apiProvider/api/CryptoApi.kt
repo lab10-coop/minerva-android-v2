@@ -10,7 +10,7 @@ import retrofit2.http.Url
 
 interface CryptoApi {
 
-    @GET("simple/priceeeee")
+    @GET("simple/price")
     fun getMarkets(@Query(IDS) coinIds: String, @Query(VS_CURRENCIES) currency: String): Single<Markets>
 
     @GET
