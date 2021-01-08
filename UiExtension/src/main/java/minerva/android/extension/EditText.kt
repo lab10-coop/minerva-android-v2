@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 
 private const val TEXT_WATCHER_DEBOUNCE = 1000L
 private const val FIRST = 1L
-private const val NO_ICON = 0
+const val NO_ICON = 0
 
 fun EditText.getValidationObservable(
     inputLayout: TextInputLayout? = null,

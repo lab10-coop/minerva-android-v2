@@ -10,7 +10,7 @@ import minerva.android.R
 import minerva.android.extension.addFragment
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.launchActivity
-import minerva.android.extension.replaceFragment
+import minerva.android.extension.replaceFragmentWithBackStack
 import minerva.android.kotlinUtils.Empty
 import minerva.android.main.MainActivity
 import minerva.android.onboarding.create.CreateWalletFragment
@@ -61,12 +61,12 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
     private fun isBackButtonPressed(menuItem: MenuItem) = menuItem.itemId == android.R.id.home
 
     override fun showRestoreWalletFragment() {
-        replaceFragment(R.id.main_content, RestoreWalletFragment.newInstance())
+        replaceFragmentWithBackStack(R.id.main_content, RestoreWalletFragment.newInstance())
         setToolbarBackButtonVisibility(true)
     }
 
     override fun showCreateWalletFragment() {
-        replaceFragment(R.id.main_content, CreateWalletFragment.newInstance())
+        replaceFragmentWithBackStack(R.id.main_content, CreateWalletFragment.newInstance())
         setToolbarBackButtonVisibility(true)
     }
 

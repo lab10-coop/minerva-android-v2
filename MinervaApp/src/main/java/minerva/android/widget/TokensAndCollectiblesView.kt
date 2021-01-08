@@ -28,6 +28,7 @@ class TokensAndCollectiblesView(
 
     init {
         initView()
+        initMainToken(account, callback)
         prepareListeners()
         initAssetsList()
     }
@@ -76,8 +77,8 @@ class TokensAndCollectiblesView(
 
     private fun initAssetsList() {
         binding.apply {
+            tokensContainer.removeAllViews()
             account.accountAssets.forEachIndexed { index, _ ->
-                tokensContainer.removeAllViews()
                 tokensContainer.addView(TokenView(context).apply {
                     initView(account, callback, index)
                 })

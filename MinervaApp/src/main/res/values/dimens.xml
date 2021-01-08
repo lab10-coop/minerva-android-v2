@@ -56,5 +56,6 @@
     <dimen name="scrollbar_size">3dp</dimen>
     <dimen name="check_box_offset">6dp</dimen>
     <dimen name="progressbar_size">20dp</dimen>
+    <dimen name="progressbar_size_small">18dp</dimen>
     <dimen name="drag_view_margin">120dp</dimen>
 </resources>

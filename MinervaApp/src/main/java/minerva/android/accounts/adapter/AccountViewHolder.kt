@@ -36,6 +36,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     override fun onSendTokenAssetClicked(account: Account, tokenIndex: Int) =
         listener.onSendAssetTokenClicked(account, tokenIndex)
+
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
     fun setListener(listener: AccountsAdapterListener) {
@@ -76,13 +77,13 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun prepareView(account: Account) {
         if (!account.isSafeAccount) {
-            prepareView()
+            prepareAccountView()
         } else {
             prepareSafeAccountView()
         }
     }
 
-    private fun prepareView() {
+    private fun prepareAccountView() {
         binding.mainContent.run {
             margin(NO_FRAME, FRAME_TOP_WIDTH, NO_FRAME, NO_FRAME)
             setBackgroundResource(R.drawable.identity_background)
@@ -122,7 +123,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
             account.accountAssets.isNotEmpty().let { visible ->
                 with(container) {
                     removeAllViews()
-                    addView(TokensAndCollectiblesView(viewGroup, account, this@AccountViewHolder, true).apply {
+                    //TODO showing/hiding main token in TokensAndCollectiblesView is made using last argument - needs to be updated in the future
+                    addView(TokensAndCollectiblesView(viewGroup, account, this@AccountViewHolder, false).apply {
                         visibleOrGone(visible)
                     })
                 }
@@ -158,6 +160,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.walletConnect -> listener.onWalletConnect()
+                R.id.manageAssets -> listener.onManageAssets(index)
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
                 R.id.remove -> listener.onAccountRemoved(index)

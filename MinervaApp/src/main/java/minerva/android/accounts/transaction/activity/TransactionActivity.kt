@@ -14,9 +14,9 @@ import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.accounts.transaction.fragment.adapter.TransactionPagerAdapter
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.databinding.ActivityTransactionBinding
+import minerva.android.extension.addFragmentWithBackStack
 import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.onTabSelected
-import minerva.android.extension.replaceFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.widget.MinervaFlashbar
@@ -119,7 +119,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     override fun showScanner() {
         supportActionBar?.hide()
-        replaceFragment(
+        addFragmentWithBackStack(
             R.id.container,
             AddressScannerFragment.newInstance(),
             R.animator.slide_in_left,
@@ -143,7 +143,6 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     companion object {
         const val SEND_TRANSACTION_INDEX = 0
-        const val RECEIVE_TRANSACTION_INDEX = 1
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val ACCOUNT_INDEX = "account_index"

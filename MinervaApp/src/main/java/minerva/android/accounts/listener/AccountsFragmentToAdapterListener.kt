@@ -10,4 +10,7 @@ interface AccountsFragmentToAdapterListener {
     fun onShowAddress(accountIndex: Int)
     fun onShowSafeAccountSettings(account: Account, position: Int)
     fun onWalletConnect()
+    fun onManageAssets(index: Int)
+    fun isAssetVisible(networkAddress: String, assetAddress: String): Boolean?
+    fun saveAssetVisibility(networkAddress: String, assetAddress: String, visibility: Boolean)
 }

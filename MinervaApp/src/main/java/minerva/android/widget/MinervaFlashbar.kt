@@ -21,6 +21,10 @@ object MinervaFlashbar {
             .build()
             .show()
     }
+
+    //TODO find all implementation of showing error and use below
+    fun showError(activity: Activity, throwable: Throwable, title: String = activity.getString(R.string.error_title)) =
+        show(activity, title, throwable.message ?: activity.getString(R.string.unexpected_error))
 }
 
 object MinervaFlashBarWithTwoButtons {

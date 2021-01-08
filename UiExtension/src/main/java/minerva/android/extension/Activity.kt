@@ -7,22 +7,15 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 
-fun AppCompatActivity.addFragment(containerId: Int, fragment: Fragment, slideIn: Int = 0, slideOut: Int = 0) {
-    supportFragmentManager.beginTransaction().apply {
-        setCustomAnimations(slideIn, 0, 0, slideOut)
-        add(containerId, fragment)
-        commit()
-    }
-}
+fun AppCompatActivity.addFragmentWithBackStack(containerId: Int, fragment: Fragment, slideIn: Int = 0, slideOut: Int = 0) =
+    showFragment(containerId, fragment, slideIn, slideOut, replace = false, addToBackstack = true)
 
-fun AppCompatActivity.replaceFragment(containerId: Int, fragment: Fragment, slideIn: Int = 0, slideOut: Int = 0) {
-    supportFragmentManager.beginTransaction().apply {
-        setCustomAnimations(slideIn, 0, 0, slideOut)
-        replace(containerId, fragment)
-        addToBackStack(null)
-        commit()
-    }
-}
+fun AppCompatActivity.addFragment(containerId: Int, fragment: Fragment, slideIn: Int = 0, slideOut: Int = 0) =
+    showFragment(containerId, fragment, slideIn, slideOut, replace = false, addToBackstack = false)
+
+fun AppCompatActivity.replaceFragmentWithBackStack(containerId: Int, fragment: Fragment, slideIn: Int = 0, slideOut: Int = 0) =
+    showFragment(containerId, fragment, slideIn, slideOut, replace = true, addToBackstack = true)
+
 
 inline fun <reified T : Any> Context.launchActivity(options: Bundle? = null, noinline init: Intent.() -> Unit = {}) {
     newIntent<T>(this).apply {
@@ -45,5 +38,25 @@ inline fun <reified T : Any> Activity.launchActivityForResult(
 inline fun <reified T : Any> newIntent(context: Context): Intent =
     Intent(context, T::class.java)
 
+
+//TODO check this method. I think, that it is working wrong - first fragment is not this one which is already visible,
+// I think that the last is correct
 fun AppCompatActivity.getCurrentFragment(): Fragment? =
     supportFragmentManager.fragments.firstOrNull { it.isVisible }
+
+private fun AppCompatActivity.showFragment(
+    containerId: Int,
+    fragment: Fragment,
+    slideIn: Int,
+    slideOut: Int,
+    replace: Boolean,
+    addToBackstack: Boolean
+) {
+    supportFragmentManager.beginTransaction().apply {
+        setCustomAnimations(slideIn, 0, 0, slideOut)
+        if(replace) replace(containerId, fragment)
+        else add(containerId, fragment)
+        if(addToBackstack) addToBackStack(fragment.tag)
+        commit()
+    }
+}
