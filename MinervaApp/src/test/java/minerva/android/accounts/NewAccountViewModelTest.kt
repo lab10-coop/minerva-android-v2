@@ -5,14 +5,12 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
+import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
-import org.amshove.kluent.shouldBe
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
 class NewAccountViewModelTest : BaseViewModelTest() {

@@ -9,7 +9,14 @@ import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Compan
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.INCOGNITO_PUBLIC_KEY
 
 @Retention(AnnotationRetention.SOURCE)
-@StringDef(DEFAULT_IDENTITY_NAME, INCOGNITO_IDENTITY, INCOGNITO_NAME, INCOGNITO_PHONE, INCOGNITO_PRIVATE_KEY, INCOGNITO_PUBLIC_KEY)
+@StringDef(
+    DEFAULT_IDENTITY_NAME,
+    INCOGNITO_IDENTITY,
+    INCOGNITO_NAME,
+    INCOGNITO_PHONE,
+    INCOGNITO_PRIVATE_KEY,
+    INCOGNITO_PUBLIC_KEY
+)
 annotation class DefaultWalletConfigFields {
     companion object {
         const val DEFAULT_IDENTITY_NAME = "Identity #1"

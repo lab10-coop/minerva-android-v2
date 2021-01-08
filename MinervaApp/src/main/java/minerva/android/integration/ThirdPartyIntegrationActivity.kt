@@ -10,7 +10,6 @@ import kotlinx.android.synthetic.main.activity_third_party_integration.*
 import minerva.android.R
 import minerva.android.extension.addFragment
 import minerva.android.extension.gone
-import minerva.android.extension.replaceFragment
 import minerva.android.extension.visible
 import minerva.android.integration.fragment.ConfirmTransactionFragment
 import minerva.android.integration.fragment.ConnectionRequestFragment
@@ -56,9 +55,13 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
                     is ConnectionRequest.ServiceConnected -> onNewServicesConnected(it.data)
                 }
             })
-            showPaymentConfirmationLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { showConfirmTransactionScreen() })
+            showPaymentConfirmationLiveData.observe(
+                this@ThirdPartyIntegrationActivity,
+                EventObserver { showConfirmTransactionScreen() })
             errorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { handleError(it) })
-            onDenyConnectionSuccessLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver { sendResult(ON_DENY_REQUEST) })
+            onDenyConnectionSuccessLiveData.observe(
+                this@ThirdPartyIntegrationActivity,
+                EventObserver { sendResult(ON_DENY_REQUEST) })
         }
     }
 
@@ -97,7 +100,12 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
     }
 
     override fun showConfirmTransactionScreen() {
-        replaceFragment(R.id.container, ConfirmTransactionFragment.newInstance(), R.animator.slide_in_left, R.animator.slide_out_right)
+        addFragment(
+            R.id.container,
+            ConfirmTransactionFragment.newInstance(),
+            R.animator.slide_in_left,
+            R.animator.slide_out_right
+        )
     }
 
     override fun onDeny() {

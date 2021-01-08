@@ -38,7 +38,8 @@ class OwnerAdapter(private val listener: OnOwnerRemovedListener) : RecyclerView.
     }
 }
 
-class OwnerViewHolder(private val view: View, private val onOwnerRemovedListener: OnOwnerRemovedListener) : RecyclerView.ViewHolder(view) {
+class OwnerViewHolder(private val view: View, private val onOwnerRemovedListener: OnOwnerRemovedListener) :
+    RecyclerView.ViewHolder(view) {
 
     fun setData(position: Int, owner: String) {
         view.apply {

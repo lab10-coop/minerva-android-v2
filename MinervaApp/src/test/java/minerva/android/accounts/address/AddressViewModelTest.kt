@@ -1,11 +1,11 @@
 package minerva.android.accounts.address
 
 import androidx.lifecycle.Observer
-import minerva.android.BaseViewModelTest
-import minerva.android.walletmanager.manager.identity.IdentityManager
 import com.nhaarman.mockitokotlin2.*
+import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.MinervaPrimitive
@@ -24,7 +24,7 @@ class AddressViewModelTest : BaseViewModelTest() {
     private val loadCaptor: KArgumentCaptor<Event<MinervaPrimitive>> = argumentCaptor()
 
     @Test
-    fun `Check that load delivers correct object` () {
+    fun `Check that load delivers correct object`() {
         val identity = Identity(0, name = "identity1")
         whenever(identityManager.loadIdentity(any(), any())).thenReturn(identity)
         viewModel.loadMinervaPrimitiveLiveData.observeForever(loadObserver)
@@ -36,7 +36,7 @@ class AddressViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `Check that viewModel load correct account` () {
+    fun `Check that viewModel load correct account`() {
         val account1 = Account(2, name = "account2")
         whenever(accountManager.loadAccount(any())).thenReturn(account1)
         viewModel.loadMinervaPrimitiveLiveData.observeForever(loadObserver)

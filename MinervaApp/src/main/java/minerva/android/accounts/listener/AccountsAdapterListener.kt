@@ -10,5 +10,6 @@ interface AccountsAdapterListener {
     fun onShowAddress(account: Account)
     fun onShowSafeAccountSettings(account: Account, index: Int)
     fun onWalletConnect()
+    fun onManageAssets(index: Int)
     fun onOpenOrClose(index: Int, isOpen: Boolean)
 }

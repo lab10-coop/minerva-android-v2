@@ -44,7 +44,7 @@ class TransactionSendFragment : Fragment() {
     private lateinit var binding: FragmentTransactionSendBinding
 
     private val spinnerPosition
-        get() = viewModel.assetIndex + 1
+        get() = viewModel.assetIndex + ONE_ELEMENT
 
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
         binding.transactionCostAmount.text =
@@ -146,7 +146,7 @@ class TransactionSendFragment : Fragment() {
             validationDisposable = Observable.combineLatest(
                 amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.cryptoBalance) },
                 receiver.getValidationObservable(receiverInputLayout)
-                { Validator.validateAddress(it, viewModel.isAddressValid(it)) },
+                { Validator.validateAddress(it, viewModel.isAddressValid(it), R.string.invalid_account_address) },
                 BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid -> isAmountValid && isAddressValid })
                 .map { areFieldsValid ->
                     if (areFieldsValid) {

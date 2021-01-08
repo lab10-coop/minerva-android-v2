@@ -10,8 +10,8 @@ import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.smartContract.SmartContractRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
@@ -38,7 +38,7 @@ class SmartContractRepositoryTest {
     val value = Account(0, owners = listOf("owner"))
 
     @Before
-    fun setup(){
+    fun setup() {
         whenever(walletConfigManager.getWalletConfig()) doReturn DataProvider.walletConfig
     }
 
@@ -100,7 +100,7 @@ class SmartContractRepositoryTest {
     fun `get safe account owners error`() {
         val error = Throwable()
         whenever(blockchainSafeAccountRepository.getGnosisSafeOwners(any(), any(), any())) doReturn Single.error(error)
-        smartContractRepository.getSafeAccountOwners("123", "ETH", "456",value)
+        smartContractRepository.getSafeAccountOwners("123", "ETH", "456", value)
             .test()
             .assertError(error)
     }
@@ -121,7 +121,14 @@ class SmartContractRepositoryTest {
     @Test
     fun `add safe account owners error`() {
         val error = Throwable()
-        whenever(blockchainSafeAccountRepository.addSafeAccountOwner(any(), any(), any(), any())) doReturn Completable.error(error)
+        whenever(
+            blockchainSafeAccountRepository.addSafeAccountOwner(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ) doReturn Completable.error(error)
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.error(error)
         whenever(walletConfigManager.updateSafeAccountOwners(any(), any())) doReturn Single.error(error)
         smartContractRepository.addSafeAccountOwner("owner", "123", "eth", "567", value)
@@ -131,7 +138,14 @@ class SmartContractRepositoryTest {
 
     @Test
     fun `remove safe account owners success`() {
-        whenever(blockchainSafeAccountRepository.removeSafeAccountOwner(any(), any(), any(), any())) doReturn Completable.complete()
+        whenever(
+            blockchainSafeAccountRepository.removeSafeAccountOwner(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ) doReturn Completable.complete()
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.complete()
         whenever(walletConfigManager.updateSafeAccountOwners(any(), any())) doReturn Single.just(listOf("test"))
         smartContractRepository.removeSafeAccountOwner("owner", "123", "eth", "567", value)
@@ -142,7 +156,9 @@ class SmartContractRepositoryTest {
     @Test
     fun `remove safe account owners error`() {
         val error = Throwable()
-        whenever(blockchainSafeAccountRepository.removeSafeAccountOwner(any(), any(), any(), any())) doReturn Completable.error(error)
+        whenever(blockchainSafeAccountRepository.removeSafeAccountOwner(any(), any(), any(), any())) doReturn Completable.error(
+            error
+        )
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.error(error)
         whenever(walletConfigManager.updateSafeAccountOwners(any(), any())) doReturn Single.error(error)
         smartContractRepository.removeSafeAccountOwner("owner", "123", "eth", "567", value)

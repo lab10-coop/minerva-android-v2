@@ -13,5 +13,6 @@ object Web3jProvider {
             Web3j.build(HttpService(it.value))
         }
     }
+
     fun provideEnsResolver(ensUrl: String): EnsResolver = EnsResolver(Web3j.build(HttpService(ensUrl)))
 }

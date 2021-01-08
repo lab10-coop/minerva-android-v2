@@ -6,6 +6,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
@@ -16,7 +17,6 @@ import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountAsset
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.walletmanager.utils.CryptoUtils
 import java.math.BigDecimal
 import java.math.BigInteger

@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.NO_DATA
+import minerva.android.walletmanager.model.AssetVisibilitySettings
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.Recipient
 
@@ -77,9 +78,21 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         sharedPreferences.edit().remove(PENDING_ACCOUNTS).apply()
     }
 
-    override fun getProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
+    override fun getProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA)
+        ?: String.NO_DATA
 
     override fun saveProfileImage(name: String, image: String) = sharedPreferences.edit().putString(name, image).apply()
+
+    override fun getAssetVisibilitySettings(): AssetVisibilitySettings =
+        sharedPreferences.getString(ASSET_VISIBILITY_SETTINGS, String.NO_DATA).let { raw ->
+            if (raw == String.NO_DATA) AssetVisibilitySettings()
+            else Gson().fromJson(raw, object : TypeToken<AssetVisibilitySettings>() {}.type)
+        }
+
+    override fun saveAssetVisibilitySettings(settings: AssetVisibilitySettings): AssetVisibilitySettings {
+        sharedPreferences.edit().putString(ASSET_VISIBILITY_SETTINGS, Gson().toJson(settings)).apply()
+        return settings
+    }
 
     companion object {
         private const val IS_MNEMONIC_REMEMBERED = "is_mnemonic_remembered"
@@ -88,5 +101,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val IS_SYNCED = "is_synced"
         private const val RECIPIENTS = "recipients"
         private const val PENDING_ACCOUNTS = "pending_accounts"
+        private const val ASSET_VISIBILITY_SETTINGS = "asset_visibility_settings"
     }
 }

@@ -6,11 +6,10 @@ import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
-import minerva.android.observeWithPredicate
 import minerva.android.walletmanager.manager.order.OrderManager
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Identity
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.defs.WalletActionType
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo

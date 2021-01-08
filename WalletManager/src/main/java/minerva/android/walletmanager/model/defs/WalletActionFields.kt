@@ -1,8 +1,8 @@
 package minerva.android.walletmanager.model.defs
 
 import androidx.annotation.StringDef
-import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.IDENTITY_NAME
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.ACCOUNT_NAME
+import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.IDENTITY_NAME
 
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(IDENTITY_NAME, ACCOUNT_NAME)

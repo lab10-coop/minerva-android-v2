@@ -18,7 +18,8 @@ import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 
-class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) : RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {
+class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) :
+    RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {
 
     private var primitives: List<MinervaPrimitive> = listOf()
 
@@ -67,7 +68,8 @@ class MinervaPrimitiveViewHolder(
             }
 
             minervaPrimitiveName.text = minervaPrimitive.name
-            lastUsedLabel.text = "${context.getString(R.string.last_used)} ${DateUtils.getDateWithTimeFromTimestamp(minervaPrimitive.lastUsed)}"
+            lastUsedLabel.text =
+                "${context.getString(R.string.last_used)} ${DateUtils.getDateWithTimeFromTimestamp(minervaPrimitive.lastUsed)}"
             container.setOnClickListener { listener.onContainerClick(minervaPrimitive) }
             popupMenu.setOnClickListener { view ->
                 PopupMenu(this@MinervaPrimitiveViewHolder.view.context, view).apply {

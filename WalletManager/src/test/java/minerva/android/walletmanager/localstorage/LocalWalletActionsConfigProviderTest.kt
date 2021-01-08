@@ -16,7 +16,7 @@ class LocalWalletActionsConfigProviderTest {
     private val localWalletActionsConfigProvider = LocalWalletActionsConfigProviderImpl(sharedPref)
 
     @Test
-    fun `save wallet action config test`(){
+    fun `save wallet action config test`() {
         localWalletActionsConfigProvider.saveWalletActionsConfig(WalletActionsConfigPayload())
         verify {
             sharedPref.edit().putString(any(), any()).apply()
@@ -25,7 +25,7 @@ class LocalWalletActionsConfigProviderTest {
     }
 
     @Test
-    fun `load wallet action config test`(){
+    fun `load wallet action config test`() {
         localWalletActionsConfigProvider.loadWalletActionsConfig()
         verify {
             sharedPref.getString(any(), any())

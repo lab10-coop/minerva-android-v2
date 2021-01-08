@@ -5,5 +5,6 @@ import minerva.android.kotlinUtils.Empty
 data class Asset(
     val name: String = String.Empty,
     val shortName: String = String.Empty,
-    val address: String = String.Empty
+    val address: String = String.Empty,
+    val decimals: String = String.Empty
 )

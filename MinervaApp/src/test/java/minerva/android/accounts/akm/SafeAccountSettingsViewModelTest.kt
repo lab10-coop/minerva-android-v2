@@ -36,7 +36,14 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `load updated owner list`() {
         whenever(accountManager.loadAccount(any())).thenReturn(mockValue)
-        whenever(smartContractRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(Single.just(listOf("0x456", "0x789")))
+        whenever(smartContractRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(
+            Single.just(
+                listOf(
+                    "0x456",
+                    "0x789"
+                )
+            )
+        )
         viewModel.ownersLiveData.observeForever(ownersObserver)
         viewModel.loadAccount(0)
         kArgumentCaptor.run {
@@ -48,7 +55,14 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `getting current owners`() {
         whenever(accountManager.loadAccount(any())).thenReturn(mockValue)
-        whenever(smartContractRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(Single.just(listOf("0x456", "0x789")))
+        whenever(smartContractRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(
+            Single.just(
+                listOf(
+                    "0x456",
+                    "0x789"
+                )
+            )
+        )
         viewModel.run {
             loadAccount(0)
             getOwners("0x303", "", "")
@@ -73,7 +87,15 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `add owner success test`() {
-        whenever(smartContractRepository.addSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.just(listOf("tom"))
+        whenever(
+            smartContractRepository.addSafeAccountOwner(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ) doReturn Single.just(listOf("tom"))
         viewModel.run {
             ownersLiveData.observeForever(addOwnerObserver)
             account = mockValue
@@ -122,7 +144,15 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `remove owner success test`() {
-        whenever(smartContractRepository.removeSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.just(listOf("tom", "beata"))
+        whenever(
+            smartContractRepository.removeSafeAccountOwner(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ) doReturn Single.just(listOf("tom", "beata"))
         viewModel.run {
             ownersLiveData.observeForever(ownersObserver)
             account = Account(id = 0, owners = listOf("tom", "beata"))

@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.network_list_row.view.*
 import minerva.android.R
 import minerva.android.extension.gone
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.widget.repository.getNetworkIcon
 

@@ -22,12 +22,12 @@ class FormValidatorTest {
 
     @Test
     fun `test receiver address validator`() {
-        val incorrectReceiverValidationResult = Validator.validateAddress("123456789", false)
+        val incorrectReceiverValidationResult = Validator.validateAddress("123456789", false, R.string.invalid_account_address)
         incorrectReceiverValidationResult.hasError shouldBeEqualTo true
         incorrectReceiverValidationResult.errorMessageId shouldBeEqualTo R.string.invalid_account_address
-        val correctReceiverValidationResult = Validator.validateAddress("0x324324", true)
+        val correctReceiverValidationResult = Validator.validateAddress("0x324324", true, R.string.invalid_account_address)
         correctReceiverValidationResult.hasError shouldBeEqualTo false
-        val correctEnsValidationResult = Validator.validateAddress("aaa.sfsada", true)
+        val correctEnsValidationResult = Validator.validateAddress("aaa.sfsada", true, R.string.invalid_account_address)
         correctEnsValidationResult.hasError shouldBeEqualTo false
     }
 

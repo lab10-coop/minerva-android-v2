@@ -11,9 +11,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_confirm_transaction.*
 import minerva.android.R
-import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.integration.ThirdPartyRequestViewModel
 import minerva.android.integration.listener.PaymentCommunicationListener
+import minerva.android.kotlinUtils.event.EventObserver
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class ConfirmTransactionFragment : Fragment() {

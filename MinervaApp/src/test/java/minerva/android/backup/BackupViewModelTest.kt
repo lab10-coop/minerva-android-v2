@@ -12,7 +12,7 @@ class BackupViewModelTest {
     private val viewModel = BackupViewModel(masterSeedRepository)
 
     @Test
-    fun`test formatting mnemonic`(){
+    fun `test formatting mnemonic`() {
         val mnemonic = viewModel.getFormattedMnemonic("asd asd asd asd asd")
         assertEquals("asd\nasd\nasd\nasd\nasd\n", mnemonic)
     }

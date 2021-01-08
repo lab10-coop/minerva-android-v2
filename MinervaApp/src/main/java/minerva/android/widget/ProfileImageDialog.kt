@@ -98,7 +98,11 @@ class ProfileImageDialog(private val fragment: Fragment) : Dialog(fragment.requi
 
     private fun onPermissionDenied() {
         fragment.apply {
-            MinervaFlashbar.show(requireActivity(), getString(R.string.permission_error), getString(R.string.permission_error_message))
+            MinervaFlashbar.show(
+                requireActivity(),
+                getString(R.string.permission_error),
+                getString(R.string.permission_error_message)
+            )
         }
     }
 

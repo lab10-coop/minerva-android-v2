@@ -39,7 +39,11 @@ class IdentityAdapter(private val listener: IdentityFragmentListener) : Recycler
     private fun isRemovable() = activeIdentities.size > LAST_ELEMENT
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IdentityViewHolder =
-        IdentityViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.identity_list_row, parent, false), parent, listener)
+        IdentityViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.identity_list_row, parent, false),
+            parent,
+            listener
+        )
 
     fun updateList(identities: List<Identity>, credentials: List<Credential>) {
         rawIdentities = identities
