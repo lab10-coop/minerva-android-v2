@@ -1,4 +1,4 @@
-package minerva.android.servicesApiProvider.model
+package minerva.android.apiProvider.model
 
 import com.google.gson.annotations.SerializedName
 import java.math.BigDecimal

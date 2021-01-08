@@ -1,8 +1,9 @@
-package com.exchangemarketsprovider.retrofit
+package minerva.android.apiProvider.retrofit
 
-import com.exchangemarketsprovider.api.BinanceApi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import minerva.android.apiProvider.api.CryptoApi
+import minerva.android.apiProvider.api.ServicesApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -12,6 +13,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitProvider {
+
     fun providePrivateOkHttpClient(
         isDebug: Boolean
     ): OkHttpClient {
@@ -40,7 +42,9 @@ object RetrofitProvider {
             .client(okHttpClient)
             .build()
 
-    fun provideMinervaApi(retrofit: Retrofit): BinanceApi = retrofit.create(BinanceApi::class.java)
+    fun provideServicesApi(retrofit: Retrofit): ServicesApi = retrofit.create(ServicesApi::class.java)
+
+    fun provideCoinGecko(retrofit: Retrofit): CryptoApi = retrofit.create(CryptoApi::class.java)
 
     private val gson: Gson = GsonBuilder().enableComplexMapKeySerialization().create()
     private val converterFactory = GsonConverterFactory.create(gson)
