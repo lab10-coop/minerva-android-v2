@@ -73,7 +73,7 @@
                 android:layout_marginEnd="@dimen/margin_big"
                 android:fontFamily="@font/rubik_regular"
                 android:gravity="center"
-                android:padding="@dimen/padding_xsmall"
+                android:padding="@dimen/margin_xsmall"
                 android:text="@string/connection_request_manual"
                 android:textSize="@dimen/text_xsmall"
                 app:layout_constraintLeft_toLeftOf="parent"

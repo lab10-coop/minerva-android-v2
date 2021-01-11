@@ -16,6 +16,7 @@ interface TransactionRepository {
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
     fun getAccount(accountIndex: Int): Account?
+    fun getFreeATS(address: String): Completable
 
     fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount>
     fun removePendingAccount(pendingAccount: PendingAccount)

@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_DATA
 import minerva.android.walletmanager.model.AssetVisibilitySettings
 import minerva.android.walletmanager.model.PendingAccount
@@ -78,8 +79,13 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         sharedPreferences.edit().remove(PENDING_ACCOUNTS).apply()
     }
 
-    override fun getProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA)
-        ?: String.NO_DATA
+    override fun getLastFreeATSTimestamp(): Long = sharedPreferences.getLong(FREE_ATS_TIMESTAMP, Long.InvalidValue)
+
+    override fun saveFreeATSTimestamp(timestamp: Long) {
+        sharedPreferences.edit().putLong(FREE_ATS_TIMESTAMP, timestamp).apply()
+    }
+
+    override fun getProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
 
     override fun saveProfileImage(name: String, image: String) = sharedPreferences.edit().putString(name, image).apply()
 
@@ -102,5 +108,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val RECIPIENTS = "recipients"
         private const val PENDING_ACCOUNTS = "pending_accounts"
         private const val ASSET_VISIBILITY_SETTINGS = "asset_visibility_settings"
+        private const val FREE_ATS_TIMESTAMP = "free_ats_timestamp"
     }
 }

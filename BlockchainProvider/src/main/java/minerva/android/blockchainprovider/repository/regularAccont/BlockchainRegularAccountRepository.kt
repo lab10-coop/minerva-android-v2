@@ -39,4 +39,5 @@ interface BlockchainRegularAccountRepository {
     fun isAddressValid(address: String): Boolean
     fun getCurrentBlockNumber(network: String): Flowable<BigInteger>
     fun toChecksumAddress(address: String): String
+    fun getFreeATS(address: String): Completable
 }
