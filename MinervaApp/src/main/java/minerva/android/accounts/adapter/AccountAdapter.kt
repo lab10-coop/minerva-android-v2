@@ -24,8 +24,6 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     val activeAccountsList
         get()= activeAccounts
 
-    private var openAccounts = mutableListOf<Boolean>()
-
     override fun getItemCount(): Int = activeAccounts.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
