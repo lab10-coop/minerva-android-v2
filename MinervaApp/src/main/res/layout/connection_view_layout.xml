@@ -5,14 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <minerva.android.widget.ConnectionIcon
+    <ImageView
         android:id="@+id/connectionIcon"
         android:layout_width="@dimen/connection_icon_size"
         android:layout_height="@dimen/connection_icon_size"
         android:layout_marginStart="20dp"
         android:layout_marginTop="40dp"
         android:layout_marginBottom="40dp"
-        android:src="@drawable/ic_settings_in_circle"
+        android:background="@drawable/connection_icon_shape"
+        android:padding="20dp"
+        android:src="@drawable/ic_services"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/checkboxIcon"
@@ -48,16 +50,20 @@
         app:layout_constraintRight_toLeftOf="@+id/logo"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <minerva.android.widget.ConnectionIcon
+    <ImageView
         android:id="@+id/logo"
         android:layout_width="@dimen/connection_icon_size"
         android:layout_height="@dimen/connection_icon_size"
         android:layout_marginTop="40dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="40dp"
+        android:background="@drawable/connection_icon_shape"
+        android:padding="20dp"
+        android:src="@drawable/ic_minerva_icon"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/checkboxIcon"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

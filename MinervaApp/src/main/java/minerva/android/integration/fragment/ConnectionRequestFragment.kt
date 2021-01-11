@@ -37,7 +37,7 @@ class ConnectionRequestFragment : Fragment() {
         with(connectionRequestView) {
             setRequestedData(viewModel.requestedData)
             setConnectionIcon(R.drawable.ic_services)
-            setConnectionIconsSize()
+            setConnectionIconsPadding()
         }
     }
 
