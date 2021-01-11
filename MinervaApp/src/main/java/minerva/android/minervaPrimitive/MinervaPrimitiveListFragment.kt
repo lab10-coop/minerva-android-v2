@@ -1,12 +1,10 @@
 package minerva.android.minervaPrimitive
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
+import minerva.android.databinding.RecyclerViewLayoutBinding
 import minerva.android.kotlinUtils.Empty
 import minerva.android.main.base.BaseFragment
 import minerva.android.services.listener.MinervaPrimitiveClickListener
@@ -16,6 +14,7 @@ import minerva.android.walletmanager.model.Service
 
 abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_view_layout), MinervaPrimitiveClickListener {
 
+    internal lateinit var binding: RecyclerViewLayoutBinding
     lateinit var primitivesAdapter: MinervaPrimitiveAdapter
     abstract fun prepareObservers()
 
@@ -26,13 +25,14 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = RecyclerViewLayoutBinding.bind(view)
         setupRecycleView()
         prepareObservers()
     }
 
     private fun setupRecycleView() {
         primitivesAdapter = MinervaPrimitiveAdapter(this)
-        recyclerView.apply {
+        binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = primitivesAdapter
         }

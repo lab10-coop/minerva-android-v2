@@ -7,12 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
+import minerva.android.databinding.RecyclerViewLayoutBinding
 import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.main.base.BaseFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.Identity
@@ -22,16 +23,15 @@ import minerva.android.wrapped.startEditIdentityWrappedActivity
 import minerva.android.wrapped.startIdentityAddressWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-class MyIdentitiesFragment : Fragment(), IdentityFragmentListener {
+class MyIdentitiesFragment : Fragment(R.layout.recycler_view_layout), IdentityFragmentListener {
 
     private val viewModel: MinervaPrimitivesViewModel by sharedViewModel()
+    private lateinit var binding: RecyclerViewLayoutBinding
     private val identityAdapter = IdentityAdapter(this)
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.recycler_view_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = RecyclerViewLayoutBinding.bind(view)
         setupRecycleView()
         setObservers()
     }
@@ -46,7 +46,7 @@ class MyIdentitiesFragment : Fragment(), IdentityFragmentListener {
     }
 
     private fun setupRecycleView() {
-        recyclerView.apply {
+        binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = identityAdapter
         }

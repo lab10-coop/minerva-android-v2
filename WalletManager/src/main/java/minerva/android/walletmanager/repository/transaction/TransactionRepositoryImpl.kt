@@ -208,6 +208,8 @@ class TransactionRepositoryImpl(
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
 
+    override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
+
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1
         private const val PENDING_NETWORK_LIMIT = 2

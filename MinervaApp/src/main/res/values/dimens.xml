@@ -4,23 +4,20 @@
     <dimen name="margin_big">20dp</dimen>
     <dimen name="margin_xbig">24dp</dimen>
     <dimen name="margin_large">32dp</dimen>
-    <dimen name="margin_xlarge">64dp</dimen>
+    <dimen name="margin_xlarge">40dp</dimen>
+    <dimen name="margin_xxlarge">48dp</dimen>
+    <dimen name="margin_xxxlarge">64dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">12dp</dimen>
     <dimen name="margin_xsmall">8dp</dimen>
     <dimen name="margin_xxsmall">4dp</dimen>
     <dimen name="margin_xxxsmall">2dp</dimen>
 
-    <dimen name="padding_xsmall">8dp</dimen>
-    <dimen name="padding_xxsmall">4dp</dimen>
-    <dimen name="padding_xbig">24dp</dimen>
-
     <dimen name="text_big">20sp</dimen>
     <dimen name="text_normal">16sp</dimen>
     <dimen name="text_small">14sp</dimen>
     <dimen name="text_xsmall">12sp</dimen>
 
-    <dimen name="xsmall_logo_size">32dp</dimen>
     <dimen name="large_letter_logo_size">128dp</dimen>
     <dimen name="big_letter_logo_size">96dp</dimen>
     <dimen name="qr_code_size">256dp</dimen>
@@ -28,6 +25,8 @@
     <dimen name="camera_logo_icon_size">24dp</dimen>
     <dimen name="logo_size">72dp</dimen>
     <dimen name="icon_size">40dp</dimen>
+    <dimen name="rounded_background_radius">16dp</dimen>
+    <dimen name="xsmall_logo_size">32dp</dimen>
     <dimen name="small_logo_size">36dp</dimen>
     <dimen name="dapp_logo_size">60dp</dimen>
     <dimen name="badge_logo_size">16dp</dimen>
@@ -57,5 +56,6 @@
     <dimen name="check_box_offset">6dp</dimen>
     <dimen name="progressbar_size">20dp</dimen>
     <dimen name="progressbar_size_small">18dp</dimen>
+    <dimen name="drawable_icon_small">16dp</dimen>
     <dimen name="drag_view_margin">120dp</dimen>
 </resources>

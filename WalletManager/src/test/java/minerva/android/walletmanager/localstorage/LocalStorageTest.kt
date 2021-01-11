@@ -2,6 +2,7 @@ package minerva.android.walletmanager.localstorage
 
 import android.content.SharedPreferences
 import io.mockk.*
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.AssetVisibilitySettings
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.storage.LocalStorageImpl
@@ -12,8 +13,10 @@ class LocalStorageTest {
     private val sharedPref = mockk<SharedPreferences> {
         every { edit().putString(any(), any()).apply() } just Runs
         every { edit().putBoolean(any(), any()).apply() } just Runs
+        every { edit().putLong(any(), any()).apply() } just Runs
         every { getBoolean(any(), any()) } returns true
         every { getString(any(), any()) } returns ""
+        every { getLong(any(), any()) } returns Long.InvalidValue
     }
 
     private val localStorage = LocalStorageImpl(sharedPref)
@@ -120,6 +123,25 @@ class LocalStorageTest {
         localStorage.getAssetVisibilitySettings()
         verify {
             sharedPref.getString(any(), any())
+        }
+    }
+
+    @Test
+    fun `save last free ATS timetamp` () {
+        val timestamp = 333L
+        localStorage.saveFreeATSTimestamp(timestamp)
+        every { localStorage.getLastFreeATSTimestamp() } returns timestamp
+        verify {
+            sharedPref.edit().putLong(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
+    }
+
+    @Test
+    fun `load last free ATS timestamp` () {
+        localStorage.getLastFreeATSTimestamp()
+        verify {
+            sharedPref.getLong(any(), Long.InvalidValue)
         }
     }
 }

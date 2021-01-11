@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.reactivex.Flowable
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
 import minerva.android.kotlinUtils.InvalidIndex
 import org.junit.Test
@@ -13,6 +14,7 @@ import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.methods.response.*
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.net.URL
 import kotlin.test.assertEquals
 
 
@@ -25,12 +27,13 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     private val ATS = "ATS"
     private val web3J = mockk<Web3j>()
     private val ensResolver = mockk<EnsResolver>()
+    private val freeTokenRepository = mockk<FreeTokenRepository>()
     private val web3Js: Map<String, Web3j> = mapOf(Pair(ETH, web3J))
     private val gasPrice: Map<String, BigInteger> =
         mapOf(Pair(ETH, EthGasPrice), Pair(ATS, AtsGasPrice))
 
     private val repository: BlockchainRegularAccountRepositoryImpl =
-        BlockchainRegularAccountRepositoryImpl(web3Js, gasPrice, ensResolver)
+        BlockchainRegularAccountRepositoryImpl(web3Js, gasPrice, ensResolver, freeTokenRepository)
 
     @Test
     fun `refresh balance success`() {
@@ -258,5 +261,23 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     fun `to address checksum test`() {
         val result = repository.toChecksumAddress("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359")
         assertEquals("0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359", result)
+    }
+
+    @Test
+    fun `Getting Free ATS request` () {
+        every { freeTokenRepository.getFreeATS("some address") } returns "txHash: 0xCookie"
+        repository.getFreeATS("some address")
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+    }
+
+    @Test
+    fun `Getting free ATS request error` () {
+        val response = "Wrong txHash for: 0xCookie"
+        every { freeTokenRepository.getFreeATS("some address") } returns response
+        repository.getFreeATS("some address")
+            .test()
+            .assertErrorMessage(response)
     }
 }
