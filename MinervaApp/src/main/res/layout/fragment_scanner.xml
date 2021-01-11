@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_wallet_connect"
                 android:drawablePadding="@dimen/margin_small"
-                android:padding="@dimen/padding_xsmall"
+                android:padding="@dimen/margin_xsmall"
                 android:text="@string/wc_message"
                 android:textColor="@color/white"
                 app:drawableTint="@color/white" />

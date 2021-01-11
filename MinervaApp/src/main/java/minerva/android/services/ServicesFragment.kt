@@ -1,7 +1,6 @@
 package minerva.android.services
 
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.EventObserver
@@ -22,7 +21,7 @@ class ServicesFragment : MinervaPrimitiveListFragment() {
     override fun prepareObservers() {
         viewModel.apply {
             walletConfigLiveData.observe(viewLifecycleOwner, Observer {
-                noDataMessage.visibleOrGone(it.services.isEmpty())
+                binding.noDataMessage.visibleOrGone(it.services.isEmpty())
                 primitivesAdapter.updateList(it.services)
             })
             serviceRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })

@@ -1,7 +1,10 @@
 package minerva.android.accounts.transaction.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import minerva.android.R
@@ -32,6 +35,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = RefreshableRecyclerViewLayoutBinding.bind(view)
+        initFragment()
         setupRecycleView(view)
         setupLiveData()
     }
@@ -43,6 +47,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             onResume()
             refreshBalances()
             refreshAssetBalance()
+            refreshFreeATSButton()
             if (arePendingAccountsEmpty()) accountAdapter.stopPendingTransactions()
         }
     }
@@ -86,6 +91,15 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)
     }
 
+    private fun initFragment() {
+        binding.apply {
+            viewModel.apply {
+                networksHeader.text = getHeader(areMainNetsEnabled)
+                addTatsButton.visibleOrGone(!areMainNetsEnabled)
+            }
+        }
+    }
+
     private fun setupRecycleView(view: View) {
         binding.apply {
             swipeRefresh.apply {
@@ -111,51 +125,68 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     private fun setupLiveData() {
-        binding.apply {
-            viewModel.apply {
-                networksHeader.text = getHeader(areMainNetsEnabled)
-                shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
-                    if (it) {
-                        FundsAtRiskDialog(requireContext()).show()
-                    }
-                })
+        viewModel.apply {
+            shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
+                if (it) {
+                    FundsAtRiskDialog(requireContext()).show()
+                }
+            })
+            binding.apply {
                 walletConfigLiveData.observe(viewLifecycleOwner, Observer { walletConfig ->
                     noDataMessage.visibleOrGone(walletConfig.hasActiveAccount)
                     accountAdapter.updateList(walletConfig.accounts, areMainNetsEnabled)
+                    setTatsButtonListener(accountAdapter.activeAccountsList)
                 })
                 balanceLiveData.observe(viewLifecycleOwner, Observer {
                     accountAdapter.updateBalances(it)
                     swipeRefresh.isRefreshing = false
                 })
-                accountAssetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
-                errorLiveData.observe(
-                    viewLifecycleOwner,
-                    EventObserver { showErrorFlashbar(getString(R.string.error_header), getString(R.string.unexpected_error)) })
-                noFundsLiveData.observe(viewLifecycleOwner, Observer {
-                    MinervaFlashbar.show(requireActivity(), getString(R.string.no_funds), getString(R.string.no_funds_message))
-                })
-                loadingLiveData.observe(viewLifecycleOwner, EventObserver {
-                    interactor.shouldShowLoadingScreen(it)
-                })
-                balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                    showErrorFlashbar(
-                        getString(R.string.cannot_remove_safe_account_title),
-                        getString(R.string.cannot_remove_safe_account_message)
-                    )
-                })
-                balanceIsNotEmptyErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                    showErrorFlashbar(
-                        getString(R.string.cannot_remove_account_title),
-                        getString(R.string.cannot_remove_account_message)
-                    )
-                })
-                isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                    showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
-                })
-                automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
-                accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
-                refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleRefreshBalancesError(it) })
             }
+            accountAssetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
+            errorLiveData.observe(viewLifecycleOwner, EventObserver {
+                showErrorFlashbar(
+                    getString(R.string.error_header),
+                    getString(R.string.unexpected_error)
+                )
+            })
+
+            noFundsLiveData.observe(viewLifecycleOwner, Observer {
+                MinervaFlashbar.show(
+                    requireActivity(),
+                    getString(R.string.no_funds),
+                    getString(R.string.no_funds_message)
+                )
+            })
+
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver {
+                interactor.shouldShowLoadingScreen(it)
+            })
+
+            balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(viewLifecycleOwner, EventObserver {
+                showErrorFlashbar(
+                    getString(R.string.cannot_remove_safe_account_title),
+                    getString(R.string.cannot_remove_safe_account_message)
+                )
+            })
+
+            balanceIsNotEmptyErrorLiveData.observe(viewLifecycleOwner, EventObserver {
+                showErrorFlashbar(
+                    getString(R.string.cannot_remove_account_title),
+                    getString(R.string.cannot_remove_account_message)
+                )
+            })
+
+            isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
+                showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
+            })
+
+            accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver {
+                activity?.invalidateOptionsMenu()
+                refreshFreeATSButton()
+            })
+
+            automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
+            refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleRefreshBalancesError(it) })
         }
     }
 
@@ -172,6 +203,26 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             )
         }
     }
+
+    private fun refreshFreeATSButton() {
+        viewModel.isAddingFreeATSAvailable(accountAdapter.activeAccountsList).let { isAvailable ->
+            binding.addTatsButton.apply {
+                val color = if (isAvailable) R.color.artis else R.color.inactiveButtonColor
+                setBackgroundColor(ContextCompat.getColor(context, color))
+            }
+        }
+    }
+
+    private fun setTatsButtonListener(accounts: List<Account>) =
+        binding.addTatsButton.setOnClickListener {
+            viewModel.apply {
+                Toast.makeText(it.context, R.string.free_ats_warning, Toast.LENGTH_SHORT).show()
+                if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
+                    it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
+                    addAtsToken(accounts, getString(R.string.free_ats_warning))
+                }
+            }
+        }
 
     private fun showErrorFlashbar(title: String, message: String? = String.Empty) =
         message?.let {

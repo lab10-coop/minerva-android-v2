@@ -77,11 +77,10 @@ fun startAccountAddressWrappedActivity(
     }
 }
 
-fun startNewAccountWrappedActivity(context: Context, title: String, position: Int) {
+fun startNewAccountWrappedActivity(context: Context, title: String) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ACCOUNT)
         putExtra(WrappedActivity.TITLE, title)
-        putExtra(WrappedActivity.POSITION, position)
     }
 }
 

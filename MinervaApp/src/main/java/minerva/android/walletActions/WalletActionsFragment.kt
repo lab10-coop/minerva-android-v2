@@ -1,12 +1,10 @@
 package minerva.android.walletActions
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
+import minerva.android.databinding.RecyclerViewLayoutBinding
 import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
@@ -20,9 +18,11 @@ class WalletActionsFragment : BaseFragment(R.layout.recycler_view_layout) {
 
     private val viewModel: WalletActionsViewModel by viewModel()
     private val walletActionsAdapter by lazy { WalletActionsAdapter() }
+    private lateinit var binding: RecyclerViewLayoutBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = RecyclerViewLayoutBinding.bind(view)
         setupRecycleView(view)
         prepareObservers()
     }
@@ -44,26 +44,30 @@ class WalletActionsFragment : BaseFragment(R.layout.recycler_view_layout) {
     }
 
     private fun handleWalletActionsLiveData(it: List<WalletActionClustered>) {
-        if (it.isEmpty()) {
-            progressBar.gone()
-            noDataMessage.visible()
-        } else {
-            progressBar.gone()
-            walletActionsAdapter.updateList(it)
+        binding.apply {
+            if (it.isEmpty()) {
+                progressBar.gone()
+                noDataMessage.visible()
+            } else {
+                progressBar.gone()
+                walletActionsAdapter.updateList(it)
+            }
         }
     }
 
     private fun handleLoadingLiveData(isShowing: Boolean) {
-        if (isShowing) {
-            progressBar.gone()
-        } else {
-            progressBar.visible()
-            noDataMessage.gone()
+        binding.apply {
+            if (isShowing) {
+                progressBar.gone()
+            } else {
+                progressBar.visible()
+                noDataMessage.gone()
+            }
         }
     }
 
     private fun setupRecycleView(view: View) {
-        recyclerView.apply {
+        binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(view.context)
             adapter = walletActionsAdapter
         }

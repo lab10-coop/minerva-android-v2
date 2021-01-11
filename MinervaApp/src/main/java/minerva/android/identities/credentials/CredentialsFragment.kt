@@ -1,7 +1,6 @@
 package minerva.android.identities.credentials
 
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.identities.MinervaPrimitivesViewModel
@@ -18,7 +17,7 @@ class CredentialsFragment : MinervaPrimitiveListFragment() {
     override fun prepareObservers() {
         viewModel.apply {
             walletConfigLiveData.observe(viewLifecycleOwner, Observer { config ->
-                noDataMessage.visibleOrGone(config.credentials.isEmpty())
+                binding.noDataMessage.visibleOrGone(config.credentials.isEmpty())
                 primitivesAdapter.updateList(config.credentials)
             })
             removeCredentialLiveData.observe(viewLifecycleOwner, Observer {

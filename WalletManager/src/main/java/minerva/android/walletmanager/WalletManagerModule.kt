@@ -35,6 +35,8 @@ import minerva.android.configProvider.localSharedPrefs
 import minerva.android.walletmanager.manager.networks.NetworkManager.gasPriceMap
 import minerva.android.walletmanager.manager.networks.NetworkManager.httpsUrlMap
 import minerva.android.walletmanager.manager.networks.NetworkManager.wssUrlMap
+import minerva.android.walletmanager.provider.CurrentTimeProvider
+import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.utils.EnsProvider
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
@@ -63,6 +65,7 @@ fun createWalletModules() = module {
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
+    factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
 }
 
 private const val MinervaStorage = "MinervaSharedPrefs"
