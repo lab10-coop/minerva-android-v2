@@ -1,6 +1,8 @@
 package minerva.android.blockchainprovider
 
 import minerva.android.blockchainprovider.provider.Web3jProvider
+import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
+import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepositoryImpl
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
@@ -19,8 +21,9 @@ fun createBlockchainProviderModule(
 ) = module {
     factory { Web3jProvider.provideWeb3j(httpUrls.toMutableMap(), get()) }
     factory { Web3jProvider.provideEnsResolver(get()) }
-    factory<BlockchainRegularAccountRepository> { BlockchainRegularAccountRepositoryImpl(get(), gasPrice, get()) }
+    factory<BlockchainRegularAccountRepository> { BlockchainRegularAccountRepositoryImpl(get(), gasPrice, get(), get()) }
     factory<BlockchainSafeAccountRepository> { BlockchainSafeAccountRepositoryImpl(get(), gasPrice) }
     factory<WebSocketServiceProvider> { WebSocketServiceProviderImpl() }
     factory<WebSocketRepository> { WebSocketRepositoryImpl(get(), wssUrls) }
+    factory<FreeTokenRepository> { FreeTokenRepositoryImpl() }
 }

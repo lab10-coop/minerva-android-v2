@@ -24,6 +24,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+
+        buildConfigField "String", "FREE_ATS_URL", '"https://faucet.tau1.artis.network/ats/"'
     }
 
     buildTypes {

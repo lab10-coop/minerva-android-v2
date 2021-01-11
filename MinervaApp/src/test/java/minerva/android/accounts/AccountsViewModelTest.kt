@@ -10,10 +10,9 @@ import minerva.android.accounts.enum.ErrorCode
 import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.AccountAsset
-import minerva.android.walletmanager.model.Asset
-import minerva.android.walletmanager.model.Balance
+import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.storage.LocalStorage
@@ -31,6 +30,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val localStorage: LocalStorage = mock()
+    private val timeProvider: CurrentTimeProvider = mock()
     private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
@@ -63,7 +63,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletActionsRepository,
             smartContractRepository,
             transactionRepository,
-            localStorage
+            localStorage,
+            timeProvider
         )
     }
 
@@ -205,4 +206,80 @@ class AccountsViewModelTest : BaseViewModelTest() {
             verify(noFundsObserver).onChanged(capture())
         }
     }
+
+    @Test
+    fun `get first active artis account`() {
+        NetworkManager.initialize(networks)
+        val account = viewModel.getAccountForFreeATS(accounts)
+        assertEquals(true, account.id == 2)
+    }
+
+    @Test
+    fun `check that last free ATS was at least 24 hours (86400000 mills) ago`() {
+        NetworkManager.initialize(networks)
+        whenever(timeProvider.currentTimeMills()).thenReturn(1610120569428)
+        timeProvider.currentTimeMills().let { time ->
+            whenever(localStorage.getLastFreeATSTimestamp()).thenReturn(
+                time - 96400000,
+                time - 86400001,
+                time - 86299933,
+                time - 500,
+                time - 96400000,
+                time - 303
+            )
+        }
+        assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
+        assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
+        assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
+        assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
+        assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
+        assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
+    }
+
+    @Test
+    fun `adding free ATS correct` () {
+        NetworkManager.initialize(networks)
+        whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.complete())
+        viewModel.addAtsToken(accounts, "nope")
+        verify(localStorage, times(1)).saveFreeATSTimestamp(any())
+    }
+
+    @Test
+    fun `adding free ATS error` () {
+        NetworkManager.initialize(networks)
+        viewModel.errorLiveData.observeForever(errorObserver)
+        whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.error(Throwable("Some error")))
+        viewModel.addAtsToken(accounts, "nope")
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `missing account for adding free ATS test error` () {
+        viewModel.errorLiveData.observeForever(errorObserver)
+        whenever(localStorage.getLastFreeATSTimestamp()).thenReturn(0)
+        viewModel.addAtsToken(listOf(), "nope")
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+        }
+    }
+
+    private val accounts = listOf(
+        Account(1, network = Network(short = "second_network")),
+        Account(2, network = Network(short = "first_network")),
+        Account(3, network = Network(short = "first_network")),
+        Account(4, network = Network(short = "some_other_network"))
+    )
+
+    private val accountsWithoutPrimaryAccount = listOf(
+        Account(1, network = Network(short = "second_network")),
+        Account(4, network = Network(short = "some_other_network"))
+    )
+
+    private val networks = listOf(
+        Network(httpRpc = "some_rpc", short = "first_network"),
+        Network(httpRpc = "some_rpc", short = "second_network"),
+        Network(httpRpc = "some_rpc", short = "some_other_network")
+    )
 }

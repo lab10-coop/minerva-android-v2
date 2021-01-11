@@ -293,8 +293,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun startNewAccountActivity() {
         startNewAccountWrappedActivity(
             this,
-            String.format(NEW_VALUE_TITLE_PATTERN, getString(R.string.new_account), viewModel.getValueIterator()),
-            viewModel.getValueIterator()
+            String.format(NEW_VALUE_TITLE_PATTERN, getString(R.string.new_account), viewModel.getValueIterator())
         )
     }
 

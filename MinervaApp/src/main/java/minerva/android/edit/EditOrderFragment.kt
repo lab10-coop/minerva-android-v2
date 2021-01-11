@@ -6,9 +6,9 @@ import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.recycler_view_layout.*
 import minerva.android.R
 import minerva.android.accounts.listener.OnBackListener
+import minerva.android.databinding.FragmentEditOrderBinding
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
@@ -21,8 +21,11 @@ class EditOrderFragment : BaseFragment(R.layout.fragment_edit_order) {
     private val viewModel: EditOrderViewModel by viewModel()
     private val orderAdapter = OrderAdapter()
 
+    private lateinit var binding: FragmentEditOrderBinding
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentEditOrderBinding.bind(view)
         initializeFragment()
         setupRecyclerView()
         setupLiveData()
@@ -49,17 +52,14 @@ class EditOrderFragment : BaseFragment(R.layout.fragment_edit_order) {
     }
 
     private fun setupRecyclerView() {
-        recyclerView.let {
+        binding.recyclerView.let {
             it.layoutManager = LinearLayoutManager(it.context)
             it.adapter = orderAdapter
             DragManageAdapter(
                 orderAdapter,
                 ItemTouchHelper.UP.or(ItemTouchHelper.DOWN),
                 ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT)
-            )
-                .let { drag ->
-                    ItemTouchHelper(drag).apply { attachToRecyclerView(it) }
-                }
+            ).let { drag -> ItemTouchHelper(drag).attachToRecyclerView(it) }
         }
     }
 

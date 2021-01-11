@@ -19,8 +19,10 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
 
     private var activeAccounts = listOf<Account>()
     private var rawAccounts = listOf<Account>()
-
     private var openAccounts = mutableListOf<Boolean>()
+
+    val activeAccountsList
+        get()= activeAccounts
 
     override fun getItemCount(): Int = activeAccounts.size
 

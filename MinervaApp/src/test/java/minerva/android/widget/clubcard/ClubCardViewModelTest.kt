@@ -30,7 +30,7 @@ class ClubCardViewModelTest {
         get() = InstantTaskExecutorRule()
 
     @Before
-    open fun setupRxSchedulers() {
+    fun setupRxSchedulers() {
         RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
     }
