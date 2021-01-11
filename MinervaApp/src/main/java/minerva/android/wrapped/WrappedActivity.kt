@@ -91,22 +91,11 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
                 intent.getParcelableExtra(SERVICE_QR_CODE)
             )
             WrappedFragmentType.IDENTITY_ORDER -> EditOrderFragment.newInstance(WalletActionType.IDENTITY)
-            WrappedFragmentType.ACCOUNT -> NewAccountFragment.newInstance(intent.getIntExtra(POSITION, Int.InvalidIndex))
-            WrappedFragmentType.ACCOUNT_ADDRESS -> AddressFragment.newInstance(
-                fragmentType,
-                intent.getIntExtra(INDEX, Int.InvalidIndex)
-            )
-            WrappedFragmentType.IDENTITY_ADDRESS -> AddressFragment.newInstance(
-                fragmentType,
-                intent.getIntExtra(INDEX, Int.InvalidIndex)
-            )
+            WrappedFragmentType.ACCOUNT -> NewAccountFragment.newInstance()
+            WrappedFragmentType.ACCOUNT_ADDRESS -> AddressFragment.newInstance(fragmentType, intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.IDENTITY_ADDRESS -> AddressFragment.newInstance(fragmentType, intent.getIntExtra(INDEX, Int.InvalidIndex))
             WrappedFragmentType.ACCOUNT_ORDER -> EditOrderFragment.newInstance(WalletActionType.ACCOUNT)
-            WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(
-                intent.getIntExtra(
-                    INDEX,
-                    Int.InvalidIndex
-                )
-            )
+            WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
             WrappedFragmentType.CREDENTIAL_ORDER -> EditOrderFragment.newInstance(WalletActionType.CREDENTIAL)
             WrappedFragmentType.MANAGE_ASSETS -> ManageAssetsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
@@ -129,11 +118,11 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
         supportActionBar?.apply {
-            (intent.getStringExtra(TITLE) ?: getDefaultTitle(fragmentType)).apply {
-                title = "  $this"  //hacks for padding between logo and title
+            (intent.getStringExtra(TITLE) ?: getDefaultTitle(fragmentType)).let {
+                title = String.format(TITLE_FORMAT, it)
             }
             intent.getStringExtra(SUBTITLE)?.let {
-                subtitle = "   $it" //hacks for padding between logo and title
+                title = String.format(TITLE_FORMAT, it)
             }
 
             val isSafeAccount = intent.getBooleanExtra(IS_SAFE_ACCOUNT, false)

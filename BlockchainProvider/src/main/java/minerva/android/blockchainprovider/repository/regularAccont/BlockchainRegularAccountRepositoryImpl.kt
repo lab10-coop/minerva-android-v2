@@ -4,12 +4,16 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.zipWith
+import io.reactivex.schedulers.Schedulers
+import minerva.android.blockchainprovider.BuildConfig
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
+import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
@@ -31,13 +35,15 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
 import java.util.*
+import java.net.URL
 import java.util.concurrent.TimeUnit
 import kotlin.Pair
 
 class BlockchainRegularAccountRepositoryImpl(
     private val web3j: Map<String, Web3j>,
     private val gasPrices: Map<String, BigInteger>,
-    private val ensResolver: EnsResolver
+    private val ensResolver: EnsResolver,
+    private val freeTokenRepository: FreeTokenRepository
 ) : BlockchainRegularAccountRepository {
 
     override fun getTransactions(pendingHashes: List<Pair<String, String>>): Single<List<Pair<String, String?>>> =
@@ -121,6 +127,15 @@ class BlockchainRegularAccountRepositoryImpl(
                 (Keys.toChecksumAddress(address) == address || address.toLowerCase(Locale.ROOT) == address)
 
     override fun toChecksumAddress(address: String): String = Keys.toChecksumAddress(address)
+
+    override fun getFreeATS(address: String): Completable = Completable.create {
+        freeTokenRepository.getFreeATS(address).let { responseText ->
+            if (responseText.startsWith(CORRECT_ATS_FREE_PREFIX)) it.onComplete()
+            else it.onError(Throwable(responseText))
+        }
+    }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
 
     override fun refreshAssetBalance(
         privateKey: String,
@@ -285,5 +300,6 @@ class BlockchainRegularAccountRepositoryImpl(
         private const val DOT = "."
         private const val BLOCK_NUMBER_OFFSET = 5L
         private const val TIMEOUT = 5L
+        private const val CORRECT_ATS_FREE_PREFIX = "txHash"
     }
 }

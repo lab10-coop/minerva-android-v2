@@ -3,6 +3,7 @@
     <color name="colorPrimary">#5858ED</color>
     <color name="colorPrimaryVariant">#00574B</color>
     <color name="colorSecondary">#5a42eb</color>
+    <color name="lightPurple">#997878E9</color>
     <color name="inactiveBottomBarColor">#7d7c8b</color>
     <color name="lightGray">#f6f6f9</color>
     <color name="darkGray">#3a3944</color>
@@ -16,6 +17,7 @@
     <color name="safeAccountBackground">#F8F8FA</color>
     <color name="defaultCheckButtonColor">#E4E4E8</color>
     <color name="settingNameColor">#5C5D6D</color>
+    <color name="inactiveButtonColor">#c9c8d4</color>
 
     <color name="colorSetOne">#FFF15161</color>
     <color name="colorSetOneOpacity">#29F15161</color>

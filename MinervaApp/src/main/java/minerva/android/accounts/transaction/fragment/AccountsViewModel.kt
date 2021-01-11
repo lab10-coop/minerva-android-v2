@@ -1,5 +1,6 @@
 package minerva.android.accounts.transaction.fragment
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -8,31 +9,39 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.enum.ErrorCode
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
+import java.util.concurrent.TimeUnit
 
+
+//TODO try to use CurrentTimeProvider and DateUtils for getting timestamp
 class AccountsViewModel(
     private val accountManager: AccountManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository,
-    private val localStorage: LocalStorage
+    private val localStorage: LocalStorage,
+    private val timeProvider: CurrentTimeProvider
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -74,11 +83,10 @@ class AccountsViewModel(
     val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
 
     private lateinit var assetVisibilitySettings: AssetVisibilitySettings
+    val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
 
     fun arePendingAccountsEmpty() =
         transactionRepository.getPendingAccounts().isEmpty()
-
-    val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
 
     init {
         launchDisposable {
@@ -199,6 +207,37 @@ class AccountsViewModel(
         }
     }
 
+    fun addAtsToken(accounts: List<Account>, errorMessage: String) {
+        getAccountForFreeATS(accounts).let { account ->
+            if (account.id != Int.InvalidId) {
+                transactionRepository.getFreeATS(account.address).subscribeBy(
+                    onComplete = { localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills()) },
+                    onError = {
+                        Timber.e("Adding 5 tATS failed: ${it.message}")
+                        _errorLiveData.value = Event(Throwable(it.message))
+                    }
+                )
+            } else {
+                Timber.e("Adding 5 tATS failed: $errorMessage")
+                _errorLiveData.value = Event(Throwable(errorMessage))
+            }
+        }
+    }
+
+    fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
+        ((localStorage.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(HOURS_IN_DAY)) < timeProvider.currentTimeMills())
+                && accounts.any { it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short }
+
+
+    @VisibleForTesting
+    fun getAccountForFreeATS(accounts: List<Account>): Account {
+        accounts.forEach {
+            if (it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short)
+                return it
+        }
+        return Account(Int.InvalidId)
+    }
+
     fun isAssetVisible(networkAddress: String, assetAddress: String) =
         assetVisibilitySettings.getAssetVisibility(networkAddress, assetAddress)
 
@@ -215,4 +254,8 @@ class AccountsViewModel(
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
+
+    companion object {
+        private const val HOURS_IN_DAY = 24L
+    }
 }

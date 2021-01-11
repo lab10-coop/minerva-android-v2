@@ -3,22 +3,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".identities.IdentitiesFragment">
 
     <TextView
-        android:id="@+id/networksHeader"
+        android:id="@+id/networks_header"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/margin_large"
+        android:layout_height="@dimen/margin_xlarge"
         android:layout_marginStart="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
         android:gravity="center_vertical"
+        android:paddingTop="@dimen/margin_small"
+        android:paddingBottom="@dimen/margin_xsmall"
         android:text="@string/test_networks"
         android:textAllCaps="true"
         android:textColor="@color/networksTypeHeader"
         android:textSize="@dimen/text_xsmall" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/add_tats_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:drawableLeft="@drawable/ic_add_white_small"
+        android:drawablePadding="@dimen/margin_xxsmall"
+        android:drawableTint="@color/white"
+        android:fontFamily="@font/rubik_medium"
+        android:backgroundTint="@color/artis"
+        android:gravity="center_vertical"
+        android:padding="@dimen/margin_xsmall"
+        android:text="@string/add_tats"
+        app:cornerRadius="@dimen/rounded_background_small"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_xsmall" />
+
     <TextView
-        android:id="@+id/noDataMessage"
+        android:id="@+id/no_data_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -27,19 +49,19 @@
         android:visibility="gone" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/margin_xbig">
+        android:layout_marginTop="@dimen/margin_xxlarge">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+            android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ProgressBar
-        android:id="@+id/progressBar"
+        android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
