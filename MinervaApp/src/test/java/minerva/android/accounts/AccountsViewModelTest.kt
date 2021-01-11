@@ -192,6 +192,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
+
+        verify(localStorage.areMainNetsEnabled)
     }
 
     @Test
