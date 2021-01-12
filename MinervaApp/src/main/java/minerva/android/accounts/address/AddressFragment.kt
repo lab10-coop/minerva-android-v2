@@ -29,7 +29,7 @@ import minerva.android.wrapped.WrappedFragmentType
 import net.glxn.qrgen.android.QRCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AddressFragment : Fragment() {
+class AddressFragment : Fragment(R.layout.fragment_address) {
 
     private lateinit var binding: FragmentAddressBinding
 
@@ -41,18 +41,11 @@ class AddressFragment : Fragment() {
         arguments?.get(FRAGMENT_TYPE) as WrappedFragmentType
     }
 
-    private var viewGroup: ViewGroup? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding = FragmentAddressBinding.bind(view)
         initializeFragment()
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_address, container, false).apply {
-                binding = FragmentAddressBinding.bind(this)
-                viewGroup = container
-            }
 
     private fun initializeView(minervaPrimitive: MinervaPrimitive) {
         with(minervaPrimitive) {
@@ -107,7 +100,7 @@ class AddressFragment : Fragment() {
                 setTitleAndBody(prepareTitleAddress(), prepareTextAddress(minervaPrimitive))
                 setSingleLine()
                 setOnClickListener {
-                    TransitionManager.beginDelayedTransition(viewGroup)
+                    TransitionManager.beginDelayedTransition(addressView)
                     textFullAddress.visibleOrInvisible(!textFullAddress.isVisible)
                 }
             }
@@ -116,7 +109,7 @@ class AddressFragment : Fragment() {
 
     private fun initializeFragment() {
         with(viewModel) {
-            loadMinervaPrimitiveLiveData.observe(this@AddressFragment, EventObserver { initializeView(it) })
+            loadMinervaPrimitiveLiveData.observe(viewLifecycleOwner, EventObserver { initializeView(it) })
             loadMinervaPrimitive(fragmentType, index)
         }
     }
