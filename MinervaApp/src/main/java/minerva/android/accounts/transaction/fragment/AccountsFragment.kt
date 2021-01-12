@@ -216,11 +216,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun setTatsButtonListener(accounts: List<Account>) =
         binding.addTatsButton.setOnClickListener {
             viewModel.apply {
-                Toast.makeText(it.context, R.string.free_ats_warning, Toast.LENGTH_SHORT).show()
                 if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
                     it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
                     addAtsToken(accounts, getString(R.string.free_ats_warning))
-                }
+                } else Toast.makeText(it.context, R.string.free_ats_warning, Toast.LENGTH_SHORT).show()
             }
         }
 
