@@ -1,0 +1,2 @@
+package minerva.android.walletConnect
+
