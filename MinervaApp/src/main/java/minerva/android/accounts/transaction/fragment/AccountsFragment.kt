@@ -144,6 +144,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             }
             accountAssetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
+                refreshFreeATSButton()
                 showErrorFlashbar(
                     getString(R.string.error_header),
                     getString(R.string.unexpected_error)
@@ -216,10 +217,13 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun setTatsButtonListener(accounts: List<Account>) =
         binding.addTatsButton.setOnClickListener {
             viewModel.apply {
-                if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
+                val toastMessage = if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
                     it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
                     addAtsToken(accounts, getString(R.string.free_ats_warning))
-                } else Toast.makeText(it.context, R.string.free_ats_warning, Toast.LENGTH_SHORT).show()
+                    R.string.refresh_balance_to_check_transaction_status
+                } else R.string.free_ats_warning
+
+                Toast.makeText(it.context, toastMessage, Toast.LENGTH_SHORT).show()
             }
         }
 

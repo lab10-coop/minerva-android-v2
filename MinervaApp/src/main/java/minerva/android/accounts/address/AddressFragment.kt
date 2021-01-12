@@ -109,7 +109,7 @@ class AddressFragment : Fragment(R.layout.fragment_address) {
 
     private fun initializeFragment() {
         with(viewModel) {
-            loadMinervaPrimitiveLiveData.observe(this@AddressFragment, EventObserver { initializeView(it) })
+            loadMinervaPrimitiveLiveData.observe(viewLifecycleOwner, EventObserver { initializeView(it) })
             loadMinervaPrimitive(fragmentType, index)
         }
     }
