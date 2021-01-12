@@ -21,7 +21,6 @@ import okio.ByteString
 import java.util.*
 
 const val JSONRPC_VERSION = "2.0"
-const val WS_CLOSE_NORMAL = 1000
 
 open class WCClient(
     builder: GsonBuilder = GsonBuilder(),
