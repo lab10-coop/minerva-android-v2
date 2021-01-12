@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.setPadding
 import com.bumptech.glide.Glide
 import minerva.android.databinding.ConnectionViewLayoutBinding
 
@@ -17,6 +18,19 @@ class ConnectionView @JvmOverloads constructor(
         ConnectionViewLayoutBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun setConnectionIcon(resId: Int) {
-        binding.connectionIcon.setIcon(resId)
+        Glide.with(context)
+            .load(resId)
+            .into(binding.connectionIcon)
+    }
+
+    fun setConnectionIconsPadding() {
+        with(binding) {
+            connectionIcon.setPadding(PADDING)
+            logo.setPadding(PADDING)
+        }
+    }
+
+    companion object {
+        private const val PADDING = 70
     }
 }
