@@ -224,7 +224,7 @@ class AccountsViewModel(
     }
 
     fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
-        ((localStorage.getLastFreeATSTimestamp() + TimeUnit.SECONDS.toMillis(HOURS_IN_DAY)) < timeProvider.currentTimeMills())
+        ((localStorage.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(HOURS_IN_DAY)) < timeProvider.currentTimeMills())
                 && accounts.any { it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short }
 
 
