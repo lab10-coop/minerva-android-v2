@@ -25,6 +25,8 @@ import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
 import minerva.android.walletActions.WalletActionsViewModel
+import minerva.android.walletConnect.repository.WalletConnectRepository
+import minerva.android.walletConnect.repository.WalletConnectRepositoryImpl
 import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage
 import minerva.android.widget.clubCard.CacheStorageImpl
@@ -35,8 +37,15 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 fun createAppModule() = mutableListOf<Module>().apply {
-    addAll(createWalletManagerModules(BuildConfig.DEBUG, BuildConfig.REST_API_URL, BuildConfig.MARKETS_API_URL))
+    addAll(
+        createWalletManagerModules(
+            BuildConfig.DEBUG,
+            BuildConfig.REST_API_URL,
+            BuildConfig.MARKETS_API_URL
+        )
+    )
     add(appModules)
+    add(walletConnectModules)
 }
 
 private val appModules = module {
@@ -62,9 +71,13 @@ private val appModules = module {
     viewModel { WalletActionsViewModel(get()) }
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
-    viewModel { WalletConnectViewModel() }
+    viewModel { WalletConnectViewModel(get()) }
     viewModel { ManageAssetsViewModel(get(), get()) }
     viewModel { AddAssetViewModel(get()) }
+}
+
+private val walletConnectModules = module {
+    factory<WalletConnectRepository> { WalletConnectRepositoryImpl() }
 }
 
 private const val MinervaCache = "MinervaCache"

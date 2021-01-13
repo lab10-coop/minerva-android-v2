@@ -258,4 +258,5 @@
     <string name="connect_to_website">Connect to website</string>
     <string name="all_my_assets">All my Assets</string>
     <string name="free_ats_warning">You can only get 5 tATS per day and you need to have at least one ARTIS (τ1) account.</string>
+    <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
 </resources>

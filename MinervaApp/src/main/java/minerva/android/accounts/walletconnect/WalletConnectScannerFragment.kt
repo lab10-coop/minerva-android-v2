@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.margin
 import minerva.android.extension.visible
@@ -20,14 +22,31 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     val viewModel: WalletConnectViewModel by sharedViewModel()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private val dappsAdapter: DappsAdapter by lazy {
-        DappsAdapter(viewModel.dapps) { Toast.makeText(context, "Available soon...", Toast.LENGTH_LONG).show() }
+        DappsAdapter(viewModel.dapps) {
+            Toast.makeText(context, "Available soon...", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        observeViewState()
         showWalletConnectViews()
         setupBottomSheet()
         setupRecycler()
+    }
+
+    private fun observeViewState() {
+        viewModel.viewStateLiveData.observe(viewLifecycleOwner, Observer {
+            when (it) {
+                WrongQrCodeState -> handleWrongQrCode()
+            }
+        })
+    }
+
+    private fun handleWrongQrCode() {
+        Toast.makeText(context, getString(R.string.scan_wc_qr), Toast.LENGTH_SHORT)
+            .show()
+        shouldScan = true
     }
 
     private fun setupBottomSheet() = with(binding) {
@@ -62,8 +81,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             decodeCallback = DecodeCallback { result ->
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
-                        //TODO handle wallet connect qr
-                        context?.let { showDialog(it) }
+                        viewModel.handleQrCode(result.text)
                         shouldScan = false
                     }
                 }
@@ -74,7 +92,13 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     private fun showDialog(it: Context) {
-        with(DappConfirmationDialog(it) { Toast.makeText(context, "Connecting...", Toast.LENGTH_LONG).show() }) {
+        with(DappConfirmationDialog(it) {
+            Toast.makeText(
+                context,
+                "Connecting...",
+                Toast.LENGTH_LONG
+            ).show()
+        }) {
             setOnDismissListener { shouldScan = true }
             show()
         }
