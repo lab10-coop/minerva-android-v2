@@ -27,6 +27,7 @@ import minerva.android.splash.SplashScreenViewModel
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletConnect.repository.WalletConnectRepository
 import minerva.android.walletConnect.repository.WalletConnectRepositoryImpl
+import minerva.android.walletConnect.walletConnectModules
 import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage
 import minerva.android.widget.clubCard.CacheStorageImpl
@@ -74,10 +75,6 @@ private val appModules = module {
     viewModel { WalletConnectViewModel(get()) }
     viewModel { ManageAssetsViewModel(get(), get()) }
     viewModel { AddAssetViewModel(get()) }
-}
-
-private val walletConnectModules = module {
-    factory<WalletConnectRepository> { WalletConnectRepositoryImpl() }
 }
 
 private const val MinervaCache = "MinervaCache"

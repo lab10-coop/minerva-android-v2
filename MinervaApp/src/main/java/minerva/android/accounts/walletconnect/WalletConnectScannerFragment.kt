@@ -39,13 +39,13 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         viewModel.viewStateLiveData.observe(viewLifecycleOwner, Observer {
             when (it) {
                 WrongQrCodeState -> handleWrongQrCode()
+                CorrectQrCodeState -> shouldScan = false
             }
         })
     }
 
     private fun handleWrongQrCode() {
-        Toast.makeText(context, getString(R.string.scan_wc_qr), Toast.LENGTH_SHORT)
-            .show()
+        Toast.makeText(context, getString(R.string.scan_wc_qr), Toast.LENGTH_SHORT).show()
         shouldScan = true
     }
 
@@ -82,7 +82,6 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
                         viewModel.handleQrCode(result.text)
-                        shouldScan = false
                     }
                 }
             }
