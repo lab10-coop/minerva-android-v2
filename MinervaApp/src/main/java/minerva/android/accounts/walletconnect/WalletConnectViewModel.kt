@@ -12,6 +12,8 @@ import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
 import minerva.android.walletConnect.client.OnSessionRequest
 import minerva.android.walletConnect.repository.WalletConnectRepository
+import minerva.android.walletmanager.manager.services.ServiceManager
+import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 
 class WalletConnectViewModel(private val repository: WalletConnectRepository) :
     BaseViewModel() {

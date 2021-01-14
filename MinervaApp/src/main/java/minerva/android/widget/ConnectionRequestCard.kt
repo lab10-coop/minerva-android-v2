@@ -1,6 +1,7 @@
 package minerva.android.widget
 
 import android.content.Context
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -25,6 +26,10 @@ class ConnectionRequestCard
 
     fun setConnectionIcon(resId: Int) {
         binding.connectionView.setConnectionIcon(resId)
+    }
+
+    fun setIcon(url: String) {
+        binding.connectionView.setIconUrl(Uri.parse(url))
     }
 
     fun setConnectionIconsPadding() {

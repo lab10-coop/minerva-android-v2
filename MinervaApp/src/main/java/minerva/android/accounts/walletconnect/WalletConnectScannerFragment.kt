@@ -1,6 +1,5 @@
 package minerva.android.accounts.walletconnect
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -15,6 +14,7 @@ import minerva.android.extension.gone
 import minerva.android.extension.margin
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
+import minerva.android.walletConnect.model.session.WCPeerMeta
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
@@ -41,7 +41,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
                 is OnError -> Toast.makeText(context, it.error.message, Toast.LENGTH_SHORT).show()
-                is OnWCSessionRequest -> Toast.makeText(context, it.meta.name, Toast.LENGTH_SHORT).show()
+                is OnWCSessionRequest -> showConnectionDialog(it.meta)
                 is OnWCDisconnected -> Toast.makeText(context, it.reason, Toast.LENGTH_SHORT).show()
             }
         })
@@ -93,15 +93,12 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    private fun showDialog(it: Context) {
-        with(DappConfirmationDialog(it) {
-            Toast.makeText(
-                context,
-                "Connecting...",
-                Toast.LENGTH_LONG
-            ).show()
+    private fun showConnectionDialog(meta: WCPeerMeta) {
+        with(DappConfirmationDialog(requireContext()) {
+            Toast.makeText(context, "Connecting...", Toast.LENGTH_LONG).show()
         }) {
             setOnDismissListener { shouldScan = true }
+            setView(meta)
             show()
         }
     }
