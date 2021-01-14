@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
-import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ACCOUNT_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
@@ -80,7 +79,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 forEach {
                     showFlashbar(
                         getString(R.string.transaction_success_title),
-                        getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
+                        getString(
+                            R.string.transaction_success_message,
+                            it.amount,
+                            getNetwork(it.network).token
+                        )
                     )
                 }
                 stopPendingAccounts()
@@ -98,13 +101,25 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun prepareObservers() {
         viewModel.apply {
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
-                Toast.makeText(this@MainActivity, getString(R.string.not_existed_identity_message), Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.not_existed_identity_message),
+                    Toast.LENGTH_LONG
+                ).show()
             })
             requestedFieldsLiveData.observe(this@MainActivity, EventObserver {
-                Toast.makeText(this@MainActivity, getString(R.string.fill_requested_data_message, it), Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.fill_requested_data_message, it),
+                    Toast.LENGTH_LONG
+                ).show()
             })
             errorLiveData.observe(this@MainActivity, EventObserver {
-                Toast.makeText(this@MainActivity, getString(R.string.unexpected_error), Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.unexpected_error),
+                    Toast.LENGTH_LONG
+                ).show()
             })
             loadingLiveData.observe(this@MainActivity, EventObserver {
                 (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(it.first, it.second)
@@ -119,9 +134,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 }
                 showBindCredentialFlashbar(false, message)
             })
-            updatePendingAccountLiveData.observe(this@MainActivity, EventObserver { updatePendingAccount(it) })
+            updatePendingAccountLiveData.observe(
+                this@MainActivity,
+                EventObserver { updatePendingAccount(it) })
             updatePendingTransactionErrorLiveData.observe(this@MainActivity, EventObserver {
-                showFlashbar(getString(R.string.error_header), getString(R.string.pending_account_error_message))
+                showFlashbar(
+                    getString(R.string.error_header),
+                    getString(R.string.pending_account_error_message)
+                )
                 stopPendingAccounts()
                 viewModel.clearPendingAccounts()
             })
@@ -154,12 +174,20 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         if (account.blockHash != null) {
             showFlashbar(
                 getString(R.string.transaction_success_title),
-                getString(R.string.transaction_success_message, account.amount, getNetwork(account.network).token)
+                getString(
+                    R.string.transaction_success_message,
+                    account.amount,
+                    getNetwork(account.network).token
+                )
             )
         } else {
             showFlashbar(
                 getString(R.string.transaction_error_title),
-                getString(R.string.transaction_error_details_message, account.amount, account.network)
+                getString(
+                    R.string.transaction_error_details_message,
+                    account.amount,
+                    account.network
+                )
             )
         }
     }
@@ -199,7 +227,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 findItem(R.id.editServiceOrder)?.isVisible =
                     isServicesTabSelected() && isOrderEditAvailable(WalletActionType.SERVICE)
                 findItem(R.id.editCredentialsOrder)?.isVisible = isIdentitiesTabSelected() &&
-                        getCurrentChildFragment() is CredentialsFragment && isOrderEditAvailable(WalletActionType.CREDENTIAL)
+                        getCurrentChildFragment() is CredentialsFragment && isOrderEditAvailable(
+                    WalletActionType.CREDENTIAL
+                )
                 findItem(R.id.qrCodeScanner)?.isVisible = isServicesTabSelected() ||
                         (isIdentitiesTabSelected() && getCurrentChildFragment() is CredentialsFragment)
             }
@@ -218,7 +248,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             R.id.editCredentialsOrder -> startEditCredentialOrderWrappedActivity(this)
             R.id.addAccount -> startNewAccountActivity()
             R.id.editServiceOrder -> startEditServiceOrderWrappedActivity(this)
-            R.id.qrCodeScanner -> launchActivityForResult<LoginScannerActivity>(LOGIN_SCANNER_RESULT_REQUEST_CODE)
+            R.id.qrCodeScanner -> launchActivityForResult<LoginScannerActivity>(
+                LOGIN_SCANNER_RESULT_REQUEST_CODE
+            )
         }
         return super.onOptionsItemSelected(item)
     }
@@ -286,14 +318,20 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     override fun removeSettingsBadgeIcon() =
         binding.bottomNavigation.removeBadge(R.id.settings)
 
-    override fun showWalletConnectScanner() {
-        launchActivity<WalletConnectActivity>()
+    override fun showWalletConnectScanner(index: Int) {
+        launchActivity<WalletConnectActivity>() {
+            putExtra(ACCOUNT_INDEX, index)
+        }
     }
 
     private fun startNewAccountActivity() {
         startNewAccountWrappedActivity(
             this,
-            String.format(NEW_VALUE_TITLE_PATTERN, getString(R.string.new_account), viewModel.getValueIterator())
+            String.format(
+                NEW_VALUE_TITLE_PATTERN,
+                getString(R.string.new_account),
+                viewModel.getValueIterator()
+            )
         )
     }
 
@@ -303,13 +341,18 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     fun onAllowNotifications(shouldLogin: Boolean) {
         if (shouldLogin) viewModel.painlessLogin()
-        else Toast.makeText(this, "Allow push notifications, will be added soon", Toast.LENGTH_SHORT).show()
+        else Toast.makeText(
+            this,
+            "Allow push notifications, will be added soon",
+            Toast.LENGTH_SHORT
+        ).show()
         //        TODO send to API that push notifications are allowed
     }
 
     fun onDenyNotifications() {
 //        TODO send to API that push notifications are no longer allowed
-        Toast.makeText(this, "Disable push notifications, will be added soon", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Disable push notifications, will be added soon", Toast.LENGTH_SHORT)
+            .show()
     }
 
     companion object {
@@ -318,5 +361,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
         const val JWT = "jwt"
+        const val ACCOUNT_INDEX = "account_index"
     }
 }

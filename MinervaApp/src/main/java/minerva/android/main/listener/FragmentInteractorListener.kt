@@ -8,5 +8,5 @@ interface FragmentInteractorListener {
     fun shouldShowLoadingScreen(isLoading: Boolean)
     fun changeActionBarColor(color: Int)
     fun removeSettingsBadgeIcon()
-    fun showWalletConnectScanner()
+    fun showWalletConnectScanner(index: Int)
 }

@@ -17,7 +17,6 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
 
-
     override fun connect(qrCode: String) {
 
         with(WCClient(httpClient = okHttpClient)) {
@@ -41,7 +40,7 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
 
             onDisconnect = { code, reason ->
                 Timber.tag("kobe").d("on disconnect: code$code, reason: $reason")
-                status.onNext(OnDisconnect(reason))
+                status.onNext(OnDisconnect(code))
             }
 
             WCSession.from(qrCode)?.let {
@@ -57,11 +56,19 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
         }
     }
 
-    override fun approve() {
-        TODO("approve connection")
+    override fun approveSession(addresses: List<String>, chainId: Int) {
+        client.approveSession(addresses, chainId)
     }
 
-    override fun close() {
+    override fun rejectSession(reason: String) {
+        client.rejectSession(reason)
+    }
+
+    override fun killSession() {
+        client.killSession()
+    }
+
+    override fun disconnect() {
         client.disconnect()
     }
 

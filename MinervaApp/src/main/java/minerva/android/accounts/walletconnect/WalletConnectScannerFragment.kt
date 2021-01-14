@@ -11,6 +11,7 @@ import com.budiyev.android.codescanner.ErrorCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import minerva.android.R
 import minerva.android.extension.gone
+import minerva.android.extension.invisible
 import minerva.android.extension.margin
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
@@ -23,7 +24,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private val dappsAdapter: DappsAdapter by lazy {
         DappsAdapter(viewModel.dapps) {
-            Toast.makeText(context, "Available soon...", Toast.LENGTH_LONG).show()
+            viewModel.killSession()
+            //todo delete from list
         }
     }
 
@@ -37,6 +39,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
 
     private fun observeViewState() {
         viewModel.viewStateLiveData.observe(viewLifecycleOwner, Observer {
+            binding.scannerProgressBar.invisible()
             when (it) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
@@ -83,6 +86,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         codeScanner.apply {
             decodeCallback = DecodeCallback { result ->
                 requireActivity().runOnUiThread {
+                    binding.scannerProgressBar.visible()
                     if (shouldScan) {
                         viewModel.handleQrCode(result.text)
                     }
@@ -94,11 +98,22 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     private fun showConnectionDialog(meta: WCPeerMeta) {
-        with(DappConfirmationDialog(requireContext()) {
-            Toast.makeText(context, "Connecting...", Toast.LENGTH_LONG).show()
-        }) {
+        DappConfirmationDialog(requireContext(),
+            {
+                viewModel.approveSession()
+                viewModel.dapps.add(Dapp(name = meta.name, icon = meta.icons[0]))
+                dappsAdapter.updateDapps(viewModel.dapps)
+                binding.dappsBottomSheet.dapps.visible()
+                shouldScan = true
+                binding.scannerProgressBar.invisible()
+            },
+            {
+                viewModel.rejectSession()
+                shouldScan = true
+                binding.scannerProgressBar.invisible()
+            }).apply {
             setOnDismissListener { shouldScan = true }
-            setView(meta)
+            setView(meta, viewModel.networkName)
             show()
         }
     }

@@ -3,13 +3,14 @@ package minerva.android.accounts.walletconnect
 import android.content.Context
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.dapp_confirmation_dialog.*
 import minerva.android.R
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.walletConnect.model.session.WCPeerMeta
 
-class DappConfirmationDialog(context: Context, connect: () -> Unit) :
+class DappConfirmationDialog(context: Context, connect: () -> Unit, deny: () -> Unit) :
     BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
 
     private val binding: DappConfirmationDialogBinding =
@@ -21,10 +22,12 @@ class DappConfirmationDialog(context: Context, connect: () -> Unit) :
         with(binding) {
             confirmationView.hideRequestedData()
             cancel.setOnClickListener {
+                deny()
                 dismiss()
             }
             this@DappConfirmationDialog.connect.setOnClickListener {
                 connect()
+                dismiss()
             }
         }
         setOnKeyListener { _, keyCode, _ ->
@@ -33,7 +36,12 @@ class DappConfirmationDialog(context: Context, connect: () -> Unit) :
         }
     }
 
-    fun setView(meta: WCPeerMeta) {
-        binding.confirmationView.setIcon(meta.icons[0])
+    fun setView(meta: WCPeerMeta, networkName: String) = with(binding) {
+        confirmationView.setIcon(meta.icons[0])
+        name.text = meta.name
+        network.text = networkName
+        Glide.with(context)
+            .load(meta.icons[0])
+            .into(icon)
     }
 }

@@ -9,19 +9,32 @@ import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.DappItemBinding
 
-class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> Unit) : RecyclerView.Adapter<DappViewHolder>() {
+class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> Unit) :
+    RecyclerView.Adapter<DappViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DappViewHolder =
-        DappViewHolder(DappItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)) { disconnect() }
+        DappViewHolder(
+            DappItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        ) { disconnect() }
 
     override fun onBindViewHolder(holder: DappViewHolder, position: Int) {
         holder.setItem(dapps[position])
     }
 
     override fun getItemCount(): Int = dapps.size
+
+    fun updateDapps(dapps: List<Dapp>) {
+        this.dapps = dapps
+        notifyDataSetChanged()
+    }
 }
 
 @SuppressLint("RestrictedApi")
@@ -31,6 +44,9 @@ class DappViewHolder(private val binding: DappItemBinding, private val disconnec
     fun setItem(dapp: Dapp) {
         with(binding) {
             name.text = dapp.name
+            Glide.with(binding.root.context)
+                .load(dapp.icon)
+                .into(icon)
             menu.setOnClickListener { showMenu() }
         }
 

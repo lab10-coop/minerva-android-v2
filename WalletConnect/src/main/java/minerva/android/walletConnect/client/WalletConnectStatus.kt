@@ -5,4 +5,4 @@ import minerva.android.walletConnect.model.session.WCPeerMeta
 sealed class WalletConnectStatus
 data class OnSessionRequest(val meta: WCPeerMeta, val chainId: String?) : WalletConnectStatus()
 data class OnConnectionFailure(val error: Throwable) : WalletConnectStatus()
-data class OnDisconnect(val reason: String) : WalletConnectStatus()
+data class OnDisconnect(val reason: Int) : WalletConnectStatus()

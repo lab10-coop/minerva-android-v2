@@ -159,7 +159,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun PopupMenu.setOnItemMenuClickListener(index: Int, account: Account) {
         setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.walletConnect -> listener.onWalletConnect()
+                R.id.walletConnect -> listener.onWalletConnect(index)
                 R.id.manageAssets -> listener.onManageAssets(index)
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)

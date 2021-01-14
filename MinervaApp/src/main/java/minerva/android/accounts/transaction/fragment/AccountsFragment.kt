@@ -76,7 +76,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onShowSafeAccountSettings(account: Account, position: Int) =
         startSafeAccountWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
 
-    override fun onWalletConnect() = interactor.showWalletConnectScanner()
+    override fun onWalletConnect(index: Int) = interactor.showWalletConnectScanner(index)
 
     override fun onManageAssets(index: Int) = startManageAssetsWrappedActivity(requireContext(), index)
 
