@@ -29,8 +29,8 @@ class WalletConnectActivity : AppCompatActivity() {
 
     private fun observeViewState() {
         viewModel.viewStateLiveData.observe(this, Observer {
-            when (it) {
-                CloseScannerState -> onBackPressed()
+            if (it == CloseScannerState) {
+                onBackPressed()
             }
         })
     }

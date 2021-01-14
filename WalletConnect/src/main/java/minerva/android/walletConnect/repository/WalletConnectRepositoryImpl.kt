@@ -1,6 +1,9 @@
 package minerva.android.walletConnect.repository
 
-import minerva.android.walletConnect.client.WCClient
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
+import io.reactivex.subjects.PublishSubject
+import minerva.android.walletConnect.client.*
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import okhttp3.OkHttpClient
@@ -10,6 +13,10 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
     WalletConnectRepository {
 
     private lateinit var client: WCClient
+    private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
+    override val connectionStatusFlowable: Flowable<WalletConnectStatus>
+        get() = status.toFlowable(BackpressureStrategy.BUFFER)
+
 
     override fun connect(qrCode: String) {
 
@@ -21,17 +28,20 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
                 Timber.tag("kobe").d("on wc open, peerId: $peerId")
             }
 
-            onSessionRequest = { id, peer, chainId ->
+            onSessionRequest = { id, meta, chainId ->
                 Timber.tag("kobe")
-                    .d("on session request id: $id; meta: name:${peer.name}, icon: ${peer.icons[0]} url: ${peer.url}, chainID: $chainId")
+                    .d("on session request id: $id; meta: name:${meta.name}, icon: ${meta.icons[0]} url: ${meta.url}, chainID: $chainId")
+                status.onNext(OnSessionRequest(meta, chainId))
             }
 
             onFailure = {
                 Timber.tag("kobe").d("on failure: $it")
+                status.onNext(OnConnectionFailure(it))
             }
 
             onDisconnect = { code, reason ->
                 Timber.tag("kobe").d("on disconnect: code$code, reason: $reason")
+                status.onNext(OnDisconnect(reason))
             }
 
             WCSession.from(qrCode)?.let {

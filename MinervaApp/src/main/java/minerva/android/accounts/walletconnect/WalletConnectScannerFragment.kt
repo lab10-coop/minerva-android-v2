@@ -38,8 +38,11 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     private fun observeViewState() {
         viewModel.viewStateLiveData.observe(viewLifecycleOwner, Observer {
             when (it) {
-                WrongQrCodeState -> handleWrongQrCode()
-                CorrectQrCodeState -> shouldScan = false
+                is WrongQrCodeState -> handleWrongQrCode()
+                is CorrectQrCodeState -> shouldScan = false
+                is OnError -> Toast.makeText(context, it.error.message, Toast.LENGTH_SHORT).show()
+                is OnWCSessionRequest -> Toast.makeText(context, it.meta.name, Toast.LENGTH_SHORT).show()
+                is OnWCDisconnected -> Toast.makeText(context, it.reason, Toast.LENGTH_SHORT).show()
             }
         })
     }
