@@ -17,7 +17,6 @@ import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import timber.log.Timber
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
@@ -44,13 +43,16 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
                 is OnError -> Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
-                is OnWCSessionRequest -> showConnectionDialog(it.meta, it.chainId)
-                is OnWCDisconnected -> handleOnWCDisconnect()
+                is OnDisconnected -> handleOnWCDisconnect()
                 is ProgressBarState -> {
                     if (!it.show) {
                         binding.scannerProgressBar.invisible()
                     }
                 }
+                is OnSessionRequestWithDefinedNetwork ->
+                    showConnectionDialog(it.meta, it.network, true)
+                is OnSessionRequestWithUndefinedNetwork ->
+                    showConnectionDialog(it.meta, it.network, false)
             }
         })
     }
@@ -111,8 +113,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    private fun showConnectionDialog(meta: WCPeerMeta, chainId: Int?) {
-        Timber.tag("kobe").d("CHAINID $chainId")
+    private fun showConnectionDialog(meta: WCPeerMeta, network: String, isNetworkDefined: Boolean) {
         DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession()
@@ -128,8 +129,9 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             }).apply {
             setOnDismissListener { shouldScan = true }
             setView(meta)
-            viewModel.getNetworkName(chainId)?.let {
-                setNetworkName(it)
+            setNetworkName(network)
+            if (!isNetworkDefined) {
+                setWarning()
             }
             show()
         }

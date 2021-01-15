@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.schedulers.Timed
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
 import minerva.android.base.BaseViewModel
@@ -18,7 +17,6 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.defs.NetworkShortName
-import timber.log.Timber
 
 class WalletConnectViewModel(
     private val repository: WalletConnectRepository,
@@ -33,9 +31,6 @@ class WalletConnectViewModel(
     private val _viewStateLiveData = MutableLiveData<WalletConnectViewState>()
     val viewStateLiveData: LiveData<WalletConnectViewState> get() = _viewStateLiveData
 
-    val networkName: String
-        get() = account.network.full
-
     init {
         launchDisposable {
             repository.connectionStatusFlowable
@@ -45,9 +40,9 @@ class WalletConnectViewModel(
                 .subscribeBy(
                     onNext = {
                         _viewStateLiveData.value = when (it) {
-                            is OnSessionRequest -> OnWCSessionRequest(it.meta, it.chainId)
+                            is OnSessionRequest -> handleSessionRequest(it)
                             is OnConnectionFailure -> OnError(it.error)
-                            is OnDisconnect -> OnWCDisconnected(it.reason)
+                            is OnDisconnect -> OnDisconnected(it.reason)
                         }
                     },
                     onError = {
@@ -56,6 +51,13 @@ class WalletConnectViewModel(
                 )
         }
     }
+
+    private fun handleSessionRequest(it: OnSessionRequest) =
+        it.chainId?.let { id ->
+            OnSessionRequestWithDefinedNetwork(it.meta, getNetworkName(id))
+        }.orElse {
+            OnSessionRequestWithUndefinedNetwork(it.meta, getNetworkName(it.chainId))
+        }
 
     fun getAccount(index: Int) {
         account = accountManager.loadAccount(index)
@@ -86,7 +88,7 @@ class WalletConnectViewModel(
         repository.approveSession(listOf(account.address), account.network.chainId)
     }
 
-    fun getNetworkName(chainId: Int?): String? {
+    private fun getNetworkName(chainId: Int?): String {
         chainId?.let {
             return NetworkManager.networks.find { it.chainId == chainId }?.full.orElse { getNetworkWhenChainIdNotDefined() }
         }.orElse {
@@ -94,10 +96,10 @@ class WalletConnectViewModel(
         }
     }
 
-    private fun getNetworkWhenChainIdNotDefined(): String? =
+    private fun getNetworkWhenChainIdNotDefined(): String =
         if (account.network.testNet) {
-            NetworkManager.networks.find { it.short == NetworkShortName.ETH_GOR }?.full
+            NetworkManager.networks.find { it.short == NetworkShortName.ETH_GOR }?.full.toString()
         } else {
-            NetworkManager.networks.find { it.short == NetworkShortName.ETH_MAIN }?.full
+            NetworkManager.networks.find { it.short == NetworkShortName.ETH_MAIN }?.full.toString()
         }
 }

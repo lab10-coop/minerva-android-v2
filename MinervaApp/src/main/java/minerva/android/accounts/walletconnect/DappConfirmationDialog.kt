@@ -3,14 +3,16 @@ package minerva.android.accounts.walletconnect
 import android.content.Context
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.android.synthetic.main.dapp_confirmation_dialog.*
 import minerva.android.R
 import minerva.android.databinding.DappConfirmationDialogBinding
+import minerva.android.extension.invisible
+import minerva.android.extension.visible
 import minerva.android.walletConnect.model.session.WCPeerMeta
 
-class DappConfirmationDialog(context: Context, connect: () -> Unit, deny: () -> Unit) :
+class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
     BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
 
     private val binding: DappConfirmationDialogBinding =
@@ -25,8 +27,8 @@ class DappConfirmationDialog(context: Context, connect: () -> Unit, deny: () -> 
                 deny()
                 dismiss()
             }
-            this@DappConfirmationDialog.connect.setOnClickListener {
-                connect()
+            connect.setOnClickListener {
+                approve()
                 dismiss()
             }
         }
@@ -48,6 +50,22 @@ class DappConfirmationDialog(context: Context, connect: () -> Unit, deny: () -> 
     }
 
     fun setNetworkName(name: String) {
-        network.text = name
+        binding.network.text = name
+    }
+
+    fun setWarning() = with(binding) {
+        manual.invisible()
+        warning.visible()
+        warringIcon.visible()
+        with(network) {
+            background = context.getDrawable(R.drawable.network_not_defined_background)
+            setCompoundDrawablesWithIntrinsicBounds(
+                ContextCompat.getDrawable(context, R.drawable.ic_help),
+                null,
+                null,
+                null
+            )
+            compoundDrawablePadding = resources.getDimension(R.dimen.margin_small).toInt()
+        }
     }
 }

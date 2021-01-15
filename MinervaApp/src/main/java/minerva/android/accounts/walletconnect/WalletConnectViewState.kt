@@ -7,6 +7,9 @@ object CloseScannerState : WalletConnectViewState()
 object WrongQrCodeState : WalletConnectViewState()
 object CorrectQrCodeState : WalletConnectViewState()
 data class OnError(val error: Throwable) : WalletConnectViewState()
-data class OnWCSessionRequest(val meta: WCPeerMeta, val chainId: Int?) : WalletConnectViewState()
-data class OnWCDisconnected(val reason: Int) : WalletConnectViewState()
-data class ProgressBarState(val show: Boolean): WalletConnectViewState()
+data class OnSessionRequestWithDefinedNetwork(val meta: WCPeerMeta, val network: String) :
+    WalletConnectViewState()
+data class OnSessionRequestWithUndefinedNetwork(val meta: WCPeerMeta, val network: String) :
+    WalletConnectViewState()
+data class OnDisconnected(val reason: Int) : WalletConnectViewState()
+data class ProgressBarState(val show: Boolean) : WalletConnectViewState()
