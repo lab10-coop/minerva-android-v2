@@ -9,12 +9,15 @@ import io.reactivex.schedulers.Timed
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
 import minerva.android.walletConnect.client.OnSessionRequest
 import minerva.android.walletConnect.repository.WalletConnectRepository
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.defs.NetworkShortName
 import timber.log.Timber
 
 class WalletConnectViewModel(
@@ -80,6 +83,21 @@ class WalletConnectViewModel(
     }
 
     fun approveSession() {
-        repository.approveSession(listOf(account.address), 1) //todo get chain id from account
+        repository.approveSession(listOf(account.address), account.network.chainId)
     }
+
+    fun getNetworkName(chainId: Int?): String? {
+        chainId?.let {
+            return NetworkManager.networks.find { it.chainId == chainId }?.full.orElse { getNetworkWhenChainIdNotDefined() }
+        }.orElse {
+            return getNetworkWhenChainIdNotDefined()
+        }
+    }
+
+    private fun getNetworkWhenChainIdNotDefined(): String? =
+        if (account.network.testNet) {
+            NetworkManager.networks.find { it.short == NetworkShortName.ETH_GOR }?.full
+        } else {
+            NetworkManager.networks.find { it.short == NetworkShortName.ETH_MAIN }?.full
+        }
 }

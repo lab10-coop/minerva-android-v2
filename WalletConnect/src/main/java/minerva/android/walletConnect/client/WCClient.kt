@@ -67,7 +67,7 @@ open class WCClient(
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
     var onDisconnect: (code: Int, reason: String) -> Unit = { _, _ -> Unit }
-    var onSessionRequest: (id: Long, peer: WCPeerMeta, chainId: String?) -> Unit =
+    var onSessionRequest: (id: Long, peer: WCPeerMeta, chainId: Int?) -> Unit =
         { _, _, _ -> Unit }
     var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit =
@@ -286,7 +286,7 @@ open class WCClient(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                onSessionRequest(request.id, param.peerMeta, param.chainId)
+                onSessionRequest(request.id, param.peerMeta, param.chainId?.toInt())
             }
             WCMethod.SESSION_UPDATE -> {
                 val param = gson.fromJson<List<WCSessionUpdate>>(request.params)

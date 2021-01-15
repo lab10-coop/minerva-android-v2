@@ -39,12 +39,15 @@ class DappConfirmationDialog(context: Context, connect: () -> Unit, deny: () -> 
         }
     }
 
-    fun setView(meta: WCPeerMeta, networkName: String) = with(binding) {
+    fun setView(meta: WCPeerMeta) = with(binding) {
         confirmationView.setIcon(meta.icons[0])
         name.text = meta.name
-        network.text = networkName
         Glide.with(context)
             .load(meta.icons[0])
             .into(icon)
+    }
+
+    fun setNetworkName(name: String) {
+        network.text = name
     }
 }

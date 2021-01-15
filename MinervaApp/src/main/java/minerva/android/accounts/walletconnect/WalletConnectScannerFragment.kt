@@ -44,10 +44,10 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
                 is OnError -> Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
-                is OnWCSessionRequest -> showConnectionDialog(it.meta)
+                is OnWCSessionRequest -> showConnectionDialog(it.meta, it.chainId)
                 is OnWCDisconnected -> handleOnWCDisconnect()
                 is ProgressBarState -> {
-                    if (!it.show){
+                    if (!it.show) {
                         binding.scannerProgressBar.invisible()
                     }
                 }
@@ -111,7 +111,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    private fun showConnectionDialog(meta: WCPeerMeta) {
+    private fun showConnectionDialog(meta: WCPeerMeta, chainId: Int?) {
+        Timber.tag("kobe").d("CHAINID $chainId")
         DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession()
@@ -126,7 +127,10 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 shouldScan = true
             }).apply {
             setOnDismissListener { shouldScan = true }
-            setView(meta, viewModel.networkName)
+            setView(meta)
+            viewModel.getNetworkName(chainId)?.let {
+                setNetworkName(it)
+            }
             show()
         }
     }
