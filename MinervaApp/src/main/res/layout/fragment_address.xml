@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/address_view"
     android:fillViewport="true"
     android:clipToPadding="false"
     android:paddingBottom="@dimen/margin_xbig"

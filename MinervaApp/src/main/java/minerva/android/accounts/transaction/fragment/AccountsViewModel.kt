@@ -33,7 +33,6 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
-
 //TODO try to use CurrentTimeProvider and DateUtils for getting timestamp
 class AccountsViewModel(
     private val accountManager: AccountManager,
