@@ -8,6 +8,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
@@ -27,6 +28,7 @@ class WalletConnectViewModel(
     val dapps: MutableList<Dapp> = mutableListOf()
 
     private lateinit var account: Account
+    var requestedNetwork: String = String.Empty
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectViewState>()
     val viewStateLiveData: LiveData<WalletConnectViewState> get() = _viewStateLiveData
@@ -54,9 +56,11 @@ class WalletConnectViewModel(
 
     private fun handleSessionRequest(it: OnSessionRequest) =
         it.chainId?.let { id ->
-            OnSessionRequestWithDefinedNetwork(it.meta, getNetworkName(id))
+            requestedNetwork = getNetworkName(id)
+            OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
         }.orElse {
-            OnSessionRequestWithUndefinedNetwork(it.meta, getNetworkName(it.chainId))
+            requestedNetwork = getNetworkName(it.chainId)
+            OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
         }
 
     fun getAccount(index: Int) {
@@ -87,6 +91,9 @@ class WalletConnectViewModel(
     fun approveSession() {
         repository.approveSession(listOf(account.address), account.network.chainId)
     }
+
+    val shouldChangeNetwork: Boolean
+        get() = account.network.full != requestedNetwork
 
     private fun getNetworkName(chainId: Int?): String {
         chainId?.let {

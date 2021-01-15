@@ -130,10 +130,21 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             setOnDismissListener { shouldScan = true }
             setView(meta)
             setNetworkName(network)
-            if (!isNetworkDefined) {
-                setWarning()
-            }
+            handleNetwork(isNetworkDefined)
             show()
+        }
+    }
+
+    private fun DappConfirmationDialog.handleNetwork(isNetworkDefined: Boolean) {
+        when {
+            !isNetworkDefined && !viewModel.shouldChangeNetwork -> setNotDefinedNetwork()
+            !isNetworkDefined && viewModel.shouldChangeNetwork -> setNotDefinedNetworkWarning()
+            isNetworkDefined && viewModel.shouldChangeNetwork -> setWrongNetworkMessage(
+                getString(
+                    R.string.wrong_network_message,
+                    viewModel.requestedNetwork
+                )
+            )
         }
     }
 

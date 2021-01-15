@@ -53,11 +53,8 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         binding.network.text = name
     }
 
-    fun setWarning() = with(binding) {
-        manual.invisible()
-        warning.visible()
-        warringIcon.visible()
-        with(network) {
+    fun setNotDefinedNetwork() {
+        with(binding.network) {
             background = context.getDrawable(R.drawable.network_not_defined_background)
             setCompoundDrawablesWithIntrinsicBounds(
                 ContextCompat.getDrawable(context, R.drawable.ic_help),
@@ -67,5 +64,21 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             )
             compoundDrawablePadding = resources.getDimension(R.dimen.margin_small).toInt()
         }
+    }
+
+    fun setNotDefinedNetworkWarning() = with(binding) {
+        showWaring()
+        setNotDefinedNetwork()
+    }
+
+    fun setWrongNetworkMessage(message: String) = with(binding) {
+        warning.text = message
+        showWaring()
+    }
+
+    private fun DappConfirmationDialogBinding.showWaring() {
+        manual.invisible()
+        warning.visible()
+        warringIcon.visible()
     }
 }
