@@ -31,7 +31,10 @@ class DappConfirmationDialog(context: Context, connect: () -> Unit, deny: () -> 
             }
         }
         setOnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_BACK) dismiss()
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                deny()
+                dismiss()
+            }
             true
         }
     }

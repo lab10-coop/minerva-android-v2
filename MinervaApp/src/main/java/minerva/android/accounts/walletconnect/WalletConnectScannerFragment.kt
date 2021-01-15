@@ -17,6 +17,7 @@ import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import timber.log.Timber
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
@@ -25,7 +26,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     private val dappsAdapter: DappsAdapter by lazy {
         DappsAdapter(viewModel.dapps) {
             viewModel.killSession()
-            //todo delete from list
+            //todo delete dapps from list separately
         }
     }
 
@@ -39,15 +40,28 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
 
     private fun observeViewState() {
         viewModel.viewStateLiveData.observe(viewLifecycleOwner, Observer {
-            binding.scannerProgressBar.invisible()
             when (it) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
-                is OnError -> Toast.makeText(context, it.error.message, Toast.LENGTH_SHORT).show()
+                is OnError -> Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
                 is OnWCSessionRequest -> showConnectionDialog(it.meta)
-                is OnWCDisconnected -> Toast.makeText(context, it.reason, Toast.LENGTH_SHORT).show()
+                is OnWCDisconnected -> handleOnWCDisconnect()
+                is ProgressBarState -> {
+                    if (!it.show){
+                        binding.scannerProgressBar.invisible()
+                    }
+                }
             }
         })
+    }
+
+    private fun handleOnWCDisconnect() {
+        dappsAdapter.updateDapps(emptyList())
+        with(binding) {
+            dappsBottomSheet.dapps.gone()
+            closeButton.margin(bottom = DEFAULT_MARGIN)
+        }
+        Toast.makeText(context, "Dapp disconnected", Toast.LENGTH_LONG).show()
     }
 
     private fun handleWrongQrCode() {
@@ -105,12 +119,11 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 dappsAdapter.updateDapps(viewModel.dapps)
                 binding.dappsBottomSheet.dapps.visible()
                 shouldScan = true
-                binding.scannerProgressBar.invisible()
+                binding.closeButton.margin(bottom = INCREASED_MARGIN)
             },
             {
                 viewModel.rejectSession()
                 shouldScan = true
-                binding.scannerProgressBar.invisible()
             }).apply {
             setOnDismissListener { shouldScan = true }
             setView(meta, viewModel.networkName)

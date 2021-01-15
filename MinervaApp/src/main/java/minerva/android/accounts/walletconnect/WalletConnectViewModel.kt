@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.schedulers.Timed
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
 import minerva.android.base.BaseViewModel
@@ -14,6 +15,7 @@ import minerva.android.walletConnect.client.OnSessionRequest
 import minerva.android.walletConnect.repository.WalletConnectRepository
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Account
+import timber.log.Timber
 
 class WalletConnectViewModel(
     private val repository: WalletConnectRepository,
@@ -36,6 +38,7 @@ class WalletConnectViewModel(
             repository.connectionStatusFlowable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext { _viewStateLiveData.value = ProgressBarState(false) }
                 .subscribeBy(
                     onNext = {
                         _viewStateLiveData.value = when (it) {
@@ -63,7 +66,7 @@ class WalletConnectViewModel(
         repository.rejectSession("Rejected by user")
     }
 
-    fun killSession(){
+    fun killSession() {
         repository.killSession()
     }
 
@@ -78,10 +81,5 @@ class WalletConnectViewModel(
 
     fun approveSession() {
         repository.approveSession(listOf(account.address), 1) //todo get chain id from account
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        repository.disconnect()
     }
 }

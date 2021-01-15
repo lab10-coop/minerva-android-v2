@@ -24,12 +24,12 @@
         android:drawableStart="@drawable/ic_lock"
         android:drawablePadding="@dimen/margin_xsmall"
         android:fontFamily="@font/rubik_medium"
-        tools:text="Kleros • Curate"
         android:textColor="@color/networksTypeHeader"
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/icon" />
+        app:layout_constraintTop_toBottomOf="@+id/icon"
+        tools:text="Kleros • Curate" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/network"
@@ -42,11 +42,11 @@
         android:paddingTop="@dimen/margin_xxsmall"
         android:paddingEnd="@dimen/margin_xbig"
         android:paddingBottom="@dimen/margin_xxsmall"
-        tools:text="ARTIS  (τ1)"
         android:textColor="@color/dappStatusColorGray"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name" />
+        app:layout_constraintTop_toBottomOf="@+id/name"
+        tools:text="ARTIS  (τ1)" />
 
     <minerva.android.widget.ConnectionRequestCard
         android:id="@+id/confirmation_view"
@@ -75,7 +75,7 @@
         android:paddingBottom="2dp"
         android:text="@string/connect_to_website"
         android:textAllCaps="true"
-        android:textColor="@color/colorPrimary"
+        android:textColor="#564AF5"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintBottom_toTopOf="@+id/confirmation_view"
         app:layout_constraintLeft_toLeftOf="parent"
