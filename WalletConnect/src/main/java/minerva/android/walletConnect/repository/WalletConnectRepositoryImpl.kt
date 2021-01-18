@@ -8,6 +8,7 @@ import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import okhttp3.OkHttpClient
 
+//todo tests will be added when multiple session management is implemented
 class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
     WalletConnectRepository {
 
