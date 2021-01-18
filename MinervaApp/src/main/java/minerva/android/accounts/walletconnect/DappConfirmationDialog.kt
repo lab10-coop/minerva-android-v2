@@ -42,11 +42,18 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     }
 
     fun setView(meta: WCPeerMeta) = with(binding) {
-        confirmationView.setIcon(meta.icons[0])
+        if (meta.icons.isEmpty()) {
+            Glide.with(context)
+                .load(R.drawable.ic_services)
+                .into(icon)
+            confirmationView.setDefaultIcon()
+        } else {
+            Glide.with(context)
+                .load(meta.icons[0])
+                .into(icon)
+            confirmationView.setIcon(meta.icons[0])
+        }
         name.text = meta.name
-        Glide.with(context)
-            .load(meta.icons[0])
-            .into(icon)
     }
 
     fun setNetworkName(name: String) {

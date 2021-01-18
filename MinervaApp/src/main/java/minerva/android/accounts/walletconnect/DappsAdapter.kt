@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.DappItemBinding
+import minerva.android.kotlinUtils.Empty
 
 class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> Unit) :
     RecyclerView.Adapter<DappViewHolder>() {
@@ -44,12 +45,22 @@ class DappViewHolder(private val binding: DappItemBinding, private val disconnec
     fun setItem(dapp: Dapp) {
         with(binding) {
             name.text = dapp.name
-            Glide.with(binding.root.context)
-                .load(dapp.icon)
-                .into(icon)
+            setIcon(dapp)
             menu.setOnClickListener { showMenu() }
         }
 
+    }
+
+    private fun DappItemBinding.setIcon(dapp: Dapp) {
+        if (dapp.icon != String.Empty) {
+            Glide.with(binding.root.context)
+                .load(dapp.icon)
+                .into(icon)
+        } else {
+            Glide.with(binding.root.context)
+                .load(dapp.defaultIcon)
+                .into(icon)
+        }
     }
 
     private fun DappItemBinding.showMenu() {

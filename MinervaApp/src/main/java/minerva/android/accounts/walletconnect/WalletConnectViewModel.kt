@@ -18,6 +18,7 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import timber.log.Timber
 
 class WalletConnectViewModel(
     private val repository: WalletConnectRepository,

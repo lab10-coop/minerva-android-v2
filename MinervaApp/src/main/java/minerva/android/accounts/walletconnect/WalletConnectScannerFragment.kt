@@ -14,13 +14,15 @@ import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.margin
 import minerva.android.extension.visible
+import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import timber.log.Timber
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
-    val viewModel: WalletConnectViewModel by sharedViewModel()
+    private val viewModel: WalletConnectViewModel by sharedViewModel()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private val dappsAdapter: DappsAdapter by lazy {
         DappsAdapter(viewModel.dapps) {
@@ -42,7 +44,10 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             when (it) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
-                is OnError -> Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
+                is OnError -> {
+                    shouldScan = true
+                    Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
+                }
                 is OnDisconnected -> handleOnWCDisconnect()
                 is ProgressBarState -> {
                     if (!it.show) {
@@ -102,8 +107,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         codeScanner.apply {
             decodeCallback = DecodeCallback { result ->
                 requireActivity().runOnUiThread {
-                    binding.scannerProgressBar.visible()
                     if (shouldScan) {
+                        binding.scannerProgressBar.visible()
                         viewModel.handleQrCode(result.text)
                     }
                 }
@@ -117,7 +122,13 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession()
-                viewModel.dapps.add(Dapp(name = meta.name, icon = meta.icons[0]))
+                viewModel.dapps.add(
+                    Dapp(
+                        name = meta.name,
+                        icon = getIcon(meta.icons),
+                        defaultIcon = R.drawable.ic_services
+                    )
+                )
                 dappsAdapter.updateDapps(viewModel.dapps)
                 binding.dappsBottomSheet.dapps.visible()
                 shouldScan = true
@@ -134,6 +145,10 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             show()
         }
     }
+
+    private fun getIcon(icons: List<String>) =
+        if (icons.isEmpty()) String.Empty
+        else icons[0]
 
     private fun DappConfirmationDialog.handleNetwork(isNetworkDefined: Boolean) {
         when {
