@@ -28,13 +28,13 @@ class WalletConnectViewModel(
     //TODO get list of connected dapps
     val dapps: MutableList<Dapp> = mutableListOf()
 
-    private lateinit var account: Account
+    internal lateinit var account: Account
     var requestedNetwork: String = String.Empty
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectViewState>()
     val viewStateLiveData: LiveData<WalletConnectViewState> get() = _viewStateLiveData
 
-    init {
+    fun setConnectionStatusFlowable() {
         launchDisposable {
             repository.connectionStatusFlowable
                 .subscribeOn(Schedulers.io())
@@ -55,15 +55,6 @@ class WalletConnectViewModel(
         }
     }
 
-    private fun handleSessionRequest(it: OnSessionRequest) =
-        it.chainId?.let { id ->
-            requestedNetwork = getNetworkName(id)
-            OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
-        }.orElse {
-            requestedNetwork = getNetworkName(it.chainId)
-            OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
-        }
-
     fun getAccount(index: Int) {
         account = accountManager.loadAccount(index)
     }
@@ -73,7 +64,7 @@ class WalletConnectViewModel(
     }
 
     fun rejectSession() {
-        repository.rejectSession("Rejected by user")
+        repository.rejectSession()
     }
 
     fun killSession() {
@@ -95,6 +86,15 @@ class WalletConnectViewModel(
 
     val shouldChangeNetwork: Boolean
         get() = account.network.full != requestedNetwork
+
+    private fun handleSessionRequest(it: OnSessionRequest): WalletConnectViewState =
+        it.chainId?.let { id ->
+            requestedNetwork = getNetworkName(id)
+            OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
+        }.orElse {
+            requestedNetwork = getNetworkName(it.chainId)
+            OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
+        }
 
     private fun getNetworkName(chainId: Int?): String {
         chainId?.let {

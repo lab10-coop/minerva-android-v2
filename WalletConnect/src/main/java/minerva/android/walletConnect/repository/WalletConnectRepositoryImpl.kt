@@ -7,7 +7,6 @@ import minerva.android.walletConnect.client.*
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import okhttp3.OkHttpClient
-import timber.log.Timber
 
 class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
     WalletConnectRepository {
@@ -20,26 +19,20 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
     override fun connect(qrCode: String) {
 
         with(WCClient(httpClient = okHttpClient)) {
-
             client = this
-
             onWCOpen = { peerId ->
-                Timber.tag("kobe").d("on wc open, peerId: $peerId")
+                //todo handle for multiple session management
             }
 
-            onSessionRequest = { id, meta, chainId ->
-                Timber.tag("kobe")
-                    .d("on session request id: $id; meta: name:${meta.name}, icon: ${meta.icons[0]} url: ${meta.url}, chainID: $chainId")
+            onSessionRequest = { _, meta, chainId ->
                 status.onNext(OnSessionRequest(meta, chainId))
             }
 
             onFailure = {
-                Timber.tag("kobe").d("on failure: $it")
                 status.onNext(OnConnectionFailure(it))
             }
 
             onDisconnect = { code, reason ->
-                Timber.tag("kobe").d("on disconnect: code$code, reason: $reason")
                 status.onNext(OnDisconnect(code))
             }
 
@@ -48,8 +41,7 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
                     it,
                     peerMeta = WCPeerMeta( //todo extract values
                         name = "Minerva Wallet",
-                        url = "https://docs.minerva.digital/",
-                        description = "Minerva Wallet"
+                        url = "https://docs.minerva.digital/"
                     )
                 )
             }
@@ -60,8 +52,8 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
         client.approveSession(addresses, chainId)
     }
 
-    override fun rejectSession(reason: String) {
-        client.rejectSession(reason)
+    override fun rejectSession() {
+        client.rejectSession()
     }
 
     override fun killSession() {
