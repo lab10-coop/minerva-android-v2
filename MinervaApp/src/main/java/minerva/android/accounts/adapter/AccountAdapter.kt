@@ -105,7 +105,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
 
     override fun onShowSafeAccountSettings(account: Account, index: Int) = listener.onShowSafeAccountSettings(account, index)
 
-    override fun onWalletConnect() = listener.onWalletConnect()
+    override fun onWalletConnect(index: Int) = listener.onWalletConnect(index)
 
     override fun onManageAssets(index: Int) = listener.onManageAssets(index)
 

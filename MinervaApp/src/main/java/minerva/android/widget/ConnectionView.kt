@@ -1,6 +1,7 @@
 package minerva.android.widget
 
 import android.content.Context
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -17,9 +18,15 @@ class ConnectionView @JvmOverloads constructor(
     private val binding: ConnectionViewLayoutBinding =
         ConnectionViewLayoutBinding.inflate(LayoutInflater.from(context), this, true)
 
-    fun setConnectionIcon(resId: Int) {
+    fun setConnectionIcon(icon: Int) {
         Glide.with(context)
-            .load(resId)
+            .load(icon)
+            .into(binding.connectionIcon)
+    }
+
+    fun setIconUrl(icon:Uri){
+        Glide.with(context)
+            .load(icon)
             .into(binding.connectionIcon)
     }
 
