@@ -25,8 +25,11 @@ class WalletConnectViewModel(
     private val accountManager: AccountManager
 ) : BaseViewModel() {
 
-    //TODO get list of connected dapps
+    //TODO get list of connected dApps
     val dapps: MutableList<Dapp> = mutableListOf()
+
+    // todo get all connected dApps for given account
+    val connectedDapps: Map<String, List<Dapp>> = mapOf()
 
     internal lateinit var account: Account
     var requestedNetwork: String = String.Empty

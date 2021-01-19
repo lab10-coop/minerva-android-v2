@@ -1,7 +1,6 @@
 package minerva.android.di
 
 import android.content.Context
-import android.os.Build
 import minerva.android.BuildConfig
 import minerva.android.accounts.address.AddressViewModel
 import minerva.android.accounts.akm.SafeAccountSettingsViewModel
@@ -25,8 +24,6 @@ import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
 import minerva.android.walletActions.WalletActionsViewModel
-import minerva.android.walletConnect.repository.WalletConnectRepository
-import minerva.android.walletConnect.repository.WalletConnectRepositoryImpl
 import minerva.android.walletConnect.walletConnectModules
 import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage

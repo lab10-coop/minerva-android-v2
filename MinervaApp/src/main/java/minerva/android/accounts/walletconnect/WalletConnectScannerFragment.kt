@@ -22,6 +22,8 @@ import timber.log.Timber
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
+    //TODO walletConnect scanner that displays all connected dApps for given account
+
     private val viewModel: WalletConnectViewModel by sharedViewModel()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private val dappsAdapter: DappsAdapter by lazy {
@@ -123,7 +125,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession()
-                viewModel.dapps.add(Dapp(meta.name, getIcon(meta.icons)))
+                viewModel.dapps.add(Dapp(meta.name, getIcon(meta.icons), ""))
                 dappsAdapter.updateDapps(viewModel.dapps)
                 binding.dappsBottomSheet.dapps.visible()
                 shouldScan = true
