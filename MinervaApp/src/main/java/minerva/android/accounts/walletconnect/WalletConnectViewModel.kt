@@ -89,14 +89,14 @@ class WalletConnectViewModel(
 
     private fun handleSessionRequest(it: OnSessionRequest): WalletConnectViewState =
         it.chainId?.let { id ->
-            requestedNetwork = getNetworkName(id)
+            requestedNetwork = getNetworkName(id).orElse { String.Empty }
             OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
         }.orElse {
-            requestedNetwork = getNetworkName(it.chainId)
+            requestedNetwork = getNetworkName(it.chainId).orElse { String.Empty }
             OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
         }
 
-    private fun getNetworkName(chainId: Int?): String {
+    private fun getNetworkName(chainId: Int?): String? {
         chainId?.let {
             return NetworkManager.networks.find { it.chainId == chainId }?.full.orElse { getNetworkWhenChainIdNotDefined() }
         }.orElse {
@@ -104,10 +104,10 @@ class WalletConnectViewModel(
         }
     }
 
-    private fun getNetworkWhenChainIdNotDefined(): String =
+    private fun getNetworkWhenChainIdNotDefined(): String? =
         if (account.network.testNet) {
-            NetworkManager.networks.find { it.short == NetworkShortName.ETH_GOR }?.full.toString()
+            NetworkManager.networks.find { it.short == NetworkShortName.ETH_GOR }?.full
         } else {
-            NetworkManager.networks.find { it.short == NetworkShortName.ETH_MAIN }?.full.toString()
+            NetworkManager.networks.find { it.short == NetworkShortName.ETH_MAIN }?.full
         }
 }
