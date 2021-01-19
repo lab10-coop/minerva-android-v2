@@ -42,6 +42,5 @@ dependencies {
     api rxDependencies.values()
     implementation retrofitDependencies.values()
     testImplementation testDependencies.values()
-    implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
-
+    implementation kotson.values()
 }
