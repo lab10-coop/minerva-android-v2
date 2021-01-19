@@ -87,6 +87,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation platform('com.google.firebase:firebase-bom:25.12.0')
     implementation project(':WalletManager')
+    implementation project(':WalletConnect')
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
 

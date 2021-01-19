@@ -25,10 +25,10 @@ data class Account(
         account.publicKey,
         account.privateKey,
         account.address,
-        account.name,
+        String.Empty,
         account.network,
         isDeleted,
-        owners = account.owners,
+        owners = listOf(),
         isPending = false
     )
 

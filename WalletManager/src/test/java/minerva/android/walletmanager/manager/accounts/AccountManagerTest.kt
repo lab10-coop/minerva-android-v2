@@ -47,7 +47,14 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager creates new regular account`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(
+            cryptographyRepository.calculateDerivedKeys(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val test = repository.createRegularAccount(Network()).test()
@@ -64,7 +71,14 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager don't save new regular account`() {
         val error = Throwable()
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(
+            cryptographyRepository.calculateDerivedKeys(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val test = repository.createRegularAccount(Network()).test()
@@ -81,7 +95,14 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager removes correct empty value`() {
         val account = Account(2)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(
+            cryptographyRepository.calculateDerivedKeys(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
@@ -99,7 +120,14 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager removes correct not empty value`() {
         val account = Account(2)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(
+            cryptographyRepository.calculateDerivedKeys(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
@@ -119,7 +147,14 @@ class AccountManagerTest : RxTest() {
         val account = Account(5)
         val account2 = Account(6)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(
+            cryptographyRepository.calculateDerivedKeys(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
@@ -143,7 +178,14 @@ class AccountManagerTest : RxTest() {
         val account = Account(5)
         val account2 = Account(6)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(
+            cryptographyRepository.calculateDerivedKeys(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
@@ -253,12 +295,12 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `enable main nets emits true`() {
         whenever(walletConfigManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
-        val result = repository.enableMainNetsFlowable.test().assertValue { it }
+        repository.enableMainNetsFlowable.test().assertValue { it }
     }
 
     @Test
     fun `enable main nets emits false`() {
         whenever(walletConfigManager.enableMainNetsFlowable).thenReturn(Flowable.just(false))
-        val result = repository.enableMainNetsFlowable.test().assertValue { !it }
+        repository.enableMainNetsFlowable.test().assertValue { !it }
     }
 }

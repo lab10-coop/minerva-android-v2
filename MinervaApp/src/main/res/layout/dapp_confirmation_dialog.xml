@@ -24,12 +24,12 @@
         android:drawableStart="@drawable/ic_lock"
         android:drawablePadding="@dimen/margin_xsmall"
         android:fontFamily="@font/rubik_medium"
-        android:text="Kleros • Curate"
         android:textColor="@color/networksTypeHeader"
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/icon" />
+        app:layout_constraintTop_toBottomOf="@+id/icon"
+        tools:text="Kleros • Curate" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/network"
@@ -38,15 +38,16 @@
         android:layout_marginTop="@dimen/margin_xsmall"
         android:background="@drawable/network_border"
         android:fontFamily="@font/rubik_medium"
-        android:paddingStart="@dimen/margin_xbig"
+        android:gravity="center"
+        android:paddingStart="@dimen/margin_normal"
         android:paddingTop="@dimen/margin_xxsmall"
-        android:paddingEnd="@dimen/margin_xbig"
+        android:paddingEnd="@dimen/margin_normal"
         android:paddingBottom="@dimen/margin_xxsmall"
-        android:text="ARTIS  (τ1)"
         android:textColor="@color/dappStatusColorGray"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name" />
+        app:layout_constraintTop_toBottomOf="@+id/name"
+        tools:text="ARTIS  (τ1)" />
 
     <minerva.android.widget.ConnectionRequestCard
         android:id="@+id/confirmation_view"
@@ -75,7 +76,7 @@
         android:paddingBottom="2dp"
         android:text="@string/connect_to_website"
         android:textAllCaps="true"
-        android:textColor="@color/colorPrimary"
+        android:textColor="#564AF5"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintBottom_toTopOf="@+id/confirmation_view"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -90,6 +91,35 @@
         android:layout_marginRight="@dimen/margin_normal"
         android:gravity="center"
         android:text="@string/dapp_connection_manual"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/confirmation_view" />
+
+    <ImageView
+        android:id="@+id/warring_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:src="@drawable/ic_alert"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/warning"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/confirmation_view"
+        tools:ignore="ContentDescription" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/warning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="59dp"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:gravity="center"
+        android:text="@string/dapp_connection_warning"
+        android:textColor="@color/warningRed"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/confirmation_view" />
