@@ -10,8 +10,13 @@ data class WCEthereumSignMessage(
 
     val data
         get() = when (type) {
-            WCSignType.MESSAGE -> raw[1]
-            WCSignType.TYPED_MESSAGE -> raw[1]
-            WCSignType.PERSONAL_MESSAGE -> raw[0]
+            WCSignType.MESSAGE -> raw[SECOND]
+            WCSignType.TYPED_MESSAGE -> raw[SECOND]
+            WCSignType.PERSONAL_MESSAGE -> raw[FIRST]
         }
+
+    companion object {
+        private const val FIRST = 0
+        private const val SECOND = 1
+    }
 }
