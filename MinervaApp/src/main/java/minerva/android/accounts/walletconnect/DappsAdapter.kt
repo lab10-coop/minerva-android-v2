@@ -44,24 +44,16 @@ class DappViewHolder(private val binding: DappItemBinding, private val disconnec
 
     fun setItem(dapp: Dapp) {
         with(binding) {
+            Glide.with(binding.root.context)
+                .load(getIcon(dapp))
+                .into(icon)
             name.text = dapp.name
-            setIcon(dapp)
             menu.setOnClickListener { showMenu() }
         }
-
     }
 
-    private fun DappItemBinding.setIcon(dapp: Dapp) {
-        if (dapp.icon != String.Empty) {
-            Glide.with(binding.root.context)
-                .load(dapp.icon)
-                .into(icon)
-        } else {
-            Glide.with(binding.root.context)
-                .load(dapp.defaultIcon)
-                .into(icon)
-        }
-    }
+    private fun getIcon(dapp: Dapp): Any =
+        if (dapp.icon != String.Empty) dapp.icon else R.drawable.ic_services
 
     private fun DappItemBinding.showMenu() {
         PopupMenu(root.context, menu).apply {

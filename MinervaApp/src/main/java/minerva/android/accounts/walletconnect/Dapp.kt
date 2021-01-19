@@ -5,6 +5,5 @@ import minerva.android.kotlinUtils.InvalidId
 
 data class Dapp(
     val name: String = String.Empty,
-    val icon: String = String.Empty,
-    val defaultIcon: Int = Int.InvalidId
+    val icon: String = String.Empty
 )

@@ -123,13 +123,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession()
-                viewModel.dapps.add(
-                    Dapp(
-                        name = meta.name,
-                        icon = getIcon(meta.icons),
-                        defaultIcon = R.drawable.ic_services
-                    )
-                )
+                viewModel.dapps.add(Dapp(meta.name, getIcon(meta.icons)))
                 dappsAdapter.updateDapps(viewModel.dapps)
                 binding.dappsBottomSheet.dapps.visible()
                 shouldScan = true
@@ -149,7 +143,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
 
     private fun getIcon(icons: List<String>) =
         if (icons.isEmpty()) String.Empty
-        else icons[0]
+        else icons[FIRST_ICON]
 
     private fun DappConfirmationDialog.handleNetwork(isNetworkDefined: Boolean) {
         when {
@@ -176,5 +170,6 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         const val PEEK_HEIGHT = 240
         const val DEFAULT_MARGIN = 32f
         const val INCREASED_MARGIN = 115f
+        const val FIRST_ICON = 0
     }
 }

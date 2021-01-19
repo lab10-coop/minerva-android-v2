@@ -7,9 +7,11 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import minerva.android.R
+import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletConnect.model.session.WCPeerMeta
 
 class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
@@ -42,19 +44,20 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     }
 
     fun setView(meta: WCPeerMeta) = with(binding) {
-        if (meta.icons.isEmpty()) {
-            Glide.with(context)
-                .load(R.drawable.ic_services)
-                .into(icon)
-            confirmationView.setDefaultIcon()
-        } else {
-            Glide.with(context)
-                .load(meta.icons[0])
-                .into(icon)
-            confirmationView.setIcon(meta.icons[0])
-        }
+        Glide.with(context)
+            .load(getIcon(meta))
+            .into(icon)
         name.text = meta.name
     }
+
+    private fun DappConfirmationDialogBinding.getIcon(meta: WCPeerMeta): Any =
+        if (meta.icons.isEmpty()) {
+            confirmationView.setDefaultIcon()
+            R.drawable.ic_services
+        } else {
+            confirmationView.setIcon(meta.icons[FIRST_ICON])
+            meta.icons[FIRST_ICON]
+        }
 
     fun setNetworkName(name: String) {
         binding.network.text = name
