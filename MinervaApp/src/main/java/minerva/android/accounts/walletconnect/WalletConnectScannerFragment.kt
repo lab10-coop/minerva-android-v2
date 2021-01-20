@@ -21,8 +21,6 @@ import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
-    //TODO walletConnect scanner that displays all connected dApps for given account
-
     private val viewModel: WalletConnectViewModel by sharedViewModel()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
 

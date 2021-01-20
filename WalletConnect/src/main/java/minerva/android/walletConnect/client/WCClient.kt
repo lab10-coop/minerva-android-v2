@@ -68,7 +68,7 @@ open class WCClient(
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
     var onDisconnect: (code: Int, reason: String, peerId: String?) -> Unit = { _, _, _ -> Unit }
-    var onSessionRequest: (handShakeId: Long, peer: WCPeerMeta, chainId: Int?, peerId: String?) -> Unit =
+    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String?) -> Unit =
         { _, _, _, _ -> Unit }
     var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit =
@@ -93,6 +93,7 @@ open class WCClient(
             this.peerId ?: throw IllegalStateException("peerId can't be null on connection open")
         // The Session.topic channel is used to listen session request messages only.
         subscribe(session.topic)
+        Timber.tag("kobe").d("SESSION TOPIC: ${session.topic}")
         // The peerId channel is used to listen to all messages sent to this httpClient.
         subscribe(peerId)
 
@@ -112,7 +113,7 @@ open class WCClient(
             val message = gson.fromJson<WCSocketMessage>(text)
             decrypted = decryptMessage(message)
 
-            Timber.tag("kobe").d("RECEIVED TOPIC ${message.topic}")
+//            Timber.tag("kobe").d("RECEIVED TOPIC ${message.topic}")
 
             Log.d(TAG, "<== decrypted $decrypted")
             handleMessage(decrypted)
@@ -291,10 +292,7 @@ open class WCClient(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-
-//                Timber.tag("kobe").d("HANDSHAKE id: $handshakeId, RemotePeerId $remotePeerId")
-
-                onSessionRequest(request.id, param.peerMeta, param.chainId?.toInt(), peerId)
+                onSessionRequest(remotePeerId, param.peerMeta, param.chainId?.toInt(), peerId)
             }
             WCMethod.SESSION_UPDATE -> {
                 val param = gson.fromJson<List<WCSessionUpdate>>(request.params)

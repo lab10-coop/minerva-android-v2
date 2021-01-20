@@ -80,11 +80,6 @@ class WalletConnectViewModel(
 
     fun killSession(peerId: String) {
         repository.killSession(peerId)
-
-        //todo should be done when disconnected occurs???
-//        val dApp = connectedDapps.find { it.peerId == peerId }
-//        connectedDapps.remove(dApp)
-//        dapps[account.address] = connectedDapps
     }
 
     fun handleQrCode(qrCode: String) {

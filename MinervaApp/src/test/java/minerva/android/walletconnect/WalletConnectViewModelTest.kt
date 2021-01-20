@@ -66,7 +66,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on disconnect event test`() {
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnDisconnect(1)))
+            .thenReturn(Flowable.just(OnDisconnect(1, "peerID")))
         viewModel.viewStateLiveData.observeForever(viewStateObserver)
         viewModel.setConnectionStatusFlowable()
         viewStateCaptor.run {
@@ -80,7 +80,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on session request event test with defined chainId on test net`() {
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnSessionRequest(meta, 1)))
+            .thenReturn(Flowable.just(OnSessionRequest(meta, 1, "peerID")))
         NetworkManager.networks = listOf(Network(full = "Ethereum", chainId = 1))
         viewModel.viewStateLiveData.observeForever(viewStateObserver)
         viewModel.setConnectionStatusFlowable()
@@ -105,7 +105,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
             )
 
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnSessionRequest(meta, null)))
+            .thenReturn(Flowable.just(OnSessionRequest(meta, null, "peerID")))
         viewModel.viewStateLiveData.observeForever(viewStateObserver)
         viewModel.account = Account(1, network = Network(testNet = true, full = "Ethereum"))
         viewModel.setConnectionStatusFlowable()
@@ -121,7 +121,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on session request event test with defined chainId on main net`() {
         val meta = WCPeerMeta(name = "token", url = "url", description = "dsc")
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnSessionRequest(meta, null)))
+            .thenReturn(Flowable.just(OnSessionRequest(meta, null, "peerID")))
         NetworkManager.networks =
             listOf(Network(full = "Ethereum", chainId = 1, short = "eth_mainnet"))
         viewModel.account = Account(1, network = Network(testNet = false, full = "Ethereum"))
@@ -160,20 +160,21 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `approve session test`(){
         viewModel.account = Account(1, network = Network(testNet = false, full = "Ethereum"))
-        viewModel.approveSession()
-        verify(repository).approveSession(any(), any())
+        viewModel.connectedDapps = mutableListOf()
+        viewModel.approveSession(WCPeerMeta(name = "name", url = "url"))
+        verify(repository).approveSession(any(), any(), any())
     }
 
     @Test
     fun `reject session test`(){
         viewModel.rejectSession()
-        verify(repository).rejectSession()
+        verify(repository).rejectSession("")
     }
 
     @Test
     fun `kill session test`(){
-        viewModel.killSession()
-        verify(repository).killSession()
+        viewModel.killSession("peerID")
+        verify(repository).killSession("peerID")
     }
 
     @Test

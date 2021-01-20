@@ -7,4 +7,5 @@ data class Dapp(
     val name: String = String.Empty,
     val icon: String = String.Empty,
     val peerId: String
+    //todo add remotePeerId for reconnection ??
 )

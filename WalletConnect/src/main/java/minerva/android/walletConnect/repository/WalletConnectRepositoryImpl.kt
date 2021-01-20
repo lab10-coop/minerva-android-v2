@@ -14,13 +14,9 @@ import java.util.concurrent.ConcurrentHashMap
 class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
     WalletConnectRepository {
 
-    //TODO manage all sessions/connected dApps for given account
-    // map of sessionsId to WCClients
-
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
-
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 
     override fun connect(qrCode: String) {
@@ -30,11 +26,11 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
             onWCOpen = { peerId ->
                 Timber.tag("kobe").d("ON OPEN peerId: $peerId")
                 clientMap[peerId] = this
-                //todo looks like peerId is my unique id for given WCClient
             }
 
-            onSessionRequest = { handShakeId, meta, chainId, peerId ->
-                Timber.tag("kobe").d("ON SESSION REQUEST handShakeId: $handShakeId; peerId: $peerId")
+            onSessionRequest = { remotePeerId, meta, chainId, peerId ->
+                Timber.tag("kobe")
+                    .d("ON SESSION REQUEST remotePeerId: $remotePeerId; peerId: $peerId")
                 status.onNext(OnSessionRequest(meta, chainId, peerId))
             }
 
@@ -78,9 +74,4 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
         clientMap[peerId]?.killSession()
         Timber.tag("kobe").d("kill session PEER ID: $peerId")
     }
-
-//    override fun disconnect(peerId: String) {
-//        clientMap[peerId]?.disconnect()
-//    }
-
 }
