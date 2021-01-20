@@ -11,5 +11,5 @@ data class OnSessionRequestWithDefinedNetwork(val meta: WCPeerMeta, val network:
     WalletConnectViewState()
 data class OnSessionRequestWithUndefinedNetwork(val meta: WCPeerMeta, val network: String) :
     WalletConnectViewState()
-data class OnDisconnected(val reason: Int) : WalletConnectViewState()
+data class OnDisconnected(val reason: Int, val peerId: String?) : WalletConnectViewState()
 data class ProgressBarState(val show: Boolean) : WalletConnectViewState()

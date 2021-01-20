@@ -18,7 +18,6 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import timber.log.Timber
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
@@ -26,11 +25,9 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
 
     private val viewModel: WalletConnectViewModel by sharedViewModel()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
+
     private val dappsAdapter: DappsAdapter by lazy {
-        DappsAdapter(viewModel.dapps) {
-            viewModel.killSession()
-            //todo delete dapps from list separately
-        }
+        DappsAdapter(viewModel.connectedDapps) { peerId -> viewModel.killSession(peerId) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,7 +48,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                     shouldScan = true
                     Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
                 }
-                is OnDisconnected -> handleOnWCDisconnect()
+                is OnDisconnected -> handleOnWCDisconnect(it.peerId)
                 is ProgressBarState -> {
                     if (!it.show) {
                         binding.scannerProgressBar.invisible()
@@ -65,13 +62,15 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         })
     }
 
-    private fun handleOnWCDisconnect() {
-        dappsAdapter.updateDapps(emptyList())
+    private fun handleOnWCDisconnect(peerId: String?) {
+        dappsAdapter.updateDapps(viewModel.connectedDapps)
         with(binding) {
-            dappsBottomSheet.dapps.gone()
-            closeButton.margin(bottom = DEFAULT_MARGIN)
+            if (viewModel.connectedDapps.isEmpty()) {
+                dappsBottomSheet.dapps.gone()
+                closeButton.margin(bottom = DEFAULT_MARGIN)
+            }
         }
-        Toast.makeText(context, "Dapp disconnected", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "Dapp disconnected; peerId: $peerId", Toast.LENGTH_LONG).show()
     }
 
     private fun handleWrongQrCode() {
@@ -85,7 +84,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             peekHeight = PEEK_HEIGHT
         }
 
-        val bottomMargin = if (viewModel.dapps.isEmpty()) {
+        val bottomMargin = if (viewModel.connectedDapps.isEmpty()) {
             dappsBottomSheet.dapps.gone()
             DEFAULT_MARGIN
         } else {
@@ -124,9 +123,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     private fun showConnectionDialog(meta: WCPeerMeta, network: String, isNetworkDefined: Boolean) {
         DappConfirmationDialog(requireContext(),
             {
-                viewModel.approveSession()
-                viewModel.dapps.add(Dapp(meta.name, getIcon(meta.icons), ""))
-                dappsAdapter.updateDapps(viewModel.dapps)
+                viewModel.approveSession(meta)
+                dappsAdapter.updateDapps(viewModel.connectedDapps)
                 binding.dappsBottomSheet.dapps.visible()
                 shouldScan = true
                 binding.closeButton.margin(bottom = INCREASED_MARGIN)
@@ -142,10 +140,6 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             show()
         }
     }
-
-    private fun getIcon(icons: List<String>) =
-        if (icons.isEmpty()) String.Empty
-        else icons[FIRST_ICON]
 
     private fun DappConfirmationDialog.handleNetwork(isNetworkDefined: Boolean) {
         when {

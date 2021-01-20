@@ -3,7 +3,6 @@ package minerva.android.accounts.walletconnect
 import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.view.menu.MenuPopupHelper
@@ -14,7 +13,10 @@ import minerva.android.R
 import minerva.android.databinding.DappItemBinding
 import minerva.android.kotlinUtils.Empty
 
-class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> Unit) :
+class DappsAdapter(
+    private var dapps: List<Dapp>,
+    private val disconnect: (peerId: String) -> Unit
+) :
     RecyclerView.Adapter<DappViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DappViewHolder =
@@ -24,7 +26,7 @@ class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> 
                 parent,
                 false
             )
-        ) { disconnect() }
+        ) { peerId -> disconnect(peerId) }
 
     override fun onBindViewHolder(holder: DappViewHolder, position: Int) {
         holder.setItem(dapps[position])
@@ -39,7 +41,10 @@ class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> 
 }
 
 @SuppressLint("RestrictedApi")
-class DappViewHolder(private val binding: DappItemBinding, private val disconnect: () -> Unit) :
+class DappViewHolder(
+    private val binding: DappItemBinding,
+    private val disconnect: (peerId: String) -> Unit
+) :
     RecyclerView.ViewHolder(binding.root) {
 
     fun setItem(dapp: Dapp) {
@@ -48,18 +53,18 @@ class DappViewHolder(private val binding: DappItemBinding, private val disconnec
                 .load(getIcon(dapp))
                 .into(icon)
             name.text = dapp.name
-            menu.setOnClickListener { showMenu() }
+            menu.setOnClickListener { showMenu(dapp.peerId) }
         }
     }
 
     private fun getIcon(dapp: Dapp): Any =
         if (dapp.icon != String.Empty) dapp.icon else R.drawable.ic_services
 
-    private fun DappItemBinding.showMenu() {
+    private fun DappItemBinding.showMenu(peerId: String) {
         PopupMenu(root.context, menu).apply {
             inflate(R.menu.dapp_menu)
             setOnMenuItemClickListener {
-                if (it.itemId == R.id.disconnect) disconnect()
+                if (it.itemId == R.id.disconnect) disconnect(peerId)
                 true
             }
         }.also {

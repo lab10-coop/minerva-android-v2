@@ -13,23 +13,22 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
 import minerva.android.walletConnect.client.OnSessionRequest
+import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.repository.WalletConnectRepository
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.defs.NetworkShortName
-import timber.log.Timber
 
 class WalletConnectViewModel(
     private val repository: WalletConnectRepository,
-    private val accountManager: AccountManager
+    private val accountManager: AccountManager,
+    // todo get all connected dApps for given account, should get from local storage
+    private val dapps: MutableMap<String, MutableList<Dapp>> = mutableMapOf()
 ) : BaseViewModel() {
 
-    //TODO get list of connected dApps
-    val dapps: MutableList<Dapp> = mutableListOf()
-
-    // todo get all connected dApps for given account
-    val connectedDapps: Map<String, List<Dapp>> = mapOf()
+    lateinit var connectedDapps: MutableList<Dapp>
+    var latestPeerId: String = String.Empty
 
     internal lateinit var account: Account
     var requestedNetwork: String = String.Empty
@@ -46,9 +45,17 @@ class WalletConnectViewModel(
                 .subscribeBy(
                     onNext = {
                         _viewStateLiveData.value = when (it) {
-                            is OnSessionRequest -> handleSessionRequest(it)
+                            is OnSessionRequest -> {
+                                latestPeerId = it.peerId ?: String.Empty
+                                handleSessionRequest(it)
+                            }
                             is OnConnectionFailure -> OnError(it.error)
-                            is OnDisconnect -> OnDisconnected(it.reason)
+                            is OnDisconnect -> {
+                                val dApp = connectedDapps.find { dApp -> dApp.peerId == it.peerId }
+                                connectedDapps.remove(dApp)
+                                dapps[account.address] = connectedDapps
+                                OnDisconnected(it.reason, it.peerId)
+                            }
                         }
                     },
                     onError = {
@@ -60,6 +67,7 @@ class WalletConnectViewModel(
 
     fun getAccount(index: Int) {
         account = accountManager.loadAccount(index)
+        connectedDapps = dapps[account.address] ?: mutableListOf()
     }
 
     fun closeScanner() {
@@ -67,11 +75,16 @@ class WalletConnectViewModel(
     }
 
     fun rejectSession() {
-        repository.rejectSession()
+        repository.rejectSession(latestPeerId)
     }
 
-    fun killSession() {
-        repository.killSession()
+    fun killSession(peerId: String) {
+        repository.killSession(peerId)
+
+        //todo should be done when disconnected occurs???
+//        val dApp = connectedDapps.find { it.peerId == peerId }
+//        connectedDapps.remove(dApp)
+//        dapps[account.address] = connectedDapps
     }
 
     fun handleQrCode(qrCode: String) {
@@ -83,9 +96,16 @@ class WalletConnectViewModel(
         }
     }
 
-    fun approveSession() {
-        repository.approveSession(listOf(account.address), account.network.chainId)
+    fun approveSession(meta: WCPeerMeta) {
+        repository.approveSession(listOf(account.address), account.network.chainId, latestPeerId)
+
+        connectedDapps.add(Dapp(meta.name, getIcon(meta.icons), latestPeerId))
+        dapps[account.address] = connectedDapps
     }
+
+    private fun getIcon(icons: List<String>) =
+        if (icons.isEmpty()) String.Empty
+        else icons[WalletConnectScannerFragment.FIRST_ICON]
 
     val shouldChangeNetwork: Boolean
         get() = account.network.full != requestedNetwork

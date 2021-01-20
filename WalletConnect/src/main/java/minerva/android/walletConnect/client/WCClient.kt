@@ -19,6 +19,7 @@ import minerva.android.walletConnect.utils.WCCipher
 import minerva.android.walletConnect.utils.toByteArray
 import okhttp3.*
 import okio.ByteString
+import timber.log.Timber
 import java.util.*
 
 const val JSONRPC_VERSION = "2.0"
@@ -66,9 +67,9 @@ open class WCClient(
         private set
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
-    var onDisconnect: (code: Int, reason: String) -> Unit = { _, _ -> Unit }
-    var onSessionRequest: (id: Long, peer: WCPeerMeta, chainId: Int?) -> Unit =
-        { _, _, _ -> Unit }
+    var onDisconnect: (code: Int, reason: String, peerId: String?) -> Unit = { _, _, _ -> Unit }
+    var onSessionRequest: (handShakeId: Long, peer: WCPeerMeta, chainId: Int?, peerId: String?) -> Unit =
+        { _, _, _, _ -> Unit }
     var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit =
         { _, _ -> Unit }
@@ -107,7 +108,12 @@ open class WCClient(
                 return;
             }
             Log.d(TAG, "<== message $text")
-            decrypted = decryptMessage(text)
+
+            val message = gson.fromJson<WCSocketMessage>(text)
+            decrypted = decryptMessage(message)
+
+            Timber.tag("kobe").d("RECEIVED TOPIC ${message.topic}")
+
             Log.d(TAG, "<== decrypted $decrypted")
             handleMessage(decrypted)
         } catch (e: Exception) {
@@ -138,8 +144,8 @@ open class WCClient(
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         Log.d(TAG, "<< closing socket >>")
 
+        onDisconnect(code, reason, peerId)
         resetState()
-        onDisconnect(code, reason)
 
         listeners.forEach { it.onClosing(webSocket, code, reason) }
     }
@@ -159,6 +165,8 @@ open class WCClient(
         this.peerId = peerId
         this.remotePeerId = remotePeerId
 
+//        Timber.tag("kobe").d("PEER ID: $peerId")
+
         val request = Request.Builder()
             .url(session.bridge)
             .build()
@@ -166,7 +174,7 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int): Boolean {
+    fun approveSession(accounts: List<String>, chainId: Int, peerId: String): Boolean {
         check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
 
         this.accounts = accounts;
@@ -244,8 +252,7 @@ open class WCClient(
         return encryptAndSend(gson.toJson(response))
     }
 
-    private fun decryptMessage(text: String): String {
-        val message = gson.fromJson<WCSocketMessage>(text)
+    private fun decryptMessage(message: WCSocketMessage): String {
         val encrypted = gson.fromJson<WCEncryptionPayload>(message.payload)
         val session = this.session
             ?: throw IllegalStateException("Session is null")
@@ -286,7 +293,10 @@ open class WCClient(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                onSessionRequest(request.id, param.peerMeta, param.chainId?.toInt())
+
+//                Timber.tag("kobe").d("HANDSHAKE id: $handshakeId, RemotePeerId $remotePeerId")
+
+                onSessionRequest(request.id, param.peerMeta, param.chainId?.toInt(), peerId)
             }
             WCMethod.SESSION_UPDATE -> {
                 val param = gson.fromJson<List<WCSessionUpdate>>(request.params)
