@@ -165,8 +165,6 @@ open class WCClient(
         this.peerId = peerId
         this.remotePeerId = remotePeerId
 
-//        Timber.tag("kobe").d("PEER ID: $peerId")
-
         val request = Request.Builder()
             .url(session.bridge)
             .build()
