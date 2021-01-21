@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.DappItemBinding
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletConnect.model.session.Dapp
 
 class DappsAdapter(
     private var dapps: List<Dapp>,

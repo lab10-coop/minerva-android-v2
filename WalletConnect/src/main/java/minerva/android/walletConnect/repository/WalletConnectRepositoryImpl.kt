@@ -4,6 +4,7 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.subjects.PublishSubject
 import minerva.android.walletConnect.client.*
+import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import okhttp3.OkHttpClient
@@ -31,7 +32,7 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
             onSessionRequest = { remotePeerId, meta, chainId, peerId ->
                 Timber.tag("kobe")
                     .d("ON SESSION REQUEST remotePeerId: $remotePeerId; peerId: $peerId")
-                status.onNext(OnSessionRequest(meta, chainId, peerId))
+                status.onNext(OnSessionRequest(meta, chainId, Topic(peerId, remotePeerId)))
             }
 
             onFailure = {

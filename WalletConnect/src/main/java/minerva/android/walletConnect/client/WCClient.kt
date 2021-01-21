@@ -5,6 +5,7 @@ import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletConnect.model.enums.MessageType
 import minerva.android.walletConnect.model.enums.WCMethod
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
@@ -45,7 +46,7 @@ open class WCClient(
     var peerMeta: WCPeerMeta? = null
         private set
 
-    var peerId: String? = null
+    var peerId: String = String.Empty
         private set
 
     var remotePeerId: String? = null
@@ -68,7 +69,7 @@ open class WCClient(
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
     var onDisconnect: (code: Int, reason: String, peerId: String?) -> Unit = { _, _, _ -> Unit }
-    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String?) -> Unit =
+    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String) -> Unit =
         { _, _, _, _ -> Unit }
     var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit =
@@ -401,7 +402,7 @@ open class WCClient(
         handshakeId = -1
         isConnected = false
         session = null
-        peerId = null
+        peerId = String.Empty
         remotePeerId = null
         peerMeta = null
     }
