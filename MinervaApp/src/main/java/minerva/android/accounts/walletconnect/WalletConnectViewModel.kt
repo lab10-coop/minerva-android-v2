@@ -13,11 +13,11 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
 import minerva.android.walletConnect.client.OnSessionRequest
-import minerva.android.walletConnect.model.session.ConnectedDapps
 import minerva.android.walletConnect.model.session.Dapp
 import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.repository.WalletConnectRepository
+import minerva.android.walletConnect.storage.WalletConnectStorage
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
@@ -26,17 +26,17 @@ import minerva.android.walletmanager.model.defs.NetworkShortName
 class WalletConnectViewModel(
     private val repository: WalletConnectRepository,
     private val accountManager: AccountManager,
-    // todo get all connected dApps for given account, should get from local storage
-    private val dApps: MutableList<ConnectedDapps> = mutableListOf()
+    private val storage: WalletConnectStorage
 ) : BaseViewModel() {
 
-    lateinit var connectedDapps: MutableList<Dapp>
     internal lateinit var account: Account
     var requestedNetwork: String = String.Empty
     private lateinit var topic: Topic
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectViewState>()
     val viewStateLiveData: LiveData<WalletConnectViewState> get() = _viewStateLiveData
+
+    lateinit var connectedDapps: MutableList<Dapp>
 
     fun setConnectionStatusFlowable() {
         launchDisposable {
@@ -64,7 +64,9 @@ class WalletConnectViewModel(
 
     fun getAccount(index: Int) {
         account = accountManager.loadAccount(index)
-        connectedDapps = dApps.find { it.address == account.address }?.dapps ?: mutableListOf()
+//        storage.clear()
+        connectedDapps = storage.getConnectedDapps(account.address).toMutableList()
+        //todo try to reconnect
     }
 
     fun closeScanner() {
@@ -90,15 +92,19 @@ class WalletConnectViewModel(
 
     fun approveSession(meta: WCPeerMeta) {
         repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId)
-
-        connectedDapps.add(Dapp(meta.name, getIcon(meta.icons), topic.peerId, topic.remotePeerId))
-       //todo update local storage
+        val dapp = Dapp(meta.name, getIcon(meta.icons), topic.peerId, topic.remotePeerId)
+        storage.saveDapp(account.address, dapp)
+        connectedDapps.add(dapp)
+        //todo work only on local storage // should post to live data and update view
     }
 
     private fun onDisconnected(it: OnDisconnect): OnDisconnected {
-        val dApp = connectedDapps.find { dApp -> dApp.peerId == it.peerId }
-        connectedDapps.remove(dApp)
-        //todo update local storage
+        connectedDapps.find { dApp -> dApp.peerId == it.peerId }
+            ?.let {
+                storage.removeDapp(account.address, it)
+                connectedDapps.remove(it)
+            }
+        //todo work only on local storage // should post to live data and update view
         return OnDisconnected(it.reason, it.peerId)
     }
 

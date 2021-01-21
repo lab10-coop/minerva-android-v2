@@ -1,7 +1,6 @@
 package minerva.android.walletConnect.model.session
 
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidId
 
 data class Dapp(
     val name: String = String.Empty,

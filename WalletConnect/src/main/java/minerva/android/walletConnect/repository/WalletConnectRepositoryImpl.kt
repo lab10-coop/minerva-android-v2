@@ -11,13 +11,14 @@ import okhttp3.OkHttpClient
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 
-//todo tests will be added when multiple session management is implemented
+//todo move to service binded to MainActivity
 class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
     WalletConnectRepository {
 
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
+
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 
     override fun connect(qrCode: String) {
