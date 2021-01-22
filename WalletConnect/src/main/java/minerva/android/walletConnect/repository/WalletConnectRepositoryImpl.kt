@@ -1,9 +1,14 @@
 package minerva.android.walletConnect.repository
 
 import io.reactivex.BackpressureStrategy
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.subjects.PublishSubject
 import minerva.android.walletConnect.client.*
+import minerva.android.walletConnect.database.WalletConnectDatabase
+import minerva.android.walletConnect.mapper.DappSessionToEntityMapper
+import minerva.android.walletConnect.mapper.EntityToDappSessionMapper
+import minerva.android.walletConnect.model.session.DappSession
 import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
@@ -12,8 +17,12 @@ import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 
 //todo move to service binded to MainActivity
-class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
-    WalletConnectRepository {
+class WalletConnectRepositoryImpl(
+    private val okHttpClient: OkHttpClient,
+    database: WalletConnectDatabase
+) : WalletConnectRepository {
+
+    private val dappDao = database.dappDao()
 
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
@@ -60,6 +69,16 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
 
         }
     }
+
+    override fun getConnectedDapps(addresses: String): Flowable<List<DappSession>> =
+        dappDao.getConnectedDapps(addresses)
+            .map { EntityToDappSessionMapper.map(it) }
+
+    override fun saveDappSession(dappSession: DappSession): Completable =
+        dappDao.insert(DappSessionToEntityMapper.map(dappSession))
+
+    override fun deleteDappSession(peerId: String): Completable =
+        dappDao.delete(peerId)
 
     override fun approveSession(addresses: List<String>, chainId: Int, peerId: String) {
         clientMap[peerId]?.approveSession(addresses, chainId, peerId)

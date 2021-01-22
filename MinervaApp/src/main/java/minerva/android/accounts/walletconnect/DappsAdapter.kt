@@ -12,13 +12,12 @@ import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.DappItemBinding
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletConnect.model.session.Dapp
+import minerva.android.walletConnect.model.session.DappSession
 
-class DappsAdapter(
-    private var dapps: List<Dapp>,
-    private val disconnect: (peerId: String) -> Unit
-) :
+class DappsAdapter(private val disconnect: (peerId: String) -> Unit) :
     RecyclerView.Adapter<DappViewHolder>() {
+
+    private var dapps: List<DappSession> = listOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DappViewHolder =
         DappViewHolder(
@@ -35,8 +34,8 @@ class DappsAdapter(
 
     override fun getItemCount(): Int = dapps.size
 
-    fun updateDapps(dapps: List<Dapp>) {
-        this.dapps = dapps
+    fun updateDapps(dappSessions: List<DappSession>) {
+        this.dapps = dappSessions
         notifyDataSetChanged()
     }
 }
@@ -48,18 +47,18 @@ class DappViewHolder(
 ) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun setItem(dapp: Dapp) {
+    fun setItem(dappSession: DappSession) {
         with(binding) {
             Glide.with(binding.root.context)
-                .load(getIcon(dapp))
+                .load(getIcon(dappSession))
                 .into(icon)
-            name.text = dapp.name
-            menu.setOnClickListener { showMenu(dapp.peerId) }
+            name.text = dappSession.name
+            menu.setOnClickListener { showMenu(dappSession.peerId) }
         }
     }
 
-    private fun getIcon(dapp: Dapp): Any =
-        if (dapp.icon != String.Empty) dapp.icon else R.drawable.ic_services
+    private fun getIcon(dappSession: DappSession): Any =
+        if (dappSession.icon != String.Empty) dappSession.icon else R.drawable.ic_services
 
     private fun DappItemBinding.showMenu(peerId: String) {
         PopupMenu(root.context, menu).apply {

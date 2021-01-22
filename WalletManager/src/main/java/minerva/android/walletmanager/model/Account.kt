@@ -28,7 +28,7 @@ data class Account(
         String.Empty,
         account.network,
         isDeleted,
-        owners = listOf(),
+        owners = account.owners,
         isPending = false
     )
 

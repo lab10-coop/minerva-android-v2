@@ -14,18 +14,16 @@ import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.margin
 import minerva.android.extension.visible
-import minerva.android.kotlinUtils.Empty
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
-    private val viewModel: WalletConnectViewModel by sharedViewModel()
+    internal val viewModel: WalletConnectViewModel by sharedViewModel()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
-
     private val dappsAdapter: DappsAdapter by lazy {
-        DappsAdapter(viewModel.connectedDapps) { peerId -> viewModel.killSession(peerId) }
+        DappsAdapter { peerId -> viewModel.killSession(peerId) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -46,7 +44,13 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                     shouldScan = true
                     Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
                 }
-                is OnDisconnected -> handleOnWCDisconnect(it.peerId)
+                is OnDisconnected ->
+                    Toast.makeText(
+                        context,
+                        "Dapp disconnected; peerId: ${it.peerId}",
+                        Toast.LENGTH_LONG
+                    ).show()
+
                 is ProgressBarState -> {
                     if (!it.show) {
                         binding.scannerProgressBar.invisible()
@@ -56,19 +60,15 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                     showConnectionDialog(it.meta, it.network, true)
                 is OnSessionRequestWithUndefinedNetwork ->
                     showConnectionDialog(it.meta, it.network, false)
+                is UpdateDappsState -> dappsAdapter.updateDapps(it.dapps)
+                is HideDappsState -> {
+                    with(binding) {
+                        dappsBottomSheet.dapps.gone()
+                        closeButton.margin(bottom = DEFAULT_MARGIN)
+                    }
+                }
             }
         })
-    }
-
-    private fun handleOnWCDisconnect(peerId: String?) {
-        dappsAdapter.updateDapps(viewModel.connectedDapps)
-        with(binding) {
-            if (viewModel.connectedDapps.isEmpty()) {
-                dappsBottomSheet.dapps.gone()
-                closeButton.margin(bottom = DEFAULT_MARGIN)
-            }
-        }
-        Toast.makeText(context, "Dapp disconnected; peerId: $peerId", Toast.LENGTH_LONG).show()
     }
 
     private fun handleWrongQrCode() {
@@ -81,14 +81,6 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             bottomSheetBehavior = this
             peekHeight = PEEK_HEIGHT
         }
-
-        val bottomMargin = if (viewModel.connectedDapps.isEmpty()) {
-            dappsBottomSheet.dapps.gone()
-            DEFAULT_MARGIN
-        } else {
-            INCREASED_MARGIN
-        }
-        closeButton.margin(bottom = bottomMargin)
     }
 
     private fun setupRecycler() {
@@ -122,7 +114,6 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession(meta)
-                dappsAdapter.updateDapps(viewModel.connectedDapps)
                 binding.dappsBottomSheet.dapps.visible()
                 shouldScan = true
                 binding.closeButton.margin(bottom = INCREASED_MARGIN)

@@ -14,12 +14,11 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
 import minerva.android.walletConnect.client.OnSessionRequest
-import minerva.android.walletConnect.model.session.Dapp
+import minerva.android.walletConnect.model.session.DappSession
 import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletConnect.repository.WalletConnectRepository
-import minerva.android.walletConnect.storage.WalletConnectStorage
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
@@ -27,18 +26,16 @@ import minerva.android.walletmanager.model.defs.NetworkShortName
 
 class WalletConnectViewModel(
     private val repository: WalletConnectRepository,
-    private val accountManager: AccountManager,
-    private val storage: WalletConnectStorage
+    private val accountManager: AccountManager
 ) : BaseViewModel() {
 
     internal lateinit var account: Account
     var requestedNetwork: String = String.Empty
-    private lateinit var topic: Topic
+    internal lateinit var topic: Topic
+    internal lateinit var currentSession: WCSession
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectViewState>()
     val viewStateLiveData: LiveData<WalletConnectViewState> get() = _viewStateLiveData
-
-    lateinit var connectedDapps: MutableList<Dapp>
 
     fun setConnectionStatusFlowable() {
         launchDisposable {
@@ -66,13 +63,24 @@ class WalletConnectViewModel(
 
     fun getAccount(index: Int) {
         account = accountManager.loadAccount(index)
-//        storage.clear()
-        connectedDapps = storage.getConnectedDapps(account.address).toMutableList()
+        launchDisposable {
+            repository.getConnectedDapps(account.address)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        val viewState = if (it.isEmpty()) {
+                            HideDappsState
+                        } else {
+                            UpdateDappsState(it)
+                        }
+                        _viewStateLiveData.value = viewState
+                    },
+                    onError = { _viewStateLiveData.value = OnError(it) }
+                )
+        }
 
-        //todo try to reconnect for every existing dApp, get WCSession from local storage
-        val peerId = connectedDapps[0].peerId
-        val remotePeerId = connectedDapps[0].remotePeerId
-
+        //todo try to reconnect
 //        repository.connect(WCSession(), peerId, remotePeerId)
     }
 
@@ -86,6 +94,13 @@ class WalletConnectViewModel(
 
     fun killSession(peerId: String) {
         repository.killSession(peerId)
+
+//        launchDisposable {
+//            repository.deleteDappSession(peerId)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeBy(onError = { OnError(it) })
+//        }
     }
 
     fun handleQrCode(qrCode: String) {
@@ -93,29 +108,44 @@ class WalletConnectViewModel(
             _viewStateLiveData.value = WrongQrCodeState
         } else {
             _viewStateLiveData.value = CorrectQrCodeState
-
-            val session = WCSession.from(qrCode)
-            repository.connect(session)
+            currentSession = WCSession.from(qrCode)
+            repository.connect(currentSession)
         }
     }
 
     fun approveSession(meta: WCPeerMeta) {
-
+        //todo should remove from DB when approve session return true?
         repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId)
-
-        //todo handle saving session in case of reconnection in session we gonna have peerID, remotePeerID, icon, name, bridge, version, topic, key, address wich says that given session is for given address
-        val dapp = Dapp(meta.name, getIcon(meta.icons), topic.peerId, topic.remotePeerId)
-        storage.saveDapp(account.address, dapp)
-        connectedDapps.add(dapp)
+        launchDisposable {
+            repository.saveDappSession(getDapp(meta))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onError = { OnError(it) })
+        }
     }
 
+    private fun getDapp(meta: WCPeerMeta) = DappSession(
+        account.address,
+        currentSession.topic,
+        currentSession.version,
+        currentSession.bridge,
+        currentSession.key,
+        meta.name,
+        getIcon(meta.icons),
+        topic.peerId,
+        topic.remotePeerId
+    )
+
     private fun onDisconnected(it: OnDisconnect): OnDisconnected {
-        connectedDapps.find { dApp -> dApp.peerId == it.peerId }
-            ?.let {
-                storage.removeDapp(account.address, it)
-                connectedDapps.remove(it)
+        it.peerId?.let { peerId ->
+            launchDisposable {
+                repository.deleteDappSession(peerId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(onError = { OnError(it) })
             }
-        return OnDisconnected(it.reason, it.peerId)
+        }
+        return OnDisconnected(it.peerId)
     }
 
     private fun getIcon(icons: List<String>) =
