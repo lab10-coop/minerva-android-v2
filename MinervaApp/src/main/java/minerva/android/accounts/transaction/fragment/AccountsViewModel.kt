@@ -33,7 +33,6 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
-
 //TODO try to use CurrentTimeProvider and DateUtils for getting timestamp
 class AccountsViewModel(
     private val accountManager: AccountManager,
@@ -65,8 +64,8 @@ class AccountsViewModel(
     private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
-    private val _assetBalanceLiveData = MutableLiveData<Map<String, List<AccountAsset>>>()
-    val accountAssetBalanceLiveData: LiveData<Map<String, List<AccountAsset>>> get() = _assetBalanceLiveData
+    private val _tokenBalanceLiveData = MutableLiveData<Map<String, List<AccountToken>>>()
+    val tokenBalanceLiveData: LiveData<Map<String, List<AccountToken>>> get() = _tokenBalanceLiveData
 
     private val _noFundsLiveData = MutableLiveData<Event<Unit>>()
     val noFundsLiveData: LiveData<Event<Unit>> get() = _noFundsLiveData
@@ -123,18 +122,18 @@ class AccountsViewModel(
                 )
         }
 
-    fun refreshAssetBalance() =
+    fun refreshTokenBalance() =
         launchDisposable {
-            transactionRepository.refreshAssetBalance()
+            transactionRepository.refreshTokenBalance()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = {
-                        _assetBalanceLiveData.value = it
+                        _tokenBalanceLiveData.value = it
                     },
                     onError = {
                         Timber.e("Refresh asset balance error: ${it.message}")
-                        _refreshBalancesErrorLiveData.value = Event(ErrorCode.ASSET_BALANCE_ERROR)
+                        _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
                     }
                 )
         }

@@ -14,7 +14,7 @@ import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.AccountAsset
+import minerva.android.walletmanager.model.AccountToken
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.utils.CryptoUtils
@@ -44,7 +44,7 @@ class AccountManagerImpl(
                     val newAccount = Account(
                         index,
                         name = accountName,
-                        network = network,
+                        networkShort = network.short,
                         publicKey = keys.publicKey,
                         privateKey = keys.privateKey,
                         address = keys.address
@@ -76,7 +76,7 @@ class AccountManagerImpl(
                     val newAccount = Account(
                         index,
                         name = getSafeAccountName(account),
-                        network = account.network,
+                        networkShort = account.network.short,
                         bindedOwner = ownerAddress,
                         publicKey = keys.publicKey,
                         privateKey = keys.privateKey,
@@ -135,7 +135,7 @@ class AccountManagerImpl(
             config.accounts.forEachIndexed { index, item ->
                 if (index == accountIndex) {
                     return when {
-                        areFundsOnValue(item.cryptoBalance, item.accountAssets) -> handleNoFundsError(item)
+                        areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
                         isNotSafeAccountMasterOwner(config.accounts, item) ->
                             Completable.error(IsNotSafeAccountMasterOwnerThrowable())
                         else -> {
@@ -165,8 +165,8 @@ class AccountManagerImpl(
         return false
     }
 
-    private fun areFundsOnValue(balance: BigDecimal, accountAssets: List<AccountAsset>): Boolean {
-        accountAssets.forEach {
+    private fun areFundsOnValue(balance: BigDecimal, accountTokens: List<AccountToken>): Boolean {
+        accountTokens.forEach {
             if (blockchainRepository.toGwei(it.balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
         return blockchainRepository.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE

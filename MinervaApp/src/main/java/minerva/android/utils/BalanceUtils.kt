@@ -3,6 +3,7 @@ package minerva.android.utils
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidValue
 import java.math.BigDecimal
+import java.util.*
 
 object BalanceUtils {
 
@@ -11,7 +12,7 @@ object BalanceUtils {
         else cryptoBalance.toPlainString()
 
     fun getFiatBalance(fiatBalance: BigDecimal): String =
-        if (fiatBalance != Int.InvalidValue.toBigDecimal()) String.format(CURRENCY_FORMAT, fiatBalance)
+        if (fiatBalance != Int.InvalidValue.toBigDecimal()) String.format(Locale.ROOT, CURRENCY_FORMAT, fiatBalance)
         else NO_FIAT_VALUE
 
     private const val CURRENCY_FORMAT = "€ %.2f"

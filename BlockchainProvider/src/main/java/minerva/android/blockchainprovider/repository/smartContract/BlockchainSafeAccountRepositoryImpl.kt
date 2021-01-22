@@ -89,24 +89,23 @@ class BlockchainSafeAccountRepositoryImpl(
         gnosisAddress: String,
         network: String,
         privateKey: String
-    ): Completable =
-        getGnosisSafeOwners(gnosisAddress, network, privateKey)
-            .flatMapCompletable {
-                getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
-                    gnosisSafe.removeOwner(getPreviousOwner(removeAddress, it), removeAddress, BigInteger.valueOf(1))
-                        .encodeFunctionCall()
-                        .let { data ->
-                            performTransaction(
-                                gnosisSafe, gnosisAddress, Numeric.hexStringToByteArray(data), network,
-                                TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
-                            )
-                        }
-                }
+    ): Completable = getGnosisSafeOwners(gnosisAddress, network, privateKey)
+        .flatMapCompletable {
+            getGnosisSafe(gnosisAddress, network, privateKey).let { gnosisSafe ->
+                gnosisSafe.removeOwner(getPreviousOwner(removeAddress, it), removeAddress, BigInteger.valueOf(1))
+                    .encodeFunctionCall()
+                    .let { data ->
+                        performTransaction(
+                            gnosisSafe, gnosisAddress, Numeric.hexStringToByteArray(data), network,
+                            TransactionPayload(privateKey = privateKey, contractAddress = gnosisAddress), noFunds
+                        )
+                    }
             }
+        }
 
-    override fun transferERC20Token(network: String, transactionPayload: TransactionPayload, erc20Address: String): Completable {
+    override fun transferERC20Token(network: String, transactionPayload: TransactionPayload, tokenAddress: String): Completable {
         Numeric.hexStringToByteArray(getSafeTxData(transactionPayload)).run {
-            return performTransaction(getGnosisSafe(transactionPayload, network), erc20Address, this, network, transactionPayload)
+            return performTransaction(getGnosisSafe(transactionPayload, network), tokenAddress, this, network, transactionPayload)
         }
     }
 
@@ -126,37 +125,35 @@ class BlockchainSafeAccountRepositoryImpl(
         network: String,
         transactionPayload: TransactionPayload,
         amount: BigInteger = BigInteger.valueOf(0)
-    ): Completable =
-        gnosisSafe.nonce().flowable()
-            .flatMapCompletable { nonce ->
-                getTransactionHash(receiver, gnosisSafe, amount, nonce, signedData)
-                    .flowable()
-                    .zipWith(
-                        web3j.value(network).ethGetTransactionCount(
-                            Credentials.create(transactionPayload.privateKey).address,
-                            DefaultBlockParameterName.LATEST
-                        ).flowable()
+    ): Completable = gnosisSafe.nonce().flowable().flatMapCompletable { nonce ->
+        getTransactionHash(receiver, gnosisSafe, amount, nonce, signedData)
+            .flowable()
+            .zipWith(
+                web3j.value(network).ethGetTransactionCount(
+                    Credentials.create(transactionPayload.privateKey).address,
+                    DefaultBlockParameterName.LATEST
+                ).flowable()
 
-                    ).zipWith(getChainId(network))
-                    .flatMapCompletable {
-                        web3j.value(network).ethSendRawTransaction(
-                            getSignedTransaction(
-                                gnosisSafe,
-                                receiver,
-                                transactionPayload,
-                                amount,
-                                it.first,
-                                it.second.netVersion.toLong(),
-                                signedData
-                            )
-                        )
-                            .flowable()
-                            .flatMapCompletable { transaction ->
-                                if (transaction.error == null) Completable.complete()
-                                else Completable.error(Throwable(transaction.error.message))
-                            }
+            ).zipWith(getChainId(network))
+            .flatMapCompletable {
+                web3j.value(network).ethSendRawTransaction(
+                    getSignedTransaction(
+                        gnosisSafe,
+                        receiver,
+                        transactionPayload,
+                        amount,
+                        it.first,
+                        it.second.netVersion.toLong(),
+                        signedData
+                    )
+                )
+                    .flowable()
+                    .flatMapCompletable { transaction ->
+                        if (transaction.error == null) Completable.complete()
+                        else Completable.error(Throwable(transaction.error.message))
                     }
             }
+    }
 
     private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
 
@@ -221,11 +218,10 @@ class BlockchainSafeAccountRepositoryImpl(
         }
     }
 
-    private fun getGnosisSafe(gnosisAddress: String, network: String, privateKey: String) =
-        GnosisSafe.load(
-            gnosisAddress, web3j.value(network), Credentials.create(privateKey),
-            ContractGasProvider(gasPrice.value(network), Operation.SAFE_ACCOUNT_TXS.gasLimit)
-        )
+    private fun getGnosisSafe(gnosisAddress: String, network: String, privateKey: String) = GnosisSafe.load(
+        gnosisAddress, web3j.value(network), Credentials.create(privateKey),
+        ContractGasProvider(gasPrice.value(network), Operation.SAFE_ACCOUNT_TXS.gasLimit)
+    )
 
     private fun getGnosisSafe(transactionPayload: TransactionPayload, network: String): GnosisSafe =
         GnosisSafe.load(
@@ -247,31 +243,28 @@ class BlockchainSafeAccountRepositoryImpl(
         amount: BigInteger,
         nonce: BigInteger,
         data: ByteArray
-    ):
-            RemoteCall<ByteArray> =
-        gnosisContract.getTransactionHash(
-            receiver,
-            amount,
-            data,
-            operation,
-            safeTxGas,
-            baseGas,
-            noGasPrice,
-            gasToken,
-            refund,
-            nonce
-        )
+    ): RemoteCall<ByteArray> = gnosisContract.getTransactionHash(
+        receiver,
+        amount,
+        data,
+        operation,
+        safeTxGas,
+        baseGas,
+        noGasPrice,
+        gasToken,
+        refund,
+        nonce
+    )
 
     private fun getSignedByteArray(signature: Sign.SignatureData): ByteArray = signature.run { r + s + v }
 
     private fun getGnosisSetupData(address: String) =
         Numeric.hexStringToByteArray(String.format(GNOSIS_SETUP_DATA, address.removePrefix(HEX_PREFIX)))
 
-    private fun getProxyFactory(network: String, privateKey: String): ProxyFactory =
-        ProxyFactory.load(
-            PROXY_ADDRESS, web3j.value(network), Credentials.create(privateKey),
-            ContractGasProvider(gasPrice.value(network), Operation.SAFE_ACCOUNT_TXS.gasLimit)
-        )
+    private fun getProxyFactory(network: String, privateKey: String): ProxyFactory = ProxyFactory.load(
+        PROXY_ADDRESS, web3j.value(network), Credentials.create(privateKey),
+        ContractGasProvider(gasPrice.value(network), Operation.SAFE_ACCOUNT_TXS.gasLimit)
+    )
 
     companion object {
         private const val HEX_PREFIX = "0x"

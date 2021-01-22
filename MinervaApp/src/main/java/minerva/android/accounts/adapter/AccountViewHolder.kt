@@ -34,8 +34,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private val isOpen
         get() = binding.container.isVisible
 
-    override fun onSendTokenAssetClicked(account: Account, tokenIndex: Int) =
-        listener.onSendAssetTokenClicked(account, tokenIndex)
+    override fun onSendTokenTokenClicked(account: Account, tokenIndex: Int) =
+        listener.onSendTokenClicked(account, tokenIndex)
 
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
@@ -120,7 +120,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.prepareAssets(account: Account) {
         binding.apply {
-            account.accountAssets.isNotEmpty().let { visible ->
+            account.accountTokens.isNotEmpty().let { visible ->
                 with(container) {
                     removeAllViews()
                     //TODO showing/hiding main token in TokensAndCollectiblesView is made using last argument - needs to be updated in the future
@@ -159,8 +159,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun PopupMenu.setOnItemMenuClickListener(index: Int, account: Account) {
         setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.walletConnect -> listener.onWalletConnect()
-                R.id.manageAssets -> listener.onManageAssets(index)
+                R.id.walletConnect -> listener.onWalletConnect(index)
+                R.id.manageAssets -> listener.onManageTokens(index)
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
                 R.id.remove -> listener.onAccountRemoved(index)
@@ -172,7 +172,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun isCreatingSafeAccountAvailable(account: Account) =
         !isSafeAccount(account) && account.network.isSafeAccountAvailable
 
-    private fun isSafeAccount(account: Account) = account.network.isAvailable() && account.isSafeAccount
+    private fun isSafeAccount(account: Account) =
+        account.network.isAvailable() && account.isSafeAccount
 
     companion object {
         private const val FRAME_TOP_WIDTH = 3f

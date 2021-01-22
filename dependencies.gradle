@@ -157,6 +157,10 @@ ext {
             analytics     : "com.google.firebase:firebase-analytics"
     ]
 
+    kotson = [
+            kotson: "com.github.salomonbrys.kotson:kotson:2.5.0"
+    ]
+
     startupDependencies = [startup: "androidx.startup:startup-runtime:$startupVersion"]
     kotlinReflect = [kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect"]
     jsoup = [jsoup: "org.jsoup:jsoup:$jsoupVersion"]

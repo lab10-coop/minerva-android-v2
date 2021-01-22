@@ -8,15 +8,10 @@
     "wsRpc": "wss://ws.tau1.artis.network",
     "gasPriceOracle": "",
     "gasPrice": "100000000000",
-    "assets": [
-      {
-        "name": "FaucetToken",
-        "shortName": "tATS",
-        "address": "0xf6ef10e21166cf2e33db070affe262f90365e8d4"
-      }
-    ],
+    "assets": [],
     "color": "#FFF97599",
-    "testNet": true
+    "testNet": true,
+    "chainId": 246785
   },
   {
     "full": "Ethereum (Rinkeby)",
@@ -35,7 +30,8 @@
       }
     ],
     "color": "#FF486FFF",
-    "testNet": true
+    "testNet": true,
+    "chainId": 4
   },
   {
     "full": "ARTIS Σ1",
@@ -48,7 +44,8 @@
     "gasPrice": "100000000000",
     "assets": [],
     "color": "#129c6b",
-    "testNet": false
+    "testNet": false,
+    "chainId": 246529
   },
   {
     "full": "xDai Chain",
@@ -67,7 +64,8 @@
       }
     ],
     "color": "#48a9a6",
-    "testNet": false
+    "testNet": false,
+    "chainId": 100
   },
   {
     "full": "POA Network (Sokol)",
@@ -80,7 +78,8 @@
     "gasPrice": "1000000000",
     "assets": [],
     "color": "#FF5CBEAB",
-    "testNet": true
+    "testNet": true,
+    "chainId": 77
   },
   {
     "full": "LUKSO (L14 Testnet)",
@@ -93,7 +92,8 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FFFBCDC5",
-    "testNet": true
+    "testNet": true,
+    "chainId": 22
   },
   {
     "full": "Ethereum (Kovan)",
@@ -106,7 +106,8 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FF6434C9",
-    "testNet": true
+    "testNet": true,
+    "chainId": 42
   },
   {
     "full": "Ethereum (Görli)",
@@ -119,7 +120,8 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FFBDAE9B",
-    "testNet": true
+    "testNet": true,
+    "chainId": 5
   },
   {
     "full": "Ethereum (Ropsten)",
@@ -132,7 +134,8 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#FF486FFF",
-    "testNet": true
+    "testNet": true,
+    "chainId": 3
   },
   {
     "full": "Ethereum",
@@ -151,7 +154,8 @@
       }
     ],
     "color": "#486fff",
-    "testNet": false
+    "testNet": false,
+    "chainId": 1
   },
   {
     "full": "POA Core",
@@ -163,6 +167,7 @@
     "gasPrice": "10000000000",
     "assets": [],
     "color": "#5c34a2",
-    "testNet": false
+    "testNet": false,
+    "chainId": 99
   }
 ]

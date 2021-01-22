@@ -18,7 +18,7 @@ object AccountPayloadToAccountMapper {
             privateKey,
             address,
             response.name,
-            NetworkManager.getNetwork(response.network),
+            response.network,
             response.isDeleted,
             owners = response.owners,
             contractAddress = response.contractAddress,

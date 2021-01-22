@@ -238,7 +238,7 @@
     <string name="refresh_balance_to_check_transaction_status">Your transaction was sent to the network and you have to refresh the screen to see the changed balance, once it was processed.</string>
     <string name="collectibles">Collectibles</string>
     <string name="tokens">Tokens</string>
-    <string name="manage_assets">Manage Assets</string>
+    <string name="manage_token">Manage Assets</string>
     <string name="rearrange_assets">Rearrange Assets</string>
     <string name="add_asset">Add Asset</string>
     <string name="contract_address_or_name">Contract Address or name</string>
@@ -247,7 +247,7 @@
     <string name="symbol">Symbol</string>
     <string name="decimals">Decimals</string>
     <string name="invalid_account_address">Error: Invalid account address</string>
-    <string name="invalid_asset_address">Error: Invalid asset address</string>
+    <string name="invalid_token_address">Error: Invalid asset address</string>
     <string name="add_tats">Add 5 tATS</string>
     <string name="wc_message">WalletConnect lets you connect to desktop websites by scaning a QR code.</string>
     <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
@@ -258,4 +258,7 @@
     <string name="connect_to_website">Connect to website</string>
     <string name="all_my_assets">All my Assets</string>
     <string name="free_ats_warning">You can only get 5 tATS per day and you need to have at least one ARTIS (τ1) account.</string>
+    <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
+    <string name="dapp_connection_warning">The website doesn’t provide the network. Please make sure that your account is on the same network.</string>
+    <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
 </resources>

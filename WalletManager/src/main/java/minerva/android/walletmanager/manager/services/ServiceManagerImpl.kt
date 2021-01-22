@@ -8,7 +8,7 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.apiProvider.api.ServicesApi
-import minerva.android.apiProvider.model.TokenPayload
+import minerva.android.apiProvider.model.AccessTokenPayload
 import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -108,7 +108,7 @@ class ServiceManagerImpl(
         cryptographyRepository.createJwtToken(payload, privateKey ?: walletConfigManager.masterSeed.privateKey)
 
     override fun painlessLogin(url: String, jwtToken: String, identity: Identity, service: Service): Completable =
-        servicesApi.painlessLogin(url = url, tokenPayload = TokenPayload(jwtToken))
+        servicesApi.painlessLogin(url = url, accessTokenPayload = AccessTokenPayload(jwtToken))
             .flatMapCompletable {
                 //TODO should be provided the dynamic mechanism for retrieving names and icons from every services
                 if (shouldSafeService(identity, service)) saveService(service)

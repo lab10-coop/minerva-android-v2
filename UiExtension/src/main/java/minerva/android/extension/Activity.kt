@@ -38,9 +38,6 @@ inline fun <reified T : Any> Activity.launchActivityForResult(
 inline fun <reified T : Any> newIntent(context: Context): Intent =
     Intent(context, T::class.java)
 
-
-//TODO check this method. I think, that it is working wrong - first fragment is not this one which is already visible,
-// I think that the last is correct
 fun AppCompatActivity.getCurrentFragment(): Fragment? =
     supportFragmentManager.fragments.firstOrNull { it.isVisible }
 

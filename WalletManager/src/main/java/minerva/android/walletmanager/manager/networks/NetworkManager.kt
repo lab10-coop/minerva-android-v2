@@ -1,18 +1,13 @@
 package minerva.android.walletmanager.manager.networks
 
-import androidx.annotation.VisibleForTesting
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.map.value
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
-import minerva.android.walletmanager.model.AccountAsset
-import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
-import java.math.BigDecimal
 import java.math.BigInteger
 
 object NetworkManager {
-
     lateinit var networks: List<Network>
     private val networkMap: Map<String, Network> get() = networks.associateBy { it.short }
     val httpsUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.httpRpc } }
@@ -25,8 +20,6 @@ object NetworkManager {
     }
 
     fun getNetwork(type: String): Network = networkMap.value(type)
-
-    fun mapToAssets(assetList: List<Pair<String, BigDecimal>>): List<AccountAsset> = assetList.map { getAssetFromPair(it) }
 
     fun firstDefaultValueNetwork(): Network = networks[FIRST_DEFAULT_NETWORK_INDEX]
 
@@ -41,13 +34,7 @@ object NetworkManager {
         }
     }
 
-    private fun getAssetFromPair(raw: Pair<String, BigDecimal>): AccountAsset {
-        val asset = getAllAsset().find { it.address == raw.first } ?: Asset(address = raw.first)
-        return AccountAsset(asset, raw.second)
-    }
-
-    @VisibleForTesting
-    fun getAllAsset(): List<Asset> = mutableListOf<Asset>().apply { networks.forEach { addAll(it.assets) } }
+    fun getTokens(network: String) = networkMap[network]?.tokens ?: listOf()
 
     private fun isActiveNetwork(network: Network): Boolean = network.httpRpc != String.Empty
 

@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import java.math.BigInteger
 
 data class Network(
@@ -12,11 +13,12 @@ data class Network(
     val isSafeAccountAvailable: Boolean = false,
     val gasPrice: BigInteger = BigInteger.TEN,
     val gasPriceOracle: String = String.Empty,
-    val assets: List<Asset> = emptyList(),
+    val tokens: List<Token> = emptyList(),
     val color: String = String.Empty,
-    val testNet: Boolean = true
+    val testNet: Boolean = true,
+    val chainId: Int = Int.InvalidValue
 ) {
     fun isAvailable(): Boolean = httpRpc != String.Empty
 
-    fun getAssetsAddresses(): List<String> = assets.map { it.address }
+    fun getTokensAddresses(): List<String> = tokens.map { it.address }
 }

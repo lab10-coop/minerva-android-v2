@@ -27,7 +27,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "REST_API_URL", '"https://minerva-api.dev.lab10.io/"'
+        buildConfigField "String", "REST_API_URL", '"http://minerva-api.dev.lab10.io/"'
         buildConfigField "String", "MARKETS_API_URL", '"https://api.coingecko.com/api/v3/"'
         buildConfigField "String", "LICENCE_TYPE", '"GPLv3"'
         buildConfigField "String", "TWITTER_APP", '"twitter://user?screen_name=MinervaWallet"'
@@ -58,8 +58,8 @@ android {
     productFlavors {
         flavorDimensions 'enviroment'
         staging {
-            versionCode 8
-            versionName "1.0.8"
+            versionCode 9
+            versionName "1.0.9"
             dimension 'enviroment'
             applicationIdSuffix ".staging"
             versionNameSuffix '-staging'
@@ -87,6 +87,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation platform('com.google.firebase:firebase-bom:25.12.0')
     implementation project(':WalletManager')
+    implementation project(':WalletConnect')
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
 

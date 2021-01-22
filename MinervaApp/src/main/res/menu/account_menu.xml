@@ -13,7 +13,7 @@
         android:id="@+id/manageAssets"
         android:enabled="true"
         android:icon="@drawable/ic_manage_asset"
-        android:title="@string/manage_assets"
+        android:title="@string/manage_token"
         app:showAsAction="ifRoom" />
 
     <item

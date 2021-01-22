@@ -19,6 +19,7 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.onTabSelected
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.main.MainActivity.Companion.ACCOUNT_INDEX
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedFragmentType
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -145,7 +146,6 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         const val SEND_TRANSACTION_INDEX = 0
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
-        const val ACCOUNT_INDEX = "account_index"
         const val ASSET_INDEX = "asset_index"
         const val TRANSACTION_SCREEN = "transaction_screen"
     }

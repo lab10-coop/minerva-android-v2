@@ -10,5 +10,5 @@ interface BlockchainSafeAccountRepository {
     fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable
     fun removeSafeAccountOwner(removeAddress: String, gnosisAddress: String, network: String, privateKey: String): Completable
     fun transferNativeCoin(network: String, transactionPayload: TransactionPayload): Completable
-    fun transferERC20Token(network: String, transactionPayload: TransactionPayload, erc20Address: String): Completable
+    fun transferERC20Token(network: String, transactionPayload: TransactionPayload, tokenAddress: String): Completable
 }

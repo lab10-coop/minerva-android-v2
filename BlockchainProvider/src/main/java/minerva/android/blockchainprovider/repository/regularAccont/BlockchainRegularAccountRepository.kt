@@ -13,7 +13,7 @@ import java.math.BigInteger
 
 interface BlockchainRegularAccountRepository {
     fun refreshBalances(networkAddress: List<Pair<String, String>>): Single<List<Pair<String, BigDecimal>>>
-    fun refreshAssetBalance(
+    fun refreshTokenBalance(
         privateKey: String,
         network: String,
         contractAddress: String,
@@ -40,4 +40,7 @@ interface BlockchainRegularAccountRepository {
     fun getCurrentBlockNumber(network: String): Flowable<BigInteger>
     fun toChecksumAddress(address: String): String
     fun getFreeATS(address: String): Completable
+    fun getERC20TokenName(privateKey: String, network: String, tokenAddress: String): Observable<String>
+    fun getERC20TokenSymbol(privateKey: String, network: String, tokenAddress: String): Observable<String>
+    fun getERC20TokenDecimals(privateKey: String, network: String, tokenAddress: String): Observable<BigInteger>
 }

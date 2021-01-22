@@ -91,7 +91,9 @@ class WalletConfigManagerImpl(
         keystoreRepository.decryptMasterSeed()?.let {
             masterSeed = it
             loadWalletConfig(it)
-        }.orElse { _walletConfigErrorLiveData.value = Event(Throwable()) }
+        }.orElse {
+            _walletConfigErrorLiveData.value = Event(Throwable())
+        }
     }
 
     private fun loadWalletConfig(masterSeed: MasterSeed) {
@@ -99,7 +101,9 @@ class WalletConfigManagerImpl(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = { _walletConfigLiveData.value = it },
+                onNext = {
+                    _walletConfigLiveData.value = it
+                         },
                 onError = { Timber.e("Loading WalletConfig error: $it") }
             )
     }
@@ -126,8 +130,14 @@ class WalletConfigManagerImpl(
 
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable {
         return if (localStorage.isBackupAllowed) {
-            val (config, payload) = Pair(walletConfig, WalletConfigToWalletPayloadMapper.map(walletConfig))
-            minervaApi.saveWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey), walletConfigPayload = payload)
+            val (config, payload) = Pair(
+                walletConfig,
+                WalletConfigToWalletPayloadMapper.map(walletConfig)
+            )
+            minervaApi.saveWalletConfig(
+                publicKey = encodePublicKey(masterSeed.publicKey),
+                walletConfigPayload = payload
+            )
                 .toSingleDefault(Pair(walletConfig, payload))
                 .map {
                     localStorage.isSynced = true
@@ -140,9 +150,7 @@ class WalletConfigManagerImpl(
                     _walletConfigLiveData.value = config
                     localWalletProvider.saveWalletConfig(payload)
                 }.ignoreElement()
-        } else {
-            Completable.error(AutomaticBackupFailedThrowable())
-        }
+        } else Completable.error(AutomaticBackupFailedThrowable())
     }
 
     override fun dispose() {
@@ -166,10 +174,18 @@ class WalletConfigManagerImpl(
         return String.Empty
     }
 
-    override fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>> {
+    override fun updateSafeAccountOwners(
+        position: Int,
+        owners: List<String>
+    ): Single<List<String>> {
         getWalletConfig()?.let { config ->
             config.accounts.forEach { if (it.id == position) it.owners = owners }
-            return updateWalletConfig(config.copy(version = config.updateVersion, accounts = config.accounts))
+            return updateWalletConfig(
+                config.copy(
+                    version = config.updateVersion,
+                    accounts = config.accounts
+                )
+            )
                 .andThen(Single.just(owners))
         }
         throw NotInitializedWalletConfigThrowable()
@@ -198,7 +214,12 @@ class WalletConfigManagerImpl(
     override fun saveService(service: Service): Completable {
         getWalletConfig()?.run {
             if (services.isEmpty()) {
-                return updateWalletConfig(this.copy(version = updateVersion, services = listOf(service)))
+                return updateWalletConfig(
+                    this.copy(
+                        version = updateVersion,
+                        services = listOf(service)
+                    )
+                )
             }
             return updateWalletConfig(getWalletConfigWithUpdatedService(service))
         }
@@ -247,7 +268,10 @@ class WalletConfigManagerImpl(
         }
 
     private fun syncWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig> =
-        minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), localWalletProvider.getWalletConfig().blockingGet())
+        minervaApi.saveWalletConfig(
+            encodePublicKey(masterSeed.publicKey),
+            localWalletProvider.getWalletConfig().blockingGet()
+        )
             .andThen { localStorage.isSynced = true }
             .toObservable<WalletConfig>()
             .onErrorResumeNext { _: Observer<in WalletConfig> ->
@@ -266,13 +290,20 @@ class WalletConfigManagerImpl(
             .toObservable()
             .flatMap { completeKeys(masterSeed, it) }
 
-    private fun completeKeys(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> {
+    private fun completeKeys(
+        masterSeed: MasterSeed,
+        payload: WalletConfigPayload
+    ): Observable<WalletConfig> {
         val identitiesResponse = payload.identityResponse
         val accountsResponse = payload.accountResponse
         return Observable.range(START, identitiesResponse.size)
             .filter { !identitiesResponse[it].isDeleted }
             .flatMapSingle {
-                cryptographyRepository.calculateDerivedKeys(masterSeed.seed, identitiesResponse[it].index, DID_PATH)
+                cryptographyRepository.calculateDerivedKeys(
+                    masterSeed.seed,
+                    identitiesResponse[it].index,
+                    DID_PATH
+                )
             }
             .toList()
             .map { keys -> completeIdentitiesKeys(payload, keys) }
@@ -295,23 +326,39 @@ class WalletConfigManagerImpl(
                         identity,
                         account,
                         ServicesResponseToServicesMapper.map(payload.serviceResponse),
-                        CredentialsPayloadToCredentials.map(payload.credentialResponse)
+                        CredentialsPayloadToCredentials.map(payload.credentialResponse),
+                        payload.erc20TokenResponse.map { (key, value) -> key to value.map { TokenPayloadToTokenMapper.map(it) } }
+                            .toMap()
                     )
                 }
             ).toObservable()
     }
 
-    private fun completeAccountsKeys(walletConfigPayload: WalletConfigPayload, derivedKeys: List<DerivedKeys>): List<Account> {
+    private fun completeAccountsKeys(
+        walletConfigPayload: WalletConfigPayload,
+        derivedKeys: List<DerivedKeys>
+    ): List<Account> {
         val accounts = mutableListOf<Account>()
         walletConfigPayload.accountResponse.forEach { accountPayload ->
             val keys = getAccountKeys(derivedKeys, accountPayload)
-            val address = if (accountPayload.contractAddress.isEmpty()) keys.address else accountPayload.contractAddress
-            accounts.add(AccountPayloadToAccountMapper.map(accountPayload, keys.publicKey, keys.privateKey, address))
+            val address =
+                if (accountPayload.contractAddress.isEmpty()) keys.address else accountPayload.contractAddress
+            accounts.add(
+                AccountPayloadToAccountMapper.map(
+                    accountPayload,
+                    keys.publicKey,
+                    keys.privateKey,
+                    address
+                )
+            )
         }
         return accounts
     }
 
-    private fun getAccountKeys(keys: List<DerivedKeys>, accountPayload: AccountPayload): DerivedKeys {
+    private fun getAccountKeys(
+        keys: List<DerivedKeys>,
+        accountPayload: AccountPayload
+    ): DerivedKeys {
         val isTestNet = NetworkManager.getNetwork(accountPayload.network).testNet
         keys.forEach { derivedKeys ->
             if (derivedKeys.index == accountPayload.index && derivedKeys.isTestNet == isTestNet) {
@@ -331,11 +378,21 @@ class WalletConfigManagerImpl(
     private fun isTestNet(accountsResponse: List<AccountPayload>, index: Int) =
         NetworkManager.getNetwork(accountsResponse[index].network).testNet
 
-    private fun completeIdentitiesKeys(walletConfigPayload: WalletConfigPayload, keys: List<DerivedKeys>): List<Identity> {
+    private fun completeIdentitiesKeys(
+        walletConfigPayload: WalletConfigPayload,
+        keys: List<DerivedKeys>
+    ): List<Identity> {
         val identities = mutableListOf<Identity>()
         walletConfigPayload.identityResponse.forEach { identityResponse ->
             getIdentityKeys(identityResponse.index, keys).let { key ->
-                identities.add(IdentityPayloadToIdentityMapper.map(identityResponse, key.publicKey, key.privateKey, key.address))
+                identities.add(
+                    IdentityPayloadToIdentityMapper.map(
+                        identityResponse,
+                        key.publicKey,
+                        key.privateKey,
+                        key.address
+                    )
+                )
             }
         }
         return identities
@@ -350,13 +407,14 @@ class WalletConfigManagerImpl(
 
     private fun completeIdentitiesProfileImages(identities: List<Identity>): List<Identity> {
         identities.forEach {
-            it.profileImageBitmap = BitmapMapper.fromBase64(localStorage.getProfileImage(it.profileImageName))
+            it.profileImageBitmap =
+                BitmapMapper.fromBase64(localStorage.getProfileImage(it.profileImageName))
         }
         return identities
     }
 
     private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {
-        var walletConfig = WalletConfig(updateVersion, identities, accounts, services, credentials)
+        var walletConfig = WalletConfig(updateVersion, identities, accounts, services, credentials, erc20Tokens)
         isServiceIsAlreadyConnected(newService)?.let {
             updateService(it)
         }.orElse {
