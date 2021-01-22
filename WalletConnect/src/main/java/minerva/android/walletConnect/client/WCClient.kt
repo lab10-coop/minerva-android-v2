@@ -67,8 +67,8 @@ open class WCClient(
     var chainId: Int? = null
         private set
 
-    var onFailure: (Throwable) -> Unit = { _ -> Unit }
-    var onDisconnect: (code: Int, reason: String, peerId: String?) -> Unit = { _, _, _ -> Unit }
+    var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> Unit }
+    var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> Unit }
     var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String) -> Unit =
         { _, _, _, _ -> Unit }
     var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
@@ -119,7 +119,7 @@ open class WCClient(
             Log.d(TAG, "<== decrypted $decrypted")
             handleMessage(decrypted)
         } catch (e: Exception) {
-            onFailure(e)
+            onFailure(e, peerId)
         } finally {
             listeners.forEach { it.onMessage(webSocket, decrypted ?: text) }
         }
@@ -127,7 +127,7 @@ open class WCClient(
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         resetState()
-        onFailure(t)
+        onFailure(t, peerId)
 
         listeners.forEach { it.onFailure(webSocket, t, response) }
     }
@@ -146,7 +146,7 @@ open class WCClient(
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         Log.d(TAG, "<< closing socket >>")
 
-        onDisconnect(code, reason, peerId)
+        onDisconnect(code, peerId)
         resetState()
 
         listeners.forEach { it.onClosing(webSocket, code, reason) }

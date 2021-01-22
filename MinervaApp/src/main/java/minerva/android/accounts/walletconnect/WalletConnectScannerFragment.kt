@@ -42,7 +42,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is CorrectQrCodeState -> shouldScan = false
                 is OnError -> {
                     shouldScan = true
-                    Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "${it.error.message} ${it.peerId}", Toast.LENGTH_LONG)
+                        .show()
                 }
                 is OnDisconnected ->
                     Toast.makeText(

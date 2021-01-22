@@ -7,7 +7,7 @@ sealed class WalletConnectViewState
 object CloseScannerState : WalletConnectViewState()
 object WrongQrCodeState : WalletConnectViewState()
 object CorrectQrCodeState : WalletConnectViewState()
-data class OnError(val error: Throwable) : WalletConnectViewState()
+data class OnError(val error: Throwable, val peerId: String? = null) : WalletConnectViewState()
 data class OnSessionRequestWithDefinedNetwork(val meta: WCPeerMeta, val network: String) :
     WalletConnectViewState()
 

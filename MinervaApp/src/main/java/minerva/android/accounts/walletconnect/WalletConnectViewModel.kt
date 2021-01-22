@@ -50,7 +50,7 @@ class WalletConnectViewModel(
                                 topic = it.topic
                                 handleSessionRequest(it)
                             }
-                            is OnConnectionFailure -> OnError(it.error)
+                            is OnConnectionFailure -> OnError(it.error, it.peerId)
                             is OnDisconnect -> onDisconnected(it)
                         }
                     },
@@ -68,20 +68,32 @@ class WalletConnectViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onNext = {
-                        val viewState = if (it.isEmpty()) {
-                            HideDappsState
-                        } else {
-                            UpdateDappsState(it)
-                        }
-                        _viewStateLiveData.value = viewState
-                    },
+                    onNext = { _viewStateLiveData.value = handleSessions(it) },
                     onError = { _viewStateLiveData.value = OnError(it) }
                 )
         }
+    }
 
-        //todo try to reconnect
-//        repository.connect(WCSession(), peerId, remotePeerId)
+    private fun handleSessions(it: List<DappSession>) =
+        if (it.isEmpty()) {
+            HideDappsState
+        } else {
+            reconnect(it)
+            UpdateDappsState(it)
+        }
+
+    private fun reconnect(dapps: List<DappSession>) {
+        if (repository.isClientMapEmpty) {
+            dapps.forEach { session ->
+                with(session) {
+                    repository.connect(
+                        WCSession(topic, version, bridge, key),
+                        session.peerId,
+                        session.remotePeerId
+                    )
+                }
+            }
+        }
     }
 
     fun closeScanner() {
@@ -92,15 +104,9 @@ class WalletConnectViewModel(
         repository.rejectSession(topic.peerId)
     }
 
+
     fun killSession(peerId: String) {
         repository.killSession(peerId)
-
-//        launchDisposable {
-//            repository.deleteDappSession(peerId)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeBy(onError = { OnError(it) })
-//        }
     }
 
     fun handleQrCode(qrCode: String) {
