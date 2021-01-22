@@ -2,7 +2,7 @@ package minerva.android.walletmanager.manager.networks
 
 
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
-import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.model.Token
 import minerva.android.walletmanager.model.Network
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -74,30 +74,37 @@ class NetworkManagerTest {
         NetworkManager.getStringColor(testNetworks1[1], false) shouldBeEqualTo "#223344"
         NetworkManager.getStringColor(testNetworks1[1], true) shouldBeEqualTo "#29223344"
     }
-
+    
     @Test
-    fun `Getting correct assets`() {
+    fun `Getting correct tokens for network`() {
         NetworkManager.initialize(testNetworks1)
-        NetworkManager.getAllAsset().size shouldBeEqualTo 6
-        NetworkManager.initialize(testNetworks2)
-        NetworkManager.getAllAsset().size shouldBeEqualTo 0
+        val tokensSet1 = NetworkManager.getTokens("SN1")
+        tokensSet1.size shouldBeEqualTo 3
+        tokensSet1[0].name shouldBeEqualTo "token1"
+        val tokensSet2 = NetworkManager.getTokens("SN2")
+        tokensSet2.size shouldBeEqualTo 3
+        tokensSet2[0].name shouldBeEqualTo "token4"
+        val tokensSet3 = NetworkManager.getTokens("SN3")
+        tokensSet3.size shouldBeEqualTo 0
+        val tokenSet4 = NetworkManager.getTokens("SN0")
+        tokenSet4.size shouldBeEqualTo 0
     }
 
-    private val assetSet1 = listOf(
-        Asset("asset1", "ass1", "address1"),
-        Asset("asset2", "ass2", "address2"),
-        Asset("asset3", "ass3", "address3")
+    private val tokenSet1 = listOf(
+        Token("token1", "ass1", "address1"),
+        Token("token2", "ass2", "address2"),
+        Token("token3", "ass3", "address3")
     )
 
-    private val assetSet2 = listOf(
-        Asset("asset4", "ass4", "address4"),
-        Asset("asset5", "ass5", "address5"),
-        Asset("asset6", "ass6", "address6")
+    private val tokenSet2 = listOf(
+        Token("token4", "ass4", "address4"),
+        Token("token5", "ass5", "address5"),
+        Token("token6", "ass6", "address6")
     )
 
     private val testNetworks1 = listOf(
-        Network("FullName1", "SN1", "WT1", "someAddress1", "someAddress1", false, BigInteger.TEN, "", assetSet1, "#FF223344"),
-        Network("FullName2", "SN2", "WT2", "", "someAddress2", false, BigInteger.TEN, "", assetSet2, "#223344"),
+        Network("FullName1", "SN1", "WT1", "someAddress1", "someAddress1", false, BigInteger.TEN, "", tokenSet1, "#FF223344"),
+        Network("FullName2", "SN2", "WT2", "", "someAddress2", false, BigInteger.TEN, "", tokenSet2, "#223344"),
         Network("FullName3", "SN3", "WT3", "someAddress3", "someAddress3", false, BigInteger.TEN, "", listOf(), "#FF223344"),
         Network("FullName4", "SN4", "WT4", "", "someAddress4", true, BigInteger.TEN, "", listOf(), "#223344", false),
         Network("FullName5", "SN5", "WT5", "someAddress5", "someAddress5", true, BigInteger.TEN, "", listOf(), "#FF223344", false)

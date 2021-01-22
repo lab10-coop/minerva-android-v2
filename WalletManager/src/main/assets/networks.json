@@ -8,13 +8,7 @@
     "wsRpc": "wss://ws.tau1.artis.network",
     "gasPriceOracle": "",
     "gasPrice": "100000000000",
-    "assets": [
-      {
-        "name": "FaucetToken",
-        "shortName": "tATS",
-        "address": "0xf6ef10e21166cf2e33db070affe262f90365e8d4"
-      }
-    ],
+    "assets": [],
     "color": "#FFF97599",
     "testNet": true,
     "chainId": 246785

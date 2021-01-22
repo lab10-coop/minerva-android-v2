@@ -14,12 +14,12 @@ import minerva.android.accounts.listener.ShowFragmentListener
 import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.edit.EditOrderFragment
 import minerva.android.extension.addFragment
-import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.addFragmentWithBackStack
+import minerva.android.extension.getCurrentFragment
 import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.manage.ManageAssetsFragment
+import minerva.android.manage.ManageTokensFragment
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.repository.getNetworkIcon
 import java.util.*
@@ -71,6 +71,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
     override fun onBack() {
         super.onBackPressed()
         supportActionBar?.show()
+        getCurrentFragment()?.onResume()
     }
 
     override fun showFragment(fragment: Fragment, slideIn: Int, slideOut: Int, title: String?) {
@@ -92,13 +93,24 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             )
             WrappedFragmentType.IDENTITY_ORDER -> EditOrderFragment.newInstance(WalletActionType.IDENTITY)
             WrappedFragmentType.ACCOUNT -> NewAccountFragment.newInstance()
-            WrappedFragmentType.ACCOUNT_ADDRESS -> AddressFragment.newInstance(fragmentType, intent.getIntExtra(INDEX, Int.InvalidIndex))
-            WrappedFragmentType.IDENTITY_ADDRESS -> AddressFragment.newInstance(fragmentType, intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.ACCOUNT_ADDRESS -> AddressFragment.newInstance(
+                fragmentType,
+                intent.getIntExtra(INDEX, Int.InvalidIndex)
+            )
+            WrappedFragmentType.IDENTITY_ADDRESS -> AddressFragment.newInstance(
+                fragmentType,
+                intent.getIntExtra(INDEX, Int.InvalidIndex)
+            )
             WrappedFragmentType.ACCOUNT_ORDER -> EditOrderFragment.newInstance(WalletActionType.ACCOUNT)
-            WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> SafeAccountSettingsFragment.newInstance(
+                intent.getIntExtra(
+                    INDEX,
+                    Int.InvalidIndex
+                )
+            )
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
             WrappedFragmentType.CREDENTIAL_ORDER -> EditOrderFragment.newInstance(WalletActionType.CREDENTIAL)
-            WrappedFragmentType.MANAGE_ASSETS -> ManageAssetsFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.MANAGE_ASSETS -> ManageTokensFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
         }
         addFragment(R.id.container, fragment)
     }
@@ -113,7 +125,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> getString(R.string.settings)
             WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
             WrappedFragmentType.CREDENTIAL_ORDER -> getString(R.string.edit_credentials_order)
-            WrappedFragmentType.MANAGE_ASSETS -> getString(R.string.manage_assets)
+            WrappedFragmentType.MANAGE_ASSETS -> getString(R.string.manage_token)
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
@@ -146,10 +158,11 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
         const val INDEX = "index"
         const val POSITION = "position"
         const val FRAGMENT = "fragment"
-        const val NETWORK = "logo"
+        const val NETWORK = "network"
         const val FRAGMENT_TYPE = "type"
         const val SERVICE_QR_CODE = "service_qr_code"
         const val IS_SAFE_ACCOUNT = "is_safe_account"
+        const val PRIVATE_KEY = "private_key"
     }
 }
 

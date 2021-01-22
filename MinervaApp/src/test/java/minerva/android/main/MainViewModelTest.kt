@@ -222,7 +222,6 @@ class MainViewModelTest : BaseViewModelTest() {
         viewModel.run {
             handleTimeoutOnPendingTransactionsLiveData.observeForever(timeoutPendingAccountObserver)
             restorePendingTransactions()
-
         }
         timeoutPendingAccountCaptor.run {
             verify(timeoutPendingAccountObserver).onChanged(capture())

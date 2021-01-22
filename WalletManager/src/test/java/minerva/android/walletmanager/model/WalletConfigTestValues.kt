@@ -2,6 +2,7 @@ package minerva.android.walletmanager.model
 
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
+import java.math.BigDecimal
 
 object WalletConfigTestValues {
 
@@ -36,14 +37,30 @@ object WalletConfigTestValues {
         Identity(3, "pubicKey", "privateKey", "IdentityName2", "address", identityData, true)
     )
 
+    val tokens =
+        mapOf(
+            Pair(
+                "user01", listOf(
+                    Token("CookieCoin", "COOKiE", "0xC00k13", "13"),
+                    Token("otherCoin", "OC", "0x0th3rC01n", "32")
+                )
+            ),
+            Pair(
+                "user02", listOf(
+                    Token("diffCoin", "DiFF", "0xD1FF", "13")
+                )
+            )
+        )
+
+
     val networks = listOf(
-        Network(short = "ATS", httpRpc = "httpRpc"),
-        Network(short = "RIN", httpRpc = "httpRpc")
+        Network(short = "artis_tau1", httpRpc = "httpRpc"),
+        Network(short = "eth_rinkeby", httpRpc = "httpRpc")
     )
 
     val accounts = listOf(
-        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", networks[0], contractAddress = "test"),
-        Account(2, "publicKey", "privateKey", "address", "ValuePayload2", networks[1])
+        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", networks[0].short, contractAddress = "test"),
+        Account(2, "publicKey", "privateKey", "address", "ValuePayload2", networks[1].short)
     )
 
     val accountsResponse = listOf(

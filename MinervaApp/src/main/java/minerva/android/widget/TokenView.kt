@@ -22,12 +22,12 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     fun initView(
         account: Account,
         callback: TokenViewCallback,
-        assetIndex: Int = Int.InvalidIndex,
+        tokenIndex: Int = Int.InvalidIndex,
         logo: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_default_token)
     ) {
-        prepareView(account, assetIndex, logo)
-        prepareListeners(callback, account, assetIndex)
-        getTokensValues(account, assetIndex).let { (crypto, fiat) ->
+        prepareView(account, tokenIndex, logo)
+        prepareListeners(callback, account, tokenIndex)
+        getTokensValues(account, tokenIndex).let { (crypto, fiat) ->
             with(binding.amountView) {
                 setCrypto(getCryptoBalance(crypto))
                 setFiat(getFiatBalance(fiat))
@@ -35,8 +35,8 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         }
     }
 
-    private fun getTokensValues(account: Account, assetIndex: Int): Pair<BigDecimal, BigDecimal> =
-        if (assetIndex != Int.InvalidIndex) Pair(account.accountAssets[assetIndex].balance, WRONG_CURRENCY_VALUE)
+    private fun getTokensValues(account: Account, tokenIndex: Int): Pair<BigDecimal, BigDecimal> =
+        if (tokenIndex != Int.InvalidIndex) Pair(account.accountTokens[tokenIndex].balance, WRONG_CURRENCY_VALUE)
         else Pair(account.cryptoBalance, prepareFiatBalance(account))
 
     private fun prepareFiatBalance(account: Account) =
@@ -46,14 +46,14 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     private fun prepareView(account: Account, tokenIndex: Int, logo: Drawable?) {
         binding.apply {
             tokenLogo.setImageDrawable(logo)
-            tokenName.text = if (tokenIndex != Int.InvalidIndex) account.accountAssets[tokenIndex].asset.name
+            tokenName.text = if (tokenIndex != Int.InvalidIndex) account.accountTokens[tokenIndex].token.name
             else account.network.token
         }
     }
 
 
     private fun prepareListeners(callback: TokenViewCallback, account: Account, tokenIndex: Int) {
-        if (tokenIndex != Int.InvalidIndex) setOnClickListener { callback.onSendTokenAssetClicked(account, tokenIndex) }
+        if (tokenIndex != Int.InvalidIndex) setOnClickListener { callback.onSendTokenTokenClicked(account, tokenIndex) }
         else setOnClickListener { callback.onSendTokenClicked(account) }
     }
 
@@ -62,7 +62,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     }
 
     interface TokenViewCallback {
-        fun onSendTokenAssetClicked(account: Account, tokenIndex: Int)
+        fun onSendTokenTokenClicked(account: Account, tokenIndex: Int)
         fun onSendTokenClicked(account: Account)
     }
 }

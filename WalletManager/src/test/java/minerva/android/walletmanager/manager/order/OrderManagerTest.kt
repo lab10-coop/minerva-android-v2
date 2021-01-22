@@ -6,11 +6,9 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import minerva.android.walletmanager.manager.RxTest
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -29,13 +27,19 @@ class OrderManagerTest : RxTest() {
     )
 
     private val values = listOf(
-        Account(10, name = "Value1"),
-        Account(11, name = "Value2"),
-        Account(12, name = "Value3")
+        Account(10, name = "Value1", networkShort = "net1"),
+        Account(11, name = "Value2", networkShort = "net2"),
+        Account(12, name = "Value3", networkShort = "net3")
     )
 
     private val services = listOf(
         Service(name = "Service1")
+    )
+
+    private val networks = listOf(
+        Network(short = "net1", httpRpc = "some"),
+        Network(short = "net2", httpRpc = "some"),
+        Network(short = "net3", httpRpc = "some")
     )
 
     private val walletConfig = WalletConfig(0, identities, values, services)
@@ -95,6 +99,7 @@ class OrderManagerTest : RxTest() {
 
     @Test
     fun `Is edit order icon shown correct`() {
+        NetworkManager.initialize(networks)
         walletConfig.accounts[1].isDeleted = true
         walletConfig.accounts[2].isDeleted = true
         val walletConfigLD = MutableLiveData<WalletConfig>()

@@ -14,6 +14,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -30,36 +31,36 @@ class TransactionRepositoryImpl(
     private val walletConfigManager: WalletConfigManager,
     private val cryptoApi: CryptoApi,
     private val localStorage: LocalStorage,
-    private val webSocketRepository: WebSocketRepository
+    private val webSocketRepository: WebSocketRepository,
+    private val tokenManager: TokenManager
 ) : TransactionRepository {
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
         walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
-                return blockchainRepository.refreshBalances(getAddresses(accounts))
-                    .zipWith(cryptoApi.getMarkets(MarketUtils.getMarketsIds(accounts), EUR_CURRENCY).onErrorReturnItem(Markets()))
-                    .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
-            }
+            return blockchainRepository.refreshBalances(getAddresses(accounts))
+                .zipWith(cryptoApi.getMarkets(MarketUtils.getMarketsIds(accounts), EUR_CURRENCY).onErrorReturnItem(Markets()))
+                .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
+        }
         throw NotInitializedWalletConfigThrowable()
     }
 
-    private fun accountsFilter(it: Account) =
-        refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
+    private fun accountsFilter(it: Account) = refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
 
     private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> =
-        accounts.map { it.network.short to it.address }
+        accounts.map {
+            it.network.short to it.address }
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
-    override fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>> {
-        walletConfigManager.getWalletConfig()?.let { config ->
-            return Observable.range(START, config.accounts.size)
-                .filter { position -> refreshBalanceFilter(config.accounts[position]) }
-                .filter { position -> config.accounts[position].network.isAvailable() }
-                //TODO checking balance of tokens will be part of another task
-                //.filter { position -> config.accounts[position].network.assets.isEmpty() }
-                .flatMapSingle { position -> refreshAssetsBalance(config.accounts[position]) }
+    override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> {
+        walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
+            return Observable.range(START, accounts.size)
+                .filter { position -> refreshBalanceFilter(accounts[position]) }
+                .filter { position -> accounts[position].network.isAvailable() }
+                .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
                 .toList()
-                .map { list -> list.map { it.first to NetworkManager.mapToAssets(it.second) }.toMap() }
+                .map { list -> list.map {
+                    it.second to tokenManager.mapToAccountTokensList(it.first, it.third) }.toMap() }
         }
         throw NotInitializedWalletConfigThrowable()
     }
@@ -82,28 +83,28 @@ class TransactionRepositoryImpl(
 
     override fun getTransactionCosts(
         network: String,
-        assetIndex: Int,
+        tokenIndex: Int,
         from: String,
         to: String,
         amount: BigDecimal
     ): Single<TransactionCost> =
         if (NetworkManager.getNetwork(network).gasPriceOracle.isNotEmpty()) {
             cryptoApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
-                .flatMap { gasPrice -> getTxCosts(network, assetIndex, from, to, amount, gasPrice.fast.divide(BigDecimal.TEN)) }
-                .onErrorResumeNext { getTxCosts(network, assetIndex, from, to, amount, null) }
+                .flatMap { gasPrice -> getTxCosts(network, tokenIndex, from, to, amount, gasPrice.fast.divide(BigDecimal.TEN)) }
+                .onErrorResumeNext { getTxCosts(network, tokenIndex, from, to, amount, null) }
 
         } else {
-            getTxCosts(network, assetIndex, from, to, amount, null)
+            getTxCosts(network, tokenIndex, from, to, amount, null)
         }
 
     private fun getTxCosts(
         network: String,
-        assetIndex: Int,
+        tokenIndex: Int,
         from: String,
         to: String,
         amount: BigDecimal,
         gasPrice: BigDecimal?
-    ) = blockchainRepository.getTransactionCosts(network, assetIndex, from, to, amount, gasPrice)
+    ) = blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice)
         .map { TransactionCostPayloadToTransactionCost.map(it) }
 
     override fun isAddressValid(address: String): Boolean =
@@ -190,21 +191,24 @@ class TransactionRepositoryImpl(
     /**
      *
      * return statement: Single<Pair<String, List<Pair<String, BigDecimal>>>>
-     *                   Single<Pair<ValuePrivateKey, List<ContractAddress, BalanceOnContract>>>>
+     *                   Single<Triple<Network, ValuePrivateKey, List<ContractAddress, BalanceOnContract>>>>
      *
      */
-    private fun refreshAssetsBalance(account: Account): Single<Pair<String, List<Pair<String, BigDecimal>>>> =
-        Observable.range(START, account.network.assets.size)
-            .flatMap {
-                blockchainRepository.refreshAssetBalance(
-                    account.privateKey,
-                    account.network.short,
-                    account.network.getAssetsAddresses()[it],
-                    account.address
-                )
-            }
-            .toList()
-            .map { Pair(account.privateKey, it) }
+
+    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, BigDecimal>>>> =
+        tokenManager.loadTokens(account.network.short).let { tokens ->
+            return Observable.range(START, tokens.size)
+                .flatMap {
+                    blockchainRepository.refreshTokenBalance(
+                        account.privateKey,
+                        account.network.short,
+                        tokens[it].address,
+                        account.address
+                    )
+                }
+                .toList()
+                .map { Triple(account.network.short, account.privateKey, it) }
+        }
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
 
@@ -214,7 +218,6 @@ class TransactionRepositoryImpl(
         private const val ONE_PENDING_ACCOUNT = 1
         private const val PENDING_NETWORK_LIMIT = 2
         private const val START = 0
-        private val NO_FUNDS = BigDecimal.valueOf(0)
         private const val EUR_CURRENCY = "eur"
     }
 }

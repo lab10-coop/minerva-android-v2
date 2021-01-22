@@ -9,7 +9,7 @@ import java.math.BigInteger
 
 interface TransactionRepository {
     fun refreshBalances(): Single<HashMap<String, Balance>>
-    fun refreshAssetBalance(): Single<Map<String, List<AccountAsset>>>
+    fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable
     fun transferERC20Token(network: String, transaction: Transaction): Completable

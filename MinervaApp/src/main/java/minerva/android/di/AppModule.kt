@@ -1,7 +1,6 @@
 package minerva.android.di
 
 import android.content.Context
-import android.os.Build
 import minerva.android.BuildConfig
 import minerva.android.accounts.address.AddressViewModel
 import minerva.android.accounts.akm.SafeAccountSettingsViewModel
@@ -14,8 +13,8 @@ import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.integration.ThirdPartyRequestViewModel
 import minerva.android.main.MainViewModel
-import minerva.android.manage.AddAssetViewModel
-import minerva.android.manage.ManageAssetsViewModel
+import minerva.android.manage.AddTokenViewModel
+import minerva.android.manage.ManageTokensViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.services.ServicesViewModel
@@ -73,8 +72,8 @@ private val appModules = module {
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
     viewModel { WalletConnectViewModel(get(), get()) }
-    viewModel { ManageAssetsViewModel(get(), get()) }
-    viewModel { AddAssetViewModel(get()) }
+    viewModel { ManageTokensViewModel(get(), get(), get()) }
+    viewModel { AddTokenViewModel(get(), get(), get()) }
 }
 
 private const val MinervaCache = "MinervaCache"

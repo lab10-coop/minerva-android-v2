@@ -7,7 +7,8 @@ data class WalletConfig(
     val identities: List<Identity> = listOf(),
     val accounts: List<Account> = listOf(),
     val services: List<Service> = listOf(),
-    val credentials: List<Credential> = listOf()
+    val credentials: List<Credential> = listOf(),
+    val erc20Tokens: Map<String, List<Token>> = mapOf()
 ) {
     val updateVersion: Int
         get() = version + 1

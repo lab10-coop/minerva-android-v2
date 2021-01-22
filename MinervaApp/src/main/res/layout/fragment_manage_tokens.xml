@@ -21,7 +21,7 @@
             android:padding="@dimen/margin_normal">
 
             <TextView
-                android:id="@+id/rearrange_assets"
+                android:id="@+id/rearrange_tokens"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableLeft="@drawable/ic_edit_order_circle"
@@ -33,7 +33,7 @@
                 android:textColor="@color/gray" />
 
             <TextView
-                android:id="@+id/add_asset"
+                android:id="@+id/add_token"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_normal"
@@ -58,7 +58,7 @@
             android:textSize="@dimen/text_xsmall" />
 
         <LinearLayout
-            android:id="@+id/asset_container"
+            android:id="@+id/token_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_white_background"

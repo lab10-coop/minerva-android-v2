@@ -10,6 +10,7 @@ import minerva.android.databinding.OrderListRowBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.widget.ProfileImage
 import minerva.android.widget.repository.getNetworkIcon
@@ -42,18 +43,12 @@ class OrderAdapter : RecyclerView.Adapter<OrderViewHolder>() {
     }
 
     private fun filterInactiveAccounts(it: MinervaPrimitive, areMainNetsEnabled: Boolean) =
-        if (it is Account) {
-            it.network.testNet == areMainNetsEnabled
-        } else {
-            false
-        }
+        if (it is Account) it.network.testNet == areMainNetsEnabled
+        else false
 
     private fun areAccountsActive(it: MinervaPrimitive, areMainNetsEnabled: Boolean) =
-        if (it is Account) {
-            it.network.testNet != areMainNetsEnabled
-        } else {
-            true
-        }
+        if (it is Account) it.network.testNet != areMainNetsEnabled
+        else true
 
     fun swapItems(fromPosition: Int, toPosition: Int) {
         if (fromPosition < toPosition) {

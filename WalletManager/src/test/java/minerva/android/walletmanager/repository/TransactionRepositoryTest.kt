@@ -13,15 +13,15 @@ import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
+import minerva.android.apiProvider.model.GasPrice
+import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.Price
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
-import minerva.android.apiProvider.api.ServicesApi
-import minerva.android.apiProvider.model.GasPrice
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.Price
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -44,6 +44,7 @@ class TransactionRepositoryTest {
     private val localStorage: LocalStorage = mock()
     private val webSocketRepositoryImpl: WebSocketRepositoryImpl = mock()
     private val cryptoApi: CryptoApi = mock()
+    private val tokenManager: TokenManager = mock()
 
     private val repository =
         TransactionRepositoryImpl(
@@ -51,7 +52,8 @@ class TransactionRepositoryTest {
             walletConfigManager,
             cryptoApi,
             localStorage,
-            webSocketRepositoryImpl
+            webSocketRepositoryImpl,
+            tokenManager
         )
 
     @get:Rule
@@ -62,6 +64,11 @@ class TransactionRepositoryTest {
     fun setupRxSchedulers() {
         RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
+    }
+
+    @Before
+    fun initialize() {
+        NetworkManager.initialize(DataProvider.networks)
         whenever(walletConfigManager.getWalletConfig()) doReturn DataProvider.walletConfig
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
@@ -167,17 +174,13 @@ class TransactionRepositoryTest {
 
     @Test
     fun `get assets balances complete test`() {
-        whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())).thenReturn(
+        NetworkManager.initialize(DataProvider.networks)
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
+        whenever(blockchainRegularAccountRepository.refreshTokenBalance(any(), any(), any(), any())).thenReturn(
             Observable.just(Pair("privateKey1", BigDecimal.TEN))
         )
-        NetworkManager.initialize(
-            listOf(
-                Network(short = "artis_tau1", httpRpc = "some"),
-                Network(short = "eth_rinkeby", httpRpc = "some1")
-            )
-        )
         repository.apply {
-            refreshAssetBalance()
+            refreshTokenBalance()
                 .test()
                 .assertComplete()
         }
@@ -187,12 +190,12 @@ class TransactionRepositoryTest {
     fun `get asset balances when values are empty and there are no assets needed test`() {
         val error = Throwable()
         whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(0, accounts = emptyList())
-        whenever(blockchainRegularAccountRepository.refreshAssetBalance(any(), any(), any(), any())) doReturn Observable.error(
+        whenever(blockchainRegularAccountRepository.refreshTokenBalance(any(), any(), any(), any())) doReturn Observable.error(
             error
         )
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed())
         repository.apply {
-            refreshAssetBalance()
+            refreshTokenBalance()
                 .test()
                 .assertComplete()
                 .assertValue {

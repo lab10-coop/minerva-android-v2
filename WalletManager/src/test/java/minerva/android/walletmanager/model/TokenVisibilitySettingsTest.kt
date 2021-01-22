@@ -3,7 +3,7 @@ package minerva.android.walletmanager.model
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class AssetVisibilitySettingsTest {
+class TokenVisibilitySettingsTest {
 
     private val settingsData: MutableMap<String, MutableMap<String, Boolean>> = mutableMapOf(
         Pair(

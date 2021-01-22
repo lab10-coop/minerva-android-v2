@@ -32,6 +32,8 @@ import minerva.android.walletmanager.walletActions.WalletActionsRepositoryImpl
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProviderImpl
 import minerva.android.configProvider.localSharedPrefs
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManagerImpl
 import minerva.android.walletmanager.manager.networks.NetworkManager.gasPriceMap
 import minerva.android.walletmanager.manager.networks.NetworkManager.httpsUrlMap
 import minerva.android.walletmanager.manager.networks.NetworkManager.wssUrlMap
@@ -59,9 +61,10 @@ fun createWalletModules() = module {
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
     factory<AccountManager> { AccountManagerImpl(get(), get(), get()) }
+    factory<TokenManager> { TokenManagerImpl(get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
-    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get()) }
+    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get()) }
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
