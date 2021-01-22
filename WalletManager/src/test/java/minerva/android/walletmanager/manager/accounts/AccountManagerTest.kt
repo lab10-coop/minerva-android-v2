@@ -12,6 +12,7 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.RxTest
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.MasterSeed
@@ -39,7 +40,7 @@ class AccountManagerTest : RxTest() {
     @Before
     override fun setupRxSchedulers() {
         super.setupRxSchedulers()
-        whenever(walletConfigManager.getWalletConfig()) doReturn DataProvider.walletConfig
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 
@@ -70,6 +71,8 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager don't save new regular account`() {
         val error = Throwable()
+        val network = Network(short = "eth_rinkeby", httpRpc = "some")
+        NetworkManager.initialize(DataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever(
             cryptographyRepository.calculateDerivedKeys(
@@ -81,7 +84,7 @@ class AccountManagerTest : RxTest() {
         ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        val test = repository.createRegularAccount(Network()).test()
+        val test = repository.createRegularAccount(network).test()
         test.assertError(error)
         repository.loadAccount(10).apply {
             id shouldBeEqualTo -1
@@ -238,10 +241,11 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `create safe account success`() {
+        NetworkManager.initialize(DataProvider.networks)
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        repository.createSafeAccount(Account(1), "contract")
+        repository.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
             .test()
             .assertComplete()
     }
@@ -252,7 +256,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        repository.createSafeAccount(Account(1), "contract")
+        repository.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
             .test()
             .assertError(error)
     }

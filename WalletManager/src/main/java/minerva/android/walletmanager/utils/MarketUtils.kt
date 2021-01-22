@@ -25,9 +25,13 @@ object MarketUtils {
         markets: Markets
     ): HashMap<String, Balance> {
         val balancesMap = hashMapOf<String, Balance>()
-        cryptoBalances.forEachIndexed { index, cryptoBalance ->
-            if (cryptoBalance.first == accounts?.get(index)?.address) {
-                getBalance(balancesMap, cryptoBalance, getRate(accounts[index].network.short, markets))
+        accounts?.let {
+            if (it.isNotEmpty()) {
+                cryptoBalances.forEachIndexed { index, cryptoBalance ->
+                    if (cryptoBalance.first == it[index]?.address) {
+                        getBalance(balancesMap, cryptoBalance, getRate(accounts[index].network.short, markets))
+                    }
+                }
             }
         }
         return balancesMap
@@ -54,7 +58,7 @@ object MarketUtils {
 
     fun getMarketsIds(accounts: List<Account>?): String {
         var ids = String.Empty
-        accounts?.distinctBy { it.network.short }?.forEach {
+        accounts?.distinctBy { it.network }?.forEach {
             when (it.network.short) {
                 ETH_MAIN -> ids = "$ids${MarketIds.ETHEREUM},"
                 POA_CORE -> ids = "$ids${MarketIds.POA_NETWORK},"

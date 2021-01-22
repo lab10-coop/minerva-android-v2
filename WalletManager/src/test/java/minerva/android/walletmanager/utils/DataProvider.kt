@@ -22,6 +22,25 @@ object DataProvider {
     val onlineWalletConfigResponse =
         WalletConfigPayload(_version = 0, _identityPayloads = onlineIdentityResponse, _accountPayloads = accountsResponse)
 
+    val networks = listOf(
+        Network(
+            short = NetworkShortName.ATS_TAU, httpRpc = "address", testNet = true,
+            tokens = listOf(
+                Token("CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
+                Token("SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
+            )
+        ),
+        Network(
+            short = NetworkShortName.ETH_RIN, httpRpc = "address", testNet = true,
+            tokens = listOf(
+                Token("CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
+                Token("OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
+            )
+        ),
+        Network(short = NetworkShortName.ATS_SIGMA, httpRpc = "address", testNet = true),
+        Network(short = NetworkShortName.POA_CORE, httpRpc = "address", testNet = true)
+    )
+
     val walletConfig = WalletConfig(
         0, listOf(
             Identity(0, "identityName1", "11", "privateKey", "address1", data),
@@ -29,30 +48,30 @@ object DataProvider {
             Identity(3, "identityName3", "", "privateKey", "address3", data)
         ),
         listOf(
-            Account(2, "publicKey1", "privateKey1", "address", network = Network(short = NetworkShortName.ETH_RIN)),
-            Account(4, "publicKey2", "privateKey2", "address", network = Network(short = NetworkShortName.ATS_TAU)),
+            Account(2, "publicKey1", "privateKey1", "address", networkShort = NetworkShortName.ETH_RIN),
+            Account(4, "publicKey2", "privateKey2", "address", networkShort = NetworkShortName.ATS_TAU),
             Account(
-                5, "publicKey3", "privateKey3", "address", network = Network(short = NetworkShortName.ATS_TAU),
+                5, "publicKey3", "privateKey3", "address", networkShort = NetworkShortName.ATS_TAU,
                 owners = listOf("masterOwner")
             ),
             Account(
-                6, "publicKey4", "privateKey4", "address", network = Network(short = NetworkShortName.ATS_TAU),
+                6, "publicKey4", "privateKey4", "address", networkShort = NetworkShortName.ATS_TAU,
                 owners = listOf("notMasterOwner", "masterOwner")
             ),
-            Account(7, "publicKey5", "privateKey5", "address", network = Network(short = NetworkShortName.ATS_TAU)),
+            Account(7, "publicKey5", "privateKey5", "address", networkShort = NetworkShortName.ATS_TAU),
             Account(
                 1,
                 "publicKey1Main",
                 "privateKey1Main",
                 "address1Main",
-                network = Network(short = NetworkShortName.ATS_SIGMA, testNet = false)
+                networkShort = NetworkShortName.ATS_SIGMA
             ),
             Account(
                 2,
                 "publicKey2Main",
                 "privateKey2Main",
                 "address2Main",
-                network = Network(short = NetworkShortName.POA_CORE, testNet = false)
+                networkShort = NetworkShortName.POA_CORE
             )
         ),
         listOf(
@@ -65,6 +84,18 @@ object DataProvider {
                 membershipType = CredentialType.AUTOMOTIVE_CLUB.type,
                 issuer = "iss"
             )
+        ),
+        mapOf(
+            Pair(
+                NetworkShortName.ATS_TAU, listOf(
+                    Token("CookieTokenATS", "Cookie", "0xC00k1e", "13"),
+                    Token("OtherTokenATS", "OtherC", "0x0th3r", "32")
+                )
+            ),
+            Pair(NetworkShortName.ETH_RIN, listOf(
+                Token("OtherTokenETH", "OtherC", "0x0th3r", "32"),
+                Token("CookieTokenETH", "Cookie", "0xC00k1e", "13")
+            ))
         )
     )
 }

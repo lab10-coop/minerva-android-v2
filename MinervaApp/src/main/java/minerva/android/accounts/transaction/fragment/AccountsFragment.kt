@@ -1,7 +1,6 @@
 package minerva.android.accounts.transaction.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -46,7 +45,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         viewModel.apply {
             onResume()
             refreshBalances()
-            refreshAssetBalance()
+            refreshTokenBalance()
             refreshFreeATSButton()
             if (arePendingAccountsEmpty()) accountAdapter.stopPendingTransactions()
         }
@@ -58,8 +57,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onSendTransaction(index: Int) = interactor.showTransactionScreen(index)
 
-    override fun onSendAssetTransaction(accountIndex: Int, assetIndex: Int) =
-        interactor.showTransactionScreen(accountIndex, assetIndex)
+    override fun onSendTokenTransaction(accountIndex: Int, tokenIndex: Int) =
+        interactor.showTransactionScreen(accountIndex, tokenIndex)
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
@@ -78,13 +77,13 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onWalletConnect(index: Int) = interactor.showWalletConnectScanner(index)
 
-    override fun onManageAssets(index: Int) = startManageAssetsWrappedActivity(requireContext(), index)
+    override fun onManageTokens(index: Int) = startManageAssetsWrappedActivity(requireContext(), index)
 
-    override fun isAssetVisible(networkAddress: String, assetAddress: String): Boolean? =
-        viewModel.isAssetVisible(networkAddress, assetAddress)
+    override fun isTokenVisible(networkAddress: String, tokenAddress: String): Boolean? =
+        viewModel.isAssetVisible(networkAddress, tokenAddress)
 
-    override fun saveAssetVisibility(networkAddress: String, assetAddress: String, visibility: Boolean) {
-        viewModel.saveAssetVisible(networkAddress, assetAddress, visibility)
+    override fun saveTokenVisibility(networkAddress: String, tokenAddress: String, visibility: Boolean) {
+        viewModel.saveAssetVisible(networkAddress, tokenAddress, visibility)
     }
 
     fun setPendingAccount(index: Int, pending: Boolean) {
@@ -112,7 +111,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 setOnRefreshListener {
                     with(viewModel) {
                         refreshBalances()
-                        refreshAssetBalance()
+                        refreshTokenBalance()
                     }
                 }
             }
@@ -142,7 +141,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     swipeRefresh.isRefreshing = false
                 })
             }
-            accountAssetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
+            tokenBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateTokenBalances(it) })
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 refreshFreeATSButton()
                 showErrorFlashbar(
@@ -198,7 +197,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 getString(R.string.error_header),
                 getString(R.string.refresh_balances_error)
             )
-            ErrorCode.ASSET_BALANCE_ERROR -> showErrorFlashbar(
+            ErrorCode.TOKEN_BALANCE_ERROR -> showErrorFlashbar(
                 getString(R.string.error_header),
                 getString(R.string.refresh_asset_balances_error)
             )

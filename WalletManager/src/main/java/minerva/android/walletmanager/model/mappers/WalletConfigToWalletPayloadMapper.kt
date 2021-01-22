@@ -13,6 +13,8 @@ object WalletConfigToWalletPayloadMapper : Mapper<WalletConfig, WalletConfigPayl
             _identityPayloads = input.identities.map { IdentityToIdentityPayloadMapper.map(it) },
             _accountPayloads = input.accounts.map { AccountToAccountPayloadMapper.map(it) },
             _servicesPayloads = input.services.map { ServiceToServicePayloadMapper.map(it) },
-            _credentialPayloads = input.credentials.map { CredentialToCredentialPayloadMapper.map(it) }
+            _credentialPayloads = input.credentials.map { CredentialToCredentialPayloadMapper.map(it) },
+            _erc20Tokens = input.erc20Tokens.map { (key, value) -> key to value.map { TokenToTokenPayloadMapper.map(it) } }
+                .toMap()
         )
 }

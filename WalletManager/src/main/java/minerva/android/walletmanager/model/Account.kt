@@ -10,23 +10,23 @@ data class Account(
     var privateKey: String = String.Empty,
     override var address: String = String.Empty,
     override var name: String = String.Empty,
-    override val network: Network = Network(),
+    override val networkShort: String = String.Empty,
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = BigDecimal.ZERO,
-    var accountAssets: List<AccountAsset> = listOf(),
+    var accountTokens: List<AccountToken> = listOf(),
     var fiatBalance: BigDecimal = Int.InvalidValue.toBigDecimal(),
     var owners: List<String>? = null,
     var contractAddress: String = String.Empty,
     var isPending: Boolean = false,
     override val bindedOwner: String = String.Empty
-) : MinervaPrimitive(address, name, isDeleted, bindedOwner, network) {
+) : MinervaPrimitive(address, name, isDeleted, bindedOwner, networkShort) {
     constructor(account: Account, isDeleted: Boolean) : this(
         account.id,
         account.publicKey,
         account.privateKey,
         account.address,
         String.Empty,
-        account.network,
+        account.networkShort,
         isDeleted,
         owners = listOf(),
         isPending = false

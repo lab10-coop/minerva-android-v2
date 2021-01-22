@@ -4,6 +4,7 @@ import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
+import minerva.android.configProvider.model.walletConfig.TokenPayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.WalletConfigTestValues.accounts
@@ -11,7 +12,9 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.accountsRespon
 import minerva.android.walletmanager.model.WalletConfigTestValues.identities
 import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
 import minerva.android.walletmanager.model.WalletConfigTestValues.networks
+import minerva.android.walletmanager.model.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.mappers.*
+import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigDecimal
@@ -101,12 +104,14 @@ class MapperTest {
 
     @Test
     fun `Mapping Account to AccountResponse Test`() {
+        NetworkManager.initialize(DataProvider.networks)
         val value = Account(
             0,
             "publicKey",
             "privateKey",
             "ValueTest",
-            "ValueNetworkTest"
+            "ValueNetworkTest",
+            "artis_tau1"
         )
 
         val valueResponse = AccountToAccountPayloadMapper.map(value)
@@ -114,6 +119,28 @@ class MapperTest {
         value.id shouldBeEqualTo valueResponse.index
         value.name shouldBeEqualTo valueResponse.name
         value.network shouldBeEqualTo value.network
+    }
+
+    @Test
+    fun `Mapping Token to TokenPayload Test`() {
+        val value = Token("name", "symbol", "address", "decimals")
+        val valueResponse = TokenToTokenPayloadMapper.map(value)
+
+        value.name shouldBeEqualTo valueResponse.name
+        value.symbol shouldBeEqualTo valueResponse.symbol
+        value.address shouldBeEqualTo valueResponse.address
+        value.decimals shouldBeEqualTo valueResponse.decimals
+    }
+
+    @Test
+    fun `Mapping TokenPayload to Token Test`() {
+        val value = TokenPayload("name", "symbol", "address", "decimals")
+        val valueResponse = TokenPayloadToTokenMapper.map(value)
+
+        valueResponse.name shouldBeEqualTo value.name
+        valueResponse.symbol shouldBeEqualTo value.symbol
+        valueResponse.address shouldBeEqualTo value.address
+        valueResponse.decimals shouldBeEqualTo value.decimals
     }
 
     @Test
@@ -271,16 +298,19 @@ class MapperTest {
 
     @Test
     fun `Mapping WalletConfig to WalletPayload Test`() {
+        NetworkManager.initialize(DataProvider.networks)
         val walletConfig = WalletConfig(
             0,
             identities,
-            accounts
+            accounts,
+            erc20Tokens = tokens
         )
         val walletPayload = WalletConfigToWalletPayloadMapper.map(walletConfig)
 
         walletConfig.version shouldBeEqualTo walletPayload.version
         walletConfig.identities[0].name shouldBeEqualTo walletPayload.identityResponse[0].name
         walletConfig.accounts[0].name shouldBeEqualTo walletPayload.accountResponse[0].name
+        walletConfig.erc20Tokens["user01"]?.get(0)?.name shouldBeEqualTo walletPayload.erc20TokenResponse["user01"]?.get(0)?.name
     }
 
     @Test

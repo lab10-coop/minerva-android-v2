@@ -2,7 +2,7 @@ package minerva.android.apiProvider.api
 
 import io.reactivex.Single
 import minerva.android.apiProvider.model.LoginResponse
-import minerva.android.apiProvider.model.TokenPayload
+import minerva.android.apiProvider.model.AccessTokenPayload
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -13,7 +13,7 @@ interface ServicesApi {
     fun painlessLogin(
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
         @Url url: String,
-        @Body tokenPayload: TokenPayload
+        @Body accessTokenPayload: AccessTokenPayload
     ): Single<LoginResponse>
 
     companion object {

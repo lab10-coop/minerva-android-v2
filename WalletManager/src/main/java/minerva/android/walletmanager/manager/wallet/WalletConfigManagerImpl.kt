@@ -91,7 +91,9 @@ class WalletConfigManagerImpl(
         keystoreRepository.decryptMasterSeed()?.let {
             masterSeed = it
             loadWalletConfig(it)
-        }.orElse { _walletConfigErrorLiveData.value = Event(Throwable()) }
+        }.orElse {
+            _walletConfigErrorLiveData.value = Event(Throwable())
+        }
     }
 
     private fun loadWalletConfig(masterSeed: MasterSeed) {
@@ -99,7 +101,9 @@ class WalletConfigManagerImpl(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = { _walletConfigLiveData.value = it },
+                onNext = {
+                    _walletConfigLiveData.value = it
+                         },
                 onError = { Timber.e("Loading WalletConfig error: $it") }
             )
     }
@@ -146,9 +150,7 @@ class WalletConfigManagerImpl(
                     _walletConfigLiveData.value = config
                     localWalletProvider.saveWalletConfig(payload)
                 }.ignoreElement()
-        } else {
-            Completable.error(AutomaticBackupFailedThrowable())
-        }
+        } else Completable.error(AutomaticBackupFailedThrowable())
     }
 
     override fun dispose() {
@@ -324,7 +326,9 @@ class WalletConfigManagerImpl(
                         identity,
                         account,
                         ServicesResponseToServicesMapper.map(payload.serviceResponse),
-                        CredentialsPayloadToCredentials.map(payload.credentialResponse)
+                        CredentialsPayloadToCredentials.map(payload.credentialResponse),
+                        payload.erc20TokenResponse.map { (key, value) -> key to value.map { TokenPayloadToTokenMapper.map(it) } }
+                            .toMap()
                     )
                 }
             ).toObservable()
@@ -410,7 +414,7 @@ class WalletConfigManagerImpl(
     }
 
     private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {
-        var walletConfig = WalletConfig(updateVersion, identities, accounts, services, credentials)
+        var walletConfig = WalletConfig(updateVersion, identities, accounts, services, credentials, erc20Tokens)
         isServiceIsAlreadyConnected(newService)?.let {
             updateService(it)
         }.orElse {

@@ -9,33 +9,37 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.switchmaterial.SwitchMaterial
 import minerva.android.R
 import minerva.android.accounts.listener.ShowFragmentListener
-import minerva.android.databinding.FragmentManageAssetsBinding
+import minerva.android.databinding.FragmentManageTokensBinding
 import minerva.android.kotlinUtils.NO_PADDING
 import minerva.android.main.base.BaseFragment
-import minerva.android.walletmanager.model.Asset
+import minerva.android.walletmanager.model.Token
 import minerva.android.wrapped.WrappedActivity
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ManageAssetsFragment : BaseFragment(R.layout.fragment_manage_assets) {
+class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
 
-    private val viewModel: ManageAssetsViewModel by viewModel()
+    private val viewModel: ManageTokensViewModel by viewModel()
     private lateinit var showFragmentListener: ShowFragmentListener
 
-    private lateinit var binding: FragmentManageAssetsBinding
+    private lateinit var binding: FragmentManageTokensBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentManageAssetsBinding.bind(view)
+        binding = FragmentManageTokensBinding.bind(view)
         showFragmentListener = (activity as WrappedActivity)
         initFragment()
         prepareListeners()
-        prepareAssetList()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        prepareTokenList()
     }
 
     private fun prepareListeners() {
         binding.apply {
-            rearrangeAssets.setOnClickListener {
+            rearrangeTokens.setOnClickListener {
                 //TODO implement this element
                 Toast.makeText(
                     it.context,
@@ -44,42 +48,44 @@ class ManageAssetsFragment : BaseFragment(R.layout.fragment_manage_assets) {
                 ).show()
             }
 
-            addAsset.setOnClickListener {
-                showFragmentListener.showFragment(
-                    AddAssetFragment.newInstance(),
-                    R.animator.slide_in_left,
-                    R.animator.slide_out_right,
-                    getString(R.string.add_asset)
-                )
+            addToken.setOnClickListener {
+                viewModel.account.let {
+                    showFragmentListener.showFragment(
+                        AddTokenFragment.newInstance(it.privateKey, it.network.short),
+                        R.animator.slide_in_left,
+                        R.animator.slide_out_right,
+                        getString(R.string.add_asset)
+                    )
+                }
             }
         }
     }
 
-    private fun prepareAssetList() {
-        viewModel.loadAssets().let { assets ->
-            binding.assetContainer.apply {
+    private fun prepareTokenList() {
+        viewModel.loadTokens().let { tokens ->
+            binding.tokenContainer.apply {
                 removeAllViews()
-                addMainToken(assets)
-                addAssets(assets)
+                addMainToken(tokens)
+                addTokens(tokens)
             }
         }
     }
 
-    private fun addMainToken(assets: List<Asset>) {
-        binding.assetContainer.apply {
+    private fun addMainToken(tokens: List<Token>) {
+        binding.tokenContainer.apply {
             addView(TextView(requireContext()).apply {
-                initTokenRow(this, assets[MAIN_TOKEN_INDEX].name)
+                initTokenRow(this, tokens[MAIN_TOKEN_INDEX].name)
             })
         }
     }
 
-    private fun addAssets(assets: List<Asset>) {
-        binding.assetContainer.apply {
-            assets.drop(FIRST_ELEMENT).forEach { asset ->
+    private fun addTokens(tokens: List<Token>) {
+        binding.tokenContainer.apply {
+            tokens.drop(FIRST_ELEMENT).forEach { token ->
                 addView(SwitchMaterial(requireContext()).apply {
-                    initTokenRow(this, asset.name)
-                    isChecked = viewModel.getAssetVisibilitySettings(asset.address)
-                    setOnCheckedChangeListener { _, _ -> viewModel.saveAssetVisibilitySettings(asset.address, isChecked) }
+                    initTokenRow(this, token.name)
+                    isChecked = viewModel.getTokenVisibilitySettings(token.address)
+                    setOnCheckedChangeListener { _, _ -> viewModel.saveTokenVisibilitySettings(token.address, isChecked) }
                 })
             }
         }
@@ -115,7 +121,7 @@ class ManageAssetsFragment : BaseFragment(R.layout.fragment_manage_assets) {
 
         @JvmStatic
         fun newInstance(index: Int) =
-            ManageAssetsFragment().apply {
+            ManageTokensFragment().apply {
                 arguments = Bundle().apply {
                     putInt(INDEX, index)
                 }
