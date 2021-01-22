@@ -12,10 +12,6 @@ data class WCSession(
 
     companion object {
         fun from(from: String): WCSession {
-//            if (!from.startsWith("wc:")) {
-//                return null
-//            }
-
             val uriString = from.replace("wc:", "wc://")
             val uri = Uri.parse(uriString)
             val bridge = uri.getQueryParameter("bridge")

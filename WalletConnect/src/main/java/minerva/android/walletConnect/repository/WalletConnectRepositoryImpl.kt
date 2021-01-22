@@ -21,7 +21,7 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
 
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 
-    override fun connect(qrCode: String) {
+    override fun connect(session: WCSession, peerId: String, remotePeerId: String?) {
 
         with(WCClient(httpClient = okHttpClient)) {
 
@@ -48,15 +48,14 @@ class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
                 status.onNext(OnDisconnect(code, peerId))
             }
 
-            val session = WCSession.from(qrCode)
-            Timber.tag("kobe").d("BRIDGE: ${session.bridge}")
-
             connect(
                 session,
                 peerMeta = WCPeerMeta( //todo extract values
                     name = "Minerva Wallet",
                     url = "https://docs.minerva.digital/"
-                )
+                ),
+                peerId = peerId,
+                remotePeerId = remotePeerId
             )
 
         }

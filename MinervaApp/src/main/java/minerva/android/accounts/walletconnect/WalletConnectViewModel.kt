@@ -7,6 +7,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
+import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
@@ -16,6 +17,7 @@ import minerva.android.walletConnect.client.OnSessionRequest
 import minerva.android.walletConnect.model.session.Dapp
 import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
+import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletConnect.repository.WalletConnectRepository
 import minerva.android.walletConnect.storage.WalletConnectStorage
 import minerva.android.walletmanager.manager.accounts.AccountManager
@@ -66,7 +68,12 @@ class WalletConnectViewModel(
         account = accountManager.loadAccount(index)
 //        storage.clear()
         connectedDapps = storage.getConnectedDapps(account.address).toMutableList()
-        //todo try to reconnect
+
+        //todo try to reconnect for every existing dApp, get WCSession from local storage
+        val peerId = connectedDapps[0].peerId
+        val remotePeerId = connectedDapps[0].remotePeerId
+
+//        repository.connect(WCSession(), peerId, remotePeerId)
     }
 
     fun closeScanner() {
@@ -86,16 +93,20 @@ class WalletConnectViewModel(
             _viewStateLiveData.value = WrongQrCodeState
         } else {
             _viewStateLiveData.value = CorrectQrCodeState
-            repository.connect(qrCode)
+
+            val session = WCSession.from(qrCode)
+            repository.connect(session)
         }
     }
 
     fun approveSession(meta: WCPeerMeta) {
+
         repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId)
+
+        //todo handle saving session in case of reconnection in session we gonna have peerID, remotePeerID, icon, name, bridge, version, topic, key, address wich says that given session is for given address
         val dapp = Dapp(meta.name, getIcon(meta.icons), topic.peerId, topic.remotePeerId)
         storage.saveDapp(account.address, dapp)
         connectedDapps.add(dapp)
-        //todo work only on local storage // should post to live data and update view
     }
 
     private fun onDisconnected(it: OnDisconnect): OnDisconnected {
@@ -104,13 +115,12 @@ class WalletConnectViewModel(
                 storage.removeDapp(account.address, it)
                 connectedDapps.remove(it)
             }
-        //todo work only on local storage // should post to live data and update view
         return OnDisconnected(it.reason, it.peerId)
     }
 
     private fun getIcon(icons: List<String>) =
         if (icons.isEmpty()) String.Empty
-        else icons[WalletConnectScannerFragment.FIRST_ICON]
+        else icons[FIRST_ICON]
 
     val shouldChangeNetwork: Boolean
         get() = account.network.full != requestedNetwork
