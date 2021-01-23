@@ -86,11 +86,7 @@ class WalletConnectViewModel(
         if (repository.isClientMapEmpty) {
             dapps.forEach { session ->
                 with(session) {
-                    repository.connect(
-                        WCSession(topic, version, bridge, key),
-                        session.peerId,
-                        session.remotePeerId
-                    )
+                    repository.connect(WCSession(topic, version, bridge, key), peerId, remotePeerId)
                 }
             }
         }
