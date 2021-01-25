@@ -24,23 +24,17 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REM
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
-import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
-import java.util.concurrent.TimeUnit
 
-//TODO try to use CurrentTimeProvider and DateUtils for getting timestamp
 class AccountsViewModel(
     private val accountManager: AccountManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
-    private val transactionRepository: TransactionRepository,
-    private val localStorage: LocalStorage,
-    private val timeProvider: CurrentTimeProvider
+    private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -49,7 +43,8 @@ class AccountsViewModel(
     private val _refreshBalancesErrorLiveData = MutableLiveData<Event<ErrorCode>>()
     val refreshBalancesErrorLiveData: LiveData<Event<ErrorCode>> get() = _refreshBalancesErrorLiveData
 
-    private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData = MutableLiveData<Event<Throwable>>()
+    private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData =
+        MutableLiveData<Event<Throwable>>()
     val balanceIsNotEmptyAndHasMoreOwnersErrorLiveData: LiveData<Event<Throwable>> get() = _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData
 
     private val _balanceIsNotEmptyErrorLiveData = MutableLiveData<Event<Throwable>>()
@@ -105,7 +100,7 @@ class AccountsViewModel(
 
     override fun onResume() {
         super.onResume()
-        assetVisibilitySettings = localStorage.getAssetVisibilitySettings()
+        assetVisibilitySettings = accountManager.getAssetVisibilitySettings()
     }
 
     fun refreshBalances() =
@@ -142,7 +137,15 @@ class AccountsViewModel(
         launchDisposable {
             accountManager.removeAccount(account)
                 .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
+                .andThen(
+                    walletActionsRepository.saveWalletActions(
+                        listOf(
+                            getRemovedAccountAction(
+                                account
+                            )
+                        )
+                    )
+                )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -150,11 +153,14 @@ class AccountsViewModel(
                     onError = {
                         Timber.e("Removing account with index ${account.id} failure")
                         when (it) {
-                            is BalanceIsNotEmptyThrowable -> _balanceIsNotEmptyErrorLiveData.value = Event(it)
-                            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value =
-                                Event(it)
-                            is IsNotSafeAccountMasterOwnerThrowable -> _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
-                            is AutomaticBackupFailedThrowable -> _automaticBackupErrorLiveData.value = Event(it)
+                            is BalanceIsNotEmptyThrowable ->
+                                _balanceIsNotEmptyErrorLiveData.value = Event(it)
+                            is BalanceIsNotEmptyAndHasMoreOwnersThrowable ->
+                                _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
+                            is IsNotSafeAccountMasterOwnerThrowable ->
+                                _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
+                            is AutomaticBackupFailedThrowable ->
+                                _automaticBackupErrorLiveData.value = Event(it)
                             else -> _errorLiveData.value = Event(Throwable(it.message))
                         }
                     }
@@ -210,7 +216,7 @@ class AccountsViewModel(
         getAccountForFreeATS(accounts).let { account ->
             if (account.id != Int.InvalidId) {
                 transactionRepository.getFreeATS(account.address).subscribeBy(
-                    onComplete = { localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills()) },
+                    onComplete = { accountManager.saveFreeATSTimestamp() },
                     onError = {
                         Timber.e("Adding 5 tATS failed: ${it.message}")
                         _errorLiveData.value = Event(Throwable(it.message))
@@ -224,8 +230,8 @@ class AccountsViewModel(
     }
 
     fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
-        ((localStorage.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(HOURS_IN_DAY)) < timeProvider.currentTimeMills())
-                && accounts.any { it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short }
+        accountManager.shouldGetFreeAts() &&
+                accounts.any { it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short }
 
 
     @VisibleForTesting
@@ -241,7 +247,7 @@ class AccountsViewModel(
         assetVisibilitySettings.getAssetVisibility(networkAddress, assetAddress)
 
     fun saveAssetVisible(networkAddress: String, assetAddress: String, visibility: Boolean) {
-        assetVisibilitySettings = localStorage.saveAssetVisibilitySettings(
+        assetVisibilitySettings = accountManager.saveAssetVisibilitySettings(
             assetVisibilitySettings.updateAssetVisibility(networkAddress, assetAddress, visibility)
         )
     }
@@ -253,8 +259,4 @@ class AccountsViewModel(
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
-
-    companion object {
-        private const val HOURS_IN_DAY = 24L
-    }
 }
