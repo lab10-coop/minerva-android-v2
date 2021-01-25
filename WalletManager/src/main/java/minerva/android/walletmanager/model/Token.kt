@@ -1,7 +1,6 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 
 data class Token(
@@ -9,7 +8,7 @@ data class Token(
     val symbol: String = String.Empty,
     val address: String = String.Empty,
     val decimals: String = String.Empty,
-    val logoRes: Int = Int.InvalidValue
+    val logoRes: Int? = null
 ) {
     override fun equals(other: Any?): Boolean =
         (other as? Token)?.let {

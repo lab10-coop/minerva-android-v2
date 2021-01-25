@@ -10,7 +10,6 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import minerva.android.R
 import minerva.android.accounts.listener.ShowFragmentListener
 import minerva.android.databinding.FragmentManageTokensBinding
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_PADDING
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.Token
@@ -101,15 +100,12 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
                 if (this !is SwitchMaterial) setPadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding)
                 compoundDrawablePadding = padding
             }
-            (if(token.logoRes != Int.InvalidValue) token.logoRes
-            else R.drawable.ic_default_token).let {
-                setCompoundDrawablesWithIntrinsicBounds(
-                    ContextCompat.getDrawable(requireContext(), it),
-                    null,
-                    null,
-                    null
-                )
-            }
+            setCompoundDrawablesWithIntrinsicBounds(
+                ContextCompat.getDrawable(requireContext(), token.logoRes ?: R.drawable.ic_default_token),
+                null,
+                null,
+                null
+            )
         }
     }
 
