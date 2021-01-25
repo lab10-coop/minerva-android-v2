@@ -32,11 +32,6 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     private val dappSessionRepository: DappSessionRepository = com.nhaarman.mockitokotlin2.mock()
     private val manager: AccountManager = mock()
     private lateinit var viewModel: WalletConnectViewModel
-
-    private val networks = listOf(
-        Network(testNet = false, full = "Ethereum", short = "eee", httpRpc = "someaddress")
-    )
-
     private val viewStateObserver: Observer<WalletConnectViewState> = mock()
     private val viewStateCaptor: KArgumentCaptor<WalletConnectViewState> = argumentCaptor()
     private val meta = WCPeerMeta(name = "token", url = "url", description = "dsc")
@@ -126,7 +121,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
                 )
             )
         viewModel.viewStateLiveData.observeForever(viewStateObserver)
-        viewModel.account = Account(1, network = Network(testNet = true, full = "Ethereum"))
+        viewModel.account = Account(1, networkShort = "eth_goerli")
         viewModel.setConnectionStatusFlowable()
         viewStateCaptor.run {
             verify(viewStateObserver, times(2)).onChanged(capture())
@@ -150,9 +145,16 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
                 )
             )
         NetworkManager.networks =
-            listOf(Network(full = "Ethereum", chainId = 1, short = "eth_mainnet"))
-        viewModel.account = Account(1, network = Network(testNet = false, full = "Ethereum"))
-
+            listOf(
+                Network(
+                    full = "Ethereum",
+                    chainId = 1,
+                    short = "eth_mainnet",
+                    testNet = false,
+                    httpRpc = "url"
+                )
+            )
+        viewModel.account = Account(1, networkShort = "eth_mainnet")
         viewModel.viewStateLiveData.observeForever(viewStateObserver)
         viewModel.setConnectionStatusFlowable()
         viewStateCaptor.run {
@@ -166,6 +168,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `handle wc qr code test`() {
+        whenever(repository.getWCSessionFromQr(any())).thenReturn(WCSession(topic = "topic", version = "v", bridge = "b", key = "k"))
         viewModel.viewStateLiveData.observeForever(viewStateObserver)
         viewModel.handleQrCode("wc:123456789")
         viewStateCaptor.run {
@@ -186,9 +189,19 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `approve session test`() {
+        NetworkManager.networks =
+            listOf(
+                Network(
+                    full = "Ethereum",
+                    chainId = 1,
+                    short = "eth_mainnet",
+                    testNet = false,
+                    httpRpc = "url"
+                )
+            )
         viewModel.topic = Topic()
         viewModel.currentSession = WCSession("topic", "version", "bridge", "key")
-        viewModel.account = Account(1, network = Network(testNet = false, full = "Ethereum"))
+        viewModel.account = Account(1, networkShort = "eth_mainnet")
         whenever(dappSessionRepository.saveDappSession(any())).thenReturn(Completable.complete())
         viewModel.approveSession(WCPeerMeta(name = "name", url = "url"))
         verify(repository).approveSession(any(), any(), any())
@@ -211,7 +224,8 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `get account test`() {
         whenever(manager.loadAccount(any())).thenReturn(Account(1))
         whenever(dappSessionRepository.getAllSessions()).thenReturn(
-            Flowable.just(listOf(DappSession(address = "address"))))
+            Flowable.just(listOf(DappSession(address = "address")))
+        )
         viewModel.getAccount(1)
         assertEquals(1, viewModel.account.id)
     }

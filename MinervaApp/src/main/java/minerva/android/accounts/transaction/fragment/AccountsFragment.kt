@@ -44,8 +44,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         interactor.changeActionBarColor(R.color.lightGray)
         viewModel.apply {
             onResume()
-            refreshBalances()
-            refreshTokenBalance()
             refreshFreeATSButton()
             if (arePendingAccountsEmpty()) accountAdapter.stopPendingTransactions()
         }
@@ -131,9 +129,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 }
             })
             binding.apply {
-                walletConfigLiveData.observe(viewLifecycleOwner, Observer { walletConfig ->
-                    noDataMessage.visibleOrGone(walletConfig.hasActiveAccount)
-                    accountAdapter.updateList(walletConfig.accounts, areMainNetsEnabled)
+                accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
+                    noDataMessage.visibleOrGone(hasActiveAccount)
+                    accountAdapter.updateList(accounts, areMainNetsEnabled)
                     setTatsButtonListener(accountAdapter.activeAccountsList)
                 })
                 balanceLiveData.observe(viewLifecycleOwner, Observer {

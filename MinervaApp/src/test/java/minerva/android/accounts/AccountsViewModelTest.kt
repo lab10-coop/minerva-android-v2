@@ -35,7 +35,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
 
     private val tokensBalanceObserver: Observer<Map<String, List<AccountToken>>> = mock()
-    private val tokensBalanceCaptor: KArgumentCaptor<Map<String, List<AccountToken>>> = argumentCaptor()
+    private val tokensBalanceCaptor: KArgumentCaptor<Map<String, List<AccountToken>>> =
+        argumentCaptor()
 
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -168,7 +169,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("error")
         whenever(accountManager.removeAccount(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
-            Completable.error(error))
+            Completable.error(error)
+        )
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.removeAccount(Account(1, "test"))
         errorCaptor.run {
@@ -191,7 +193,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `create safe account error`() {
         val error = Throwable("error")
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
-            Completable.error(error))
+            Completable.error(error)
+        )
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
         whenever(accountManager.createRegularAccount(any())).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
@@ -269,10 +272,10 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     private val accounts = listOf(
-        Account(1, network = Network(short = "second_network")),
-        Account(2, network = Network(short = "first_network")),
-        Account(3, network = Network(short = "first_network")),
-        Account(4, network = Network(short = "some_other_network"))
+        Account(1, networkShort = "second_network"),
+        Account(2, networkShort = "first_network"),
+        Account(3, networkShort = "first_network"),
+        Account(4, networkShort = "some_other_network")
     )
 
     private val accountsWithoutPrimaryAccount = listOf(

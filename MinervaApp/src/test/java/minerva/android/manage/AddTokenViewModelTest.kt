@@ -8,8 +8,7 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.model.Token
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 

@@ -149,7 +149,7 @@ class AccountsViewModel(
         super.onResume()
         assetVisibilitySettings = accountManager.getAssetVisibilitySettings()
         refreshBalances()
-        refreshAssetBalance()
+        refreshTokenBalance()
 //        getSessions(accounts)
     }
 
