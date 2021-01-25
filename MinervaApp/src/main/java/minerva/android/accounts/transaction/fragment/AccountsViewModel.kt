@@ -26,6 +26,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -34,7 +35,8 @@ class AccountsViewModel(
     private val accountManager: AccountManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val dappSessionRepository: DappSessionRepository
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -250,6 +252,10 @@ class AccountsViewModel(
         assetVisibilitySettings = accountManager.saveAssetVisibilitySettings(
             assetVisibilitySettings.updateAssetVisibility(networkAddress, assetAddress, visibility)
         )
+    }
+
+    fun getSessionNumber(){
+//        dappSessionRepository.getConnectedDapps()
     }
 
     private fun getWalletAction(status: Int, name: String) =

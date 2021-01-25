@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.kotlinUtils.NO_DATA
 
+//TODO move saving WalletActionsConfigPayload to Room - MinervaDatabase
 class LocalWalletActionsConfigProviderImpl(private val sharedPreferences: SharedPreferences) : LocalWalletActionsConfigProvider {
 
     override fun loadWalletActionsConfig(): WalletActionsConfigPayload =

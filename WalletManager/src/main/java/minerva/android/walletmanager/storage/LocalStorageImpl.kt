@@ -10,6 +10,7 @@ import minerva.android.walletmanager.model.AssetVisibilitySettings
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.Recipient
 
+//TODO move saving object to Room - MinervaDatabase, handle primitives only here
 class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : LocalStorage {
 
     override var isBackupAllowed: Boolean

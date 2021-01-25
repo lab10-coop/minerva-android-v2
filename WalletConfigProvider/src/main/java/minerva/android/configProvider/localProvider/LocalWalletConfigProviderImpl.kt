@@ -7,6 +7,7 @@ import minerva.android.configProvider.migration.Migration
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.kotlinUtils.NO_DATA
 
+//TODO move saving WalletConfig to Room - MinervaDatabase
 class LocalWalletConfigProviderImpl(private val sharedPreferences: SharedPreferences) : LocalWalletConfigProvider {
     override fun getWalletConfig(): Single<WalletConfigPayload> =
         Single.just(sharedPreferences.getString(WALLET_CONFIG, String.NO_DATA))
