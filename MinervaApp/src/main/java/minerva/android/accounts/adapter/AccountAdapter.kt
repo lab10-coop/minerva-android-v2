@@ -9,6 +9,7 @@ import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountToken
 import minerva.android.walletmanager.model.Balance
@@ -111,7 +112,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     override fun onManageTokens(index: Int) = listener.onManageTokens(index)
 
     override fun onOpenOrClose(index: Int, isOpen: Boolean) {
-        openAccounts[index] = isOpen
+        if (openAccounts.inBounds(index)) openAccounts[index] = isOpen
     }
 
     companion object {

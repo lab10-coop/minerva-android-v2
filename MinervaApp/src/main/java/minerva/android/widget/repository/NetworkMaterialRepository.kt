@@ -24,6 +24,8 @@ import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
 fun getNetworkIcon(context: Context, networkShort: String, isSafeAccount: Boolean = false): Drawable? =
     prepareSafeAccountBadge(context, getMainIcon(networkShort), isSafeAccount)
 
+fun getMainTokenIcon(context: Context, networkShort: String) = ContextCompat.getDrawable(context, getMainTokenIconRes(networkShort))
+
 private fun getMainIcon(networkShort: String): Int =
     when (networkShort) {
         ATS_TAU -> R.drawable.ic_artis
@@ -36,6 +38,19 @@ private fun getMainIcon(networkShort: String): Int =
         POA_CORE -> R.drawable.ic_poa_core
         ATS_SIGMA -> R.drawable.ic_artis_sigma
         else -> Int.InvalidId
+    }
+
+fun getMainTokenIconRes(networkShort: String): Int =
+    when (networkShort) {
+        ATS_TAU, ATS_SIGMA -> R.drawable.ic_tats
+        POA_SKL -> R.drawable.ic_poa
+        LUKSO_14 -> R.drawable.ic_lukso
+        ETH_CLASSIC_KOTTI -> R.drawable.ic_ethereum_classic
+        ETH_GOR -> R.drawable.ic_ethereum
+        ETH_RIN, ETH_ROP, ETH_KOV, ETH_MAIN -> R.drawable.ic_ethereum
+        XDAI -> R.drawable.ic_xdai
+        POA_CORE -> R.drawable.ic_poa_core
+        else -> R.drawable.ic_default_token
     }
 
 

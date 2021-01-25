@@ -7,7 +7,8 @@ data class Token(
     val name: String = String.Empty,
     val symbol: String = String.Empty,
     val address: String = String.Empty,
-    val decimals: String = String.Empty
+    val decimals: String = String.Empty,
+    val logoRes: Int? = null
 ) {
     override fun equals(other: Any?): Boolean =
         (other as? Token)?.let {

@@ -26,6 +26,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.widget.repository.getMainTokenIconRes
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -81,7 +82,7 @@ class TransactionViewModel(
     //TODO add logos for tokens
     val tokensList: List<TokenSpinnerElement>
         get() = mutableListOf<TokenSpinnerElement>().apply {
-            add(TokenSpinnerElement(account.network.token))
+            add(TokenSpinnerElement(account.network.token, getMainTokenIconRes(account.network.short)))
             account.accountTokens.forEach {
                 add(TokenSpinnerElement(it.token.name))
             }
