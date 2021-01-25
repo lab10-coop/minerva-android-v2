@@ -112,6 +112,7 @@ class WalletConnectViewModel(
 
     fun killSession(peerId: String) {
         repository.killSession(peerId)
+        removeSession(peerId)
     }
 
     fun handleQrCode(qrCode: String) {
@@ -147,7 +148,11 @@ class WalletConnectViewModel(
     )
 
     private fun onDisconnected(it: OnDisconnect): OnDisconnected {
-        it.peerId?.let { peerId -> removeSession(peerId) }
+        it.peerId?.let { peerId ->
+            if (repository.walletConnectClients.containsKey(peerId)) {
+                removeSession(peerId)
+            }
+        }
         return OnDisconnected
     }
 

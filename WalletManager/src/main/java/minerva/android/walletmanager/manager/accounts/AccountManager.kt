@@ -24,6 +24,7 @@ interface AccountManager : Manager {
     fun currentTimeMills(): Long
     fun shouldGetFreeAts(): Boolean
     fun getAllAccounts(): Single<List<Account>>
+    fun toChecksumAddress(address: String): String
     val areMainNetworksEnabled: Boolean
     var toggleMainNetsEnabled: Boolean?
     val enableMainNetsFlowable: Flowable<Boolean>

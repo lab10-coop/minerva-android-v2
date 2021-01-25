@@ -79,42 +79,33 @@ class AccountsViewModel(
     private val _dappSessions = MutableLiveData<List<Account>>()
     val dappSessions: LiveData<List<Account>> get() = _dappSessions
     var hasActiveAccount: Boolean = false
-    var accounts: List<Account> = listOf()
 
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
             hasActiveAccount = it.hasActiveAccount
-            accounts = it.accounts
             it.accounts
         }
 
-    fun getSessions(accounts: List<Account>) {
+    private fun getSessions(accounts: List<Account>) {
         launchDisposable {
             dappSessionRepository.getConnectedDapps()
                 .map { sessions ->
-
-                    accounts.filter { it.network.testNet == !areMainNetsEnabled }
-
-                        .onEach { account ->
-//                        sessions.forEach {
-
-//                            if (account.address == it.address) {
-                            val count = sessions.distinctBy { account.address }.size
-                            val test = account.copy(dappSessionCount = count)
-                            Timber.tag("kobe").d("account: ${test.address} count ${test.dappSessionCount}")
-//                            }
-                        }
-//                    }
+                    if (sessions.isNotEmpty()) {
+                        val list: MutableList<Account> = mutableListOf()
+                        accounts.forEach { account ->
+                                val count = sessions.filter { it.address == accountManager.toChecksumAddress(account.address) }.size
+                                list.add(account.copy(dappSessionCount = count))
+                            }
+                        list
+                    } else {
+                        accounts
+                    }
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        it.forEach {
-                            Timber.tag("kobe").d("LIST: ${it.address} count ${it.dappSessionCount}")
-                        }
-                        _dappSessions.value = it
-                    }
+                    onSuccess = { _dappSessions.value = it },
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
@@ -150,7 +141,9 @@ class AccountsViewModel(
         assetVisibilitySettings = accountManager.getAssetVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
-//        getSessions(accounts)
+        accountManager.walletConfigLiveData.value?.accounts?.let {
+            getSessions(it)
+        }
     }
 
     fun refreshBalances() =

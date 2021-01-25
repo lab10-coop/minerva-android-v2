@@ -127,11 +127,11 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         with(menu) {
             findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
             findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
-            if (account.dappSessionCount != Int.InvalidValue) {
+            if (account.dappSessionCount != 0) {
                 findItem(R.id.walletConnect).title =
                     view.context.getString(
                         R.string.wallet_connect_with_count_title,
-                        "${account.dappSessionCount}"
+                        account.dappSessionCount
                     )
             }
         }

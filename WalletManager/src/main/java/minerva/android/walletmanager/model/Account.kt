@@ -18,7 +18,7 @@ data class Account(
     var owners: List<String>? = null,
     var contractAddress: String = String.Empty,
     var isPending: Boolean = false,
-    var dappSessionCount: Int = Int.InvalidValue,
+    var dappSessionCount: Int = 0,
     override val bindedOwner: String = String.Empty
 ) : MinervaPrimitive(address, name, isDeleted, bindedOwner, networkShort) {
     constructor(account: Account, isDeleted: Boolean) : this(

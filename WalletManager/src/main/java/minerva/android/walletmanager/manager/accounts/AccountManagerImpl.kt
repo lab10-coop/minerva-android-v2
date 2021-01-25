@@ -49,7 +49,7 @@ class AccountManagerImpl(
                         networkShort = network.short,
                         publicKey = keys.publicKey,
                         privateKey = keys.privateKey,
-                        address = keys.address
+                        address = blockchainRepository.toChecksumAddress(keys.address)
                     )
                     addAccount(newAccount, config)
                 }
@@ -83,7 +83,7 @@ class AccountManagerImpl(
                         bindedOwner = ownerAddress,
                         publicKey = keys.publicKey,
                         privateKey = keys.privateKey,
-                        address = contract,
+                        address = blockchainRepository.toChecksumAddress(contract),
                         contractAddress = contract,
                         owners = mutableListOf(ownerAddress)
                     )
@@ -146,6 +146,9 @@ class AccountManagerImpl(
     override fun getAllAccounts(): Single<List<Account>> =
         Single.just(walletManager.getWalletConfig()?.accounts)
 
+    override fun toChecksumAddress(address: String): String =
+        blockchainRepository.toChecksumAddress(address)
+
     override val areMainNetworksEnabled: Boolean
         get() = walletManager.areMainNetworksEnabled
 
@@ -165,7 +168,10 @@ class AccountManagerImpl(
             config.accounts.forEachIndexed { index, item ->
                 if (index == accountIndex) {
                     return when {
-                        areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
+                        areFundsOnValue(
+                            item.cryptoBalance,
+                            item.accountTokens
+                        ) -> handleNoFundsError(item)
                         isNotSafeAccountMasterOwner(config.accounts, item) ->
                             Completable.error(IsNotSafeAccountMasterOwnerThrowable())
                         else -> {
@@ -202,7 +208,9 @@ class AccountManagerImpl(
 
     private fun areFundsOnValue(balance: BigDecimal, accountTokens: List<AccountToken>): Boolean {
         accountTokens.forEach {
-            if (blockchainRepository.toGwei(it.balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
+            if (blockchainRepository.toGwei(it.balance)
+                    .toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
+            ) return true
         }
         return blockchainRepository.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
     }
@@ -214,6 +222,7 @@ class AccountManagerImpl(
     override fun loadAccount(index: Int): Account {
         walletManager.getWalletConfig()?.accounts?.apply {
             return if (inBounds(index)) {
+                this[index]
                 val account = this[index]
                 account.copy(address = blockchainRepository.toChecksumAddress(account.address))
             } else Account(Int.InvalidIndex)
