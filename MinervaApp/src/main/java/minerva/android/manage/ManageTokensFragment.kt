@@ -10,6 +10,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import minerva.android.R
 import minerva.android.accounts.listener.ShowFragmentListener
 import minerva.android.databinding.FragmentManageTokensBinding
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_PADDING
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.Token
@@ -74,7 +75,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
     private fun addMainToken(tokens: List<Token>) {
         binding.tokenContainer.apply {
             addView(TextView(requireContext()).apply {
-                initTokenRow(this, tokens[MAIN_TOKEN_INDEX].name)
+                initTokenRow(this, tokens[MAIN_TOKEN_INDEX])
             })
         }
     }
@@ -83,7 +84,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
         binding.tokenContainer.apply {
             tokens.drop(FIRST_ELEMENT).forEach { token ->
                 addView(SwitchMaterial(requireContext()).apply {
-                    initTokenRow(this, token.name)
+                    initTokenRow(this, token)
                     isChecked = viewModel.getTokenVisibilitySettings(token.address)
                     setOnCheckedChangeListener { _, _ -> viewModel.saveTokenVisibilitySettings(token.address, isChecked) }
                 })
@@ -91,21 +92,24 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
         }
     }
 
-    private fun initTokenRow(view: TextView, title: String) {
+    private fun initTokenRow(view: TextView, token: Token) {
         view.apply {
-            text = title
+            text = token.name
             gravity = Gravity.CENTER_VERTICAL
             setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
             resources.getDimension(R.dimen.margin_xsmall).toInt().let { padding ->
                 if (this !is SwitchMaterial) setPadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding)
                 compoundDrawablePadding = padding
             }
-            setCompoundDrawablesWithIntrinsicBounds(
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_default_token),
-                null,
-                null,
-                null
-            )
+            (if(token.logoRes != Int.InvalidValue) token.logoRes
+            else R.drawable.ic_default_token).let {
+                setCompoundDrawablesWithIntrinsicBounds(
+                    ContextCompat.getDrawable(requireContext(), it),
+                    null,
+                    null,
+                    null
+                )
+            }
         }
     }
 

@@ -21,6 +21,7 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.TokenView
 import minerva.android.widget.TokensAndCollectiblesView
+import minerva.android.widget.repository.getMainTokenIcon
 import minerva.android.widget.repository.getNetworkIcon
 
 class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
@@ -70,7 +71,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 mainIcon.setImageDrawable(getNetworkIcon(context, network.short, isSafeAccount))
                 accountName.text = name
                 //TODO add correct icon here: logoRes = getNetworkIcon(context, network.short, isSafeAccount)
-                mainTokenView.initView(account, this@AccountViewHolder)
+                mainTokenView.initView(account, this@AccountViewHolder, logo = getMainTokenIcon(context, network.short))
             }
         }
     }
