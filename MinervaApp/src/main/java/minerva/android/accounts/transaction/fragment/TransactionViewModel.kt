@@ -18,8 +18,8 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
-import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.NETWORK
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.RECEIVER
+import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.TOKEN
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -81,7 +81,7 @@ class TransactionViewModel(
     //TODO add logos for tokens
     val tokensList: List<TokenSpinnerElement>
         get() = mutableListOf<TokenSpinnerElement>().apply {
-            add(TokenSpinnerElement(account.network.full))
+            add(TokenSpinnerElement(account.network.token))
             account.accountTokens.forEach {
                 add(TokenSpinnerElement(it.token.name))
             }
@@ -301,14 +301,14 @@ class TransactionViewModel(
     fun prepareCurrency() =
         if (tokenIndex != Int.InvalidIndex) account.accountTokens[tokenIndex].token.symbol else token
 
-    private fun getAccountsWalletAction(transaction: Transaction, network: String, status: Int): WalletAction =
+    private fun getAccountsWalletAction(transaction: Transaction, token: String, status: Int): WalletAction =
         WalletAction(
             WalletActionType.ACCOUNT,
             status,
             DateUtils.timestamp,
             hashMapOf(
                 Pair(AMOUNT, transaction.amount.toPlainString()),
-                Pair(NETWORK, network),
+                Pair(TOKEN, token),
                 Pair(RECEIVER, transaction.receiverKey)
             )
         )
@@ -344,7 +344,7 @@ class TransactionViewModel(
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network.short, status)))
+        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network.token, status)))
 
     private fun prepareTransaction(
         receiverKey: String,

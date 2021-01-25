@@ -23,7 +23,7 @@ class ManageTokensViewModel(
     }
 
     fun loadTokens() = account.network.let {
-        listOf(Token(it.full, it.short)) + tokenManager.loadTokens(it.short)
+        listOf(Token(it.token, it.short)) + tokenManager.loadTokens(it.short)
     }
 
     fun getTokenVisibilitySettings(assetAddress: String): Boolean =

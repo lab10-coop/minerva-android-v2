@@ -114,7 +114,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
         binding.type.text = context.getString(
             text,
             "${walletAction.fields[WalletActionFields.AMOUNT]}",
-            "${walletAction.fields[WalletActionFields.NETWORK]}",
+            "${walletAction.fields[WalletActionFields.TOKEN]}",
             "${walletAction.fields[WalletActionFields.RECEIVER]}"
         )
         showIcon(R.drawable.ic_values)
