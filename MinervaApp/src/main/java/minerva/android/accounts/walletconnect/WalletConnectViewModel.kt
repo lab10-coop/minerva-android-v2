@@ -14,19 +14,21 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
 import minerva.android.walletConnect.client.OnSessionRequest
-import minerva.android.walletConnect.model.session.DappSession
 import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletConnect.repository.WalletConnectRepository
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.defs.NetworkShortName
 
 class WalletConnectViewModel(
-    private val repository: WalletConnectRepository,
-    private val accountManager: AccountManager
+    private val sessionRepository: DappSessionRepository,
+    private val accountManager: AccountManager,
+    private val repository: WalletConnectRepository
 ) : BaseViewModel() {
 
     internal lateinit var account: Account
@@ -64,7 +66,7 @@ class WalletConnectViewModel(
     fun getAccount(index: Int) {
         account = accountManager.loadAccount(index)
         launchDisposable {
-            repository.getConnectedDapps(account.address)
+            sessionRepository.getConnectedDapps(account.address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -103,6 +105,7 @@ class WalletConnectViewModel(
 
     fun killSession(peerId: String) {
         repository.killSession(peerId)
+        //todo maybe it is better to delete session when killSession return true?
     }
 
     fun handleQrCode(qrCode: String) {
@@ -110,7 +113,7 @@ class WalletConnectViewModel(
             _viewStateLiveData.value = WrongQrCodeState
         } else {
             _viewStateLiveData.value = CorrectQrCodeState
-            currentSession = WCSession.from(qrCode)
+            currentSession = repository.getWCSessionFromQr(qrCode)
             repository.connect(currentSession)
         }
     }
@@ -119,7 +122,7 @@ class WalletConnectViewModel(
         //todo should remove from DB when approve session return true?
         repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId)
         launchDisposable {
-            repository.saveDappSession(getDapp(meta))
+            sessionRepository.saveDappSession(getDapp(meta))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onError = { OnError(it) })
@@ -141,7 +144,7 @@ class WalletConnectViewModel(
     private fun onDisconnected(it: OnDisconnect): OnDisconnected {
         it.peerId?.let { peerId ->
             launchDisposable {
-                repository.deleteDappSession(peerId)
+                sessionRepository.deleteDappSession(peerId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(onError = { OnError(it) })

@@ -1,8 +1,9 @@
-package minerva.android.walletConnect.database
+package minerva.android.walletmanager.database.dao
 
 import androidx.room.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import minerva.android.walletmanager.database.entity.DappSessionEntity
 
 @Dao
 interface DappSessionDao {

@@ -1,4 +1,4 @@
-package minerva.android.walletConnect.model.session
+package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.Empty
 

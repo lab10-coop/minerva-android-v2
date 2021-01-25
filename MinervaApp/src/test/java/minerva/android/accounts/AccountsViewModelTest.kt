@@ -14,7 +14,7 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe

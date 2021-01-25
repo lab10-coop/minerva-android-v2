@@ -11,9 +11,12 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.list.inBounds
+import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.mappers.DappSessionToEntityMapper
+import minerva.android.walletmanager.model.mappers.EntityToDappSessionMapper
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils

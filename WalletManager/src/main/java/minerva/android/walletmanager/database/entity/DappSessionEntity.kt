@@ -1,4 +1,4 @@
-package minerva.android.walletConnect.database
+package minerva.android.walletmanager.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

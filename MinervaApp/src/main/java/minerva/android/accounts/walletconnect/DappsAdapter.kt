@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.DappItemBinding
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletConnect.model.session.DappSession
+import minerva.android.walletmanager.model.DappSession
 
 class DappsAdapter(private val disconnect: (peerId: String) -> Unit) :
     RecyclerView.Adapter<DappViewHolder>() {

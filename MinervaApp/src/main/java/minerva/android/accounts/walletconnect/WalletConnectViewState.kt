@@ -1,7 +1,7 @@
 package minerva.android.accounts.walletconnect
 
-import minerva.android.walletConnect.model.session.DappSession
 import minerva.android.walletConnect.model.session.WCPeerMeta
+import minerva.android.walletmanager.model.DappSession
 
 sealed class WalletConnectViewState
 object CloseScannerState : WalletConnectViewState()

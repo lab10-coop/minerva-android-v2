@@ -25,7 +25,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAF
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal

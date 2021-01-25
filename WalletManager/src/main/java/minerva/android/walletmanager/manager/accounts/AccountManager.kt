@@ -6,6 +6,7 @@ import io.reactivex.Single
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AssetVisibilitySettings
+import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.Network
 
 interface AccountManager : Manager {

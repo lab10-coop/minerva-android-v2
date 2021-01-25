@@ -1,6 +1,9 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
+}
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
@@ -53,4 +56,9 @@ dependencies {
     implementation startupDependencies.values()
     implementation jsonLogicDependencies.values()
     testImplementation testDependencies.values()
+
+    //    todo extract to dependencies
+    implementation "androidx.room:room-runtime:2.2.6"
+    implementation "androidx.room:room-rxjava2:2.2.6"
+    kapt "androidx.room:room-compiler:2.2.6"
 }

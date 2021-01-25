@@ -9,7 +9,7 @@ import minerva.android.accounts.walletconnect.*
 import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
 import minerva.android.walletConnect.client.OnSessionRequest
-import minerva.android.walletConnect.model.session.DappSession
+import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession

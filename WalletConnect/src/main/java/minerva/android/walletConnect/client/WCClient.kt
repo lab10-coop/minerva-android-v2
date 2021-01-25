@@ -27,7 +27,7 @@ const val JSONRPC_VERSION = "2.0"
 
 open class WCClient(
     builder: GsonBuilder = GsonBuilder(),
-    private val httpClient: OkHttpClient
+    private val httpClient: OkHttpClient = OkHttpClient()
 ) : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
