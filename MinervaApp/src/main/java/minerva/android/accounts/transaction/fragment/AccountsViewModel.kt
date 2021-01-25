@@ -93,7 +93,7 @@ class AccountsViewModel(
                     if (sessions.isNotEmpty()) {
                         val list: MutableList<Account> = mutableListOf()
                         accounts.forEach { account ->
-                                val count = sessions.filter { it.address == accountManager.toChecksumAddress(account.address) }.size
+                                val count = sessions.count { it.address == accountManager.toChecksumAddress(account.address) }
                                 list.add(account.copy(dappSessionCount = count))
                             }
                         list

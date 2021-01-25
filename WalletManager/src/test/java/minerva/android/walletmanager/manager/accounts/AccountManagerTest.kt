@@ -80,6 +80,7 @@ class AccountManagerTest : RxTest() {
         val network = Network(short = "eth_rinkeby", httpRpc = "some")
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn(String.Empty)
         whenever(
             cryptographyRepository.calculateDerivedKeys(
                 any(),
@@ -251,6 +252,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
         repository.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
             .test()
             .assertComplete()
@@ -262,6 +264,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
         repository.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
             .test()
             .assertError(error)
