@@ -18,6 +18,7 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -28,6 +29,7 @@ import kotlin.test.assertEquals
 class WalletConnectViewModelTest : BaseViewModelTest() {
 
     private val repository: WalletConnectRepository = mock()
+    private val dappSessionRepository: DappSessionRepository = com.nhaarman.mockitokotlin2.mock()
     private val manager: AccountManager = mock()
     private lateinit var viewModel: WalletConnectViewModel
 
@@ -37,14 +39,14 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Before
     fun setup() {
-        viewModel = WalletConnectViewModel(repository, manager)
+        viewModel = WalletConnectViewModel(dappSessionRepository, manager, repository)
     }
 
     @Test
     fun `on connection failure event test`() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnConnectionFailure(error)))
+            .thenReturn(Flowable.just(OnConnectionFailure(error, "peerId")))
         viewModel.viewStateLiveData.observeForever(viewStateObserver)
         viewModel.setConnectionStatusFlowable()
         viewStateCaptor.run {
@@ -182,7 +184,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.topic = Topic()
         viewModel.currentSession = WCSession("topic", "version", "bridge", "key")
         viewModel.account = Account(1, network = Network(testNet = false, full = "Ethereum"))
-        whenever(repository.saveDappSession(any())).thenReturn(Completable.complete())
+        whenever(dappSessionRepository.saveDappSession(any())).thenReturn(Completable.complete())
         viewModel.approveSession(WCPeerMeta(name = "name", url = "url"))
         verify(repository).approveSession(any(), any(), any())
     }
@@ -203,15 +205,8 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `get account test`() {
         whenever(manager.loadAccount(any())).thenReturn(Account(1))
-        whenever(repository.getConnectedDapps(any())).thenReturn(
-            Flowable.just(
-                listOf(
-                    DappSession(
-                        address = "address"
-                    )
-                )
-            )
-        )
+        whenever(dappSessionRepository.getAllSessions()).thenReturn(
+            Flowable.just(listOf(DappSession(address = "address"))))
         viewModel.getAccount(1)
         assertEquals(1, viewModel.account.id)
     }

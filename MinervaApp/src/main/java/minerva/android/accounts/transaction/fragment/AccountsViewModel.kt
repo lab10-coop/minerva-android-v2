@@ -76,11 +76,49 @@ class AccountsViewModel(
     private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
     val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
 
-    val walletConfigLiveData: LiveData<WalletConfig> =
+    private val _dappSessions = MutableLiveData<List<Account>>()
+    val dappSessions: LiveData<List<Account>> get() = _dappSessions
+    var hasActiveAccount: Boolean = false
+    var accounts: List<Account> = listOf()
+
+    val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
-//            val sessions: List<DappSession> = dappSessionRepository.getAll().blockingGet()
-            it
+            hasActiveAccount = it.hasActiveAccount
+            accounts = it.accounts
+            it.accounts
         }
+
+    fun getSessions(accounts: List<Account>) {
+        launchDisposable {
+            dappSessionRepository.getConnectedDapps()
+                .map { sessions ->
+
+                    accounts.filter { it.network.testNet == !areMainNetsEnabled }
+
+                        .onEach { account ->
+//                        sessions.forEach {
+
+//                            if (account.address == it.address) {
+                            val count = sessions.distinctBy { account.address }.size
+                            val test = account.copy(dappSessionCount = count)
+                            Timber.tag("kobe").d("account: ${test.address} count ${test.dappSessionCount}")
+//                            }
+                        }
+//                    }
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = {
+                        it.forEach {
+                            Timber.tag("kobe").d("LIST: ${it.address} count ${it.dappSessionCount}")
+                        }
+                        _dappSessions.value = it
+                    }
+                )
+        }
+    }
+
 
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
     val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
@@ -112,7 +150,7 @@ class AccountsViewModel(
         assetVisibilitySettings = accountManager.getAssetVisibilitySettings()
         refreshBalances()
         refreshAssetBalance()
-//        getSessionsCount()
+//        getSessions(accounts)
     }
 
     fun refreshBalances() =
@@ -271,10 +309,4 @@ class AccountsViewModel(
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
-
-    fun addSessions(accounts: List<Account>): List<Account> {
-
-        TODO("Not yet implemented")
-    }
-
 }

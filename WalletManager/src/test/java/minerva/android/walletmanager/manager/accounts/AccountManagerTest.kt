@@ -12,11 +12,14 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.RxTest
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.provider.CurrentTimeProvider
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -29,11 +32,15 @@ class AccountManagerTest : RxTest() {
 
     private val walletConfigManager: WalletConfigManager = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
+    private val localStorage: LocalStorage = mock()
+    private val timeProvider: CurrentTimeProvider = mock()
     private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
     private val repository = AccountManagerImpl(
         walletConfigManager,
         cryptographyRepository,
-        blockchainRegularAccountRepository
+        blockchainRegularAccountRepository,
+        localStorage,
+        timeProvider
     )
 
     @Before

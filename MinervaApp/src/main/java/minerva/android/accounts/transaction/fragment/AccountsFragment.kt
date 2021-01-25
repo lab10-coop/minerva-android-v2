@@ -1,7 +1,6 @@
 package minerva.android.accounts.transaction.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -142,11 +141,13 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 }
             })
             binding.apply {
-                walletConfigLiveData.observe(viewLifecycleOwner, Observer { walletConfig ->
-
-                    noDataMessage.visibleOrGone(walletConfig.hasActiveAccount)
-                    accountAdapter.updateList(walletConfig.accounts, areMainNetsEnabled)
+                accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
+                    noDataMessage.visibleOrGone(hasActiveAccount)
+                    accountAdapter.updateList(accounts, areMainNetsEnabled)
                     setTatsButtonListener(accountAdapter.activeAccountsList)
+                })
+                dappSessions.observe(viewLifecycleOwner, Observer {
+                    accountAdapter.updateList(it, areMainNetsEnabled)
                 })
                 balanceLiveData.observe(viewLifecycleOwner, Observer {
                     accountAdapter.updateBalances(it)

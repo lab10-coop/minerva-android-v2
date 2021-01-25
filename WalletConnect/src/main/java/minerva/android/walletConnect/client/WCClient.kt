@@ -94,7 +94,6 @@ open class WCClient(
             this.peerId ?: throw IllegalStateException("peerId can't be null on connection open")
         // The Session.topic channel is used to listen session request messages only.
         subscribe(session.topic)
-        Timber.tag("kobe").d("SESSION TOPIC: ${session.topic}")
         // The peerId channel is used to listen to all messages sent to this httpClient.
         subscribe(peerId)
 
@@ -113,8 +112,6 @@ open class WCClient(
 
             val message = gson.fromJson<WCSocketMessage>(text)
             decrypted = decryptMessage(message)
-
-//            Timber.tag("kobe").d("RECEIVED TOPIC ${message.topic}")
 
             Log.d(TAG, "<== decrypted $decrypted")
             handleMessage(decrypted)

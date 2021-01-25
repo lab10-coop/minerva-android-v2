@@ -32,16 +32,7 @@ class WalletConnectRepositoryImpl : WalletConnectRepository {
                 status.onNext(OnDisconnect(code, peerId))
             }
 
-            connect(
-                session,
-                peerMeta = WCPeerMeta( //todo extract values
-                    name = "Minerva Wallet",
-                    url = "https://docs.minerva.digital/"
-                ),
-                peerId = peerId,
-                remotePeerId = remotePeerId
-            )
-
+            connect(session, peerMeta = WCPeerMeta(), peerId = peerId, remotePeerId = remotePeerId)
         }
     }
 

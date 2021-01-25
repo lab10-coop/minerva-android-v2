@@ -12,10 +12,9 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.provider.CurrentTimeProvider
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
-import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
 import org.junit.Before
@@ -29,15 +28,15 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val smartContractRepository: SmartContractRepository = mock()
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
-    private val localStorage: LocalStorage = mock()
-    private val timeProvider: CurrentTimeProvider = mock()
+    private val dappSessionRepository: DappSessionRepository = mock()
     private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
 
     private val assetsBalanceObserver: Observer<Map<String, List<AccountAsset>>> = mock()
-    private val assetsBalanceCaptor: KArgumentCaptor<Map<String, List<AccountAsset>>> = argumentCaptor()
+    private val assetsBalanceCaptor: KArgumentCaptor<Map<String, List<AccountAsset>>> =
+        argumentCaptor()
 
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -63,8 +62,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletActionsRepository,
             smartContractRepository,
             transactionRepository,
-            localStorage,
-            timeProvider
+            dappSessionRepository
         )
     }
 
@@ -105,7 +103,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `refresh balances success`() {
         whenever(transactionRepository.refreshBalances()).thenReturn(
-            Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
+            Single.just(
+                hashMapOf(
+                    Pair(
+                        "123",
+                        Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN)
+                    )
+                )
+            )
         )
         viewModel.balanceLiveData.observeForever(balanceObserver)
         viewModel.refreshBalances()
@@ -163,7 +168,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `Remove value error`() {
         val error = Throwable("error")
         whenever(accountManager.removeAccount(any())).thenReturn(Completable.error(error))
-        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
+            Completable.error(
+                error
+            )
+        )
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.removeAccount(Account(1, "test"))
         errorCaptor.run {
@@ -185,7 +194,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `create safe account error`() {
         val error = Throwable("error")
-        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
+            Completable.error(
+                error
+            )
+        )
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
         whenever(accountManager.createRegularAccount(any())).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
@@ -213,37 +226,15 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `check that last free ATS was at least 24 hours (86400000 mills) ago`() {
-        NetworkManager.initialize(networks)
-        whenever(timeProvider.currentTimeMills()).thenReturn(1610120569428)
-        timeProvider.currentTimeMills().let { time ->
-            whenever(localStorage.getLastFreeATSTimestamp()).thenReturn(
-                time - 96400000,
-                time - 86400001,
-                time - 86299933,
-                time - 500,
-                time - 96400000,
-                time - 303
-            )
-        }
-        assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
-        assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
-        assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
-        assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
-        assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
-        assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
-    }
-
-    @Test
-    fun `adding free ATS correct` () {
+    fun `adding free ATS correct`() {
         NetworkManager.initialize(networks)
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.complete())
         viewModel.addAtsToken(accounts, "nope")
-        verify(localStorage, times(1)).saveFreeATSTimestamp(any())
+        verify(accountManager, times(1)).saveFreeATSTimestamp()
     }
 
     @Test
-    fun `adding free ATS error` () {
+    fun `adding free ATS error`() {
         NetworkManager.initialize(networks)
         viewModel.errorLiveData.observeForever(errorObserver)
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.error(Throwable("Some error")))
@@ -254,24 +245,45 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `missing account for adding free ATS test error` () {
+    fun `missing account for adding free ATS test error`() {
         viewModel.errorLiveData.observeForever(errorObserver)
-        whenever(localStorage.getLastFreeATSTimestamp()).thenReturn(0)
+        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0)
         viewModel.addAtsToken(listOf(), "nope")
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
     }
 
+    @Test
+    fun `check that last free ATS was at least 24 hours (86400000 mills) ago`() {
+        NetworkManager.initialize(networks)
+        whenever(accountManager.currentTimeMills()).thenReturn(1610120569428)
+        accountManager.currentTimeMills().let { time ->
+            whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(
+                time - 96400000,
+                time - 86400001,
+                time - 86299933,
+                time - 500,
+                time - 96400000,
+                time - 303
+            )
+        }
+        whenever(accountManager.shouldGetFreeAts()).thenReturn(false)
+        assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
+        assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
+        assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
+        assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
+    }
+
+    private val accountsWithoutPrimaryAccount = listOf(
+        Account(1, network = Network(short = "second_network")),
+        Account(4, network = Network(short = "some_other_network"))
+    )
+
     private val accounts = listOf(
         Account(1, network = Network(short = "second_network")),
         Account(2, network = Network(short = "first_network")),
         Account(3, network = Network(short = "first_network")),
-        Account(4, network = Network(short = "some_other_network"))
-    )
-
-    private val accountsWithoutPrimaryAccount = listOf(
-        Account(1, network = Network(short = "second_network")),
         Account(4, network = Network(short = "some_other_network"))
     )
 

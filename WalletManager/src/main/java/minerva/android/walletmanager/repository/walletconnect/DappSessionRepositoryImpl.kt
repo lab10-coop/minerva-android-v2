@@ -12,9 +12,8 @@ class DappSessionRepositoryImpl(database: MinervaDatabase) : DappSessionReposito
 
     private val dappDao = database.dappDao()
 
-    override fun getConnectedDapps(addresses: String): Flowable<List<DappSession>> =
-        dappDao.getConnectedDapps(addresses)
-            .map { EntityToDappSessionMapper.map(it) }
+    override fun getConnectedDapps(): Single<List<DappSession>> =
+        dappDao.getAll().firstOrError().map { EntityToDappSessionMapper.map(it) }
 
     override fun saveDappSession(dappSession: DappSession): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
