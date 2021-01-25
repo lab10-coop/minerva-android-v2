@@ -66,7 +66,7 @@ class WalletConnectViewModel(
     fun getAccount(index: Int) {
         account = accountManager.loadAccount(index)
         launchDisposable {
-            sessionRepository.getConnectedDapps(account.address)
+            sessionRepository.getAllSessions()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(

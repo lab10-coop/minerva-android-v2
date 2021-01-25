@@ -3,10 +3,12 @@ package minerva.android.accounts.transaction.fragment
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.flow.map
 import minerva.android.accounts.enum.ErrorCode
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
@@ -74,7 +76,11 @@ class AccountsViewModel(
     private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
     val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
 
-    val walletConfigLiveData: LiveData<WalletConfig> = accountManager.walletConfigLiveData
+    val walletConfigLiveData: LiveData<WalletConfig> =
+        Transformations.map(accountManager.walletConfigLiveData) {
+//            val sessions: List<DappSession> = dappSessionRepository.getAll().blockingGet()
+            it
+        }
 
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
     val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
@@ -265,4 +271,10 @@ class AccountsViewModel(
             DateUtils.timestamp,
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
+
+    fun addSessions(accounts: List<Account>): List<Account> {
+
+        TODO("Not yet implemented")
+    }
+
 }

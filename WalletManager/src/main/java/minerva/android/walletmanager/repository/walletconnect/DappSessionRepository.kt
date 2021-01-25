@@ -9,5 +9,5 @@ interface DappSessionRepository {
     fun getConnectedDapps(addresses: String): Flowable<List<DappSession>>
     fun saveDappSession(dappSession: DappSession): Completable
     fun deleteDappSession(peerId: String): Completable
-    fun getAll(): Single<List<DappSession>>
+    fun getAllSessions(): Flowable<List<DappSession>>
 }

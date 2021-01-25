@@ -19,5 +19,5 @@ interface DappSessionDao {
     fun delete(peerId: String): Completable
 
     @Query("SELECT * FROM dapp_sessions")
-    fun getAll(): Single<List<DappSessionEntity>>
+    fun getAll(): Flowable<List<DappSessionEntity>>
 }

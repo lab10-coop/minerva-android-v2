@@ -143,6 +143,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             })
             binding.apply {
                 walletConfigLiveData.observe(viewLifecycleOwner, Observer { walletConfig ->
+
                     noDataMessage.visibleOrGone(walletConfig.hasActiveAccount)
                     accountAdapter.updateList(walletConfig.accounts, areMainNetsEnabled)
                     setTatsButtonListener(accountAdapter.activeAccountsList)
