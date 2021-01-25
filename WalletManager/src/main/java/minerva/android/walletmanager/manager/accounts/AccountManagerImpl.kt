@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import io.reactivex.SingleSource
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath
@@ -145,6 +146,9 @@ class AccountManagerImpl(
 
     override fun shouldGetFreeAts(): Boolean =
         ((getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(HOURS_IN_DAY)) < timeProvider.currentTimeMills())
+
+    override fun getAllAccounts(): Single<List<Account>> =
+        Single.just(walletManager.getWalletConfig()?.accounts)
 
     override val areMainNetworksEnabled: Boolean
         get() = walletManager.areMainNetworksEnabled

@@ -2,6 +2,7 @@ package minerva.android.walletmanager.repository.walletconnect
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Single
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.mappers.DappSessionToEntityMapper
@@ -20,4 +21,7 @@ class DappSessionRepositoryImpl(database: MinervaDatabase) : DappSessionReposito
 
     override fun deleteDappSession(peerId: String): Completable =
         dappDao.delete(peerId)
+
+    override fun getAll(): Single<List<DappSession>> =
+        dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
 }

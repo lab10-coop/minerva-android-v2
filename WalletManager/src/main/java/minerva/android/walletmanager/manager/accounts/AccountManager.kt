@@ -23,6 +23,7 @@ interface AccountManager : Manager {
     fun saveAssetVisibilitySettings(settings: AssetVisibilitySettings): AssetVisibilitySettings
     fun currentTimeMills(): Long
     fun shouldGetFreeAts(): Boolean
+    fun getAllAccounts(): Single<List<Account>>
     val areMainNetworksEnabled: Boolean
     var toggleMainNetsEnabled: Boolean?
     val enableMainNetsFlowable: Flowable<Boolean>

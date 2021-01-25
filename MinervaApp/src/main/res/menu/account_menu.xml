@@ -6,7 +6,7 @@
         android:id="@+id/walletConnect"
         android:enabled="true"
         android:icon="@drawable/ic_wallet_connect"
-        android:title="@string/walletConnect"
+        android:title="@string/wallet_connect_title"
         app:showAsAction="ifRoom" />
 
     <item

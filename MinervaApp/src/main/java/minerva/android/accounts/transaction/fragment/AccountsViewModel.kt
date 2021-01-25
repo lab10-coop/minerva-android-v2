@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.enum.ErrorCode
 import minerva.android.base.BaseViewModel
@@ -103,6 +104,9 @@ class AccountsViewModel(
     override fun onResume() {
         super.onResume()
         assetVisibilitySettings = accountManager.getAssetVisibilitySettings()
+        refreshBalances()
+        refreshAssetBalance()
+//        getSessionsCount()
     }
 
     fun refreshBalances() =
@@ -252,10 +256,6 @@ class AccountsViewModel(
         assetVisibilitySettings = accountManager.saveAssetVisibilitySettings(
             assetVisibilitySettings.updateAssetVisibility(networkAddress, assetAddress, visibility)
         )
-    }
-
-    fun getSessionNumber(){
-//        dappSessionRepository.getConnectedDapps()
     }
 
     private fun getWalletAction(status: Int, name: String) =

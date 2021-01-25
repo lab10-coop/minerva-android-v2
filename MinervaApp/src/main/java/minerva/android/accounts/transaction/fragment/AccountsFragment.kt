@@ -25,7 +25,8 @@ import minerva.android.wrapped.startManageAssetsWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout), AccountsFragmentToAdapterListener {
+class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
+    AccountsFragmentToAdapterListener {
 
     private val viewModel: AccountsViewModel by viewModel()
     private val accountAdapter by lazy { AccountAdapter(this) }
@@ -45,8 +46,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         interactor.changeActionBarColor(R.color.lightGray)
         viewModel.apply {
             onResume()
-            refreshBalances()
-            refreshAssetBalance()
             refreshFreeATSButton()
             if (arePendingAccountsEmpty()) accountAdapter.stopPendingTransactions()
         }
@@ -74,16 +73,27 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         interactor.showTransactionScreen(accountIndex, screenIndex = RECEIVE_TRANSACTION_INDEX)
 
     override fun onShowSafeAccountSettings(account: Account, position: Int) =
-        startSafeAccountWrappedActivity(requireContext(), account.name, position, account.network.short, account.isSafeAccount)
+        startSafeAccountWrappedActivity(
+            requireContext(),
+            account.name,
+            position,
+            account.network.short,
+            account.isSafeAccount
+        )
 
     override fun onWalletConnect(index: Int) = interactor.showWalletConnectScanner(index)
 
-    override fun onManageAssets(index: Int) = startManageAssetsWrappedActivity(requireContext(), index)
+    override fun onManageAssets(index: Int) =
+        startManageAssetsWrappedActivity(requireContext(), index)
 
     override fun isAssetVisible(networkAddress: String, assetAddress: String): Boolean? =
         viewModel.isAssetVisible(networkAddress, assetAddress)
 
-    override fun saveAssetVisibility(networkAddress: String, assetAddress: String, visibility: Boolean) {
+    override fun saveAssetVisibility(
+        networkAddress: String,
+        assetAddress: String,
+        visibility: Boolean
+    ) {
         viewModel.saveAssetVisible(networkAddress, assetAddress, visibility)
     }
 
@@ -142,7 +152,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     swipeRefresh.isRefreshing = false
                 })
             }
-            accountAssetBalanceLiveData.observe(viewLifecycleOwner, Observer { accountAdapter.updateAssetBalances(it) })
+            accountAssetBalanceLiveData.observe(
+                viewLifecycleOwner,
+                Observer { accountAdapter.updateAssetBalances(it) })
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 refreshFreeATSButton()
                 showErrorFlashbar(
@@ -163,12 +175,14 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 interactor.shouldShowLoadingScreen(it)
             })
 
-            balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                showErrorFlashbar(
-                    getString(R.string.cannot_remove_safe_account_title),
-                    getString(R.string.cannot_remove_safe_account_message)
-                )
-            })
+            balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver {
+                    showErrorFlashbar(
+                        getString(R.string.cannot_remove_safe_account_title),
+                        getString(R.string.cannot_remove_safe_account_message)
+                    )
+                })
 
             balanceIsNotEmptyErrorLiveData.observe(viewLifecycleOwner, EventObserver {
                 showErrorFlashbar(
@@ -178,7 +192,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             })
 
             isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                showErrorFlashbar(getString(R.string.error_header), getString(R.string.safe_account_removal_error))
+                showErrorFlashbar(
+                    getString(R.string.error_header),
+                    getString(R.string.safe_account_removal_error)
+                )
             })
 
             accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver {
@@ -186,8 +203,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 refreshFreeATSButton()
             })
 
-            automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
-            refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleRefreshBalancesError(it) })
+            automaticBackupErrorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { handleAutomaticBackupError(it) })
+            refreshBalancesErrorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { handleRefreshBalancesError(it) })
         }
     }
 
@@ -217,11 +238,17 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun setTatsButtonListener(accounts: List<Account>) =
         binding.addTatsButton.setOnClickListener {
             viewModel.apply {
-                val toastMessage = if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
-                    it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
-                    addAtsToken(accounts, getString(R.string.free_ats_warning))
-                    R.string.refresh_balance_to_check_transaction_status
-                } else R.string.free_ats_warning
+                val toastMessage =
+                    if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
+                        it.setBackgroundColor(
+                            ContextCompat.getColor(
+                                it.context,
+                                R.color.inactiveButtonColor
+                            )
+                        )
+                        addAtsToken(accounts, getString(R.string.free_ats_warning))
+                        R.string.refresh_balance_to_check_transaction_status
+                    } else R.string.free_ats_warning
 
                 Toast.makeText(it.context, toastMessage, Toast.LENGTH_SHORT).show()
             }
