@@ -48,7 +48,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         rawPosition = index
         view.apply {
             prepareView(account)
-            prepareAssets(account)
+            prepareToken(account)
             bindData(account)
             setOnMenuClickListener(rawPosition, account)
             if (isOpen) binding.container.visible()
@@ -116,10 +116,10 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun View.setOnItemClickListener(isAssetAreaAvailable: Boolean) =
-        setOnClickListener { if (isAssetAreaAvailable) if (isOpen) close() else open() }
+    private fun View.setOnItemClickListener(isTokenAreaAvailable: Boolean) =
+        setOnClickListener { if (isTokenAreaAvailable) if (isOpen) close() else open() }
 
-    private fun View.prepareAssets(account: Account) {
+    private fun View.prepareToken(account: Account) {
         binding.apply {
             account.accountTokens.isNotEmpty().let { visible ->
                 with(container) {
@@ -161,7 +161,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.walletConnect -> listener.onWalletConnect(index)
-                R.id.manageAssets -> listener.onManageTokens(index)
+                R.id.manageTokens -> listener.onManageTokens(index)
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
                 R.id.remove -> listener.onAccountRemoved(index)
