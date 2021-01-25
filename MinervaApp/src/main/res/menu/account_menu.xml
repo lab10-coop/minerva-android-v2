@@ -10,7 +10,7 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/manageAssets"
+        android:id="@+id/manageTokens"
         android:enabled="true"
         android:icon="@drawable/ic_manage_asset"
         android:title="@string/manage_token"

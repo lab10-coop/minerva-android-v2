@@ -7,6 +7,7 @@ import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AssetVisibilitySettings
 import minerva.android.walletmanager.model.Token
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.widget.repository.getMainTokenIconRes
 
 class ManageTokensViewModel(
     private val accountManager: AccountManager,
@@ -23,7 +24,7 @@ class ManageTokensViewModel(
     }
 
     fun loadTokens() = account.network.let {
-        listOf(Token(it.full, it.short)) + tokenManager.loadTokens(it.short)
+        listOf(Token(it.token, it.short, logoRes = getMainTokenIconRes(it.short))) + tokenManager.loadTokens(it.short)
     }
 
     fun getTokenVisibilitySettings(assetAddress: String): Boolean =

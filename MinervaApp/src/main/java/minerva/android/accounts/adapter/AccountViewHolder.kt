@@ -21,6 +21,7 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.TokenView
 import minerva.android.widget.TokensAndCollectiblesView
+import minerva.android.widget.repository.getMainTokenIcon
 import minerva.android.widget.repository.getNetworkIcon
 
 class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
@@ -47,7 +48,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         rawPosition = index
         view.apply {
             prepareView(account)
-            prepareAssets(account)
+            prepareToken(account)
             bindData(account)
             setOnMenuClickListener(rawPosition, account)
             if (isOpen) binding.container.visible()
@@ -70,7 +71,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 mainIcon.setImageDrawable(getNetworkIcon(context, network.short, isSafeAccount))
                 accountName.text = name
                 //TODO add correct icon here: logoRes = getNetworkIcon(context, network.short, isSafeAccount)
-                mainTokenView.initView(account, this@AccountViewHolder)
+                mainTokenView.initView(account, this@AccountViewHolder, logo = getMainTokenIcon(context, network.short))
             }
         }
     }
@@ -115,10 +116,10 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun View.setOnItemClickListener(isAssetAreaAvailable: Boolean) =
-        setOnClickListener { if (isAssetAreaAvailable) if (isOpen) close() else open() }
+    private fun View.setOnItemClickListener(isTokenAreaAvailable: Boolean) =
+        setOnClickListener { if (isTokenAreaAvailable) if (isOpen) close() else open() }
 
-    private fun View.prepareAssets(account: Account) {
+    private fun View.prepareToken(account: Account) {
         binding.apply {
             account.accountTokens.isNotEmpty().let { visible ->
                 with(container) {
@@ -160,7 +161,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.walletConnect -> listener.onWalletConnect(index)
-                R.id.manageAssets -> listener.onManageTokens(index)
+                R.id.manageTokens -> listener.onManageTokens(index)
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
                 R.id.remove -> listener.onAccountRemoved(index)
