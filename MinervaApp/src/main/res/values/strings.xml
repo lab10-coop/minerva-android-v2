@@ -262,4 +262,5 @@
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
     <string name="dapp_connection_warning">The website doesn’t provide the network. Please make sure that your account is on the same network.</string>
     <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
+    <string name="dapp_disconnected">Dapp disconnected</string>
 </resources>

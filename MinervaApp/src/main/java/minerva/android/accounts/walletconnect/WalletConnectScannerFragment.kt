@@ -42,16 +42,10 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is CorrectQrCodeState -> shouldScan = false
                 is OnError -> {
                     shouldScan = true
-                    Toast.makeText(context, "${it.error.message} ${it.peerId}", Toast.LENGTH_LONG)
-                        .show()
+                    showToast("${it.error.message}")
                 }
                 is OnDisconnected ->
-                    Toast.makeText(
-                        context,
-                        "Dapp disconnected; peerId: ${it.peerId}",
-                        Toast.LENGTH_LONG
-                    ).show()
-
+                    showToast(getString(R.string.dapp_disconnected))
                 is ProgressBarState -> {
                     if (!it.show) {
                         binding.scannerProgressBar.invisible()
@@ -70,6 +64,10 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 }
             }
         })
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 
     private fun handleWrongQrCode() {

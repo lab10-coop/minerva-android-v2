@@ -62,6 +62,9 @@ class WalletConnectRepositoryImpl : WalletConnectRepository {
     }
 
     override fun killSession(peerId: String) {
-        clientMap[peerId]?.killSession()
+        with(clientMap) {
+            this[peerId]?.killSession()
+            remove(peerId)
+        }
     }
 }

@@ -52,7 +52,7 @@ class WalletConnectViewModel(
                                 topic = it.topic
                                 handleSessionRequest(it)
                             }
-                            is OnConnectionFailure -> OnError(it.error, it.peerId)
+                            is OnConnectionFailure -> onError(it)
                             is OnDisconnect -> onDisconnected(it)
                         }
                     },
@@ -61,6 +61,13 @@ class WalletConnectViewModel(
                     }
                 )
         }
+    }
+
+    private fun onError(it: OnConnectionFailure): OnError {
+        if (!repository.walletConnectClients.containsKey(it.peerId)) {
+            it.peerId?.let { removeSession(it) }
+        }
+        return OnError(it.error)
     }
 
     fun getAccount(index: Int) {
@@ -105,7 +112,6 @@ class WalletConnectViewModel(
 
     fun killSession(peerId: String) {
         repository.killSession(peerId)
-        //todo maybe it is better to delete session when killSession return true?
     }
 
     fun handleQrCode(qrCode: String) {
@@ -119,7 +125,6 @@ class WalletConnectViewModel(
     }
 
     fun approveSession(meta: WCPeerMeta) {
-        //todo should remove from DB when approve session return true?
         repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId)
         launchDisposable {
             sessionRepository.saveDappSession(getDapp(meta))
@@ -142,15 +147,17 @@ class WalletConnectViewModel(
     )
 
     private fun onDisconnected(it: OnDisconnect): OnDisconnected {
-        it.peerId?.let { peerId ->
-            launchDisposable {
-                sessionRepository.deleteDappSession(peerId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(onError = { OnError(it) })
-            }
+        it.peerId?.let { peerId -> removeSession(peerId) }
+        return OnDisconnected
+    }
+
+    private fun removeSession(peerId: String) {
+        launchDisposable {
+            sessionRepository.deleteDappSession(peerId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onError = { OnError(it) })
         }
-        return OnDisconnected(it.peerId)
     }
 
     private fun getIcon(icons: List<String>) =
