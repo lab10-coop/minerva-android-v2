@@ -44,7 +44,7 @@ class TransactionSendFragment : Fragment() {
     private lateinit var binding: FragmentTransactionSendBinding
 
     private val spinnerPosition
-        get() = viewModel.assetIndex + ONE_ELEMENT
+        get() = viewModel.tokenIndex + ONE_ELEMENT
 
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
         binding.transactionCostAmount.text =
@@ -189,7 +189,7 @@ class TransactionSendFragment : Fragment() {
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                            viewModel.assetIndex = position - ONE_ELEMENT
+                            viewModel.tokenIndex = position - ONE_ELEMENT
                             setupTexts()
                         }
 

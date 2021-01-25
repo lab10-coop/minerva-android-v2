@@ -34,9 +34,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
 
-    private val assetsBalanceObserver: Observer<Map<String, List<AccountAsset>>> = mock()
-    private val assetsBalanceCaptor: KArgumentCaptor<Map<String, List<AccountAsset>>> =
-        argumentCaptor()
+    private val tokensBalanceObserver: Observer<Map<String, List<AccountToken>>> = mock()
+    private val tokensBalanceCaptor: KArgumentCaptor<Map<String, List<AccountToken>>> = argumentCaptor()
 
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -133,34 +132,34 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `get assets balance success test`() {
-        whenever(transactionRepository.refreshAssetBalance()).thenReturn(
+    fun `get tokens balance success test`() {
+        whenever(transactionRepository.refreshTokenBalance()).thenReturn(
             Single.just(
                 mapOf(
                     Pair(
                         "test",
-                        listOf(AccountAsset(Asset("name")))
+                        listOf(AccountToken(Token("name")))
                     )
                 )
             )
         )
-        viewModel.accountAssetBalanceLiveData.observeForever(assetsBalanceObserver)
-        viewModel.refreshAssetBalance()
-        assetsBalanceCaptor.run {
-            verify(assetsBalanceObserver).onChanged(capture())
-            (firstValue["test"] ?: error(""))[0].asset.name shouldBe "name"
+        viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
+        viewModel.refreshTokenBalance()
+        tokensBalanceCaptor.run {
+            verify(tokensBalanceObserver).onChanged(capture())
+            (firstValue["test"] ?: error(""))[0].token.name shouldBe "name"
         }
     }
 
     @Test
-    fun `get assets balance error test`() {
+    fun `get tokens balance error test`() {
         val error = Throwable()
-        whenever(transactionRepository.refreshAssetBalance()).thenReturn(Single.error(error))
+        whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.error(error))
         viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
-        viewModel.refreshAssetBalance()
+        viewModel.refreshTokenBalance()
         refreshBalancesErrorCaptor.run {
             verify(refreshBalancesErrorObserver).onChanged(capture())
-            firstValue.peekContent() == ErrorCode.ASSET_BALANCE_ERROR
+            firstValue.peekContent() == ErrorCode.TOKEN_BALANCE_ERROR
         }
     }
 
@@ -169,10 +168,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("error")
         whenever(accountManager.removeAccount(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
-            Completable.error(
-                error
-            )
-        )
+            Completable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.removeAccount(Account(1, "test"))
         errorCaptor.run {
@@ -195,10 +191,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `create safe account error`() {
         val error = Throwable("error")
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
-            Completable.error(
-                error
-            )
-        )
+            Completable.error(error))
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
         whenever(accountManager.createRegularAccount(any())).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
@@ -275,16 +268,16 @@ class AccountsViewModelTest : BaseViewModelTest() {
         assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
     }
 
-    private val accountsWithoutPrimaryAccount = listOf(
-        Account(1, network = Network(short = "second_network")),
-        Account(4, network = Network(short = "some_other_network"))
-    )
-
     private val accounts = listOf(
         Account(1, network = Network(short = "second_network")),
         Account(2, network = Network(short = "first_network")),
         Account(3, network = Network(short = "first_network")),
         Account(4, network = Network(short = "some_other_network"))
+    )
+
+    private val accountsWithoutPrimaryAccount = listOf(
+        Account(1, networkShort = "second_network"),
+        Account(4, networkShort = "some_other_network")
     )
 
     private val networks = listOf(

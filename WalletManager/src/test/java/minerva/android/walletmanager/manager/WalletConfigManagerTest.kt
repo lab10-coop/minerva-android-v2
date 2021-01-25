@@ -25,6 +25,7 @@ import minerva.android.walletmanager.model.Service
 import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils
+import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.DataProvider.localWalletConfigPayload
 import minerva.android.walletmanager.utils.DataProvider.onlineWalletConfigResponse
 import org.amshove.kluent.any
@@ -87,12 +88,7 @@ class WalletConfigManagerTest {
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
         whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
         whenever(localStorage.isBackupAllowed).thenReturn(true)
-        NetworkManager.initialize(
-            listOf(
-                Network(short = "ATS", httpRpc = "httpRpc"),
-                Network(short = "RIN", httpRpc = "httpRpc")
-            )
-        )
+        NetworkManager.initialize(DataProvider.networks)
     }
 
     @Test
@@ -110,32 +106,9 @@ class WalletConfigManagerTest {
     @Test
     fun `fetch wallet config when api error occurs`() {
         val error = Throwable()
-        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.complete())
-        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(
-            MasterSeed(
-                _seed = "seed",
-                _privateKey = "privateKey",
-                _publicKey = "public"
-            )
-        )
-        whenever(localWalletConfigProvider.getWalletConfig()).thenReturn(Single.just(localWalletConfigPayload))
-        whenever(minervaApi.saveWalletActions(any(), any())).doReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(0), any(), any()))
-            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(1), any(), any()))
-            .thenReturn(Single.just(DerivedKeys(1, "publicKey", "privateKey", "address")))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(2), any(), any()))
-            .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
-        whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
-        whenever(localStorage.isBackupAllowed).thenReturn(true)
-        whenever(minervaApi.getWalletConfigVersion(any())).doReturn(Single.just(1))
-        NetworkManager.initialize(
-            listOf(
-                Network(short = "ATS", httpRpc = "httpRpc"),
-                Network(short = "RIN", httpRpc = "httpRpc")
-            )
-        )
+        mockWallet()
         whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.error(error))
+
         walletManager.initWalletConfig()
         walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
         walletConfigCaptor.run {

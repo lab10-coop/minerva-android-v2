@@ -1,5 +1,6 @@
 package minerva.android
 
+import com.nhaarman.mockitokotlin2.whenever
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Flowable
@@ -8,13 +9,13 @@ import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.blockchainprovider.smartContracts.ERC20
 import org.junit.Test
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.methods.response.*
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.net.URL
 import kotlin.test.assertEquals
 
 

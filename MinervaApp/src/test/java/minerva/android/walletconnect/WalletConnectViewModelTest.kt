@@ -33,6 +33,10 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     private val manager: AccountManager = mock()
     private lateinit var viewModel: WalletConnectViewModel
 
+    private val networks = listOf(
+        Network(testNet = false, full = "Ethereum", short = "eee", httpRpc = "someaddress")
+    )
+
     private val viewStateObserver: Observer<WalletConnectViewState> = mock()
     private val viewStateCaptor: KArgumentCaptor<WalletConnectViewState> = argumentCaptor()
     private val meta = WCPeerMeta(name = "token", url = "url", description = "dsc")
@@ -106,6 +110,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
                     full = "Ethereum (Görli)",
                     chainId = 1,
                     short = "eth_goerli",
+                    httpRpc = "someaddress",
                     testNet = true
                 )
             )
@@ -161,12 +166,12 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `handle wc qr code test`() {
-//        viewModel.viewStateLiveData.observeForever(viewStateObserver)
-//        viewModel.handleQrCode("wc:topic@123?bridge=123&key=1432")
-//        viewStateCaptor.run {
-//            verify(viewStateObserver).onChanged(capture())
-//            firstValue shouldBe CorrectQrCodeState
-//        }
+        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+        viewModel.handleQrCode("wc:123456789")
+        viewStateCaptor.run {
+            verify(viewStateObserver).onChanged(capture())
+            firstValue shouldBe CorrectQrCodeState
+        }
     }
 
     @Test

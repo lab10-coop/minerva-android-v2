@@ -6,9 +6,11 @@ import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Transaction
@@ -21,6 +23,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.math.BigDecimal
+import java.math.BigInteger
 import kotlin.test.assertEquals
 
 class SmartContractRepositoryTest {
@@ -48,8 +51,9 @@ class SmartContractRepositoryTest {
 
     @Test
     fun `create safe account success`() {
+        NetworkManager.initialize(DataProvider.networks)
         whenever(blockchainSafeAccountRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.just("address"))
-        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE)).test()
+        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE, networkShort = "eth_rinkeby")).test()
             .assertNoErrors()
             .assertComplete()
             .assertValue {
@@ -60,8 +64,9 @@ class SmartContractRepositoryTest {
     @Test
     fun `create safe account error`() {
         val error = Throwable()
+        NetworkManager.initialize(DataProvider.networks)
         whenever(blockchainSafeAccountRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.error(error))
-        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE)).test()
+        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE, networkShort = "eth_rinkeby")).test()
             .assertError(error)
     }
 
@@ -207,6 +212,45 @@ class SmartContractRepositoryTest {
         smartContractRepository.run {
             val result = getSafeAccountMasterOwnerPrivateKey("address")
             assertEquals(result, "")
+        }
+    }
+
+    @Test
+    fun `get Token details`() {
+        val error = Throwable("Some error")
+        val name = "CookieToken"
+        val symbol = "Cookie"
+        val decimal = BigInteger.ONE
+        (blockchainRegularAccountRepository).run {
+            whenever(getERC20TokenName(any(), any(), any())).thenReturn(
+                Observable.just(name),
+                Observable.error(error),
+                Observable.just(name),
+                Observable.just(name)
+            )
+            whenever(getERC20TokenSymbol(any(), any(), any())).thenReturn(
+                Observable.just(symbol),
+                Observable.just(symbol),
+                Observable.error(error),
+                Observable.just(symbol)
+            )
+            whenever(getERC20TokenDecimals(any(), any(), any())).thenReturn(
+                Observable.just(decimal),
+                Observable.just(decimal),
+                Observable.just(decimal),
+                Observable.error(error)
+            )
+        }
+        smartContractRepository.run {
+            getERC20TokenDetails("privateKey", "network", "address").test().assertComplete()
+                .assertValue {
+                    it.name == name
+                    it.symbol == symbol
+                    it.decimals == decimal.toString()
+                }
+            getERC20TokenDetails("privateKey", "network", "address").test().assertError(error)
+            getERC20TokenDetails("privateKey", "network", "address").test().assertError(error)
+            getERC20TokenDetails("privateKey", "network", "address").test().assertError(error)
         }
     }
 }

@@ -18,11 +18,8 @@ class LocalWalletConfigProviderImpl(private val sharedPreferences: SharedPrefere
         sharedPreferences.edit().putString(WALLET_CONFIG, Gson().toJson(payload)).apply()
 
     private fun makeWalletConfig(rawWalletConfig: String): WalletConfigPayload =
-        if (rawWalletConfig == String.NO_DATA) {
-            WalletConfigPayload()
-        } else {
-            Migration.migrateIfNeeded(rawWalletConfig)
-        }
+        if (rawWalletConfig == String.NO_DATA) WalletConfigPayload()
+        else Migration.migrateIfNeeded(rawWalletConfig)
 
     companion object {
         private const val WALLET_CONFIG = "wallet_config"

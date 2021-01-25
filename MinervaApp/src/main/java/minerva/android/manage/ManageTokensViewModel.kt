@@ -2,14 +2,16 @@ package minerva.android.manage
 
 import minerva.android.base.BaseViewModel
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Asset
 import minerva.android.walletmanager.model.AssetVisibilitySettings
+import minerva.android.walletmanager.model.Token
 import minerva.android.walletmanager.storage.LocalStorage
 
-class ManageAssetsViewModel(
+class ManageTokensViewModel(
     private val accountManager: AccountManager,
-    private val localStorage: LocalStorage
+    private val localStorage: LocalStorage,
+    private val tokenManager: TokenManager
 ) : BaseViewModel() {
 
     lateinit var account: Account
@@ -20,15 +22,15 @@ class ManageAssetsViewModel(
         assetVisibilitySettings = localStorage.getAssetVisibilitySettings()
     }
 
-    fun loadAssets() = account.network.let {
-        listOf(Asset(it.full, it.short)) + account.network.assets
+    fun loadTokens() = account.network.let {
+        listOf(Token(it.token, it.short)) + tokenManager.loadTokens(it.short)
     }
 
-    fun getAssetVisibilitySettings(assetAddress: String): Boolean =
+    fun getTokenVisibilitySettings(assetAddress: String): Boolean =
         assetVisibilitySettings.getAssetVisibility(account.address, assetAddress) ?: false
 
 
-    fun saveAssetVisibilitySettings(assetAddress: String, visibility: Boolean) {
+    fun saveTokenVisibilitySettings(assetAddress: String, visibility: Boolean) {
         assetVisibilitySettings = localStorage.saveAssetVisibilitySettings(
             assetVisibilitySettings.updateAssetVisibility(account.address, assetAddress, visibility)
         )

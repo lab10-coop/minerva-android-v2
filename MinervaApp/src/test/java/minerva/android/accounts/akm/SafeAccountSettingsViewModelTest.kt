@@ -7,7 +7,10 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -28,13 +31,21 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     private val viewModel: SafeAccountSettingsViewModel =
         SafeAccountSettingsViewModel(accountManager, smartContractRepository)
 
-    private val mockValue = Account(0).apply {
+    private val mockValue = Account(0, networkShort = "networkThree").apply {
         contractAddress = "0x123"
         owners = listOf("0x456")
     }
 
+    val networks = listOf(
+        Network(short = "networkOne", httpRpc = "address", testNet = true),
+        Network(short = "networkTwo", httpRpc = "address", testNet = true),
+        Network(short = "networkThree", httpRpc = "address", testNet = true),
+        Network(short = "networkFour", httpRpc = "address", testNet = true)
+    )
+
     @Test
     fun `load updated owner list`() {
+        NetworkManager.initialize(networks)
         whenever(accountManager.loadAccount(any())).thenReturn(mockValue)
         whenever(smartContractRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(
             Single.just(
@@ -155,7 +166,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
         ) doReturn Single.just(listOf("tom", "beata"))
         viewModel.run {
             ownersLiveData.observeForever(ownersObserver)
-            account = Account(id = 0, owners = listOf("tom", "beata"))
+            account = Account(id = 0, owners = listOf("tom", "beata"), networkShort = "networkThree")
             removeOwner("tom")
         }
         kArgumentCaptor.run {
@@ -166,10 +177,11 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `remove owner success error`() {
         val error = Throwable()
+        NetworkManager.initialize(networks)
         whenever(smartContractRepository.removeSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.error(error)
         viewModel.run {
             errorLiveData.observeForever(errorObserver)
-            account = Account(id = 0, owners = listOf("tom", "beata"))
+            account = Account(id = 0, owners = listOf("tom", "beata"), networkShort = "networkThree")
             removeOwner("tom")
             errorLiveData.observeLiveDataEvent(Event(error))
         }

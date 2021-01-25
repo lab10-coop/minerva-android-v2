@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import io.reactivex.SingleSource
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath
@@ -20,6 +19,10 @@ import minerva.android.walletmanager.model.mappers.DappSessionToEntityMapper
 import minerva.android.walletmanager.model.mappers.EntityToDappSessionMapper
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.AccountToken
+import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.WalletConfig
 import minerva.android.walletmanager.utils.CryptoUtils
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -50,7 +53,7 @@ class AccountManagerImpl(
                     val newAccount = Account(
                         index,
                         name = accountName,
-                        network = network,
+                        networkShort = network.short,
                         publicKey = keys.publicKey,
                         privateKey = keys.privateKey,
                         address = keys.address
@@ -83,7 +86,7 @@ class AccountManagerImpl(
                     val newAccount = Account(
                         index,
                         name = getSafeAccountName(account),
-                        network = account.network,
+                        networkShort = account.network.short,
                         bindedOwner = ownerAddress,
                         publicKey = keys.publicKey,
                         privateKey = keys.privateKey,
@@ -169,10 +172,7 @@ class AccountManagerImpl(
             config.accounts.forEachIndexed { index, item ->
                 if (index == accountIndex) {
                     return when {
-                        areFundsOnValue(
-                            item.cryptoBalance,
-                            item.accountAssets
-                        ) -> handleNoFundsError(item)
+                        areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
                         isNotSafeAccountMasterOwner(config.accounts, item) ->
                             Completable.error(IsNotSafeAccountMasterOwnerThrowable())
                         else -> {
@@ -207,11 +207,9 @@ class AccountManagerImpl(
         return false
     }
 
-    private fun areFundsOnValue(balance: BigDecimal, accountAssets: List<AccountAsset>): Boolean {
-        accountAssets.forEach {
-            if (blockchainRepository.toGwei(it.balance)
-                    .toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
-            ) return true
+    private fun areFundsOnValue(balance: BigDecimal, accountTokens: List<AccountToken>): Boolean {
+        accountTokens.forEach {
+            if (blockchainRepository.toGwei(it.balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
         return blockchainRepository.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
     }

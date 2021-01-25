@@ -16,7 +16,9 @@ data class WalletConfigPayload(
     @SerializedName("services")
     private var _servicesPayloads: List<ServicePayload>? = listOf(),
     @SerializedName("credentials")
-    private var _credentialPayloads: List<CredentialsPayload>? = listOf()
+    private var _credentialPayloads: List<CredentialsPayload>? = listOf(),
+    @SerializedName("ERC20Tokens")
+    private var _erc20Tokens: Map<String, List<TokenPayload>>? = mapOf() //TODO it will be splitted with Swarm implementation
 ) {
     val version: Int
         get() = _version ?: Int.InvalidId
@@ -28,5 +30,6 @@ data class WalletConfigPayload(
         get() = _servicesPayloads ?: listOf()
     val credentialResponse: List<CredentialsPayload>
         get() = _credentialPayloads ?: listOf()
-
+    val erc20TokenResponse: Map<String, List<TokenPayload>>
+        get() = _erc20Tokens ?: mapOf()
 }
