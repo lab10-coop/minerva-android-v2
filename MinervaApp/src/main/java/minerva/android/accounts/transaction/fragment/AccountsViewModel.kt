@@ -110,7 +110,6 @@ class AccountsViewModel(
         }
     }
 
-
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
     val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
 

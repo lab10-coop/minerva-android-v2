@@ -1,21 +1,25 @@
 package minerva.android.walletmanager.repository
 
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.DappSessionDao
 import minerva.android.walletmanager.database.entity.DappSessionEntity
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.repository.walletconnect.DappSessionRepositoryImpl
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.any
-import org.amshove.kluent.mock
 import org.junit.Test
 
 class DappSessionRepositoryTest : RxTest() {
 
     private val dappSessionDao: DappSessionDao = mock()
-    private val repository = DappSessionRepositoryImpl(dappSessionDao)
+    private val database: MinervaDatabase = mock {
+        whenever(this.mock.dappDao()).thenReturn(dappSessionDao)
+    }
+    private val repository = DappSessionRepositoryImpl(database)
 
     private val dapps =
         listOf(DappSessionEntity(address = "address1"), DappSessionEntity("ddsdress2"))

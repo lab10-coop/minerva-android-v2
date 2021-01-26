@@ -9,16 +9,18 @@ import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import java.util.concurrent.ConcurrentHashMap
 
-class WalletConnectRepositoryImpl : WalletConnectRepository {
+class WalletConnectRepositoryImpl(
+    private var wcClient: WCClient = WCClient(),
+    val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
+) : WalletConnectRepository {
 
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
 
-    private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
-
     override fun connect(session: WCSession, peerId: String, remotePeerId: String?) {
-        with(WCClient()) {
+        wcClient = WCClient()
+        with(wcClient) {
             onWCOpen = { peerId ->
                 clientMap[peerId] = this
             }
