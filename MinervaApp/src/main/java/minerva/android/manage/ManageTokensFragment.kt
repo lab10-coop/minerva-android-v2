@@ -74,7 +74,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
     private fun addMainToken(tokens: List<Token>) {
         binding.tokenContainer.apply {
             addView(TextView(requireContext()).apply {
-                initTokenRow(this, tokens[MAIN_TOKEN_INDEX].name)
+                initTokenRow(this, tokens[MAIN_TOKEN_INDEX])
             })
         }
     }
@@ -83,7 +83,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
         binding.tokenContainer.apply {
             tokens.drop(FIRST_ELEMENT).forEach { token ->
                 addView(SwitchMaterial(requireContext()).apply {
-                    initTokenRow(this, token.name)
+                    initTokenRow(this, token)
                     isChecked = viewModel.getTokenVisibilitySettings(token.address)
                     setOnCheckedChangeListener { _, _ -> viewModel.saveTokenVisibilitySettings(token.address, isChecked) }
                 })
@@ -91,9 +91,9 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
         }
     }
 
-    private fun initTokenRow(view: TextView, title: String) {
+    private fun initTokenRow(view: TextView, token: Token) {
         view.apply {
-            text = title
+            text = token.name
             gravity = Gravity.CENTER_VERTICAL
             setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
             resources.getDimension(R.dimen.margin_xsmall).toInt().let { padding ->
@@ -101,7 +101,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
                 compoundDrawablePadding = padding
             }
             setCompoundDrawablesWithIntrinsicBounds(
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_default_token),
+                ContextCompat.getDrawable(requireContext(), token.logoRes ?: R.drawable.ic_default_token),
                 null,
                 null,
                 null
