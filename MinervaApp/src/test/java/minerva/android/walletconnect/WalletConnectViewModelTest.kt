@@ -216,6 +216,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `kill session test`() {
+        whenever(dappSessionRepository.deleteDappSession(any())).thenReturn(Completable.complete())
         viewModel.killSession("peerID")
         verify(repository).killSession("peerID")
     }
