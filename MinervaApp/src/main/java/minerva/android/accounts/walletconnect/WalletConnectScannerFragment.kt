@@ -15,6 +15,7 @@ import minerva.android.extension.invisible
 import minerva.android.extension.margin
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
+import minerva.android.walletConnect.model.exceptions.InvalidAccountException
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
@@ -42,7 +43,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is CorrectQrCodeState -> shouldScan = false
                 is OnError -> {
                     shouldScan = true
-                    showToast("${it.error.message}")
+                    showToast(getErrorMessage(it))
                 }
                 is OnDisconnected ->
                     showToast(getString(R.string.dapp_disconnected))
@@ -66,7 +67,14 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         })
     }
 
-    private fun showToast(message: String) {
+    private fun getErrorMessage(it: OnError) =
+        if (it.error is InvalidAccountException) {
+            getString(R.string.invalid_account_message)
+        } else {
+            it.error.message
+        }
+
+    private fun showToast(message: String?) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 

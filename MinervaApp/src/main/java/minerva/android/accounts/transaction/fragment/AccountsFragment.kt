@@ -247,10 +247,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             }
         }
 
-    private fun AccountsViewModel.getFreeAtsMessage(it: View, accounts: List<Account>) =
-        if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
+    private fun getFreeAtsMessage(it: View, accounts: List<Account>) =
+        if (viewModel.isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
             it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
-            addAtsToken(accounts, getString(R.string.free_ats_warning))
+            viewModel.addAtsToken(accounts, getString(R.string.free_ats_warning))
             R.string.refresh_balance_to_check_transaction_status
         } else R.string.free_ats_warning
 

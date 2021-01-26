@@ -10,10 +10,12 @@ import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLE
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.OnConnectionFailure
 import minerva.android.walletConnect.client.OnDisconnect
 import minerva.android.walletConnect.client.OnSessionRequest
+import minerva.android.walletConnect.model.exceptions.InvalidAccountException
 import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
@@ -71,15 +73,19 @@ class WalletConnectViewModel(
     }
 
     fun getAccount(index: Int) {
-        account = accountManager.loadAccount(index)
-        launchDisposable {
-            sessionRepository.getAllSessions()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = { _viewStateLiveData.value = handleSessions(it) },
-                    onError = { _viewStateLiveData.value = OnError(it) }
-                )
+        if (index != Int.InvalidIndex) {
+            account = accountManager.loadAccount(index)
+            launchDisposable {
+                sessionRepository.getAllSessions()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = { _viewStateLiveData.value = handleSessions(it) },
+                        onError = { _viewStateLiveData.value = OnError(it) }
+                    )
+            }
+        } else {
+            _viewStateLiveData.value = OnError(InvalidAccountException())
         }
     }
 

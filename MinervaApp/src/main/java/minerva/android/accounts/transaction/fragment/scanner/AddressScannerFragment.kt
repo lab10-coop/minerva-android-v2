@@ -29,9 +29,7 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        arguments?.getInt(ACCOUNT_INDEX)?.let {
-            if (it != Int.InvalidValue) viewModel.getAccount(it)
-        }
+        arguments?.getInt(ACCOUNT_INDEX)?.let { viewModel.getAccount(it) }
     }
 
     override fun setupCallbacks() {
