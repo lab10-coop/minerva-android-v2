@@ -242,21 +242,17 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun setTatsButtonListener(accounts: List<Account>) =
         binding.addTatsButton.setOnClickListener {
             viewModel.apply {
-                val toastMessage =
-                    if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
-                        it.setBackgroundColor(
-                            ContextCompat.getColor(
-                                it.context,
-                                R.color.inactiveButtonColor
-                            )
-                        )
-                        addAtsToken(accounts, getString(R.string.free_ats_warning))
-                        R.string.refresh_balance_to_check_transaction_status
-                    } else R.string.free_ats_warning
-
-                Toast.makeText(it.context, toastMessage, Toast.LENGTH_SHORT).show()
+                Toast.makeText(it.context, getFreeAtsMessage(it, accounts), Toast.LENGTH_SHORT)
+                    .show()
             }
         }
+
+    private fun AccountsViewModel.getFreeAtsMessage(it: View, accounts: List<Account>) =
+        if (isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
+            it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
+            addAtsToken(accounts, getString(R.string.free_ats_warning))
+            R.string.refresh_balance_to_check_transaction_status
+        } else R.string.free_ats_warning
 
     private fun showErrorFlashbar(title: String, message: String? = String.Empty) =
         message?.let {
