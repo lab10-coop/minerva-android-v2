@@ -168,7 +168,14 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `handle wc qr code test`() {
-        whenever(repository.getWCSessionFromQr(any())).thenReturn(WCSession(topic = "topic", version = "v", bridge = "b", key = "k"))
+        whenever(repository.getWCSessionFromQr(any())).thenReturn(
+            WCSession(
+                topic = "topic",
+                version = "v",
+                bridge = "b",
+                key = "k"
+            )
+        )
         viewModel.viewStateLiveData.observeForever(viewStateObserver)
         viewModel.handleQrCode("wc:123456789")
         viewStateCaptor.run {
@@ -189,7 +196,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `approve session test`() {
-        NetworkManager.networks =
+        NetworkManager.initialize(
             listOf(
                 Network(
                     full = "Ethereum",
@@ -199,6 +206,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
                     httpRpc = "url"
                 )
             )
+        )
         viewModel.topic = Topic()
         viewModel.currentSession = WCSession("topic", "version", "bridge", "key")
         viewModel.account = Account(1, networkShort = "eth_mainnet")

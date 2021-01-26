@@ -1,6 +1,6 @@
 package minerva.android.walletmanager.storage
 
-import minerva.android.walletmanager.model.AssetVisibilitySettings
+import minerva.android.walletmanager.model.TokenVisibilitySettings
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.Recipient
 
@@ -14,8 +14,8 @@ interface LocalStorage {
     fun getProfileImage(name: String): String
     fun saveProfileImage(name: String, image: String)
 
-    fun getAssetVisibilitySettings(): AssetVisibilitySettings
-    fun saveAssetVisibilitySettings(settings: AssetVisibilitySettings): AssetVisibilitySettings
+    fun getAssetVisibilitySettings(): TokenVisibilitySettings
+    fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings
 
     fun savePendingAccount(pendingAccount: PendingAccount)
     fun getPendingAccounts(): List<PendingAccount>

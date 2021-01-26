@@ -6,9 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.flow.map
 import minerva.android.accounts.enum.ErrorCode
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
@@ -115,7 +113,7 @@ class AccountsViewModel(
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
     val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
 
-    private lateinit var assetVisibilitySettings: AssetVisibilitySettings
+    private lateinit var tokenVisibilitySettings: TokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
 
     fun arePendingAccountsEmpty() =
@@ -139,7 +137,7 @@ class AccountsViewModel(
 
     override fun onResume() {
         super.onResume()
-        assetVisibilitySettings = accountManager.getAssetVisibilitySettings()
+        tokenVisibilitySettings = accountManager.getAssetVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
         accountManager.walletConfigLiveData.value?.accounts?.let {
@@ -288,11 +286,11 @@ class AccountsViewModel(
     }
 
     fun isAssetVisible(networkAddress: String, assetAddress: String) =
-        assetVisibilitySettings.getAssetVisibility(networkAddress, assetAddress)
+        tokenVisibilitySettings.getAssetVisibility(networkAddress, assetAddress)
 
     fun saveAssetVisible(networkAddress: String, assetAddress: String, visibility: Boolean) {
-        assetVisibilitySettings = accountManager.saveAssetVisibilitySettings(
-            assetVisibilitySettings.updateAssetVisibility(networkAddress, assetAddress, visibility)
+        tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
+            tokenVisibilitySettings.updateAssetVisibility(networkAddress, assetAddress, visibility)
         )
     }
 

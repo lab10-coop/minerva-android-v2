@@ -8,14 +8,12 @@ data class WCSession(
     val bridge: String,
     val key: String
 ) {
-    fun toUri(): String = "wc:${topic}@${version}?bridge=${bridge}&key=${key}"
-
     companion object {
         fun from(from: String): WCSession {
-            val uriString = from.replace("wc:", "wc://")
+            val uriString = from.replace(WC, "wc://")
             val uri = Uri.parse(uriString)
-            val bridge = uri.getQueryParameter("bridge")
-            val key = uri.getQueryParameter("key")
+            val bridge = uri.getQueryParameter(BRIDGE)
+            val key = uri.getQueryParameter(KEY)
             val topic = uri.userInfo
             val version = uri.host
 
@@ -25,5 +23,9 @@ data class WCSession(
 
             return WCSession(topic, version, bridge, key)
         }
+
+        private const val BRIDGE = "bridge"
+        private const val KEY = "key"
+        private const val WC = "wc:"
     }
 }

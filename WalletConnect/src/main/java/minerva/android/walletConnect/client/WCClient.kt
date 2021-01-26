@@ -80,7 +80,6 @@ open class WCClient(
     var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = { _, _ -> Unit }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d(TAG, "<< websocket opened >>")
         isConnected = true
 
         listeners.forEach { it.onOpen(webSocket, response) }
@@ -101,16 +100,12 @@ open class WCClient(
         var decrypted: String? = null
         try {
             if (text.equals("ping")) {
-                Log.d(TAG, "<== pong")
                 onPong(text);
                 return;
             }
-            Log.d(TAG, "<== message $text")
 
             val message = gson.fromJson<WCSocketMessage>(text)
             decrypted = decryptMessage(message)
-
-            Log.d(TAG, "<== decrypted $decrypted")
             handleMessage(decrypted)
         } catch (e: Exception) {
             onFailure(e, peerId)
@@ -127,22 +122,16 @@ open class WCClient(
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d(TAG, "<< websocket closed >>")
-
         listeners.forEach { it.onClosed(webSocket, code, reason) }
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        Log.d(TAG, "<== Received: $bytes")
         listeners.forEach { it.onMessage(webSocket, bytes) }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d(TAG, "<< closing socket >>")
-
         onDisconnect(code, peerId)
         resetState()
-
         listeners.forEach { it.onClosing(webSocket, code, reason) }
     }
 
@@ -189,7 +178,6 @@ open class WCClient(
     }
 
     fun sendPing(): Boolean {
-        Log.d(TAG, "==> ping")
         return socket?.send("ping") ?: false
     }
 
@@ -373,10 +361,8 @@ open class WCClient(
         )
 
         val rpId = remotePeerId ?: session.topic
-        Log.d(TAG, "E&Send: $rpId")
 
         val json = gson.toJson(message)
-        Log.d(TAG, "==> encrypted $json")
         return socket?.send(json) ?: false
     }
 

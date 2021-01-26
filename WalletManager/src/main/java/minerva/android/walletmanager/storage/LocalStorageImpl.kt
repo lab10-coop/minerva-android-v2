@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_DATA
-import minerva.android.walletmanager.model.AssetVisibilitySettings
+import minerva.android.walletmanager.model.TokenVisibilitySettings
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.Recipient
 
@@ -90,13 +90,13 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
 
     override fun saveProfileImage(name: String, image: String) = sharedPreferences.edit().putString(name, image).apply()
 
-    override fun getAssetVisibilitySettings(): AssetVisibilitySettings =
+    override fun getAssetVisibilitySettings(): TokenVisibilitySettings =
         sharedPreferences.getString(ASSET_VISIBILITY_SETTINGS, String.NO_DATA).let { raw ->
-            if (raw == String.NO_DATA) AssetVisibilitySettings()
-            else Gson().fromJson(raw, object : TypeToken<AssetVisibilitySettings>() {}.type)
+            if (raw == String.NO_DATA) TokenVisibilitySettings()
+            else Gson().fromJson(raw, object : TypeToken<TokenVisibilitySettings>() {}.type)
         }
 
-    override fun saveAssetVisibilitySettings(settings: AssetVisibilitySettings): AssetVisibilitySettings {
+    override fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings {
         sharedPreferences.edit().putString(ASSET_VISIBILITY_SETTINGS, Gson().toJson(settings)).apply()
         return settings
     }
