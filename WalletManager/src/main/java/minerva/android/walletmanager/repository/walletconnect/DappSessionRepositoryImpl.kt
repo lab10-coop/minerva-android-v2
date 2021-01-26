@@ -3,14 +3,14 @@ package minerva.android.walletmanager.repository.walletconnect
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import minerva.android.walletmanager.database.MinervaDatabase
+import minerva.android.walletmanager.database.dao.DappSessionDao
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.mappers.DappSessionToEntityMapper
 import minerva.android.walletmanager.model.mappers.EntityToDappSessionMapper
 
-class DappSessionRepositoryImpl(database: MinervaDatabase) : DappSessionRepository {
+class DappSessionRepositoryImpl(sessionDao: DappSessionDao) : DappSessionRepository {
 
-    private val dappDao = database.dappDao()
+    private val dappDao = sessionDao
 
     override fun getConnectedDapps(): Single<List<DappSession>> =
         dappDao.getAll().firstOrError().map { EntityToDappSessionMapper.map(it) }

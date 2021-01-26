@@ -43,17 +43,14 @@ open class WCClient(
     var session: WCSession? = null
         private set
 
-    var peerMeta: WCPeerMeta? = null
-        private set
+    private var peerMeta: WCPeerMeta? = null
 
     var peerId: String = String.Empty
         private set
 
-    var remotePeerId: String? = null
-        private set
+    private var remotePeerId: String? = null
 
-    var isConnected: Boolean = false
-        private set
+    private var isConnected: Boolean = false
 
     fun sessionId(): String? {
         if (session != null) return session!!.topic;

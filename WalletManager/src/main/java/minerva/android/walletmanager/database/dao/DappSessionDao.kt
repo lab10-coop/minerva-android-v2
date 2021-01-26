@@ -9,9 +9,6 @@ import minerva.android.walletmanager.database.entity.DappSessionEntity
 @Dao
 interface DappSessionDao {
 
-    @Query("SELECT * FROM dapp_sessions WHERE address = :address")
-    fun getConnectedDapps(address: String): Flowable<List<DappSessionEntity>>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(dapp: DappSessionEntity): Completable
 
