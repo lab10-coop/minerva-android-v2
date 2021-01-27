@@ -19,7 +19,6 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.util.concurrent.TimeUnit
 
 class AccountManagerImpl(
     private val walletManager: WalletConfigManager,
@@ -125,8 +124,8 @@ class AccountManagerImpl(
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)
 
-    override fun getAssetVisibilitySettings(): TokenVisibilitySettings =
-        localStorage.getAssetVisibilitySettings()
+    override fun getTokenVisibilitySettings(): TokenVisibilitySettings =
+        localStorage.getTokenVisibilitySettings()
 
     override fun saveFreeATSTimestamp() {
         localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills())
@@ -229,6 +228,5 @@ class AccountManagerImpl(
     companion object {
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
         private const val NO_SAFE_ACCOUNTS = 0
-        private const val HOURS_IN_DAY = 24L
     }
 }

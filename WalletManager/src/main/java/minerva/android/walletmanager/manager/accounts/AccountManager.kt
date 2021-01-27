@@ -16,7 +16,7 @@ interface AccountManager : Manager {
     fun getSafeAccountCount(ownerAddress: String): Int
     fun getSafeAccountName(account: Account): String
     fun isAddressValid(address: String): Boolean
-    fun getAssetVisibilitySettings(): TokenVisibilitySettings
+    fun getTokenVisibilitySettings(): TokenVisibilitySettings
     fun saveFreeATSTimestamp()
     fun getLastFreeATSTimestamp(): Long
     fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings

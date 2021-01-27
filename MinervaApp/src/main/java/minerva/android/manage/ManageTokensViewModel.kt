@@ -20,7 +20,7 @@ class ManageTokensViewModel(
 
     fun initViewModel(index: Int) {
         account = accountManager.loadAccount(index)
-        tokenVisibilitySettings = localStorage.getAssetVisibilitySettings()
+        tokenVisibilitySettings = localStorage.getTokenVisibilitySettings()
     }
 
     fun loadTokens() = account.network.let {

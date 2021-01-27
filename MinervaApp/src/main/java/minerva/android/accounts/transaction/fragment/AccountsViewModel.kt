@@ -112,7 +112,7 @@ class AccountsViewModel(
 
     override fun onResume() {
         super.onResume()
-        tokenVisibilitySettings = accountManager.getAssetVisibilitySettings()
+        tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
         accountManager.getAllAccounts()?.let { getSessions(it) }
@@ -181,15 +181,7 @@ class AccountsViewModel(
         launchDisposable {
             accountManager.removeAccount(account)
                 .observeOn(Schedulers.io())
-                .andThen(
-                    walletActionsRepository.saveWalletActions(
-                        listOf(
-                            getRemovedAccountAction(
-                                account
-                            )
-                        )
-                    )
-                )
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
