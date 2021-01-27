@@ -85,35 +85,6 @@ class AccountsViewModel(
             it.accounts
         }
 
-    private fun getSessions(accounts: List<Account>) {
-        launchDisposable {
-            dappSessionRepository.getConnectedDapps()
-                .map { sessions ->
-                    if (sessions.isNotEmpty()) {
-                        mutableListOf<Account>().apply {
-                            accounts.forEach { account ->
-                                val count = sessions.count {
-                                    it.address == accountManager.toChecksumAddress(account.address)
-                                }
-                                add(account.copy(dappSessionCount = count))
-                            }
-                        }
-
-                    } else {
-                        emptyList<Account>()
-                    }
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = {
-                        if (it.isNotEmpty()) _dappSessions.value = it
-                    },
-                    onError = { _errorLiveData.value = Event(it) }
-                )
-        }
-    }
-
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
     val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
 
@@ -146,6 +117,35 @@ class AccountsViewModel(
         refreshTokenBalance()
         accountManager.walletConfigLiveData.value?.accounts?.let {
             getSessions(it)
+        }
+    }
+
+    internal fun getSessions(accounts: List<Account>) {
+        launchDisposable {
+            dappSessionRepository.getConnectedDapps()
+                .map { sessions ->
+                    if (sessions.isNotEmpty()) {
+                        mutableListOf<Account>().apply {
+                            accounts.forEach { account ->
+                                val count = sessions.count {
+                                    it.address == accountManager.toChecksumAddress(account.address)
+                                }
+                                add(account.copy(dappSessionCount = count))
+                            }
+                        }
+
+                    } else {
+                        emptyList<Account>()
+                    }
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = {
+                        if (it.isNotEmpty()) _dappSessions.value = it
+                    },
+                    onError = { _errorLiveData.value = Event(it) }
+                )
         }
     }
 

@@ -17,10 +17,13 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
+import org.amshove.kluent.shouldBeInstanceOf
 import org.junit.Before
 import org.junit.Test
+import java.lang.IndexOutOfBoundsException
 import java.math.BigDecimal
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 
 class AccountsViewModelTest : BaseViewModelTest() {
 
@@ -40,6 +43,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+
+    private val dappSessionObserver: Observer<List<Account>> = mock()
+    private val dappSessionCaptor: KArgumentCaptor<List<Account>> = argumentCaptor()
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
@@ -270,6 +276,44 @@ class AccountsViewModelTest : BaseViewModelTest() {
         assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
         assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
         assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))
+    }
+
+    @Test
+    fun `get sessions and update accounts success`() {
+        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(
+            Single.just(
+                listOf(DappSession(address = "address"))
+            )
+        )
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        viewModel.dappSessions.observeForever(dappSessionObserver)
+        viewModel.getSessions(accounts)
+        dappSessionCaptor.run {
+            verify(dappSessionObserver).onChanged(capture())
+            firstValue[0].dappSessionCount == 1
+        }
+    }
+
+    @Test
+    fun `get sessions and update accounts error`() {
+        val error = Throwable()
+        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(Single.error(error))
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        viewModel.errorLiveData.observeForever(errorObserver)
+        viewModel.getSessions(accounts)
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `no sessions so account list is not updated, so test should fail`() {
+        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(Single.just(emptyList()))
+        viewModel.dappSessions.observeForever(dappSessionObserver)
+        viewModel.getSessions(accounts)
+        dappSessionCaptor.run {
+            assertFails { firstValue }
+        }
     }
 
     private val accounts = listOf(
