@@ -31,6 +31,7 @@ import minerva.android.walletmanager.repository.walletconnect.DappSessionReposit
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
+import java.util.concurrent.TimeUnit
 
 class AccountsViewModel(
     private val accountManager: AccountManager,
@@ -272,8 +273,11 @@ class AccountsViewModel(
     }
 
     fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
-        accountManager.shouldGetFreeAts() &&
+        shouldGetFreeAts() &&
                 accounts.any { it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short }
+
+    private fun shouldGetFreeAts() =
+        ((accountManager.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(24L)) < accountManager.currentTimeMills())
 
 
     @VisibleForTesting
@@ -290,7 +294,7 @@ class AccountsViewModel(
 
     fun saveAssetVisible(networkAddress: String, assetAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
-            tokenVisibilitySettings.updateAssetVisibility(networkAddress, assetAddress, visibility)
+            tokenVisibilitySettings.updateTokenVisibility(networkAddress, assetAddress, visibility)
         )
     }
 

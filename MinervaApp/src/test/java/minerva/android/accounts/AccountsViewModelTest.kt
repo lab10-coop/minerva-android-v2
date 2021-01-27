@@ -264,7 +264,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 time - 303
             )
         }
-        whenever(accountManager.shouldGetFreeAts()).thenReturn(false)
+        assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
+        assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
         assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
         assertEquals(false, viewModel.isAddingFreeATSAvailable(accounts))
         assertEquals(false, viewModel.isAddingFreeATSAvailable(accountsWithoutPrimaryAccount))

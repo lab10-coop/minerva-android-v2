@@ -33,7 +33,7 @@ class ManageTokensViewModel(
 
     fun saveTokenVisibilitySettings(assetAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = localStorage.saveTokenVisibilitySettings(
-            tokenVisibilitySettings.updateAssetVisibility(account.address, assetAddress, visibility)
+            tokenVisibilitySettings.updateTokenVisibility(account.address, assetAddress, visibility)
         )
     }
 }

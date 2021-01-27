@@ -140,9 +140,6 @@ class AccountManagerImpl(
 
     override fun currentTimeMills(): Long = timeProvider.currentTimeMills()
 
-    override fun shouldGetFreeAts(): Boolean =
-        ((getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(HOURS_IN_DAY)) < timeProvider.currentTimeMills())
-
     override fun getAllAccounts(): Single<List<Account>> =
         Single.just(walletManager.getWalletConfig()?.accounts)
 
