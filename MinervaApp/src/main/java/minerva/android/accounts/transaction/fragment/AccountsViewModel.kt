@@ -121,31 +121,29 @@ class AccountsViewModel(
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
             dappSessionRepository.getConnectedDapps()
-                .map { sessions ->
-                    if (sessions.isNotEmpty()) {
-                        mutableListOf<Account>().apply {
-                            accounts.forEach { account ->
-                                val count = sessions.count {
-                                    it.address == accountManager.toChecksumAddress(account.address)
-                                }
-                                add(account.copy(dappSessionCount = count))
-                            }
-                        }
-
-                    } else {
-                        emptyList<Account>()
-                    }
-                }
+                .map { sessions -> updateSessions(sessions, accounts) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        if (it.isNotEmpty()) _dappSessions.value = it
-                    },
+                    onSuccess = { if (it.isNotEmpty()) _dappSessions.value = it },
                     onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
+
+    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>) =
+        if (sessions.isNotEmpty()) {
+            mutableListOf<Account>().apply {
+                accounts.forEach { account ->
+                    val count = sessions.count {
+                        it.address == accountManager.toChecksumAddress(account.address)
+                    }
+                    add(account.copy(dappSessionCount = count))
+                }
+            }
+        } else {
+            emptyList<Account>()
+        }
 
     fun refreshBalances() =
         launchDisposable {
@@ -188,19 +186,23 @@ class AccountsViewModel(
                     onComplete = { _accountRemovedLiveData.value = Event(Unit) },
                     onError = {
                         Timber.e("Removing account with index ${account.id} failure")
-                        when (it) {
-                            is BalanceIsNotEmptyThrowable ->
-                                _balanceIsNotEmptyErrorLiveData.value = Event(it)
-                            is BalanceIsNotEmptyAndHasMoreOwnersThrowable ->
-                                _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
-                            is IsNotSafeAccountMasterOwnerThrowable ->
-                                _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
-                            is AutomaticBackupFailedThrowable ->
-                                _automaticBackupErrorLiveData.value = Event(it)
-                            else -> _errorLiveData.value = Event(Throwable(it.message))
-                        }
+                        handleRemoveAccountErrors(it)
                     }
                 )
+        }
+    }
+
+    private fun handleRemoveAccountErrors(it: Throwable) {
+        when (it) {
+            is BalanceIsNotEmptyThrowable ->
+                _balanceIsNotEmptyErrorLiveData.value = Event(it)
+            is BalanceIsNotEmptyAndHasMoreOwnersThrowable ->
+                _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
+            is IsNotSafeAccountMasterOwnerThrowable ->
+                _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
+            is AutomaticBackupFailedThrowable ->
+                _automaticBackupErrorLiveData.value = Event(it)
+            else -> _errorLiveData.value = Event(Throwable(it.message))
         }
     }
 
