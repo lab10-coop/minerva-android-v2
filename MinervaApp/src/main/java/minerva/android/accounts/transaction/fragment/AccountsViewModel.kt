@@ -120,12 +120,12 @@ class AccountsViewModel(
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
-            dappSessionRepository.getConnectedDapps()
+            dappSessionRepository.getAllSessions()
                 .map { sessions -> updateSessions(sessions, accounts) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { if (it.isNotEmpty()) _dappSessions.value = it },
+                    onNext = { if (it.isNotEmpty()) _dappSessions.value = it },
                     onError = { _errorLiveData.value = Event(it) }
                 )
         }

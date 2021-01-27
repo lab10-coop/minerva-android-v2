@@ -18,6 +18,7 @@ import minerva.android.walletmanager.repository.walletconnect.DappSessionReposit
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeInstanceOf
+import org.intellij.lang.annotations.Flow
 import org.junit.Before
 import org.junit.Test
 import java.lang.IndexOutOfBoundsException
@@ -280,8 +281,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get sessions and update accounts success`() {
-        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(
-            Single.just(
+        whenever(dappSessionRepository.getAllSessions()).thenReturn(
+            Flowable.just(
                 listOf(DappSession(address = "address"))
             )
         )
@@ -297,7 +298,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `get sessions and update accounts error`() {
         val error = Throwable()
-        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(Single.error(error))
+        whenever(dappSessionRepository.getAllSessions()).thenReturn(Flowable.error(error))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.getSessions(accounts)
@@ -308,7 +309,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `no sessions so account list is not updated, so test should fail`() {
-        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(Single.just(emptyList()))
+        whenever(dappSessionRepository.getAllSessions()).thenReturn(Flowable.just(emptyList()))
         viewModel.dappSessions.observeForever(dappSessionObserver)
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {

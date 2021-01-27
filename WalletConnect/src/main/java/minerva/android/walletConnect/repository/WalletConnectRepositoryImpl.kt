@@ -9,9 +9,15 @@ import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import java.util.concurrent.ConcurrentHashMap
 
+/*TODO
+    chyba trzeba bedzie to przenieść do WalletManagera w BindedSerwice (?) i updatowac na kinkretnych eventach base danych. Tam gdzie jest potrzebny update
+    list dApps flowable bedzie nasluchiwana bedzie updatowana z DB. AccountViewModel (session count), services list.
+    Ważne jest to zeby bylo jedno zrodło eventów, gdzie jak mam disconnect to usuwam DappSession, a tam gdzie musze zrobic update to nasluchuje na flowable dAppList.
+    nasluchiwanie na websocket na konkretne channele musi byc z cyklem zycia calej apki, zeby usuwac DappSession jak poleci event. pewnie trzeba bedzie dodac pinga zeby timeout nie lecial.
+*/
 class WalletConnectRepositoryImpl(
     private var wcClient: WCClient = WCClient(),
-    val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
+    private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
 
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()

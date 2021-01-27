@@ -161,15 +161,14 @@ class AccountManagerImpl(
         walletManager.getWalletConfig()?.let { config ->
             val newAccounts: MutableList<Account> = config.accounts.toMutableList()
             val accountIndex = newAccounts.indexOf(account)
+
             config.accounts.forEachIndexed { index, item ->
+
                 if (index == accountIndex) {
                     return when {
-                        areFundsOnValue(
-                            item.cryptoBalance,
-                            item.accountTokens
-                        ) -> handleNoFundsError(item)
-                        isNotSafeAccountMasterOwner(config.accounts, item) ->
-                            Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+                        areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
+                        isNotSafeAccountMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+
                         else -> {
                             newAccounts[index] = Account(item, true)
                             walletManager.updateWalletConfig(
