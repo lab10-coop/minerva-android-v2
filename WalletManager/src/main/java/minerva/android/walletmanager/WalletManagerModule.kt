@@ -56,33 +56,15 @@ fun createWalletManagerModules(isDebug: Boolean, restApiUrl: String, marketsApiU
 
 fun createWalletModules() = module {
     factory { EnsProvider(get()).ensUrl }
-    factory(named(localSharedPrefs)) {
-        androidContext().getSharedPreferences(
-            localStorage,
-            Context.MODE_PRIVATE
-        )
-    }
-    factory(named(minervaSharedPrefs)) {
-        androidContext().getSharedPreferences(
-            MinervaStorage,
-            Context.MODE_PRIVATE
-        )
-    }
+    factory(named(localSharedPrefs)) { androidContext().getSharedPreferences(localStorage, Context.MODE_PRIVATE) }
+    factory(named(minervaSharedPrefs)) { androidContext().getSharedPreferences(MinervaStorage, Context.MODE_PRIVATE) }
     factory { KeyStoreManager() }
     factory<KeystoreRepository> { KeystoreRepositoryImpl(get(named(minervaSharedPrefs)), get()) }
     factory<LocalStorage> { LocalStorageImpl(get(named(localSharedPrefs))) }
-    factory<LocalWalletActionsConfigProvider> {
-        LocalWalletActionsConfigProviderImpl(
-            get(
-                named(
-                    localSharedPrefs
-                )
-            )
-        )
-    }
+    factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
-    factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get()) }
+    factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get(), get()) }
     factory<TokenManager> { TokenManagerImpl(get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
@@ -93,11 +75,8 @@ fun createWalletModules() = module {
     factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
     factory<DappSessionRepository> { DappSessionRepositoryImpl(get()) }
     single {
-        Room.databaseBuilder(
-            androidContext(),
-            MinervaDatabase::class.java,
-            "minerva_database"
-        ).fallbackToDestructiveMigration().build()
+        Room.databaseBuilder(androidContext(), MinervaDatabase::class.java, "minerva_database")
+            .fallbackToDestructiveMigration().build()
     }
 }
 

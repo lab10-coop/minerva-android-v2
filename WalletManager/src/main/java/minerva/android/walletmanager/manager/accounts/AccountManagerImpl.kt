@@ -11,6 +11,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.list.inBounds
+import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -25,11 +26,14 @@ class AccountManagerImpl(
     private val cryptographyRepository: CryptographyRepository,
     private val blockchainRepository: BlockchainRegularAccountRepository,
     private val localStorage: LocalStorage,
-    private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
+    private val timeProvider: CurrentTimeProvider, //TODO make one class with DateUtils
+    database: MinervaDatabase
 ) : AccountManager {
 
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletManager.walletConfigLiveData
+
+    private val dappDao = database.dappDao()
 
     override fun createRegularAccount(network: Network): Single<String> {
         walletManager.getWalletConfig()?.let { config ->
@@ -37,22 +41,18 @@ class AccountManagerImpl(
             val accountName = CryptoUtils.prepareName(network, index)
             return cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
-                index,
-                derivationPath,
-                network.testNet
-            )
-                .map { keys ->
-                    val newAccount = Account(
-                        index,
-                        name = accountName,
-                        networkShort = network.short,
-                        publicKey = keys.publicKey,
-                        privateKey = keys.privateKey,
-                        address = blockchainRepository.toChecksumAddress(keys.address)
-                    )
-                    addAccount(newAccount, config)
-                }
-                .flatMapCompletable { walletManager.updateWalletConfig(it) }
+                index, derivationPath, network.testNet
+            ).map { keys ->
+                val newAccount = Account(
+                    index,
+                    name = accountName,
+                    networkShort = network.short,
+                    publicKey = keys.publicKey,
+                    privateKey = keys.privateKey,
+                    address = blockchainRepository.toChecksumAddress(keys.address)
+                )
+                addAccount(newAccount, config)
+            }.flatMapCompletable { walletManager.updateWalletConfig(it) }
                 .toSingleDefault(accountName)
         }
         throw NotInitializedWalletConfigThrowable()
@@ -69,26 +69,22 @@ class AccountManagerImpl(
             val (index, derivationPath) = getIndexWithDerivationPath(account.network, config)
             return cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
-                index,
-                derivationPath,
-                account.network.testNet
-            )
-                .map { keys ->
-                    val ownerAddress = account.address
-                    val newAccount = Account(
-                        index,
-                        name = getSafeAccountName(account),
-                        networkShort = account.network.short,
-                        bindedOwner = ownerAddress,
-                        publicKey = keys.publicKey,
-                        privateKey = keys.privateKey,
-                        address = blockchainRepository.toChecksumAddress(contract),
-                        contractAddress = contract,
-                        owners = mutableListOf(ownerAddress)
-                    )
-                    addSafeAccount(config, newAccount, ownerAddress)
-                }
-                .flatMapCompletable { walletManager.updateWalletConfig(it) }
+                index, derivationPath, account.network.testNet
+            ).map { keys ->
+                val ownerAddress = account.address
+                val newAccount = Account(
+                    index,
+                    name = getSafeAccountName(account),
+                    networkShort = account.network.short,
+                    bindedOwner = ownerAddress,
+                    publicKey = keys.publicKey,
+                    privateKey = keys.privateKey,
+                    address = blockchainRepository.toChecksumAddress(contract),
+                    contractAddress = contract,
+                    owners = mutableListOf(ownerAddress)
+                )
+                addSafeAccount(config, newAccount, ownerAddress)
+            }.flatMapCompletable { walletManager.updateWalletConfig(it) }
         }
         throw NotInitializedWalletConfigThrowable()
     }
@@ -160,14 +156,16 @@ class AccountManagerImpl(
     override fun removeAccount(account: Account): Completable {
         walletManager.getWalletConfig()?.let { config ->
             val newAccounts: MutableList<Account> = config.accounts.toMutableList()
-            val accountIndex = newAccounts.indexOf(account)
 
             config.accounts.forEachIndexed { index, item ->
 
-                if (index == accountIndex) {
+                if (item.address == account.address) {
+
                     return when {
+
                         areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
-                        isNotSafeAccountMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+                        isNotSafeAccountMasterOwner(config.accounts, item) ->
+                            Completable.error(IsNotSafeAccountMasterOwnerThrowable())
 
                         else -> {
                             newAccounts[index] = Account(item, true)
@@ -177,6 +175,9 @@ class AccountManagerImpl(
                                     accounts = newAccounts
                                 )
                             )
+//                                .andThen(
+//                                dappDao.deleteAllDappsForAccount(account.address)
+//                            )
                         }
                     }
                 }
