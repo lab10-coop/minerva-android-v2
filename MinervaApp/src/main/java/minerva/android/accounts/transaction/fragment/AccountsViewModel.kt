@@ -90,14 +90,15 @@ class AccountsViewModel(
             dappSessionRepository.getConnectedDapps()
                 .map { sessions ->
                     if (sessions.isNotEmpty()) {
-                        val list: MutableList<Account> = mutableListOf()
-                        accounts.forEach { account ->
-                            val count = sessions.count {
-                                it.address == accountManager.toChecksumAddress(account.address)
+                        mutableListOf<Account>().apply {
+                            accounts.forEach { account ->
+                                val count = sessions.count {
+                                    it.address == accountManager.toChecksumAddress(account.address)
+                                }
+                                add(account.copy(dappSessionCount = count))
                             }
-                            list.add(account.copy(dappSessionCount = count))
                         }
-                        list
+
                     } else {
                         emptyList<Account>()
                     }
@@ -105,7 +106,9 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _dappSessions.value = it },
+                    onSuccess = {
+                        if (it.isNotEmpty()) _dappSessions.value = it
+                    },
                     onError = { _errorLiveData.value = Event(it) }
                 )
         }

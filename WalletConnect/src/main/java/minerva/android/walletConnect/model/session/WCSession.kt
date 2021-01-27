@@ -10,7 +10,7 @@ data class WCSession(
 ) {
     companion object {
         fun from(from: String): WCSession {
-            val uriString = from.replace(WC, "wc://")
+            val uriString = from.replace(WC, WC_URL_PREFIX)
             val uri = Uri.parse(uriString)
             val bridge = uri.getQueryParameter(BRIDGE)
             val key = uri.getQueryParameter(KEY)
@@ -27,5 +27,6 @@ data class WCSession(
         private const val BRIDGE = "bridge"
         private const val KEY = "key"
         private const val WC = "wc:"
+        private const val WC_URL_PREFIX = "wc://"
     }
 }

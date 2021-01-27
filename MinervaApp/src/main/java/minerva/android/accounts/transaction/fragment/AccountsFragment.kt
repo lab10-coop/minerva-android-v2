@@ -147,9 +147,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     setTatsButtonListener(accountAdapter.activeAccountsList)
                 })
                 dappSessions.observe(viewLifecycleOwner, Observer {
-                    if (it.isNotEmpty()) {
-                        accountAdapter.updateList(it, areMainNetsEnabled)
-                    }
+                    accountAdapter.updateList(it, areMainNetsEnabled)
                 })
                 balanceLiveData.observe(viewLifecycleOwner, Observer {
                     accountAdapter.updateBalances(it)

@@ -73,13 +73,13 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
                                 ?.let { visibility ->
                                     visibility
                                 }.orElse {
-                                listener.saveTokenVisibility(
-                                    account.address,
-                                    it.token.address,
+                                    listener.saveTokenVisibility(
+                                        account.address,
+                                        it.token.address,
+                                        true
+                                    )
                                     true
-                                )
-                                true
-                            }
+                                }
                         }
                     notifyItemChanged(index)
                 }
