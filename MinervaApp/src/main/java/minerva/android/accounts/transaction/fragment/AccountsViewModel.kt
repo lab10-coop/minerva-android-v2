@@ -115,9 +115,7 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getAssetVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
-        accountManager.walletConfigLiveData.value?.accounts?.let {
-            getSessions(it)
-        }
+        accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
     internal fun getSessions(accounts: List<Account>) {

@@ -140,8 +140,8 @@ class AccountManagerImpl(
 
     override fun currentTimeMills(): Long = timeProvider.currentTimeMills()
 
-    override fun getAllAccounts(): Single<List<Account>> =
-        Single.just(walletManager.getWalletConfig()?.accounts)
+    override fun getAllAccounts(): List<Account>? =
+        walletManager.getWalletConfig()?.accounts
 
     override fun toChecksumAddress(address: String): String =
         blockchainRepository.toChecksumAddress(address)
