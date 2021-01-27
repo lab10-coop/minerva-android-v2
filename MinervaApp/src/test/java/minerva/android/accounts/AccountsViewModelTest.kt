@@ -178,6 +178,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
             Completable.error(error)
         )
+        whenever(dappSessionRepository.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.removeAccount(Account(1, "test"))
         errorCaptor.run {
@@ -189,6 +190,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `Remove value success`() {
         whenever(accountManager.removeAccount(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        whenever(dappSessionRepository.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
         viewModel.accountRemovedLiveData.observeForever(accountRemoveObserver)
         viewModel.removeAccount(Account(1, "test"))
         accountRemoveCaptor.run {
@@ -281,8 +283,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get sessions and update accounts success`() {
-        whenever(dappSessionRepository.getAllSessions()).thenReturn(
-            Flowable.just(
+        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(
+            Single.just(
                 listOf(DappSession(address = "address"))
             )
         )
@@ -298,7 +300,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `get sessions and update accounts error`() {
         val error = Throwable()
-        whenever(dappSessionRepository.getAllSessions()).thenReturn(Flowable.error(error))
+        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(Single.error(error))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.getSessions(accounts)
@@ -309,7 +311,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `no sessions so account list is not updated, so test should fail`() {
-        whenever(dappSessionRepository.getAllSessions()).thenReturn(Flowable.just(emptyList()))
+        whenever(dappSessionRepository.getConnectedDapps()).thenReturn(Single.just(emptyList()))
         viewModel.dappSessions.observeForever(dappSessionObserver)
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {

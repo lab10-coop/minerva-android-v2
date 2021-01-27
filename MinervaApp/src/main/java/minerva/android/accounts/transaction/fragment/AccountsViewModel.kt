@@ -82,6 +82,7 @@ class AccountsViewModel(
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
             hasActiveAccount = it.hasActiveAccount
+            getSessions(it.accounts)
             it.accounts
         }
 
@@ -115,17 +116,25 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
-        accountManager.getAllAccounts()?.let { getSessions(it) }
+        accountManager.getAllAccounts()?.let {
+            getSessions(it)
+        }
     }
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
-            dappSessionRepository.getAllSessions()
+            dappSessionRepository.getConnectedDapps()
                 .map { sessions -> updateSessions(sessions, accounts) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onNext = { if (it.isNotEmpty()) _dappSessions.value = it },
+                    onSuccess = {
+                        _dappSessions.value = if (it.isNotEmpty()) {
+                            it
+                        } else {
+                            accountManager.getAllAccounts()
+                        }
+                    },
                     onError = { _errorLiveData.value = Event(it) }
                 )
         }
@@ -135,15 +144,31 @@ class AccountsViewModel(
         if (sessions.isNotEmpty()) {
             mutableListOf<Account>().apply {
                 accounts.forEach { account ->
-                    val count = sessions.count {
-                        it.address == accountManager.toChecksumAddress(account.address)
-                    }
+                    val count = sessions.count { it.address == accountManager.toChecksumAddress(account.address) }
                     add(account.copy(dappSessionCount = count))
                 }
             }
         } else {
             emptyList<Account>()
         }
+
+    fun removeAccount(account: Account) {
+        launchDisposable {
+            accountManager.removeAccount(account)
+                .observeOn(Schedulers.io())
+                .andThen(dappSessionRepository.deleteAllDappsForAccount(account.address))
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = { _accountRemovedLiveData.value = Event(Unit) },
+                    onError = {
+                        Timber.e("Removing account with index ${account.id} failure")
+                        handleRemoveAccountErrors(it)
+                    }
+                )
+        }
+    }
 
     fun refreshBalances() =
         launchDisposable {
@@ -165,32 +190,13 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        _tokenBalanceLiveData.value = it
-                    },
+                    onSuccess = { _tokenBalanceLiveData.value = it },
                     onError = {
                         Timber.e("Refresh asset balance error: ${it.message}")
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
                     }
                 )
         }
-
-    fun removeAccount(account: Account) {
-        launchDisposable {
-            accountManager.removeAccount(account)
-                .observeOn(Schedulers.io())
-                .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { _accountRemovedLiveData.value = Event(Unit) },
-                    onError = {
-                        Timber.e("Removing account with index ${account.id} failure")
-                        handleRemoveAccountErrors(it)
-                    }
-                )
-        }
-    }
 
     private fun handleRemoveAccountErrors(it: Throwable) {
         when (it) {

@@ -11,7 +11,6 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.list.inBounds
-import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
@@ -26,14 +25,11 @@ class AccountManagerImpl(
     private val cryptographyRepository: CryptographyRepository,
     private val blockchainRepository: BlockchainRegularAccountRepository,
     private val localStorage: LocalStorage,
-    private val timeProvider: CurrentTimeProvider, //TODO make one class with DateUtils
-    database: MinervaDatabase
+    private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
 ) : AccountManager {
 
     override val walletConfigLiveData: LiveData<WalletConfig>
         get() = walletManager.walletConfigLiveData
-
-    private val dappDao = database.dappDao()
 
     override fun createRegularAccount(network: Network): Single<String> {
         walletManager.getWalletConfig()?.let { config ->
@@ -156,36 +152,28 @@ class AccountManagerImpl(
     override fun removeAccount(account: Account): Completable {
         walletManager.getWalletConfig()?.let { config ->
             val newAccounts: MutableList<Account> = config.accounts.toMutableList()
-
             config.accounts.forEachIndexed { index, item ->
-
                 if (item.address == account.address) {
-
-                    return when {
-
-                        areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
-                        isNotSafeAccountMasterOwner(config.accounts, item) ->
-                            Completable.error(IsNotSafeAccountMasterOwnerThrowable())
-
-                        else -> {
-                            newAccounts[index] = Account(item, true)
-                            walletManager.updateWalletConfig(
-                                config.copy(
-                                    version = config.updateVersion,
-                                    accounts = newAccounts
-                                )
-                            )
-//                                .andThen(
-//                                dappDao.deleteAllDappsForAccount(account.address)
-//                            )
-                        }
-                    }
+                    return handleRemovingAccount(item, config, newAccounts, index)
                 }
             }
             return Completable.error(MissingAccountThrowable())
         }
         throw NotInitializedWalletConfigThrowable()
     }
+
+    private fun handleRemovingAccount(
+        item: Account, config: WalletConfig,
+        newAccounts: MutableList<Account>, index: Int
+    ): Completable =
+        when {
+            areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
+            isNotSAMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+            else -> {
+                newAccounts[index] = Account(item, true)
+                walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+            }
+        }
 
     private fun handleNoFundsError(account: Account): Completable =
         if (account.isSafeAccount) {
@@ -194,7 +182,7 @@ class AccountManagerImpl(
             Completable.error(BalanceIsNotEmptyThrowable())
         }
 
-    private fun isNotSafeAccountMasterOwner(accounts: List<Account>, account: Account): Boolean {
+    private fun isNotSAMasterOwner(accounts: List<Account>, account: Account): Boolean {
         account.owners?.let {
             accounts.forEach { if (it.address == account.masterOwnerAddress) return false }
             return true

@@ -7,6 +7,7 @@ import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.mappers.DappSessionToEntityMapper
 import minerva.android.walletmanager.model.mappers.EntityToDappSessionMapper
+import timber.log.Timber
 
 class DappSessionRepositoryImpl(minervaDatabase: MinervaDatabase) : DappSessionRepository {
 
@@ -20,4 +21,10 @@ class DappSessionRepositoryImpl(minervaDatabase: MinervaDatabase) : DappSessionR
 
     override fun getAllSessions(): Flowable<List<DappSession>> =
         dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
+
+    override fun getConnectedDapps(): Single<List<DappSession>> =
+        dappDao.getAll().firstOrError().map { EntityToDappSessionMapper.map(it) }
+
+    override fun deleteAllDappsForAccount(address: String): Completable =
+        dappDao.deleteAllDappsForAccount(address)
 }

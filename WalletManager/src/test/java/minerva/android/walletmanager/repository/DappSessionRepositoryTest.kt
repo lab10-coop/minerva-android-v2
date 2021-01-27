@@ -25,6 +25,27 @@ class DappSessionRepositoryTest : RxTest() {
         listOf(DappSessionEntity(address = "address1"), DappSessionEntity("ddsdress2"))
 
     @Test
+    fun `get connected dapps for account success test`() {
+        whenever(dappSessionDao.getAll()).thenReturn(Flowable.just(dapps))
+        repository.getConnectedDapps()
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue {
+                it[0].address == "address1"
+            }
+    }
+
+    @Test
+    fun `get connected dapps for account error test`() {
+        val error = Throwable()
+        whenever(dappSessionDao.getAll()).thenReturn(Flowable.error(error))
+        repository.getConnectedDapps()
+            .test()
+            .assertError(error)
+    }
+
+    @Test
     fun `save dapps success test`() {
         whenever(dappSessionDao.insert(any())).thenReturn(Completable.complete())
         repository.saveDappSession(DappSession(address = "address"))
