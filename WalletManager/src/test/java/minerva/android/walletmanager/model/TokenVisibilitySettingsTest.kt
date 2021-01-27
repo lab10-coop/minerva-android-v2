@@ -22,7 +22,7 @@ class TokenVisibilitySettingsTest {
 
     @Test
     fun `Check Asset visibility`() {
-        AssetVisibilitySettings(settingsData).apply {
+        TokenVisibilitySettings(settingsData).apply {
             assertEquals(true, getAssetVisibility("network_address_one", "asset_address_one"))
             assertEquals(false, getAssetVisibility("network_address_two", "other_asset_address_one"))
             assertEquals(null, getAssetVisibility("network_address_one", "some_new_asset"))
@@ -33,17 +33,17 @@ class TokenVisibilitySettingsTest {
 
     @Test
     fun `Check updating visibility asset map`() {
-        AssetVisibilitySettings(settingsData).apply {
+        TokenVisibilitySettings(settingsData).apply {
             assertEquals(true, getAssetVisibility("network_address_one", "asset_address_one"))
-            updateAssetVisibility("network_address_one", "asset_address_one", false)
+            updateTokenVisibility("network_address_one", "asset_address_one", false)
             assertEquals(false, getAssetVisibility("network_address_one", "asset_address_one"))
 
             assertEquals(null, getAssetVisibility("some_new_network", "some_new_asset"))
-            updateAssetVisibility("some_new_network", "some_new_asset", false)
+            updateTokenVisibility("some_new_network", "some_new_asset", false)
             assertEquals(false, getAssetVisibility("some_new_network", "some_new_asset"))
 
             assertEquals(false, getAssetVisibility("network_address_two", "other_asset_address_one"))
-            updateAssetVisibility("network_address_two", "other_asset_address_one", true)
+            updateTokenVisibility("network_address_two", "other_asset_address_one", true)
             assertEquals(true, getAssetVisibility("network_address_two", "other_asset_address_one"))
         }
     }

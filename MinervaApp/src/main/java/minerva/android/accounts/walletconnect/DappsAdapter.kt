@@ -3,7 +3,6 @@ package minerva.android.accounts.walletconnect
 import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.view.menu.MenuPopupHelper
@@ -13,9 +12,12 @@ import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.DappItemBinding
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.model.DappSession
 
-class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> Unit) :
+class DappsAdapter(private val disconnect: (peerId: String) -> Unit) :
     RecyclerView.Adapter<DappViewHolder>() {
+
+    private var dapps: List<DappSession> = listOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DappViewHolder =
         DappViewHolder(
@@ -24,7 +26,7 @@ class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> 
                 parent,
                 false
             )
-        ) { disconnect() }
+        ) { peerId -> disconnect(peerId) }
 
     override fun onBindViewHolder(holder: DappViewHolder, position: Int) {
         holder.setItem(dapps[position])
@@ -32,34 +34,37 @@ class DappsAdapter(private var dapps: List<Dapp>, private val disconnect: () -> 
 
     override fun getItemCount(): Int = dapps.size
 
-    fun updateDapps(dapps: List<Dapp>) {
-        this.dapps = dapps
+    fun updateDapps(dappSessions: List<DappSession>) {
+        this.dapps = dappSessions
         notifyDataSetChanged()
     }
 }
 
 @SuppressLint("RestrictedApi")
-class DappViewHolder(private val binding: DappItemBinding, private val disconnect: () -> Unit) :
+class DappViewHolder(
+    private val binding: DappItemBinding,
+    private val disconnect: (peerId: String) -> Unit
+) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun setItem(dapp: Dapp) {
+    fun setItem(dappSession: DappSession) {
         with(binding) {
             Glide.with(binding.root.context)
-                .load(getIcon(dapp))
+                .load(getIcon(dappSession))
                 .into(icon)
-            name.text = dapp.name
-            menu.setOnClickListener { showMenu() }
+            name.text = dappSession.name
+            menu.setOnClickListener { showMenu(dappSession.peerId) }
         }
     }
 
-    private fun getIcon(dapp: Dapp): Any =
-        if (dapp.icon != String.Empty) dapp.icon else R.drawable.ic_services
+    private fun getIcon(dappSession: DappSession): Any =
+        if (dappSession.icon != String.Empty) dappSession.icon else R.drawable.ic_services
 
-    private fun DappItemBinding.showMenu() {
+    private fun DappItemBinding.showMenu(peerId: String) {
         PopupMenu(root.context, menu).apply {
             inflate(R.menu.dapp_menu)
             setOnMenuItemClickListener {
-                if (it.itemId == R.id.disconnect) disconnect()
+                if (it.itemId == R.id.disconnect) disconnect(peerId)
                 true
             }
         }.also {

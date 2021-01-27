@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.smartContract
+package minerva.android.walletmanager.repository.smartContract
 
 import io.reactivex.Completable
 import io.reactivex.Observable

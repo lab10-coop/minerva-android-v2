@@ -24,7 +24,8 @@ import minerva.android.widget.TokensAndCollectiblesView
 import minerva.android.widget.repository.getMainTokenIcon
 import minerva.android.widget.repository.getNetworkIcon
 
-class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
+class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) :
+    TokenView.TokenViewCallback,
     RecyclerView.ViewHolder(view) {
 
     private var binding = AccountListRowBinding.bind(view)
@@ -62,7 +63,14 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun View.bindData(account: Account) {
         with(account) {
             binding.apply {
-                card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
+                card.setCardBackgroundColor(
+                    Color.parseColor(
+                        NetworkManager.getStringColor(
+                            network,
+                            isPending
+                        )
+                    )
+                )
                 progress.apply {
                     visibleOrGone(isPending)
                     DrawableCompat.setTint(indeterminateDrawable, Color.parseColor(network.color))
@@ -103,8 +111,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         binding.menu.setOnClickListener {
             PopupMenu(context, binding.menu).apply {
                 inflate(R.menu.account_menu)
-                menu.findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
-                menu.findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
+                setMenuItems(account)
                 setOnItemMenuClickListener(index, account)
             }.also {
                 with(MenuPopupHelper(context, it.menu as MenuBuilder, binding.menu)) {
@@ -112,6 +119,20 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                     gravity = Gravity.END
                     show()
                 }
+            }
+        }
+    }
+
+    private fun PopupMenu.setMenuItems(account: Account) {
+        with(menu) {
+            findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
+            findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
+            if (account.dappSessionCount != 0) {
+                findItem(R.id.walletConnect).title =
+                    view.context.getString(
+                        R.string.wallet_connect_with_count_title,
+                        account.dappSessionCount
+                    )
             }
         }
     }
@@ -125,9 +146,15 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 with(container) {
                     removeAllViews()
                     //TODO showing/hiding main token in TokensAndCollectiblesView is made using last argument - needs to be updated in the future
-                    addView(TokensAndCollectiblesView(viewGroup, account, this@AccountViewHolder, false).apply {
-                        visibleOrGone(visible)
-                    })
+                    addView(
+                        TokensAndCollectiblesView(
+                            viewGroup,
+                            account,
+                            this@AccountViewHolder,
+                            false
+                        ).apply {
+                            visibleOrGone(visible)
+                        })
                 }
                 setOnItemClickListener(visible)
                 dividerTop.visibleOrInvisible(visible)

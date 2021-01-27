@@ -15,7 +15,7 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.model.WalletConfig
-import minerva.android.walletmanager.smartContract.SmartContractRepositoryImpl
+import minerva.android.walletmanager.repository.smartContract.SmartContractRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock

@@ -9,7 +9,7 @@ import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
-import minerva.android.walletmanager.manager.RxTest
+import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.storage.LocalStorage

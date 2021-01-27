@@ -3,7 +3,7 @@ package minerva.android.walletmanager.localstorage
 import android.content.SharedPreferences
 import io.mockk.*
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.walletmanager.model.AssetVisibilitySettings
+import minerva.android.walletmanager.model.TokenVisibilitySettings
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.storage.LocalStorageImpl
 import org.junit.Test
@@ -109,8 +109,8 @@ class LocalStorageTest {
 
     @Test
     fun `save asset visibility settings`() {
-        val assetVisibilitySettings = AssetVisibilitySettings()
-        localStorage.saveAssetVisibilitySettings(assetVisibilitySettings)
+        val assetVisibilitySettings = TokenVisibilitySettings()
+        localStorage.saveTokenVisibilitySettings(assetVisibilitySettings)
         every { localStorage.getAssetVisibilitySettings() } returns assetVisibilitySettings
         verify {
             sharedPref.edit().putString(any(), any()).apply()

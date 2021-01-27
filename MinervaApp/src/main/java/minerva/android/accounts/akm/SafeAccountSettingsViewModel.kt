@@ -14,7 +14,7 @@ import minerva.android.walletmanager.exception.CannotRemoveMasterOwnerAddressThr
 import minerva.android.walletmanager.exception.OwnerAlreadyAddedThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import timber.log.Timber
 
 class SafeAccountSettingsViewModel(

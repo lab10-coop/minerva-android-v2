@@ -5,6 +5,7 @@ import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletConnect.model.enums.MessageType
 import minerva.android.walletConnect.model.enums.WCMethod
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
@@ -19,13 +20,14 @@ import minerva.android.walletConnect.utils.WCCipher
 import minerva.android.walletConnect.utils.toByteArray
 import okhttp3.*
 import okio.ByteString
+import timber.log.Timber
 import java.util.*
 
 const val JSONRPC_VERSION = "2.0"
 
 open class WCClient(
     builder: GsonBuilder = GsonBuilder(),
-    private val httpClient: OkHttpClient
+    private val httpClient: OkHttpClient = OkHttpClient()
 ) : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
@@ -41,17 +43,14 @@ open class WCClient(
     var session: WCSession? = null
         private set
 
-    var peerMeta: WCPeerMeta? = null
+    private var peerMeta: WCPeerMeta? = null
+
+    var peerId: String = String.Empty
         private set
 
-    var peerId: String? = null
-        private set
+    private var remotePeerId: String? = null
 
-    var remotePeerId: String? = null
-        private set
-
-    var isConnected: Boolean = false
-        private set
+    private var isConnected: Boolean = false
 
     fun sessionId(): String? {
         if (session != null) return session!!.topic;
@@ -65,10 +64,10 @@ open class WCClient(
     var chainId: Int? = null
         private set
 
-    var onFailure: (Throwable) -> Unit = { _ -> Unit }
-    var onDisconnect: (code: Int, reason: String) -> Unit = { _, _ -> Unit }
-    var onSessionRequest: (id: Long, peer: WCPeerMeta, chainId: Int?) -> Unit =
-        { _, _, _ -> Unit }
+    var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> Unit }
+    var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> Unit }
+    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String) -> Unit =
+        { _, _, _, _ -> Unit }
     var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit =
         { _, _ -> Unit }
@@ -81,7 +80,6 @@ open class WCClient(
     var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = { _, _ -> Unit }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d(TAG, "<< websocket opened >>")
         isConnected = true
 
         listeners.forEach { it.onOpen(webSocket, response) }
@@ -102,16 +100,15 @@ open class WCClient(
         var decrypted: String? = null
         try {
             if (text.equals("ping")) {
-                Log.d(TAG, "<== pong")
                 onPong(text);
                 return;
             }
-            Log.d(TAG, "<== message $text")
-            decrypted = decryptMessage(text)
-            Log.d(TAG, "<== decrypted $decrypted")
+
+            val message = gson.fromJson<WCSocketMessage>(text)
+            decrypted = decryptMessage(message)
             handleMessage(decrypted)
         } catch (e: Exception) {
-            onFailure(e)
+            onFailure(e, peerId)
         } finally {
             listeners.forEach { it.onMessage(webSocket, decrypted ?: text) }
         }
@@ -119,28 +116,22 @@ open class WCClient(
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         resetState()
-        onFailure(t)
+        onFailure(t, peerId)
 
         listeners.forEach { it.onFailure(webSocket, t, response) }
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d(TAG, "<< websocket closed >>")
-
         listeners.forEach { it.onClosed(webSocket, code, reason) }
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        Log.d(TAG, "<== Received: $bytes")
         listeners.forEach { it.onMessage(webSocket, bytes) }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d(TAG, "<< closing socket >>")
-
+        onDisconnect(code, peerId)
         resetState()
-        onDisconnect(code, reason)
-
         listeners.forEach { it.onClosing(webSocket, code, reason) }
     }
 
@@ -166,7 +157,7 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int): Boolean {
+    fun approveSession(accounts: List<String>, chainId: Int, peerId: String): Boolean {
         check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
 
         this.accounts = accounts;
@@ -187,7 +178,6 @@ open class WCClient(
     }
 
     fun sendPing(): Boolean {
-        Log.d(TAG, "==> ping")
         return socket?.send("ping") ?: false
     }
 
@@ -244,8 +234,7 @@ open class WCClient(
         return encryptAndSend(gson.toJson(response))
     }
 
-    private fun decryptMessage(text: String): String {
-        val message = gson.fromJson<WCSocketMessage>(text)
+    private fun decryptMessage(message: WCSocketMessage): String {
         val encrypted = gson.fromJson<WCEncryptionPayload>(message.payload)
         val session = this.session
             ?: throw IllegalStateException("Session is null")
@@ -286,7 +275,7 @@ open class WCClient(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                onSessionRequest(request.id, param.peerMeta, param.chainId?.toInt())
+                onSessionRequest(remotePeerId, param.peerMeta, param.chainId?.toInt(), peerId)
             }
             WCMethod.SESSION_UPDATE -> {
                 val param = gson.fromJson<List<WCSessionUpdate>>(request.params)
@@ -372,10 +361,8 @@ open class WCClient(
         )
 
         val rpId = remotePeerId ?: session.topic
-        Log.d(TAG, "E&Send: $rpId")
 
         val json = gson.toJson(message)
-        Log.d(TAG, "==> encrypted $json")
         return socket?.send(json) ?: false
     }
 
@@ -395,7 +382,7 @@ open class WCClient(
         handshakeId = -1
         isConnected = false
         session = null
-        peerId = null
+        peerId = String.Empty
         remotePeerId = null
         peerMeta = null
     }

@@ -12,7 +12,7 @@ import minerva.android.apiProvider.api.ServicesApi
 import minerva.android.apiProvider.model.LoginResponse
 import minerva.android.apiProvider.model.Profile
 import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
-import minerva.android.walletmanager.manager.RxTest
+import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.CredentialType

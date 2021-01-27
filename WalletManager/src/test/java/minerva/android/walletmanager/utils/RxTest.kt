@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.manager
+package minerva.android.walletmanager.utils
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.reactivex.android.plugins.RxAndroidPlugins

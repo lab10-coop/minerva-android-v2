@@ -13,18 +13,20 @@ import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.AccountToken
-import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.provider.CurrentTimeProvider
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.util.concurrent.TimeUnit
 
 class AccountManagerImpl(
     private val walletManager: WalletConfigManager,
     private val cryptographyRepository: CryptographyRepository,
-    private val blockchainRepository: BlockchainRegularAccountRepository
+    private val blockchainRepository: BlockchainRegularAccountRepository,
+    private val localStorage: LocalStorage,
+    private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
 ) : AccountManager {
 
     override val walletConfigLiveData: LiveData<WalletConfig>
@@ -47,11 +49,12 @@ class AccountManagerImpl(
                         networkShort = network.short,
                         publicKey = keys.publicKey,
                         privateKey = keys.privateKey,
-                        address = keys.address
+                        address = blockchainRepository.toChecksumAddress(keys.address)
                     )
                     addAccount(newAccount, config)
                 }
-                .flatMapCompletable { walletManager.updateWalletConfig(it) }.toSingleDefault(accountName)
+                .flatMapCompletable { walletManager.updateWalletConfig(it) }
+                .toSingleDefault(accountName)
         }
         throw NotInitializedWalletConfigThrowable()
     }
@@ -80,7 +83,7 @@ class AccountManagerImpl(
                         bindedOwner = ownerAddress,
                         publicKey = keys.publicKey,
                         privateKey = keys.privateKey,
-                        address = contract,
+                        address = blockchainRepository.toChecksumAddress(contract),
                         contractAddress = contract,
                         owners = mutableListOf(ownerAddress)
                     )
@@ -91,14 +94,21 @@ class AccountManagerImpl(
         throw NotInitializedWalletConfigThrowable()
     }
 
-    private fun getIndexWithDerivationPath(network: Network, config: WalletConfig): Pair<Int, String> =
+    private fun getIndexWithDerivationPath(
+        network: Network,
+        config: WalletConfig
+    ): Pair<Int, String> =
         if (network.testNet) {
             Pair(config.newTestNetworkIndex, DerivationPath.TEST_NET_PATH)
         } else {
             Pair(config.newMainNetworkIndex, DerivationPath.MAIN_NET_PATH)
         }
 
-    private fun addSafeAccount(config: WalletConfig, newAccount: Account, ownerAddress: String): WalletConfig {
+    private fun addSafeAccount(
+        config: WalletConfig,
+        newAccount: Account,
+        ownerAddress: String
+    ): WalletConfig {
         val newAccounts = config.accounts.toMutableList()
         var newAccountPosition = config.accounts.size
         config.accounts.forEachIndexed { position, account ->
@@ -115,6 +125,26 @@ class AccountManagerImpl(
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)
 
+    override fun getAssetVisibilitySettings(): TokenVisibilitySettings =
+        localStorage.getAssetVisibilitySettings()
+
+    override fun saveFreeATSTimestamp() {
+        localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills())
+    }
+
+    override fun getLastFreeATSTimestamp(): Long =
+        localStorage.getLastFreeATSTimestamp()
+
+    override fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings =
+        localStorage.saveTokenVisibilitySettings(settings)
+
+    override fun currentTimeMills(): Long = timeProvider.currentTimeMills()
+
+    override fun getAllAccounts(): Single<List<Account>> =
+        Single.just(walletManager.getWalletConfig()?.accounts)
+
+    override fun toChecksumAddress(address: String): String =
+        blockchainRepository.toChecksumAddress(address)
 
     override val areMainNetworksEnabled: Boolean
         get() = walletManager.areMainNetworksEnabled
@@ -135,12 +165,20 @@ class AccountManagerImpl(
             config.accounts.forEachIndexed { index, item ->
                 if (index == accountIndex) {
                     return when {
-                        areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
+                        areFundsOnValue(
+                            item.cryptoBalance,
+                            item.accountTokens
+                        ) -> handleNoFundsError(item)
                         isNotSafeAccountMasterOwner(config.accounts, item) ->
                             Completable.error(IsNotSafeAccountMasterOwnerThrowable())
                         else -> {
                             newAccounts[index] = Account(item, true)
-                            walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+                            walletManager.updateWalletConfig(
+                                config.copy(
+                                    version = config.updateVersion,
+                                    accounts = newAccounts
+                                )
+                            )
                         }
                     }
                 }
@@ -167,7 +205,9 @@ class AccountManagerImpl(
 
     private fun areFundsOnValue(balance: BigDecimal, accountTokens: List<AccountToken>): Boolean {
         accountTokens.forEach {
-            if (blockchainRepository.toGwei(it.balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
+            if (blockchainRepository.toGwei(it.balance)
+                    .toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
+            ) return true
         }
         return blockchainRepository.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
     }
@@ -189,5 +229,6 @@ class AccountManagerImpl(
     companion object {
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
         private const val NO_SAFE_ACCOUNTS = 0
+        private const val HOURS_IN_DAY = 24L
     }
 }
