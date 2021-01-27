@@ -4,65 +4,60 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.subjects.PublishSubject
 import minerva.android.walletConnect.client.*
+import minerva.android.walletConnect.model.session.Topic
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
-import okhttp3.OkHttpClient
+import java.util.concurrent.ConcurrentHashMap
 
-//todo tests will be added when multiple session management is implemented
-class WalletConnectRepositoryImpl(private val okHttpClient: OkHttpClient) :
-    WalletConnectRepository {
+class WalletConnectRepositoryImpl(
+    private var wcClient: WCClient = WCClient(),
+    val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
+) : WalletConnectRepository {
 
-    private lateinit var client: WCClient
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
 
-    override fun connect(qrCode: String) {
-
-        with(WCClient(httpClient = okHttpClient)) {
-            client = this
+    override fun connect(session: WCSession, peerId: String, remotePeerId: String?) {
+        wcClient = WCClient()
+        with(wcClient) {
             onWCOpen = { peerId ->
-                //todo handle for multiple session management
+                clientMap[peerId] = this
+            }
+            onSessionRequest = { remotePeerId, meta, chainId, peerId ->
+                status.onNext(OnSessionRequest(meta, chainId, Topic(peerId, remotePeerId)))
+            }
+            onFailure = { error, peerId ->
+                status.onNext(OnConnectionFailure(error, peerId))
+            }
+            onDisconnect = { code, peerId ->
+                status.onNext(OnDisconnect(code, peerId))
             }
 
-            onSessionRequest = { _, meta, chainId ->
-                status.onNext(OnSessionRequest(meta, chainId))
-            }
-
-            onFailure = {
-                status.onNext(OnConnectionFailure(it))
-            }
-
-            onDisconnect = { code, reason ->
-                status.onNext(OnDisconnect(code))
-            }
-
-            WCSession.from(qrCode)?.let {
-                connect(
-                    it,
-                    peerMeta = WCPeerMeta( //todo extract values
-                        name = "Minerva Wallet",
-                        url = "https://docs.minerva.digital/"
-                    )
-                )
-            }
+            connect(session, peerMeta = WCPeerMeta(), peerId = peerId, remotePeerId = remotePeerId)
         }
     }
 
-    override fun approveSession(addresses: List<String>, chainId: Int) {
-        client.approveSession(addresses, chainId)
+    override val isClientMapEmpty: Boolean
+        get() = clientMap.isEmpty()
+
+    override val walletConnectClients: ConcurrentHashMap<String, WCClient>
+        get() = clientMap
+
+    override fun getWCSessionFromQr(qrCode: String): WCSession = WCSession.from(qrCode)
+
+    override fun approveSession(addresses: List<String>, chainId: Int, peerId: String) {
+        clientMap[peerId]?.approveSession(addresses, chainId, peerId)
     }
 
-    override fun rejectSession() {
-        client.rejectSession()
+    override fun rejectSession(peerId: String) {
+        clientMap[peerId]?.rejectSession()
     }
 
-    override fun killSession() {
-        client.killSession()
+    override fun killSession(peerId: String) {
+        with(clientMap) {
+            this[peerId]?.killSession()
+            remove(peerId)
+        }
     }
-
-    override fun disconnect() {
-        client.disconnect()
-    }
-
 }

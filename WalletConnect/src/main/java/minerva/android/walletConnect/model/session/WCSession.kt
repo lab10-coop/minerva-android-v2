@@ -8,26 +8,25 @@ data class WCSession(
     val bridge: String,
     val key: String
 ) {
-    fun toUri(): String = "wc:${topic}@${version}?bridge=${bridge}&key=${key}"
-
     companion object {
-        fun from(from: String): WCSession? {
-            if (!from.startsWith("wc:")) {
-                return null
-            }
-
-            val uriString = from.replace("wc:", "wc://")
+        fun from(from: String): WCSession {
+            val uriString = from.replace(WC, WC_URL_PREFIX)
             val uri = Uri.parse(uriString)
-            val bridge = uri.getQueryParameter("bridge")
-            val key = uri.getQueryParameter("key")
+            val bridge = uri.getQueryParameter(BRIDGE)
+            val key = uri.getQueryParameter(KEY)
             val topic = uri.userInfo
             val version = uri.host
 
             if (bridge == null || key == null || topic == null || version == null) {
-                return null
+                throw Throwable("Invalid WalletConnect qr code")
             }
 
             return WCSession(topic, version, bridge, key)
         }
+
+        private const val BRIDGE = "bridge"
+        private const val KEY = "key"
+        private const val WC = "wc:"
+        private const val WC_URL_PREFIX = "wc://"
     }
 }

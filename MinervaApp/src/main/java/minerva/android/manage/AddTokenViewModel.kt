@@ -10,8 +10,8 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.model.Token
+import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.smartContract.SmartContractRepository
 import timber.log.Timber
 
 class AddTokenViewModel(

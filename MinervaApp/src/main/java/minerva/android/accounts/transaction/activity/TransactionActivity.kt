@@ -122,7 +122,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         supportActionBar?.hide()
         addFragmentWithBackStack(
             R.id.container,
-            AddressScannerFragment.newInstance(),
+            AddressScannerFragment.newInstance(viewModel.accountIndex),
             R.animator.slide_in_left,
             R.animator.slide_out_right
         )

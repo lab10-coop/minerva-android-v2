@@ -5,6 +5,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.TokenVisibilitySettings
 import minerva.android.walletmanager.model.Network
 
 interface AccountManager : Manager {
@@ -15,7 +16,13 @@ interface AccountManager : Manager {
     fun getSafeAccountCount(ownerAddress: String): Int
     fun getSafeAccountName(account: Account): String
     fun isAddressValid(address: String): Boolean
-
+    fun getAssetVisibilitySettings(): TokenVisibilitySettings
+    fun saveFreeATSTimestamp()
+    fun getLastFreeATSTimestamp(): Long
+    fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings
+    fun currentTimeMills(): Long
+    fun getAllAccounts(): Single<List<Account>>
+    fun toChecksumAddress(address: String): String
     val areMainNetworksEnabled: Boolean
     var toggleMainNetsEnabled: Boolean?
     val enableMainNetsFlowable: Flowable<Boolean>

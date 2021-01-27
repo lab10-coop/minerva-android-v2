@@ -11,13 +11,15 @@ import minerva.android.blockchainprovider.repository.regularAccont.BlockchainReg
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.manager.RxTest
+import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.provider.CurrentTimeProvider
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -30,11 +32,15 @@ class AccountManagerTest : RxTest() {
 
     private val walletConfigManager: WalletConfigManager = mock()
     private val cryptographyRepository: CryptographyRepository = mock()
+    private val localStorage: LocalStorage = mock()
+    private val timeProvider: CurrentTimeProvider = mock()
     private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
     private val repository = AccountManagerImpl(
         walletConfigManager,
         cryptographyRepository,
-        blockchainRegularAccountRepository
+        blockchainRegularAccountRepository,
+        localStorage,
+        timeProvider
     )
 
     @Before
@@ -74,6 +80,7 @@ class AccountManagerTest : RxTest() {
         val network = Network(short = "eth_rinkeby", httpRpc = "some")
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn(String.Empty)
         whenever(
             cryptographyRepository.calculateDerivedKeys(
                 any(),
@@ -245,6 +252,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
         repository.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
             .test()
             .assertComplete()
@@ -256,6 +264,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
         repository.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
             .test()
             .assertError(error)

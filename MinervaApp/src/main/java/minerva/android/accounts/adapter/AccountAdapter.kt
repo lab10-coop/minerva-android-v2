@@ -15,7 +15,8 @@ import minerva.android.walletmanager.model.AccountToken
 import minerva.android.walletmanager.model.Balance
 import java.math.BigDecimal
 
-class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : RecyclerView.Adapter<AccountViewHolder>(),
+class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
+    RecyclerView.Adapter<AccountViewHolder>(),
     AccountsAdapterListener {
 
     private var activeAccounts = listOf<Account>()
@@ -28,7 +29,10 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
     override fun getItemCount(): Int = activeAccounts.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
-        AccountViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false), parent)
+        AccountViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
+            parent
+        )
 
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
         activeAccounts[position].let {
@@ -65,12 +69,17 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
                     account.accountTokens = accountsList
                         .filter { it.balance > NO_FUNDS }
                         .filter {
-                            listener.isTokenVisible(account.address, it.token.address)?.let { visibility ->
-                                visibility
-                            }.orElse {
-                                listener.saveTokenVisibility(account.address, it.token.address, true)
-                                true
-                            }
+                            listener.isTokenVisible(account.address, it.token.address)
+                                ?.let { visibility ->
+                                    visibility
+                                }.orElse {
+                                    listener.saveTokenVisibility(
+                                        account.address,
+                                        it.token.address,
+                                        true
+                                    )
+                                    true
+                                }
                         }
                     notifyItemChanged(index)
                 }
@@ -93,7 +102,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
         notifyDataSetChanged()
     }
 
-    override fun onSendAccountClicked(account: Account) = listener.onSendTransaction(rawAccounts.indexOf(account))
+    override fun onSendAccountClicked(account: Account) =
+        listener.onSendTransaction(rawAccounts.indexOf(account))
 
     override fun onSendTokenClicked(account: Account, tokenIndex: Int) {
         listener.onSendTokenTransaction(rawAccounts.indexOf(account), tokenIndex)
@@ -101,11 +111,14 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) : 
 
     override fun onAccountRemoved(index: Int) = listener.onAccountRemove(rawAccounts[index])
 
-    override fun onCreateSafeAccountClicked(account: Account) = listener.onCreateSafeAccount(account)
+    override fun onCreateSafeAccountClicked(account: Account) =
+        listener.onCreateSafeAccount(account)
 
-    override fun onShowAddress(account: Account) = listener.onShowAddress(rawAccounts.indexOf(account))
+    override fun onShowAddress(account: Account) =
+        listener.onShowAddress(rawAccounts.indexOf(account))
 
-    override fun onShowSafeAccountSettings(account: Account, index: Int) = listener.onShowSafeAccountSettings(account, index)
+    override fun onShowSafeAccountSettings(account: Account, index: Int) =
+        listener.onShowSafeAccountSettings(account, index)
 
     override fun onWalletConnect(index: Int) = listener.onWalletConnect(index)
 

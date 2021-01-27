@@ -8,7 +8,7 @@ import org.koin.dsl.module
 
 val walletConnectModules = module {
     factory(named(QUALIFIER)) { OkHttpProvider.okHttpClient }
-    factory<WalletConnectRepository> { WalletConnectRepositoryImpl(get(named(QUALIFIER))) }
+    factory<WalletConnectRepository> { WalletConnectRepositoryImpl() }
 }
 
 private const val QUALIFIER = "WalletConnect"

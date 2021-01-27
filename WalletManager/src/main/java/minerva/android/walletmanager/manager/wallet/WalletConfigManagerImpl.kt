@@ -49,6 +49,7 @@ class WalletConfigManagerImpl(
     override lateinit var masterSeed: MasterSeed
     private var disposable: Disposable? = null
 
+    //TODO delete saving WalletConfig as reference - use Room for handling it - MinervaDatabase
     private val _walletConfigLiveData = MutableLiveData<WalletConfig>()
     override val walletConfigLiveData: LiveData<WalletConfig> get() = _walletConfigLiveData
 
