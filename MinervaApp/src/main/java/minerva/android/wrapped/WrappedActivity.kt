@@ -19,7 +19,7 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.manage.ManageTokensFragment
+import minerva.android.token.ManageTokensFragment
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.repository.getNetworkIcon
 import java.util.*

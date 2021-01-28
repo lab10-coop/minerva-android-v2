@@ -2,7 +2,8 @@ package minerva.android.walletmanager.model
 
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
-import java.math.BigDecimal
+import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.Token
 
 object WalletConfigTestValues {
 
@@ -41,13 +42,13 @@ object WalletConfigTestValues {
         mapOf(
             Pair(
                 "user01", listOf(
-                    Token("CookieCoin", "COOKiE", "0xC00k13", "13"),
-                    Token("otherCoin", "OC", "0x0th3rC01n", "32")
+                    ERC20Token("CookieCoin", "COOKiE", "0xC00k13", "13"),
+                    ERC20Token("otherCoin", "OC", "0x0th3rC01n", "32")
                 )
             ),
             Pair(
                 "user02", listOf(
-                    Token("diffCoin", "DiFF", "0xD1FF", "13")
+                    ERC20Token("diffCoin", "DiFF", "0xD1FF", "13")
                 )
             )
         )

@@ -4,7 +4,7 @@ import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
-import minerva.android.configProvider.model.walletConfig.TokenPayload
+import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.WalletConfigTestValues.accounts
@@ -14,6 +14,7 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
 import minerva.android.walletmanager.model.WalletConfigTestValues.networks
 import minerva.android.walletmanager.model.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.mappers.*
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -123,7 +124,7 @@ class MapperTest {
 
     @Test
     fun `Mapping Token to TokenPayload Test`() {
-        val value = Token("name", "symbol", "address", "decimals")
+        val value = ERC20Token("name", "symbol", "address", "decimals")
         val valueResponse = TokenToTokenPayloadMapper.map(value)
 
         value.name shouldBeEqualTo valueResponse.name
@@ -134,7 +135,7 @@ class MapperTest {
 
     @Test
     fun `Mapping TokenPayload to Token Test`() {
-        val value = TokenPayload("name", "symbol", "address", "decimals")
+        val value = ERC20TokenPayload("name", "symbol", "address", "decimals")
         val valueResponse = TokenPayloadToTokenMapper.map(value)
 
         valueResponse.name shouldBeEqualTo value.name

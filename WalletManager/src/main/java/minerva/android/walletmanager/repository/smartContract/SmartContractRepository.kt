@@ -3,8 +3,8 @@ package minerva.android.walletmanager.repository.smartContract
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Token
 import minerva.android.walletmanager.model.Transaction
+import minerva.android.walletmanager.model.token.ERC20Token
 
 interface SmartContractRepository {
     fun createSafeAccount(account: Account): Single<String>
@@ -26,5 +26,5 @@ interface SmartContractRepository {
     fun transferERC20Token(network: String, transaction: Transaction, erc20Address: String): Completable
     fun getSafeAccountMasterOwnerPrivateKey(address: String?): String
     fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>>
-    fun getERC20TokenDetails(privateKey: String, network: String, tokenAddress: String): Single<Token>
+    fun getERC20TokenDetails(privateKey: String, network: String, tokenAddress: String): Single<ERC20Token>
 }
