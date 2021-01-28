@@ -13,11 +13,10 @@ import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.MinervaPrimitiveListRowBinding
 import minerva.android.extension.gone
-import minerva.android.extension.invisible
 import minerva.android.extension.visible
+import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
 import minerva.android.walletmanager.model.DappSession
@@ -59,26 +58,33 @@ class MinervaPrimitiveViewHolder(
 
             when (minervaPrimitive) {
                 is Credential -> showCredential(minervaPrimitive, binding)
-                is Service -> {
-                    minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl, R.drawable.ic_services)
-                    showLastUsed(minervaPrimitive, binding)
-                }
-                is DappSession -> {
-                    Glide.with(binding.root.context)
-                        .load(minervaPrimitive.iconUrl)
-                        .into(minervaPrimitiveLogo)
-                    lastUsedLabel.gone()
-                    identityName.gone()
-                    sessionInfoLabel.visible()
-                    networkLabel.visible()
-
-                    sessionInfoLabel.text = "${minervaPrimitive.accounName}: ${minervaPrimitive.address}"
-                    networkLabel.text = minervaPrimitive.networkName
-                }
+                is Service -> showService(minervaPrimitive, binding)
+                is DappSession -> showDappSessions(minervaPrimitive, binding)
             }
             minervaPrimitiveName.text = minervaPrimitive.name
             setupPopupMenu(minervaPrimitive, binding)
         }
+    }
+
+    private fun showService(minervaPrimitive: Service, binding: MinervaPrimitiveListRowBinding) = with(binding) {
+        setSessionItemsVisibility(false)
+        binding.minervaPrimitiveLogo.loadImageUrl(minervaPrimitive.iconUrl, R.drawable.ic_services)
+        showLastUsed(minervaPrimitive, binding)
+    }
+
+    private fun showDappSessions(minervaPrimitive: DappSession, binding: MinervaPrimitiveListRowBinding) = with(binding) {
+        Glide.with(root.context)
+            .load(minervaPrimitive.iconUrl)
+            .into(minervaPrimitiveLogo)
+        setSessionItemsVisibility(true)
+        sessionInfoLabel.text = "${minervaPrimitive.accounName}: ${minervaPrimitive.address}"
+        networkLabel.text = minervaPrimitive.networkName
+    }
+
+    private fun MinervaPrimitiveListRowBinding.setSessionItemsVisibility(isVisible: Boolean) {
+        lastUsedLabel.visibleOrGone(!isVisible)
+        sessionInfoLabel.visibleOrGone(isVisible)
+        networkLabel.visibleOrGone(isVisible)
     }
 
     private fun showCredential(minervaPrimitive: MinervaPrimitive, binding: MinervaPrimitiveListRowBinding) =
@@ -101,7 +107,7 @@ class MinervaPrimitiveViewHolder(
                 menuInflater.inflate(R.menu.remove_menu, menu)
                 setMenuItems(minervaPrimitive)
                 setOnMenuItemClickListener {
-                    if (it.itemId == R.id.remove) listener.onRemoved(minervaPrimitive)
+                    if (it.itemId == R.id.remove || it.itemId == R.id.disconnect) listener.onRemoved(minervaPrimitive)
                     true
                 }
             }.also {

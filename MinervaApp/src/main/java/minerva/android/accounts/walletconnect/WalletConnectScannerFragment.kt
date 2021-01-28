@@ -75,11 +75,11 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
 
     private fun showToast(message: String?) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun handleWrongQrCode() {
-        Toast.makeText(context, getString(R.string.scan_wc_qr), Toast.LENGTH_SHORT).show()
+        showToast(getString(R.string.scan_wc_qr))
         shouldScan = true
     }
 

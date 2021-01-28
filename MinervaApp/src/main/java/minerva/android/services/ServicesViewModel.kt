@@ -17,6 +17,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import timber.log.Timber
 
 class ServicesViewModel(
     private val serviceManager: ServiceManager,
@@ -24,9 +25,9 @@ class ServicesViewModel(
     private val dappSessionRepository: DappSessionRepository
 ) : BaseViewModel() {
 
-    val walletConfigLiveData: LiveData<List<Service>> =
+    val servicesLiveData: LiveData<List<Service>> =
         Transformations.map(serviceManager.walletConfigLiveData) {
-            setDappSessionsFlowable(it.services) //todo zeby tylko raz updatowac liste, moze wywal to i zrob tylko z pobieraniem z bz danych i dolaczaj services
+            setDappSessionsFlowable(it.services)
             it.services
         }
 
@@ -52,18 +53,24 @@ class ServicesViewModel(
         }
     }
 
-    fun setDappSessionsFlowable(services: List<MinervaPrimitive>) {
+    internal fun setDappSessionsFlowable(services: List<MinervaPrimitive>) {
         launchDisposable {
             dappSessionRepository.getSessionsFlowable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onNext = {
-                        _dappSessionsLiveData.value =
-                            services.mergeWithoutDuplicates(it) //services.mergeWithoutDuplicates(it)
-                    },
+                    onNext = { _dappSessionsLiveData.value = services.mergeWithoutDuplicates(it) },
                     onError = { _errorLiveData.value = Event(it) }
                 )
+        }
+    }
+
+    fun removeSession(dapp: DappSession) {
+        launchDisposable {
+            dappSessionRepository.deleteDappSession(dapp.peerId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onError = { Timber.e(it) })
         }
     }
 
