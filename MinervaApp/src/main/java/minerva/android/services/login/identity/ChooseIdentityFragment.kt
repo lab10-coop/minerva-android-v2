@@ -69,7 +69,7 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
     }
 
     private fun setupServiceData() {
-        minervaPrimitiveName.text = serviceQrCode.serviceName
+        minerva_primitive_name.text = serviceQrCode.serviceName
         requestedData.prepareChain(serviceQrCode.requestedData, getString(R.string.requested_data), getString(R.string.did))
     }
 

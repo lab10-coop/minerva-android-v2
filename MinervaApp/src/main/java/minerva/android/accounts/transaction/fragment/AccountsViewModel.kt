@@ -123,7 +123,7 @@ class AccountsViewModel(
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
-            dappSessionRepository.getConnectedDapps()
+            dappSessionRepository.getSessions()
                 .map { sessions -> updateSessions(sessions, accounts) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -76,7 +76,7 @@ class WalletConnectViewModel(
         if (index != Int.InvalidIndex) {
             account = accountManager.loadAccount(index)
             launchDisposable {
-                sessionRepository.getAllSessions()
+                sessionRepository.getSessionsFlowable()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
@@ -150,7 +150,9 @@ class WalletConnectViewModel(
         meta.name,
         getIcon(meta.icons),
         topic.peerId,
-        topic.remotePeerId
+        topic.remotePeerId,
+        requestedNetwork,
+        account.name
     )
 
     private fun onDisconnected(it: OnDisconnect): OnDisconnected {

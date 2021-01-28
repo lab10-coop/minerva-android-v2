@@ -19,7 +19,9 @@ object EntityToDappSessionMapper : Mapper<List<DappSessionEntity>, List<DappSess
                             name,
                             icon,
                             peerId,
-                            remotePeerId
+                            remotePeerId,
+                            networkName,
+                            accountName
                         )
                     )
                 }

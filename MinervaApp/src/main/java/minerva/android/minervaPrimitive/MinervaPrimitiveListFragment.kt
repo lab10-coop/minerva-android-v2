@@ -9,6 +9,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.main.base.BaseFragment
 import minerva.android.services.listener.MinervaPrimitiveClickListener
 import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 
@@ -20,6 +21,7 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
 
     open fun onRemoveCredential(credential: Credential) {}
     open fun onRemoveService(service: Service) {}
+    open fun onRemoveDappSession(dapp: DappSession) {}
     open fun onCredentialContainerClick(credential: Credential) {}
     open fun getLoggedIdentityName(loggedInIdentityDid: String): String = String.Empty
 
@@ -42,6 +44,7 @@ abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_vie
         when (minervaPrimitive) {
             is Service -> onRemoveService(minervaPrimitive)
             is Credential -> onRemoveCredential(minervaPrimitive)
+            is DappSession -> onRemoveDappSession(minervaPrimitive)
         }
     }
 

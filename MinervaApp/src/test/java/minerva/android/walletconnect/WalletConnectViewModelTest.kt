@@ -232,7 +232,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `get account test`() {
         whenever(manager.loadAccount(any())).thenReturn(Account(1))
-        whenever(dappSessionRepository.getAllSessions()).thenReturn(
+        whenever(dappSessionRepository.getSessionsFlowable()).thenReturn(
             Flowable.just(listOf(DappSession(address = "address")))
         )
         viewModel.getAccount(1)

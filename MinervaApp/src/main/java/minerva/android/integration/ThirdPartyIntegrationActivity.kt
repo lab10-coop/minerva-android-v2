@@ -82,7 +82,7 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
         viewModel.credentialRequest = it.data
         container.visible()
         loader.gone()
-        minervaPrimitiveName.text = it.data.second.service.name
+        minerva_primitive_name.text = it.data.second.service.name
         addFragment(
             R.id.container,
             ConnectionRequestFragment.newInstance(),

@@ -27,7 +27,7 @@ class DappSessionRepositoryTest : RxTest() {
     @Test
     fun `get connected dapps for account success test`() {
         whenever(dappSessionDao.getAll()).thenReturn(Flowable.just(dapps))
-        repository.getConnectedDapps()
+        repository.getSessions()
             .test()
             .assertComplete()
             .assertNoErrors()
@@ -40,7 +40,7 @@ class DappSessionRepositoryTest : RxTest() {
     fun `get connected dapps for account error test`() {
         val error = Throwable()
         whenever(dappSessionDao.getAll()).thenReturn(Flowable.error(error))
-        repository.getConnectedDapps()
+        repository.getSessions()
             .test()
             .assertError(error)
     }
@@ -84,7 +84,7 @@ class DappSessionRepositoryTest : RxTest() {
     @Test
     fun `get connected dapps success test`() {
         whenever(dappSessionDao.getAll()).thenReturn(Flowable.just(dapps))
-        repository.getAllSessions()
+        repository.getSessionsFlowable()
             .test()
             .assertComplete()
             .assertNoErrors()
@@ -97,7 +97,7 @@ class DappSessionRepositoryTest : RxTest() {
     fun `get connected dapps error test`() {
         val error = Throwable()
         whenever(dappSessionDao.getAll()).thenReturn(Flowable.error(error))
-        repository.getAllSessions()
+        repository.getSessionsFlowable()
             .test()
             .assertError(error)
     }

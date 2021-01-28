@@ -3,9 +3,9 @@ package minerva.android.walletmanager
 import android.content.Context
 import androidx.room.Room
 import minerva.android.blockchainprovider.createBlockchainProviderModule
-import minerva.android.configProvider.createWalletConfigProviderModule
 import minerva.android.cryptographyProvider.createCryptographyModules
 import minerva.android.apiProvider.apiProviderModule
+import minerva.android.configProvider.createWalletConfigProviderModule
 import minerva.android.walletmanager.keystore.KeyStoreManager
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.keystore.KeystoreRepositoryImpl

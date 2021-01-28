@@ -19,10 +19,10 @@ class DappSessionRepositoryImpl(minervaDatabase: MinervaDatabase) : DappSessionR
     override fun deleteDappSession(peerId: String): Completable =
         dappDao.delete(peerId)
 
-    override fun getAllSessions(): Flowable<List<DappSession>> =
+    override fun getSessionsFlowable(): Flowable<List<DappSession>> =
         dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
 
-    override fun getConnectedDapps(): Single<List<DappSession>> =
+    override fun getSessions(): Single<List<DappSession>> =
         dappDao.getAll().firstOrError().map { EntityToDappSessionMapper.map(it) }
 
     override fun deleteAllDappsForAccount(address: String): Completable =

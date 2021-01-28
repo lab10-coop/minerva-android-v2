@@ -10,7 +10,7 @@
     <color name="dividerGray">#C9C8D3</color>
     <color name="titleColor">#908F9D</color>
     <color name="bodyColor">#3F3F4B</color>
-    <color name="borderGray">#B5B5B5</color>
+    <color name="borderGray">#908aa6</color>
     <color name="gray">#3F3F4B</color>
     <color name="message_gray">#676879</color>
     <color name="alertRed">#CC2800</color>
