@@ -7,5 +7,5 @@ import minerva.android.walletmanager.model.token.Token
 
 object TokenToTokenPayloadMapper : Mapper<ERC20Token, ERC20TokenPayload> {
     override fun map(input: ERC20Token): ERC20TokenPayload =
-        ERC20TokenPayload(input.name, input.symbol, input.address, input.decimals)
+        ERC20TokenPayload(input.chainId, input.name, input.symbol, input.address, input.decimals)
 }

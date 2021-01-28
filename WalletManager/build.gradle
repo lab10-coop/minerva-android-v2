@@ -20,6 +20,7 @@ android {
         consumerProguardFiles 'consumer-rules.pro'
         buildConfigField "String", "ENS_TEST_URL", '"https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
         buildConfigField "String", "ENS_MAIN_URL", '"https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
+        buildConfigField "String", "ERC20_TOKEN_DATA_URL", '"https://raw.githubusercontent.com/lab10-coop/minerva-tokenlists/master/all.json"'
     }
 
     buildTypes {
