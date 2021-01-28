@@ -125,8 +125,8 @@ class AccountManagerImpl(
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)
 
-    override fun getAssetVisibilitySettings(): TokenVisibilitySettings =
-        localStorage.getAssetVisibilitySettings()
+    override fun getTokenVisibilitySettings(): TokenVisibilitySettings =
+        localStorage.getTokenVisibilitySettings()
 
     override fun saveFreeATSTimestamp() {
         localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills())

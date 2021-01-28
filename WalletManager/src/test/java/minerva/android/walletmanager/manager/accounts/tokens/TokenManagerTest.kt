@@ -9,8 +9,9 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Token
+import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -51,7 +52,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test saving tokens for giving network`() {
         NetworkManager.initialize(DataProvider.networks)
-        val firstToken = Token("CookieToken", "COOKiE", "0xC00k1e", "C00")
+        val firstToken = ERC20Token("CookieToken", "COOKiE", "0xC00k1e", "C00")
         tokenManager.saveToken(NetworkShortName.ATS_TAU, firstToken)
             .test()
             .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
@@ -63,14 +64,14 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `Test updating tokens list`() {
-        val newToken = Token("SomeToken", "some", "0xt0k3n", "32")
+        val newToken = ERC20Token("SomeToken", "some", "0xt0k3n", "32")
         NetworkShortName.ATS_TAU.let { ATS ->
             val updatedTokens =
                 tokenManager.updateTokens(ATS, newToken, DataProvider.walletConfig.erc20Tokens)
             updatedTokens[ATS]?.size shouldBeEqualTo 3
             updatedTokens[ATS]?.get(2)?.name shouldBeEqualTo "SomeToken"
             updatedTokens[ATS]?.get(0)?.name shouldBeEqualTo "CookieTokenATS"
-            val secondNewToken = Token("CookieCoin", "CC", "0xC00k1e", "32")
+            val secondNewToken = ERC20Token("CookieCoin", "CC", "0xC00k1e", "32")
             val secondUpdatedToken = tokenManager.updateTokens(ATS, secondNewToken, DataProvider.walletConfig.erc20Tokens)
             secondUpdatedToken[ATS]?.size shouldBeEqualTo 2
             secondUpdatedToken[ATS]?.get(1)?.name shouldBeEqualTo "CookieCoin"

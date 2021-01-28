@@ -8,7 +8,6 @@ import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.accounts.transaction.model.TokenSpinnerElement
 import minerva.android.base.BaseViewModel
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.DateUtils
@@ -23,6 +22,9 @@ import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.TOK
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.NativeToken
+import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -79,12 +81,12 @@ class TransactionViewModel(
     val token
         get() = network.token
 
-    //TODO add logos for tokens
-    val tokensList: List<TokenSpinnerElement>
-        get() = mutableListOf<TokenSpinnerElement>().apply {
-            add(TokenSpinnerElement(account.network.token, getMainTokenIconRes(account.network.short)))
+    //TODO add logo URI for ERC20 tokens
+    val tokensList: List<Token>
+        get() = mutableListOf<Token>().apply {
+            add(NativeToken(account.name, account.network.token, getMainTokenIconRes(account.network.short)))
             account.accountTokens.forEach {
-                add(TokenSpinnerElement(it.token.name))
+                add(ERC20Token(symbol = it.token.symbol, address = it.token.address))
             }
         }
 

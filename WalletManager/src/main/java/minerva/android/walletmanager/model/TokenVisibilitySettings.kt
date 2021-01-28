@@ -16,6 +16,6 @@ class TokenVisibilitySettings(private val map: MutableMap<String, MutableMap<Str
         return this
     }
 
-    fun getAssetVisibility(networkAddress: String, assetAddress: String): Boolean? =
-        map[networkAddress.toLowerCase(Locale.ROOT)]?.get(assetAddress.toLowerCase(Locale.ROOT))
+    fun getTokenVisibility(networkAddress: String, tokenAddress: String): Boolean? =
+        map[networkAddress.toLowerCase(Locale.ROOT)]?.get(tokenAddress.toLowerCase(Locale.ROOT))
 }

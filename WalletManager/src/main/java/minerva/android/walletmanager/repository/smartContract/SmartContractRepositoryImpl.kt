@@ -9,10 +9,11 @@ import minerva.android.blockchainprovider.repository.smartContract.BlockchainSaf
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Token
+import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.model.mappers.TransactionMapper
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.storage.LocalStorage
 import java.math.BigInteger
 
@@ -74,14 +75,14 @@ class SmartContractRepositoryImpl(
     override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String =
         walletConfigManager.getSafeAccountMasterOwnerPrivateKey(address)
 
-    override fun getERC20TokenDetails(privateKey: String, network: String, tokenAddress: String): Single<Token> =
+    override fun getERC20TokenDetails(privateKey: String, network: String, tokenAddress: String): Single<ERC20Token> =
         (blockchainRegularAccountRepository).run {
             Observable.zip(
                 getERC20TokenName(privateKey, network, tokenAddress),
                 getERC20TokenSymbol(privateKey, network, tokenAddress),
                 getERC20TokenDecimals(privateKey, network, tokenAddress),
-                Function3<String, String, BigInteger, Token> { name, symbol, decimals ->
-                    Token(name, symbol, tokenAddress, decimals.toString())
+                Function3<String, String, BigInteger, ERC20Token> { name, symbol, decimals ->
+                    ERC20Token(name, symbol, tokenAddress, decimals.toString())
                 }
             ).firstOrError()
         }

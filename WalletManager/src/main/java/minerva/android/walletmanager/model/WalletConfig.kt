@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.walletmanager.model.token.ERC20Token
 
 data class WalletConfig(
     val version: Int = Int.InvalidId,
@@ -8,7 +9,7 @@ data class WalletConfig(
     val accounts: List<Account> = listOf(),
     val services: List<Service> = listOf(),
     val credentials: List<Credential> = listOf(),
-    val erc20Tokens: Map<String, List<Token>> = mapOf()
+    val erc20Tokens: Map<String, List<ERC20Token>> = mapOf()
 ) {
     val updateVersion: Int
         get() = version + 1

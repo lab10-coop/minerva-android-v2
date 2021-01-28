@@ -88,7 +88,8 @@ class AccountsViewModel(
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
     val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
 
-    private lateinit var tokenVisibilitySettings: TokenVisibilitySettings
+    @VisibleForTesting
+    lateinit var tokenVisibilitySettings: TokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
 
     fun arePendingAccountsEmpty() =
@@ -112,7 +113,7 @@ class AccountsViewModel(
 
     override fun onResume() {
         super.onResume()
-        tokenVisibilitySettings = accountManager.getAssetVisibilitySettings()
+        tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
         accountManager.walletConfigLiveData.value?.accounts?.let {
@@ -292,12 +293,12 @@ class AccountsViewModel(
         return Account(Int.InvalidId)
     }
 
-    fun isAssetVisible(networkAddress: String, assetAddress: String) =
-        tokenVisibilitySettings.getAssetVisibility(networkAddress, assetAddress)
+    fun isTokenVisible(networkAddress: String, tokenAddress: String) =
+        tokenVisibilitySettings.getTokenVisibility(networkAddress, tokenAddress)
 
-    fun saveAssetVisible(networkAddress: String, assetAddress: String, visibility: Boolean) {
+    fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
-            tokenVisibilitySettings.updateTokenVisibility(networkAddress, assetAddress, visibility)
+            tokenVisibilitySettings.updateTokenVisibility(networkAddress, tokenAddress, visibility)
         )
     }
 

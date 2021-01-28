@@ -7,6 +7,7 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identityRespon
 import minerva.android.walletmanager.model.WalletConfigTestValues.onlineIdentityResponse
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.token.ERC20Token
 
 object DataProvider {
 
@@ -26,15 +27,15 @@ object DataProvider {
         Network(
             short = NetworkShortName.ATS_TAU, httpRpc = "address", testNet = true,
             tokens = listOf(
-                Token("CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
-                Token("SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
+                ERC20Token("CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
+                ERC20Token("SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
             )
         ),
         Network(
             short = NetworkShortName.ETH_RIN, httpRpc = "address", testNet = true,
             tokens = listOf(
-                Token("CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
-                Token("OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
+                ERC20Token("CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
+                ERC20Token("OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
             )
         ),
         Network(short = NetworkShortName.ATS_SIGMA, httpRpc = "address", testNet = true),
@@ -88,13 +89,13 @@ object DataProvider {
         mapOf(
             Pair(
                 NetworkShortName.ATS_TAU, listOf(
-                    Token("CookieTokenATS", "Cookie", "0xC00k1e", "13"),
-                    Token("OtherTokenATS", "OtherC", "0x0th3r", "32")
+                    ERC20Token("CookieTokenATS", "Cookie", "0xC00k1e", "13"),
+                    ERC20Token("OtherTokenATS", "OtherC", "0x0th3r", "32")
                 )
             ),
             Pair(NetworkShortName.ETH_RIN, listOf(
-                Token("OtherTokenETH", "OtherC", "0x0th3r", "32"),
-                Token("CookieTokenETH", "Cookie", "0xC00k1e", "13")
+                ERC20Token("OtherTokenETH", "OtherC", "0x0th3r", "32"),
+                ERC20Token("CookieTokenETH", "Cookie", "0xC00k1e", "13")
             ))
         )
     )

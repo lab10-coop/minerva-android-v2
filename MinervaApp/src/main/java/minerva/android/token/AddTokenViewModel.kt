@@ -1,4 +1,4 @@
-package minerva.android.manage
+package minerva.android.token
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,9 +9,9 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
-import minerva.android.walletmanager.model.Token
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import timber.log.Timber
 
 class AddTokenViewModel(
@@ -26,8 +26,8 @@ class AddTokenViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
-    private val _addressDetailsLiveData = MutableLiveData<Token>()
-    val addressDetailsLiveData: LiveData<Token> get() = _addressDetailsLiveData
+    private val _addressDetailsLiveData = MutableLiveData<ERC20Token>()
+    val addressDetailsLiveData: LiveData<ERC20Token> get() = _addressDetailsLiveData
 
     private val _tokenAddedLiveData = MutableLiveData<Event<Unit>>()
     val tokenAddedLiveData: LiveData<Event<Unit>> get() = _tokenAddedLiveData
@@ -58,7 +58,7 @@ class AddTokenViewModel(
                 )
         }
 
-    fun addToken(token: Token) =
+    fun addToken(token: ERC20Token) =
         launchDisposable {
             tokenManager.saveToken(network, token)
                 .subscribeOn(Schedulers.io())
