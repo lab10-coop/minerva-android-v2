@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.manager.accounts
+package minerva.android.walletmanager.manager.accounts.tokens
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
@@ -7,7 +7,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.utils.RxTest
-import minerva.android.walletmanager.manager.accounts.tokens.TokenManagerImpl
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Token

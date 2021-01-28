@@ -1,14 +1,15 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import minerva.android.kotlinUtils.Empty
+import androidx.annotation.VisibleForTesting
 
 class TokenRepositoryImpl : TokenRepository {
 
-    private val iconUrls: Map<String, String> by lazy {
+    @VisibleForTesting
+    val iconUrls: Map<String, String> by lazy {
         getTokensIconURLs()
     }
 
-    override fun getIconURL(chainId: Int, address: String): String = iconUrls[prepareKey(chainId, address)] ?: String.Empty
+    override fun getIconURL(chainId: Int, address: String): String? = iconUrls[prepareKey(chainId, address)]
 
     private fun getTokensIconURLs(): Map<String, String> = mapOf()
 
