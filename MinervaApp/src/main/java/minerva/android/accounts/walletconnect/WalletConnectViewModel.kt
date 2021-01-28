@@ -28,7 +28,7 @@ import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.defs.NetworkShortName
 
 class WalletConnectViewModel(
-    private val sessionRepository: DappSessionRepository,
+    private val sessionRepository: DappSessionRepository, //todo tylko do getSessionsFlowable
     private val accountManager: AccountManager,
     private val repository: WalletConnectRepository
 ) : BaseViewModel() {
@@ -67,7 +67,10 @@ class WalletConnectViewModel(
 
     private fun onError(it: OnConnectionFailure): OnError {
         if (!repository.walletConnectClients.containsKey(it.peerId)) {
-            it.peerId?.let { removeSession(it) }
+            it.peerId?.let {
+                //todo remove session powinno byc na posiomie servisu i tam usuwac sessje z bazy a tu tylko reagowac w UI na event
+                removeSession(it)
+            }
         }
         return OnError(it.error)
     }
@@ -80,7 +83,15 @@ class WalletConnectViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onNext = { _viewStateLiveData.value = handleSessions(it) },
+                        onNext = {
+                            _viewStateLiveData.value = if (it.isEmpty()) {
+                                HideDappsState
+                            } else {
+                                reconnect(it) //todo remove reconnection, recconnection will be done when service binded to main activity is started
+                                UpdateDappsState(it)
+                            }
+
+                        },
                         onError = { _viewStateLiveData.value = OnError(it) }
                     )
             }
@@ -88,14 +99,6 @@ class WalletConnectViewModel(
             _viewStateLiveData.value = OnError(InvalidAccountException())
         }
     }
-
-    private fun handleSessions(it: List<DappSession>) =
-        if (it.isEmpty()) {
-            HideDappsState
-        } else {
-            reconnect(it)
-            UpdateDappsState(it)
-        }
 
     private fun reconnect(dapps: List<DappSession>) {
         if (repository.isClientMapEmpty) {
@@ -115,10 +118,9 @@ class WalletConnectViewModel(
         repository.rejectSession(topic.peerId)
     }
 
-
     fun killSession(peerId: String) {
         repository.killSession(peerId)
-        removeSession(peerId)
+        removeSession(peerId) //todo usuwanie sesji z bazy w servisie powinno byc
     }
 
     fun handleQrCode(qrCode: String) {
@@ -134,6 +136,7 @@ class WalletConnectViewModel(
     fun approveSession(meta: WCPeerMeta) {
         repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId)
         launchDisposable {
+            //todo nope dodawanie do bazy powinno byc w servisie jak zaraz po approveSession, gdzie przekazuje DappSession
             sessionRepository.saveDappSession(getDapp(meta))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -158,7 +161,7 @@ class WalletConnectViewModel(
     private fun onDisconnected(it: OnDisconnect): OnDisconnected {
         it.peerId?.let { peerId ->
             if (repository.walletConnectClients.containsKey(peerId)) {
-                removeSession(peerId)
+                removeSession(peerId) //todo przenies to servisu tutaj tylko update UI
             }
         }
         return OnDisconnected
@@ -166,6 +169,7 @@ class WalletConnectViewModel(
 
     private fun removeSession(peerId: String) {
         launchDisposable {
+            //toto tutaj powinien byc serwis, gdzie jest robione killSession, a potem usuwanie z db juz w serwisie
             sessionRepository.deleteDappSession(peerId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

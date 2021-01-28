@@ -10,6 +10,7 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
+import minerva.android.walletConnect.repository.WalletConnectRepository
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
@@ -22,7 +23,7 @@ import timber.log.Timber
 class ServicesViewModel(
     private val serviceManager: ServiceManager,
     private val walletActionsRepository: WalletActionsRepository,
-    private val dappSessionRepository: DappSessionRepository
+    private val dappSessionRepository: DappSessionRepository //todo tylko do getSessionsFlowable
 ) : BaseViewModel() {
 
     val servicesLiveData: LiveData<List<Service>> =
@@ -67,6 +68,7 @@ class ServicesViewModel(
 
     fun removeSession(dapp: DappSession) {
         launchDisposable {
+            //toto tutaj powinien byc serwis, gdzie jest robione killSession, a potem usuwanie z db juz w serwisie
             dappSessionRepository.deleteDappSession(dapp.peerId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

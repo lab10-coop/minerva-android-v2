@@ -10,10 +10,12 @@ import minerva.android.walletConnect.model.session.WCSession
 import java.util.concurrent.ConcurrentHashMap
 
 /*TODO
-    chyba trzeba bedzie to przenieść do WalletManagera w BindedSerwice (?) i updatowac na kinkretnych eventach base danych. Tam gdzie jest potrzebny update
-    list dApps flowable bedzie nasluchiwana bedzie updatowana z DB. AccountViewModel (session count), services list.
-    Ważne jest to zeby bylo jedno zrodło eventów, gdzie jak mam disconnect to usuwam DappSession, a tam gdzie musze zrobic update to nasluchuje na flowable dAppList.
-    nasluchiwanie na websocket na konkretne channele musi byc z cyklem zycia calej apki, zeby usuwac DappSession jak poleci event. pewnie trzeba bedzie dodac pinga zeby timeout nie lecial.
+  this should be moved to service binded to the MainActivity class. Here within the app lifecycle, on given events, databe base
+  with dapp sessions should be updated. Thanks to that every view listeting for changes im DB will update all necesarry data.
+
+  HERE ALL OPERATION ON DB. besides removal when user updates by himself
+
+  tutaj powinno byc wstrzykniete DappSessionRepository, ktore ogrania handlowanie bazy danych
 */
 class WalletConnectRepositoryImpl(
     private var wcClient: WCClient = WCClient(),
@@ -53,14 +55,18 @@ class WalletConnectRepositoryImpl(
     override fun getWCSessionFromQr(qrCode: String): WCSession = WCSession.from(qrCode)
 
     override fun approveSession(addresses: List<String>, chainId: Int, peerId: String) {
+        //todo add to DB
         clientMap[peerId]?.approveSession(addresses, chainId, peerId)
     }
 
     override fun rejectSession(peerId: String) {
         clientMap[peerId]?.rejectSession()
+        //todo should delete WCClient from map (?)
     }
 
     override fun killSession(peerId: String) {
+        //todo add killing all sessions for given account
+        //todo remove from DB
         with(clientMap) {
             this[peerId]?.killSession()
             remove(peerId)

@@ -38,7 +38,7 @@ class AccountsViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository,
-    private val dappSessionRepository: DappSessionRepository
+    private val dappSessionRepository: DappSessionRepository //todo tylko do getSessionsFlowable
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -123,7 +123,7 @@ class AccountsViewModel(
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
-            dappSessionRepository.getSessions()
+            dappSessionRepository.getSessions() //todo zmien na getSessionFlowable, po ty aby nasluchiwac na zmiany w db i updatowac numer sesji. uwazaj prze usuwaniu accounta zeby lista sie 2x nieupdatowala
                 .map { sessions -> updateSessions(sessions, accounts) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -156,6 +156,7 @@ class AccountsViewModel(
         launchDisposable {
             accountManager.removeAccount(account)
                 .observeOn(Schedulers.io())
+                //todo tutaj powinno byc kill all sessions for given account w servisie
                 .andThen(dappSessionRepository.deleteAllDappsForAccount(account.address))
                 .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
                 .subscribeOn(Schedulers.io())
