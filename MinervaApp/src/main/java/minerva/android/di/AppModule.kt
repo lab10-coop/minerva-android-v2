@@ -65,7 +65,7 @@ private val appModules = module {
     viewModel { SafeAccountSettingsViewModel(get(), get()) }
     viewModel { TransactionViewModel(get(), get(), get()) }
     viewModel { NewAccountViewModel(get(), get()) }
-    viewModel { ServicesViewModel(get(), get(), get(), get()) }
+    viewModel { ServicesViewModel(get(), get(), get()) }
     viewModel { WalletActionsViewModel(get()) }
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
