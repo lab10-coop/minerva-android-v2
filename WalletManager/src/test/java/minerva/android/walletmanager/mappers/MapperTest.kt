@@ -124,7 +124,7 @@ class MapperTest {
 
     @Test
     fun `Mapping Token to TokenPayload Test`() {
-        val value = ERC20Token("name", "symbol", "address", "decimals")
+        val value = ERC20Token(3, "name", "symbol", "address", "decimals")
         val valueResponse = TokenToTokenPayloadMapper.map(value)
 
         value.name shouldBeEqualTo valueResponse.name
@@ -135,7 +135,7 @@ class MapperTest {
 
     @Test
     fun `Mapping TokenPayload to Token Test`() {
-        val value = ERC20TokenPayload("name", "symbol", "address", "decimals")
+        val value = ERC20TokenPayload(1, "name", "symbol", "address", "decimals")
         val valueResponse = TokenPayloadToTokenMapper.map(value)
 
         valueResponse.name shouldBeEqualTo value.name

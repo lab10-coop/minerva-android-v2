@@ -28,7 +28,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `Check getting Token details` () {
-        whenever(smartContractRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(Single.just(ERC20Token(name = "Some Token")))
+        whenever(smartContractRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(Single.just(ERC20Token(1, name = "Some Token")))
         viewModel.run {
             addressDetailsLiveData.observeForever(tokenObserver)
             getTokenDetails("0xS0m34ddr35")
@@ -44,7 +44,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
         whenever(tokenManager.saveToken(any(), any())).thenReturn(Completable.complete(), Completable.error(Throwable("Some error here!")))
         viewModel.run {
             tokenAddedLiveData.observeForever(addTokenObserver)
-            addToken(ERC20Token())
+            addToken(ERC20Token(1))
         }
         addTokenCaptor.run {
             verify(addTokenObserver).onChanged(capture())

@@ -27,15 +27,15 @@ object DataProvider {
         Network(
             short = NetworkShortName.ATS_TAU, httpRpc = "address", testNet = true,
             tokens = listOf(
-                ERC20Token("CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
-                ERC20Token("SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
+                ERC20Token(3, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
+                ERC20Token(3, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
             )
         ),
         Network(
             short = NetworkShortName.ETH_RIN, httpRpc = "address", testNet = true,
             tokens = listOf(
-                ERC20Token("CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
-                ERC20Token("OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
+                ERC20Token(3, "CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
+                ERC20Token(3, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
             )
         ),
         Network(short = NetworkShortName.ATS_SIGMA, httpRpc = "address", testNet = true),
@@ -89,13 +89,13 @@ object DataProvider {
         mapOf(
             Pair(
                 NetworkShortName.ATS_TAU, listOf(
-                    ERC20Token("CookieTokenATS", "Cookie", "0xC00k1e", "13"),
-                    ERC20Token("OtherTokenATS", "OtherC", "0x0th3r", "32")
+                    ERC20Token(3, "CookieTokenATS", "Cookie", "0xC00k1e", "13"),
+                    ERC20Token(3, "OtherTokenATS", "OtherC", "0x0th3r", "32")
                 )
             ),
             Pair(NetworkShortName.ETH_RIN, listOf(
-                ERC20Token("OtherTokenETH", "OtherC", "0x0th3r", "32"),
-                ERC20Token("CookieTokenETH", "Cookie", "0xC00k1e", "13")
+                ERC20Token(3, "OtherTokenETH", "OtherC", "0x0th3r", "32"),
+                ERC20Token(3, "CookieTokenETH", "Cookie", "0xC00k1e", "13")
             ))
         )
     )

@@ -15,6 +15,7 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
@@ -221,6 +222,7 @@ class SmartContractRepositoryTest {
         val name = "CookieToken"
         val symbol = "Cookie"
         val decimal = BigInteger.ONE
+        NetworkManager.initialize(DataProvider.networks)
         (blockchainRegularAccountRepository).run {
             whenever(getERC20TokenName(any(), any(), any())).thenReturn(
                 Observable.just(name),
@@ -242,15 +244,15 @@ class SmartContractRepositoryTest {
             )
         }
         smartContractRepository.run {
-            getERC20TokenDetails("privateKey", "network", "address").test().assertComplete()
+            getERC20TokenDetails("privateKey", NetworkShortName.ATS_TAU, "address").test().assertComplete()
                 .assertValue {
                     it.name == name
                     it.symbol == symbol
                     it.decimals == decimal.toString()
                 }
-            getERC20TokenDetails("privateKey", "network", "address").test().assertError(error)
-            getERC20TokenDetails("privateKey", "network", "address").test().assertError(error)
-            getERC20TokenDetails("privateKey", "network", "address").test().assertError(error)
+            getERC20TokenDetails("privateKey", NetworkShortName.ATS_TAU, "address").test().assertError(error)
+            getERC20TokenDetails("privateKey", NetworkShortName.ATS_TAU, "address").test().assertError(error)
+            getERC20TokenDetails("privateKey", NetworkShortName.ATS_TAU, "address").test().assertError(error)
         }
     }
 }
