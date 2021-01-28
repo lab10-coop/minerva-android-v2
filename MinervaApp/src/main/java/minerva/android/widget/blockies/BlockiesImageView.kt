@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
+import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -48,6 +49,10 @@ open class BlockiesImageView(context: Context, attributeSet: AttributeSet?) : Ap
     }
 
     private fun prepareERC20TokenIcon(token: ERC20Token) {
+        token.logoURI?.let {
+            Glide.with(this).load(it).into(this)
+            return
+        }
         blockies = Blockies.fromAddress(token.address)
         invalidate()
     }

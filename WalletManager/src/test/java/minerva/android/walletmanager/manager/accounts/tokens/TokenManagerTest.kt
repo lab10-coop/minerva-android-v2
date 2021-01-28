@@ -1,10 +1,9 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import androidx.lifecycle.Observer
+import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -22,7 +21,8 @@ import java.math.BigDecimal
 class TokenManagerTest : RxTest() {
 
     private val walletManager: WalletConfigManager = mock()
-    private val tokenManager = TokenManagerImpl(walletManager)
+    private val tokenIconRepository: TokenIconRepository = mock()
+    private val tokenManager = TokenManagerImpl(walletManager, tokenIconRepository)
 
     @Before
     fun initializeMocks() {
@@ -96,4 +96,50 @@ class TokenManagerTest : RxTest() {
         tokenETH[0].token.name shouldBeEqualTo  "CookieTokenDETH"
         tokenETH[1].token.name shouldBeEqualTo  "OtherTokenETH"
     }
+
+    @Test
+    fun `Check getting Token Icon URL method` () {
+        NetworkManager.initialize(DataProvider.networks)
+        whenever(tokenIconRepository.getIconRawFile()).thenReturn(data, null, "fake data")
+        tokenManager.getTokenIconURL(1, "0x4ddre55")
+            .test()
+            .assertComplete()
+            .values().let {
+                it.first() shouldBeEqualTo "iconURL"
+            }
+        tokenManager.getTokenIconURL(1, "0x4ddre55")
+            .test()
+            .assertNotComplete()
+        tokenManager.getTokenIconURL(1, "0x4ddre55")
+            .test()
+            .assertNotComplete()
+
+        verify(tokenIconRepository, times(3)).getIconRawFile()
+    }
+
+    @Test
+    fun `Check that generating key for map is correct` () {
+        val chaiId = 3
+        val address = "0x4ddr355"
+        val key = tokenManager.generateTokenIconKey(chaiId, address)
+        key shouldBeEqualTo "30x4ddr355"
+    }
+
+    private val data = "[\n" +
+            "  {\n" +
+            "    \"address\": \"0x4ddre55\",\n" +
+            "    \"chainId\": 1,\n" +
+            "    \"name\": \"ChiGastokenby1inch\",\n" +
+            "    \"symbol\": \"CHI\",\n" +
+            "    \"decimals\": 0,\n" +
+            "    \"logoURI\": \"iconURL\"\n" +
+            "  },\n" +
+            "  {\n" +
+            "    \"address\": \"0x50m34ddr355\",\n" +
+            "    \"chainId\": 1,\n" +
+            "    \"name\": \"TrueUSD\",\n" +
+            "    \"symbol\": \"TUSD\",\n" +
+            "    \"decimals\": 18,\n" +
+            "    \"logoURI\": \"iconURLTwo\"\n" +
+            "  }]"
 }

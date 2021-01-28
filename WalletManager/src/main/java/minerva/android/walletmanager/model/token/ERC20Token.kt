@@ -9,7 +9,7 @@ data class ERC20Token(
     override val symbol: String = String.Empty,
     val address: String = String.Empty,
     val decimals: String = String.Empty,
-    val logoURI: String? = null
+    var logoURI: String? = null
 ) : Token {
     override fun equals(other: Any?): Boolean =
         (other as? ERC20Token)?.let {

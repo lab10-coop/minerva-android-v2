@@ -8,5 +8,6 @@ data class ERC20TokenPayload(
     val name: String = String.Empty,
     val symbol: String = String.Empty,
     val address: String = String.Empty,
-    val decimals: String = String.Empty
+    val decimals: String = String.Empty,
+    val logoURI: String? = null
 )

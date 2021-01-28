@@ -2,6 +2,7 @@ package minerva.android.walletmanager.manager.accounts.tokens
 
 import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.SingleObserver
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
