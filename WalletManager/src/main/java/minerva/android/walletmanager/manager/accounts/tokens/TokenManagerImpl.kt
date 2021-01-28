@@ -62,10 +62,7 @@ class TokenManagerImpl(private val walletManager: WalletConfigManager, private v
     @VisibleForTesting
     fun generateTokenIconKey(chainId: Int, address: String) = "$chainId$address"
 
-    private fun getTokenFromPair(
-        allTokens: List<Token>,
-        raw: Pair<String, BigDecimal>
-    ): AccountToken =
+    private fun getTokenFromPair(allTokens: List<Token>, raw: Pair<String, BigDecimal>): AccountToken =
         ((allTokens.find { (it as? ERC20Token)?.address == raw.first } as? ERC20Token)
             ?: ERC20Token(chainId = Int.InvalidValue, address = raw.first)).let {
             AccountToken(it, raw.second)

@@ -10,7 +10,6 @@ import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test

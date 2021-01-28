@@ -199,17 +199,10 @@ class TransactionViewModel(
                 }
             transactionRepository.resolveENS(receiverKey)
                 .flatMap { resolvedENS ->
-                    getTransactionForSafeAccount(
-                        ownerPrivateKey,
-                        resolvedENS,
-                        amount,
-                        gasPrice,
-                        gasLimit
-                    )
+                    getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferNativeCoin(network.short, it)
-                                .toSingleDefault(it)
+                            smartContractRepository.transferNativeCoin(network.short, it).toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
@@ -220,13 +213,11 @@ class TransactionViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = {
-                        _sendTransactionLiveData.value =
-                            Event(Pair("$amount ${prepareCurrency()}", SENT))
+                        _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
                     },
                     onError = {
                         Timber.e("Send safe account transaction error: ${it.message}")
-                        _saveWalletActionFailedLiveData.value =
-                            Event(Pair("$amount ${prepareCurrency()}", SENT))
+                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
                     }
                 )
         }
@@ -306,9 +297,7 @@ class TransactionViewModel(
         get() = cryptoBalance.minus(transactionCost)
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
-        transactionRepository.calculateTransactionCost(gasPrice, gasLimit)
-            .apply { transactionCost = this }
-
+        transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
 
     fun prepareCurrency() =
         if (tokenIndex != Int.InvalidIndex) account.accountTokens[tokenIndex].token.symbol else token
@@ -353,11 +342,7 @@ class TransactionViewModel(
         contractAddress: String = String.Empty
     ): Single<Transaction> =
         transactionRepository.resolveENS(receiverKey)
-            .map {
-                prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply {
-                    transaction = this
-                }
-            }
+            .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
         walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network.token, status)))

@@ -1,17 +1,17 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import androidx.lifecycle.Observer
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
-import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
-import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
