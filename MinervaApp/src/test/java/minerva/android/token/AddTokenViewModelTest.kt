@@ -1,4 +1,4 @@
-package minerva.android.manage
+package minerva.android.token
 
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
@@ -7,7 +7,8 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
-import minerva.android.walletmanager.model.Token
+import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -27,7 +28,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `Check getting Token details` () {
-        whenever(smartContractRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(Single.just(Token(name = "Some Token")))
+        whenever(smartContractRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(Single.just(ERC20Token(name = "Some Token")))
         viewModel.run {
             addressDetailsLiveData.observeForever(tokenObserver)
             getTokenDetails("0xS0m34ddr35")
@@ -43,7 +44,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
         whenever(tokenManager.saveToken(any(), any())).thenReturn(Completable.complete(), Completable.error(Throwable("Some error here!")))
         viewModel.run {
             tokenAddedLiveData.observeForever(addTokenObserver)
-            addToken(Token())
+            addToken(ERC20Token())
         }
         addTokenCaptor.run {
             verify(addTokenObserver).onChanged(capture())

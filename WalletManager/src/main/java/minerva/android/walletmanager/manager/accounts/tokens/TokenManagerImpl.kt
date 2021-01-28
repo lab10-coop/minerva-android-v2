@@ -9,23 +9,21 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.AccountToken
-import minerva.android.walletmanager.model.Token
 import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.Token
 import java.math.BigDecimal
 
 class TokenManagerImpl(private val walletManager: WalletConfigManager) : TokenManager {
 
-    override val walletConfigLiveData: LiveData<WalletConfig>
-        get() = walletManager.walletConfigLiveData
-
-    override fun loadTokens(network: String): List<Token> =
+    override fun loadTokens(network: String): List<ERC20Token> =
         walletManager.getWalletConfig()?.let {
             NetworkManager.getTokens(network)
                 .mergeWithoutDuplicates(it.erc20Tokens[network] ?: listOf())
                 .sortedBy { it.name }
         } ?: listOf()
 
-    override fun saveToken(network: String, token: Token): Completable =
+    override fun saveToken(network: String, token: ERC20Token): Completable =
         walletManager.getWalletConfig()?.let { config ->
             config.copy(
                 version = config.updateVersion,
@@ -41,14 +39,12 @@ class TokenManagerImpl(private val walletManager: WalletConfigManager) : TokenMa
         }
 
     private fun getTokenFromPair(allTokens: List<Token>, raw: Pair<String, BigDecimal>): AccountToken {
-        val token = allTokens.find {
-            it.address == raw.first
-        } ?: Token(address = raw.first)
+        val token = (allTokens.find { (it as? ERC20Token)?.address == raw.first } as? ERC20Token) ?: ERC20Token(address = raw.first)
         return AccountToken(token, raw.second)
     }
 
     @VisibleForTesting
-    fun updateTokens(network: String, token: Token, tokens: Map<String, List<Token>>) =
+    fun updateTokens(network: String, token: ERC20Token, tokens: Map<String, List<ERC20Token>>) =
         tokens.toMutableMap().apply {
             (this[network] ?: listOf()).toMutableList().let { currentTokens ->
                 currentTokens.removeAll { it.address == token.address }

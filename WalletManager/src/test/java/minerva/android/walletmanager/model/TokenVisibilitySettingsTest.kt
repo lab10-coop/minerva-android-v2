@@ -23,28 +23,28 @@ class TokenVisibilitySettingsTest {
     @Test
     fun `Check Asset visibility`() {
         TokenVisibilitySettings(settingsData).apply {
-            assertEquals(true, getAssetVisibility("network_address_one", "asset_address_one"))
-            assertEquals(false, getAssetVisibility("network_address_two", "other_asset_address_one"))
-            assertEquals(null, getAssetVisibility("network_address_one", "some_new_asset"))
-            assertEquals(null, getAssetVisibility("some_new_network", "some_new_asset"))
-            assertEquals(null, getAssetVisibility("network_address_one", "some new asset"))
+            assertEquals(true, getTokenVisibility("network_address_one", "asset_address_one"))
+            assertEquals(false, getTokenVisibility("network_address_two", "other_asset_address_one"))
+            assertEquals(null, getTokenVisibility("network_address_one", "some_new_asset"))
+            assertEquals(null, getTokenVisibility("some_new_network", "some_new_asset"))
+            assertEquals(null, getTokenVisibility("network_address_one", "some new asset"))
         }
     }
 
     @Test
     fun `Check updating visibility asset map`() {
         TokenVisibilitySettings(settingsData).apply {
-            assertEquals(true, getAssetVisibility("network_address_one", "asset_address_one"))
+            assertEquals(true, getTokenVisibility("network_address_one", "asset_address_one"))
             updateTokenVisibility("network_address_one", "asset_address_one", false)
-            assertEquals(false, getAssetVisibility("network_address_one", "asset_address_one"))
+            assertEquals(false, getTokenVisibility("network_address_one", "asset_address_one"))
 
-            assertEquals(null, getAssetVisibility("some_new_network", "some_new_asset"))
+            assertEquals(null, getTokenVisibility("some_new_network", "some_new_asset"))
             updateTokenVisibility("some_new_network", "some_new_asset", false)
-            assertEquals(false, getAssetVisibility("some_new_network", "some_new_asset"))
+            assertEquals(false, getTokenVisibility("some_new_network", "some_new_asset"))
 
-            assertEquals(false, getAssetVisibility("network_address_two", "other_asset_address_one"))
+            assertEquals(false, getTokenVisibility("network_address_two", "other_asset_address_one"))
             updateTokenVisibility("network_address_two", "other_asset_address_one", true)
-            assertEquals(true, getAssetVisibility("network_address_two", "other_asset_address_one"))
+            assertEquals(true, getTokenVisibility("network_address_two", "other_asset_address_one"))
         }
     }
 }

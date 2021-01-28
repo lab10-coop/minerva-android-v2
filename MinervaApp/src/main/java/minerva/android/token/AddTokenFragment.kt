@@ -1,11 +1,10 @@
-package minerva.android.manage
+package minerva.android.token
 
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.transition.TransitionManager
 import android.view.View
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
@@ -19,7 +18,7 @@ import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
-import minerva.android.walletmanager.model.Token
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity
 import minerva.android.wrapped.WrappedActivity.Companion.NETWORK
@@ -57,10 +56,10 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
         showFragmentListener.setActionBarTitle(getString(R.string.manage_token))
     }
 
-    private fun showTokenData(token: Token) {
+    private fun showTokenData(token: ERC20Token) {
         binding.apply {
             TransitionManager.beginDelayedTransition(this.root)
-            prepareTokenLogo(true)
+            tokenImage.initView(token)
             addTokenButton.visible()
             supportText.gone()
             address.apply {
@@ -76,15 +75,6 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
         }
     }
 
-    private fun prepareTokenLogo(tokenData: Boolean) {
-        //TODO implement generating and adding token image
-        binding.apply {
-            tokenImage.setImageResource(R.drawable.ic_default_token)
-            tokenImageCamera.visibleOrGone(tokenData)
-            tokenImageContainer.isEnabled = tokenData
-        }
-    }
-
     private fun onLoading(isLoading: Boolean) {
         binding.loader.visibleOrGone(isLoading)
     }
@@ -97,15 +87,10 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
                 onNext = {
                     if (it) {
                         addTokenButton.hideKeyboard()
-                        viewModel.getTokenDetails(
-                            tokenAddress.text.toString()
-                        )
+                        viewModel.getTokenDetails(tokenAddress.text.toString())
                     } else onError()
                 }
             )
-            tokenImageContainer.setOnClickListener {
-                Toast.makeText(context, "Tokens logo editing will be enabled soon", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -122,8 +107,8 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
     }
 
     private fun onError() {
-        prepareTokenLogo(false)
         binding.apply {
+            tokenImage.clear()
             addTokenButton.gone()
             tokenAddressLayout.error = getString(R.string.invalid_token_address)
             tokenAddressLayout.setErrorIconDrawable(NO_ICON)

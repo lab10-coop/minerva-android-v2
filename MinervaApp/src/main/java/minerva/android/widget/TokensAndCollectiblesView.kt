@@ -15,6 +15,7 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_PADDING
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.Collectible
+import minerva.android.widget.token.TokenView
 
 @SuppressLint("ViewConstructor")
 class TokensAndCollectiblesView(
