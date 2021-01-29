@@ -86,14 +86,14 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         startManageAssetsWrappedActivity(requireContext(), index)
 
     override fun isTokenVisible(networkAddress: String, tokenAddress: String): Boolean? =
-        viewModel.isAssetVisible(networkAddress, tokenAddress)
+        viewModel.isTokenVisible(networkAddress, tokenAddress)
 
     override fun saveTokenVisibility(
         networkAddress: String,
         tokenAddress: String,
         visibility: Boolean
     ) {
-        viewModel.saveAssetVisible(networkAddress, tokenAddress, visibility)
+        viewModel.saveTokenVisible(networkAddress, tokenAddress, visibility)
     }
 
     fun setPendingAccount(index: Int, pending: Boolean) {

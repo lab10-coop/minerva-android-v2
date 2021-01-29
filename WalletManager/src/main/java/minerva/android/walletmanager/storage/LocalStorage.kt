@@ -14,7 +14,7 @@ interface LocalStorage {
     fun getProfileImage(name: String): String
     fun saveProfileImage(name: String, image: String)
 
-    fun getAssetVisibilitySettings(): TokenVisibilitySettings
+    fun getTokenVisibilitySettings(): TokenVisibilitySettings
     fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings
 
     fun savePendingAccount(pendingAccount: PendingAccount)

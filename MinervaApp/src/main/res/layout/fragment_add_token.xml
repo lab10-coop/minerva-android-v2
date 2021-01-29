@@ -4,10 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightGray"
+    android:clickable="true"
     android:clipToPadding="false"
     android:padding="@dimen/margin_normal"
-    android:clickable="true"
-    tools:context=".manage.AddTokenFragment">
+    tools:context=".token.AddTokenFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,29 +18,13 @@
         android:padding="@dimen/margin_normal"
         tools:ignore="PrivateResource">
 
-        <FrameLayout
-            android:id="@+id/token_image_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/token_image"
-                android:layout_width="@dimen/big_letter_logo_size"
-                android:layout_height="@dimen/big_letter_logo_size"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_default_token"
-                tools:ignore="ContentDescription" />
-
-            <ImageView
-                android:id="@+id/token_image_camera"
-                android:layout_width="@dimen/camera_logo_icon_size"
-                android:layout_height="@dimen/camera_logo_icon_size"
-                android:layout_gravity="top|end"
-                android:layout_margin="@dimen/margin_xxsmall"
-                android:src="@drawable/camera_icon"
-                android:visibility="gone"
-                tools:ignore="ContentDescription" />
-        </FrameLayout>
+        <minerva.android.widget.blockies.BlockiesImageView
+            android:id="@+id/token_image"
+            android:layout_width="@dimen/big_letter_logo_size"
+            android:layout_height="@dimen/big_letter_logo_size"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_default_token"
+            tools:ignore="ContentDescription" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/token_address_layout"
@@ -64,10 +48,10 @@
             android:id="@+id/loader"
             android:layout_width="@dimen/progressbar_size_small"
             android:layout_height="@dimen/progressbar_size_small"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:visibility="gone"
             android:layout_gravity="center_horizontal"
-            android:foregroundGravity="center" />
+            android:layout_marginTop="@dimen/margin_normal"
+            android:foregroundGravity="center"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/support_text"
@@ -84,34 +68,34 @@
             android:id="@+id/address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_marginLeft="@dimen/margin_xsmall"
-            android:layout_marginTop="@dimen/margin_normal" />
+            android:layout_marginTop="@dimen/margin_normal"
+            android:visibility="gone" />
 
         <minerva.android.widget.HorizontalLabeledTextView
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_marginLeft="@dimen/margin_xsmall"
-            android:layout_marginTop="@dimen/margin_xxsmall" />
+            android:layout_marginTop="@dimen/margin_xxsmall"
+            android:visibility="gone" />
 
         <minerva.android.widget.HorizontalLabeledTextView
             android:id="@+id/symbol"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_marginLeft="@dimen/margin_xsmall"
-            android:layout_marginTop="@dimen/margin_xxsmall" />
+            android:layout_marginTop="@dimen/margin_xxsmall"
+            android:visibility="gone" />
 
         <minerva.android.widget.HorizontalLabeledTextView
             android:id="@+id/decimals"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_marginLeft="@dimen/margin_xsmall"
             android:layout_marginTop="@dimen/margin_xxsmall"
-            android:layout_marginBottom="@dimen/margin_normal" />
+            android:layout_marginBottom="@dimen/margin_normal"
+            android:visibility="gone" />
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -121,7 +105,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:elevation="@dimen/elevation_small"
-        android:visibility="gone"
         android:outlineProvider="none"
-        android:text="@string/add_token" />
+        android:text="@string/add_token"
+        android:visibility="gone" />
 </FrameLayout>

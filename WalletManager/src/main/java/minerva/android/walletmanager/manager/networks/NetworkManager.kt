@@ -21,6 +21,8 @@ object NetworkManager {
 
     fun getNetwork(type: String): Network = networkMap.value(type)
 
+    fun getChainId(type: String): Int = networkMap.value(type).chainId
+
     fun firstDefaultValueNetwork(): Network = networks[FIRST_DEFAULT_NETWORK_INDEX]
 
     fun getNetworkByIndex(index: Int): Network =

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="@dimen/margin_normal">
+    android:orientation="horizontal">
 
     <minerva.android.widget.blockies.BlockiesImageView
         android:id="@+id/token_logo"
@@ -19,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="@dimen/margin_small"
-        android:fontFamily="@font/rubik_medium"
-        android:textColor="@color/gray"
-        tools:text="SOME SOME" />
-</LinearLayout>
+        tools:text="Some Token"
+        android:textColor="@color/gray" />
+
+</merge>
