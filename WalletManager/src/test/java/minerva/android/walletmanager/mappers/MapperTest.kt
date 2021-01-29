@@ -4,7 +4,7 @@ import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
-import minerva.android.configProvider.model.walletConfig.TokenPayload
+import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.WalletConfigTestValues.accounts
@@ -14,6 +14,7 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
 import minerva.android.walletmanager.model.WalletConfigTestValues.networks
 import minerva.android.walletmanager.model.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.mappers.*
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -122,20 +123,21 @@ class MapperTest {
     }
 
     @Test
-    fun `Mapping Token to TokenPayload Test`() {
-        val value = Token("name", "symbol", "address", "decimals")
-        val valueResponse = TokenToTokenPayloadMapper.map(value)
+    fun `Mapping ERC20Token to ERC20TokenPayload Test`() {
+        val value = ERC20Token(3, "name", "symbol", "address", "decimals", "logoUri")
+        val valueResponse = ERC20TokenToERC20TokenPayloadMapper.map(value)
 
         value.name shouldBeEqualTo valueResponse.name
         value.symbol shouldBeEqualTo valueResponse.symbol
         value.address shouldBeEqualTo valueResponse.address
         value.decimals shouldBeEqualTo valueResponse.decimals
+        value.logoURI shouldBeEqualTo valueResponse.logoURI
     }
 
     @Test
-    fun `Mapping TokenPayload to Token Test`() {
-        val value = TokenPayload("name", "symbol", "address", "decimals")
-        val valueResponse = TokenPayloadToTokenMapper.map(value)
+    fun `Mapping ERC20TokenPayload to ERC20Token Test`() {
+        val value = ERC20TokenPayload(1, "name", "symbol", "address", "decimals")
+        val valueResponse = ERC20TokenPayloadToERC20TokenMapper.map(value)
 
         valueResponse.name shouldBeEqualTo value.name
         valueResponse.symbol shouldBeEqualTo value.symbol

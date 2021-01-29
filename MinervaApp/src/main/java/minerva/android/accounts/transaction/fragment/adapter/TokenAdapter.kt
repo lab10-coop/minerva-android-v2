@@ -6,16 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.annotation.LayoutRes
-import androidx.core.content.ContextCompat
-import minerva.android.accounts.transaction.model.TokenSpinnerElement
 import minerva.android.databinding.SpinnerTokenBinding
+import minerva.android.walletmanager.model.token.Token
 
-class TokenAdapter(context: Context, @LayoutRes private val layoutResource: Int, private val tokens: List<TokenSpinnerElement>) :
-    ArrayAdapter<TokenSpinnerElement>(context, layoutResource, tokens) {
+class TokenAdapter(context: Context, @LayoutRes private val layoutResource: Int, private val tokens: List<Token>) :
+    ArrayAdapter<Token>(context, layoutResource, tokens) {
 
     override fun getCount(): Int = tokens.size
 
-    override fun getItem(position: Int): TokenSpinnerElement = tokens[position]
+    override fun getItem(position: Int): Token = tokens[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
@@ -27,13 +26,8 @@ class TokenAdapter(context: Context, @LayoutRes private val layoutResource: Int,
     private fun createView(position: Int, parent: ViewGroup): View =
         LayoutInflater.from(context).inflate(layoutResource, parent, false).apply {
             SpinnerTokenBinding.bind(this).apply {
-                tokenName.text = tokens[position].name
-                tokenName.setCompoundDrawablesWithIntrinsicBounds(
-                    ContextCompat.getDrawable(context, tokens[position].logo),
-                    null,
-                    null,
-                    null
-                )
+                tokenName.text = tokens[position].symbol
+                tokenLogo.initView(tokens[position])
             }
         }
 }

@@ -10,26 +10,24 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true" />
 
-    <ImageView
+    <minerva.android.widget.blockies.BlockiesImageView
         android:id="@+id/token_logo"
         android:layout_width="@dimen/xsmall_logo_size"
         android:layout_height="@dimen/xsmall_logo_size"
-        android:layout_alignTop="@id/amount_view"
-        android:layout_alignBottom="@id/amount_view"
-        android:layout_alignParentStart="true"
         android:layout_marginLeft="@dimen/margin_xxxsmall"
+        android:layout_centerVertical="true"
         tools:ignore="ContentDescription"
         tools:src="@drawable/ic_default_token" />
 
     <TextView
         android:id="@+id/token_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_alignTop="@id/amount_view"
         android:layout_alignBottom="@id/amount_view"
         android:layout_marginStart="@dimen/margin_small"
         android:layout_toEndOf="@id/token_logo"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:textColor="@color/gray"
         tools:text="sDai" />
 </merge>

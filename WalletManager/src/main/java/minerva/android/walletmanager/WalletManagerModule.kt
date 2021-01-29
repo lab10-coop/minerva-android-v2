@@ -71,19 +71,11 @@ fun createWalletModules() = module {
     factory { KeyStoreManager() }
     factory<KeystoreRepository> { KeystoreRepositoryImpl(get(named(minervaSharedPrefs)), get()) }
     factory<LocalStorage> { LocalStorageImpl(get(named(localSharedPrefs))) }
-    factory<LocalWalletActionsConfigProvider> {
-        LocalWalletActionsConfigProviderImpl(
-            get(
-                named(
-                    localSharedPrefs
-                )
-            )
-        )
-    }
+    factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
     factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get()) }
-    factory<TokenManager> { TokenManagerImpl(get()) }
+    factory<TokenManager> { TokenManagerImpl(get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
     factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get()) }

@@ -72,7 +72,7 @@
             app:layout_constraintTop_toTopOf="@id/main_icon"
             tools:ignore="ContentDescription" />
 
-        <minerva.android.widget.TokenView
+        <minerva.android.widget.token.TokenView
             android:id="@+id/main_token_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

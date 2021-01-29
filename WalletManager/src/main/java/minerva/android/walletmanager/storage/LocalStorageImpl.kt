@@ -90,7 +90,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
 
     override fun saveProfileImage(name: String, image: String) = sharedPreferences.edit().putString(name, image).apply()
 
-    override fun getAssetVisibilitySettings(): TokenVisibilitySettings =
+    override fun getTokenVisibilitySettings(): TokenVisibilitySettings =
         sharedPreferences.getString(ASSET_VISIBILITY_SETTINGS, String.NO_DATA).let { raw ->
             if (raw == String.NO_DATA) TokenVisibilitySettings()
             else Gson().fromJson(raw, object : TypeToken<TokenVisibilitySettings>() {}.type)
