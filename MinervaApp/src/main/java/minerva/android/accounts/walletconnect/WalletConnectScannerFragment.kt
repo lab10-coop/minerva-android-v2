@@ -63,6 +63,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                         closeButton.margin(bottom = DEFAULT_MARGIN)
                     }
                 }
+                is OnSessionDeleted -> showToast(getString(R.string.dapp_deleted))
             }
         })
     }

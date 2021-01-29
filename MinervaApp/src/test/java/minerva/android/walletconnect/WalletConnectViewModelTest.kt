@@ -212,7 +212,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.account = Account(1, networkShort = "eth_mainnet")
         whenever(dappSessionRepository.saveDappSession(any())).thenReturn(Completable.complete())
         viewModel.approveSession(WCPeerMeta(name = "name", url = "url"))
-        verify(repository).approveSession(any(), any(), any())
+        verify(repository).approveSession(any(), any(), any(), getDapp(meta))
     }
 
     @Test

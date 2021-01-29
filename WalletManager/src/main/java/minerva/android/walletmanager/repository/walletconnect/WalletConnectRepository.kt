@@ -17,9 +17,9 @@ interface WalletConnectRepository {
         remotePeerId: String? = null
     )
 
-    fun approveSession(addresses: List<String>, chainId: Int, peerId: String)
+    fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSession): Completable
     fun rejectSession(peerId: String)
-    fun killSession(peerId: String)
+    fun killSession(peerId: String): Completable
     val connectionStatusFlowable: Flowable<WalletConnectStatus>
     val isClientMapEmpty: Boolean
     val walletConnectClients: ConcurrentHashMap<String, WCClient>

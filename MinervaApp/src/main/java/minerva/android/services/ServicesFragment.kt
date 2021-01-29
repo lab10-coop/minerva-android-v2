@@ -1,5 +1,6 @@
 package minerva.android.services
 
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
@@ -26,6 +27,9 @@ class ServicesFragment : MinervaPrimitiveListFragment() {
             dappSessionsLiveData.observe(viewLifecycleOwner, Observer { updateList(it) })
             serviceRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
             errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
+            dappRemovedLiveData.observe(viewLifecycleOwner, EventObserver {
+                Toast.makeText(context, getString(R.string.dapp_deleted), Toast.LENGTH_SHORT).show()
+            })
         }
     }
 

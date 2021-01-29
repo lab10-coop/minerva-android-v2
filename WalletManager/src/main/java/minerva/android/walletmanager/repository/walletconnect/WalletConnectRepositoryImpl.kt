@@ -4,7 +4,12 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
@@ -13,19 +18,12 @@ import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.Topic
 import minerva.android.walletmanager.model.WalletConnectSession
 import minerva.android.walletmanager.model.mappers.*
+import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 
-/*TODO
-  this should be moved to service binded to the MainActivity class. Here within the app lifecycle, on given events, databe base
-  with dapp sessions should be updated. Thanks to that every view listeting for changes im DB will update all necesarry data.
-
-  HERE ALL OPERATION ON DB. besides removal when user updates by himself
-
-  tutaj powinno byc wstrzykniete DappSessionRepository, ktore ogrania handlowanie bazy danych
-*/
 class WalletConnectRepositoryImpl(
     minervaDatabase: MinervaDatabase,
-    private var wcClient: WCClient,
+    private var wcClient: WCClient = WCClient(),
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
 
@@ -50,13 +48,13 @@ class WalletConnectRepositoryImpl(
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
         dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
 
+    private var disposable: Disposable? = null //todo dispose somewhere ?
+
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?) {
         wcClient = WCClient()
-        wcClient.killSession()
         with(wcClient) {
-            onWCOpen = { peerId ->
-                clientMap[peerId] = this
-            }
+            onWCOpen = { peerId -> clientMap[peerId] = this }
+
             onSessionRequest = { remotePeerId, meta, chainId, peerId ->
                 status.onNext(
                     OnSessionRequest(
@@ -70,6 +68,15 @@ class WalletConnectRepositoryImpl(
                 status.onNext(OnConnectionFailure(error, peerId))
             }
             onDisconnect = { code, peerId ->
+
+                peerId?.let {
+                    if (walletConnectClients.containsKey(peerId)) {
+                        disposable = deleteDappSession(peerId)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeBy(onError = { Timber.e(it) })
+                    }
+                }
                 status.onNext(OnDisconnect(code, peerId))
             }
 
@@ -91,22 +98,30 @@ class WalletConnectRepositoryImpl(
     override fun getWCSessionFromQr(qrCode: String): WalletConnectSession =
         WCSessionToWalletConnectSessionMapper.map(WCSession.from(qrCode))
 
-    override fun approveSession(addresses: List<String>, chainId: Int, peerId: String) {
-        //todo add to DB
-        clientMap[peerId]?.approveSession(addresses, chainId, peerId)
+    override fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSession): Completable {
+        val isApproved: Boolean = clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true
+        return if (isApproved) {
+            saveDappSession(dapp)
+        } else {
+            Completable.error(Throwable("Session not approved"))
+        }
     }
 
     override fun rejectSession(peerId: String) {
-        clientMap[peerId]?.rejectSession()
-        //todo should delete WCClient from map (?)
-    }
-
-    override fun killSession(peerId: String) {
-        //todo add killing all sessions for given account
-        //todo remove from DB
         with(clientMap) {
-            this[peerId]?.killSession()
+            this[peerId]?.rejectSession()
             remove(peerId)
         }
     }
+
+    //TODO add killing all session for given account
+
+    override fun killSession(peerId: String): Completable =
+        deleteDappSession(peerId)
+            .andThen {
+                with(clientMap) {
+                    this[peerId]?.killSession()
+                    remove(peerId)
+                }
+            }
 }
