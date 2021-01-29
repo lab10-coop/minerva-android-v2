@@ -1,19 +1,20 @@
-package minerva.android.walletmanager.manager.accounts
+package minerva.android.walletmanager.manager.accounts.tokens
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
+import io.reactivex.Single
+import minerva.android.apiProvider.api.CryptoApi
+import minerva.android.apiProvider.model.TokenIconDetails
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
-import minerva.android.walletmanager.utils.RxTest
-import minerva.android.walletmanager.manager.accounts.tokens.TokenManagerImpl
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -23,7 +24,8 @@ import java.math.BigDecimal
 class TokenManagerTest : RxTest() {
 
     private val walletManager: WalletConfigManager = mock()
-    private val tokenManager = TokenManagerImpl(walletManager)
+    private val cryptoApi: CryptoApi = mock()
+    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi)
 
     @Before
     fun initializeMocks() {
@@ -53,7 +55,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test saving tokens for giving network`() {
         NetworkManager.initialize(DataProvider.networks)
-        val firstToken = ERC20Token("CookieToken", "COOKiE", "0xC00k1e", "C00")
+        val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "C00")
         tokenManager.saveToken(NetworkShortName.ATS_TAU, firstToken)
             .test()
             .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
@@ -65,14 +67,14 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `Test updating tokens list`() {
-        val newToken = ERC20Token("SomeToken", "some", "0xt0k3n", "32")
+        val newToken = ERC20Token(1, "SomeToken", "some", "0xt0k3n", "32")
         NetworkShortName.ATS_TAU.let { ATS ->
             val updatedTokens =
                 tokenManager.updateTokens(ATS, newToken, DataProvider.walletConfig.erc20Tokens)
             updatedTokens[ATS]?.size shouldBeEqualTo 3
             updatedTokens[ATS]?.get(2)?.name shouldBeEqualTo "SomeToken"
             updatedTokens[ATS]?.get(0)?.name shouldBeEqualTo "CookieTokenATS"
-            val secondNewToken = ERC20Token("CookieCoin", "CC", "0xC00k1e", "32")
+            val secondNewToken = ERC20Token(1, "CookieCoin", "CC", "0xC00k1e", "32")
             val secondUpdatedToken = tokenManager.updateTokens(ATS, secondNewToken, DataProvider.walletConfig.erc20Tokens)
             secondUpdatedToken[ATS]?.size shouldBeEqualTo 2
             secondUpdatedToken[ATS]?.get(1)?.name shouldBeEqualTo "CookieCoin"
@@ -97,4 +99,37 @@ class TokenManagerTest : RxTest() {
         tokenETH[0].token.name shouldBeEqualTo  "CookieTokenDETH"
         tokenETH[1].token.name shouldBeEqualTo  "OtherTokenETH"
     }
+
+    @Test
+    fun `Check getting Token Icon URL method` () {
+        NetworkManager.initialize(DataProvider.networks)
+        whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.just(data), Single.just(listOf()))
+        tokenManager.getTokenIconURL(1, "0x4ddre55")
+            .test()
+            .assertComplete()
+            .values().let {
+                it.first() shouldBeEqualTo "LogoUri"
+            }
+        tokenManager.getTokenIconURL(1, "0x4ddre55")
+            .test()
+            .assertComplete()
+            .values().let {
+                it.first() shouldBeEqualTo ""
+            }
+
+        verify(cryptoApi, times(2)).getTokenRawData(any(), any())
+    }
+
+    @Test
+    fun `Check that generating key for map is correct` () {
+        val chaiId = 3
+        val address = "0x4ddr355"
+        val key = tokenManager.generateTokenIconKey(chaiId, address)
+        key shouldBeEqualTo "30x4ddr355"
+    }
+
+    private val data = listOf(
+        TokenIconDetails(1, "0x4ddre55", "LogoUri"),
+        TokenIconDetails(2, "0x4ddre55", "LogoUri2")
+    )
 }

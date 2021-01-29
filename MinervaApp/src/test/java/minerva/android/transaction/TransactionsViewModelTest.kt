@@ -61,7 +61,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             address = "address",
             contractAddress = "aa",
             bindedOwner = "binded",
-            accountTokens = listOf(AccountToken(ERC20Token(symbol = "SomeSymbol"), BigDecimal.ZERO))
+            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol"), BigDecimal.ZERO))
         )
 
         val tokenList = viewModel.tokensList
@@ -172,7 +172,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 address = "address",
                 networkShort = "net1",
                 contractAddress = "aa",
-                accountTokens = listOf(AccountToken(ERC20Token("name")))
+                accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
             )
             tokenIndex = 0
         }
@@ -193,7 +193,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.apply {
             account = Account(
                 id = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                networkShort = "net3", accountTokens = listOf(AccountToken(ERC20Token("name")))
+                networkShort = "net3", accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
             )
             tokenIndex = 0
         }
@@ -210,7 +210,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account asset transaction test success`() {
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token("name"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
             publicKey = "12",
             privateKey = "12",
             address = "address",
@@ -234,7 +234,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token("name"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
             publicKey = "12",
             privateKey = "12",
             networkShort = "net3",

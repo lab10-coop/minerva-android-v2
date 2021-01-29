@@ -3,6 +3,7 @@ package minerva.android.apiProvider.api
 import io.reactivex.Single
 import minerva.android.apiProvider.model.GasPrice
 import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.TokenIconDetails
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
@@ -18,6 +19,12 @@ interface CryptoApi {
         @Header(ServicesApi.CONTENT_TYPE) content: String = ServicesApi.APPLICATION_JSON,
         @Url url: String
     ): Single<GasPrice>
+
+    @GET
+    fun getTokenRawData(
+        @Header(ServicesApi.CONTENT_TYPE) content: String = ServicesApi.APPLICATION_JSON,
+        @Url url: String
+    ) : Single<List<TokenIconDetails>>
 
     companion object {
         private const val IDS = "ids"

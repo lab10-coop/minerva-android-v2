@@ -139,7 +139,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 mapOf(
                     Pair(
                         "test",
-                        listOf(AccountToken(ERC20Token("name")))
+                        listOf(AccountToken(ERC20Token(1, "name")))
                     )
                 )
             )

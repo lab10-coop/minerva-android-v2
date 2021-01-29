@@ -92,15 +92,15 @@ class NetworkManagerTest {
     }
 
     private val tokenSet1 = listOf(
-        ERC20Token("token1", "ass1", "address1"),
-        ERC20Token("token2", "ass2", "address2"),
-        ERC20Token("token3", "ass3", "address3")
+        ERC20Token(2, "token1", "ass1", "address1"),
+        ERC20Token(2, "token2", "ass2", "address2"),
+        ERC20Token(2, "token3", "ass3", "address3")
     )
 
     private val tokenSet2 = listOf(
-        ERC20Token("token4", "ass4", "address4"),
-        ERC20Token("token5", "ass5", "address5"),
-        ERC20Token("token6", "ass6", "address6")
+        ERC20Token(3, "token4", "ass4", "address4"),
+        ERC20Token(3, "token5", "ass5", "address5"),
+        ERC20Token(3, "token6", "ass6", "address6")
     )
 
     private val testNetworks1 = listOf(

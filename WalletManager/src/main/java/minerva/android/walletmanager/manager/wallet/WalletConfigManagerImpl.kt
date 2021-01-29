@@ -328,7 +328,7 @@ class WalletConfigManagerImpl(
                         account,
                         ServicesResponseToServicesMapper.map(payload.serviceResponse),
                         CredentialsPayloadToCredentials.map(payload.credentialResponse),
-                        payload.erc20TokenResponse.map { (key, value) -> key to value.map { TokenPayloadToTokenMapper.map(it) } }
+                        payload.erc20TokenResponse.map { (key, value) -> key to value.map { ERC20TokenPayloadToERC20TokenMapper.map(it) } }
                             .toMap()
                     )
                 }

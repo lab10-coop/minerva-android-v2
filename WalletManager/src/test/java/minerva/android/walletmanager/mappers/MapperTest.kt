@@ -123,20 +123,21 @@ class MapperTest {
     }
 
     @Test
-    fun `Mapping Token to TokenPayload Test`() {
-        val value = ERC20Token("name", "symbol", "address", "decimals")
-        val valueResponse = TokenToTokenPayloadMapper.map(value)
+    fun `Mapping ERC20Token to ERC20TokenPayload Test`() {
+        val value = ERC20Token(3, "name", "symbol", "address", "decimals", "logoUri")
+        val valueResponse = ERC20TokenToERC20TokenPayloadMapper.map(value)
 
         value.name shouldBeEqualTo valueResponse.name
         value.symbol shouldBeEqualTo valueResponse.symbol
         value.address shouldBeEqualTo valueResponse.address
         value.decimals shouldBeEqualTo valueResponse.decimals
+        value.logoURI shouldBeEqualTo valueResponse.logoURI
     }
 
     @Test
-    fun `Mapping TokenPayload to Token Test`() {
-        val value = ERC20TokenPayload("name", "symbol", "address", "decimals")
-        val valueResponse = TokenPayloadToTokenMapper.map(value)
+    fun `Mapping ERC20TokenPayload to ERC20Token Test`() {
+        val value = ERC20TokenPayload(1, "name", "symbol", "address", "decimals")
+        val valueResponse = ERC20TokenPayloadToERC20TokenMapper.map(value)
 
         valueResponse.name shouldBeEqualTo value.name
         valueResponse.symbol shouldBeEqualTo value.symbol

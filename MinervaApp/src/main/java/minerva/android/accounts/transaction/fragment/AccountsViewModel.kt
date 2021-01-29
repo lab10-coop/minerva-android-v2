@@ -262,7 +262,10 @@ class AccountsViewModel(
     fun addAtsToken(accounts: List<Account>, errorMessage: String) {
         getAccountForFreeATS(accounts).let { account ->
             if (account.id != Int.InvalidId) {
-                transactionRepository.getFreeATS(account.address).subscribeBy(
+                transactionRepository.getFreeATS(account.address)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
                     onComplete = { accountManager.saveFreeATSTimestamp() },
                     onError = {
                         Timber.e("Adding 5 tATS failed: ${it.message}")

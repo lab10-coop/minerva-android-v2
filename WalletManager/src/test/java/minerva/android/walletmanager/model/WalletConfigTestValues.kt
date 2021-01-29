@@ -42,13 +42,13 @@ object WalletConfigTestValues {
         mapOf(
             Pair(
                 "user01", listOf(
-                    ERC20Token("CookieCoin", "COOKiE", "0xC00k13", "13"),
-                    ERC20Token("otherCoin", "OC", "0x0th3rC01n", "32")
+                    ERC20Token(1, "CookieCoin", "COOKiE", "0xC00k13", "13"),
+                    ERC20Token(2, "otherCoin", "OC", "0x0th3rC01n", "32")
                 )
             ),
             Pair(
                 "user02", listOf(
-                    ERC20Token("diffCoin", "DiFF", "0xD1FF", "13")
+                    ERC20Token(2, "diffCoin", "DiFF", "0xD1FF", "13")
                 )
             )
         )

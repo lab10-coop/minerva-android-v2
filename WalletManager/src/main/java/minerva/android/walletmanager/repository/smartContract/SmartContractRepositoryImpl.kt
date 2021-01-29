@@ -7,9 +7,9 @@ import io.reactivex.functions.Function3
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.Recipient
 import minerva.android.walletmanager.model.Transaction
 import minerva.android.walletmanager.model.mappers.TransactionMapper
@@ -82,7 +82,7 @@ class SmartContractRepositoryImpl(
                 getERC20TokenSymbol(privateKey, network, tokenAddress),
                 getERC20TokenDecimals(privateKey, network, tokenAddress),
                 Function3<String, String, BigInteger, ERC20Token> { name, symbol, decimals ->
-                    ERC20Token(name, symbol, tokenAddress, decimals.toString())
+                    ERC20Token(NetworkManager.getChainId(network), name, symbol, tokenAddress, decimals.toString())
                 }
             ).firstOrError()
         }
