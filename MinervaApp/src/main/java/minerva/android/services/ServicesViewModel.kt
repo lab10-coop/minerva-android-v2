@@ -10,20 +10,22 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
-import minerva.android.walletConnect.repository.WalletConnectRepository
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.DappSession
+import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
 class ServicesViewModel(
     private val serviceManager: ServiceManager,
     private val walletActionsRepository: WalletActionsRepository,
-    private val dappSessionRepository: DappSessionRepository //todo tylko do getSessionsFlowable
+    private val walletConnectRepository: WalletConnectRepository
 ) : BaseViewModel() {
 
     val servicesLiveData: LiveData<List<Service>> =
@@ -56,7 +58,7 @@ class ServicesViewModel(
 
     internal fun setDappSessionsFlowable(services: List<MinervaPrimitive>) {
         launchDisposable {
-            dappSessionRepository.getSessionsFlowable()
+            walletConnectRepository.getSessionsFlowable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -69,7 +71,7 @@ class ServicesViewModel(
     fun removeSession(dapp: DappSession) {
         launchDisposable {
             //toto tutaj powinien byc serwis, gdzie jest robione killSession, a potem usuwanie z db juz w serwisie
-            dappSessionRepository.deleteDappSession(dapp.peerId)
+            walletConnectRepository.deleteDappSession(dapp.peerId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onError = { Timber.e(it) })

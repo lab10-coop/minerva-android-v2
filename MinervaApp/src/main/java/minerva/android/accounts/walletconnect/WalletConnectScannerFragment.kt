@@ -15,8 +15,8 @@ import minerva.android.extension.invisible
 import minerva.android.extension.margin
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
-import minerva.android.walletConnect.model.exceptions.InvalidAccountException
-import minerva.android.walletConnect.model.session.WCPeerMeta
+import minerva.android.walletmanager.exception.InvalidAccountException
+import minerva.android.walletmanager.model.WalletConnectPeerMeta
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
@@ -117,7 +117,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    private fun showConnectionDialog(meta: WCPeerMeta, network: String, isNetworkDefined: Boolean) {
+    private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: String, isNetworkDefined: Boolean) {
         DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession(meta)

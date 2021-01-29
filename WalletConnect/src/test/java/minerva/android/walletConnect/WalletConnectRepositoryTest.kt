@@ -9,8 +9,8 @@ import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.walletConnect.client.WCClient
-import minerva.android.walletConnect.repository.WalletConnectRepository
-import minerva.android.walletConnect.repository.WalletConnectRepositoryImpl
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -22,7 +22,7 @@ class WalletConnectRepositoryTest {
 
     private val client: WCClient = mock()
     private lateinit var clientMap: ConcurrentHashMap<String, WCClient>
-    private lateinit var repository: WalletConnectRepository
+    private lateinit var repository: minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 
     @get:Rule
     val rule
@@ -35,7 +35,7 @@ class WalletConnectRepositoryTest {
 
         clientMap = ConcurrentHashMap()
         clientMap["peerId"] = client
-        repository = WalletConnectRepositoryImpl(client, clientMap)
+        repository = minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl(client, clientMap)
     }
 
     @After
@@ -47,7 +47,7 @@ class WalletConnectRepositoryTest {
     @Test
     fun `is client map empty test`() {
         clientMap = ConcurrentHashMap()
-        repository = WalletConnectRepositoryImpl(client, clientMap)
+        repository = minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl(client, clientMap)
         val result = repository.isClientMapEmpty
         assertEquals(true, result)
     }

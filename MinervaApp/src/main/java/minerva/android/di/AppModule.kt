@@ -24,7 +24,6 @@ import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
 import minerva.android.walletActions.WalletActionsViewModel
-import minerva.android.walletConnect.walletConnectModules
 import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage
 import minerva.android.widget.clubCard.CacheStorageImpl
@@ -43,7 +42,6 @@ fun createAppModule() = mutableListOf<Module>().apply {
         )
     )
     add(appModules)
-    add(walletConnectModules)
 }
 
 private val appModules = module {

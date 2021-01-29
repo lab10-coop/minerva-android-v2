@@ -20,14 +20,13 @@ import minerva.android.walletConnect.utils.WCCipher
 import minerva.android.walletConnect.utils.toByteArray
 import okhttp3.*
 import okio.ByteString
-import timber.log.Timber
 import java.util.*
 
 const val JSONRPC_VERSION = "2.0"
 
 open class WCClient(
-    builder: GsonBuilder = GsonBuilder(),
-    private val httpClient: OkHttpClient = OkHttpClient()
+    private val httpClient: OkHttpClient = OkHttpClient(),
+    builder: GsonBuilder = GsonBuilder()
 ) : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName

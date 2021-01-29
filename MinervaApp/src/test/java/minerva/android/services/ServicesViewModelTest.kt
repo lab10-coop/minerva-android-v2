@@ -11,7 +11,7 @@ import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
+import minerva.android.walletmanager.repository.walletconnect.session.DappSessionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Before
 import org.junit.Test

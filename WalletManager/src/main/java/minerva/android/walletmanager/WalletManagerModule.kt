@@ -2,47 +2,48 @@ package minerva.android.walletmanager
 
 import android.content.Context
 import androidx.room.Room
-import minerva.android.blockchainprovider.createBlockchainProviderModule
-import minerva.android.cryptographyProvider.createCryptographyModules
 import minerva.android.apiProvider.apiProviderModule
+import minerva.android.blockchainprovider.createBlockchainProviderModule
 import minerva.android.configProvider.createWalletConfigProviderModule
+import minerva.android.configProvider.localSharedPrefs
+import minerva.android.cryptographyProvider.createCryptographyModules
+import minerva.android.walletConnect.walletConnectModules
+import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.keystore.KeyStoreManager
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.keystore.KeystoreRepositoryImpl
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.AccountManagerImpl
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManagerImpl
 import minerva.android.walletmanager.manager.identity.IdentityManager
 import minerva.android.walletmanager.manager.identity.IdentityManagerImpl
+import minerva.android.walletmanager.manager.networks.NetworkManager.gasPriceMap
+import minerva.android.walletmanager.manager.networks.NetworkManager.httpsUrlMap
+import minerva.android.walletmanager.manager.networks.NetworkManager.wssUrlMap
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.order.OrderManagerImpl
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.manager.services.ServiceManagerImpl
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
+import minerva.android.walletmanager.provider.CurrentTimeProvider
+import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepositoryImpl
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.LocalStorageImpl
+import minerva.android.walletmanager.utils.EnsProvider
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepositoryImpl
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProviderImpl
-import minerva.android.configProvider.localSharedPrefs
-import minerva.android.walletmanager.database.MinervaDatabase
-import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
-import minerva.android.walletmanager.manager.accounts.tokens.TokenManagerImpl
-import minerva.android.walletmanager.manager.networks.NetworkManager.gasPriceMap
-import minerva.android.walletmanager.manager.networks.NetworkManager.httpsUrlMap
-import minerva.android.walletmanager.manager.networks.NetworkManager.wssUrlMap
-import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
-import minerva.android.walletmanager.repository.walletconnect.DappSessionRepositoryImpl
-import minerva.android.walletmanager.provider.CurrentTimeProvider
-import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
-import minerva.android.walletmanager.utils.EnsProvider
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -53,6 +54,7 @@ fun createWalletManagerModules(isDebug: Boolean, restApiUrl: String, marketsApiU
         .plus(createWalletConfigProviderModule(isDebug, restApiUrl))
         .plus(apiProviderModule(isDebug, marketsApiUrl))
         .plus(createBlockchainProviderModule(httpsUrlMap, gasPriceMap, wssUrlMap))
+        .plus(walletConnectModules)
 
 fun createWalletModules() = module {
     factory { EnsProvider(get()).ensUrl }
@@ -73,7 +75,7 @@ fun createWalletModules() = module {
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
     factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
-    factory<DappSessionRepository> { DappSessionRepositoryImpl(get()) }
+    single<WalletConnectRepository> { WalletConnectRepositoryImpl(get(), get()) }
     single {
         Room.databaseBuilder(androidContext(), MinervaDatabase::class.java, "minerva_database")
             .fallbackToDestructiveMigration().build()

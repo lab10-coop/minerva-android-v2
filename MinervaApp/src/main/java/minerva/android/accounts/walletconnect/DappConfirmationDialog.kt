@@ -11,8 +11,7 @@ import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Compa
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
-import minerva.android.kotlinUtils.Empty
-import minerva.android.walletConnect.model.session.WCPeerMeta
+import minerva.android.walletmanager.model.WalletConnectPeerMeta
 
 class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
     BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
@@ -43,14 +42,14 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
-    fun setView(meta: WCPeerMeta) = with(binding) {
+    fun setView(meta: WalletConnectPeerMeta) = with(binding) {
         Glide.with(context)
             .load(getIcon(meta))
             .into(icon)
         name.text = meta.name
     }
 
-    private fun DappConfirmationDialogBinding.getIcon(meta: WCPeerMeta): Any =
+    private fun DappConfirmationDialogBinding.getIcon(meta: WalletConnectPeerMeta): Any =
         if (meta.icons.isEmpty()) {
             confirmationView.setDefaultIcon()
             R.drawable.ic_services

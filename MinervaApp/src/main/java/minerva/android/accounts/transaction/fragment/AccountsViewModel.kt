@@ -25,9 +25,9 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REM
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
-import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -38,7 +38,7 @@ class AccountsViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository,
-    private val dappSessionRepository: DappSessionRepository //todo tylko do getSessionsFlowable
+    private val walletConnectRepository: WalletConnectRepository
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -123,7 +123,7 @@ class AccountsViewModel(
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
-            dappSessionRepository.getSessions() //todo zmien na getSessionFlowable, po ty aby nasluchiwac na zmiany w db i updatowac numer sesji. uwazaj prze usuwaniu accounta zeby lista sie 2x nieupdatowala
+            walletConnectRepository.getSessions() //todo zmien na getSessionFlowable, po ty aby nasluchiwac na zmiany w db i updatowac numer sesji. uwazaj prze usuwaniu accounta zeby lista sie 2x nieupdatowala
                 .map { sessions -> updateSessions(sessions, accounts) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -157,7 +157,7 @@ class AccountsViewModel(
             accountManager.removeAccount(account)
                 .observeOn(Schedulers.io())
                 //todo tutaj powinno byc kill all sessions for given account w servisie
-                .andThen(dappSessionRepository.deleteAllDappsForAccount(account.address))
+                .andThen(walletConnectRepository.deleteAllDappsForAccount(account.address))
                 .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

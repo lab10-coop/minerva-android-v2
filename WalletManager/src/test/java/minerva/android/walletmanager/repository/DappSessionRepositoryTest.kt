@@ -8,7 +8,7 @@ import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.DappSessionDao
 import minerva.android.walletmanager.database.entity.DappSessionEntity
 import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.repository.walletconnect.DappSessionRepositoryImpl
+import minerva.android.walletmanager.repository.walletconnect.session.DappSessionRepositoryImpl
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.any
 import org.junit.Test
