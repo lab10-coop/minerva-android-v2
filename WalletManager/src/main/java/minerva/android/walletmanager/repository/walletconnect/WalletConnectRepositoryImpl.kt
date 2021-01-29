@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap
   tutaj powinno byc wstrzykniete DappSessionRepository, ktore ogrania handlowanie bazy danych
 */
 class WalletConnectRepositoryImpl(
-    private var wcClient: WCClient,
     minervaDatabase: MinervaDatabase,
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
@@ -50,6 +49,7 @@ class WalletConnectRepositoryImpl(
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
         dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
 
+    private var wcClient: WCClient = WCClient()
 
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?) {
         wcClient = WCClient()

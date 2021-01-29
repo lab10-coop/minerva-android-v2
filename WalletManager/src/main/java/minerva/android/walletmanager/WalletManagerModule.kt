@@ -75,10 +75,13 @@ fun createWalletModules() = module {
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
     factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
-    single<WalletConnectRepository> { WalletConnectRepositoryImpl(get(), get()) }
+    single<WalletConnectRepository> { WalletConnectRepositoryImpl(get()) }
     single {
-        Room.databaseBuilder(androidContext(), MinervaDatabase::class.java, "minerva_database")
-            .fallbackToDestructiveMigration().build()
+        Room.databaseBuilder(
+            androidContext(),
+            MinervaDatabase::class.java,
+            "minerva_database"
+        ).fallbackToDestructiveMigration().build()
     }
 }
 
