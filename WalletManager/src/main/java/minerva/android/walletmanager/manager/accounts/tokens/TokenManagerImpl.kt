@@ -1,14 +1,14 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
 import androidx.annotation.VisibleForTesting
-import com.google.gson.Gson
 import io.reactivex.Completable
 import io.reactivex.Single
+import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
+import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -17,7 +17,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.Token
 import java.math.BigDecimal
 
-class TokenManagerImpl(private val walletManager: WalletConfigManager, private val tokenIconRepository: TokenIconRepository) :
+class TokenManagerImpl(private val walletManager: WalletConfigManager, private val cryptoApi: CryptoApi) :
     TokenManager {
 
     override fun loadTokens(network: String): List<ERC20Token> =
@@ -46,17 +46,8 @@ class TokenManagerImpl(private val walletManager: WalletConfigManager, private v
         }
 
     override fun getTokenIconURL(chainId: Int, address: String): Single<String> =
-        Single.create {
-            tokenIconRepository.getIconRawFile().let { data ->
-                Gson().fromJson(data, Array<ERC20Token>::class.java).associateBy { generateTokenIconKey(it.chainId, it.address) }
-                    .let { map ->
-                        map[generateTokenIconKey(chainId, address)]?.logoURI?.let { result ->
-                            it.onSuccess(result)
-                        }.orElse {
-                            it.onSuccess(String.Empty)
-                        }
-                    }
-            }
+        cryptoApi.getTokenRawData(url = BuildConfig.ERC20_TOKEN_DATA_URL).map { data ->
+            data.find { chainId == it.chainId && address == it.address }?.logoURI ?: String.Empty
         }
 
     @VisibleForTesting

@@ -33,8 +33,6 @@ import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActi
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProviderImpl
 import minerva.android.configProvider.localSharedPrefs
 import minerva.android.walletmanager.database.MinervaDatabase
-import minerva.android.walletmanager.manager.accounts.tokens.TokenIconRepository
-import minerva.android.walletmanager.manager.accounts.tokens.TokenIconRepositoryImpl
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManagerImpl
 import minerva.android.walletmanager.manager.networks.NetworkManager.gasPriceMap
@@ -73,15 +71,7 @@ fun createWalletModules() = module {
     factory { KeyStoreManager() }
     factory<KeystoreRepository> { KeystoreRepositoryImpl(get(named(minervaSharedPrefs)), get()) }
     factory<LocalStorage> { LocalStorageImpl(get(named(localSharedPrefs))) }
-    factory<LocalWalletActionsConfigProvider> {
-        LocalWalletActionsConfigProviderImpl(
-            get(
-                named(
-                    localSharedPrefs
-                )
-            )
-        )
-    }
+    factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
     factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get()) }
@@ -94,7 +84,6 @@ fun createWalletModules() = module {
     factory<OrderManager> { OrderManagerImpl(get()) }
     factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
     factory<DappSessionRepository> { DappSessionRepositoryImpl(get()) }
-    factory<TokenIconRepository> { TokenIconRepositoryImpl() }
     single {
         Room.databaseBuilder(
             androidContext(),
