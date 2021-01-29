@@ -50,11 +50,11 @@ import org.koin.dsl.module
 
 fun createWalletManagerModules(isDebug: Boolean, restApiUrl: String, marketsApiUrl: String) =
     createWalletModules()
+        .plus(walletConnectModules)
         .plus(createCryptographyModules())
         .plus(createWalletConfigProviderModule(isDebug, restApiUrl))
         .plus(apiProviderModule(isDebug, marketsApiUrl))
         .plus(createBlockchainProviderModule(httpsUrlMap, gasPriceMap, wssUrlMap))
-        .plus(walletConnectModules)
 
 fun createWalletModules() = module {
     factory { EnsProvider(get()).ensUrl }
@@ -75,7 +75,7 @@ fun createWalletModules() = module {
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
     factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
-    single<WalletConnectRepository> { WalletConnectRepositoryImpl(get()) }
+    single<WalletConnectRepository> { WalletConnectRepositoryImpl(get(), get()) }
     single {
         Room.databaseBuilder(
             androidContext(),
