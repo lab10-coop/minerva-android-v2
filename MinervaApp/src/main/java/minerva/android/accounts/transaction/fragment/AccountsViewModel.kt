@@ -156,8 +156,7 @@ class AccountsViewModel(
         launchDisposable {
             accountManager.removeAccount(account)
                 .observeOn(Schedulers.io())
-                //todo tutaj powinno byc kill all sessions for given account w servisie
-                .andThen(walletConnectRepository.deleteAllDappsForAccount(account.address))
+                .andThen(walletConnectRepository.killAllAccountSessions(accountManager.toChecksumAddress(account.address)))
                 .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

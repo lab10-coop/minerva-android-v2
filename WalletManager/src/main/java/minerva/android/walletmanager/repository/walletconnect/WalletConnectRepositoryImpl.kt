@@ -10,6 +10,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
@@ -42,9 +43,6 @@ class WalletConnectRepositoryImpl(
     override fun getSessions(): Single<List<DappSession>> =
         dappDao.getAll().firstOrError().map { EntityToDappSessionMapper.map(it) }
 
-    override fun deleteAllDappsForAccount(address: String): Completable =
-        dappDao.deleteAllDappsForAccount(address)
-
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
         dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
 
@@ -68,7 +66,6 @@ class WalletConnectRepositoryImpl(
                 status.onNext(OnConnectionFailure(error, peerId))
             }
             onDisconnect = { code, peerId ->
-
                 peerId?.let {
                     if (walletConnectClients.containsKey(peerId)) {
                         disposable = deleteDappSession(peerId)
@@ -114,7 +111,17 @@ class WalletConnectRepositoryImpl(
         }
     }
 
-    //TODO add killing all session for given account
+    override fun killAllAccountSessions(address: String): Completable =
+        getSessions()
+            .map { sessions ->
+                sessions.filter { it.address == address }.forEach { session ->
+                    Timber.tag("kobe").d(session.name)
+                    clientMap[session.peerId]?.killSession()
+                    clientMap.remove(session.peerId)
+                }
+            }.flatMapCompletable {
+                dappDao.deleteAllDappsForAccount(address)
+            }
 
     override fun killSession(peerId: String): Completable =
         deleteDappSession(peerId)

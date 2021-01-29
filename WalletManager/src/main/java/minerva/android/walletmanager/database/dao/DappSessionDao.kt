@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Single
 import minerva.android.walletmanager.database.entity.DappSessionEntity
 
 @Dao
