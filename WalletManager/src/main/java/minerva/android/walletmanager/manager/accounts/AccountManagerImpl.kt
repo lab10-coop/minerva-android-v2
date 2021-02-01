@@ -19,7 +19,6 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.util.concurrent.TimeUnit
 
 class AccountManagerImpl(
     private val walletManager: WalletConfigManager,
@@ -133,7 +132,7 @@ class AccountManagerImpl(
     }
 
     override fun getLastFreeATSTimestamp(): Long =
-        localStorage.getLastFreeATSTimestamp()
+        localStorage.loadLastFreeATSTimestamp()
 
     override fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings =
         localStorage.saveTokenVisibilitySettings(settings)

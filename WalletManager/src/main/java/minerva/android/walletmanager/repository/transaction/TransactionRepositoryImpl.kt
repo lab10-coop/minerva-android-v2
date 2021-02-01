@@ -48,7 +48,8 @@ class TransactionRepositoryImpl(
 
     private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> =
         accounts.map {
-            it.network.short to it.address }
+            it.network.short to it.address
+        }
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
@@ -59,8 +60,11 @@ class TransactionRepositoryImpl(
                 .filter { position -> accounts[position].network.isAvailable() }
                 .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
                 .toList()
-                .map { list -> list.map {
-                    it.second to tokenManager.mapToAccountTokensList(it.first, it.third) }.toMap() }
+                .map { list ->
+                    list.map {
+                        it.second to tokenManager.mapToAccountTokensList(it.first, it.third)
+                    }.toMap()
+                }
         }
         throw NotInitializedWalletConfigThrowable()
     }
@@ -213,6 +217,8 @@ class TransactionRepositoryImpl(
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
+
+    override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1

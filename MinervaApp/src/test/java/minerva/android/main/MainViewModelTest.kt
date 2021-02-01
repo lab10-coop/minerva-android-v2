@@ -29,6 +29,7 @@ class MainViewModelTest : BaseViewModelTest() {
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
     private val transactionRepository: TransactionRepository = mock()
+
     private val viewModel =
         MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager, transactionRepository)
 
@@ -242,5 +243,12 @@ class MainViewModelTest : BaseViewModelTest() {
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
+    }
+
+    @Test
+    fun `Checking token icons updating works fine` () {
+        whenever(transactionRepository.updateTokenIcons()).thenReturn(Completable.complete())
+        viewModel.updateTokenIcons()
+        verify(transactionRepository, times(1)).updateTokenIcons()
     }
 }

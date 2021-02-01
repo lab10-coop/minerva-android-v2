@@ -7,12 +7,16 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
+import minerva.android.apiProvider.model.Commit
+import minerva.android.apiProvider.model.CommitElement
+import minerva.android.apiProvider.model.Committer
 import minerva.android.apiProvider.model.TokenIconDetails
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
@@ -25,7 +29,8 @@ class TokenManagerTest : RxTest() {
 
     private val walletManager: WalletConfigManager = mock()
     private val cryptoApi: CryptoApi = mock()
-    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi)
+    private val localStorage: LocalStorage = mock()
+    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi, localStorage)
 
     @Before
     fun initializeMocks() {
@@ -34,7 +39,7 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Test loading tokens list` () {
+    fun `Test loading tokens list`() {
         NetworkManager.initialize(DataProvider.networks)
         tokenManager.loadTokens("Some").size shouldBeEqualTo 0
         tokenManager.loadTokens(NetworkShortName.ATS_TAU).let {
@@ -83,7 +88,7 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check mapping from raw addresses to tokens` () {
+    fun `Check mapping from raw addresses to tokens`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
         val rawTokens = listOf(
@@ -96,12 +101,12 @@ class TokenManagerTest : RxTest() {
         tokensATS[1].token.name shouldBeEqualTo "OtherTokenATS"
         val tokenETH = tokenManager.mapToAccountTokensList(NetworkShortName.ETH_RIN, rawTokens)
         tokenETH.size shouldBeEqualTo 2
-        tokenETH[0].token.name shouldBeEqualTo  "CookieTokenDETH"
-        tokenETH[1].token.name shouldBeEqualTo  "OtherTokenETH"
+        tokenETH[0].token.name shouldBeEqualTo "CookieTokenDETH"
+        tokenETH[1].token.name shouldBeEqualTo "OtherTokenETH"
     }
 
     @Test
-    fun `Check getting Token Icon URL method` () {
+    fun `Check getting Token Icon URL method`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.just(data), Single.just(listOf()))
         tokenManager.getTokenIconURL(1, "0x4ddre55")
@@ -121,12 +126,25 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check that generating key for map is correct` () {
+    fun `Check that generating key for map is correct`() {
         val chaiId = 3
         val address = "0x4ddr355"
         val key = tokenManager.generateTokenIconKey(chaiId, address)
         key shouldBeEqualTo "30x4ddr355"
     }
+
+
+    //TODO klop update this test
+    @Test
+    fun `Check mapping last commit data to last commit timestamp`() {
+        whenever(cryptoApi.getTokenLastCommitRawData(any(), any())).thenReturn(Single.just(commitData))
+        tokenManager.updateTokenIcons()
+            .test()
+    }
+
+    private val commitData: List<CommitElement>
+        get() = listOf(CommitElement(Commit(Committer("cookie", "2021-01-29T19:56:02Z"))))
+
 
     private val data = listOf(
         TokenIconDetails(1, "0x4ddre55", "LogoUri"),

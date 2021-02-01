@@ -1,11 +1,14 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
+import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
 import minerva.android.walletmanager.BuildConfig
@@ -15,9 +18,14 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.Token
+import minerva.android.walletmanager.storage.LocalStorage
 import java.math.BigDecimal
 
-class TokenManagerImpl(private val walletManager: WalletConfigManager, private val cryptoApi: CryptoApi) :
+class TokenManagerImpl(
+    private val walletManager: WalletConfigManager,
+    private val cryptoApi: CryptoApi,
+    private val localStorage: LocalStorage
+) :
     TokenManager {
 
     override fun loadTokens(network: String): List<ERC20Token> =
@@ -45,6 +53,20 @@ class TokenManagerImpl(private val walletManager: WalletConfigManager, private v
             }
         }
 
+    override fun updateTokenIcons(): Completable =
+        cryptoApi.getTokenLastCommitRawData(url = BuildConfig.ERC20_TOKEN_DATA_LAST_COMMIT)
+            .flatMapCompletable {
+                it[LAST_UPDATE_INDEX].commit?.committer?.date?.let {
+                    val lastUpdate = DateUtils.getTimestampFromDate(it)
+                    val lastLocalUpdate = localStorage.loadTokenIconsUpdateTimestamp()
+                    if (lastLocalUpdate > lastUpdate) {
+                        Log.e("klop", "Updating token icons NOW")
+                        Completable.complete()
+                    }
+                    else Completable.error(Throwable("Missing new token icons version"))
+                }
+            }
+
     override fun getTokenIconURL(chainId: Int, address: String): Single<String> =
         cryptoApi.getTokenRawData(url = BuildConfig.ERC20_TOKEN_DATA_URL).map { data ->
             data.find { chainId == it.chainId && address == it.address }?.logoURI ?: String.Empty
@@ -68,4 +90,8 @@ class TokenManagerImpl(private val walletManager: WalletConfigManager, private v
                 put(network, currentTokens)
             }
         }
+
+    companion object {
+        private const val LAST_UPDATE_INDEX = 0
+    }
 }

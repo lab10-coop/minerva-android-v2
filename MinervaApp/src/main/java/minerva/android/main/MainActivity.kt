@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     override fun onResume() {
         super.onResume()
+        viewModel.updateTokenIcons()
         shouldShowLoadingScreen(false)
         handleExecutedAccounts()
     }

@@ -4,32 +4,37 @@ import minerva.android.kotlinUtils.extension.toMilliseconds
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
 import java.text.SimpleDateFormat
+import java.time.OffsetDateTime
 import java.util.*
 
 object DateUtils {
     const val DATE_FORMAT = "dd.MM.yyyy"
     const val SHORT_DATE_FORMAT = "MM/yyyy"
+    private const val ISO_8601 = "yyyy-MM-dd'T'HH:mm:ssX"
     private const val DATE_WITH_TIME_FORMAT = "dd.MM.yyyy hh:mm"
     private const val TIME_FORMAT = "hh:mm"
 
     fun getDateWithTimeFromTimestamp(dateInMillis: Long = timestamp): String =
         SimpleDateFormat(
             DATE_WITH_TIME_FORMAT,
-            Locale.getDefault()
+            Locale.ROOT
         ).format(Date(dateInMillis))
 
 
-    fun getDateFromTimestamp(timestamp: Long, format: String): String =
+    fun getDateFromTimestamp(timestamp: Long, format: String = DATE_FORMAT): String =
         SimpleDateFormat(
             format,
-            Locale.getDefault()
+            Locale.ROOT
         ).format(Date(timestamp.toMilliseconds()))
 
     fun getTimeFromTimeStamp(time: Long = timestamp): String =
         SimpleDateFormat(
             TIME_FORMAT,
-            Locale.getDefault()
+            Locale.ROOT
         ).format(Date(time))
+
+    fun getTimestampFromDate(date: String, format: String = ISO_8601): Long =
+        SimpleDateFormat(format).parse(date).time
 
     val timestamp get() = (System.currentTimeMillis() / DateTimeConstants.MILLIS_PER_SECOND) * 1000L
 
