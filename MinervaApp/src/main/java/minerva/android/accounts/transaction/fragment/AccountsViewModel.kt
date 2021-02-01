@@ -124,12 +124,12 @@ class AccountsViewModel(
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
-            walletConnectRepository.getSessions() //todo zmien na getSessionFlowable, po ty aby nasluchiwac na zmiany w db i updatowac numer sesji. uwazaj prze usuwaniu accounta zeby lista sie 2x nieupdatowala
+            walletConnectRepository.getSessionsFlowable()
                 .map { sessions -> updateSessions(sessions, accounts) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
+                    onNext = {
                         _dappSessions.value = if (it.isNotEmpty()) {
                             it
                         } else {
@@ -264,12 +264,12 @@ class AccountsViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                    onComplete = { accountManager.saveFreeATSTimestamp() },
-                    onError = {
-                        Timber.e("Adding 5 tATS failed: ${it.message}")
-                        _errorLiveData.value = Event(Throwable(it.message))
-                    }
-                )
+                        onComplete = { accountManager.saveFreeATSTimestamp() },
+                        onError = {
+                            Timber.e("Adding 5 tATS failed: ${it.message}")
+                            _errorLiveData.value = Event(Throwable(it.message))
+                        }
+                    )
             } else {
                 Timber.e("Adding 5 tATS failed: $errorMessage")
                 _errorLiveData.value = Event(Throwable(errorMessage))

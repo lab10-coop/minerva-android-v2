@@ -273,8 +273,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get sessions and update accounts success`() {
-        whenever(walletConnectRepository.getSessions()).thenReturn(
-            Single.just(
+        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(
+            Flowable.just(
                 listOf(DappSession(address = "address"))
             )
         )
@@ -290,7 +290,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `get sessions and update accounts error`() {
         val error = Throwable()
-        whenever(walletConnectRepository.getSessions()).thenReturn(Single.error(error))
+        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.error(error))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.getSessions(accounts)
@@ -301,7 +301,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `no sessions so account list is not updated, so test should fail`() {
-        whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(emptyList()))
+        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(emptyList()))
         viewModel.dappSessions.observeForever(dappSessionObserver)
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {
