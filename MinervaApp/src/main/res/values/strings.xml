@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MinervaMVP</string>
+    <string name="app_name">Minerva</string>
     <string name="identities">Identities</string>
     <string name="accounts">Accounts</string>
     <string name="accounts_navigation_menu_header">Values</string>
