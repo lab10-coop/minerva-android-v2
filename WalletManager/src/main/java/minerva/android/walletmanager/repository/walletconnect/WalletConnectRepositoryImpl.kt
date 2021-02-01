@@ -111,6 +111,7 @@ class WalletConnectRepositoryImpl(
         }
     }
 
+    //todo test
     override fun killAllAccountSessions(address: String): Completable =
         getSessions()
             .map { sessions ->
