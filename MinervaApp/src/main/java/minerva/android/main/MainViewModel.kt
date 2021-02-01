@@ -73,10 +73,12 @@ class MainViewModel(
 
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
-    fun dispose() = masterSeedRepository.dispose()
+    fun dispose() {
+        masterSeedRepository.dispose()
+        walletConnectRepository.dispose()
+    }
 
     init {
-        //todo test
         launchDisposable {
             walletConnectRepository.getSessions()
                 .subscribeOn(Schedulers.io())

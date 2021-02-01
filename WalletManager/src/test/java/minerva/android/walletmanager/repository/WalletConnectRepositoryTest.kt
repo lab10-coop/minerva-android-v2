@@ -1,9 +1,7 @@
 package minerva.android.walletmanager.repository
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.android.plugins.RxAndroidPlugins
@@ -173,6 +171,26 @@ class WalletConnectRepositoryTest {
         val error = Throwable()
         whenever(dappSessionDao.getAll()).thenReturn(Flowable.error(error))
         repository.getSessionsFlowable()
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `kill all account sessions test`() {
+        whenever(dappSessionDao.getAll()).thenReturn(Flowable.just(dapps))
+        whenever(dappSessionDao.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
+        repository.killAllAccountSessions("address1")
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+    }
+
+    @Test
+    fun `kill all account sessions error test`() {
+        val error = Throwable()
+        whenever(dappSessionDao.getAll()).thenReturn(Flowable.error(error))
+        whenever(dappSessionDao.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
+        repository.killAllAccountSessions("address1")
             .test()
             .assertError(error)
     }

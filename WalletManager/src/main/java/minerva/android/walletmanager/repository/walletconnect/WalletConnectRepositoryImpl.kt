@@ -46,7 +46,7 @@ class WalletConnectRepositoryImpl(
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
         dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
 
-    private var disposable: Disposable? = null //todo dispose somewhere ?
+    private var disposable: Disposable? = null
 
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?) {
         wcClient = WCClient()
@@ -68,10 +68,7 @@ class WalletConnectRepositoryImpl(
             onDisconnect = { code, peerId ->
                 peerId?.let {
                     if (walletConnectClients.containsKey(peerId)) {
-                        disposable = deleteDappSession(peerId)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribeBy(onError = { Timber.e(it) })
+                        deleteSession(peerId)
                     }
                 }
                 status.onNext(OnDisconnect(code, peerId))
@@ -84,6 +81,13 @@ class WalletConnectRepositoryImpl(
                 remotePeerId = remotePeerId
             )
         }
+    }
+
+    private fun deleteSession(peerId: String) {
+        disposable = deleteDappSession(peerId)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(onError = { Timber.e(it) })
     }
 
     override val isClientMapEmpty: Boolean
@@ -111,18 +115,22 @@ class WalletConnectRepositoryImpl(
         }
     }
 
-    //todo test
     override fun killAllAccountSessions(address: String): Completable =
         getSessions()
             .map { sessions ->
                 sessions.filter { it.address == address }.forEach { session ->
-                    Timber.tag("kobe").d(session.name)
-                    clientMap[session.peerId]?.killSession()
-                    clientMap.remove(session.peerId)
+                    with(clientMap) {
+                        this[session.peerId]?.killSession()
+                        remove(session.peerId)
+                    }
                 }
             }.flatMapCompletable {
                 dappDao.deleteAllDappsForAccount(address)
             }
+
+    override fun dispose() {
+        disposable?.dispose()
+    }
 
     override fun killSession(peerId: String): Completable =
         deleteDappSession(peerId)

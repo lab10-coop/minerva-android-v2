@@ -10,10 +10,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.CredentialQrCode
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.PendingAccount
-import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -63,6 +60,36 @@ class MainViewModelTest : BaseViewModelTest() {
             transactionRepository,
             walletConnectRepository
         )
+    }
+
+    @Test
+    fun `reconnect to saved sessions test`() {
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        viewModel = MainViewModel(
+            masterSeedRepository,
+            serviceManager,
+            walletActionsRepository,
+            orderManager,
+            transactionRepository,
+            walletConnectRepository
+        )
+        verify(walletConnectRepository, times(2)).connect(any(), any(), any())
+    }
+
+    @Test
+    fun `do not reconnect when no sessions saved test`() {
+        whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(listOf()))
+        viewModel = MainViewModel(
+            masterSeedRepository,
+            serviceManager,
+            walletActionsRepository,
+            orderManager,
+            transactionRepository,
+            walletConnectRepository
+        )
+        verify(walletConnectRepository, times(0)).connect(any(), any(), any())
     }
 
     @Test
