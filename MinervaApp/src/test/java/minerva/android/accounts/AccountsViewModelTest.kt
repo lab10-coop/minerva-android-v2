@@ -13,10 +13,9 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.repository.walletconnect.session.DappSessionRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
 import org.junit.Before
@@ -31,7 +30,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val smartContractRepository: SmartContractRepository = mock()
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
-    private val dappSessionRepository: DappSessionRepository = mock()
+    private val walletConnectRepository: WalletConnectRepository = mock()
     private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
@@ -67,7 +66,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletActionsRepository,
             smartContractRepository,
             transactionRepository,
-            dappSessionRepository
+            walletConnectRepository
         )
     }
 
@@ -169,7 +168,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
             Completable.error(error)
         )
-        whenever(dappSessionRepository.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
+        whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.removeAccount(Account(1, "test"))
         errorCaptor.run {
@@ -181,7 +181,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `Remove value success`() {
         whenever(accountManager.removeAccount(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(dappSessionRepository.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
+        whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.accountRemovedLiveData.observeForever(accountRemoveObserver)
         viewModel.removeAccount(Account(1, "test"))
         accountRemoveCaptor.run {
@@ -272,7 +273,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get sessions and update accounts success`() {
-        whenever(dappSessionRepository.getSessions()).thenReturn(
+        whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(
                 listOf(DappSession(address = "address"))
             )
@@ -289,7 +290,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `get sessions and update accounts error`() {
         val error = Throwable()
-        whenever(dappSessionRepository.getSessions()).thenReturn(Single.error(error))
+        whenever(walletConnectRepository.getSessions()).thenReturn(Single.error(error))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.getSessions(accounts)
@@ -300,7 +301,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `no sessions so account list is not updated, so test should fail`() {
-        whenever(dappSessionRepository.getSessions()).thenReturn(Single.just(emptyList()))
+        whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(emptyList()))
         viewModel.dappSessions.observeForever(dappSessionObserver)
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {

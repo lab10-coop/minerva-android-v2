@@ -24,7 +24,6 @@ import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepos
 import timber.log.Timber
 
 class WalletConnectViewModel(
-    private val walletConnectRepository: WalletConnectRepository,
     private val accountManager: AccountManager,
     private val repository: WalletConnectRepository
 ) : BaseViewModel() {
@@ -65,7 +64,7 @@ class WalletConnectViewModel(
         if (index != Int.InvalidIndex) {
             account = accountManager.loadAccount(index)
             launchDisposable {
-                walletConnectRepository.getSessionsFlowable()
+                repository.getSessionsFlowable()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(

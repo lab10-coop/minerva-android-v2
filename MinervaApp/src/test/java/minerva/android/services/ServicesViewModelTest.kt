@@ -11,7 +11,7 @@ import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.repository.walletconnect.session.DappSessionRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Before
 import org.junit.Test
@@ -20,7 +20,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
 
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val servicesManager: ServiceManager = mock()
-    private val dappSessionRepository: DappSessionRepository = mock()
+    private val walletConnectRepository: WalletConnectRepository = mock()
     private lateinit var viewModel: ServicesViewModel
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
@@ -29,9 +29,12 @@ class ServicesViewModelTest : BaseViewModelTest() {
     private val dappSessionObserver: Observer<List<MinervaPrimitive>> = mock()
     private val dappSessionCaptor: KArgumentCaptor<List<MinervaPrimitive>> = argumentCaptor()
 
+    private val removeDappObserver: Observer<Event<Unit>> = mock()
+    private val removeDappCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+
     @Before
     fun setup() {
-        viewModel = ServicesViewModel(servicesManager, walletActionsRepository, dappSessionRepository)
+        viewModel = ServicesViewModel(servicesManager, walletActionsRepository, walletConnectRepository)
     }
 
     @Test
@@ -56,7 +59,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `set dapp session flowable`() {
-        whenever(dappSessionRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession(name = ""))))
+        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession(name = ""))))
         viewModel.setDappSessionsFlowable(listOf(Service(name = "name")))
         viewModel.dappSessionsLiveData.observeForever(dappSessionObserver)
         dappSessionCaptor.run {
@@ -67,7 +70,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
     @Test
     fun `set dapp session flowable and error occurs`() {
         val error = Throwable()
-        whenever(dappSessionRepository.getSessionsFlowable()).thenReturn(Flowable.error(error))
+        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.error(error))
         viewModel.setDappSessionsFlowable(listOf(Service(name = "name")))
         viewModel.errorLiveData.observeForever(errorObserver)
         errorCaptor.run {
@@ -77,8 +80,11 @@ class ServicesViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `remove session test`() {
-        whenever(dappSessionRepository.deleteDappSession(any())).thenReturn(Completable.complete())
+        whenever(walletConnectRepository.killSession(any())).thenReturn(Completable.complete())
+        viewModel.dappRemovedLiveData.observeForever(removeDappObserver)
         viewModel.removeSession(DappSession(peerId = "peerId"))
-        verify(dappSessionRepository).deleteDappSession("peerId")
+        removeDappCaptor.run {
+            verify(removeDappObserver).onChanged(capture())
+        }
     }
 }

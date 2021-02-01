@@ -76,6 +76,7 @@ class MainViewModel(
     fun dispose() = masterSeedRepository.dispose()
 
     init {
+        //todo test
         launchDisposable {
             walletConnectRepository.getSessions()
                 .subscribeOn(Schedulers.io())
