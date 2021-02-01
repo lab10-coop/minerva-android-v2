@@ -109,9 +109,9 @@ class LocalStorageTest {
 
     @Test
     fun `save asset visibility settings`() {
-        val assetVisibilitySettings = TokenVisibilitySettings()
-        localStorage.saveTokenVisibilitySettings(assetVisibilitySettings)
-        every { localStorage.getTokenVisibilitySettings() } returns assetVisibilitySettings
+        val tokenVisibilitySettings = TokenVisibilitySettings()
+        localStorage.saveTokenVisibilitySettings(tokenVisibilitySettings)
+        every { localStorage.getTokenVisibilitySettings() } returns tokenVisibilitySettings
         verify {
             sharedPref.edit().putString(any(), any()).apply()
         }

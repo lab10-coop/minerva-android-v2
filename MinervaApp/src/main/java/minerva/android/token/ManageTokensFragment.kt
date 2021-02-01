@@ -1,18 +1,16 @@
-package minerva.android.manage
+package minerva.android.token
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
-import com.google.android.material.switchmaterial.SwitchMaterial
 import minerva.android.R
 import minerva.android.accounts.listener.ShowFragmentListener
 import minerva.android.databinding.FragmentManageTokensBinding
-import minerva.android.kotlinUtils.NO_PADDING
 import minerva.android.main.base.BaseFragment
-import minerva.android.walletmanager.model.Token
+import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.Token
+import minerva.android.widget.token.SwitchTokenRow
+import minerva.android.widget.token.TokenRow
 import minerva.android.wrapped.WrappedActivity
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -73,39 +71,23 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
 
     private fun addMainToken(tokens: List<Token>) {
         binding.tokenContainer.apply {
-            addView(TextView(requireContext()).apply {
-                initTokenRow(this, tokens[MAIN_TOKEN_INDEX])
+            addView(TokenRow(requireContext()).apply {
+                initView(tokens[MAIN_TOKEN_INDEX])
             })
         }
     }
 
     private fun addTokens(tokens: List<Token>) {
         binding.tokenContainer.apply {
-            tokens.drop(FIRST_ELEMENT).forEach { token ->
-                addView(SwitchMaterial(requireContext()).apply {
-                    initTokenRow(this, token)
-                    isChecked = viewModel.getTokenVisibilitySettings(token.address)
-                    setOnCheckedChangeListener { _, _ -> viewModel.saveTokenVisibilitySettings(token.address, isChecked) }
-                })
+            tokens.drop(FIRST_ELEMENT).forEach {
+                (it as? ERC20Token)?.let { token ->
+                    addView(SwitchTokenRow(requireContext()).apply {
+                        initView(token, viewModel.getTokenVisibilitySettings(token.address)) { address, isChecked ->
+                            viewModel.saveTokenVisibilitySettings(address, isChecked)
+                        }
+                    })
+                }
             }
-        }
-    }
-
-    private fun initTokenRow(view: TextView, token: Token) {
-        view.apply {
-            text = token.name
-            gravity = Gravity.CENTER_VERTICAL
-            setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
-            resources.getDimension(R.dimen.margin_xsmall).toInt().let { padding ->
-                if (this !is SwitchMaterial) setPadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding)
-                compoundDrawablePadding = padding
-            }
-            setCompoundDrawablesWithIntrinsicBounds(
-                ContextCompat.getDrawable(requireContext(), token.logoRes ?: R.drawable.ic_default_token),
-                null,
-                null,
-                null
-            )
         }
     }
 

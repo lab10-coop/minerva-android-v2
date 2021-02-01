@@ -8,7 +8,6 @@ import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.accounts.transaction.model.TokenSpinnerElement
 import minerva.android.base.BaseViewModel
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.DateUtils
@@ -23,6 +22,9 @@ import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.TOK
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.NativeToken
+import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -79,12 +81,13 @@ class TransactionViewModel(
     val token
         get() = network.token
 
-    //TODO add logos for tokens
-    val tokensList: List<TokenSpinnerElement>
-        get() = mutableListOf<TokenSpinnerElement>().apply {
-            add(TokenSpinnerElement(account.network.token, getMainTokenIconRes(account.network.short)))
-            account.accountTokens.forEach {
-                add(TokenSpinnerElement(it.token.name))
+    val tokensList: List<Token>
+        get() = mutableListOf<Token>().apply {
+            with(account.network) {
+                add(NativeToken(chainId, account.name, token, getMainTokenIconRes(short)))
+                account.accountTokens.forEach {
+                    add(ERC20Token(chainId, symbol = it.token.symbol, address = it.token.address))
+                }
             }
         }
 
@@ -99,6 +102,12 @@ class TransactionViewModel(
 
     private val isSafeAccountTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && account.isSafeAccount
+
+    private val tokenAddress
+        get() = account.accountTokens[tokenIndex].token.address
+
+    val cryptoBalance: BigDecimal
+        get() = if (tokenIndex == Int.InvalidIndex) account.cryptoBalance else account.accountTokens[tokenIndex].balance
 
     fun getAccount(accountIndex: Int, tokenIndex: Int) {
         transactionRepository.getAccount(accountIndex)?.let {
@@ -135,7 +144,6 @@ class TransactionViewModel(
         }
     }
 
-
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         when {
             isMainTransaction -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
@@ -159,7 +167,11 @@ class TransactionViewModel(
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferERC20Token(network.short, it, tokenAddress).toSingleDefault(it)
+                            smartContractRepository.transferERC20Token(
+                                network.short,
+                                it,
+                                tokenAddress
+                            ).toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
@@ -179,15 +191,12 @@ class TransactionViewModel(
 
     }
 
-    private fun sendSafeAccountMainTransaction(
-        receiverKey: String,
-        amount: BigDecimal,
-        gasPrice: BigDecimal,
-        gasLimit: BigInteger
-    ) {
+    private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             val ownerPrivateKey =
-                account.masterOwnerAddress.let { smartContractRepository.getSafeAccountMasterOwnerPrivateKey(it) }
+                account.masterOwnerAddress.let {
+                    smartContractRepository.getSafeAccountMasterOwnerPrivateKey(it)
+                }
             transactionRepository.resolveENS(receiverKey)
                 .flatMap { resolvedENS ->
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
@@ -266,19 +275,11 @@ class TransactionViewModel(
                 .subscribeBy(
                     onComplete = {
                         _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
-                                 },
-                    onError = {
-                        _errorLiveData.value = Event(it)
-                    }
+                    },
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
-
-    private val tokenAddress
-        get() = account.accountTokens[tokenIndex].token.address
-
-    val cryptoBalance: BigDecimal
-        get() = if (tokenIndex == Int.InvalidIndex) account.cryptoBalance else account.accountTokens[tokenIndex].balance
 
     fun getAllAvailableFunds(): String {
         if (tokenIndex != Int.InvalidIndex) return account.accountTokens[tokenIndex].balance.toPlainString()
@@ -297,7 +298,6 @@ class TransactionViewModel(
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
-
 
     fun prepareCurrency() =
         if (tokenIndex != Int.InvalidIndex) account.accountTokens[tokenIndex].token.symbol else token

@@ -19,7 +19,7 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.widget.TokenView
+import minerva.android.widget.token.TokenView
 import minerva.android.widget.TokensAndCollectiblesView
 import minerva.android.widget.repository.getMainTokenIcon
 import minerva.android.widget.repository.getNetworkIcon
@@ -78,8 +78,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 pendingMask.visibleOrGone(isPending)
                 mainIcon.setImageDrawable(getNetworkIcon(context, network.short, isSafeAccount))
                 accountName.text = name
-                //TODO add correct icon here: logoRes = getNetworkIcon(context, network.short, isSafeAccount)
-                mainTokenView.initView(account, this@AccountViewHolder, logo = getMainTokenIcon(context, network.short))
+                mainTokenView.initView(account, this@AccountViewHolder)
             }
         }
     }

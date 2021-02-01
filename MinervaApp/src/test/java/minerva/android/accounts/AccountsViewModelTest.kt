@@ -12,6 +12,8 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.session.DappSessionRepository
@@ -36,8 +38,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
 
     private val tokensBalanceObserver: Observer<Map<String, List<AccountToken>>> = mock()
-    private val tokensBalanceCaptor: KArgumentCaptor<Map<String, List<AccountToken>>> =
-        argumentCaptor()
+    private val tokensBalanceCaptor: KArgumentCaptor<Map<String, List<AccountToken>>> = argumentCaptor()
 
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -107,14 +108,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `refresh balances success`() {
         whenever(transactionRepository.refreshBalances()).thenReturn(
-            Single.just(
-                hashMapOf(
-                    Pair(
-                        "123",
-                        Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN)
-                    )
-                )
-            )
+            Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
         )
         viewModel.balanceLiveData.observeForever(balanceObserver)
         viewModel.refreshBalances()
@@ -143,7 +137,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 mapOf(
                     Pair(
                         "test",
-                        listOf(AccountToken(Token("name")))
+                        listOf(AccountToken(ERC20Token(1, "name")))
                     )
                 )
             )
@@ -198,9 +192,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `create safe account error`() {
         val error = Throwable("error")
-        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
-            Completable.error(error)
-        )
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
         whenever(accountManager.createRegularAccount(any())).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
@@ -313,6 +305,16 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {
             assertFails { firstValue }
+        }
+    }
+
+    @Test
+    fun `Check if calling getTokenVisibility() method is calling the method` () {
+        viewModel.tokenVisibilitySettings = mock()
+        viewModel.tokenVisibilitySettings.let { settings ->
+            whenever(settings.getTokenVisibility(any(), any())).thenReturn(false)
+            viewModel.isTokenVisible("", "")
+            verify(settings, times(1)).getTokenVisibility(any(), any())
         }
     }
 

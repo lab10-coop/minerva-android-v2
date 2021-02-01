@@ -13,8 +13,8 @@ import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.integration.ThirdPartyRequestViewModel
 import minerva.android.main.MainViewModel
-import minerva.android.manage.AddTokenViewModel
-import minerva.android.manage.ManageTokensViewModel
+import minerva.android.token.AddTokenViewModel
+import minerva.android.token.ManageTokensViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.services.ServicesViewModel

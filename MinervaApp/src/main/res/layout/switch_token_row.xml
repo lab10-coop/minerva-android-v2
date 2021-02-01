@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="@dimen/margin_normal">
+    android:orientation="horizontal">
 
     <minerva.android.widget.blockies.BlockiesImageView
         android:id="@+id/token_logo"
         android:layout_width="@dimen/xsmall_logo_size"
         android:layout_height="@dimen/xsmall_logo_size"
+        android:layout_gravity="center_vertical"
         android:src="@drawable/ic_default_token"
         tools:ignore="ContentDescription" />
 
-    <TextView
-        android:id="@+id/token_name"
-        android:layout_width="wrap_content"
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/token_switch"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="@dimen/margin_small"
-        android:fontFamily="@font/rubik_medium"
-        android:textColor="@color/gray"
-        tools:text="SOME SOME" />
-</LinearLayout>
+        android:textColor="@color/gray" />
+
+</merge>

@@ -141,8 +141,6 @@ class BlockchainRegularAccountRepositoryImpl(
             else it.onError(Throwable(responseText))
         }
     }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
 
     override fun refreshTokenBalance(
         privateKey: String,

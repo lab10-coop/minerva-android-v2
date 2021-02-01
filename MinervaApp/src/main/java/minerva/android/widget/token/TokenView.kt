@@ -1,16 +1,16 @@
-package minerva.android.widget
+package minerva.android.widget.token
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.widget.RelativeLayout
-import androidx.core.content.ContextCompat
 import minerva.android.R
 import minerva.android.databinding.TokenViewBinding
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.utils.BalanceUtils.getCryptoBalance
 import minerva.android.utils.BalanceUtils.getFiatBalance
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.token.NativeToken
+import minerva.android.widget.repository.getMainTokenIconRes
 import java.math.BigDecimal
 
 class TokenView(context: Context, attributeSet: AttributeSet? = null) : RelativeLayout(context, attributeSet) {
@@ -22,10 +22,9 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     fun initView(
         account: Account,
         callback: TokenViewCallback,
-        tokenIndex: Int = Int.InvalidIndex,
-        logo: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_default_token)
+        tokenIndex: Int = Int.InvalidIndex
     ) {
-        prepareView(account, tokenIndex, logo)
+        prepareView(account, tokenIndex)
         prepareListeners(callback, account, tokenIndex)
         getTokensValues(account, tokenIndex).let { (crypto, fiat) ->
             with(binding.amountView) {
@@ -43,11 +42,18 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         if (account.network.testNet) BigDecimal.ZERO
         else account.fiatBalance
 
-    private fun prepareView(account: Account, tokenIndex: Int, logo: Drawable?) {
+    private fun prepareView(account: Account, tokenIndex: Int) {
         binding.apply {
-            tokenLogo.setImageDrawable(logo)
-            tokenName.text = if (tokenIndex != Int.InvalidIndex) account.accountTokens[tokenIndex].token.name
-            else account.network.token
+            if (tokenIndex != Int.InvalidIndex)
+                with(account.accountTokens[tokenIndex].token) {
+                    tokenLogo.initView(this)
+                    tokenName.text = symbol
+                }
+            else
+                with(account.network) {
+                    tokenLogo.initView(NativeToken(chainId, full, token, getMainTokenIconRes(short)))
+                    tokenName.text = token
+                }
         }
     }
 

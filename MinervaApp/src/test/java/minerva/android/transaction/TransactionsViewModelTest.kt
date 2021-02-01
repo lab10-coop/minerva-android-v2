@@ -10,6 +10,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -42,12 +43,31 @@ class TransactionViewModelTest : BaseViewModelTest() {
     private val networks = listOf(
         Network(short = "net1", httpRpc = "address", testNet = true),
         Network(short = "net2", httpRpc = "address", testNet = true),
-        Network(short = "net3", httpRpc = "address", testNet = true)
+        Network(short = "net3", httpRpc = "address", testNet = true, token = "cookie")
     )
 
     @Before
     fun init() {
         NetworkManager.initialize(networks)
+    }
+
+    @Test
+    fun `getting token list` () {
+        viewModel.account = Account(
+            id = 0,
+            publicKey = "12",
+            privateKey = "12",
+            networkShort = "net3",
+            address = "address",
+            contractAddress = "aa",
+            bindedOwner = "binded",
+            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol"), BigDecimal.ZERO))
+        )
+
+        val tokenList = viewModel.tokensList
+        tokenList.size shouldBeEqualTo 2
+        tokenList[0].symbol shouldBeEqualTo "cookie"
+        tokenList[1].symbol shouldBeEqualTo "SomeSymbol"
     }
 
     @Test
@@ -152,7 +172,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 address = "address",
                 networkShort = "net1",
                 contractAddress = "aa",
-                accountTokens = listOf(AccountToken(Token("name")))
+                accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
             )
             tokenIndex = 0
         }
@@ -173,7 +193,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.apply {
             account = Account(
                 id = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                networkShort = "net3", accountTokens = listOf(AccountToken(Token("name")))
+                networkShort = "net3", accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
             )
             tokenIndex = 0
         }
@@ -190,7 +210,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account asset transaction test success`() {
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(Token("name"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
             publicKey = "12",
             privateKey = "12",
             address = "address",
@@ -214,7 +234,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(Token("name"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
             publicKey = "12",
             privateKey = "12",
             networkShort = "net3",
