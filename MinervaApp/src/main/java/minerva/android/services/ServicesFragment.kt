@@ -11,6 +11,7 @@ import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class ServicesFragment : MinervaPrimitiveListFragment() {
 
@@ -27,9 +28,6 @@ class ServicesFragment : MinervaPrimitiveListFragment() {
             dappSessionsLiveData.observe(viewLifecycleOwner, Observer { updateList(it) })
             serviceRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
             errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
-            dappRemovedLiveData.observe(viewLifecycleOwner, EventObserver {
-                Toast.makeText(context, getString(R.string.dapp_deleted), Toast.LENGTH_SHORT).show()
-            })
         }
     }
 

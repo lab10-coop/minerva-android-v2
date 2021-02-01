@@ -37,9 +37,6 @@ class ServicesViewModel(
     private val _serviceRemovedLiveData = MutableLiveData<Event<Unit>>()
     val serviceRemovedLiveData: LiveData<Event<Unit>> get() = _serviceRemovedLiveData
 
-    private val _dappRemovedLiveData = MutableLiveData<Event<Unit>>()
-    val dappRemovedLiveData: LiveData<Event<Unit>> get() = _dappRemovedLiveData
-
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
@@ -76,9 +73,7 @@ class ServicesViewModel(
             walletConnectRepository.killSession(dapp.peerId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { _dappRemovedLiveData.value = Event(Unit) },
-                    onError = { Timber.e(it) })
+                .subscribeBy(onError = { Timber.e(it) })
         }
     }
 

@@ -81,10 +81,7 @@ class ServicesViewModelTest : BaseViewModelTest() {
     @Test
     fun `remove session test`() {
         whenever(walletConnectRepository.killSession(any())).thenReturn(Completable.complete())
-        viewModel.dappRemovedLiveData.observeForever(removeDappObserver)
         viewModel.removeSession(DappSession(peerId = "peerId"))
-        removeDappCaptor.run {
-            verify(removeDappObserver).onChanged(capture())
-        }
+        verify(walletConnectRepository).killSession("peerId")
     }
 }
