@@ -17,26 +17,19 @@ object DateUtils {
         SimpleDateFormat(
             DATE_WITH_TIME_FORMAT,
             Locale.getDefault()
-        ).let {
-            it.timeZone = TimeZone.getDefault()
-            it.format(Date(dateInMillis))
-        }
-
+        ).format(dateInMillis)
 
     fun getDateFromTimestamp(timestamp: Long, format: String = DATE_FORMAT): String =
         SimpleDateFormat(
             format,
             Locale.getDefault()
-        ).format(Date(timestamp.toMilliseconds()))
+        ).format(timestamp.toMilliseconds())
 
     fun getTimeFromTimeStamp(time: Long = timestamp): String =
         SimpleDateFormat(
             TIME_FORMAT,
             Locale.getDefault()
-        ).let {
-            it.timeZone = TimeZone.getDefault()
-            it.format(Date(time))
-        }
+        ).format(time)
 
     fun getTimestampFromDate(date: String, format: String = ISO_8601): Long =
         SimpleDateFormat(format).parse(date).time
