@@ -17,20 +17,20 @@ object DateUtils {
     fun getDateWithTimeFromTimestamp(dateInMillis: Long = timestamp): String =
         SimpleDateFormat(
             DATE_WITH_TIME_FORMAT,
-            Locale.ROOT
+            Locale.getDefault()
         ).format(Date(dateInMillis))
 
 
     fun getDateFromTimestamp(timestamp: Long, format: String = DATE_FORMAT): String =
         SimpleDateFormat(
             format,
-            Locale.ROOT
+            Locale.getDefault()
         ).format(Date(timestamp.toMilliseconds()))
 
     fun getTimeFromTimeStamp(time: Long = timestamp): String =
         SimpleDateFormat(
             TIME_FORMAT,
-            Locale.ROOT
+            Locale.getDefault()
         ).format(Date(time))
 
     fun getTimestampFromDate(date: String, format: String = ISO_8601): Long =
