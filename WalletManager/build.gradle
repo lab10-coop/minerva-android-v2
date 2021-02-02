@@ -59,6 +59,6 @@ dependencies {
     implementation jsonLogicDependencies.values()
     testImplementation testDependencies.values()
     implementation room.values()
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation okhttp.values()
     kapt "androidx.room:room-compiler:2.2.6"
 }

@@ -7,8 +7,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.fragment_choose_identity.*
 import minerva.android.R
+import minerva.android.databinding.FragmentChooseIdentityBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
@@ -30,6 +30,7 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
     private val identitiesAdapter = IdentitiesAdapter()
     private lateinit var serviceQrCode: ServiceQrCode
     private lateinit var listener: LoginScannerListener
+    private lateinit var binding: FragmentChooseIdentityBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +41,7 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentChooseIdentityBinding.bind(view)
         prepareObservers()
         setLoginButtonOnClickListener()
         setupServiceData()
@@ -58,19 +60,23 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
 
     fun handleLogin(index: Int, serviceQrCode: ServiceQrCode) = viewModel.handleLogin(index, serviceQrCode)
 
-    private fun hideLoader() {
+    private fun hideLoader() = with(binding) {
         loginButton.visible()
         loginProgressBar.invisible()
     }
 
-    private fun showLoader() {
+    private fun showLoader() = with(binding) {
         loginProgressBar.visible()
         loginButton.invisible()
     }
 
-    private fun setupServiceData() {
-        minerva_primitive_name.text = serviceQrCode.serviceName
-        requestedData.prepareChain(serviceQrCode.requestedData, getString(R.string.requested_data), getString(R.string.did))
+    private fun setupServiceData() = with(binding) {
+        minervaPrimitiveName.text = serviceQrCode.serviceName
+        requestedData.prepareChain(
+            serviceQrCode.requestedData,
+            getString(R.string.requested_data),
+            getString(R.string.did)
+        )
     }
 
     private fun setupIdentitiesList() {
@@ -80,7 +86,7 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
     }
 
     private fun setLoginButtonOnClickListener() {
-        loginButton.setOnClickListener {
+        binding.loginButton.setOnClickListener {
             handleLoginButton()
         }
     }
@@ -93,7 +99,7 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
         }
     }
 
-    private fun setupRecycleView() {
+    private fun setupRecycleView() = with(binding) {
         identities.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = identitiesAdapter
@@ -106,7 +112,9 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
             errorLiveData.observe(
                 viewLifecycleOwner,
                 EventObserver { listener.onPainlessLoginResult(false, LoginPayload(getLoginStatus(it))) })
-            loginLiveData.observe(viewLifecycleOwner, EventObserver { listener.onPainlessLoginResult(true, payload = it) })
+            loginLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { listener.onPainlessLoginResult(true, payload = it) })
             requestedFieldsLiveData.observe(viewLifecycleOwner, EventObserver { handleRequestedFields() })
         }
     }
