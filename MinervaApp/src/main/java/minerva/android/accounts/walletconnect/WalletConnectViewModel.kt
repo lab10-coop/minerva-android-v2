@@ -12,23 +12,18 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletConnect.client.OnConnectionFailure
-import minerva.android.walletConnect.client.OnDisconnect
-import minerva.android.walletConnect.client.OnSessionRequest
-import minerva.android.walletConnect.model.exceptions.InvalidAccountException
-import minerva.android.walletConnect.model.session.Topic
-import minerva.android.walletConnect.model.session.WCPeerMeta
-import minerva.android.walletConnect.model.session.WCSession
-import minerva.android.walletConnect.repository.WalletConnectRepository
+import minerva.android.walletmanager.exception.InvalidAccountException
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.DappSession
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.repository.walletconnect.OnConnectionFailure
+import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import timber.log.Timber
 
 class WalletConnectViewModel(
-    private val sessionRepository: DappSessionRepository,
     private val accountManager: AccountManager,
     private val repository: WalletConnectRepository
 ) : BaseViewModel() {
@@ -36,7 +31,7 @@ class WalletConnectViewModel(
     internal lateinit var account: Account
     var requestedNetwork: String = String.Empty
     internal lateinit var topic: Topic
-    internal lateinit var currentSession: WCSession
+    internal lateinit var currentSession: WalletConnectSession
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectViewState>()
     val viewStateLiveData: LiveData<WalletConnectViewState> get() = _viewStateLiveData
@@ -54,8 +49,8 @@ class WalletConnectViewModel(
                                 topic = it.topic
                                 handleSessionRequest(it)
                             }
-                            is OnConnectionFailure -> onError(it)
-                            is OnDisconnect -> onDisconnected(it)
+                            is OnConnectionFailure -> OnError(it.error)
+                            is OnDisconnect -> OnDisconnected
                         }
                     },
                     onError = {
@@ -65,45 +60,27 @@ class WalletConnectViewModel(
         }
     }
 
-    private fun onError(it: OnConnectionFailure): OnError {
-        if (!repository.walletConnectClients.containsKey(it.peerId)) {
-            it.peerId?.let { removeSession(it) }
-        }
-        return OnError(it.error)
-    }
-
     fun getAccount(index: Int) {
         if (index != Int.InvalidIndex) {
             account = accountManager.loadAccount(index)
             launchDisposable {
-                sessionRepository.getAllSessions()
+                repository.getSessionsFlowable()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onNext = { _viewStateLiveData.value = handleSessions(it) },
+                        onNext = {
+                            _viewStateLiveData.value = if (it.isEmpty()) {
+                                HideDappsState
+                            } else {
+                                UpdateDappsState(it)
+                            }
+
+                        },
                         onError = { _viewStateLiveData.value = OnError(it) }
                     )
             }
         } else {
             _viewStateLiveData.value = OnError(InvalidAccountException())
-        }
-    }
-
-    private fun handleSessions(it: List<DappSession>) =
-        if (it.isEmpty()) {
-            HideDappsState
-        } else {
-            reconnect(it)
-            UpdateDappsState(it)
-        }
-
-    private fun reconnect(dapps: List<DappSession>) {
-        if (repository.isClientMapEmpty) {
-            dapps.forEach { session ->
-                with(session) {
-                    repository.connect(WCSession(topic, version, bridge, key), peerId, remotePeerId)
-                }
-            }
         }
     }
 
@@ -115,10 +92,15 @@ class WalletConnectViewModel(
         repository.rejectSession(topic.peerId)
     }
 
-
     fun killSession(peerId: String) {
-        repository.killSession(peerId)
-        removeSession(peerId)
+        launchDisposable {
+            repository.killSession(peerId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = { _viewStateLiveData.value = OnSessionDeleted },
+                    onError = { Timber.e(it) })
+        }
     }
 
     fun handleQrCode(qrCode: String) {
@@ -131,17 +113,16 @@ class WalletConnectViewModel(
         }
     }
 
-    fun approveSession(meta: WCPeerMeta) {
-        repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId)
+    fun approveSession(meta: WalletConnectPeerMeta) {
         launchDisposable {
-            sessionRepository.saveDappSession(getDapp(meta))
+            repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId, getDapp(meta))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onError = { OnError(it) })
         }
     }
 
-    private fun getDapp(meta: WCPeerMeta) = DappSession(
+    private fun getDapp(meta: WalletConnectPeerMeta) = DappSession(
         account.address,
         currentSession.topic,
         currentSession.version,
@@ -150,26 +131,10 @@ class WalletConnectViewModel(
         meta.name,
         getIcon(meta.icons),
         topic.peerId,
-        topic.remotePeerId
+        topic.remotePeerId,
+        requestedNetwork,
+        account.name
     )
-
-    private fun onDisconnected(it: OnDisconnect): OnDisconnected {
-        it.peerId?.let { peerId ->
-            if (repository.walletConnectClients.containsKey(peerId)) {
-                removeSession(peerId)
-            }
-        }
-        return OnDisconnected
-    }
-
-    private fun removeSession(peerId: String) {
-        launchDisposable {
-            sessionRepository.deleteDappSession(peerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { OnError(it) })
-        }
-    }
 
     private fun getIcon(icons: List<String>) =
         if (icons.isEmpty()) String.Empty

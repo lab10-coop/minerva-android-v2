@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import minerva.android.walletmanager.database.dao.DappSessionDao
 import minerva.android.walletmanager.database.entity.DappSessionEntity
 
-@Database(entities = [DappSessionEntity::class], version = 1)
+@Database(entities = [DappSessionEntity::class], version = 3)
 abstract class MinervaDatabase : RoomDatabase() {
     abstract fun dappDao(): DappSessionDao
 }

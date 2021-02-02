@@ -1,9 +1,6 @@
 package minerva.android.walletmanager.manager.accounts
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doNothing
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
@@ -14,10 +11,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.MasterSeed
-import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
@@ -35,7 +29,7 @@ class AccountManagerTest : RxTest() {
     private val localStorage: LocalStorage = mock()
     private val timeProvider: CurrentTimeProvider = mock()
     private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
-    private val repository = AccountManagerImpl(
+    private val manager = AccountManagerImpl(
         walletConfigManager,
         cryptographyRepository,
         blockchainRegularAccountRepository,
@@ -64,9 +58,9 @@ class AccountManagerTest : RxTest() {
         ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        val test = repository.createRegularAccount(Network()).test()
+        val test = manager.createRegularAccount(Network()).test()
         test.assertNoErrors()
-        repository.loadAccount(1).apply {
+        manager.loadAccount(1).apply {
             id shouldBeEqualTo 4
             publicKey shouldBeEqualTo "publicKey2"
             privateKey shouldBeEqualTo "privateKey2"
@@ -91,9 +85,9 @@ class AccountManagerTest : RxTest() {
         ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
-        val test = repository.createRegularAccount(network).test()
+        val test = manager.createRegularAccount(network).test()
         test.assertError(error)
-        repository.loadAccount(10).apply {
+        manager.loadAccount(10).apply {
             id shouldBeEqualTo -1
             privateKey shouldBeEqualTo String.Empty
             publicKey shouldBeEqualTo String.Empty
@@ -117,9 +111,9 @@ class AccountManagerTest : RxTest() {
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
-        repository.removeAccount(account).test()
-        val removedValue = repository.loadAccount(0)
-        val notRemovedValue = repository.loadAccount(1)
+        manager.removeAccount(account).test()
+        val removedValue = manager.loadAccount(0)
+        val notRemovedValue = manager.loadAccount(1)
         removedValue.id shouldBeEqualTo 2
         removedValue.isDeleted shouldBeEqualTo false
         notRemovedValue.id shouldBeEqualTo 4
@@ -143,9 +137,9 @@ class AccountManagerTest : RxTest() {
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.removeAccount(account).test()
-        val removedValue = repository.loadAccount(0)
-        val notRemovedValue = repository.loadAccount(1)
+        manager.removeAccount(account).test()
+        val removedValue = manager.loadAccount(0)
+        val notRemovedValue = manager.loadAccount(1)
         removedValue.id shouldBeEqualTo 2
         removedValue.isDeleted shouldBeEqualTo false
         notRemovedValue.id shouldBeEqualTo 4
@@ -169,14 +163,14 @@ class AccountManagerTest : RxTest() {
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
-        repository.removeAccount(account).test()
-        repository.removeAccount(account2).test()
-        repository.loadAccount(2).apply {
+        manager.removeAccount(account).test()
+        manager.removeAccount(account2).test()
+        manager.loadAccount(2).apply {
             id shouldBeEqualTo 5
             publicKey shouldBeEqualTo "publicKey3"
             isDeleted shouldBeEqualTo false
         }
-        repository.loadAccount(3).apply {
+        manager.loadAccount(3).apply {
             id shouldBeEqualTo 6
             publicKey shouldBeEqualTo "publicKey4"
             isDeleted shouldBeEqualTo false
@@ -201,14 +195,14 @@ class AccountManagerTest : RxTest() {
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.removeAccount(account).test()
-        repository.removeAccount(account2).test()
-        repository.loadAccount(2).apply {
+        manager.removeAccount(account).test()
+        manager.removeAccount(account2).test()
+        manager.loadAccount(2).apply {
             id shouldBeEqualTo 5
             publicKey shouldBeEqualTo "publicKey3"
             isDeleted shouldBeEqualTo false
         }
-        repository.loadAccount(3).apply {
+        manager.loadAccount(3).apply {
             id shouldBeEqualTo 6
             publicKey shouldBeEqualTo "publicKey4"
             isDeleted shouldBeEqualTo false
@@ -224,7 +218,7 @@ class AccountManagerTest : RxTest() {
             )
         )
         whenever(walletConfigManager.getSafeAccountNumber(any())) doReturn 2
-        repository.run {
+        manager.run {
             val result = getSafeAccountCount("owner")
             assertEquals(result, 2)
         }
@@ -240,7 +234,7 @@ class AccountManagerTest : RxTest() {
             )
         )
         whenever(walletConfigManager.getSafeAccountNumber(any())) doReturn 1
-        repository.run {
+        manager.run {
             val result = getSafeAccountCount("owner")
             assertEquals(result, 1)
         }
@@ -253,7 +247,7 @@ class AccountManagerTest : RxTest() {
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
-        repository.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
+        manager.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
             .test()
             .assertComplete()
     }
@@ -265,7 +259,7 @@ class AccountManagerTest : RxTest() {
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
-        repository.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
+        manager.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
             .test()
             .assertError(error)
     }
@@ -273,47 +267,98 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `get safe account name test`() {
         val result =
-            repository.getSafeAccountName(Account(1, address = "masterOwner", name = "test"))
+            manager.getSafeAccountName(Account(1, address = "masterOwner", name = "test"))
         assertEquals("test", result)
     }
 
     @Test
     fun `is address valid success`() {
         whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(true)
-        val result = repository.isAddressValid("0x12345")
+        val result = manager.isAddressValid("0x12345")
         assertEquals(true, result)
     }
 
     @Test
     fun `is address valid false`() {
         whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(false)
-        val result = repository.isAddressValid("2342343")
+        val result = manager.isAddressValid("2342343")
         assertEquals(false, result)
     }
 
     @Test
     fun `are main nets enabled returns true`() {
         whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(true)
-        val result = repository.areMainNetworksEnabled
+        val result = manager.areMainNetworksEnabled
         assertEquals(true, result)
     }
 
     @Test
     fun `toggle main nets enabled returns true`() {
         whenever(walletConfigManager.toggleMainNetsEnabled).thenReturn(true)
-        val result = repository.toggleMainNetsEnabled
+        val result = manager.toggleMainNetsEnabled
         assertEquals(true, result)
     }
 
     @Test
     fun `enable main nets emits true`() {
         whenever(walletConfigManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
-        repository.enableMainNetsFlowable.test().assertValue { it }
+        manager.enableMainNetsFlowable.test().assertValue { it }
     }
 
     @Test
     fun `enable main nets emits false`() {
         whenever(walletConfigManager.enableMainNetsFlowable).thenReturn(Flowable.just(false))
-        repository.enableMainNetsFlowable.test().assertValue { !it }
+        manager.enableMainNetsFlowable.test().assertValue { !it }
+    }
+
+    @Test
+    fun `get token visibility test`() {
+        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
+        manager.getTokenVisibilitySettings()
+        verify(localStorage).getTokenVisibilitySettings()
+    }
+
+    @Test
+    fun `save free ats timestamp test`() {
+        doNothing().whenever(localStorage).saveFreeATSTimestamp(any())
+        manager.saveFreeATSTimestamp()
+        verify(localStorage).saveFreeATSTimestamp(0L)
+    }
+
+    @Test
+    fun `get free ats timestamp visibility test`() {
+        whenever(localStorage.getLastFreeATSTimestamp()).thenReturn(0L)
+        manager.getLastFreeATSTimestamp()
+        verify(localStorage).getLastFreeATSTimestamp()
+    }
+
+    @Test
+    fun `save token visibility test`() {
+        val visibility = TokenVisibilitySettings()
+        whenever(localStorage.saveTokenVisibilitySettings(any())).thenReturn(visibility)
+        manager.saveTokenVisibilitySettings(visibility)
+        verify(localStorage).saveTokenVisibilitySettings(visibility)
+    }
+
+    @Test
+    fun `get current timestamp test`() {
+        whenever(timeProvider.currentTimeMills()).thenReturn(1L)
+        val result = manager.currentTimeMills()
+        verify(timeProvider).currentTimeMills()
+        assertEquals(1L, result)
+    }
+
+    @Test
+    fun `get all accounts test`() {
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, accounts = listOf(Account(1))))
+        val result = manager.getAllAccounts()
+        assertEquals(result?.get(0)?.id, 1)
+    }
+
+    @Test
+    fun `to checksum address test`() {
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("checksum")
+        val result = manager.toChecksumAddress("address")
+        assertEquals(result, "checksum")
     }
 }

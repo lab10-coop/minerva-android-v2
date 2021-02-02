@@ -39,7 +39,6 @@ dependencies {
     implementation project(':KotlinUtils')
     implementation coreDependencies.values()
     implementation koinDependencies.values()
-    api rxDependencies.values()
     implementation retrofitDependencies.values()
     testImplementation testDependencies.values()
     implementation kotson.values()

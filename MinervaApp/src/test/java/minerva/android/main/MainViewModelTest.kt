@@ -10,16 +10,15 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.CredentialQrCode
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.PendingAccount
-import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
+import org.junit.Before
 import org.junit.Test
 
 class MainViewModelTest : BaseViewModelTest() {
@@ -29,8 +28,8 @@ class MainViewModelTest : BaseViewModelTest() {
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
     private val transactionRepository: TransactionRepository = mock()
-    private val viewModel =
-        MainViewModel(masterSeedRepository, serviceManager, walletActionsRepository, orderManager, transactionRepository)
+    private val walletConnectRepository: WalletConnectRepository = mock()
+    private lateinit var viewModel: MainViewModel
 
     private val notExistedIdentityObserver: Observer<Event<Unit>> = mock()
     private val notExistedIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -49,6 +48,49 @@ class MainViewModelTest : BaseViewModelTest() {
 
     private val timeoutPendingAccountObserver: Observer<Event<List<PendingAccount>>> = mock()
     private val timeoutPendingAccountCaptor: KArgumentCaptor<Event<List<PendingAccount>>> = argumentCaptor()
+
+    @Before
+    fun setup() {
+        whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(listOf()))
+        viewModel = MainViewModel(
+            masterSeedRepository,
+            serviceManager,
+            walletActionsRepository,
+            orderManager,
+            transactionRepository,
+            walletConnectRepository
+        )
+    }
+
+    @Test
+    fun `reconnect to saved sessions test`() {
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        viewModel = MainViewModel(
+            masterSeedRepository,
+            serviceManager,
+            walletActionsRepository,
+            orderManager,
+            transactionRepository,
+            walletConnectRepository
+        )
+        verify(walletConnectRepository, times(2)).connect(any(), any(), any())
+    }
+
+    @Test
+    fun `do not reconnect when no sessions saved test`() {
+        whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(listOf()))
+        viewModel = MainViewModel(
+            masterSeedRepository,
+            serviceManager,
+            walletActionsRepository,
+            orderManager,
+            transactionRepository,
+            walletConnectRepository
+        )
+        verify(walletConnectRepository, times(0)).connect(any(), any(), any())
+    }
 
     @Test
     fun `test known user login when there is no identity`() {
@@ -147,7 +189,14 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `subscribe to executed transactions success`() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
-        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")))
+        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(
+            Flowable.just(
+                PendingAccount(
+                    1,
+                    "123"
+                )
+            )
+        )
         whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
             updatePendingAccountLiveData.observeForever(updatePendingAccountObserver)

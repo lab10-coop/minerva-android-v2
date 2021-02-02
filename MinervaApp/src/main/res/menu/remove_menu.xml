@@ -6,4 +6,11 @@
         android:enabled="true"
         android:title="@string/remove"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/disconnect"
+        android:enabled="true"
+        android:icon="@drawable/ic_disconnect"
+        android:title="@string/disconnect"
+        app:showAsAction="ifRoom" />
 </menu>

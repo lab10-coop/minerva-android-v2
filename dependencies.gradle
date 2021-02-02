@@ -61,6 +61,7 @@ ext {
     flexboxVersion = '2.0.1'
     cookieFlashbarVersion = '1.0.2'
     mockitoInline = '3.4.0'
+    roomVersion = '2.2.6'
 
     rxbinding = [
             rxbinding    : "com.jakewharton.rxbinding3:rxbinding:$rxbindingVersion",
@@ -161,8 +162,17 @@ ext {
             kotson: "com.github.salomonbrys.kotson:kotson:2.5.0"
     ]
 
+    okhttp = [
+            kotson: "com.squareup.okhttp3:okhttp:4.9.0"
+    ]
+
     startupDependencies = [startup: "androidx.startup:startup-runtime:$startupVersion"]
     kotlinReflect = [kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect"]
     jsoup = [jsoup: "org.jsoup:jsoup:$jsoupVersion"]
     jsonLogicDependencies = [jsonLogic: "eu.afse:eu.afse.jsonlogic:$jsonLogicVersion"]
+
+    room = [
+            room  : "androidx.room:room-runtime:$roomVersion",
+            rommRx: "androidx.room:room-rxjava2:$roomVersion",
+    ]
 }

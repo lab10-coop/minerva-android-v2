@@ -42,7 +42,7 @@
         tools:text="ÖAMTC-Member Card" />
 
     <ImageView
-        android:id="@+id/popupMenu"
+        android:id="@+id/popup_menu"
         android:layout_width="@dimen/clickable_area"
         android:layout_height="@dimen/clickable_area"
         android:scaleType="center"
