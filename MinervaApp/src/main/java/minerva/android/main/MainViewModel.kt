@@ -26,6 +26,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectStatus
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -68,6 +69,9 @@ class MainViewModel(
     private val _handleTimeoutOnPendingTransactionsLiveData = MutableLiveData<Event<List<PendingAccount>>>()
     val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
 
+    private val _walletConnectStatus = MutableLiveData<WalletConnectStatus>()
+    val walletConnectStatus: LiveData<WalletConnectStatus> get() = _walletConnectStatus
+
     val executedAccounts = mutableListOf<PendingAccount>()
     private var webSocketSubscriptions = CompositeDisposable()
 
@@ -99,6 +103,22 @@ class MainViewModel(
                     remotePeerId
                 )
             }
+        }
+        subscribeToWalletConnectEvents()
+    }
+
+    private fun subscribeToWalletConnectEvents() {
+        launchDisposable {
+            walletConnectRepository.connectionStatusFlowable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        Timber.tag("kobe").d("on next")
+                        _walletConnectStatus.value = it
+                    },
+                    onError = { Timber.e(it) }
+                )
         }
     }
 
@@ -152,31 +172,6 @@ class MainViewModel(
     fun clearPendingAccounts() {
         transactionRepository.clearPendingAccounts()
     }
-//todo remove when Charging Station Dashboard is not needed anymore, or prepare this service for integration
-//    fun loginFromNotification(jwtToken: String?) {
-//        jwtToken?.let {
-//            launchDisposable {
-//                serviceManager.decodeJwtToken(it)
-//                    .subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribeBy(
-//                        onSuccess = { handleQrCodeResponse(it) },
-//                        onError = {
-//                            Timber.e(it)
-//                            _errorLiveData.value = Event(it)
-//                        }
-//                    )
-//            }
-//        }
-//    }
-
-//    private fun handleQrCodeResponse(response: QrCode) {
-//        (response as? ServiceQrCode)?.apply {
-//            loginPayload =
-//                LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.), response)
-//            painlessLogin()
-//        }
-//    }
 
     fun isOrderEditAvailable(type: Int) = orderManager.isOrderAvailable(type)
 
