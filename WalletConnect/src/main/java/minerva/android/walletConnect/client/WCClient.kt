@@ -20,14 +20,13 @@ import minerva.android.walletConnect.utils.WCCipher
 import minerva.android.walletConnect.utils.toByteArray
 import okhttp3.*
 import okio.ByteString
-import timber.log.Timber
 import java.util.*
 
 const val JSONRPC_VERSION = "2.0"
 
 open class WCClient(
-    builder: GsonBuilder = GsonBuilder(),
-    private val httpClient: OkHttpClient = OkHttpClient()
+    private val httpClient: OkHttpClient = OkHttpClient(),
+    builder: GsonBuilder = GsonBuilder()
 ) : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
@@ -52,32 +51,29 @@ open class WCClient(
 
     private var isConnected: Boolean = false
 
-    fun sessionId(): String? {
-        if (session != null) return session!!.topic;
-        else return null;
-    }
+    fun sessionId(): String? =
+        if (session != null) session!!.topic;
+        else null;
 
     private var handshakeId: Long = -1
 
     var accounts: List<String>? = null
         private set
-    var chainId: Int? = null
+    private var chainId: Int? = null
         private set
 
-    var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> Unit }
-    var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> Unit }
+    var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> }
+    var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> }
     var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String) -> Unit =
-        { _, _, _, _ -> Unit }
-    var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
-    var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit =
-        { _, _ -> Unit }
-    var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit =
-        { _, _ -> Unit }
-    var onCustomRequest: (id: Long, payload: String) -> Unit = { _, _ -> Unit }
-    var onGetAccounts: (id: Long) -> Unit = { _ -> Unit }
-    var onWCOpen: (peerId: String) -> Unit = { _ -> Unit }
-    var onPong: (peerId: String) -> Unit = { _ -> Unit }
-    var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = { _, _ -> Unit }
+        { _, _, _, _ -> }
+    var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> }
+    var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
+    var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
+    var onCustomRequest: (id: Long, payload: String) -> Unit = { _, _ -> }
+    var onGetAccounts: (id: Long) -> Unit = { _ -> }
+    var onWCOpen: (peerId: String) -> Unit = { _ -> }
+    var onPong: (peerId: String) -> Unit = { _ -> }
+    var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = { _, _ -> }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         isConnected = true

@@ -14,25 +14,26 @@
     android:paddingBottom="@dimen/margin_normal">
 
     <ImageView
-        android:id="@+id/minervaPrimitiveLogo"
+        android:id="@+id/minerva_primitive_logo"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
         android:src="@drawable/ic_minerva_icon"
-        app:layout_constraintTop_toTopOf="@id/vertical_center"
-        app:layout_constraintBottom_toBottomOf="@id/vertical_center"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />
 
     <TextView
-        android:id="@+id/minervaPrimitiveName"
+        android:id="@+id/minerva_primitive_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_small"
-        android:fontFamily="@font/rubik_regular"
-        android:textColor="@color/gray"
         android:layout_marginBottom="@dimen/margin_xxxsmall"
-        app:layout_constraintLeft_toRightOf="@+id/minervaPrimitiveLogo"
-        app:layout_constraintBottom_toTopOf="@id/identity_name"
+        android:fontFamily="@font/rubik_medium"
+        android:textColor="@color/gray"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintLeft_toRightOf="@+id/minerva_primitive_logo"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="Minerva Service" />
 
     <TextView
@@ -40,39 +41,66 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/rubik_regular"
-        tools:text="Identity: Some Name"
         android:textColor="@color/borderGray"
         android:visibility="gone"
-        app:layout_constraintLeft_toLeftOf="@id/minervaPrimitiveName"
-        app:layout_constraintBottom_toBottomOf="@id/vertical_center"
-        app:layout_constraintTop_toTopOf="@id/vertical_center" />
+        app:layout_constraintLeft_toLeftOf="@id/minerva_primitive_name"
+        app:layout_constraintTop_toBottomOf="@id/minerva_primitive_name"
+        tools:text="Identity: Some Name" />
 
     <TextView
-        android:id="@+id/lastUsedLabel"
+        android:id="@+id/last_used_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_xxxsmall"
         android:fontFamily="@font/rubik_regular"
         android:textColor="@color/borderGray"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="@id/minerva_primitive_name"
         app:layout_constraintTop_toBottomOf="@id/identity_name"
-        app:layout_constraintLeft_toLeftOf="@id/minervaPrimitiveName"
         tools:text="@string/last_used" />
 
+    <TextView
+        android:id="@+id/session_info_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxxsmall"
+        android:layout_marginEnd="@dimen/margin_xxsmall"
+        android:ellipsize="middle"
+        android:fontFamily="@font/rubik_regular"
+        android:singleLine="true"
+        android:textColor="@color/borderGray"
+        android:textSize="@dimen/text_xsmall"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@id/minerva_primitive_name"
+        app:layout_constraintRight_toLeftOf="@+id/popup_menu"
+        app:layout_constraintTop_toBottomOf="@id/identity_name"
+        tools:ignore="UnknownIdInLayout"
+        tools:text="test" />
+
+    <TextView
+        android:id="@+id/network_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxxsmall"
+        android:layout_marginEnd="@dimen/margin_xxsmall"
+        android:fontFamily="@font/rubik_regular"
+        android:textColor="@color/borderGray"
+        android:textSize="@dimen/text_xsmall"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@id/minerva_primitive_name"
+        app:layout_constraintRight_toLeftOf="@+id/popup_menu"
+        app:layout_constraintTop_toBottomOf="@id/session_info_label"
+        tools:ignore="UnknownIdInLayout"
+        tools:text="test" />
+
     <ImageView
-        android:id="@+id/popupMenu"
+        android:id="@+id/popup_menu"
         android:layout_width="@dimen/clickable_area"
         android:layout_height="@dimen/clickable_area"
         android:scaleType="center"
         android:src="@drawable/ic_three_dots"
-        app:layout_constraintTop_toTopOf="@id/vertical_center"
-        app:layout_constraintBottom_toBottomOf="@id/vertical_center"
+        app:layout_constraintBottom_toBottomOf="@id/minerva_primitive_logo"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/minerva_primitive_logo"
         tools:ignore="ContentDescription" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/vertical_center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
 </androidx.constraintlayout.widget.ConstraintLayout>

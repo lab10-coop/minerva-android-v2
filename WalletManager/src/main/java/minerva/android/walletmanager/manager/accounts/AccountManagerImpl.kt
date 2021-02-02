@@ -37,22 +37,18 @@ class AccountManagerImpl(
             val accountName = CryptoUtils.prepareName(network, index)
             return cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
-                index,
-                derivationPath,
-                network.testNet
-            )
-                .map { keys ->
-                    val newAccount = Account(
-                        index,
-                        name = accountName,
-                        networkShort = network.short,
-                        publicKey = keys.publicKey,
-                        privateKey = keys.privateKey,
-                        address = blockchainRepository.toChecksumAddress(keys.address)
-                    )
-                    addAccount(newAccount, config)
-                }
-                .flatMapCompletable { walletManager.updateWalletConfig(it) }
+                index, derivationPath, network.testNet
+            ).map { keys ->
+                val newAccount = Account(
+                    index,
+                    name = accountName,
+                    networkShort = network.short,
+                    publicKey = keys.publicKey,
+                    privateKey = keys.privateKey,
+                    address = blockchainRepository.toChecksumAddress(keys.address)
+                )
+                addAccount(newAccount, config)
+            }.flatMapCompletable { walletManager.updateWalletConfig(it) }
                 .toSingleDefault(accountName)
         }
         throw NotInitializedWalletConfigThrowable()
@@ -69,26 +65,22 @@ class AccountManagerImpl(
             val (index, derivationPath) = getIndexWithDerivationPath(account.network, config)
             return cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
-                index,
-                derivationPath,
-                account.network.testNet
-            )
-                .map { keys ->
-                    val ownerAddress = account.address
-                    val newAccount = Account(
-                        index,
-                        name = getSafeAccountName(account),
-                        networkShort = account.network.short,
-                        bindedOwner = ownerAddress,
-                        publicKey = keys.publicKey,
-                        privateKey = keys.privateKey,
-                        address = blockchainRepository.toChecksumAddress(contract),
-                        contractAddress = contract,
-                        owners = mutableListOf(ownerAddress)
-                    )
-                    addSafeAccount(config, newAccount, ownerAddress)
-                }
-                .flatMapCompletable { walletManager.updateWalletConfig(it) }
+                index, derivationPath, account.network.testNet
+            ).map { keys ->
+                val ownerAddress = account.address
+                val newAccount = Account(
+                    index,
+                    name = getSafeAccountName(account),
+                    networkShort = account.network.short,
+                    bindedOwner = ownerAddress,
+                    publicKey = keys.publicKey,
+                    privateKey = keys.privateKey,
+                    address = blockchainRepository.toChecksumAddress(contract),
+                    contractAddress = contract,
+                    owners = mutableListOf(ownerAddress)
+                )
+                addSafeAccount(config, newAccount, ownerAddress)
+            }.flatMapCompletable { walletManager.updateWalletConfig(it) }
         }
         throw NotInitializedWalletConfigThrowable()
     }
@@ -139,8 +131,8 @@ class AccountManagerImpl(
 
     override fun currentTimeMills(): Long = timeProvider.currentTimeMills()
 
-    override fun getAllAccounts(): Single<List<Account>> =
-        Single.just(walletManager.getWalletConfig()?.accounts)
+    override fun getAllAccounts(): List<Account>? =
+        walletManager.getWalletConfig()?.accounts
 
     override fun toChecksumAddress(address: String): String =
         blockchainRepository.toChecksumAddress(address)
@@ -160,32 +152,28 @@ class AccountManagerImpl(
     override fun removeAccount(account: Account): Completable {
         walletManager.getWalletConfig()?.let { config ->
             val newAccounts: MutableList<Account> = config.accounts.toMutableList()
-            val accountIndex = newAccounts.indexOf(account)
             config.accounts.forEachIndexed { index, item ->
-                if (index == accountIndex) {
-                    return when {
-                        areFundsOnValue(
-                            item.cryptoBalance,
-                            item.accountTokens
-                        ) -> handleNoFundsError(item)
-                        isNotSafeAccountMasterOwner(config.accounts, item) ->
-                            Completable.error(IsNotSafeAccountMasterOwnerThrowable())
-                        else -> {
-                            newAccounts[index] = Account(item, true)
-                            walletManager.updateWalletConfig(
-                                config.copy(
-                                    version = config.updateVersion,
-                                    accounts = newAccounts
-                                )
-                            )
-                        }
-                    }
+                if (item.address == account.address) {
+                    return handleRemovingAccount(item, config, newAccounts, index)
                 }
             }
             return Completable.error(MissingAccountThrowable())
         }
         throw NotInitializedWalletConfigThrowable()
     }
+
+    private fun handleRemovingAccount(
+        item: Account, config: WalletConfig,
+        newAccounts: MutableList<Account>, index: Int
+    ): Completable =
+        when {
+            areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
+            isNotSAMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+            else -> {
+                newAccounts[index] = Account(item, true)
+                walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+            }
+        }
 
     private fun handleNoFundsError(account: Account): Completable =
         if (account.isSafeAccount) {
@@ -194,7 +182,7 @@ class AccountManagerImpl(
             Completable.error(BalanceIsNotEmptyThrowable())
         }
 
-    private fun isNotSafeAccountMasterOwner(accounts: List<Account>, account: Account): Boolean {
+    private fun isNotSAMasterOwner(accounts: List<Account>, account: Account): Boolean {
         account.owners?.let {
             accounts.forEach { if (it.address == account.masterOwnerAddress) return false }
             return true
@@ -228,6 +216,5 @@ class AccountManagerImpl(
     companion object {
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
         private const val NO_SAFE_ACCOUNTS = 0
-        private const val HOURS_IN_DAY = 24L
     }
 }

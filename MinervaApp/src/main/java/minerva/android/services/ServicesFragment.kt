@@ -1,13 +1,17 @@
 package minerva.android.services
 
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
 import minerva.android.utils.AlertDialogHandler
+import minerva.android.walletmanager.model.DappSession
+import minerva.android.walletmanager.model.MinervaPrimitive
 import minerva.android.walletmanager.model.Service
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class ServicesFragment : MinervaPrimitiveListFragment() {
 
@@ -20,22 +24,25 @@ class ServicesFragment : MinervaPrimitiveListFragment() {
 
     override fun prepareObservers() {
         viewModel.apply {
-            walletConfigLiveData.observe(viewLifecycleOwner, Observer {
-                binding.noDataMessage.visibleOrGone(it.services.isEmpty())
-                primitivesAdapter.updateList(it.services)
-            })
+            servicesLiveData.observe(viewLifecycleOwner, Observer { updateList(it) })
+            dappSessionsLiveData.observe(viewLifecycleOwner, Observer { updateList(it) })
             serviceRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
             errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
         }
     }
 
-    override fun onRemoveService(service: Service) {
-        AlertDialogHandler.showRemoveDialog(requireContext(), service.name, getString(R.string.remove_service_dialog_message)) {
-            viewModel.removeService(
-                service.issuer,
-                service.name
-            )
-        }
+    private fun updateList(it: List<MinervaPrimitive>) {
+        binding.noDataMessage.visibleOrGone(it.isEmpty())
+        primitivesAdapter.updateList(it)
+    }
+
+    override fun onRemoveService(service: Service) = with(service) {
+        AlertDialogHandler.showRemoveDialog(requireContext(), name, getString(R.string.remove_service_dialog_message))
+        { viewModel.removeService(issuer, name) }
+    }
+
+    override fun onRemoveDappSession(dapp: DappSession) {
+        viewModel.removeSession(dapp)
     }
 
     companion object {

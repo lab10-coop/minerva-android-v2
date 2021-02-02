@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_third_party_integration.*
 import minerva.android.R
+import minerva.android.databinding.ActivityThirdPartyIntegrationBinding
 import minerva.android.extension.addFragment
 import minerva.android.extension.gone
 import minerva.android.extension.visible
@@ -26,10 +27,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationListener {
 
     private val viewModel: ThirdPartyRequestViewModel by viewModel()
+    private lateinit var binding: ActivityThirdPartyIntegrationBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_third_party_integration)
+        binding = ActivityThirdPartyIntegrationBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         checkIfWalletExists(intent.data?.encodedPath?.removePrefix(SLASH))
     }
 
@@ -80,9 +83,11 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
 
     private fun connectService(it: ConnectionRequest.ServiceNotConnected<Pair<Credential, CredentialRequest>>) {
         viewModel.credentialRequest = it.data
-        container.visible()
-        loader.gone()
-        minervaPrimitiveName.text = it.data.second.service.name
+        with(binding) {
+            container.visible()
+            loader.gone()
+            minerva_primitive_name.text = it.data.second.service.name
+        }
         addFragment(
             R.id.container,
             ConnectionRequestFragment.newInstance(),

@@ -24,7 +24,6 @@ import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
 import minerva.android.walletActions.WalletActionsViewModel
-import minerva.android.walletConnect.walletConnectModules
 import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage
 import minerva.android.widget.clubCard.CacheStorageImpl
@@ -43,14 +42,13 @@ fun createAppModule() = mutableListOf<Module>().apply {
         )
     )
     add(appModules)
-    add(walletConnectModules)
 }
 
 private val appModules = module {
     factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
     factory<CacheStorage> { CacheStorageImpl(get()) }
     viewModel { ClubCardViewModel(get()) }
-    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
@@ -65,11 +63,11 @@ private val appModules = module {
     viewModel { SafeAccountSettingsViewModel(get(), get()) }
     viewModel { TransactionViewModel(get(), get(), get()) }
     viewModel { NewAccountViewModel(get(), get()) }
-    viewModel { ServicesViewModel(get(), get()) }
+    viewModel { ServicesViewModel(get(), get(), get()) }
     viewModel { WalletActionsViewModel(get()) }
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
-    viewModel { WalletConnectViewModel(get(), get(), get()) }
+    viewModel { WalletConnectViewModel(get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
 }

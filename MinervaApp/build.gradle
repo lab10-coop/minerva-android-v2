@@ -58,8 +58,8 @@ android {
     productFlavors {
         flavorDimensions 'enviroment'
         staging {
-            versionCode 11
-            versionName "1.0.11"
+            versionCode 12
+            versionName "1.0.12"
             dimension 'enviroment'
             applicationIdSuffix ".staging"
             versionNameSuffix '-staging'
@@ -74,7 +74,7 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/core.kotlin_module'
+        exclude("META-INF/*.kotlin_module")
     }
 
     dexOptions {
@@ -88,7 +88,6 @@ dependencies {
     implementation project(':WalletManager')
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
-    implementation project(':WalletConnect')
 
     implementation firebaseDepenedencies.values()
     implementation crashlyticsDependencies.values()

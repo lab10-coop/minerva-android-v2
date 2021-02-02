@@ -58,7 +58,7 @@ class DappViewHolder(
     }
 
     private fun getIcon(dappSession: DappSession): Any =
-        if (dappSession.icon != String.Empty) dappSession.icon else R.drawable.ic_services
+        if (dappSession.iconUrl != String.Empty) dappSession.iconUrl else R.drawable.ic_services
 
     private fun DappItemBinding.showMenu(peerId: String) {
         PopupMenu(root.context, menu).apply {

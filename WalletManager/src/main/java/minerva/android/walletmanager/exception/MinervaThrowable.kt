@@ -18,3 +18,4 @@ class NoLoggedInIdentityThrowable : Throwable("The provided did does not match t
 class AllTokenIconsUpdated() : Throwable("All Token Icons are updated")
 class AutomaticBackupFailedThrowable : Throwable()
 class EncodingJwtFailedThrowable : Throwable()
+class InvalidAccountException: Exception("Invalid Account error")
