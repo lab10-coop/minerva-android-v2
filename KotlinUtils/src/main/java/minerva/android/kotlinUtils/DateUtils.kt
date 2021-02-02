@@ -4,7 +4,6 @@ import minerva.android.kotlinUtils.extension.toMilliseconds
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
 import java.text.SimpleDateFormat
-import java.time.OffsetDateTime
 import java.util.*
 
 object DateUtils {
@@ -18,7 +17,10 @@ object DateUtils {
         SimpleDateFormat(
             DATE_WITH_TIME_FORMAT,
             Locale.getDefault()
-        ).format(Date(dateInMillis))
+        ).let {
+            it.timeZone = TimeZone.getDefault()
+            it.format(Date(dateInMillis))
+        }
 
 
     fun getDateFromTimestamp(timestamp: Long, format: String = DATE_FORMAT): String =
@@ -31,7 +33,10 @@ object DateUtils {
         SimpleDateFormat(
             TIME_FORMAT,
             Locale.getDefault()
-        ).format(Date(time))
+        ).let {
+            it.timeZone = TimeZone.getDefault()
+            it.format(Date(time))
+        }
 
     fun getTimestampFromDate(date: String, format: String = ISO_8601): Long =
         SimpleDateFormat(format).parse(date).time

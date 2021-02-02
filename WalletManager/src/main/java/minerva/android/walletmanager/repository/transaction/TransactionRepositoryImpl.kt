@@ -47,9 +47,7 @@ class TransactionRepositoryImpl(
     private fun accountsFilter(it: Account) = refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
 
     private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> =
-        accounts.map {
-            it.network.short to it.address
-        }
+        accounts.map { it.network.short to it.address }
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
@@ -60,11 +58,7 @@ class TransactionRepositoryImpl(
                 .filter { position -> accounts[position].network.isAvailable() }
                 .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
                 .toList()
-                .map { list ->
-                    list.map {
-                        it.second to tokenManager.mapToAccountTokensList(it.first, it.third)
-                    }.toMap()
-                }
+                .map { list -> list.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
         }
         throw NotInitializedWalletConfigThrowable()
     }

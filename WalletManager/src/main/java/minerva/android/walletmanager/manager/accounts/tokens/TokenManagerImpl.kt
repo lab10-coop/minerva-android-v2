@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -72,7 +71,7 @@ class TokenManagerImpl(
 
     private fun getTokenIconsURL(): Single<Map<String, String>> =
         cryptoApi.getTokenRawData(url = BuildConfig.ERC20_TOKEN_DATA_URL).map { data ->
-            data.associateBy({ generateTokenIconKey(it.chainId, it.address) }, { it.logoURI })
+            data.associate { generateTokenIconKey(it.chainId, it.address) to it.logoURI }
         }
 
     private fun updateAllTokenIcons(updatedIcons: Map<String, String>): Completable =
