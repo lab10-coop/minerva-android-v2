@@ -9,7 +9,7 @@ class DateUtilsTest {
     fun `Check getting date with time from Timestamp` () {
         val timestamp = 1612193618000
         val result = DateUtils.getDateWithTimeFromTimestamp(timestamp)
-        result shouldBeEqualTo "01.02.2021 04:33"
+        result shouldBeEqualTo "01.02.2021 03:33"
     }
 
     @Test
@@ -23,7 +23,7 @@ class DateUtilsTest {
     fun `Check getting time from timestamp` () {
         val timestamp = 1612193618000
         val result = DateUtils.getTimeFromTimeStamp(timestamp)
-        result shouldBeEqualTo "04:33"
+        result shouldBeEqualTo "03:33"
     }
 
     @Test
