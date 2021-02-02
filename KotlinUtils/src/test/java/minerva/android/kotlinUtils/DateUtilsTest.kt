@@ -2,13 +2,14 @@ package minerva.android.kotlinUtils
 
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
+import java.util.*
 
 class DateUtilsTest {
 
     @Test
     fun `Check getting date with time from Timestamp` () {
         val timestamp = 1612193618000
-        val result = DateUtils.getDateWithTimeFromTimestamp(timestamp)
+        val result = DateUtils.getDateWithTimeFromTimestamp(timestamp, TimeZone.getTimeZone("UTC"))
         result shouldBeEqualTo "01.02.2021 03:33"
     }
 
@@ -22,7 +23,7 @@ class DateUtilsTest {
     @Test
     fun `Check getting time from timestamp` () {
         val timestamp = 1612193618000
-        val result = DateUtils.getTimeFromTimeStamp(timestamp)
+        val result = DateUtils.getTimeFromTimeStamp(timestamp, TimeZone.getTimeZone("UTC"))
         result shouldBeEqualTo "03:33"
     }
 

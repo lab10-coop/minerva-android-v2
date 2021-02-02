@@ -12,14 +12,13 @@ object DateUtils {
     private const val ISO_8601 = "yyyy-MM-dd'T'HH:mm:ssX"
     private const val DATE_WITH_TIME_FORMAT = "dd.MM.yyyy hh:mm"
     private const val TIME_FORMAT = "hh:mm"
-    private const val UTC = "UTC"
 
-    fun getDateWithTimeFromTimestamp(dateInMillis: Long = timestamp): String =
+    fun getDateWithTimeFromTimestamp(dateInMillis: Long = timestamp, timeZone: TimeZone = TimeZone.getDefault()): String =
         SimpleDateFormat(
             DATE_WITH_TIME_FORMAT,
             Locale.getDefault()
         ).run {
-            timeZone = TimeZone.getTimeZone(UTC)
+            this.timeZone = timeZone
             format(dateInMillis.toMilliseconds())
         }
 
@@ -27,17 +26,14 @@ object DateUtils {
         SimpleDateFormat(
             format,
             Locale.getDefault()
-        ).run {
-            timeZone = TimeZone.getTimeZone(UTC)
-            format(timestamp.toMilliseconds())
-        }
+        ).format(timestamp.toMilliseconds())
 
-    fun getTimeFromTimeStamp(time: Long = timestamp): String =
+    fun getTimeFromTimeStamp(time: Long = timestamp, timeZone: TimeZone = TimeZone.getDefault()): String =
         SimpleDateFormat(
             TIME_FORMAT,
             Locale.getDefault()
         ).run {
-            timeZone = TimeZone.getTimeZone(UTC)
+            this.timeZone = timeZone
             format(time.toMilliseconds())
         }
 

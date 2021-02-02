@@ -146,7 +146,7 @@ class TokenManagerTest : RxTest() {
     }
 
     private val commitData: List<CommitElement>
-        get() = listOf(CommitElement(Commit(Committer("cookie", "2021-01-29T19:56:02Z")))) //1611950162000 in mills
+        get() = listOf(CommitElement(Commit(Committer("2021-01-29T19:56:02Z")))) //1611950162000 in mills
 
 
     private val data = listOf(
