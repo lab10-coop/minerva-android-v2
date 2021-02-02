@@ -59,11 +59,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 getString(R.string.outdated_wallet_error_message)
             )
         }
+        viewModel.updateTokenIcons()
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel.updateTokenIcons()
         shouldShowLoadingScreen(false)
         handleExecutedAccounts()
     }

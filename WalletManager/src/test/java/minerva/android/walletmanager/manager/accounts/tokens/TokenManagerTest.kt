@@ -133,17 +133,20 @@ class TokenManagerTest : RxTest() {
         key shouldBeEqualTo "30x4ddr355"
     }
 
-
-    //TODO klop update this test
     @Test
     fun `Check mapping last commit data to last commit timestamp`() {
+        NetworkManager.initialize(DataProvider.networks)
         whenever(cryptoApi.getTokenLastCommitRawData(any(), any())).thenReturn(Single.just(commitData))
-        tokenManager.updateTokenIcons()
-            .test()
+        whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.just(data))
+        whenever(localStorage.loadTokenIconsUpdateTimestamp()).thenReturn(333L, 1611950162000, 1611950162333)
+        whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
+        tokenManager.updateTokenIcons().test().assertComplete()
+        tokenManager.updateTokenIcons().test().assertNotComplete()
+        tokenManager.updateTokenIcons().test().assertNotComplete()
     }
 
     private val commitData: List<CommitElement>
-        get() = listOf(CommitElement(Commit(Committer("cookie", "2021-01-29T19:56:02Z"))))
+        get() = listOf(CommitElement(Commit(Committer("cookie", "2021-01-29T19:56:02Z")))) //1611950162000 in mills
 
 
     private val data = listOf(
