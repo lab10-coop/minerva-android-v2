@@ -25,9 +25,9 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REM
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
-import minerva.android.walletmanager.repository.walletconnect.DappSessionRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -38,7 +38,7 @@ class AccountsViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository,
-    private val dappSessionRepository: DappSessionRepository
+    private val walletConnectRepository: WalletConnectRepository
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -82,6 +82,7 @@ class AccountsViewModel(
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
             hasActiveAccount = it.hasActiveAccount
+            getSessions(it.accounts)
             it.accounts
         }
 
@@ -116,36 +117,53 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
-        accountManager.walletConfigLiveData.value?.accounts?.let {
+        accountManager.getAllAccounts()?.let {
             getSessions(it)
         }
     }
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
-            dappSessionRepository.getConnectedDapps()
-                .map { sessions ->
-                    if (sessions.isNotEmpty()) {
-                        mutableListOf<Account>().apply {
-                            accounts.forEach { account ->
-                                val count = sessions.count {
-                                    it.address == accountManager.toChecksumAddress(account.address)
-                                }
-                                add(account.copy(dappSessionCount = count))
-                            }
-                        }
-
-                    } else {
-                        emptyList<Account>()
-                    }
-                }
+            walletConnectRepository.getSessionsFlowable()
+                .map { sessions -> updateSessions(sessions, accounts) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        if (it.isNotEmpty()) _dappSessions.value = it
+                    onNext = {
+                        _dappSessions.value = if (it.isNotEmpty()) it
+                        else accountManager.getAllAccounts()
                     },
                     onError = { _errorLiveData.value = Event(it) }
+                )
+        }
+    }
+
+    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>) =
+        if (sessions.isNotEmpty()) {
+            mutableListOf<Account>().apply {
+                accounts.forEach { account ->
+                    val count = sessions.count { it.address == accountManager.toChecksumAddress(account.address) }
+                    add(account.copy(dappSessionCount = count))
+                }
+            }
+        } else {
+            emptyList<Account>()
+        }
+
+    fun removeAccount(account: Account) {
+        launchDisposable {
+            accountManager.removeAccount(account)
+                .observeOn(Schedulers.io())
+                .andThen(walletConnectRepository.killAllAccountSessions(accountManager.toChecksumAddress(account.address)))
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = { _accountRemovedLiveData.value = Event(Unit) },
+                    onError = {
+                        Timber.e("Removing account with index ${account.id} failure")
+                        handleRemoveAccountErrors(it)
+                    }
                 )
         }
     }
@@ -170,9 +188,7 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        _tokenBalanceLiveData.value = it
-                    },
+                    onSuccess = { _tokenBalanceLiveData.value = it },
                     onError = {
                         Timber.e("Refresh asset balance error: ${it.message}")
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
@@ -180,38 +196,17 @@ class AccountsViewModel(
                 )
         }
 
-    fun removeAccount(account: Account) {
-        launchDisposable {
-            accountManager.removeAccount(account)
-                .observeOn(Schedulers.io())
-                .andThen(
-                    walletActionsRepository.saveWalletActions(
-                        listOf(
-                            getRemovedAccountAction(
-                                account
-                            )
-                        )
-                    )
-                )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { _accountRemovedLiveData.value = Event(Unit) },
-                    onError = {
-                        Timber.e("Removing account with index ${account.id} failure")
-                        when (it) {
-                            is BalanceIsNotEmptyThrowable ->
-                                _balanceIsNotEmptyErrorLiveData.value = Event(it)
-                            is BalanceIsNotEmptyAndHasMoreOwnersThrowable ->
-                                _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
-                            is IsNotSafeAccountMasterOwnerThrowable ->
-                                _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
-                            is AutomaticBackupFailedThrowable ->
-                                _automaticBackupErrorLiveData.value = Event(it)
-                            else -> _errorLiveData.value = Event(Throwable(it.message))
-                        }
-                    }
-                )
+    private fun handleRemoveAccountErrors(it: Throwable) {
+        when (it) {
+            is BalanceIsNotEmptyThrowable ->
+                _balanceIsNotEmptyErrorLiveData.value = Event(it)
+            is BalanceIsNotEmptyAndHasMoreOwnersThrowable ->
+                _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
+            is IsNotSafeAccountMasterOwnerThrowable ->
+                _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
+            is AutomaticBackupFailedThrowable ->
+                _automaticBackupErrorLiveData.value = Event(it)
+            else -> _errorLiveData.value = Event(Throwable(it.message))
         }
     }
 
@@ -266,12 +261,12 @@ class AccountsViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                    onComplete = { accountManager.saveFreeATSTimestamp() },
-                    onError = {
-                        Timber.e("Adding 5 tATS failed: ${it.message}")
-                        _errorLiveData.value = Event(Throwable(it.message))
-                    }
-                )
+                        onComplete = { accountManager.saveFreeATSTimestamp() },
+                        onError = {
+                            Timber.e("Adding 5 tATS failed: ${it.message}")
+                            _errorLiveData.value = Event(Throwable(it.message))
+                        }
+                    )
             } else {
                 Timber.e("Adding 5 tATS failed: $errorMessage")
                 _errorLiveData.value = Event(Throwable(errorMessage))

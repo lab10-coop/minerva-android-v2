@@ -64,7 +64,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
             IdentityBindedItem(context).let {
                 it.setIconUrl(credential.iconUrl)
                 it.setDateAndName(credential.name, DateUtils.getDateFromTimestamp(credential.lastUsed, DATE_FORMAT))
-                it.popupMenu.setOnClickListener { item -> showMenu(item.popupMenu, credential) }
+                it.popup_menu.setOnClickListener { item -> showMenu(item.popup_menu, credential) }
                 it.setOnItemClickListener { ClubCard(context, credential).show() }
                 views.add(it)
                 addView(it)
@@ -79,7 +79,7 @@ class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout
             bindedService.setDateAndName(service.name, DateUtils.getDateFromTimestamp(service.lastUsed, DATE_FORMAT))
             //TODO change to adding proper icon based on the service type
             bindedService.setIcon(R.drawable.ic_backup)
-            bindedService.popupMenu.setOnClickListener { showMenu(bindedService.popupMenu, service) }
+            bindedService.popup_menu.setOnClickListener { showMenu(bindedService.popup_menu, service) }
             views.add(bindedService)
             addView(bindedService)
         }

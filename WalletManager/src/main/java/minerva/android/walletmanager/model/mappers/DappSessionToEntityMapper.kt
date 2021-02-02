@@ -6,6 +6,18 @@ import minerva.android.walletmanager.model.DappSession
 
 object DappSessionToEntityMapper : Mapper<DappSession, DappSessionEntity> {
     override fun map(input: DappSession): DappSessionEntity = with(input) {
-        DappSessionEntity(address, topic, version, bridge, key, name, icon, peerId, remotePeerId)
+        DappSessionEntity(
+            address,
+            topic,
+            version,
+            bridge,
+            key,
+            name,
+            iconUrl,
+            peerId,
+            remotePeerId,
+            networkName,
+            accounName
+        )
     }
 }

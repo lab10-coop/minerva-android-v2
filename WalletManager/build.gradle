@@ -49,6 +49,7 @@ dependencies {
     implementation project(':WalletConfigProvider')
     implementation project(':ApiProvider')
     implementation project(':BlockchainProvider')
+    implementation project(':WalletConnect')
 
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
@@ -57,9 +58,7 @@ dependencies {
     implementation startupDependencies.values()
     implementation jsonLogicDependencies.values()
     testImplementation testDependencies.values()
-
-    //    todo extract to dependencies
-    implementation "androidx.room:room-runtime:2.2.6"
-    implementation "androidx.room:room-rxjava2:2.2.6"
+    implementation room.values()
+    implementation okhttp.values()
     kapt "androidx.room:room-compiler:2.2.6"
 }

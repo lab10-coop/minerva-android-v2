@@ -17,3 +17,4 @@ class NoBindedCredentialThrowable : Throwable("There is no such Credential binde
 class NoLoggedInIdentityThrowable : Throwable("The provided did does not match to any existed Identity")
 class AutomaticBackupFailedThrowable : Throwable()
 class EncodingJwtFailedThrowable : Throwable()
+class InvalidAccountException: Exception("Invalid Account error")

@@ -102,9 +102,7 @@ class WalletConfigManagerImpl(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = {
-                    _walletConfigLiveData.value = it
-                         },
+                onNext = { _walletConfigLiveData.value = it },
                 onError = { Timber.e("Loading WalletConfig error: $it") }
             )
     }
@@ -129,8 +127,8 @@ class WalletConfigManagerImpl(
                 initWalletConfig()
             }
 
-    override fun updateWalletConfig(walletConfig: WalletConfig): Completable {
-        return if (localStorage.isBackupAllowed) {
+    override fun updateWalletConfig(walletConfig: WalletConfig): Completable =
+        if (localStorage.isBackupAllowed) {
             val (config, payload) = Pair(
                 walletConfig,
                 WalletConfigToWalletPayloadMapper.map(walletConfig)
@@ -152,7 +150,6 @@ class WalletConfigManagerImpl(
                     localWalletProvider.saveWalletConfig(payload)
                 }.ignoreElement()
         } else Completable.error(AutomaticBackupFailedThrowable())
-    }
 
     override fun dispose() {
         disposable?.dispose()
