@@ -10,14 +10,19 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import minerva.android.walletConnect.client.WCClient
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.*
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.*
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
+import minerva.android.walletConnect.utils.hexToUtf8
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.Topic
 import minerva.android.walletmanager.model.WalletConnectSession
 import minerva.android.walletmanager.model.mappers.*
 import timber.log.Timber
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
 
 class WalletConnectRepositoryImpl(
@@ -82,8 +87,12 @@ class WalletConnectRepositoryImpl(
                 status.onNext(OnDisconnect(code, peerId))
             }
 
-            onEthSign = { id, message, peerId ->
-                status.onNext(OnEthSign(message.raw[1], peerId)) //todo get encrypted persolan message
+            onEthSign = { _, message, peerId ->
+                val data: String = when (message.type) {
+                    PERSONAL_MESSAGE -> message.data.hexToUtf8()
+                    MESSAGE, TYPED_MESSAGE -> message.data
+                }
+                status.onNext(OnEthSign(data, peerId))
             }
 
             connect(

@@ -1,11 +1,27 @@
 package minerva.android.walletConnect.utils
 
 import okhttp3.internal.and
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 
 
 fun ByteArray.toHexString(): String = toHexString(this, 0, this.size, false)
 
 fun String.toByteArray(): ByteArray = hexStringToByteArray(this)
+
+fun String.hexToUtf8(): String {
+    var hex = this
+    hex = cleanHexPrefix(hex)
+    val buff = ByteBuffer.allocate(hex.length / 2)
+    var i = 0
+    while (i < hex.length) {
+        buff.put(hex.substring(i, i + 2).toInt(16).toByte())
+        i += 2
+    }
+    buff.rewind()
+    val cb = StandardCharsets.UTF_8.decode(buff)
+    return cb.toString()
+}
 
 private fun toHexString(input: ByteArray, offset: Int, length: Int, withPrefix: Boolean): String {
     val stringBuilder = StringBuilder()
