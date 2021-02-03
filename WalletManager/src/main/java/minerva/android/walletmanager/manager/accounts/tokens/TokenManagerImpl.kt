@@ -105,7 +105,7 @@ class TokenManagerImpl(
         }
 
     private fun checkUpdates(list: List<CommitElement>): Boolean =
-        list[LAST_UPDATE_INDEX].commit?.committer?.date?.let {
+        list[LAST_UPDATE_INDEX].commit.committer.date.let {
             localStorage.loadTokenIconsUpdateTimestamp() < DateUtils.getTimestampFromDate(it)
         }
 
