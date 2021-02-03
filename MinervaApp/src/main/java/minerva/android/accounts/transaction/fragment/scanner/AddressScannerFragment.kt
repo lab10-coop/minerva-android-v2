@@ -4,19 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import com.budiyev.android.codescanner.DecodeCallback
-import com.budiyev.android.codescanner.ErrorCallback
 import minerva.android.R
-import minerva.android.accounts.akm.SafeAccountSettingsFragment
 import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment
 import minerva.android.extension.invisible
-import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.main.MainActivity
 import minerva.android.main.MainActivity.Companion.ACCOUNT_INDEX
-import minerva.android.wrapped.WrappedActivity
 
 class AddressScannerFragment : WalletConnectScannerFragment() {
 
@@ -33,18 +27,7 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
     }
 
     override fun setupCallbacks() {
-        codeScanner.apply {
-            decodeCallback = DecodeCallback { result ->
-                requireActivity().runOnUiThread {
-                    if (shouldScan) {
-                        binding.scannerProgressBar.visible()
-                        handleScanResult(AddressParser.parse(result.text))
-                    }
-                }
-            }
-
-            errorCallback = ErrorCallback { handleCameraError(it) }
-        }
+        setupCallbackAction { qrCode -> handleScanResult(AddressParser.parse(qrCode)) }
     }
 
     private fun handleScanResult(parsedResult: String) {
@@ -62,9 +45,7 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
     }
 
     override fun setOnCloseButtonListener() {
-        binding.closeButton.setOnClickListener {
-            listener.onBackPressed()
-        }
+        setOnCloseButtonAction { listener.onBackPressed() }
     }
 
     override fun onPermissionNotGranted() {

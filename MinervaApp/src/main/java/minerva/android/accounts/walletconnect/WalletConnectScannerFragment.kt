@@ -10,6 +10,7 @@ import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import minerva.android.R
+import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.margin
@@ -104,17 +105,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     override fun setupCallbacks() {
-        codeScanner.apply {
-            decodeCallback = DecodeCallback { result ->
-                requireActivity().runOnUiThread {
-                    if (shouldScan) {
-                        binding.scannerProgressBar.visible()
-                        viewModel.handleQrCode(result.text)
-                    }
-                }
-            }
-
-            errorCallback = ErrorCallback { handleCameraError(it) }
+        setupCallbackAction { qrCode ->
+            viewModel.handleQrCode(qrCode)
         }
     }
 
@@ -152,7 +144,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     override fun setOnCloseButtonListener() {
-        binding.closeButton.setOnClickListener { viewModel.closeScanner() }
+        setOnCloseButtonAction { viewModel.closeScanner() }
     }
 
     override fun onPermissionNotGranted() {
@@ -160,6 +152,9 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     companion object {
+        @JvmStatic
+        fun newInstance() = WalletConnectScannerFragment()
+
         const val PEEK_HEIGHT = 240
         const val DEFAULT_MARGIN = 32f
         const val INCREASED_MARGIN = 115f

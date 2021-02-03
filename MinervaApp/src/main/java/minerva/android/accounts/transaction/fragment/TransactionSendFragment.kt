@@ -19,6 +19,7 @@ import minerva.android.R
 import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.fragment.adapter.RecipientAdapter
 import minerva.android.accounts.transaction.fragment.adapter.TokenAdapter
+import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.databinding.FragmentTransactionSendBinding
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
@@ -310,7 +311,7 @@ class TransactionSendFragment : Fragment() {
 
     private fun setGetAllBalanceListener() {
         binding.receiver.onRightDrawableClicked {
-            listener.showScanner()
+            listener.showScanner(AddressScannerFragment.newInstance(viewModel.accountIndex))
         }
     }
 

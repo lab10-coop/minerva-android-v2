@@ -10,10 +10,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.budiyev.android.codescanner.AutoFocusMode
 import com.budiyev.android.codescanner.CodeScanner
+import com.budiyev.android.codescanner.DecodeCallback
+import com.budiyev.android.codescanner.ErrorCallback
 import com.budiyev.android.codescanner.ScanMode
 import com.google.zxing.BarcodeFormat
 import minerva.android.R
 import minerva.android.databinding.FragmentScannerBinding
+import minerva.android.extension.visible
 import minerva.android.kotlinUtils.function.orElse
 import java.lang.Exception
 
@@ -47,6 +50,24 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
         super.onPause()
     }
 
+    fun setupCallbackAction(action: (text: String) -> Unit) {
+        codeScanner.apply {
+            decodeCallback = DecodeCallback { result ->
+                requireActivity().runOnUiThread {
+                    if (shouldScan) {
+                        binding.scannerProgressBar.visible()
+                        action(result.text)
+                    }
+                }
+            }
+            errorCallback = ErrorCallback { handleCameraError(it) }
+        }
+    }
+
+    fun setOnCloseButtonAction(action: () -> Unit) {
+        binding.closeButton.setOnClickListener { action() }
+    }
+
     private fun setupCodeScanner() {
         CodeScanner(requireActivity(), binding.scanner).apply {
             codeScanner = this
@@ -73,7 +94,6 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
             Toast.makeText(context, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
         }
     }
-
 
     private fun startCameraPreview() {
         //delay to wait when camera is active, enables smooth animations
