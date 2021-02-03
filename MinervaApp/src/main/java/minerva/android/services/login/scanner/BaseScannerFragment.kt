@@ -26,7 +26,7 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
     private var isPermissionGranted = false
     var shouldScan = true
     lateinit var codeScanner: CodeScanner
-    abstract fun setOnCloseButtonListener()
+    abstract fun onCloseButtonAction()
     abstract fun onPermissionNotGranted()
     abstract fun setupCallbacks()
 
@@ -36,7 +36,7 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
         setupCodeScanner()
         setupCallbacks()
         checkCameraPermission()
-        setOnCloseButtonListener()
+        setOnCloseButtonAction()
     }
 
     override fun onResume() {
@@ -56,6 +56,7 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
                         binding.scannerProgressBar.visible()
+                        setupCallbacks()
                         action(result.text)
                     }
                 }
@@ -64,8 +65,8 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
         }
     }
 
-    fun setOnCloseButtonAction(action: () -> Unit) {
-        binding.closeButton.setOnClickListener { action() }
+    private fun setOnCloseButtonAction() {
+        binding.closeButton.setOnClickListener { onCloseButtonAction() }
     }
 
     private fun setupCodeScanner() {

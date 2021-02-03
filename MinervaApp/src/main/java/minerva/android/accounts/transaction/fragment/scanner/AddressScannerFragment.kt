@@ -44,8 +44,8 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
         }
     }
 
-    override fun setOnCloseButtonListener() {
-        setOnCloseButtonAction { listener.onBackPressed() }
+    override fun onCloseButtonAction() {
+        listener.onBackPressed()
     }
 
     override fun onPermissionNotGranted() {

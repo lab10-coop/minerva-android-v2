@@ -143,8 +143,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    override fun setOnCloseButtonListener() {
-        setOnCloseButtonAction { viewModel.closeScanner() }
+    override fun onCloseButtonAction() {
+        viewModel.closeScanner()
     }
 
     override fun onPermissionNotGranted() {

@@ -14,11 +14,7 @@ class TokenAddressScannerFragment : BaseScannerFragment() {
         listener = context as AddressScannerListener
     }
 
-    override fun setOnCloseButtonListener() {
-        setOnCloseButtonAction {
-            listener.onBackPressed()
-        }
-    }
+    override fun onCloseButtonAction() { listener.onBackPressed() }
 
     override fun onPermissionNotGranted() {
         listener.onBackPressed()

@@ -82,10 +82,8 @@ class LoginScannerFragment : BaseScannerFragment() {
         Handler().postDelayed({ listener.showChooseIdentityFragment(qrCodeCode) }, DELAY)
     }
 
-    override fun setOnCloseButtonListener() {
-        close_button.setOnClickListener {
-            listener.onBackPressed()
-        }
+    override fun onCloseButtonAction() {
+        close_button.setOnClickListener { listener.onBackPressed() }
     }
 
     override fun onPermissionNotGranted() {
