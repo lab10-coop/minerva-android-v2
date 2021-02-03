@@ -119,10 +119,10 @@ class MainViewModel(
                     when (it) {
                         is OnEthSign -> {
                             walletConnectRepository.getDappSessionById(it.peerId)
-                                .map { session -> Pair(getFormattedMessage(it), session) }
+                                .map { session -> Pair(it.message, session) }
                         }
                         else -> Single.just(Pair(String.Empty, null))
-                        //todo add mapping to walletConnectViewState and handle other connection states
+                        //todo add mapping to walletConnectViewState and handle other connection states to avoid ifs
                     }
                 }
                 .subscribeOn(Schedulers.io())
@@ -136,25 +136,12 @@ class MainViewModel(
         }
     }
 
-    private fun getFormattedMessage(it: OnEthSign) =
-        if (isJSONValid(it.message)) {
-            JSONObject(it.message).toString(3)
-        } else {
-            it.message
-        }
 
-    private fun isJSONValid(test: String): Boolean { //todo add as String extension
-        try {
-            JSONObject(test)
-        } catch (ex: JSONException) {
-            try {
-                JSONArray(test)
-            } catch (ex1: JSONException) {
-                return false
-            }
-        }
-        return true
-    }
+
+
+
+
+
 
 
     fun subscribeToExecutedTransactions(accountIndex: Int) {

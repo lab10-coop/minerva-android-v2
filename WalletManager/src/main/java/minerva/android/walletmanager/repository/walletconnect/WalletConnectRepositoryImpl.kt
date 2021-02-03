@@ -14,12 +14,16 @@ import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.*
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.*
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
+import minerva.android.walletConnect.utils.getFormattedMessage
 import minerva.android.walletConnect.utils.hexToUtf8
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.Topic
 import minerva.android.walletmanager.model.WalletConnectSession
 import minerva.android.walletmanager.model.mappers.*
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 import timber.log.Timber
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
@@ -89,8 +93,8 @@ class WalletConnectRepositoryImpl(
 
             onEthSign = { _, message, peerId ->
                 val data: String = when (message.type) {
-                    PERSONAL_MESSAGE -> message.data.hexToUtf8()
-                    MESSAGE, TYPED_MESSAGE -> message.data
+                    PERSONAL_MESSAGE -> message.data.hexToUtf8
+                    MESSAGE, TYPED_MESSAGE -> message.data.getFormattedMessage
                 }
                 status.onNext(OnEthSign(data, peerId))
             }
