@@ -28,6 +28,7 @@ class MainViewModelTest : BaseViewModelTest() {
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
     private val transactionRepository: TransactionRepository = mock()
+
     private val walletConnectRepository: WalletConnectRepository = mock()
     private lateinit var viewModel: MainViewModel
 
@@ -189,14 +190,7 @@ class MainViewModelTest : BaseViewModelTest() {
     @Test
     fun `subscribe to executed transactions success`() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
-        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(
-            Flowable.just(
-                PendingAccount(
-                    1,
-                    "123"
-                )
-            )
-        )
+        whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.just(PendingAccount(1, "123")))
         whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
             updatePendingAccountLiveData.observeForever(updatePendingAccountObserver)
@@ -291,5 +285,12 @@ class MainViewModelTest : BaseViewModelTest() {
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
+    }
+
+    @Test
+    fun `Checking token icons updating works fine` () {
+        whenever(transactionRepository.updateTokenIcons()).thenReturn(Completable.complete())
+        viewModel.updateTokenIcons()
+        verify(transactionRepository, times(1)).updateTokenIcons()
     }
 }

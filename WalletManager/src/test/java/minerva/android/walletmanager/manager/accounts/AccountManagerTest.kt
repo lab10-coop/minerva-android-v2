@@ -327,9 +327,9 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `get free ats timestamp visibility test`() {
-        whenever(localStorage.getLastFreeATSTimestamp()).thenReturn(0L)
+        whenever(localStorage.loadLastFreeATSTimestamp()).thenReturn(0L)
         manager.getLastFreeATSTimestamp()
-        verify(localStorage).getLastFreeATSTimestamp()
+        verify(localStorage).loadLastFreeATSTimestamp()
     }
 
     @Test

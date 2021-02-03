@@ -30,8 +30,15 @@ class WalletConnectRepositoryImpl(
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
 
-    private val dappDao = minervaDatabase.dappDao()
+    override val isClientMapEmpty: Boolean
+        get() = clientMap.isEmpty()
+
+    override val walletConnectClients: ConcurrentHashMap<String, WCClient>
+        get() = clientMap
+
     private var disposable: Disposable? = null
+
+    private val dappDao = minervaDatabase.dappDao()
 
     override fun saveDappSession(dappSession: DappSession): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
@@ -94,12 +101,6 @@ class WalletConnectRepositoryImpl(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(onError = { Timber.e(it) })
     }
-
-    override val isClientMapEmpty: Boolean
-        get() = clientMap.isEmpty()
-
-    override val walletConnectClients: ConcurrentHashMap<String, WCClient>
-        get() = clientMap
 
     override fun getWCSessionFromQr(qrCode: String): WalletConnectSession =
         WCSessionToWalletConnectSessionMapper.map(WCSession.from(qrCode))

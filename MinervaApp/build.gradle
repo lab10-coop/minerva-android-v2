@@ -36,7 +36,6 @@ android {
         buildConfigField "String", "TELEGRAM_WEB", '"https://web.telegram.org/#/im?p=@MinervaWallet"'
         buildConfigField "String", "PRIVACY_POLICY", '"https://docs.minerva.digital/legal/privacy"'
         buildConfigField "String", "TERMS_OF_SERVICE", '"https://docs.minerva.digital/legal/terms"'
-        buildConfigField "String", "ERC20_TOKEN_DATA_URL", '"https://raw.githubusercontent.com/lab10-coop/minerva-tokenlists/master/all.json"'
     }
 
     signingConfigs {
@@ -59,8 +58,8 @@ android {
     productFlavors {
         flavorDimensions 'enviroment'
         staging {
-            versionCode 11
-            versionName "1.0.11"
+            versionCode 12
+            versionName "1.0.12"
             dimension 'enviroment'
             applicationIdSuffix ".staging"
             versionNameSuffix '-staging'
@@ -75,7 +74,6 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/core.kotlin_module'
         exclude("META-INF/*.kotlin_module")
     }
 

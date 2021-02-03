@@ -9,27 +9,36 @@ import java.util.*
 object DateUtils {
     const val DATE_FORMAT = "dd.MM.yyyy"
     const val SHORT_DATE_FORMAT = "MM/yyyy"
+    private const val ISO_8601 = "yyyy-MM-dd'T'HH:mm:ssX"
     private const val DATE_WITH_TIME_FORMAT = "dd.MM.yyyy hh:mm"
     private const val TIME_FORMAT = "hh:mm"
 
-    fun getDateWithTimeFromTimestamp(dateInMillis: Long = timestamp): String =
+    fun getDateWithTimeFromTimestamp(dateInMillis: Long = timestamp, timeZone: TimeZone = TimeZone.getDefault()): String =
         SimpleDateFormat(
             DATE_WITH_TIME_FORMAT,
             Locale.getDefault()
-        ).format(Date(dateInMillis))
+        ).run {
+            this.timeZone = timeZone
+            format(dateInMillis.toMilliseconds())
+        }
 
-
-    fun getDateFromTimestamp(timestamp: Long, format: String): String =
+    fun getDateFromTimestamp(timestamp: Long, format: String = DATE_FORMAT): String =
         SimpleDateFormat(
             format,
             Locale.getDefault()
-        ).format(Date(timestamp.toMilliseconds()))
+        ).format(timestamp.toMilliseconds())
 
-    fun getTimeFromTimeStamp(time: Long = timestamp): String =
+    fun getTimeFromTimeStamp(time: Long = timestamp, timeZone: TimeZone = TimeZone.getDefault()): String =
         SimpleDateFormat(
             TIME_FORMAT,
             Locale.getDefault()
-        ).format(Date(time))
+        ).run {
+            this.timeZone = timeZone
+            format(time.toMilliseconds())
+        }
+
+    fun getTimestampFromDate(date: String, format: String = ISO_8601): Long =
+        SimpleDateFormat(format).parse(date).time
 
     val timestamp get() = (System.currentTimeMillis() / DateTimeConstants.MILLIS_PER_SECOND) * 1000L
 

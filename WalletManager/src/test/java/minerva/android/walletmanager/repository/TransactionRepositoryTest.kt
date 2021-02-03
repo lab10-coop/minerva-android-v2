@@ -1,9 +1,6 @@
 package minerva.android.walletmanager.repository
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -709,5 +706,12 @@ class TransactionRepositoryTest : RxTest() {
         whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(false)
         val result = repository.isAddressValid("123455")
         assertEquals(false, result)
+    }
+
+    @Test
+    fun `Checking token icon updates` () {
+        whenever(tokenManager.updateTokenIcons()).thenReturn(Completable.complete())
+        repository.updateTokenIcons()
+        verify(tokenManager, times(1)).updateTokenIcons()
     }
 }

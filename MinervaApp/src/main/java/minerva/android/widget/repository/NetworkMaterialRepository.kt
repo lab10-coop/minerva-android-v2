@@ -40,7 +40,8 @@ private fun getMainIcon(networkShort: String): Int =
 
 fun getMainTokenIconRes(networkShort: String): Int =
     when (networkShort) {
-        ATS_TAU, ATS_SIGMA -> R.drawable.ic_tats
+        ATS_TAU -> R.drawable.ic_tats
+        ATS_SIGMA -> R.drawable.ic_sigma_one
         POA_SKL -> R.drawable.ic_poa
         LUKSO_14 -> R.drawable.ic_lukso
         ETH_CLASSIC_KOTTI -> R.drawable.ic_ethereum_classic

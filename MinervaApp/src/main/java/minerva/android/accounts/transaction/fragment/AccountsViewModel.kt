@@ -130,11 +130,8 @@ class AccountsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        _dappSessions.value = if (it.isNotEmpty()) {
-                            it
-                        } else {
-                            accountManager.getAllAccounts()
-                        }
+                        _dappSessions.value = if (it.isNotEmpty()) it
+                        else accountManager.getAllAccounts()
                     },
                     onError = { _errorLiveData.value = Event(it) }
                 )

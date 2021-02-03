@@ -80,11 +80,16 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         sharedPreferences.edit().remove(PENDING_ACCOUNTS).apply()
     }
 
-    override fun getLastFreeATSTimestamp(): Long = sharedPreferences.getLong(FREE_ATS_TIMESTAMP, Long.InvalidValue)
+    override fun loadLastFreeATSTimestamp(): Long = sharedPreferences.getLong(FREE_ATS_TIMESTAMP, Long.InvalidValue)
 
     override fun saveFreeATSTimestamp(timestamp: Long) {
         sharedPreferences.edit().putLong(FREE_ATS_TIMESTAMP, timestamp).apply()
     }
+
+    override fun saveTokenIconsUpdateTimestamp(timestamp: Long) =
+        sharedPreferences.edit().putLong(ICON_UPDATE_TIMESTAMP, timestamp).apply()
+
+    override fun loadTokenIconsUpdateTimestamp(): Long = sharedPreferences.getLong(ICON_UPDATE_TIMESTAMP, Long.InvalidValue)
 
     override fun getProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
 
@@ -110,5 +115,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val PENDING_ACCOUNTS = "pending_accounts"
         private const val ASSET_VISIBILITY_SETTINGS = "asset_visibility_settings"
         private const val FREE_ATS_TIMESTAMP = "free_ats_timestamp"
+        private const val ICON_UPDATE_TIMESTAMP = "last_update_timestamp"
     }
 }

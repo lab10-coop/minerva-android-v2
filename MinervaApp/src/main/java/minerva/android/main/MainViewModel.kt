@@ -174,7 +174,6 @@ class MainViewModel(
         }
     }
 
-
     private fun handleExecutedAccounts(it: PendingAccount) {
         if (_updatePendingAccountLiveData.hasActiveObservers()) {
             transactionRepository.removePendingAccount(it)
@@ -277,6 +276,18 @@ class MainViewModel(
     fun getReplaceLabelRes(qrCode: CredentialQrCode): Int =
         if (serviceManager.isMoreCredentialToBind(qrCode)) R.string.replace_all
         else R.string.replace
+
+    fun updateTokenIcons() {
+        launchDisposable {
+            transactionRepository.updateTokenIcons()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = { Timber.e("Checking last token icons update failed: ${it.message}") }
+                )
+        }
+
+    }
 
     private fun saveWalletAction(walletAction: WalletAction, error: Throwable? = null) {
         launchDisposable {

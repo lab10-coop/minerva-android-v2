@@ -124,7 +124,7 @@ class AccountManagerImpl(
     }
 
     override fun getLastFreeATSTimestamp(): Long =
-        localStorage.getLastFreeATSTimestamp()
+        localStorage.loadLastFreeATSTimestamp()
 
     override fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings =
         localStorage.saveTokenVisibilitySettings(settings)
