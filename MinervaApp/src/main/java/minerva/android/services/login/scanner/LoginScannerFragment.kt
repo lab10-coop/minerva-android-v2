@@ -66,7 +66,7 @@ class LoginScannerFragment : BaseScannerFragment() {
     }
 
     override fun onCloseButtonAction() {
-        binding.closeButton.setOnClickListener { listener.onBackPressed() }
+        listener.onBackPressed()
     }
 
     override fun onPermissionNotGranted() {
