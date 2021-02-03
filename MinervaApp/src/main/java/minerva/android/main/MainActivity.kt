@@ -104,10 +104,13 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun prepareObservers() {
         viewModel.apply {
             walletConnectStatus.observe(this@MainActivity, Observer { (message, session) ->
-                DappSignMessageDialog(this@MainActivity).apply {
-                    session?.let { setContent(message, it) }
-                    show()
-                }
+                DappSignMessageDialog(this@MainActivity, {
+                    viewModel.acceptRequest()
+                }, { viewModel.rejectRequest() })
+                    .apply {
+                        session?.let { setContent(message, it) }
+                        show()
+                    }
             })
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
                 Toast.makeText(this@MainActivity, getString(R.string.not_existed_identity_message), Toast.LENGTH_LONG)

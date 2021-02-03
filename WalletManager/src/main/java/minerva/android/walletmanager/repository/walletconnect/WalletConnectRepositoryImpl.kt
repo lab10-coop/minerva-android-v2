@@ -9,7 +9,11 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.blockchainprovider.repository.signature.SignatureRepository
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletConnect.client.WCClient
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.*
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.*
 import minerva.android.walletConnect.model.session.WCPeerMeta
@@ -27,14 +31,18 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import java.security.PrivateKey
 import java.util.concurrent.ConcurrentHashMap
 
 class WalletConnectRepositoryImpl(
+    private val signatureRepository: SignatureRepository,
     minervaDatabase: MinervaDatabase,
     private var wcClient: WCClient = WCClient(),
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
 
+    private var currentRequestId: Long = Long.InvalidValue
+    private lateinit var currentEthMessage: WCEthereumSignMessage
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
@@ -91,7 +99,9 @@ class WalletConnectRepositoryImpl(
                 status.onNext(OnDisconnect(code, peerId))
             }
 
-            onEthSign = { _, message, peerId ->
+            onEthSign = { id, message, peerId ->
+                currentRequestId = id
+                currentEthMessage = message
                 val data: String = when (message.type) {
                     PERSONAL_MESSAGE -> message.data.hexToUtf8
                     MESSAGE, TYPED_MESSAGE -> message.data.getFormattedMessage
@@ -132,6 +142,17 @@ class WalletConnectRepositoryImpl(
             this[peerId]?.rejectSession()
             remove(peerId)
         }
+    }
+
+    override fun approveRequest(peerId: String, privateKey: String) {
+        clientMap[peerId]?.approveRequest(
+            currentRequestId,
+            signatureRepository.signData(currentEthMessage.data, privateKey)
+        )
+    }
+
+    override fun rejectRequest(peerId: String) {
+        clientMap[peerId]?.rejectRequest(currentRequestId)
     }
 
     override fun killAllAccountSessions(address: String): Completable =

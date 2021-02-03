@@ -12,7 +12,8 @@ import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSignMessageDialogBinding
 import minerva.android.walletmanager.model.DappSession
 
-class DappSignMessageDialog(context: Context) : BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
+class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
+    BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
 
     private val binding = DappSignMessageDialogBinding.inflate(layoutInflater)
     private val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
@@ -23,11 +24,11 @@ class DappSignMessageDialog(context: Context) : BottomSheetDialog(context, R.sty
 
         with(binding) {
             cancel.setOnClickListener {
-//                deny()
+                deny()
                 dismiss()
             }
             connect.setOnClickListener {
-//                approve()
+                approve()
                 dismiss()
             }
 
@@ -43,7 +44,7 @@ class DappSignMessageDialog(context: Context) : BottomSheetDialog(context, R.sty
         }
         setOnKeyListener { _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-//                deny()
+                deny()
                 dismiss()
             }
             true

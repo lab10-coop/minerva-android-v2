@@ -130,7 +130,11 @@ class BlockchainRegularAccountRepositoryImpl(
             loadERC20(privateKey, network, tokenAddress, it).symbol().flowable()
         }.toObservable()
 
-    override fun getERC20TokenDecimals(privateKey: String, network: String, tokenAddress: String): Observable<BigInteger> =
+    override fun getERC20TokenDecimals(
+        privateKey: String,
+        network: String,
+        tokenAddress: String
+    ): Observable<BigInteger> =
         getChainId(network).flatMap {
             loadERC20(privateKey, network, tokenAddress, it).decimals().flowable()
         }.toObservable()
@@ -165,11 +169,11 @@ class BlockchainRegularAccountRepositoryImpl(
 
     override fun transferERC20Token(network: String, payload: TransactionPayload): Completable =
         getChainId(network).flatMapCompletable {
-                loadERC20(payload.privateKey, network, payload.contractAddress, it)
-                    .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
-                    .flowable()
-                    .ignoreElements()
-            }
+            loadERC20(payload.privateKey, network, payload.contractAddress, it)
+                .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
+                .flowable()
+                .ignoreElements()
+        }
 
     override fun getTransactionCosts(
         network: String,
@@ -246,7 +250,11 @@ class BlockchainRegularAccountRepositoryImpl(
             String.Empty
         )
 
-    private fun handleGasLimit(network: String, it: EthEstimateGas, gasPrice: BigDecimal?): Single<TransactionCostPayload> {
+    private fun handleGasLimit(
+        network: String,
+        it: EthEstimateGas,
+        gasPrice: BigDecimal?
+    ): Single<TransactionCostPayload> {
         val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(network, gasLimit, gasPrice)
     }

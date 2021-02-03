@@ -80,6 +80,8 @@ class MainViewModel(
     val executedAccounts = mutableListOf<PendingAccount>()
     private var webSocketSubscriptions = CompositeDisposable()
 
+    lateinit var currentDappSession: DappSession
+
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
     fun dispose() {
@@ -119,7 +121,10 @@ class MainViewModel(
                     when (it) {
                         is OnEthSign -> {
                             walletConnectRepository.getDappSessionById(it.peerId)
-                                .map { session -> Pair(it.message, session) }
+                                .map { session ->
+                                    currentDappSession = session
+                                    Pair(it.message, session)
+                                }
                         }
                         else -> Single.just(Pair(String.Empty, null))
                         //todo add mapping to walletConnectViewState and handle other connection states to avoid ifs
@@ -129,21 +134,27 @@ class MainViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = { (message, session) ->
-                        if (session != null) _walletConnectStatus.value = Pair(message, session)
+                        if (session != null) {
+                            _walletConnectStatus.value = Pair(message, session)
+                        }
                     },
                     onError = { Timber.e(it) }
                 )
         }
     }
 
+    fun acceptRequest() {
+        val privateKey = transactionRepository.getAccountByAddress(currentDappSession.address)?.privateKey
+        privateKey?.let {
+            walletConnectRepository.approveRequest(currentDappSession.peerId, it)
+        }
+    }
 
+    fun rejectRequest() {
+        walletConnectRepository.rejectRequest(currentDappSession.peerId)
+    }
 
-
-
-
-
-
-
+    //----------
     fun subscribeToExecutedTransactions(accountIndex: Int) {
         if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {
             webSocketSubscriptions.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)
