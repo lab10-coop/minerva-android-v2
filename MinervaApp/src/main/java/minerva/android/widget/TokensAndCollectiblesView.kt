@@ -79,11 +79,13 @@ class TokensAndCollectiblesView(
     private fun initTokensList() {
         binding.apply {
             tokensContainer.removeAllViews()
-            account.accountTokens.forEachIndexed { index, _ ->
-                tokensContainer.addView(TokenView(context).apply {
-                    initView(account, callback, index)
-                })
-            }
+            account.accountTokens
+                .sortedByDescending { it.balance }
+                .forEachIndexed { index, _ ->
+                    tokensContainer.addView(TokenView(context).apply {
+                        initView(account, callback, index)
+                    })
+                }
         }
     }
 
