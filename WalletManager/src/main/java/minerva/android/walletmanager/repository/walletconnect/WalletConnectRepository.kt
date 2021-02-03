@@ -30,4 +30,5 @@ interface WalletConnectRepository {
     fun getSessions(): Single<List<DappSession>>
     fun killAllAccountSessions(address: String): Completable
     fun dispose()
+    fun getDappSessionById(peerId: String): Single<DappSession>
 }

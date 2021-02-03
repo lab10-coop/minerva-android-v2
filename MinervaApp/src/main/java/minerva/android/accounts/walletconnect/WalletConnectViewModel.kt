@@ -132,7 +132,8 @@ class WalletConnectViewModel(
         topic.peerId,
         topic.remotePeerId,
         requestedNetwork,
-        account.name
+        account.name,
+        account.network.short
     )
 
     private fun getIcon(icons: List<String>) =

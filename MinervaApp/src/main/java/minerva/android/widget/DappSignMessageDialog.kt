@@ -4,11 +4,13 @@ import android.content.Context
 import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
 import android.view.KeyEvent
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.labeled_text_view.view.*
 import minerva.android.R
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSignMessageDialogBinding
+import minerva.android.walletmanager.model.DappSession
 
 class DappSignMessageDialog(context: Context) : BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
 
@@ -48,8 +50,13 @@ class DappSignMessageDialog(context: Context) : BottomSheetDialog(context, R.sty
         }
     }
 
-    fun setContent(text: String) = with(binding) {
+    fun setContent(text: String, session: DappSession) = with(binding) {
         message.setTitleAndBody(context.getString(R.string.message), text)
-        accountType.setNetwork("Ethereum", "0x123456789")
+        accountType.setNetwork(session)
+        networkHeader.name.text = session.name
+        networkHeader.network.text = session.networkName
+        Glide.with(binding.root.context)
+            .load(session.iconUrl)
+            .into(networkHeader.icon)
     }
 }

@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
@@ -34,13 +33,10 @@ import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.repository.walletconnect.OnEthSign
 import minerva.android.widget.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
-import org.json.JSONObject
 import org.koin.android.ext.android.inject
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
@@ -106,9 +102,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     private fun prepareObservers() {
         viewModel.apply {
-            walletConnectStatus.observe(this@MainActivity, Observer {
+            walletConnectStatus.observe(this@MainActivity, Observer { (message, session) ->
                 DappSignMessageDialog(this@MainActivity).apply {
-                    setContent(it)
+                    session?.let { setContent(message, it) }
                     show()
                 }
             })

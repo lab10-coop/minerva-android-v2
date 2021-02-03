@@ -2,6 +2,7 @@ package minerva.android.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import io.reactivex.Single
 import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -9,6 +10,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.R
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginUtils
@@ -27,7 +29,6 @@ import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.OnEthSign
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectStatus
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.json.JSONArray
 import org.json.JSONException
@@ -73,8 +74,8 @@ class MainViewModel(
     private val _handleTimeoutOnPendingTransactionsLiveData = MutableLiveData<Event<List<PendingAccount>>>()
     val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
 
-    private val _walletConnectStatus = MutableLiveData<String>()
-    val walletConnectStatus: LiveData<String> get() = _walletConnectStatus
+    private val _walletConnectStatus = MutableLiveData<Pair<String, DappSession?>>()
+    val walletConnectStatus: LiveData<Pair<String, DappSession?>> get() = _walletConnectStatus
 
     val executedAccounts = mutableListOf<PendingAccount>()
     private var webSocketSubscriptions = CompositeDisposable()
@@ -114,27 +115,35 @@ class MainViewModel(
     private fun subscribeToWalletConnectEvents() {
         launchDisposable {
             walletConnectRepository.connectionStatusFlowable
+                .flatMapSingle {
+                    when (it) {
+                        is OnEthSign -> {
+                            walletConnectRepository.getDappSessionById(it.peerId)
+                                .map { session -> Pair(getFormattedMessage(it), session) }
+                        }
+                        else -> Single.just(Pair(String.Empty, null))
+                        //todo add mapping to walletConnectViewState and handle other connection states
+                    }
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onNext = {
-                        if (it is OnEthSign) {
-                            if (isJSONValid(it.message)) {
-                                val json = JSONObject(it.message)
-                                _walletConnectStatus.value = json.toString(3)
-                            } else {
-                                _walletConnectStatus.value = it.message
-                            }
-
-
-                        }
+                    onNext = { (message, session) ->
+                        if (session != null) _walletConnectStatus.value = Pair(message, session)
                     },
                     onError = { Timber.e(it) }
                 )
         }
     }
 
-    private fun isJSONValid(test: String): Boolean {
+    private fun getFormattedMessage(it: OnEthSign) =
+        if (isJSONValid(it.message)) {
+            JSONObject(it.message).toString(3)
+        } else {
+            it.message
+        }
+
+    private fun isJSONValid(test: String): Boolean { //todo add as String extension
         try {
             JSONObject(test)
         } catch (ex: JSONException) {
@@ -146,6 +155,7 @@ class MainViewModel(
         }
         return true
     }
+
 
     fun subscribeToExecutedTransactions(accountIndex: Int) {
         if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {

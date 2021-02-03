@@ -3,6 +3,7 @@ package minerva.android.walletConnect.utils
 import minerva.android.walletConnect.model.exceptions.InvalidHmacException
 import minerva.android.walletConnect.model.session.WCEncryptionPayload
 import java.security.SecureRandom
+import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.Mac
 import javax.crypto.spec.IvParameterSpec
@@ -37,13 +38,9 @@ object WCCipher {
         val data = payload.data.toByteArray()
         val iv = payload.iv.toByteArray()
 
-        val computedHmac = computeHmac(
-            data = data,
-            iv = iv,
-            key = key
-        )
+        val computedHmac = computeHmac(data = data, iv = iv, key = key)
 
-        if (computedHmac != payload.hmac.toLowerCase()) {
+        if (computedHmac != payload.hmac.toLowerCase(Locale.ROOT)) {
             throw InvalidHmacException()
         }
 

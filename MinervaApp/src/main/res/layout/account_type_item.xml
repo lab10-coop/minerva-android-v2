@@ -32,11 +32,13 @@
 
     <TextView
         android:id="@+id/address"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_xxxsmall"
         android:layout_marginEnd="@dimen/margin_xxsmall"
+        android:ellipsize="middle"
         android:fontFamily="@font/rubik_regular"
+        android:singleLine="true"
         android:textColor="@color/borderGray"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintLeft_toLeftOf="@id/accountName"

@@ -9,8 +9,6 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import minerva.android.kotlinUtils.event.Event
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
@@ -33,6 +31,7 @@ class WalletConnectRepositoryImpl(
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
 
     private val dappDao = minervaDatabase.dappDao()
+    private var disposable: Disposable? = null
 
     override fun saveDappSession(dappSession: DappSession): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
@@ -41,16 +40,18 @@ class WalletConnectRepositoryImpl(
         dappDao.delete(peerId)
 
     override fun getSessions(): Single<List<DappSession>> =
-        dappDao.getAll().firstOrError().map { EntityToDappSessionMapper.map(it) }
+        dappDao.getAll().firstOrError().map { EntitiesToDappSessionsMapper.map(it) }
 
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
-        dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
+        dappDao.getAll().map { EntitiesToDappSessionsMapper.map(it) }
 
-    private var disposable: Disposable? = null
+    override fun getDappSessionById(peerId: String): Single<DappSession> =
+        dappDao.getDapSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
 
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?) {
         wcClient = WCClient()
         with(wcClient) {
+
             onWCOpen = { peerId -> clientMap[peerId] = this }
 
             onSessionRequest = { remotePeerId, meta, chainId, peerId ->
@@ -75,7 +76,7 @@ class WalletConnectRepositoryImpl(
             }
 
             onEthSign = { id, message, peerId ->
-                status.onNext(OnEthSign(message.raw[1]))
+                status.onNext(OnEthSign(message.raw[1], peerId)) //todo get encrypted persolan message
             }
 
             connect(
