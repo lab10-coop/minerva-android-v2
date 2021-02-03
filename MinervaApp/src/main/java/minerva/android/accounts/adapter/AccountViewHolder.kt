@@ -124,7 +124,10 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun PopupMenu.setMenuItems(account: Account) {
         with(menu) {
-            findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
+            isCreatingSafeAccountAvailable(account).let {
+                findItem(R.id.addSafeAccount).isVisible = it
+                findItem(R.id.exportPrivateKey).isVisible = it
+            }
             findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
             if (account.dappSessionCount != 0) {
                 findItem(R.id.walletConnect).title =
@@ -190,6 +193,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 R.id.manageTokens -> listener.onManageTokens(index)
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
+                R.id.exportPrivateKey -> listener.onExportPrivateKey(account)
                 R.id.remove -> listener.onAccountRemoved(index)
             }
             true

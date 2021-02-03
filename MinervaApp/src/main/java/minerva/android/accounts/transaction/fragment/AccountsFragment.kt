@@ -1,6 +1,7 @@
 package minerva.android.accounts.transaction.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -84,6 +85,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onManageTokens(index: Int) =
         startManageAssetsWrappedActivity(requireContext(), index)
+
+    override fun onExportPrivateKey(account: Account) {
+        Log.e("klop", "Showing private key for ${account.name} N O W !")
+    }
 
     override fun isTokenVisible(networkAddress: String, tokenAddress: String): Boolean? =
         viewModel.isTokenVisible(networkAddress, tokenAddress)
