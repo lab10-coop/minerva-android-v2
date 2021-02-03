@@ -22,8 +22,11 @@ interface LocalStorage {
     fun removePendingAccount(pendingAccount: PendingAccount)
     fun clearPendingAccounts()
 
-    fun getLastFreeATSTimestamp(): Long
+    fun loadLastFreeATSTimestamp(): Long
     fun saveFreeATSTimestamp(timestamp: Long)
+
+    fun saveTokenIconsUpdateTimestamp(timestamp: Long)
+    fun loadTokenIconsUpdateTimestamp(): Long
 
     var isBackupAllowed: Boolean
     var isSynced: Boolean

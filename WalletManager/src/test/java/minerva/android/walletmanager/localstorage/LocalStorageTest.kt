@@ -3,8 +3,8 @@ package minerva.android.walletmanager.localstorage
 import android.content.SharedPreferences
 import io.mockk.*
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.walletmanager.model.TokenVisibilitySettings
 import minerva.android.walletmanager.model.Recipient
+import minerva.android.walletmanager.model.TokenVisibilitySettings
 import minerva.android.walletmanager.storage.LocalStorageImpl
 import org.junit.Test
 
@@ -127,10 +127,10 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `save last free ATS timetamp` () {
+    fun `save last free ATS timestamp` () {
         val timestamp = 333L
         localStorage.saveFreeATSTimestamp(timestamp)
-        every { localStorage.getLastFreeATSTimestamp() } returns timestamp
+        every { localStorage.loadLastFreeATSTimestamp() } returns timestamp
         verify {
             sharedPref.edit().putLong(any(), any()).apply()
         }
@@ -139,7 +139,26 @@ class LocalStorageTest {
 
     @Test
     fun `load last free ATS timestamp` () {
-        localStorage.getLastFreeATSTimestamp()
+        localStorage.loadLastFreeATSTimestamp()
+        verify {
+            sharedPref.getLong(any(), Long.InvalidValue)
+        }
+    }
+
+    @Test
+    fun `save token icons update timestamp` () {
+        val timestamp = 333L
+        localStorage.saveTokenIconsUpdateTimestamp(timestamp)
+        every { localStorage.loadTokenIconsUpdateTimestamp()} returns timestamp
+        verify {
+            sharedPref.edit().putLong(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
+    }
+
+    @Test
+    fun `load token icons update timestamp` () {
+        localStorage.loadTokenIconsUpdateTimestamp()
         verify {
             sharedPref.getLong(any(), Long.InvalidValue)
         }
