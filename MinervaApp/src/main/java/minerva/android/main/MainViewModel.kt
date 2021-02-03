@@ -25,9 +25,13 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPD
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.repository.walletconnect.OnEthSign
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectStatus
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 import timber.log.Timber
 
 class MainViewModel(
@@ -69,8 +73,8 @@ class MainViewModel(
     private val _handleTimeoutOnPendingTransactionsLiveData = MutableLiveData<Event<List<PendingAccount>>>()
     val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
 
-    private val _walletConnectStatus = MutableLiveData<WalletConnectStatus>()
-    val walletConnectStatus: LiveData<WalletConnectStatus> get() = _walletConnectStatus
+    private val _walletConnectStatus = MutableLiveData<String>()
+    val walletConnectStatus: LiveData<String> get() = _walletConnectStatus
 
     val executedAccounts = mutableListOf<PendingAccount>()
     private var webSocketSubscriptions = CompositeDisposable()
@@ -114,12 +118,33 @@ class MainViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = {
-                        Timber.tag("kobe").d("on next")
-                        _walletConnectStatus.value = it
+                        if (it is OnEthSign) {
+                            if (isJSONValid(it.message)) {
+                                val json = JSONObject(it.message)
+                                _walletConnectStatus.value = json.toString(3)
+                            } else {
+                                _walletConnectStatus.value = it.message
+                            }
+
+
+                        }
                     },
                     onError = { Timber.e(it) }
                 )
         }
+    }
+
+    private fun isJSONValid(test: String): Boolean {
+        try {
+            JSONObject(test)
+        } catch (ex: JSONException) {
+            try {
+                JSONArray(test)
+            } catch (ex1: JSONException) {
+                return false
+            }
+        }
+        return true
     }
 
     fun subscribeToExecutedTransactions(accountIndex: Int) {

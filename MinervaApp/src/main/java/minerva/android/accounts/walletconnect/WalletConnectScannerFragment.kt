@@ -17,6 +17,7 @@ import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.walletmanager.exception.InvalidAccountException
 import minerva.android.walletmanager.model.WalletConnectPeerMeta
+import minerva.android.widget.DappConfirmationDialog
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {

@@ -1,14 +1,14 @@
-package minerva.android.accounts.walletconnect
+package minerva.android.widget
 
 import android.content.Context
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import minerva.android.R
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogBinding
+import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.WalletConnectPeerMeta
@@ -16,14 +16,15 @@ import minerva.android.walletmanager.model.WalletConnectPeerMeta
 class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
     BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
 
-    private val binding: DappConfirmationDialogBinding =
-        DappConfirmationDialogBinding.inflate(LayoutInflater.from(context))
+    private val binding: DappConfirmationDialogBinding = DappConfirmationDialogBinding.inflate(layoutInflater)
+    private val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
 
     init {
         setContentView(binding.root)
         setCancelable(false)
+        binding.confirmationView.hideRequestedData()
+
         with(binding) {
-            confirmationView.hideRequestedData()
             cancel.setOnClickListener {
                 deny()
                 dismiss()
@@ -33,6 +34,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                 dismiss()
             }
         }
+
         setOnKeyListener { _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 deny()
@@ -42,11 +44,12 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
+
     fun setView(meta: WalletConnectPeerMeta) = with(binding) {
         Glide.with(context)
             .load(getIcon(meta))
-            .into(icon)
-        name.text = meta.name
+            .into(networkHeader.icon)
+        networkHeader.name.text = meta.name
     }
 
     private fun DappConfirmationDialogBinding.getIcon(meta: WalletConnectPeerMeta): Any =
@@ -59,11 +62,11 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
 
     fun setNetworkName(name: String) {
-        binding.network.text = name
+        networkHeader.network.text = name
     }
 
     fun setNotDefinedNetwork() {
-        with(binding.network) {
+        with(networkHeader.network) {
             background = context.getDrawable(R.drawable.network_not_defined_background)
             setCompoundDrawablesWithIntrinsicBounds(
                 ContextCompat.getDrawable(context, R.drawable.ic_help),

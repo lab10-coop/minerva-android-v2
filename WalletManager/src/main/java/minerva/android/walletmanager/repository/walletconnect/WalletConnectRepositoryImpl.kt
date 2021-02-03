@@ -74,9 +74,8 @@ class WalletConnectRepositoryImpl(
                 status.onNext(OnDisconnect(code, peerId))
             }
 
-            onEthSign = { id, message ->
-                Timber.tag("kobe").d("eth sign")
-                OnEthSign(message.data)
+            onEthSign = { id, message, peerId ->
+                status.onNext(OnEthSign(message.raw[1]))
             }
 
             connect(

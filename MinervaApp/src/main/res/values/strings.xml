@@ -265,4 +265,7 @@
     <string name="dapp_disconnected">Dapp disconnected</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
+    <string name="confirm">Confirm</string>
+    <string name="message_signing_request">Message signing request</string>
+    <string name="message">Message</string>
 </resources>

@@ -66,7 +66,7 @@ open class WCClient(
     var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> }
     var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String) -> Unit =
         { _, _, _, _ -> }
-    var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> }
+    var onEthSign: (id: Long, message: WCEthereumSignMessage, peerId: String) -> Unit = { _, _, _ -> }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
     var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
     var onCustomRequest: (id: Long, payload: String) -> Unit = { _, _ -> }
@@ -286,7 +286,8 @@ open class WCClient(
                     throw InvalidJsonRpcParamsException(request.id)
                 onEthSign(
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.MESSAGE)
+                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.MESSAGE),
+                    peerId
                 )
             }
             WCMethod.ETH_PERSONAL_SIGN -> {
@@ -295,7 +296,8 @@ open class WCClient(
                     throw InvalidJsonRpcParamsException(request.id)
                 onEthSign(
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
+                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE),
+                    peerId
                 )
             }
             WCMethod.ETH_SIGN_TYPE_DATA -> {
@@ -304,7 +306,8 @@ open class WCClient(
                     throw InvalidJsonRpcParamsException(request.id)
                 onEthSign(
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
+                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE),
+                    peerId
                 )
             }
             WCMethod.ETH_SIGN_TRANSACTION -> {

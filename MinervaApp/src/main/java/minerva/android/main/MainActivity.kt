@@ -35,8 +35,10 @@ import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.walletconnect.OnEthSign
+import minerva.android.widget.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
+import org.json.JSONObject
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 
@@ -105,9 +107,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun prepareObservers() {
         viewModel.apply {
             walletConnectStatus.observe(this@MainActivity, Observer {
-                Timber.tag("kobe").d("main activity")
-                if (it is OnEthSign){
-                    AlertDialogHandler.showDialog(this@MainActivity, "title", it.message)
+                DappSignMessageDialog(this@MainActivity).apply {
+                    setContent(it)
+                    show()
                 }
             })
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {

@@ -13,15 +13,13 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.utils.exhaustive
+import minerva.android.utils.safe
 import minerva.android.walletmanager.exception.InvalidAccountException
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.NetworkShortName
-import minerva.android.walletmanager.repository.walletconnect.OnConnectionFailure
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.repository.walletconnect.*
 import timber.log.Timber
 
 class WalletConnectViewModel(
@@ -45,14 +43,13 @@ class WalletConnectViewModel(
                 .doOnNext { _viewStateLiveData.value = ProgressBarState(false) }
                 .subscribeBy(
                     onNext = {
-                        _viewStateLiveData.value = when (it) {
+                        when (it) {
                             is OnSessionRequest -> {
                                 topic = it.topic
-                                handleSessionRequest(it)
+                                _viewStateLiveData.value = handleSessionRequest(it)
                             }
-                            is OnConnectionFailure -> OnError(it.error)
-                            is OnDisconnect -> OnDisconnected
-                            else -> OnError(Throwable()) //todo delete
+                            is OnConnectionFailure -> _viewStateLiveData.value = OnError(it.error)
+                            is OnDisconnect -> _viewStateLiveData.value = OnDisconnected
                         }
                     },
                     onError = {
