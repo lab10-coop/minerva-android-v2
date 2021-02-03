@@ -6,11 +6,8 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.budiyev.android.codescanner.DecodeCallback
-import com.budiyev.android.codescanner.ErrorCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import minerva.android.R
-import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.margin
@@ -104,10 +101,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         dappsBottomSheet.dapps.visible()
     }
 
-    override fun setupCallbacks() {
-        setupCallbackAction { qrCode ->
-            viewModel.handleQrCode(qrCode)
-        }
+    override fun onCallbackAction(qrCode: String) {
+        viewModel.handleQrCode(qrCode)
     }
 
     private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: String, isNetworkDefined: Boolean) {

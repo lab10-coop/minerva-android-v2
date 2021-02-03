@@ -26,8 +26,8 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
         arguments?.getInt(ACCOUNT_INDEX)?.let { viewModel.getAccount(it) }
     }
 
-    override fun setupCallbacks() {
-        setupCallbackAction { qrCode -> handleScanResult(AddressParser.parse(qrCode)) }
+    override fun onCallbackAction(qrCode: String) {
+        handleScanResult(AddressParser.parse(qrCode))
     }
 
     private fun handleScanResult(parsedResult: String) {
