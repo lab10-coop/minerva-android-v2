@@ -27,6 +27,8 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
+import minerva.android.main.walletconnect.OnEthSignRequest
+import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
@@ -41,6 +43,7 @@ import org.koin.android.ext.android.inject
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     internal val viewModel: MainViewModel by inject()
+    private val walletConnectViewModel: WalletConnectInteractionsViewModel by inject()
     private var shouldDisableAddButton = false
     internal lateinit var binding: ActivityMainBinding
 
@@ -99,19 +102,24 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.dispose()
+        walletConnectViewModel.dispose()
     }
 
     private fun prepareObservers() {
-        viewModel.apply {
-            walletConnectStatus.observe(this@MainActivity, Observer { (message, session) ->
-                DappSignMessageDialog(this@MainActivity, {
-                    viewModel.acceptRequest()
-                }, { viewModel.rejectRequest() })
-                    .apply {
-                        session?.let { setContent(message, it) }
+        walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
+            when (it) {
+                is OnEthSignRequest -> {
+                    DappSignMessageDialog(this@MainActivity,
+                        { walletConnectViewModel.acceptRequest() },
+                        { walletConnectViewModel.rejectRequest() }
+                    ).apply {
+                        setContent(it.message, it.session)
                         show()
                     }
-            })
+                }
+            }
+        })
+        viewModel.apply {
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
                 Toast.makeText(this@MainActivity, getString(R.string.not_existed_identity_message), Toast.LENGTH_LONG)
                     .show()

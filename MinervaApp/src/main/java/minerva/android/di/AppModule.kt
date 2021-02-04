@@ -13,6 +13,7 @@ import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.integration.ThirdPartyRequestViewModel
 import minerva.android.main.MainViewModel
+import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.token.AddTokenViewModel
 import minerva.android.token.ManageTokensViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
@@ -48,7 +49,8 @@ private val appModules = module {
     factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
     factory<CacheStorage> { CacheStorageImpl(get()) }
     viewModel { ClubCardViewModel(get()) }
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
+    viewModel { WalletConnectInteractionsViewModel(get(), get()) }
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }

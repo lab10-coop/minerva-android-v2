@@ -40,8 +40,7 @@ class MainViewModel(
     private val serviceManager: ServiceManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val orderManager: OrderManager,
-    private val transactionRepository: TransactionRepository,
-    private val walletConnectRepository: WalletConnectRepository
+    private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
 
     lateinit var loginPayload: LoginPayload
@@ -74,87 +73,16 @@ class MainViewModel(
     private val _handleTimeoutOnPendingTransactionsLiveData = MutableLiveData<Event<List<PendingAccount>>>()
     val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
 
-    private val _walletConnectStatus = MutableLiveData<Pair<String, DappSession?>>()
-    val walletConnectStatus: LiveData<Pair<String, DappSession?>> get() = _walletConnectStatus
-
     val executedAccounts = mutableListOf<PendingAccount>()
     private var webSocketSubscriptions = CompositeDisposable()
 
-    lateinit var currentDappSession: DappSession
-
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
+
     fun dispose() {
         masterSeedRepository.dispose()
-        walletConnectRepository.dispose()
     }
 
-    init {
-        launchDisposable {
-            walletConnectRepository.getSessions()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = { reconnect(it) },
-                    onError = { Timber.e(it) }
-                )
-        }
-    }
-
-    private fun reconnect(dapps: List<DappSession>) {
-        dapps.forEach { session ->
-            with(session) {
-                walletConnectRepository.connect(
-                    WalletConnectSession(topic, version, bridge, key),
-                    peerId,
-                    remotePeerId
-                )
-            }
-        }
-        subscribeToWalletConnectEvents()
-    }
-
-    private fun subscribeToWalletConnectEvents() {
-        launchDisposable {
-            walletConnectRepository.connectionStatusFlowable
-                .flatMapSingle {
-                    when (it) {
-                        is OnEthSign -> {
-                            walletConnectRepository.getDappSessionById(it.peerId)
-                                .map { session ->
-                                    currentDappSession = session
-                                    Pair(it.message, session)
-                                }
-                        }
-                        else -> Single.just(Pair(String.Empty, null))
-                        //todo add mapping to walletConnectViewState and handle other connection states to avoid ifs
-                    }
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = { (message, session) ->
-                        if (session != null) {
-                            _walletConnectStatus.value = Pair(message, session)
-                        }
-                    },
-                    onError = { Timber.e(it) }
-                )
-        }
-    }
-
-    fun acceptRequest() {
-        val privateKey = transactionRepository.getAccountByAddress(currentDappSession.address)?.privateKey
-        privateKey?.let {
-            walletConnectRepository.approveRequest(currentDappSession.peerId, it)
-        }
-    }
-
-    fun rejectRequest() {
-        walletConnectRepository.rejectRequest(currentDappSession.peerId)
-    }
-
-    //----------
     fun subscribeToExecutedTransactions(accountIndex: Int) {
         if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {
             webSocketSubscriptions.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)
@@ -296,12 +224,11 @@ class MainViewModel(
                 .subscribeBy(
                     onSuccess = { (status, error) ->
                         Timber.d("Save update binded credential wallet action success")
-                        when {
-                            status == FAILED && error is AutomaticBackupFailedThrowable -> _updateCredentialErrorLiveData.value =
+                        _updateCredentialErrorLiveData.value = when {
+                            status == FAILED && error is AutomaticBackupFailedThrowable ->
                                 Event(AutomaticBackupFailedThrowable())
-                            status == FAILED -> _updateCredentialErrorLiveData.value =
-                                Event(NoBindedCredentialThrowable())
-
+                            status == FAILED -> Event(NoBindedCredentialThrowable())
+                            else -> Event(Throwable())
                         }
                     },
                     onError = { Timber.e("Save bind credential error: $it") }
