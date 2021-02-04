@@ -10,6 +10,7 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
 import minerva.android.walletConnect.client.WCClient
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.DappSessionDao
 import minerva.android.walletmanager.database.entity.DappSessionEntity
@@ -50,7 +51,9 @@ class WalletConnectRepositoryTest {
 
         clientMap = ConcurrentHashMap()
         clientMap["peerId"] = client
-        repository = WalletConnectRepositoryImpl(signatureRepository, database, client, clientMap)
+        repository = WalletConnectRepositoryImpl(signatureRepository, database, client, clientMap).also {
+            it.currentEthMessage = WCEthereumSignMessage(type = WCEthereumSignMessage.WCSignType.MESSAGE, raw = listOf("test1", "test2"))
+        }
     }
 
     @After
@@ -98,6 +101,21 @@ class WalletConnectRepositoryTest {
         whenever(dappSessionDao.delete(any())).thenReturn(Completable.complete())
         repository.killSession("peerId")
         assertEquals(clientMap.size, 1)
+    }
+
+    @Test
+    fun `reject request test`() {
+        whenever(clientMap["peerId"]?.rejectRequest(any(), any())).thenReturn(true)
+        repository.rejectRequest("peerId")
+        verify(clientMap["peerId"])?.rejectRequest(any(), any())
+    }
+
+    @Test
+    fun `accept request test`() {
+        whenever(clientMap["peerId"]?.approveRequest(any(), eq(""))).thenReturn(true)
+        whenever(signatureRepository.signData(any(), any())).thenReturn("privKey")
+        repository.approveRequest("peerId", "privKey")
+        verify(clientMap["peerId"])?.approveRequest(any(), eq("privKey"))
     }
 
     @Test

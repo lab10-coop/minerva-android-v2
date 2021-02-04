@@ -42,7 +42,7 @@ class WalletConnectRepositoryImpl(
 ) : WalletConnectRepository {
 
     private var currentRequestId: Long = Long.InvalidValue
-    private lateinit var currentEthMessage: WCEthereumSignMessage
+    internal lateinit var currentEthMessage: WCEthereumSignMessage
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
