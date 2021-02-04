@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private val walletConnectViewModel: WalletConnectInteractionsViewModel by inject()
     private var shouldDisableAddButton = false
     internal lateinit var binding: ActivityMainBinding
+    private var signDialog: DappSignMessageDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,12 +110,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
             when (it) {
                 is OnEthSignRequest -> {
-                    DappSignMessageDialog(this@MainActivity,
-                        { walletConnectViewModel.acceptRequest() },
-                        { walletConnectViewModel.rejectRequest() }
-                    ).apply {
-                        setContent(it.message, it.session)
-                        show()
+                    signDialog = if (signDialog != null) {
+                        signDialog?.dismiss()
+                        getDappSignDialog(it)
+                    } else {
+                        getDappSignDialog(it)
                     }
                 }
             }
@@ -166,6 +166,21 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             })
         }
     }
+
+    private fun getDappSignDialog(it: OnEthSignRequest) =
+        DappSignMessageDialog(this@MainActivity,
+            {
+                walletConnectViewModel.acceptRequest()
+                signDialog = null
+            },
+            {
+                walletConnectViewModel.rejectRequest()
+                signDialog = null
+            }
+        ).apply {
+            setContent(it.message, it.session)
+            show()
+        }
 
     private fun updatePendingAccount(it: PendingAccount) {
         showFlashbar(

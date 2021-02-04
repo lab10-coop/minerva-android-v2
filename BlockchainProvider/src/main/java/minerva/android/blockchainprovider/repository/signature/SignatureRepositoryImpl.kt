@@ -1,6 +1,7 @@
 package minerva.android.blockchainprovider.repository.signature
 
 import org.web3j.crypto.Credentials
+import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.Sign
 import org.web3j.utils.Numeric
 import java.util.*
@@ -15,12 +16,13 @@ class SignatureRepositoryImpl : SignatureRepository {
             data.toByteArray()
         }
 
+
         val ethMessage = getEthereumMessage(messageBytes)
-        val credentials = Credentials.create(privateKey)
+        val credentials = Credentials.create(privateKey)//ECKeyPair.create(Numeric.hexStringToByteArray(privateKey))
         val signetData = Sign.signMessage(ethMessage, credentials.ecKeyPair)
         val signedBytes = bytesFromSignature(signetData)//signetData.run { r + s + v }
-        val vcComponent = patchSignatureVComponent(signedBytes)
-        return Numeric.toHexString(vcComponent)
+//        val vcComponent = patchSignatureVComponent(signedBytes)
+        return Numeric.toHexString(signedBytes)
     }
 
     private fun patchSignatureVComponent(signature: ByteArray?): ByteArray? {

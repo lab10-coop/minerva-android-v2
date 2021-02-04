@@ -8,6 +8,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 interface TransactionRepository {
+    val masterSeed: MasterSeed
     fun refreshBalances(): Single<HashMap<String, Balance>>
     fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal

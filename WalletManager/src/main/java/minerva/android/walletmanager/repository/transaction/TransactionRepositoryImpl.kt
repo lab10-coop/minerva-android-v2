@@ -34,6 +34,8 @@ class TransactionRepositoryImpl(
     private val webSocketRepository: WebSocketRepository,
     private val tokenManager: TokenManager
 ) : TransactionRepository {
+    override val masterSeed: MasterSeed
+        get() = walletConfigManager.masterSeed
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
         walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->

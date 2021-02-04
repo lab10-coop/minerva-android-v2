@@ -50,6 +50,7 @@ class WalletConnectViewModel(
                             }
                             is OnConnectionFailure -> _viewStateLiveData.value = OnError(it.error)
                             is OnDisconnect -> _viewStateLiveData.value = OnDisconnected
+//                            is OnEthSign ->
                         }
                     },
                     onError = {
