@@ -87,10 +87,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onManageTokens(index: Int) =
         startManageAssetsWrappedActivity(requireContext(), index)
 
-    override fun onExportPrivateKey(account: Account) {
-        Log.e("klop", "Showing private key for ${account.name} N O W !")
-        ExportPrivateKeyDialog(requireContext()).show()
-    }
+    override fun onExportPrivateKey(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
 
     override fun isTokenVisible(networkAddress: String, tokenAddress: String): Boolean? =
         viewModel.isTokenVisible(networkAddress, tokenAddress)

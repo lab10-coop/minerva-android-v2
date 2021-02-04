@@ -1,8 +1,12 @@
 package minerva.android.widget
 
 import android.content.Context
+import android.text.InputType
 import android.text.TextUtils
+import android.text.method.PasswordTransformationMethod
+import android.transition.TransitionManager
 import android.util.AttributeSet
+import android.view.Gravity
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import minerva.android.R
@@ -34,6 +38,20 @@ class LabeledTextView(context: Context, attrs: AttributeSet? = null) : LinearLay
         binding.apply {
             body.setTextColor(ContextCompat.getColor(context, getEnabledTextColor(enabled)))
             container.setBackgroundResource(getEnabledResource(enabled))
+        }
+    }
+
+    fun setBodyGravity(gravity: Int) {
+        binding.body.gravity = gravity
+    }
+
+    fun togglePasswordTransformation() {
+        binding.body.apply {
+            (transformationMethod !is PasswordTransformationMethod).let { isNotPasswordTransformation ->
+                isSingleLine = isNotPasswordTransformation
+                transformationMethod = if (isNotPasswordTransformation) PasswordTransformationMethod.getInstance()
+                else null
+            }
         }
     }
 

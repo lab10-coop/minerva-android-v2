@@ -4,12 +4,16 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.transition.TransitionManager
+import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Window
 import minerva.android.R
 import minerva.android.databinding.ExportPrivateKeyDialogBinding
+import minerva.android.walletmanager.model.Account
 
-class ExportPrivateKeyDialog(context: Context) : Dialog(context, R.style.DialogStyle) {
+class ExportPrivateKeyDialog(context: Context, private val account: Account) : Dialog(context, R.style.DialogStyle) {
 
     private val binding = ExportPrivateKeyDialogBinding.inflate(LayoutInflater.from(context))
 
@@ -22,7 +26,26 @@ class ExportPrivateKeyDialog(context: Context) : Dialog(context, R.style.DialogS
     }
 
     private fun initView() {
-        binding.closeCross.setOnClickListener { dismiss() }
+        with(binding) {
+            privateKeyLabel.apply {
+                showPrivateKeyButton.setOnClickListener {
+                    //TODO add animations for toggling view
+                    //TransitionManager.beginDelayedTransition(root)
+                    showPrivateKeyButton.text = toggleButtonText(showPrivateKeyButton.text)
+                    togglePasswordTransformation()
+                }
+                setBodyGravity(Gravity.LEFT)
+                togglePasswordTransformation()
+                setTitleAndBody("${account.name} ${context.getString(R.string.private_key)}", account.privateKey)
+            }
+        }
     }
 
+    private fun toggleButtonText(currentText: CharSequence): String =
+        with(context) {
+            getString(R.string.show_private_key).let { showPrivateKeyText ->
+                if (showPrivateKeyText == currentText) getString(R.string.hide_private_key)
+                else getString(R.string.show_private_key)
+            }
+        }
 }
