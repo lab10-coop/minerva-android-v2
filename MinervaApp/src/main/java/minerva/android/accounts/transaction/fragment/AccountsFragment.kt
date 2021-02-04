@@ -88,6 +88,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onExportPrivateKey(account: Account) {
         Log.e("klop", "Showing private key for ${account.name} N O W !")
+
     }
 
     override fun isTokenVisible(networkAddress: String, tokenAddress: String): Boolean? =
