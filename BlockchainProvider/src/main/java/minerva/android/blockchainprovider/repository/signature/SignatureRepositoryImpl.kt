@@ -16,9 +16,8 @@ class SignatureRepositoryImpl : SignatureRepository {
             data.toByteArray()
         }
 
-
         val ethMessage = getEthereumMessage(messageBytes)
-        val credentials = Credentials.create(privateKey)//ECKeyPair.create(Numeric.hexStringToByteArray(privateKey))
+        val credentials = Credentials.create(privateKey) //ECKeyPair.create(Numeric.hexStringToByteArray(privateKey))
         val signetData = Sign.signMessage(ethMessage, credentials.ecKeyPair)
         val signedBytes = bytesFromSignature(signetData)//signetData.run { r + s + v }
 //        val vcComponent = patchSignatureVComponent(signedBytes)

@@ -15,6 +15,8 @@ import minerva.android.accounts.transaction.activity.TransactionActivity.Compani
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
 import minerva.android.accounts.transaction.fragment.AccountsFragment
+import minerva.android.accounts.walletconnect.OnDisconnected
+import minerva.android.accounts.walletconnect.OnEthSignRequest
 import minerva.android.accounts.walletconnect.WalletConnectActivity
 import minerva.android.databinding.ActivityMainBinding
 import minerva.android.extension.*
@@ -27,7 +29,6 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
-import minerva.android.main.walletconnect.OnEthSignRequest
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
@@ -116,6 +117,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                     } else {
                         getDappSignDialog(it)
                     }
+                }
+                is OnDisconnected -> {
+                    signDialog?.dismiss()
+                    signDialog = null
                 }
             }
         })

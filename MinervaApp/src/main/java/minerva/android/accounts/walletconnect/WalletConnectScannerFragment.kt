@@ -38,7 +38,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     private fun observeViewState() {
-        viewModel.viewStateLiveData.observe(viewLifecycleOwner, Observer {
+        viewModel.stateLiveData.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false

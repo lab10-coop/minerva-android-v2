@@ -6,10 +6,15 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.accounts.walletconnect.DefaultRequest
+import minerva.android.accounts.walletconnect.OnDisconnected
+import minerva.android.accounts.walletconnect.OnEthSignRequest
+import minerva.android.accounts.walletconnect.WalletConnectState
 import minerva.android.base.BaseViewModel
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.WalletConnectSession
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnEthSign
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectStatus
@@ -22,8 +27,8 @@ class WalletConnectInteractionsViewModel(
 
     lateinit var currentDappSession: DappSession
 
-    private val _walletConnectStatus = MutableLiveData<WalletConnectRequest>()
-    val walletConnectStatus: LiveData<WalletConnectRequest> get() = _walletConnectStatus
+    private val _walletConnectStatus = MutableLiveData<WalletConnectState>()
+    val walletConnectStatus: LiveData<WalletConnectState> get() = _walletConnectStatus
 
 
     fun dispose() {
@@ -72,6 +77,7 @@ class WalletConnectInteractionsViewModel(
                     OnEthSignRequest(it.message, session)
                 }
         }
+        is OnDisconnect -> Single.just(OnDisconnected)
         else -> Single.just(DefaultRequest)
     }
 

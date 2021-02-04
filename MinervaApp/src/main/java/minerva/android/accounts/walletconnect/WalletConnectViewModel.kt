@@ -12,8 +12,6 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.utils.exhaustive
-import minerva.android.utils.safe
 import minerva.android.walletmanager.exception.InvalidAccountException
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -32,8 +30,8 @@ class WalletConnectViewModel(
     internal lateinit var topic: Topic
     internal lateinit var currentSession: WalletConnectSession
 
-    private val _viewStateLiveData = MutableLiveData<WalletConnectViewState>()
-    val viewStateLiveData: LiveData<WalletConnectViewState> get() = _viewStateLiveData
+    private val _viewStateLiveData = MutableLiveData<WalletConnectState>()
+    val stateLiveData: LiveData<WalletConnectState> get() = _viewStateLiveData
 
     fun setConnectionStatusFlowable() {
         launchDisposable {
@@ -50,7 +48,6 @@ class WalletConnectViewModel(
                             }
                             is OnConnectionFailure -> _viewStateLiveData.value = OnError(it.error)
                             is OnDisconnect -> _viewStateLiveData.value = OnDisconnected
-//                            is OnEthSign ->
                         }
                     },
                     onError = {
@@ -144,7 +141,7 @@ class WalletConnectViewModel(
     val shouldChangeNetwork: Boolean
         get() = account.network.full != requestedNetwork
 
-    private fun handleSessionRequest(it: OnSessionRequest): WalletConnectViewState =
+    private fun handleSessionRequest(it: OnSessionRequest): WalletConnectState =
         it.chainId?.let { id ->
             requestedNetwork = getNetworkName(id).orElse { String.Empty }
             OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)

@@ -88,15 +88,16 @@ class WalletConnectRepositoryImpl(
                 )
             }
             onFailure = { error, peerId ->
+                Timber.e(error)
                 status.onNext(OnConnectionFailure(error, peerId))
             }
-            onDisconnect = { code, peerId ->
+            onDisconnect = { _, peerId ->
                 peerId?.let {
                     if (walletConnectClients.containsKey(peerId)) {
                         deleteSession(peerId)
                     }
                 }
-                status.onNext(OnDisconnect(code, peerId))
+                status.onNext(OnDisconnect)
             }
 
             onEthSign = { id, message, peerId ->
