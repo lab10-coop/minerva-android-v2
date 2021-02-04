@@ -11,7 +11,6 @@ import minerva.android.accounts.create.NewAccountFragment
 import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.accounts.listener.OnBackListener
 import minerva.android.accounts.listener.ShowFragmentListener
-import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.edit.EditOrderFragment
 import minerva.android.extension.addFragment
 import minerva.android.extension.addFragmentWithBackStack

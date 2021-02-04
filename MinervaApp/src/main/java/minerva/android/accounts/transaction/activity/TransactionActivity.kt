@@ -12,7 +12,6 @@ import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.fragment.TransactionSendFragment
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.accounts.transaction.fragment.adapter.TransactionPagerAdapter
-import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.databinding.ActivityTransactionBinding
 import minerva.android.extension.addFragmentWithBackStack
 import minerva.android.extension.getCurrentFragment

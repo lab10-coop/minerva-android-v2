@@ -12,7 +12,7 @@ import minerva.android.extension.invisible
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.main.MainActivity.Companion.ACCOUNT_INDEX
 
-class AddressScannerFragment : WalletConnectScannerFragment() {
+class TransactionAddressScanner : WalletConnectScannerFragment() {
 
     private lateinit var listener: AddressScannerListener
 
@@ -55,7 +55,7 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
     companion object {
         @JvmStatic
         fun newInstance(index: Int = Int.InvalidValue) =
-            AddressScannerFragment().apply {
+            TransactionAddressScanner().apply {
                 arguments = Bundle().apply { putInt(ACCOUNT_INDEX, index) }
             }
     }

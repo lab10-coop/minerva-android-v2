@@ -5,7 +5,7 @@ import android.view.View
 import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.services.login.scanner.BaseScannerFragment
 
-class TokenAddressScannerFragment : BaseScannerFragment() {
+class AddressScannerFragment : BaseScannerFragment() {
 
     private lateinit var listener: AddressScannerListener
 
@@ -28,6 +28,6 @@ class TokenAddressScannerFragment : BaseScannerFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() = TokenAddressScannerFragment()
+        fun newInstance() = AddressScannerFragment()
     }
 }

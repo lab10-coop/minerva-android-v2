@@ -134,7 +134,7 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
             )
         }
         binding.tokenAddress.onRightDrawableClicked {
-            listener.showScanner(TokenAddressScannerFragment.newInstance())
+            listener.showScanner(AddressScannerFragment.newInstance())
         }
     }
 
