@@ -56,11 +56,17 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
         showFragmentListener.setActionBarTitle(getString(R.string.manage_token))
     }
 
+    fun setScanResult(address: String?) {
+        address?.let {
+            binding.tokenAddress.setText(it)
+        }
+    }
+
     private fun showTokenData(token: ERC20Token) {
         binding.apply {
             TransitionManager.beginDelayedTransition(this.root)
             tokenImage.initView(token)
-            addTokenButton.visible()
+            addTokenButton.isEnabled = true
             supportText.gone()
             address.apply {
                 setDataOrHide(getString(R.string.address), token.address)
@@ -109,7 +115,7 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
     private fun onError() {
         binding.apply {
             tokenImage.clear()
-            addTokenButton.gone()
+            addTokenButton.isEnabled = false
             tokenAddressLayout.error = getString(R.string.invalid_token_address)
             tokenAddressLayout.setErrorIconDrawable(NO_ICON)
             supportText.visible()
@@ -128,7 +134,7 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
             )
         }
         binding.tokenAddress.onRightDrawableClicked {
-            listener.showScanner()
+            listener.showScanner(AddressScannerFragment.newInstance())
         }
     }
 

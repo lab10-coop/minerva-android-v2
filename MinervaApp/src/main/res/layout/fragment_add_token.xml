@@ -107,5 +107,6 @@
         android:elevation="@dimen/elevation_small"
         android:outlineProvider="none"
         android:text="@string/add_token"
-        android:visibility="gone" />
+        android:enabled="false"
+        />
 </FrameLayout>

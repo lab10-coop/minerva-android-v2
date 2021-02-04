@@ -11,7 +11,6 @@ import minerva.android.accounts.create.NewAccountFragment
 import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.accounts.listener.OnBackListener
 import minerva.android.accounts.listener.ShowFragmentListener
-import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.edit.EditOrderFragment
 import minerva.android.extension.addFragment
 import minerva.android.extension.addFragmentWithBackStack
@@ -19,6 +18,8 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.services.login.scanner.BaseScannerFragment
+import minerva.android.token.AddTokenFragment
 import minerva.android.token.ManageTokensFragment
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.repository.getNetworkIcon
@@ -46,14 +47,19 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
 
     override fun setScanResult(text: String?) {
         onBack()
-        (getCurrentFragment() as? SafeAccountSettingsFragment)?.setScanResult(text)
+        getCurrentFragment()?.let {
+            when(it) {
+                is SafeAccountSettingsFragment -> it.setScanResult(text)
+                is AddTokenFragment -> it.setScanResult(text)
+            }
+        }
     }
 
-    override fun showScanner() {
+    override fun showScanner(scanner: BaseScannerFragment) {
         supportActionBar?.hide()
         addFragmentWithBackStack(
             R.id.container,
-            AddressScannerFragment.newInstance(),
+            scanner,
             R.animator.slide_in_left,
             R.animator.slide_out_right
         )

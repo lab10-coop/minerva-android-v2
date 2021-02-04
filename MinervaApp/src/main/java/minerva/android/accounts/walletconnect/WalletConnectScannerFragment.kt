@@ -6,8 +6,6 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.budiyev.android.codescanner.DecodeCallback
-import com.budiyev.android.codescanner.ErrorCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import minerva.android.R
 import minerva.android.extension.gone
@@ -103,19 +101,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         dappsBottomSheet.dapps.visible()
     }
 
-    override fun setupCallbacks() {
-        codeScanner.apply {
-            decodeCallback = DecodeCallback { result ->
-                requireActivity().runOnUiThread {
-                    if (shouldScan) {
-                        binding.scannerProgressBar.visible()
-                        viewModel.handleQrCode(result.text)
-                    }
-                }
-            }
-
-            errorCallback = ErrorCallback { handleCameraError(it) }
-        }
+    override fun onCallbackAction(qrCode: String) {
+        viewModel.handleQrCode(qrCode)
     }
 
     private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: String, isNetworkDefined: Boolean) {
@@ -151,8 +138,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    override fun setOnCloseButtonListener() {
-        binding.closeButton.setOnClickListener { viewModel.closeScanner() }
+    override fun onCloseButtonAction() {
+        viewModel.closeScanner()
     }
 
     override fun onPermissionNotGranted() {
@@ -160,6 +147,9 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     companion object {
+        @JvmStatic
+        fun newInstance() = WalletConnectScannerFragment()
+
         const val PEEK_HEIGHT = 240
         const val DEFAULT_MARGIN = 32f
         const val INCREASED_MARGIN = 115f
