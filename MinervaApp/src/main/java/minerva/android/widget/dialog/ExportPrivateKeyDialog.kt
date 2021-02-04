@@ -7,23 +7,22 @@ import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.Window
 import minerva.android.R
-import minerva.android.databinding.FundsAtRiskDialogLayoutBinding
+import minerva.android.databinding.ExportPrivateKeyDialogBinding
 
-class FundsAtRiskDialog(context: Context) : Dialog(context, R.style.DialogStyle) {
+class ExportPrivateKeyDialog(context: Context) : Dialog(context, R.style.DialogStyle) {
 
-    private val binding = FundsAtRiskDialogLayoutBinding.inflate(LayoutInflater.from(context))
+    private val binding = ExportPrivateKeyDialogBinding.inflate(LayoutInflater.from(context))
 
     init {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(binding.root)
-        setCancelable(false)
+        setCancelable(true)
         initView()
     }
 
     private fun initView() {
-        binding.confirmButton.setOnClickListener {
-            dismiss()
-        }
+        binding.closeCross.setOnClickListener { dismiss() }
     }
+
 }

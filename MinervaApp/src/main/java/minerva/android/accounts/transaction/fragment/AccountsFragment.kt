@@ -20,6 +20,7 @@ import minerva.android.main.base.BaseFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.wrapped.startManageAssetsWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
@@ -88,7 +89,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onExportPrivateKey(account: Account) {
         Log.e("klop", "Showing private key for ${account.name} N O W !")
-
+        ExportPrivateKeyDialog(requireContext()).show()
     }
 
     override fun isTokenVisible(networkAddress: String, tokenAddress: String): Boolean? =

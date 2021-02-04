@@ -7,7 +7,7 @@
     android:background="@drawable/rounded_white_background">
 
     <ImageView
-        android:id="@+id/alertIcon"
+        android:id="@+id/alert_icon"
         android:layout_width="@dimen/small_logo_size"
         android:layout_height="@dimen/small_logo_size"
         android:layout_marginTop="@dimen/margin_normal"
@@ -18,7 +18,7 @@
         tools:ignore="ContentDescription" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/dialogTitle"
+        android:id="@+id/dialog_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_normal"
@@ -28,10 +28,10 @@
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/alertIcon" />
+        app:layout_constraintTop_toBottomOf="@+id/alert_icon" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/dialogMessage"
+        android:id="@+id/dialog_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/margin_normal"
@@ -43,7 +43,7 @@
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialogTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/dialog_title" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/confirmButton"
@@ -60,6 +60,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialogMessage" />
+        app:layout_constraintTop_toBottomOf="@+id/dialog_message" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
