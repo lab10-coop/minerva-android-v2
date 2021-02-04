@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_normal"
         android:fontFamily="@font/rubik_regular"
-        android:text="@string/experimental"
+        android:text="@string/fund_at_risk_warning"
         android:textColor="@color/alertRed"
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -47,8 +47,8 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/confirmButton"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="wrap_content"
+        style="@style/OutlinedButtonStyle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_large"
         android:layout_marginBottom="@dimen/margin_xbig"
