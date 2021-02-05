@@ -284,6 +284,7 @@ open class WCClient(
                 val params = gson.fromJson<List<String>>(request.params)
                 if (params.size < 2)
                     throw InvalidJsonRpcParamsException(request.id)
+
                 onEthSign(
                     request.id,
                     WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.MESSAGE),
@@ -291,9 +292,11 @@ open class WCClient(
                 )
             }
             WCMethod.ETH_PERSONAL_SIGN -> {
+
                 val params = gson.fromJson<List<String>>(request.params)
                 if (params.size < 2)
                     throw InvalidJsonRpcParamsException(request.id)
+
                 onEthSign(
                     request.id,
                     WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE),

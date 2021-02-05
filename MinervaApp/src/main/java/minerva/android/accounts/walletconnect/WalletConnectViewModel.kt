@@ -111,8 +111,22 @@ class WalletConnectViewModel(
     }
 
     fun approveSession(meta: WalletConnectPeerMeta) {
+//        account.network.chainId
+
+        val address = accountManager.masterSeed.publicKey
+
+        val zeroAccount = accountManager.loadAccount(2)
+
+        Timber.tag("kobe").d("master address $address")
+
+        Timber.tag("kobe").d("zero VALID address ${zeroAccount.address}")
+        Timber.tag("kobe").d("zero VALID address ${zeroAccount.name}")
+
+        Timber.tag("kobe").d("CURRENT ADDRESS ${account.address}")
+
+        //zmien an chainID i sie zaloguj na ethereum
         launchDisposable {
-            repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId, getDapp(meta))
+            repository.approveSession(listOf(zeroAccount.address), 1, topic.peerId, getDapp(meta))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onError = { OnError(it) })

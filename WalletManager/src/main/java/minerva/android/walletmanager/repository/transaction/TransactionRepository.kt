@@ -37,4 +37,6 @@ interface TransactionRepository {
     fun isAddressValid(address: String): Boolean
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun updateTokenIcons(): Completable
+
+    fun getMnemonic(): String
 }

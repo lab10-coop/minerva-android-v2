@@ -82,6 +82,9 @@ class WalletConfigManagerImpl(
         get() = enableMainNetsBehaviorSubject.toFlowable(BackpressureStrategy.LATEST)
             .filter { toggleMainNetsEnabled != null }
 
+    override fun getMnemonic(): String = cryptographyRepository.getMnemonicForMasterSeed(masterSeed.seed)
+
+
     override fun saveIsMnemonicRemembered() {
         localStorage.saveIsMnemonicRemembered(true)
     }

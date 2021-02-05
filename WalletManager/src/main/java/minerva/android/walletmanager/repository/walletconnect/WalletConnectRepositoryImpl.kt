@@ -79,6 +79,8 @@ class WalletConnectRepositoryImpl(
             onWCOpen = { peerId -> clientMap[peerId] = this }
 
             onSessionRequest = { remotePeerId, meta, chainId, peerId ->
+                Timber.tag("kobe").d("session request")
+
                 status.onNext(
                     OnSessionRequest(
                         WCPeerToWalletConnectPeerMetaMapper.map(meta),
@@ -89,9 +91,11 @@ class WalletConnectRepositoryImpl(
             }
             onFailure = { error, peerId ->
                 Timber.e(error)
+                Timber.tag("kobe").d("failure")
                 status.onNext(OnConnectionFailure(error, peerId))
             }
             onDisconnect = { _, peerId ->
+                Timber.tag("kobe").d("disconnect")
                 peerId?.let {
                     if (walletConnectClients.containsKey(peerId)) {
                         deleteSession(peerId)
@@ -101,12 +105,26 @@ class WalletConnectRepositoryImpl(
             }
 
             onEthSign = { id, message, peerId ->
+
+                Timber.tag("kobe").d("eth sign")
                 currentRequestId = id
                 currentEthMessage = message
+
+                Timber.tag("kobe").d("before enc ${message.data}")
+                Timber.tag("kobe").d("RAW ${message.raw}")
+
                 val data: String = when (message.type) {
-                    PERSONAL_MESSAGE -> message.data.hexToUtf8
-                    MESSAGE, TYPED_MESSAGE -> message.data.getFormattedMessage
+                    PERSONAL_MESSAGE -> {
+                        Timber.tag("kobe").d("PERSONAL_MESSAGE ${message.data.hexToUtf8}")
+                        message.data.hexToUtf8
+                    }
+                    MESSAGE, TYPED_MESSAGE -> {
+                        Timber.tag("kobe").d("typed message ${message.data.getFormattedMessage}")
+                        message.data.getFormattedMessage
+                    }
                 }
+
+                Timber.tag("kobe").d("data $data")
                 status.onNext(OnEthSign(data, peerId))
             }
 
@@ -145,10 +163,10 @@ class WalletConnectRepositoryImpl(
         }
     }
 
-    override fun approveRequest(peerId: String, privateKey: String) {
+    override fun approveRequest(peerId: String, privateKey: String, mnemonic: String) {
         clientMap[peerId]?.approveRequest(
             currentRequestId,
-            signatureRepository.signData(currentEthMessage.data, privateKey)
+            signatureRepository.signData(currentEthMessage.data, privateKey, mnemonic)
         )
     }
 

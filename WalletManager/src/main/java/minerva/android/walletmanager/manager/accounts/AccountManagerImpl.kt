@@ -203,6 +203,9 @@ class AccountManagerImpl(
         if (ownerAddress == String.Empty) NO_SAFE_ACCOUNTS
         else walletManager.getSafeAccountNumber(ownerAddress)
 
+    override val masterSeed: MasterSeed
+        get() = walletManager.masterSeed
+
     override fun loadAccount(index: Int): Account {
         walletManager.getWalletConfig()?.accounts?.apply {
             return if (inBounds(index)) {
