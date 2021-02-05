@@ -115,6 +115,7 @@
     <string name="transactions_error_message">Unexpected error occurred while making transaction actions</string>
     <string name="address_saved_to_clip_board">Address saved to clipboard</string>
     <string name="identity_saved_to_clipboard">Identity saved to clipboard</string>
+    <string name="private_key_saved_to_clipboard">Private Key saved to clipboard</string>
     <string name="refresh_balances_error">Error while refreshing balances</string>
     <string name="refresh_asset_balances_error">Error while refreshing assets balances</string>
     <string name="activities_error">Error while fetching activities</string>

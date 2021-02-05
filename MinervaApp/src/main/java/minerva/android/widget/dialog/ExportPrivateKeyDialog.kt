@@ -11,7 +11,10 @@ import android.view.LayoutInflater
 import android.view.Window
 import minerva.android.R
 import minerva.android.databinding.ExportPrivateKeyDialogBinding
+import minerva.android.extension.toggleVisibleOrGone
 import minerva.android.walletmanager.model.Account
+import minerva.android.widget.setupCopyButton
+import minerva.android.widget.setupShareButton
 
 class ExportPrivateKeyDialog(context: Context, private val account: Account) : Dialog(context, R.style.DialogStyle) {
 
@@ -29,14 +32,16 @@ class ExportPrivateKeyDialog(context: Context, private val account: Account) : D
         with(binding) {
             privateKeyLabel.apply {
                 showPrivateKeyButton.setOnClickListener {
-                    //TODO add animations for toggling view
-                    //TransitionManager.beginDelayedTransition(root)
                     showPrivateKeyButton.text = toggleButtonText(showPrivateKeyButton.text)
                     togglePasswordTransformation()
+                    copyButton.toggleVisibleOrGone()
+                    shareButton.toggleVisibleOrGone()
                 }
                 setBodyGravity(Gravity.LEFT)
                 togglePasswordTransformation()
                 setTitleAndBody("${account.name} ${context.getString(R.string.private_key)}", account.privateKey)
+                setupCopyButton(binding.copyButton, account.privateKey, context.getString(R.string.private_key_saved_to_clipboard))
+                setupShareButton(binding.shareButton, account.privateKey)
             }
         }
     }
