@@ -4,12 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
-import android.widget.Toast
-import com.budiyev.android.codescanner.DecodeCallback
-import com.budiyev.android.codescanner.ErrorCallback
-import kotlinx.android.synthetic.main.fragment_scanner.*
 import minerva.android.R
-import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.LoginScannerListener
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
@@ -17,7 +12,6 @@ import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.model.ServiceQrCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.lang.Exception
 
 class LoginScannerFragment : BaseScannerFragment() {
 
@@ -34,20 +28,9 @@ class LoginScannerFragment : BaseScannerFragment() {
         listener = context as LoginScannerListener
     }
 
-    override fun setupCallbacks() {
-        codeScanner.apply {
-            decodeCallback = DecodeCallback {
-                requireActivity().runOnUiThread {
-                    if (shouldScan) {
-                        scanner_progress_bar.visible()
-                        viewModel.validateResult(it.text)
-                        shouldScan = false
-                    }
-                }
-            }
-
-            errorCallback = ErrorCallback { handleCameraError(it) }
-        }
+    override fun onCallbackAction(result: String) {
+        viewModel.validateResult(result)
+        shouldScan = false
     }
 
     private fun prepareObserver() {
@@ -82,10 +65,8 @@ class LoginScannerFragment : BaseScannerFragment() {
         Handler().postDelayed({ listener.showChooseIdentityFragment(qrCodeCode) }, DELAY)
     }
 
-    override fun setOnCloseButtonListener() {
-        close_button.setOnClickListener {
-            listener.onBackPressed()
-        }
+    override fun onCloseButtonAction() {
+        listener.onBackPressed()
     }
 
     override fun onPermissionNotGranted() {

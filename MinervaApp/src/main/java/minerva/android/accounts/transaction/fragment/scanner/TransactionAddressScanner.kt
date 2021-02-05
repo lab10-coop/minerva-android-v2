@@ -4,21 +4,15 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import com.budiyev.android.codescanner.DecodeCallback
-import com.budiyev.android.codescanner.ErrorCallback
 import minerva.android.R
-import minerva.android.accounts.akm.SafeAccountSettingsFragment
 import minerva.android.accounts.listener.AddressScannerListener
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment
 import minerva.android.extension.invisible
-import minerva.android.extension.visible
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.main.MainActivity
 import minerva.android.main.MainActivity.Companion.ACCOUNT_INDEX
-import minerva.android.wrapped.WrappedActivity
 
-class AddressScannerFragment : WalletConnectScannerFragment() {
+class TransactionAddressScanner : WalletConnectScannerFragment() {
 
     private lateinit var listener: AddressScannerListener
 
@@ -32,19 +26,8 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
         arguments?.getInt(ACCOUNT_INDEX)?.let { viewModel.getAccount(it) }
     }
 
-    override fun setupCallbacks() {
-        codeScanner.apply {
-            decodeCallback = DecodeCallback { result ->
-                requireActivity().runOnUiThread {
-                    if (shouldScan) {
-                        binding.scannerProgressBar.visible()
-                        handleScanResult(AddressParser.parse(result.text))
-                    }
-                }
-            }
-
-            errorCallback = ErrorCallback { handleCameraError(it) }
-        }
+    override fun onCallbackAction(qrCode: String) {
+        handleScanResult(AddressParser.parse(qrCode))
     }
 
     private fun handleScanResult(parsedResult: String) {
@@ -61,10 +44,8 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
         }
     }
 
-    override fun setOnCloseButtonListener() {
-        binding.closeButton.setOnClickListener {
-            listener.onBackPressed()
-        }
+    override fun onCloseButtonAction() {
+        listener.onBackPressed()
     }
 
     override fun onPermissionNotGranted() {
@@ -74,7 +55,7 @@ class AddressScannerFragment : WalletConnectScannerFragment() {
     companion object {
         @JvmStatic
         fun newInstance(index: Int = Int.InvalidValue) =
-            AddressScannerFragment().apply {
+            TransactionAddressScanner().apply {
                 arguments = Bundle().apply { putInt(ACCOUNT_INDEX, index) }
             }
     }

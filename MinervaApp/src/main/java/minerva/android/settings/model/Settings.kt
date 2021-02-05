@@ -74,12 +74,6 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
         Settings(
             getString(R.string.legal), listOf(
                 SettingRow(
-                    getString(R.string.licence),
-                    detailText = BuildConfig.LICENCE_TYPE,
-                    isArrowVisible = false,
-                    rowType = SettingsRowType.LICENCE
-                ),
-                SettingRow(
                     getString(R.string.terms_of_service),
                     isArrowVisible = true,
                     rowType = SettingsRowType.TERMS_OF_SERVICE

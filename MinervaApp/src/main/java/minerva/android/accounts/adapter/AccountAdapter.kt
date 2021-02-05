@@ -123,6 +123,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun onWalletConnect(index: Int) = listener.onWalletConnect(index)
 
     override fun onManageTokens(index: Int) = listener.onManageTokens(index)
+    
+    override fun onExportPrivateKey(account: Account) = listener.onExportPrivateKey(account)
 
     override fun onOpenOrClose(index: Int, isOpen: Boolean) {
         if (openAccounts.inBounds(index)) openAccounts[index] = isOpen

@@ -38,8 +38,7 @@ inline fun <reified T : Any> Activity.launchActivityForResult(
 inline fun <reified T : Any> newIntent(context: Context): Intent =
     Intent(context, T::class.java)
 
-fun AppCompatActivity.getCurrentFragment(): Fragment? =
-    supportFragmentManager.fragments.firstOrNull { it.isVisible }
+fun AppCompatActivity.getCurrentFragment(): Fragment? = supportFragmentManager.fragments.last()
 
 private fun AppCompatActivity.showFragment(
     containerId: Int,

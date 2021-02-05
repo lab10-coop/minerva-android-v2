@@ -10,5 +10,6 @@ interface TokenManager {
     fun loadTokens(network: String): List<ERC20Token>
     fun saveToken(network: String, token: ERC20Token): Completable
     fun mapToAccountTokensList(network: String, tokenList: List<Pair<String, BigDecimal>>): List<AccountToken>
+    fun updateTokenIcons(): Completable
     fun getTokenIconURL(chainId: Int, address: String): Single<String>
 }
