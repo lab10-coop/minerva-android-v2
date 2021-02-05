@@ -4,22 +4,25 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.view.LayoutInflater
 import android.view.Window
-import kotlinx.android.synthetic.main.funds_at_risk_dialog_layout.*
 import minerva.android.R
+import minerva.android.databinding.FundsAtRiskDialogLayoutBinding
 
 class FundsAtRiskDialog(context: Context) : Dialog(context, R.style.DialogStyle) {
+
+    private val binding = FundsAtRiskDialogLayoutBinding.inflate(LayoutInflater.from(context))
 
     init {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         requestWindowFeature(Window.FEATURE_NO_TITLE)
-        setContentView(R.layout.funds_at_risk_dialog_layout)
+        setContentView(binding.root)
         setCancelable(false)
         initView()
     }
 
     private fun initView() {
-        confirmButton.setOnClickListener {
+        binding.confirmButton.setOnClickListener {
             dismiss()
         }
     }

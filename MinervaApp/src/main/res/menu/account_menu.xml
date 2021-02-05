@@ -12,13 +12,14 @@
     <item
         android:id="@+id/manageTokens"
         android:enabled="true"
-        android:icon="@drawable/ic_manage_asset"
+        android:icon="@drawable/ic_manage_token"
         android:title="@string/manage_token"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/safeAccountSettings"
         android:enabled="true"
+        android:icon="@drawable/ic_settings_menu"
         android:title="@string/settings"
         android:visible="false"
         app:showAsAction="ifRoom" />
@@ -28,6 +29,14 @@
         android:enabled="true"
         android:icon="@drawable/ic_lock"
         android:title="@string/add_safe_account"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/exportPrivateKey"
+        android:enabled="true"
+        android:icon="@drawable/ic_key"
+        android:title="@string/export_private_key"
         android:visible="false"
         app:showAsAction="ifRoom" />
 

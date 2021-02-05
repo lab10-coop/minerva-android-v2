@@ -64,7 +64,7 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
 
     private fun showTokenData(token: ERC20Token) {
         binding.apply {
-            TransitionManager.beginDelayedTransition(this.root)
+            TransitionManager.beginDelayedTransition(root)
             tokenImage.initView(token)
             addTokenButton.isEnabled = true
             supportText.gone()
