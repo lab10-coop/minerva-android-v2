@@ -1,12 +1,9 @@
 package minerva.android.widget
 
 import android.content.Context
-import android.text.InputType
 import android.text.TextUtils
 import android.text.method.PasswordTransformationMethod
-import android.transition.TransitionManager
 import android.util.AttributeSet
-import android.view.Gravity
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import minerva.android.R
