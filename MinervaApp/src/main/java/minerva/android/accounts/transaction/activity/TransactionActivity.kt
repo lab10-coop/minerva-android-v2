@@ -12,7 +12,6 @@ import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.fragment.TransactionSendFragment
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.accounts.transaction.fragment.adapter.TransactionPagerAdapter
-import minerva.android.accounts.transaction.fragment.scanner.AddressScannerFragment
 import minerva.android.databinding.ActivityTransactionBinding
 import minerva.android.extension.addFragmentWithBackStack
 import minerva.android.extension.getCurrentFragment
@@ -20,6 +19,7 @@ import minerva.android.extension.onTabSelected
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.main.MainActivity.Companion.ACCOUNT_INDEX
+import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedFragmentType
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -118,11 +118,11 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         )
     }
 
-    override fun showScanner() {
+    override fun showScanner(fragment: BaseScannerFragment) {
         supportActionBar?.hide()
         addFragmentWithBackStack(
             R.id.container,
-            AddressScannerFragment.newInstance(viewModel.accountIndex),
+            fragment,
             R.animator.slide_in_left,
             R.animator.slide_out_right
         )

@@ -8,14 +8,12 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.budiyev.android.codescanner.AutoFocusMode
-import com.budiyev.android.codescanner.CodeScanner
-import com.budiyev.android.codescanner.ScanMode
+import com.budiyev.android.codescanner.*
 import com.google.zxing.BarcodeFormat
 import minerva.android.R
 import minerva.android.databinding.FragmentScannerBinding
+import minerva.android.extension.visible
 import minerva.android.kotlinUtils.function.orElse
-import java.lang.Exception
 
 abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
 
@@ -23,17 +21,17 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
     private var isPermissionGranted = false
     var shouldScan = true
     lateinit var codeScanner: CodeScanner
-    abstract fun setOnCloseButtonListener()
+    abstract fun onCloseButtonAction()
     abstract fun onPermissionNotGranted()
-    abstract fun setupCallbacks()
+    abstract fun onCallbackAction(address: String)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentScannerBinding.bind(view)
         setupCodeScanner()
-        setupCallbacks()
         checkCameraPermission()
-        setOnCloseButtonListener()
+        setOnCloseButtonAction()
+        setupCallbackAction()
     }
 
     override fun onResume() {
@@ -45,6 +43,24 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
     override fun onPause() {
         codeScanner.releaseResources()
         super.onPause()
+    }
+
+    private fun setupCallbackAction() {
+        codeScanner.apply {
+            decodeCallback = DecodeCallback { result ->
+                requireActivity().runOnUiThread {
+                    if (shouldScan) {
+                        binding.scannerProgressBar.visible()
+                        onCallbackAction(result.text)
+                    }
+                }
+            }
+            errorCallback = ErrorCallback { handleCameraError(it) }
+        }
+    }
+
+    private fun setOnCloseButtonAction() {
+        binding.closeButton.setOnClickListener { onCloseButtonAction() }
     }
 
     private fun setupCodeScanner() {
@@ -73,7 +89,6 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
             Toast.makeText(context, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
         }
     }
-
 
     private fun startCameraPreview() {
         //delay to wait when camera is active, enables smooth animations

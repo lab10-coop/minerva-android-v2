@@ -27,7 +27,7 @@ class WalletConnectActivity : AppCompatActivity() {
         setContentView(binding.root)
         viewModel.getAccount(intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidValue))
         supportActionBar?.hide()
-        addFragment(R.id.wcContainer, WalletConnectScannerFragment())
+        addFragment(R.id.wcContainer, WalletConnectScannerFragment.newInstance())
         observeViewState()
     }
 

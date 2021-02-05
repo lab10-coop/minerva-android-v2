@@ -19,6 +19,7 @@ import minerva.android.R
 import minerva.android.accounts.listener.TransactionListener
 import minerva.android.accounts.transaction.fragment.adapter.RecipientAdapter
 import minerva.android.accounts.transaction.fragment.adapter.TokenAdapter
+import minerva.android.accounts.transaction.fragment.scanner.TransactionAddressScanner
 import minerva.android.databinding.FragmentTransactionSendBinding
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
@@ -182,7 +183,8 @@ class TransactionSendFragment : Fragment() {
         binding.apply {
             tokenSpinner.apply {
                 viewModel.tokensList.let { tokens ->
-                    tokenSpinner.setBackgroundResource(getSpinnerBackground(tokens.size))
+                    setBackgroundResource(getSpinnerBackground(tokens.size))
+                    isEnabled = isSpinnerEnabled(tokens.size)
                     adapter = TokenAdapter(context, R.layout.spinner_token, tokens)
                         .apply { setDropDownViewResource(R.layout.spinner_token) }
                     setSelection(spinnerPosition, false)
@@ -192,7 +194,6 @@ class TransactionSendFragment : Fragment() {
                             viewModel.tokenIndex = position - ONE_ELEMENT
                             setupTexts()
                         }
-
                         override fun onNothingSelected(adapterView: AdapterView<*>?) = setSelection(spinnerPosition, true)
                     }
                 }
@@ -235,6 +236,8 @@ class TransactionSendFragment : Fragment() {
     private fun getSpinnerBackground(size: Int) =
         if (size > ONE_ELEMENT) R.drawable.rounded_spinner_background
         else R.drawable.rounded_white_background
+
+    private fun isSpinnerEnabled(size: Int) = size > ONE_ELEMENT
 
     private fun setTransactionsCosts(transactionCost: TransactionCost) {
         with(binding) {
@@ -310,7 +313,7 @@ class TransactionSendFragment : Fragment() {
 
     private fun setGetAllBalanceListener() {
         binding.receiver.onRightDrawableClicked {
-            listener.showScanner()
+            listener.showScanner(TransactionAddressScanner.newInstance(viewModel.accountIndex))
         }
     }
 
