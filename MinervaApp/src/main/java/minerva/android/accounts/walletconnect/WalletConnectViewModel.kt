@@ -116,6 +116,7 @@ class WalletConnectViewModel(
         val address = accountManager.masterSeed.publicKey
 
         val zeroAccount = accountManager.loadAccount(2)
+wip        val oneAccount = accountManager.loadAccount(3)
 
         Timber.tag("kobe").d("master address $address")
 
@@ -126,7 +127,7 @@ class WalletConnectViewModel(
 
         //zmien an chainID i sie zaloguj na ethereum
         launchDisposable {
-            repository.approveSession(listOf(zeroAccount.address), 1, topic.peerId, getDapp(meta))
+            repository.approveSession(listOf(oneAccount.address), 1, topic.peerId, getDapp(meta))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onError = { OnError(it) })
