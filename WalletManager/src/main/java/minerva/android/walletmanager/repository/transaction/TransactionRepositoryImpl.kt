@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.repository.transaction
 
+import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -7,6 +8,7 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.TokenBalance
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
@@ -188,25 +190,33 @@ class TransactionRepositoryImpl(
 
     /**
      *
-     * return statement: Single<Pair<String, List<Pair<String, BigDecimal>>>>
+     * return statement: Single<Triple<String, String, List<Pair<String, BigDecimal>>>>
      *                   Single<Triple<Network, ValuePrivateKey, List<ContractAddress, BalanceOnContract>>>>
      *
      */
 
-    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, BigDecimal>>>> =
-        tokenManager.loadTokens(account.network.short).let { tokens ->
-            return Observable.range(START, tokens.size)
-                .flatMap {
-                    blockchainRepository.refreshTokenBalance(
-                        account.privateKey,
-                        account.network.short,
-                        tokens[it].address,
-                        account.address
-                    )
+    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, TokenBalance>>>> =
+        cryptoApi.getTokenBalance(url = "https://explorer.tau1.artis.network/api?module=account&action=tokenlist&address=0xfc54b30deA6c861E79CC49c3CB75b12246C11F1b")
+            .map {
+                Log.e("klop", "Tokens list: ${it.message} for account: ${account.name} whis is deleted: ${account.isDeleted}")
+                it.tokens.forEach {
+                    Log.e("klop", "${it.name}")
                 }
-                .toList()
-                .map { Triple(account.network.short, account.privateKey, it) }
-        }
+
+                Triple(account.network.short, account.privateKey, listOf<Pair<String, TokenBalance>>())
+            }
+        //tokenManager.loadTokens(account.network.short).let { tokens ->
+//            return Observable.range(START, tokens.size)
+//                .flatMap {
+//                    blockchainRepository.refreshTokenBalance(
+//                        account.privateKey,
+//                        account.network.short,
+//                        tokens[it].address,
+//                        account.address
+//                    )
+//                }
+//                .toList()
+//                .map { Triple(account.network.short, account.privateKey, it) }
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
 

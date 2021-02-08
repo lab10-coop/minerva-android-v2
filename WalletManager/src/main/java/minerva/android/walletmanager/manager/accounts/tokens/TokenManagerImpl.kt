@@ -5,6 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
+import minerva.android.apiProvider.model.TokenBalance
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
@@ -47,7 +48,7 @@ class TokenManagerImpl(
 
     override fun mapToAccountTokensList(
         network: String,
-        tokenList: List<Pair<String, BigDecimal>>
+        tokenList: List<Pair<String, TokenBalance>>
     ): List<AccountToken> =
         loadTokens(network).let { allNetworkTokens ->
             tokenList.map {
@@ -88,10 +89,10 @@ class TokenManagerImpl(
     @VisibleForTesting
     fun generateTokenIconKey(chainId: Int, address: String) = "$chainId$address"
 
-    private fun getTokenFromPair(allTokens: List<Token>, raw: Pair<String, BigDecimal>): AccountToken =
+    private fun getTokenFromPair(allTokens: List<Token>, raw: Pair<String, TokenBalance>): AccountToken =
         ((allTokens.find { (it as? ERC20Token)?.address == raw.first } as? ERC20Token)
             ?: ERC20Token(chainId = Int.InvalidValue, address = raw.first)).let {
-            AccountToken(it, raw.second)
+            AccountToken(it, raw.second.balance.toBigDecimal())
         }
 
     @VisibleForTesting

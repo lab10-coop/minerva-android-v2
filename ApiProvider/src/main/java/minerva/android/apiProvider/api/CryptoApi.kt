@@ -3,10 +3,7 @@ package minerva.android.apiProvider.api
 import io.reactivex.Single
 import minerva.android.apiProvider.api.ServicesApi.Companion.APPLICATION_JSON
 import minerva.android.apiProvider.api.ServicesApi.Companion.CONTENT_TYPE
-import minerva.android.apiProvider.model.CommitElement
-import minerva.android.apiProvider.model.GasPrice
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.TokenIconDetails
+import minerva.android.apiProvider.model.*
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
@@ -41,7 +38,7 @@ interface CryptoApi {
     fun getTokenBalance(
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
         @Url url: String
-    ) : Single<String>
+    ) : Single<TokenBalanceResponse>
 
     companion object {
         private const val IDS = "ids"

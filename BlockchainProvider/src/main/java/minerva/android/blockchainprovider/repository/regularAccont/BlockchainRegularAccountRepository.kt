@@ -13,6 +13,7 @@ import java.math.BigInteger
 
 interface BlockchainRegularAccountRepository {
     fun refreshBalances(networkAddress: List<Pair<String, String>>): Single<List<Pair<String, BigDecimal>>>
+    @Deprecated("Refreshing tokens is outdated. Use CryptoApi request")
     fun refreshTokenBalance(
         privateKey: String,
         network: String,

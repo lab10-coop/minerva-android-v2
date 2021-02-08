@@ -22,13 +22,7 @@
     "wsRpc": "wss://rinkeby.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
-    "assets": [
-      {
-        "name": "FaucetToken",
-        "shortName": "FAU",
-        "address": "0xFab46E002BbF0b4509813474841E0716E6730136"
-      }
-    ],
+    "assets": [],
     "color": "#FF6535c9",
     "testNet": true,
     "chainId": 4
@@ -56,13 +50,7 @@
     "wsRpc": "wss://rpc.xdaichain.com/wss",
     "gasPriceOracle": "",
     "gasPrice": "1000000000",
-    "assets": [
-      {
-        "name": "ATS on xdai chain",
-        "shortName": "xATS",
-        "address": "0x85886F6e9458290e7d267cB79A61c0CD7c505447"
-      }
-    ],
+    "assets": [],
     "color": "#48a9a6",
     "testNet": false,
     "chainId": 100
@@ -146,13 +134,7 @@
     "wsRpc": "wss://mainnet.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "https://ethgasstation.info/api/ethgasAPI.json?api-key=0175467b9d55284764b8e8338fe476b229ce7950d2dfc9dbed57a739aed2",
     "gasPrice": "20000000000",
-    "assets": [
-      {
-        "name": "ATS on Ethereum",
-        "shortName": "ATS20",
-        "address": "0xe41dd6e41f8f9962c5103d95d95f5d9b82d90fdf"
-      }
-    ],
+    "assets": [],
     "color": "#393939",
     "testNet": false,
     "chainId": 1
