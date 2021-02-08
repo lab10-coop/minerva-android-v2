@@ -4,100 +4,107 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lightGray"
-    android:clickable="true"
-    android:clipToPadding="false"
-    android:padding="@dimen/margin_normal"
     tools:context=".token.AddTokenFragment">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/rounded_white_background"
-        android:elevation="@dimen/cardview_default_elevation"
-        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:clipToPadding="false"
         android:padding="@dimen/margin_normal"
-        tools:ignore="PrivateResource">
+        android:layout_marginBottom="@dimen/bottom_button_margin">
 
-        <minerva.android.widget.blockies.BlockiesImageView
-            android:layout_marginTop="60dp"
-            android:id="@+id/token_image"
-            android:layout_width="@dimen/big_letter_logo_size"
-            android:layout_height="@dimen/big_letter_logo_size"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_default_token"
-            tools:ignore="ContentDescription" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/token_address_layout"
-            style="@style/FormTextInputLayoutStyle"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_xsmall"
-            android:hint="@string/contract_address_or_name">
+            android:background="@drawable/rounded_white_background"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:orientation="vertical"
+            android:padding="@dimen/margin_normal"
+            tools:ignore="PrivateResource">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/token_address"
-                style="@style/EditTextInputLayoutStyle"
+            <minerva.android.widget.blockies.BlockiesImageView
+                android:id="@+id/token_image"
+                android:layout_width="@dimen/big_letter_logo_size"
+                android:layout_height="@dimen/big_letter_logo_size"
+                android:layout_marginTop="60dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_default_token"
+                tools:ignore="ContentDescription" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/token_address_layout"
+                style="@style/FormTextInputLayoutStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableEnd="@drawable/ic_barcode_scanner"
-                android:inputType="text"
-                tools:ignore="LabelFor" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginTop="@dimen/margin_xsmall"
+                android:hint="@string/contract_address_or_name">
 
-        <ProgressBar
-            android:id="@+id/loader"
-            android:layout_width="@dimen/progressbar_size_small"
-            android:layout_height="@dimen/progressbar_size_small"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:foregroundGravity="center"
-            android:visibility="gone" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/token_address"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/ic_barcode_scanner"
+                    android:inputType="text"
+                    tools:ignore="LabelFor" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/support_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginBottom="@dimen/margin_normal"
-            android:gravity="center"
-            android:text="@string/minerva_support"
-            android:textColor="@color/titleColor"
-            android:textSize="@dimen/text_small" />
+            <ProgressBar
+                android:id="@+id/loader"
+                android:layout_width="@dimen/progressbar_size_small"
+                android:layout_height="@dimen/progressbar_size_small"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/margin_normal"
+                android:foregroundGravity="center"
+                android:visibility="gone" />
 
-        <minerva.android.widget.HorizontalLabeledTextView
-            android:id="@+id/address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_xsmall"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:visibility="gone" />
+            <TextView
+                android:id="@+id/support_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_normal"
+                android:layout_marginBottom="@dimen/margin_normal"
+                android:gravity="center"
+                android:text="@string/minerva_support"
+                android:textColor="@color/titleColor"
+                android:textSize="@dimen/text_small" />
 
-        <minerva.android.widget.HorizontalLabeledTextView
-            android:id="@+id/name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_xsmall"
-            android:layout_marginTop="@dimen/margin_xxsmall"
-            android:visibility="gone" />
+            <minerva.android.widget.HorizontalLabeledTextView
+                android:id="@+id/address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_xsmall"
+                android:layout_marginTop="@dimen/margin_normal"
+                android:visibility="gone" />
 
-        <minerva.android.widget.HorizontalLabeledTextView
-            android:id="@+id/symbol"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_xsmall"
-            android:layout_marginTop="@dimen/margin_xxsmall"
-            android:visibility="gone" />
+            <minerva.android.widget.HorizontalLabeledTextView
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_xsmall"
+                android:layout_marginTop="@dimen/margin_xxsmall"
+                android:visibility="gone" />
 
-        <minerva.android.widget.HorizontalLabeledTextView
-            android:id="@+id/decimals"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_xsmall"
-            android:layout_marginTop="@dimen/margin_xxsmall"
-            android:layout_marginBottom="@dimen/margin_normal"
-            android:visibility="gone" />
-    </LinearLayout>
+            <minerva.android.widget.HorizontalLabeledTextView
+                android:id="@+id/symbol"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_xsmall"
+                android:layout_marginTop="@dimen/margin_xxsmall"
+                android:visibility="gone" />
+
+            <minerva.android.widget.HorizontalLabeledTextView
+                android:id="@+id/decimals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_xsmall"
+                android:layout_marginTop="@dimen/margin_xxsmall"
+                android:layout_marginBottom="@dimen/margin_normal"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/add_token_button"
@@ -105,8 +112,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
         android:elevation="@dimen/elevation_small"
-        android:text="@string/add_token"
         android:enabled="false"
-        />
+        android:text="@string/add_token" />
 </FrameLayout>
