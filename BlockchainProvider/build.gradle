@@ -53,7 +53,5 @@ dependencies {
     implementation blockChainDependencies.values()
     implementation rxDependencies.values()
     implementation koinDependencies.values()
-    implementation "com.trustwallet:wallet-core:0.12.31"
-
     testImplementation testDependencies.values()
 }
