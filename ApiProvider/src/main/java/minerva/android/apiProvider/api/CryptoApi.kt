@@ -35,6 +35,14 @@ interface CryptoApi {
         @Url url: String
     ) : Single<List<CommitElement>>
 
+
+    //TODO make it real
+    @GET
+    fun getTokenBalance(
+        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
+        @Url url: String
+    ) : Single<String>
+
     companion object {
         private const val IDS = "ids"
         private const val VS_CURRENCIES = "vs_currencies"
