@@ -3,7 +3,7 @@ package minerva.android.main.handler
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import minerva.android.R
-import minerva.android.accounts.transaction.fragment.AccountsFragment
+import minerva.android.accounts.transaction.fragment.ValuesFragment
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.MainActivity
 import minerva.android.services.ServicesFragment
@@ -21,19 +21,22 @@ internal fun MainActivity.isValuesTabSelected() = binding.bottomNavigation.selec
 internal fun MainActivity.isIdentitiesTabSelected() = binding.bottomNavigation.selectedItemId == R.id.identities
 
 internal fun MainActivity.prepareBottomNavMenu() {
-    binding.bottomNavigation.setOnNavigationItemSelectedListener { item ->
-        when (item.itemId) {
-            R.id.identities -> replaceFragment(IdentitiesFragment())
-            R.id.values -> replaceFragment(AccountsFragment(), R.string.accounts)
-            R.id.services -> replaceFragment(ServicesFragment.newInstance(), R.string.services)
-            R.id.activity -> replaceFragment(WalletActionsFragment(), R.string.activity)
-            R.id.settings -> replaceFragment(SettingsFragment(), R.string.settings)
+    binding.bottomNavigation.apply {
+        selectedItemId = R.id.values
+        setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.identities -> replaceFragment(IdentitiesFragment(), R.string.identities)
+                R.id.values -> replaceFragment(ValuesFragment(), R.string.values)
+                R.id.services -> replaceFragment(ServicesFragment.newInstance(), R.string.services)
+                R.id.activity -> replaceFragment(WalletActionsFragment(), R.string.activity)
+                R.id.settings -> replaceFragment(SettingsFragment(), R.string.settings)
+            }
+            true
         }
-        true
     }
 }
 
-internal fun MainActivity.replaceFragment(fragment: Fragment, @StringRes title: Int = R.string.identities) {
+internal fun MainActivity.replaceFragment(fragment: Fragment, @StringRes title: Int = R.string.values) {
     supportActionBar?.setTitle(title)
     invalidateOptionsMenu()
     supportFragmentManager.beginTransaction().apply {

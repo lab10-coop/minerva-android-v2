@@ -13,7 +13,7 @@ import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
-import minerva.android.accounts.transaction.fragment.AccountsFragment
+import minerva.android.accounts.transaction.fragment.ValuesFragment
 import minerva.android.accounts.walletconnect.WalletConnectActivity
 import minerva.android.databinding.ActivityMainBinding
 import minerva.android.extension.*
@@ -47,8 +47,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         prepareBottomNavMenu()
-        replaceFragment(IdentitiesFragment())
-        prepareSettingsIcon()
+        replaceFragment(ValuesFragment.newInstance())
         prepareSettingsIcon()
         prepareObservers()
         viewModel.restorePendingTransactions()
@@ -123,7 +122,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 ).show()
             })
             loadingLiveData.observe(this@MainActivity, EventObserver {
-                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(it.first, it.second)
+                (getCurrentFragment() as? ValuesFragment)?.setPendingAccount(it.first, it.second)
             })
             updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(true, it)
@@ -159,7 +158,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             getString(R.string.transaction_success_title),
             getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
         )
-        (getCurrentFragment() as? AccountsFragment)?.apply {
+        (getCurrentFragment() as? ValuesFragment)?.apply {
             updateAccountFragment() {
                 setPendingAccount(it.index, false)
             }
@@ -168,7 +167,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     private fun stopPendingAccounts() {
-        (getCurrentFragment() as? AccountsFragment)?.apply { updateAccountFragment() { stopPendingTransactions() } }
+        (getCurrentFragment() as? ValuesFragment)?.apply { updateAccountFragment() { stopPendingTransactions() } }
     }
 
     private fun handlePendingAccountsResults(account: PendingAccount) {
@@ -197,7 +196,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         MinervaFlashbar.show(this@MainActivity, title, message)
     }
 
-    private fun AccountsFragment.updateAccountFragment(updatePending: () -> Unit) {
+    private fun ValuesFragment.updateAccountFragment(updatePending: () -> Unit) {
         updatePending()
         refreshBalances()
     }
@@ -269,7 +268,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             val index = getIntExtra(ACCOUNT_INDEX, Int.InvalidValue)
             if (index != Int.InvalidValue) {
                 viewModel.subscribeToExecutedTransactions(index)
-                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
+                (getCurrentFragment() as? ValuesFragment)?.setPendingAccount(index, true)
             } else {
                 getStringExtra(TRANSACTION_MESSAGE)?.let {
                     showFlashbar(getString(R.string.transaction_success_title), it)
@@ -312,8 +311,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     override fun onBackPressed() {
-        if (isIdentitiesTabSelected()) super.onBackPressed()
-        else binding.bottomNavigation.selectedItemId = R.id.identities
+        if (isValuesTabSelected()) super.onBackPressed()
+        else setDefaultBottomNavigationIcon()
     }
 
     override fun removeSettingsBadgeIcon() =
@@ -323,6 +322,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         launchActivity<WalletConnectActivity>() {
             putExtra(ACCOUNT_INDEX, index)
         }
+    }
+
+    private fun setDefaultBottomNavigationIcon() {
+        binding.bottomNavigation.selectedItemId = R.id.values
     }
 
     private fun startNewAccountActivity() {
