@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_xsmall"
-        android:drawableStart="@drawable/ic_lock"
+        android:drawableStart="@drawable/ic_connection_safe"
         android:drawablePadding="@dimen/margin_xsmall"
         android:fontFamily="@font/rubik_medium"
         android:textColor="@color/networksTypeHeader"

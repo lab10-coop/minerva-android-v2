@@ -15,7 +15,6 @@ import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
-import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.*
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.*
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
