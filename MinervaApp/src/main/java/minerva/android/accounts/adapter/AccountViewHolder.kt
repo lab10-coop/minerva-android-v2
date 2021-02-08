@@ -117,6 +117,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun PopupMenu.setMenuItems(account: Account) {
         with(menu) {
             findItem(R.id.addSafeAccount).isVisible = isCreatingSafeAccountAvailable(account)
+            findItem(R.id.exportPrivateKey).isVisible = isExportSafeAccountAvailable(account)
             findItem(R.id.safeAccountSettings).isVisible = isSafeAccount(account)
             if (account.dappSessionCount != 0) {
                 findItem(R.id.walletConnect).title =
@@ -182,14 +183,16 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 R.id.manageTokens -> listener.onManageTokens(index)
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
+                R.id.exportPrivateKey -> listener.onExportPrivateKey(account)
                 R.id.remove -> listener.onAccountRemoved(index)
             }
             true
         }
     }
 
-    private fun isCreatingSafeAccountAvailable(account: Account) =
-        !isSafeAccount(account) && account.network.isSafeAccountAvailable
+    private fun isCreatingSafeAccountAvailable(account: Account) = !isSafeAccount(account) && account.network.isSafeAccountAvailable
+
+    private fun isExportSafeAccountAvailable(account: Account) = !isSafeAccount(account)
 
     private fun isSafeAccount(account: Account) =
         account.network.isAvailable() && account.isSafeAccount

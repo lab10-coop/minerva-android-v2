@@ -9,7 +9,6 @@ import minerva.android.R
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_CLASSIC_KOTTI
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_KOV
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_MAIN
@@ -26,29 +25,28 @@ fun getNetworkIcon(context: Context, networkShort: String, isSafeAccount: Boolea
 
 private fun getMainIcon(networkShort: String): Int =
     when (networkShort) {
+        ATS_SIGMA -> R.drawable.ic_artis_sigma
+        ETH_MAIN -> R.drawable.ic_ethereum
+        XDAI -> R.drawable.ic_xdai
+        POA_CORE -> R.drawable.ic_poa_core
         ATS_TAU -> R.drawable.ic_artis
         POA_SKL -> R.drawable.ic_poa
         LUKSO_14 -> R.drawable.ic_lukso
-        ETH_CLASSIC_KOTTI -> R.drawable.ic_ethereum_classic
+        ETH_KOV, ETH_RIN, ETH_ROP -> R.drawable.ic_etherium_test
         ETH_GOR -> R.drawable.ic_gorli
-        ETH_RIN, ETH_ROP, ETH_KOV, ETH_MAIN -> R.drawable.ic_ethereum
-        XDAI -> R.drawable.ic_xdai
-        POA_CORE -> R.drawable.ic_poa_core
-        ATS_SIGMA -> R.drawable.ic_artis_sigma
         else -> Int.InvalidId
     }
 
 fun getMainTokenIconRes(networkShort: String): Int =
     when (networkShort) {
-        ATS_TAU -> R.drawable.ic_tats
-        ATS_SIGMA -> R.drawable.ic_sigma_one
-        POA_SKL -> R.drawable.ic_poa
+        ATS_SIGMA -> R.drawable.ic_artis_sigma_token
+        ETH_MAIN -> R.drawable.ic_ethereum_token
+        XDAI -> R.drawable.ic_xdai_token
+        POA_CORE -> R.drawable.ic_poa_token
+        ATS_TAU -> R.drawable.ic_artis_token
+        ETH_KOV, ETH_RIN, ETH_ROP, ETH_GOR -> R.drawable.ic_ethereum_token_test
+        POA_SKL -> R.drawable.ic_skl_token
         LUKSO_14 -> R.drawable.ic_lukso
-        ETH_CLASSIC_KOTTI -> R.drawable.ic_ethereum_classic
-        ETH_GOR -> R.drawable.ic_ethereum
-        ETH_RIN, ETH_ROP, ETH_KOV, ETH_MAIN -> R.drawable.ic_ethereum
-        XDAI -> R.drawable.ic_xdai
-        POA_CORE -> R.drawable.ic_poa_core
         else -> R.drawable.ic_default_token
     }
 

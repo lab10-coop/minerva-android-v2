@@ -16,7 +16,7 @@
   {
     "full": "Ethereum (Rinkeby)",
     "short": "eth_rinkeby",
-    "token": "rETH",
+    "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
     "wsRpc": "wss://rinkeby.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -29,7 +29,7 @@
         "address": "0xFab46E002BbF0b4509813474841E0716E6730136"
       }
     ],
-    "color": "#FF486FFF",
+    "color": "#FF6535c9",
     "testNet": true,
     "chainId": 4
   },
@@ -68,7 +68,7 @@
     "chainId": 100
   },
   {
-    "full": "POA Network (Sokol)",
+    "full": "POA Sokol",
     "short": "poa_sokol",
     "token": "tPOA",
     "isSafeAccountAvailable": "false",
@@ -105,7 +105,7 @@
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
     "assets": [],
-    "color": "#FF6434C9",
+    "color": "#FF6535c9",
     "testNet": true,
     "chainId": 42
   },
@@ -126,14 +126,14 @@
   {
     "full": "Ethereum (Ropsten)",
     "short": "eth_ropsten",
-    "token": "rETH",
+    "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
     "wsRpc": "wss://ropsten.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
     "assets": [],
-    "color": "#FF486FFF",
+    "color": "#FF6535c9",
     "testNet": true,
     "chainId": 3
   },
@@ -153,7 +153,7 @@
         "address": "0xe41dd6e41f8f9962c5103d95d95f5d9b82d90fdf"
       }
     ],
-    "color": "#486fff",
+    "color": "#393939",
     "testNet": false,
     "chainId": 1
   },

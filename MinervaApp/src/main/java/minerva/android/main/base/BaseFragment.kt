@@ -37,9 +37,6 @@ open class BaseFragment(@LayoutRes contentLayoutId: Int) : Fragment(contentLayou
     }
 
     fun getHeader(areMainNetworkEnabled: Boolean) =
-        if (areMainNetworkEnabled) {
-            "${getText(R.string.main_networks)} {` ${getString(R.string.beta_funds_at_risk)}` < text-color:#DD2B00 />}".spannify()
-        } else {
-            getString(R.string.test_networks)
-        }
+        if (areMainNetworkEnabled) getString(R.string.main_networks)
+        else getString(R.string.test_networks)
 }

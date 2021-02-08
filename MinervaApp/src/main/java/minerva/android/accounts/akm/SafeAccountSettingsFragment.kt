@@ -20,6 +20,7 @@ import minerva.android.extension.getValidationObservable
 import minerva.android.extension.onRightDrawableClicked
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.token.AddressScannerFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
@@ -128,7 +129,7 @@ class SafeAccountSettingsFragment : Fragment(), OnOwnerRemovedListener {
     }
 
     private fun setAddressScannerListener() {
-        newOwner.onRightDrawableClicked { listener.showScanner() }
+        newOwner.onRightDrawableClicked { listener.showScanner(AddressScannerFragment.newInstance()) }
     }
 
     companion object {
