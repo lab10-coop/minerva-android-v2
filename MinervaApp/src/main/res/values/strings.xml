@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Minerva Wallet</string>
     <string name="identities">Identities</string>
-    <string name="values">Accounts</string>
+    <string name="values">Values</string>
     <string name="accounts_navigation_menu_header">Values</string>
     <string name="services">Services</string>
     <string name="activity">Activity</string>
