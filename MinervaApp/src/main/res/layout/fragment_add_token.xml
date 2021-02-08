@@ -19,6 +19,7 @@
         tools:ignore="PrivateResource">
 
         <minerva.android.widget.blockies.BlockiesImageView
+            android:layout_marginTop="60dp"
             android:id="@+id/token_image"
             android:layout_width="@dimen/big_letter_logo_size"
             android:layout_height="@dimen/big_letter_logo_size"
@@ -105,7 +106,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:elevation="@dimen/elevation_small"
-        android:outlineProvider="none"
         android:text="@string/add_token"
         android:enabled="false"
         />
