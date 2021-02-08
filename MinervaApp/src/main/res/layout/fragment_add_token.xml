@@ -28,7 +28,6 @@
                 android:id="@+id/token_image"
                 android:layout_width="@dimen/big_letter_logo_size"
                 android:layout_height="@dimen/big_letter_logo_size"
-                android:layout_marginTop="60dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_default_token"
                 tools:ignore="ContentDescription" />
