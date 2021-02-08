@@ -1,12 +1,10 @@
-package minerva.android.walletConnect.utils
+package minerva.android.kotlinUtils.crypto
 
-import okhttp3.internal.and
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
-
 
 fun ByteArray.toHexString(): String = toHexString(this, 0, this.size, false)
 
@@ -58,8 +56,9 @@ private fun toHexString(input: ByteArray, offset: Int, length: Int, withPrefix: 
     }
     return stringBuilder.toString()
 }
+infix fun Byte.and(mask: Int): Int = toInt() and mask
 
-private fun hexStringToByteArray(input: String): ByteArray {
+fun hexStringToByteArray(input: String): ByteArray {
     val cleanInput: String = cleanHexPrefix(input)
     val len = cleanInput.length
     if (len == 0) {

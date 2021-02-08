@@ -51,7 +51,11 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `do not reconnect when no sessions saved test`() {
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnSessionRequest(WalletConnectPeerMeta(), 1, Topic()))
+        )
         whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(listOf()))
+        doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
         viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
         verify(walletConnectRepository, times(0)).connect(any(), any(), any())
     }

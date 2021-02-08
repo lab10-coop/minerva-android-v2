@@ -1,5 +1,7 @@
 package minerva.android.walletConnect.utils
 
+import minerva.android.kotlinUtils.crypto.toByteArray
+import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.walletConnect.model.exceptions.InvalidHmacException
 import minerva.android.walletConnect.model.session.WCEncryptionPayload
 import java.security.SecureRandom

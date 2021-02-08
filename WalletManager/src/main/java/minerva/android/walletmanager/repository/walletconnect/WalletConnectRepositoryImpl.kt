@@ -9,29 +9,22 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.crypto.getFormattedMessage
+import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.*
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.*
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
-import minerva.android.walletConnect.utils.getFormattedMessage
-import minerva.android.walletConnect.utils.hexToUtf8
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.model.DappSession
 import minerva.android.walletmanager.model.Topic
 import minerva.android.walletmanager.model.WalletConnectSession
 import minerva.android.walletmanager.model.mappers.*
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 import timber.log.Timber
-import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
-import java.security.PrivateKey
 import java.util.concurrent.ConcurrentHashMap
 
 class WalletConnectRepositoryImpl(
@@ -79,8 +72,6 @@ class WalletConnectRepositoryImpl(
             onWCOpen = { peerId -> clientMap[peerId] = this }
 
             onSessionRequest = { remotePeerId, meta, chainId, peerId ->
-                Timber.tag("kobe").d("session request")
-
                 status.onNext(
                     OnSessionRequest(
                         WCPeerToWalletConnectPeerMetaMapper.map(meta),
@@ -91,11 +82,9 @@ class WalletConnectRepositoryImpl(
             }
             onFailure = { error, peerId ->
                 Timber.e(error)
-                Timber.tag("kobe").d("failure")
                 status.onNext(OnConnectionFailure(error, peerId))
             }
             onDisconnect = { _, peerId ->
-                Timber.tag("kobe").d("disconnect")
                 peerId?.let {
                     if (walletConnectClients.containsKey(peerId)) {
                         deleteSession(peerId)
@@ -105,27 +94,9 @@ class WalletConnectRepositoryImpl(
             }
 
             onEthSign = { id, message, peerId ->
-
-                Timber.tag("kobe").d("eth sign")
                 currentRequestId = id
                 currentEthMessage = message
-
-                Timber.tag("kobe").d("before enc ${message.data}")
-                Timber.tag("kobe").d("RAW ${message.raw}")
-
-                val data: String = when (message.type) {
-                    PERSONAL_MESSAGE -> {
-                        Timber.tag("kobe").d("PERSONAL_MESSAGE ${message.data.hexToUtf8}")
-                        message.data.hexToUtf8
-                    }
-                    MESSAGE, TYPED_MESSAGE -> {
-                        Timber.tag("kobe").d("typed message ${message.data.getFormattedMessage}")
-                        message.data.getFormattedMessage
-                    }
-                }
-
-                Timber.tag("kobe").d("data $data")
-                status.onNext(OnEthSign(data, peerId))
+                status.onNext(OnEthSign(getUserReadableData(message), peerId))
             }
 
             connect(
@@ -137,6 +108,12 @@ class WalletConnectRepositoryImpl(
         }
     }
 
+    private fun getUserReadableData(message: WCEthereumSignMessage) =
+        when (message.type) {
+            PERSONAL_MESSAGE -> message.data.hexToUtf8
+            MESSAGE, TYPED_MESSAGE -> message.data.getFormattedMessage
+        }
+
     private fun deleteSession(peerId: String) {
         disposable = deleteDappSession(peerId)
             .subscribeOn(Schedulers.io())
@@ -147,14 +124,12 @@ class WalletConnectRepositoryImpl(
     override fun getWCSessionFromQr(qrCode: String): WalletConnectSession =
         WCSessionToWalletConnectSessionMapper.map(WCSession.from(qrCode))
 
-    override fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSession): Completable {
-        val isApproved: Boolean = clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true
-        return if (isApproved) {
+    override fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSession): Completable =
+        if (clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true) {
             saveDappSession(dapp)
         } else {
             Completable.error(Throwable("Session not approved"))
         }
-    }
 
     override fun rejectSession(peerId: String) {
         with(clientMap) {
@@ -163,11 +138,14 @@ class WalletConnectRepositoryImpl(
         }
     }
 
-    override fun approveRequest(peerId: String, privateKey: String, mnemonic: String) {
-        clientMap[peerId]?.approveRequest(
-            currentRequestId,
-            signatureRepository.signData(currentEthMessage.data, privateKey, mnemonic)
-        )
+    override fun approveRequest(peerId: String, privateKey: String) {
+        clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
+    }
+
+    private fun signData(privateKey: String) = if (currentEthMessage.type == TYPED_MESSAGE) {
+        signatureRepository.signTypedData(currentEthMessage.data, privateKey)
+    } else {
+        signatureRepository.signData(currentEthMessage.data, privateKey)
     }
 
     override fun rejectRequest(peerId: String) {

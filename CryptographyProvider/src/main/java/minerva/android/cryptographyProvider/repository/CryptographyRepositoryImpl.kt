@@ -33,8 +33,6 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         ByteArray(ENTROPY_SIZE).run {
             SecureRandom().nextBytes(this)
             getMasterKeys(toNoPrefixHexString(), derivationPath).run {
-
-                Timber.tag("kobe").d("master address ${getAddress()} master public: ${getPublicKey()}, private: ${getPrivateKey()}")
                 return Single.just(Triple(toNoPrefixHexString(), getAddress(), getPrivateKey()))
             }
         }
@@ -54,10 +52,6 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
     ): Single<DerivedKeys> {
         val derivationPath = "${derivationPathPrefix}$index"
         val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
-
-        Timber.tag("kobe")
-            .d("index $index address testNet ${isTestNet} ${keys.getAddress()}publicKey ${keys.publicKey}, privateKey ${keys.privateKey}")
-
         val derivedKeys =
             DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
         return Single.just(derivedKeys)

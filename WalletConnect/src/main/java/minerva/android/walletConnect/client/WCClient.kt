@@ -6,6 +6,7 @@ import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.crypto.toByteArray
 import minerva.android.walletConnect.model.enums.MessageType
 import minerva.android.walletConnect.model.enums.WCMethod
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
@@ -17,7 +18,6 @@ import minerva.android.walletConnect.model.jsonRpc.JsonRpcRequest
 import minerva.android.walletConnect.model.jsonRpc.JsonRpcResponse
 import minerva.android.walletConnect.model.session.*
 import minerva.android.walletConnect.utils.WCCipher
-import minerva.android.walletConnect.utils.toByteArray
 import okhttp3.*
 import okio.ByteString
 import java.util.*

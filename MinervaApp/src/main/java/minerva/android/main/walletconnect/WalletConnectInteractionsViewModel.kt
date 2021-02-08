@@ -71,10 +71,8 @@ class WalletConnectInteractionsViewModel(
 
     private fun mapRequests(it: WalletConnectStatus) = when (it) {
         is OnEthSign -> {
-            Timber.tag("kobe").d("mapping onEthSign")
             walletConnectRepository.getDappSessionById(it.peerId)
                 .map { session ->
-                    Timber.tag("kobe").d("session ${session.address}")
                     currentDappSession = session
                     OnEthSignRequest(it.message, session)
                 }
@@ -85,19 +83,8 @@ class WalletConnectInteractionsViewModel(
 
     fun acceptRequest() {
         val account = transactionRepository.getAccountByAddress(currentDappSession.address)
-
-        Timber.tag("kobe").d("account address ${account?.address}")
-        Timber.tag("kobe").d("account priv key ${account?.privateKey}")
-
-        val privateMasterKey = transactionRepository.masterSeed.privateKey
-        Timber.tag("kobe").d("master priv key $privateMasterKey")
-
         account?.privateKey?.let {
-            walletConnectRepository.approveRequest(
-                currentDappSession.peerId,
-                privateMasterKey,
-                transactionRepository.getMnemonic()
-            )
+            walletConnectRepository.approveRequest(currentDappSession.peerId, it)
         }
     }
 
