@@ -1,6 +1,7 @@
 package minerva.android.blockchainprovider.repository.signature
 
 import minerva.android.blockchainprovider.repository.web3j.StructuredDataEncoder
+import minerva.android.kotlinUtils.crypto.HEX_PREFIX
 import minerva.android.kotlinUtils.crypto.hexStringToByteArray
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.Sign
@@ -9,7 +10,7 @@ import org.web3j.utils.Numeric
 class SignatureRepositoryImpl : SignatureRepository {
 
     override fun signData(data: String, privateKey: String): String {
-        val messageBytes = if (data.startsWith("0x")) {
+        val messageBytes = if (data.startsWith(HEX_PREFIX)) {
             hexStringToByteArray(data)
         } else {
             data.toByteArray()

@@ -6,6 +6,8 @@ import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
+const val HEX_PREFIX = "0x"
+
 fun ByteArray.toHexString(): String = toHexString(this, 0, this.size, false)
 
 fun String.toByteArray(): ByteArray = hexStringToByteArray(this)
@@ -56,6 +58,7 @@ private fun toHexString(input: ByteArray, offset: Int, length: Int, withPrefix: 
     }
     return stringBuilder.toString()
 }
+
 infix fun Byte.and(mask: Int): Int = toInt() and mask
 
 fun hexStringToByteArray(input: String): ByteArray {

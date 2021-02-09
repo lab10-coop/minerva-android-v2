@@ -32,10 +32,12 @@ import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
+import minerva.android.utils.exhaustive
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.repository.walletconnect.OnEthSign
 import minerva.android.widget.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
@@ -109,19 +111,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     private fun prepareObservers() {
         walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
-            when (it) {
-                is OnEthSignRequest -> {
-                    signDialog = if (signDialog != null) {
-                        signDialog?.dismiss()
-                        getDappSignDialog(it)
-                    } else {
-                        getDappSignDialog(it)
-                    }
-                }
-                is OnDisconnected -> {
-                    signDialog?.dismiss()
-                    signDialog = null
-                }
+            signDialog?.dismiss()
+            signDialog = if (it is OnEthSignRequest) {
+                getDappSignDialog(it)
+            } else {
+                null
             }
         })
         viewModel.apply {

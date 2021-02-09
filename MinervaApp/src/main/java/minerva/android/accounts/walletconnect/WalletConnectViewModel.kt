@@ -41,13 +41,14 @@ class WalletConnectViewModel(
                 .doOnNext { _viewStateLiveData.value = ProgressBarState(false) }
                 .subscribeBy(
                     onNext = {
-                        when (it) {
+                        _viewStateLiveData.value = when (it) {
                             is OnSessionRequest -> {
                                 topic = it.topic
-                                _viewStateLiveData.value = handleSessionRequest(it)
+                                handleSessionRequest(it)
                             }
-                            is OnConnectionFailure -> _viewStateLiveData.value = OnError(it.error)
-                            is OnDisconnect -> _viewStateLiveData.value = OnDisconnected
+                            is OnConnectionFailure -> OnError(it.error)
+                            is OnDisconnect -> OnDisconnected
+                            else -> DefaultRequest
                         }
                     },
                     onError = {

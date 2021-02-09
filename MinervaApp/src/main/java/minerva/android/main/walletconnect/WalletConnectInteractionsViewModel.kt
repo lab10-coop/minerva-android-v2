@@ -82,9 +82,8 @@ class WalletConnectInteractionsViewModel(
     }
 
     fun acceptRequest() {
-        val account = transactionRepository.getAccountByAddress(currentDappSession.address)
-        account?.privateKey?.let {
-            walletConnectRepository.approveRequest(currentDappSession.peerId, it)
+        transactionRepository.getAccountByAddress(currentDappSession.address)?.let {
+            walletConnectRepository.approveRequest(currentDappSession.peerId, it.privateKey)
         }
     }
 

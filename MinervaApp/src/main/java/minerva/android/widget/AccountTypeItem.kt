@@ -21,7 +21,7 @@ class AccountTypeItem @JvmOverloads constructor(
     fun setNetwork(session: DappSession) = with(binding) {
         accountName.text = session.accountName
         address.text = session.address
-        Glide.with(binding.root.context)
+        Glide.with(root.context)
             .load(getNetworkIcon(context, session.networkShort))
             .into(logo)
     }

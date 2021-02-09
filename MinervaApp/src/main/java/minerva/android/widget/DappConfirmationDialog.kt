@@ -44,7 +44,6 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
-
     fun setView(meta: WalletConnectPeerMeta) = with(binding) {
         Glide.with(context)
             .load(getIcon(meta))
