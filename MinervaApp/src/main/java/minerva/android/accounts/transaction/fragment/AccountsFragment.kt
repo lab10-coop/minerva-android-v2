@@ -25,7 +25,7 @@ import minerva.android.wrapped.startManageAssetsWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ValuesFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
+class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
     AccountsFragmentToAdapterListener {
 
     private val viewModel: AccountsViewModel by viewModel()
@@ -264,7 +264,7 @@ class ValuesFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
 
     companion object {
         @JvmStatic
-        fun newInstance() = ValuesFragment()
+        fun newInstance() = AccountsFragment()
             private const val RECEIVE_TRANSACTION_INDEX = 1
     }
 }
