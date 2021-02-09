@@ -59,7 +59,7 @@ private fun toHexString(input: ByteArray, offset: Int, length: Int, withPrefix: 
     return stringBuilder.toString()
 }
 
-infix fun Byte.and(mask: Int): Int = toInt() and mask
+private infix fun Byte.and(mask: Int): Int = toInt() and mask
 
 fun hexStringToByteArray(input: String): ByteArray {
     val cleanInput: String = cleanHexPrefix(input)
