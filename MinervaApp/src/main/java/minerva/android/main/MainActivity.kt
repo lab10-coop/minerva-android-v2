@@ -47,8 +47,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         prepareBottomNavMenu()
-        replaceFragment(IdentitiesFragment())
-        prepareSettingsIcon()
+        replaceFragment(AccountsFragment.newInstance())
         prepareSettingsIcon()
         prepareObservers()
         viewModel.restorePendingTransactions()
@@ -312,8 +311,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     override fun onBackPressed() {
-        if (isIdentitiesTabSelected()) super.onBackPressed()
-        else binding.bottomNavigation.selectedItemId = R.id.identities
+        if (isValuesTabSelected()) super.onBackPressed()
+        else setDefaultBottomNavigationIcon()
     }
 
     override fun removeSettingsBadgeIcon() =
@@ -323,6 +322,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         launchActivity<WalletConnectActivity>() {
             putExtra(ACCOUNT_INDEX, index)
         }
+    }
+
+    private fun setDefaultBottomNavigationIcon() {
+        binding.bottomNavigation.selectedItemId = R.id.values
     }
 
     private fun startNewAccountActivity() {

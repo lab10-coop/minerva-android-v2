@@ -50,7 +50,8 @@
     <dimen name="card_height">242dp</dimen>
     <dimen name="card_width">384dp</dimen>
     <dimen name="tab_height">30dp</dimen>
-    <dimen name="elevation_small">2dp</dimen>
+    <dimen name="elevation_small">3dp</dimen>
+    <dimen name="elevation_xsmall">2dp</dimen>
     <dimen name="divider_height">2dp</dimen>
     <dimen name="scrollbar_size">3dp</dimen>
     <dimen name="check_box_offset">6dp</dimen>
