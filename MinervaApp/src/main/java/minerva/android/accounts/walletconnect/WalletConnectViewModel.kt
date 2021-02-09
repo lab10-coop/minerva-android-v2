@@ -17,10 +17,7 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.NetworkShortName
-import minerva.android.walletmanager.repository.walletconnect.OnConnectionFailure
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.repository.walletconnect.*
 import timber.log.Timber
 
 class WalletConnectViewModel(
@@ -33,8 +30,8 @@ class WalletConnectViewModel(
     internal lateinit var topic: Topic
     internal lateinit var currentSession: WalletConnectSession
 
-    private val _viewStateLiveData = MutableLiveData<WalletConnectViewState>()
-    val viewStateLiveData: LiveData<WalletConnectViewState> get() = _viewStateLiveData
+    private val _viewStateLiveData = MutableLiveData<WalletConnectState>()
+    val stateLiveData: LiveData<WalletConnectState> get() = _viewStateLiveData
 
     fun setConnectionStatusFlowable() {
         launchDisposable {
@@ -51,6 +48,7 @@ class WalletConnectViewModel(
                             }
                             is OnConnectionFailure -> OnError(it.error)
                             is OnDisconnect -> OnDisconnected
+                            else -> DefaultRequest
                         }
                     },
                     onError = {
@@ -133,7 +131,8 @@ class WalletConnectViewModel(
         topic.peerId,
         topic.remotePeerId,
         requestedNetwork,
-        account.name
+        account.name,
+        account.network.short
     )
 
     private fun getIcon(icons: List<String>) =
@@ -143,7 +142,7 @@ class WalletConnectViewModel(
     val shouldChangeNetwork: Boolean
         get() = account.network.full != requestedNetwork
 
-    private fun handleSessionRequest(it: OnSessionRequest): WalletConnectViewState =
+    private fun handleSessionRequest(it: OnSessionRequest): WalletConnectState =
         it.chainId?.let { id ->
             requestedNetwork = getNetworkName(id).orElse { String.Empty }
             OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)

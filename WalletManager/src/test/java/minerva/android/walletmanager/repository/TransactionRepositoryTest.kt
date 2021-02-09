@@ -709,9 +709,22 @@ class TransactionRepositoryTest : RxTest() {
     }
 
     @Test
-    fun `Checking token icon updates` () {
+    fun `Checking token icon updates`() {
         whenever(tokenManager.updateTokenIcons()).thenReturn(Completable.complete())
         repository.updateTokenIcons()
         verify(tokenManager, times(1)).updateTokenIcons()
+    }
+
+    @Test
+    fun `get account by address test`() {
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(
+            WalletConfig(
+                version = 1,
+                accounts = listOf(Account(1, address = "address"))
+            )
+        )
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
+        val result = repository.getAccountByAddress("address")
+        assertEquals(result?.address, "address")
     }
 }

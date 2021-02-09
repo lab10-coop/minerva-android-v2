@@ -28,8 +28,6 @@ class MainViewModelTest : BaseViewModelTest() {
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
     private val transactionRepository: TransactionRepository = mock()
-
-    private val walletConnectRepository: WalletConnectRepository = mock()
     private lateinit var viewModel: MainViewModel
 
     private val notExistedIdentityObserver: Observer<Event<Unit>> = mock()
@@ -52,45 +50,13 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Before
     fun setup() {
-        whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(listOf()))
         viewModel = MainViewModel(
             masterSeedRepository,
             serviceManager,
             walletActionsRepository,
             orderManager,
-            transactionRepository,
-            walletConnectRepository
+            transactionRepository
         )
-    }
-
-    @Test
-    fun `reconnect to saved sessions test`() {
-        whenever(walletConnectRepository.getSessions()).thenReturn(
-            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
-        )
-        viewModel = MainViewModel(
-            masterSeedRepository,
-            serviceManager,
-            walletActionsRepository,
-            orderManager,
-            transactionRepository,
-            walletConnectRepository
-        )
-        verify(walletConnectRepository, times(2)).connect(any(), any(), any())
-    }
-
-    @Test
-    fun `do not reconnect when no sessions saved test`() {
-        whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(listOf()))
-        viewModel = MainViewModel(
-            masterSeedRepository,
-            serviceManager,
-            walletActionsRepository,
-            orderManager,
-            transactionRepository,
-            walletConnectRepository
-        )
-        verify(walletConnectRepository, times(0)).connect(any(), any(), any())
     }
 
     @Test

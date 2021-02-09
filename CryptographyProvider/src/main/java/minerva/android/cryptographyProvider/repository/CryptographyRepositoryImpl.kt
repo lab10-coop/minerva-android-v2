@@ -33,7 +33,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         ByteArray(ENTROPY_SIZE).run {
             SecureRandom().nextBytes(this)
             getMasterKeys(toNoPrefixHexString(), derivationPath).run {
-                return Single.just(Triple(toNoPrefixHexString(), getPublicKey(), getPrivateKey()))
+                return Single.just(Triple(toNoPrefixHexString(), getAddress(), getPrivateKey()))
             }
         }
     }

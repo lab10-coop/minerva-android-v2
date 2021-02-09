@@ -8,12 +8,15 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
 import minerva.android.accounts.transaction.fragment.AccountsFragment
+import minerva.android.accounts.walletconnect.OnDisconnected
+import minerva.android.accounts.walletconnect.OnEthSignRequest
 import minerva.android.accounts.walletconnect.WalletConnectActivity
 import minerva.android.databinding.ActivityMainBinding
 import minerva.android.extension.*
@@ -26,12 +29,16 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
+import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
+import minerva.android.utils.exhaustive
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.repository.walletconnect.OnEthSign
+import minerva.android.widget.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
@@ -39,8 +46,10 @@ import org.koin.android.ext.android.inject
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     internal val viewModel: MainViewModel by inject()
+    private val walletConnectViewModel: WalletConnectInteractionsViewModel by inject()
     private var shouldDisableAddButton = false
     internal lateinit var binding: ActivityMainBinding
+    private var signDialog: DappSignMessageDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,23 +105,26 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.dispose()
+        walletConnectViewModel.dispose()
     }
 
     private fun prepareObservers() {
+        walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
+            signDialog?.dismiss()
+            signDialog = if (it is OnEthSignRequest) {
+                getDappSignDialog(it)
+            } else {
+                null
+            }
+        })
         viewModel.apply {
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
-                Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.not_existed_identity_message),
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@MainActivity, getString(R.string.not_existed_identity_message), Toast.LENGTH_LONG)
+                    .show()
             })
             requestedFieldsLiveData.observe(this@MainActivity, EventObserver {
-                Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.fill_requested_data_message, it),
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@MainActivity, getString(R.string.fill_requested_data_message, it), Toast.LENGTH_LONG)
+                    .show()
             })
             errorLiveData.observe(this@MainActivity, EventObserver {
                 Toast.makeText(
@@ -152,6 +164,21 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             })
         }
     }
+
+    private fun getDappSignDialog(it: OnEthSignRequest) =
+        DappSignMessageDialog(this@MainActivity,
+            {
+                walletConnectViewModel.acceptRequest()
+                signDialog = null
+            },
+            {
+                walletConnectViewModel.rejectRequest()
+                signDialog = null
+            }
+        ).apply {
+            setContent(it.message, it.session)
+            show()
+        }
 
     private fun updatePendingAccount(it: PendingAccount) {
         showFlashbar(

@@ -52,7 +52,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `getting token list` () {
+    fun `getting token list`() {
         viewModel.account = Account(
             id = 0,
             publicKey = "12",
@@ -289,7 +289,15 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `fetch gas limit error`() {
         val error = Throwable()
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any())).doReturn(Single.error(error))
+        whenever(
+            transactionRepository.getTransactionCosts(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).doReturn(Single.error(error))
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))
         viewModel.run {
             getAccount(0, -1)

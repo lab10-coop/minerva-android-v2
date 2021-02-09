@@ -34,6 +34,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -44,6 +53,5 @@ dependencies {
     implementation blockChainDependencies.values()
     implementation rxDependencies.values()
     implementation koinDependencies.values()
-
     testImplementation testDependencies.values()
 }
