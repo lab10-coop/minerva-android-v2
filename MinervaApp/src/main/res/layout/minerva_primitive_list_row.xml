@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/margin_small"
     android:background="@drawable/rounded_white_background"
-    android:elevation="@dimen/elevation_small"
+    android:elevation="@dimen/elevation_xsmall"
     android:paddingLeft="@dimen/margin_normal"
     android:paddingTop="@dimen/margin_normal"
     android:paddingRight="@dimen/margin_normal"
