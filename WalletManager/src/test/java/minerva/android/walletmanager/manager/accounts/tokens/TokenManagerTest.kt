@@ -7,10 +7,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.Commit
-import minerva.android.apiProvider.model.CommitElement
-import minerva.android.apiProvider.model.Committer
-import minerva.android.apiProvider.model.TokenIconDetails
+import minerva.android.apiProvider.model.*
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -92,8 +89,8 @@ class TokenManagerTest : RxTest() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
         val rawTokens = listOf(
-            Pair("0xC00k1e", BigDecimal.ONE),
-            Pair("0x0th3r", BigDecimal.TEN)
+            Pair("0xC00k1e", TokenBalance(balance = "1")),
+            Pair("0x0th3r", TokenBalance(balance = "10"))
         )
         val tokensATS = tokenManager.mapToAccountTokensList(NetworkShortName.ATS_TAU, rawTokens)
         tokensATS.size shouldBeEqualTo 2
