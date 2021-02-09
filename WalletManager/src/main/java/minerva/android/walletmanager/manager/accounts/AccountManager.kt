@@ -5,10 +5,13 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.MasterSeed
 import minerva.android.walletmanager.model.TokenVisibilitySettings
 import minerva.android.walletmanager.model.Network
 
 interface AccountManager : Manager {
+    val masterSeed: MasterSeed
+
     fun loadAccount(index: Int): Account
     fun createRegularAccount(network: Network): Single<String>
     fun createSafeAccount(account: Account, contract: String): Completable

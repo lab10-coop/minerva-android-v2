@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:layout_marginTop="@dimen/margin_xbig"
+        android:src="@drawable/ic_artis_sigma"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:drawableStart="@drawable/ic_connection_safe"
+        android:drawablePadding="@dimen/margin_xsmall"
+        android:fontFamily="@font/rubik_medium"
+        android:textColor="@color/networksTypeHeader"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/icon"
+        tools:text="Kleros • Curate" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/network"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:background="@drawable/network_border"
+        android:fontFamily="@font/rubik_medium"
+        android:gravity="center"
+        android:paddingStart="@dimen/margin_normal"
+        android:paddingTop="@dimen/margin_xxsmall"
+        android:paddingEnd="@dimen/margin_normal"
+        android:paddingBottom="@dimen/margin_xxsmall"
+        android:textColor="@color/dappStatusColorGray"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/name"
+        tools:text="ARTIS  (τ1)" />
+</merge>

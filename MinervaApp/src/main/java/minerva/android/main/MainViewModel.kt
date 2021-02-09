@@ -25,7 +25,6 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPD
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -34,8 +33,7 @@ class MainViewModel(
     private val serviceManager: ServiceManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val orderManager: OrderManager,
-    private val transactionRepository: TransactionRepository,
-    private val walletConnectRepository: WalletConnectRepository
+    private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
 
     lateinit var loginPayload: LoginPayload
@@ -73,33 +71,9 @@ class MainViewModel(
 
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
+
     fun dispose() {
         masterSeedRepository.dispose()
-        walletConnectRepository.dispose()
-    }
-
-    init {
-        launchDisposable {
-            walletConnectRepository.getSessions()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = { reconnect(it) },
-                    onError = { Timber.e(it) }
-                )
-        }
-    }
-
-    private fun reconnect(dapps: List<DappSession>) {
-        dapps.forEach { session ->
-            with(session) {
-                walletConnectRepository.connect(
-                    WalletConnectSession(topic, version, bridge, key),
-                    peerId,
-                    remotePeerId
-                )
-            }
-        }
     }
 
     fun subscribeToExecutedTransactions(accountIndex: Int) {
@@ -151,31 +125,6 @@ class MainViewModel(
     fun clearPendingAccounts() {
         transactionRepository.clearPendingAccounts()
     }
-//todo remove when Charging Station Dashboard is not needed anymore, or prepare this service for integration
-//    fun loginFromNotification(jwtToken: String?) {
-//        jwtToken?.let {
-//            launchDisposable {
-//                serviceManager.decodeJwtToken(it)
-//                    .subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribeBy(
-//                        onSuccess = { handleQrCodeResponse(it) },
-//                        onError = {
-//                            Timber.e(it)
-//                            _errorLiveData.value = Event(it)
-//                        }
-//                    )
-//            }
-//        }
-//    }
-
-//    private fun handleQrCodeResponse(response: QrCode) {
-//        (response as? ServiceQrCode)?.apply {
-//            loginPayload =
-//                LoginPayload(getLoginStatus(response), serviceManager.getLoggedInIdentityPublicKey(response.), response)
-//            painlessLogin()
-//        }
-//    }
 
     fun isOrderEditAvailable(type: Int) = orderManager.isOrderAvailable(type)
 
@@ -268,12 +217,11 @@ class MainViewModel(
                 .subscribeBy(
                     onSuccess = { (status, error) ->
                         Timber.d("Save update binded credential wallet action success")
-                        when {
-                            status == FAILED && error is AutomaticBackupFailedThrowable -> _updateCredentialErrorLiveData.value =
+                        _updateCredentialErrorLiveData.value = when {
+                            status == FAILED && error is AutomaticBackupFailedThrowable ->
                                 Event(AutomaticBackupFailedThrowable())
-                            status == FAILED -> _updateCredentialErrorLiveData.value =
-                                Event(NoBindedCredentialThrowable())
-
+                            status == FAILED -> Event(NoBindedCredentialThrowable())
+                            else -> Event(Throwable())
                         }
                     },
                     onError = { Timber.e("Save bind credential error: $it") }

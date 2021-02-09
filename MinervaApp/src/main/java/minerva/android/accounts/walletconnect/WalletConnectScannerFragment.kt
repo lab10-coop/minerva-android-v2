@@ -15,6 +15,7 @@ import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.walletmanager.exception.InvalidAccountException
 import minerva.android.walletmanager.model.WalletConnectPeerMeta
+import minerva.android.widget.DappConfirmationDialog
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
@@ -35,7 +36,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     private fun observeViewState() {
-        viewModel.viewStateLiveData.observe(viewLifecycleOwner, Observer {
+        viewModel.stateLiveData.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
@@ -118,8 +119,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 shouldScan = true
             }).apply {
             setOnDismissListener { shouldScan = true }
-            setView(meta)
-            setNetworkName(network)
+            setView(meta, network)
             handleNetwork(isNetworkDefined)
             show()
         }

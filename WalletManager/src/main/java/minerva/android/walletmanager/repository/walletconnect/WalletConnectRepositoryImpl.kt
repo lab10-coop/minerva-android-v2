@@ -9,9 +9,13 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import minerva.android.kotlinUtils.event.Event
-import minerva.android.kotlinUtils.function.orElse
+import minerva.android.blockchainprovider.repository.signature.SignatureRepository
+import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.crypto.getFormattedMessage
+import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.*
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
@@ -23,11 +27,14 @@ import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 
 class WalletConnectRepositoryImpl(
+    private val signatureRepository: SignatureRepository,
     minervaDatabase: MinervaDatabase,
     private var wcClient: WCClient = WCClient(),
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
 
+    private var currentRequestId: Long = Long.InvalidValue
+    internal lateinit var currentEthMessage: WCEthereumSignMessage
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus>
         get() = status.toFlowable(BackpressureStrategy.BUFFER)
@@ -49,14 +56,18 @@ class WalletConnectRepositoryImpl(
         dappDao.delete(peerId)
 
     override fun getSessions(): Single<List<DappSession>> =
-        dappDao.getAll().firstOrError().map { EntityToDappSessionMapper.map(it) }
+        dappDao.getAll().firstOrError().map { EntitiesToDappSessionsMapper.map(it) }
 
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
-        dappDao.getAll().map { EntityToDappSessionMapper.map(it) }
+        dappDao.getAll().map { EntitiesToDappSessionsMapper.map(it) }
+
+    override fun getDappSessionById(peerId: String): Single<DappSession> =
+        dappDao.getDapSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
 
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?) {
         wcClient = WCClient()
         with(wcClient) {
+
             onWCOpen = { peerId -> clientMap[peerId] = this }
 
             onSessionRequest = { remotePeerId, meta, chainId, peerId ->
@@ -69,15 +80,22 @@ class WalletConnectRepositoryImpl(
                 )
             }
             onFailure = { error, peerId ->
+                Timber.e(error)
                 status.onNext(OnConnectionFailure(error, peerId))
             }
-            onDisconnect = { code, peerId ->
+            onDisconnect = { _, peerId ->
                 peerId?.let {
                     if (walletConnectClients.containsKey(peerId)) {
                         deleteSession(peerId)
                     }
                 }
-                status.onNext(OnDisconnect(code, peerId))
+                status.onNext(OnDisconnect)
+            }
+
+            onEthSign = { id, message, peerId ->
+                currentRequestId = id
+                currentEthMessage = message
+                status.onNext(OnEthSign(getUserReadableData(message), peerId))
             }
 
             connect(
@@ -89,6 +107,12 @@ class WalletConnectRepositoryImpl(
         }
     }
 
+    private fun getUserReadableData(message: WCEthereumSignMessage) =
+        when (message.type) {
+            PERSONAL_MESSAGE -> message.data.hexToUtf8
+            MESSAGE, TYPED_MESSAGE -> message.data.getFormattedMessage
+        }
+
     private fun deleteSession(peerId: String) {
         disposable = deleteDappSession(peerId)
             .subscribeOn(Schedulers.io())
@@ -99,20 +123,32 @@ class WalletConnectRepositoryImpl(
     override fun getWCSessionFromQr(qrCode: String): WalletConnectSession =
         WCSessionToWalletConnectSessionMapper.map(WCSession.from(qrCode))
 
-    override fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSession): Completable {
-        val isApproved: Boolean = clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true
-        return if (isApproved) {
+    override fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSession): Completable =
+        if (clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true) {
             saveDappSession(dapp)
         } else {
             Completable.error(Throwable("Session not approved"))
         }
-    }
 
     override fun rejectSession(peerId: String) {
         with(clientMap) {
             this[peerId]?.rejectSession()
             remove(peerId)
         }
+    }
+
+    override fun approveRequest(peerId: String, privateKey: String) {
+        clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
+    }
+
+    private fun signData(privateKey: String) = if (currentEthMessage.type == TYPED_MESSAGE) {
+        signatureRepository.signTypedData(currentEthMessage.data, privateKey)
+    } else {
+        signatureRepository.signData(currentEthMessage.data, privateKey)
+    }
+
+    override fun rejectRequest(peerId: String) {
+        clientMap[peerId]?.rejectRequest(currentRequestId)
     }
 
     override fun killAllAccountSessions(address: String): Completable =

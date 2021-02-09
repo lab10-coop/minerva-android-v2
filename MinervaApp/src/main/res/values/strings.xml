@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Minerva Wallet</string>
     <string name="identities">Identities</string>
-    <string name="accounts">Accounts</string>
+    <string name="values">Values</string>
     <string name="accounts_navigation_menu_header">Values</string>
     <string name="services">Services</string>
     <string name="activity">Activity</string>
@@ -264,6 +264,8 @@
     <string name="dapp_disconnected">Dapp disconnected</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
+    <string name="confirm">Confirm</string>
+    <string name="message_signing_request">Message signing request</string>
     <string name="export_private_key">Export Private Key</string>
     <string name="warning_export_private_key">Warning: Never disclose this key. Anyone with your private key can steal any assets held in your account</string>
     <string name="show_private_key">Show Private Key</string>

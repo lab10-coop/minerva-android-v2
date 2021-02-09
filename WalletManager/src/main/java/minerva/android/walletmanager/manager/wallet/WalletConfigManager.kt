@@ -41,4 +41,6 @@ interface WalletConfigManager : Manager {
     val areMainNetworksEnabled: Boolean
     var toggleMainNetsEnabled: Boolean?
     val enableMainNetsFlowable: Flowable<Boolean>
+
+    fun getMnemonic(): String
 }

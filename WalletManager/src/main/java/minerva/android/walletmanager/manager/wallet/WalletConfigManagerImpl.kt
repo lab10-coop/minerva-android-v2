@@ -82,6 +82,9 @@ class WalletConfigManagerImpl(
         get() = enableMainNetsBehaviorSubject.toFlowable(BackpressureStrategy.LATEST)
             .filter { toggleMainNetsEnabled != null }
 
+    override fun getMnemonic(): String = cryptographyRepository.getMnemonicForMasterSeed(masterSeed.seed)
+
+
     override fun saveIsMnemonicRemembered() {
         localStorage.saveIsMnemonicRemembered(true)
     }
@@ -325,7 +328,13 @@ class WalletConfigManagerImpl(
                         account,
                         ServicesResponseToServicesMapper.map(payload.serviceResponse),
                         CredentialsPayloadToCredentials.map(payload.credentialResponse),
-                        payload.erc20TokenResponse.map { (key, value) -> key to value.map { ERC20TokenPayloadToERC20TokenMapper.map(it) } }
+                        payload.erc20TokenResponse.map { (key, value) ->
+                            key to value.map {
+                                ERC20TokenPayloadToERC20TokenMapper.map(
+                                    it
+                                )
+                            }
+                        }
                             .toMap()
                     )
                 }

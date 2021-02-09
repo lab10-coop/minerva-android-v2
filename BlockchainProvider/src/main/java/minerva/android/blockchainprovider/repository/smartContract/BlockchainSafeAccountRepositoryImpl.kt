@@ -26,6 +26,7 @@ import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHel
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.blockchainprovider.smartContracts.GnosisSafe
 import minerva.android.blockchainprovider.smartContracts.ProxyFactory
+import minerva.android.kotlinUtils.crypto.HEX_PREFIX
 import minerva.android.kotlinUtils.map.value
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
@@ -71,7 +72,12 @@ class BlockchainSafeAccountRepositoryImpl(
             .singleOrError()
 
 
-    override fun addSafeAccountOwner(owner: String, gnosisAddress: String, network: String, privateKey: String): Completable =
+    override fun addSafeAccountOwner(
+        owner: String,
+        gnosisAddress: String,
+        network: String,
+        privateKey: String
+    ): Completable =
         try {
             val gnosisSafe = getGnosisSafe(gnosisAddress, network, privateKey)
             val result = gnosisSafe.addOwnerWithThreshold(owner, BigInteger.valueOf(1)).encodeFunctionCall()
@@ -103,9 +109,19 @@ class BlockchainSafeAccountRepositoryImpl(
             }
         }
 
-    override fun transferERC20Token(network: String, transactionPayload: TransactionPayload, tokenAddress: String): Completable {
+    override fun transferERC20Token(
+        network: String,
+        transactionPayload: TransactionPayload,
+        tokenAddress: String
+    ): Completable {
         Numeric.hexStringToByteArray(getSafeTxData(transactionPayload)).run {
-            return performTransaction(getGnosisSafe(transactionPayload, network), tokenAddress, this, network, transactionPayload)
+            return performTransaction(
+                getGnosisSafe(transactionPayload, network),
+                tokenAddress,
+                this,
+                network,
+                transactionPayload
+            )
         }
     }
 
@@ -265,8 +281,4 @@ class BlockchainSafeAccountRepositoryImpl(
         PROXY_ADDRESS, web3j.value(network), Credentials.create(privateKey),
         ContractGasProvider(gasPrice.value(network), Operation.SAFE_ACCOUNT_TXS.gasLimit)
     )
-
-    companion object {
-        private const val HEX_PREFIX = "0x"
-    }
 }
