@@ -119,8 +119,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 shouldScan = true
             }).apply {
             setOnDismissListener { shouldScan = true }
-            setView(meta)
-            setNetworkName(network)
+            setView(meta, network)
             handleNetwork(isNetworkDefined)
             show()
         }

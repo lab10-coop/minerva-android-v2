@@ -74,31 +74,17 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/confirmation_view" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/cancel"
-        style="@style/OutlinedButtonStyle"
-        android:layout_width="0dp"
+    <minerva.android.widget.DappDialogButtons
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:layout_marginEnd="6dp"
+        android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_xbig"
-        android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/connect"
-        app:layout_constraintTop_toBottomOf="@+id/manual" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/connect"
-        style="@style/PurpleButtonStyle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="@dimen/margin_normal"
-        android:text="@string/Connect"
-        app:layout_constraintLeft_toRightOf="@+id/cancel"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cancel" />
+        app:layout_constraintTop_toBottomOf="@+id/manual" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,10 +1,7 @@
 package minerva.android.widget
 
 import android.content.Context
-import android.view.KeyEvent
 import androidx.core.content.ContextCompat
-import com.bumptech.glide.Glide
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import minerva.android.R
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogBinding
@@ -13,42 +10,22 @@ import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.WalletConnectPeerMeta
 
-class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
-    BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
+class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) : DappDialog(context) {
 
     private val binding: DappConfirmationDialogBinding = DappConfirmationDialogBinding.inflate(layoutInflater)
-    private val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
+    override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
 
     init {
         setContentView(binding.root)
         setCancelable(false)
-        binding.confirmationView.hideRequestedData()
-
         with(binding) {
-            cancel.setOnClickListener {
-                deny()
-                dismiss()
-            }
-            connect.setOnClickListener {
-                approve()
-                dismiss()
-            }
-        }
-
-        setOnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                deny()
-                dismiss()
-            }
-            true
+            confirmationView.hideRequestedData()
+            buttons.setView({ approve() }, { deny() }, { dismiss() })
         }
     }
 
-    fun setView(meta: WalletConnectPeerMeta) = with(binding) {
-        Glide.with(context)
-            .load(getIcon(meta))
-            .into(networkHeader.icon)
-        networkHeader.name.text = meta.name
+    fun setView(meta: WalletConnectPeerMeta, networkName: String) = with(binding) {
+        setupHeader(meta.name, networkName, getIcon(meta))
     }
 
     private fun DappConfirmationDialogBinding.getIcon(meta: WalletConnectPeerMeta): Any =
@@ -60,9 +37,6 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             meta.icons[FIRST_ICON]
         }
 
-    fun setNetworkName(name: String) {
-        networkHeader.network.text = name
-    }
 
     fun setNotDefinedNetwork() {
         with(networkHeader.network) {
