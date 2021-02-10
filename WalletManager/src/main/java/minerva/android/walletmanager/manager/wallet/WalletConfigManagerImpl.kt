@@ -91,6 +91,18 @@ class WalletConfigManagerImpl(
 
     override fun isMnemonicRemembered(): Boolean = localStorage.isMnemonicRemembered()
 
+    override fun createWalletConfig(masterSeed: MasterSeed): Completable =
+        minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), DefaultWalletConfig.create)
+            .doOnComplete { localStorage.isSynced = true }
+            .doOnError { localStorage.isSynced = false }
+            .doOnTerminate {
+                keystoreRepository.encryptMasterSeed(masterSeed)
+                localWalletProvider.saveWalletConfig(DefaultWalletConfig.create)
+                completeKeys(masterSeed, DefaultWalletConfig.create)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { _walletConfigLiveData.value = it }
+            }
+
     override fun initWalletConfig() {
         keystoreRepository.decryptMasterSeed()?.let {
             masterSeed = it
@@ -116,19 +128,6 @@ class WalletConfigManagerImpl(
                 keystoreRepository.encryptMasterSeed(masterSeed)
                 localWalletProvider.saveWalletConfig(it)
             }.ignoreElement()
-
-    override fun createWalletConfig(masterSeed: MasterSeed): Completable =
-        minervaApi.saveWalletConfig(
-            publicKey = encodePublicKey(masterSeed.publicKey),
-            walletConfigPayload = DefaultWalletConfig.create
-        )
-            .doOnComplete { localStorage.isSynced = true }
-            .doOnError { localStorage.isSynced = false }
-            .doOnTerminate {
-                keystoreRepository.encryptMasterSeed(masterSeed)
-                localWalletProvider.saveWalletConfig(DefaultWalletConfig.create)
-                initWalletConfig()
-            }
 
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable =
         if (localStorage.isBackupAllowed) {
@@ -329,13 +328,8 @@ class WalletConfigManagerImpl(
                         ServicesResponseToServicesMapper.map(payload.serviceResponse),
                         CredentialsPayloadToCredentials.map(payload.credentialResponse),
                         payload.erc20TokenResponse.map { (key, value) ->
-                            key to value.map {
-                                ERC20TokenPayloadToERC20TokenMapper.map(
-                                    it
-                                )
-                            }
-                        }
-                            .toMap()
+                            key to value.map { ERC20TokenPayloadToERC20TokenMapper.map(it) }
+                        }.toMap()
                     )
                 }
             ).toObservable()

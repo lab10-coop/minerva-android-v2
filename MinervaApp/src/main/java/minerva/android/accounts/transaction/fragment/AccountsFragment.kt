@@ -265,6 +265,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     companion object {
         @JvmStatic
         fun newInstance() = AccountsFragment()
-            private const val RECEIVE_TRANSACTION_INDEX = 1
+        private const val RECEIVE_TRANSACTION_INDEX = 1
     }
 }
