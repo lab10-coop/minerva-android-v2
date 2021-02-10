@@ -39,16 +39,15 @@ android {
 
     signingConfigs {
         release {
-            keyAlias String.valueOf(System.env.KEY_ALIAS ?: localProperty('keyAlias'))
-            keyPassword String.valueOf(System.env.KEY_PASSWORD ?: localProperty('keyPassword'))
-            storePassword String.valueOf(System.env.KEY_STORE_PASSWORD ?: localProperty('storePassword'))
+            keyAlias String.valueOf(System.env.KEY_ALIAS)
+            keyPassword String.valueOf(System.env.KEY_PASSWORD)
+            storePassword String.valueOf(System.env.KEY_STORE_PASSWORD)
             storeFile file("../keyStoreMinerva.jks")
         }
     }
 
     buildTypes {
         release {
-//            minifyEnabled true
 //            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
@@ -76,7 +75,7 @@ android {
             versionNameSuffix '-release'
 
             buildConfigField "String", "REST_API_URL", '"https://api.minerva.digital"'
-            buildConfigField "String", "API_TOKEN", '""'
+            buildConfigField "String", "API_TOKEN", String.valueOf(System.env.API_TOKEN ?: "\"\"")
         }
     }
 
