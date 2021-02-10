@@ -92,10 +92,14 @@ class WalletConfigManagerImpl(
     override fun isMnemonicRemembered(): Boolean = localStorage.isMnemonicRemembered()
 
     override fun createWalletConfig(masterSeed: MasterSeed): Completable =
-        minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), DefaultWalletConfig.create)
+        minervaApi.saveWalletConfig(
+            publicKey = encodePublicKey(masterSeed.publicKey),
+            walletConfigPayload = DefaultWalletConfig.create
+        )
             .doOnComplete { localStorage.isSynced = true }
             .doOnError { localStorage.isSynced = false }
             .doOnTerminate {
+                this.masterSeed = masterSeed
                 keystoreRepository.encryptMasterSeed(masterSeed)
                 localWalletProvider.saveWalletConfig(DefaultWalletConfig.create)
                 completeKeys(masterSeed, DefaultWalletConfig.create)
