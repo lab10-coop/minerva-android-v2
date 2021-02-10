@@ -1,8 +1,9 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.minervaprimitives
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.Network
 
 open class MinervaPrimitive(
     open val address: String = String.Empty,

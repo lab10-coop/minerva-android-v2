@@ -2,7 +2,7 @@ package minerva.android.walletmanager.manager.accounts.tokens
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.walletmanager.model.AccountToken
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import java.math.BigDecimal
 

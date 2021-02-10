@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.minervaprimitives.account
 
 import minerva.android.kotlinUtils.Empty
 import java.math.BigDecimal

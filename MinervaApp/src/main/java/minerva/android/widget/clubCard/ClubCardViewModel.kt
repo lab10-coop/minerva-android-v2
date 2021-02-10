@@ -9,7 +9,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import org.jsoup.Jsoup
 import org.w3c.dom.Document
 import timber.log.Timber

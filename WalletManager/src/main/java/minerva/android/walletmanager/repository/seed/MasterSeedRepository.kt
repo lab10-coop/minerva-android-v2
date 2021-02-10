@@ -3,7 +3,7 @@ package minerva.android.walletmanager.repository.seed
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.wallet.WalletConfig
 
 interface MasterSeedRepository {
     val walletConfigLiveData: LiveData<WalletConfig>

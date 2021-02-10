@@ -12,6 +12,10 @@ import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
 import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.DataProvider.walletConfig

@@ -8,7 +8,7 @@ import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
-import minerva.android.walletmanager.model.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 
 class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) : DappDialog(context) {
 

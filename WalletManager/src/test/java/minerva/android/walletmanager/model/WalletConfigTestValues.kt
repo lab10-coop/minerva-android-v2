@@ -2,8 +2,9 @@ package minerva.android.walletmanager.model
 
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.model.token.Token
 
 object WalletConfigTestValues {
 

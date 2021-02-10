@@ -11,9 +11,9 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.DateUtils.isTheSameDay
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.MasterSeed
-import minerva.android.walletmanager.model.WalletAction
-import minerva.android.walletmanager.model.WalletActionClustered
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletActionClustered
 import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
 import minerva.android.walletmanager.model.mappers.WalletActionsMapper
 import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey

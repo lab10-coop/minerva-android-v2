@@ -11,7 +11,6 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.PaymentRequest
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.CREDENTIAL_NAME
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.SERVICE_NAME
@@ -22,7 +21,12 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REJ
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType.Companion.SERVICE
 import minerva.android.walletmanager.model.mappers.GATEWAY
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
 import minerva.android.walletmanager.model.state.ConnectionRequest
+import minerva.android.walletmanager.model.transactions.Payment
+import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber

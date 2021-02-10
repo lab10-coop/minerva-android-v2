@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.token
 
 import java.util.*
 

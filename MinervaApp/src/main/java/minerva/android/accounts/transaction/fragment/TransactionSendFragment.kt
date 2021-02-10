@@ -25,8 +25,8 @@ import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.walletmanager.model.Recipient
-import minerva.android.walletmanager.model.TransactionCost
+import minerva.android.walletmanager.model.transactions.Recipient
+import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel

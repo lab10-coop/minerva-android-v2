@@ -5,7 +5,6 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import minerva.android.R
 import minerva.android.databinding.DappNetworkHeaderBinding
-import minerva.android.walletmanager.model.DappSession
 
 abstract class DappDialog(context: Context) : BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
 

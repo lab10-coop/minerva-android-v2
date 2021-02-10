@@ -1,6 +1,6 @@
 package minerva.android.walletmanager.keystore
 
-import minerva.android.walletmanager.model.MasterSeed
+import minerva.android.walletmanager.model.wallet.MasterSeed
 
 interface KeystoreRepository {
     fun isMasterSeedSaved(): Boolean

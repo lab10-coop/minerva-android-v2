@@ -1,7 +1,9 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.minervaprimitives.account
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.token.AccountToken
 import java.math.BigDecimal
 
 data class Account(

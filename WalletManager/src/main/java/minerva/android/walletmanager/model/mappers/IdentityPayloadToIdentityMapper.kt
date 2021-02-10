@@ -2,7 +2,7 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 
 object IdentityPayloadToIdentityMapper {
     fun map(

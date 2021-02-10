@@ -1,6 +1,7 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.walletconnect
 
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 
 data class DappSession(
     override val address: String = String.Empty,

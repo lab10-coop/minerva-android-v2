@@ -10,8 +10,9 @@ import minerva.android.databinding.OrderListRowBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.minervaprimitives.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.widget.ProfileImage
 import minerva.android.widget.repository.getNetworkIcon
 

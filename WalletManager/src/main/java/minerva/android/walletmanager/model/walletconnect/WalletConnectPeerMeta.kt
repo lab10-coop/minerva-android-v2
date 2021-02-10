@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.walletconnect
 
 import minerva.android.walletConnect.model.session.PEER_NAME
 import minerva.android.walletConnect.model.session.PEER_URL

@@ -1,7 +1,8 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.minervaprimitives.credential
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.model.minervaprimitives.service.RequestedService
 
 data class CredentialRequest(
     @SerializedName("issuer")

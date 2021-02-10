@@ -1,6 +1,10 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.wallet
 
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.token.ERC20Token
 
 data class WalletConfig(

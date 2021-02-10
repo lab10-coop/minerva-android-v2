@@ -1,7 +1,7 @@
 package minerva.android.walletmanager.model.mappers
 
 import minerva.android.kotlinUtils.Mapper
-import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
 
 object CredentialQrCodeToCredentialMapper : Mapper<CredentialQrCode, Credential> {

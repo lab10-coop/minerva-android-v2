@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.default_card.*
 import minerva.android.R
 import minerva.android.extension.fadeIn
 import minerva.android.extension.visibleOrGone
-import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.mappers.*
 import net.glxn.qrgen.android.QRCode
 import org.koin.core.KoinComponent

@@ -8,8 +8,8 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.order.OrderManager
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.wallet.WalletConfig
 
 class EditOrderViewModel(
     private val orderManager: OrderManager

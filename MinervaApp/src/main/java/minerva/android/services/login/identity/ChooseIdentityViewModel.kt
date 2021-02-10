@@ -16,7 +16,7 @@ import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.services.login.uitls.LoginUtils.isIdentityValid
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber

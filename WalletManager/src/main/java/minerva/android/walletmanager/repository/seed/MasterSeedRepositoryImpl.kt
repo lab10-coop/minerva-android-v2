@@ -6,8 +6,8 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.MasterSeed
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletConfig
 
 class MasterSeedRepositoryImpl(
     private val walletConfigManager: WalletConfigManager,

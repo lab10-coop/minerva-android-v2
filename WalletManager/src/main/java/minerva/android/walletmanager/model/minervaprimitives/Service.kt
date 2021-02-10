@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.minervaprimitives
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue

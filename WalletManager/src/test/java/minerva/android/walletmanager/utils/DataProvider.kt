@@ -7,7 +7,12 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identityRespon
 import minerva.android.walletmanager.model.WalletConfigTestValues.onlineIdentityResponse
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.wallet.WalletConfig
 
 object DataProvider {
 

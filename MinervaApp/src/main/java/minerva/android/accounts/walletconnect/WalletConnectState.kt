@@ -1,7 +1,8 @@
 package minerva.android.accounts.walletconnect
 
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 
 sealed class WalletConnectState
 object CloseScannerState : WalletConnectState()
@@ -20,4 +21,5 @@ data class UpdateDappsState(val dapps: List<DappSession>) : WalletConnectState()
 object HideDappsState : WalletConnectState()
 object OnSessionDeleted : WalletConnectState()
 data class OnEthSignRequest(val message: String, val session: DappSession) : WalletConnectState()
+data class OnEthSendTransactionRequest(val transaction: WalletConnectTransaction) : WalletConnectState()
 object DefaultRequest : WalletConnectState()

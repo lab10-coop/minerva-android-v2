@@ -8,7 +8,7 @@ import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.identity.IdentityManager
-import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Test

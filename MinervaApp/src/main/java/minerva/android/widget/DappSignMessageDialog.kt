@@ -3,13 +3,11 @@ package minerva.android.widget
 import android.content.Context
 import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
-import android.view.KeyEvent
-import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.labeled_text_view.view.*
 import minerva.android.R
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSignMessageDialogBinding
-import minerva.android.walletmanager.model.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSession
 
 class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> Unit) : DappDialog(context) {
 

@@ -6,7 +6,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.QrCode
-import minerva.android.walletmanager.model.RequestedService
+import minerva.android.walletmanager.model.minervaprimitives.service.RequestedService
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.CredentialType
 

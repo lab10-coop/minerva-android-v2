@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.minervaprimitives
 
 import android.graphics.Bitmap
 import minerva.android.kotlinUtils.Empty

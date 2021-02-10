@@ -1,7 +1,6 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.token
 
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.walletmanager.model.token.ERC20Token
 import java.math.BigDecimal
 
 data class AccountToken(

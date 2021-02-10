@@ -8,7 +8,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import org.junit.Test

@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.minervaprimitives.credential
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty

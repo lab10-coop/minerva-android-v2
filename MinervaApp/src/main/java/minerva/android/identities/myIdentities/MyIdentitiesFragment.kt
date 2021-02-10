@@ -1,9 +1,7 @@
 package minerva.android.identities.myIdentities
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,12 +11,11 @@ import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.main.base.BaseFragment
 import minerva.android.utils.AlertDialogHandler
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.wrapped.startEditIdentityWrappedActivity
 import minerva.android.wrapped.startIdentityAddressWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel

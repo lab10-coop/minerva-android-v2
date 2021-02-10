@@ -9,10 +9,10 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.identity.IdentityManager
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.WalletAction
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.IDENTITY_NAME
 import minerva.android.walletmanager.model.defs.WalletActionStatus

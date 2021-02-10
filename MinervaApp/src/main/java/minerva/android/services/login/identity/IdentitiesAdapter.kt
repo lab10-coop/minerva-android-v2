@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.databinding.PainlessLoginItemBinding
 import minerva.android.extension.visibleOrInvisible
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.IncognitoIdentity
-import minerva.android.walletmanager.model.NewIdentity
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.IncognitoIdentity
+import minerva.android.walletmanager.model.minervaprimitives.NewIdentity
 import minerva.android.widget.ProfileImage
 
 class IdentitiesAdapter : RecyclerView.Adapter<ItemViewHolder>(), ItemViewHolder.IdentitiesAdapterListener {

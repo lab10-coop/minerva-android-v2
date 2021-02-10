@@ -18,7 +18,7 @@ import minerva.android.databinding.AccountListRowBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.token.TokenView
 import minerva.android.widget.TokensAndCollectiblesView
 import minerva.android.widget.repository.getNetworkIcon

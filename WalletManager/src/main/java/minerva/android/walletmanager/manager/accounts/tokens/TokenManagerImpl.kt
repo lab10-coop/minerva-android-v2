@@ -15,7 +15,7 @@ import minerva.android.walletmanager.exception.AllTokenIconsUpdated
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.AccountToken
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
