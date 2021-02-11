@@ -91,8 +91,11 @@ class WalletConfigManagerImpl(
 
     override fun isMnemonicRemembered(): Boolean = localStorage.isMnemonicRemembered()
 
-    override fun createWalletConfig(masterSeed: MasterSeed): Completable =
-        minervaApi.saveWalletConfig(
+    override fun createWalletConfig(masterSeed: MasterSeed): Completable {
+
+        Timber.tag("kobe").d("create wallet publicKey: ${encodePublicKey(masterSeed.publicKey)}")
+
+        return minervaApi.saveWalletConfig(
             publicKey = encodePublicKey(masterSeed.publicKey),
             walletConfigPayload = DefaultWalletConfig.create
         )
@@ -106,6 +109,7 @@ class WalletConfigManagerImpl(
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { _walletConfigLiveData.value = it }
             }
+    }
 
     override fun initWalletConfig() {
         keystoreRepository.decryptMasterSeed()?.let {
@@ -126,15 +130,23 @@ class WalletConfigManagerImpl(
             )
     }
 
-    override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
-        minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
+    override fun restoreWalletConfig(masterSeed: MasterSeed): Completable {
+
+        Timber.tag("kobe").d("restore wallet publicKey: ${encodePublicKey(masterSeed.publicKey)}")
+
+        return minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
             .map {
                 keystoreRepository.encryptMasterSeed(masterSeed)
                 localWalletProvider.saveWalletConfig(it)
             }.ignoreElement()
+    }
 
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable =
         if (localStorage.isBackupAllowed) {
+
+            Timber.tag("kobe").d("update wallet publicKey: ${encodePublicKey(masterSeed.publicKey)}")
+
+
             val (config, payload) = Pair(
                 walletConfig,
                 WalletConfigToWalletPayloadMapper.map(walletConfig)
