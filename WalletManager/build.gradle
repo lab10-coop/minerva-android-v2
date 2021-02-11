@@ -22,6 +22,7 @@ android {
         buildConfigField "String", "ENS_MAIN_URL", '"https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
         buildConfigField "String", "ERC20_TOKEN_DATA_URL", '"https://raw.githubusercontent.com/lab10-coop/minerva-tokenlists/master/all.json"'
         buildConfigField "String", "ERC20_TOKEN_DATA_LAST_COMMIT" , '"https://api.github.com/repos/lab10-coop/minerva-tokenlists/commits?path=all.json&page=1&per_page=1"'
+        buildConfigField "String", "ADDRESS_TOKEN_BALANCE_URL", '"https://explorer.tau1.artis.network/api?module=account&action=tokenlist&address=%s"'
     }
 
     buildTypes {

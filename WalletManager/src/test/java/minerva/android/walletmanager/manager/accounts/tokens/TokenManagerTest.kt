@@ -8,6 +8,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
+import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -27,7 +28,8 @@ class TokenManagerTest : RxTest() {
     private val walletManager: WalletConfigManager = mock()
     private val cryptoApi: CryptoApi = mock()
     private val localStorage: LocalStorage = mock()
-    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi, localStorage)
+    private val blockchainRepository: BlockchainRegularAccountRepository = mock()
+    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository)
 
     @Before
     fun initializeMocks() {

@@ -32,8 +32,6 @@ interface CryptoApi {
         @Url url: String
     ) : Single<List<CommitElement>>
 
-
-    //TODO make it real
     @GET
     fun getTokenBalance(
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,

@@ -28,8 +28,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun getItemCount(): Int = activeAccounts.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
-        AccountViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder = AccountViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
             parent
         )
@@ -46,8 +45,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     fun updateList(data: List<Account>, areMainNetsEnabled: Boolean) {
         rawAccounts = data
-        activeAccounts =
-            data.filter { !it.isDeleted }.filter { it.network.testNet == !areMainNetsEnabled }
+        activeAccounts = data.filter { !it.isDeleted }.filter { it.network.testNet == !areMainNetsEnabled }
         openAccounts = activeAccounts.map { false }.toMutableList()
         notifyDataSetChanged()
     }
@@ -66,8 +64,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         activeAccounts.filter { !it.isPending }
             .forEachIndexed { index, account ->
                 accountTokenBalances[account.privateKey]?.let { accountsList ->
+                    //TODO klop should we assing account Tokens in Adapter??
                     account.accountTokens = accountsList
-                        .filter { it.balance > NO_FUNDS }
+                        //.filter { it.balance > NO_FUNDS }
                         .filter {
                             listener.isTokenVisible(account.address, it.token.address)
                                 ?.let { visibility ->

@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.repository.transaction
 
-import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -15,6 +14,7 @@ import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -53,17 +53,18 @@ class TransactionRepositoryImpl(
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
-    override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> {
+    override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
         walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
             return Observable.range(START, accounts.size)
-                .filter { position -> refreshBalanceFilter(accounts[position]) }
+                .filter { position -> accountsFilter(accounts[position]) }
                 .filter { position -> accounts[position].network.isAvailable() }
                 .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
                 .toList()
-                .map { list -> list.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
-        }
-        throw NotInitializedWalletConfigThrowable()
-    }
+                .map { it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
+                .map { tokenManager.updateTokensFromLocalStorage(it) }
+                .flatMap { localCheck -> tokenManager.updateTokens(localCheck).onErrorReturn { localCheck.second } }
+                .flatMap { tokenManager.saveTokens(it).onErrorComplete().andThen(Single.just(it)) }
+        }.orElse { throw NotInitializedWalletConfigThrowable() }
 
     override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(network, accountIndex, TransactionToTransactionPayloadMapper.map(transaction))
@@ -191,32 +192,19 @@ class TransactionRepositoryImpl(
     /**
      *
      * return statement: Single<Triple<String, String, List<Pair<String, BigDecimal>>>>
-     *                   Single<Triple<Network, ValuePrivateKey, List<ContractAddress, BalanceOnContract>>>>
+     *                   Single<Triple<Network, AccountPrivateKey, List<ContractAddress, BalanceOnContract>>>>
      *
      */
 
     private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, TokenBalance>>>> =
-        cryptoApi.getTokenBalance(url = "https://explorer.tau1.artis.network/api?module=account&action=tokenlist&address=0xfc54b30deA6c861E79CC49c3CB75b12246C11F1b")
+        cryptoApi.getTokenBalance(url = String.format(BuildConfig.ADDRESS_TOKEN_BALANCE_URL, account.address))
             .map {
-                Log.e("klop", "Tokens list: ${it.message} for account: ${account.name} whis is deleted: ${account.isDeleted}")
-                it.tokens.forEach {
-                    Log.e("klop", "${it.name}")
+                val tokensList = mutableListOf<Pair<String, TokenBalance>>()
+                it.tokens.forEach { tokenBalance ->
+                    tokensList.add(Pair(tokenBalance.address, tokenBalance))
                 }
-
-                Triple(account.network.short, account.privateKey, listOf<Pair<String, TokenBalance>>())
+                Triple(account.network.short, account.privateKey, tokensList.toList())
             }
-        //tokenManager.loadTokens(account.network.short).let { tokens ->
-//            return Observable.range(START, tokens.size)
-//                .flatMap {
-//                    blockchainRepository.refreshTokenBalance(
-//                        account.privateKey,
-//                        account.network.short,
-//                        tokens[it].address,
-//                        account.address
-//                    )
-//                }
-//                .toList()
-//                .map { Triple(account.network.short, account.privateKey, it) }
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
 

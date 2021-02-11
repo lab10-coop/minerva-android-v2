@@ -15,5 +15,5 @@ data class TokenBalance(
     @SerializedName("contractAddress")
     val address: String = String.Empty,
     @SerializedName("balance")
-    val balance: String = String.Empty
+    var balance: String = String.Empty
 )

@@ -2,6 +2,7 @@ package minerva.android.walletmanager.manager.networks
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.map.value
+import minerva.android.walletmanager.exception.NetworkNotFound
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
@@ -22,6 +23,14 @@ object NetworkManager {
     fun getNetwork(type: String): Network = networkMap.value(type)
 
     fun getChainId(type: String): Int = networkMap.value(type).chainId
+
+    @Deprecated("Network short is deprecated. Use chainId instead")
+    fun getShort(chainId: Int): String {
+        networks.forEach {
+            if (it.chainId == chainId) return it.short
+        }
+        throw NetworkNotFound()
+    }
 
     fun firstDefaultValueNetwork(): Network = networks[FIRST_DEFAULT_NETWORK_INDEX]
 

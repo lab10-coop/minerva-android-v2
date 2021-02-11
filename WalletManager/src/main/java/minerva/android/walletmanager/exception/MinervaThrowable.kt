@@ -18,4 +18,5 @@ class NoLoggedInIdentityThrowable : Throwable("The provided did does not match t
 class AllTokenIconsUpdated() : Throwable("All Token Icons are updated")
 class AutomaticBackupFailedThrowable : Throwable()
 class EncodingJwtFailedThrowable : Throwable()
-class InvalidAccountException: Exception("Invalid Account error")
+class InvalidAccountException : Throwable("Invalid Account error")
+class NetworkNotFound : Throwable("Network not found!")

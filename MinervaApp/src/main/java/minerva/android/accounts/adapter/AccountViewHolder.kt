@@ -21,7 +21,6 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Account
 import minerva.android.widget.token.TokenView
 import minerva.android.widget.TokensAndCollectiblesView
-import minerva.android.widget.repository.getMainTokenIcon
 import minerva.android.widget.repository.getNetworkIcon
 
 class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) :

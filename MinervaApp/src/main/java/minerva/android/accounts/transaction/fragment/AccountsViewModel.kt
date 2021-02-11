@@ -1,5 +1,6 @@
 package minerva.android.accounts.transaction.fragment
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -47,8 +48,7 @@ class AccountsViewModel(
     private val _refreshBalancesErrorLiveData = MutableLiveData<Event<ErrorCode>>()
     val refreshBalancesErrorLiveData: LiveData<Event<ErrorCode>> get() = _refreshBalancesErrorLiveData
 
-    private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData =
-        MutableLiveData<Event<Throwable>>()
+    private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData = MutableLiveData<Event<Throwable>>()
     val balanceIsNotEmptyAndHasMoreOwnersErrorLiveData: LiveData<Event<Throwable>> get() = _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData
 
     private val _balanceIsNotEmptyErrorLiveData = MutableLiveData<Event<Throwable>>()
@@ -188,7 +188,11 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _tokenBalanceLiveData.value = it },
+                    onSuccess = {
+                        Log.e("klop", "Passing new tokens balances N O W !")
+                        //accountManager.
+                            //TODO klop passing tokens to account?
+                        _tokenBalanceLiveData.value = it },
                     onError = {
                         Timber.e("Refresh asset balance error: ${it.message}")
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
