@@ -13,7 +13,6 @@ import me.uport.sdk.jwt.JWTEncodingException
 import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
 import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
-import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.MASTER_KEYS_PATH
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
