@@ -15,6 +15,7 @@ import minerva.android.extension.wrapper.TextWatcherWrapper
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.onboarding.base.BaseOnBoardingFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class RestoreWalletFragment : BaseOnBoardingFragment() {
 
@@ -40,7 +41,12 @@ class RestoreWalletFragment : BaseOnBoardingFragment() {
     private fun prepareObservers() {
         viewModel.apply {
             invalidMnemonicLiveData.observe(this@RestoreWalletFragment, EventObserver { handleInvalidMnemonic(it) })
-            restoreWalletLiveData.observe(this@RestoreWalletFragment, Observer { listener.showMainActivity() })
+
+            restoreWalletLiveData.observe(this@RestoreWalletFragment, Observer {
+                Timber.tag("kobe").d("SHOW MAIN ACTIVITY")
+                listener.showMainActivity()
+            })
+
             loadingLiveData.observe(this@RestoreWalletFragment, EventObserver { if (it) showLoader() else hideLoader() })
             walletConfigNotFoundLiveData.observe(
                 this@RestoreWalletFragment,

@@ -24,6 +24,7 @@ import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.wrapped.startManageAssetsWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
     AccountsFragmentToAdapterListener {
@@ -39,10 +40,14 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         initFragment()
         setupRecycleView(view)
         setupLiveData()
+
+        Timber.tag("kobe").d("account fragment")
     }
 
     override fun onResume() {
         super.onResume()
+        Timber.tag("kobe").d("account fragment onResume")
+
         interactor.changeActionBarColor(R.color.lightGray)
         viewModel.apply {
             onResume()
@@ -123,6 +128,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 )
                 setOnRefreshListener {
                     with(viewModel) {
+                        Timber.tag("kobe").d("set on refresh listener")
+
                         refreshBalances()
                         refreshTokenBalance()
                     }

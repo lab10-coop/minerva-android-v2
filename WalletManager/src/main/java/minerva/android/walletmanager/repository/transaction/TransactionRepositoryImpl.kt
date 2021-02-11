@@ -23,6 +23,7 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -38,6 +39,8 @@ class TransactionRepositoryImpl(
         get() = walletConfigManager.masterSeed
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
+        Timber.tag("kobe").d("refresh balances repo")
+
         walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
             return blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(

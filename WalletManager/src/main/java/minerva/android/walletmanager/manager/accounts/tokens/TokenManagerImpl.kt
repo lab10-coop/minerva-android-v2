@@ -20,6 +20,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
+import timber.log.Timber
 import java.math.BigDecimal
 
 class TokenManagerImpl(
@@ -58,8 +59,13 @@ class TokenManagerImpl(
     override fun updateTokenIcons(): Completable =
         cryptoApi.getTokenLastCommitRawData(url = BuildConfig.ERC20_TOKEN_DATA_LAST_COMMIT)
             .flatMap {
-                if (checkUpdates(it)) getTokenIconsURL()
-                else Single.error(AllTokenIconsUpdated())
+                if (checkUpdates(it)) {
+                    Timber.tag("kobe").d("should update")
+                    getTokenIconsURL()
+                } else {
+                    Timber.tag("kobe").d("no need for update")
+                    Single.error(AllTokenIconsUpdated())
+                }
             }
             .flatMapCompletable { updateAllTokenIcons(it) }
             .doOnComplete { localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills()) }
@@ -81,8 +87,8 @@ class TokenManagerImpl(
                     it.logoURI = updatedIcons[generateTokenIconKey(NetworkManager.getChainId(key), it.address)]
                 }
             }
-            config.copy(version = config.updateVersion)
-                .let { walletManager.updateWalletConfig(it) }
+            Timber.tag("kobe").d("updating wallet config")
+            walletManager.updateWalletConfig(config.copy(version = config.updateVersion))
         } ?: Completable.error(NotInitializedWalletConfigThrowable())
 
     @VisibleForTesting
