@@ -27,6 +27,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "REST_API_URL", '"http://minerva-api.dev.lab10.io/"'
         buildConfigField "String", "MARKETS_API_URL", '"https://api.coingecko.com/api/v3/"'
         buildConfigField "String", "LICENCE_TYPE", '"GPLv3"'
         buildConfigField "String", "TWITTER_APP", '"twitter://user?screen_name=MinervaWallet"'
@@ -39,9 +40,9 @@ android {
 
     signingConfigs {
         release {
-            keyAlias String.valueOf(System.env.KEY_ALIAS)
-            keyPassword String.valueOf(System.env.KEY_PASSWORD)
-            storePassword String.valueOf(System.env.KEY_STORE_PASSWORD)
+            keyAlias String.valueOf(System.env.KEY_ALIAS ?: localProperty('keyAlias'))
+            keyPassword String.valueOf(System.env.KEY_PASSWORD ?: localProperty('keyPassword'))
+            storePassword String.valueOf(System.env.KEY_STORE_PASSWORD ?: localProperty('storePassword'))
             storeFile file("../keyStoreMinerva.jks")
         }
     }
@@ -62,9 +63,6 @@ android {
             dimension 'enviroment'
             applicationIdSuffix ".staging"
             versionNameSuffix '-staging'
-
-            buildConfigField "String", "REST_API_URL", '"http://minerva-api.dev.lab10.io/"'
-            buildConfigField "String", "API_TOKEN", '"dummyToken"'
         }
 
         production {
@@ -72,9 +70,6 @@ android {
             versionName "1.0"
             dimension 'enviroment'
             versionNameSuffix '-release'
-
-            buildConfigField "String", "REST_API_URL", '"https://api.minerva.digital"'
-            buildConfigField "String", "API_TOKEN", String.valueOf(System.env.REST_API_TOKEN ?: "\"\"")
         }
     }
 

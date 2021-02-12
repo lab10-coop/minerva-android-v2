@@ -39,8 +39,7 @@ fun createAppModule() = mutableListOf<Module>().apply {
         createWalletManagerModules(
             BuildConfig.DEBUG,
             BuildConfig.REST_API_URL,
-            BuildConfig.MARKETS_API_URL,
-            BuildConfig.API_TOKEN
+            BuildConfig.MARKETS_API_URL
         )
     )
     add(appModules)
