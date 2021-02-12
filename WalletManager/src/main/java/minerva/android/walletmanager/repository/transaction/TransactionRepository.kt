@@ -8,6 +8,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 interface TransactionRepository {
+    val masterSeed: MasterSeed
     fun refreshBalances(): Single<HashMap<String, Balance>>
     fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
@@ -16,6 +17,7 @@ interface TransactionRepository {
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
     fun getAccount(accountIndex: Int): Account?
+    fun getAccountByAddress(address: String): Account?
     fun getFreeATS(address: String): Completable
 
     fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount>
@@ -35,4 +37,6 @@ interface TransactionRepository {
     fun isAddressValid(address: String): Boolean
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun updateTokenIcons(): Completable
+
+    fun getMnemonic(): String
 }

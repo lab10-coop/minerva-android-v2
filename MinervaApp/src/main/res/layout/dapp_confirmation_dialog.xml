@@ -5,49 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="@dimen/icon_size"
-        android:layout_height="@dimen/icon_size"
-        android:layout_marginTop="@dimen/margin_xbig"
-        android:src="@drawable/ic_artis_sigma"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_xsmall"
-        android:drawableStart="@drawable/ic_lock"
-        android:drawablePadding="@dimen/margin_xsmall"
-        android:fontFamily="@font/rubik_medium"
-        android:textColor="@color/networksTypeHeader"
-        android:textSize="@dimen/text_normal"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/icon"
-        tools:text="Kleros • Curate" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/network"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_xsmall"
-        android:background="@drawable/network_border"
-        android:fontFamily="@font/rubik_medium"
-        android:gravity="center"
-        android:paddingStart="@dimen/margin_normal"
-        android:paddingTop="@dimen/margin_xxsmall"
-        android:paddingEnd="@dimen/margin_normal"
-        android:paddingBottom="@dimen/margin_xxsmall"
-        android:textColor="@color/dappStatusColorGray"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name"
-        tools:text="ARTIS  (τ1)" />
+    <include layout="@layout/dapp_network_header" />
 
     <minerva.android.widget.ConnectionRequestCard
         android:id="@+id/confirmation_view"
@@ -63,21 +21,13 @@
         app:layout_constraintTop_toBottomOf="@+id/network" />
 
     <TextView
+        style="@style/RoundedLabelStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_large"
         android:layout_marginTop="@dimen/margin_large"
-        android:background="@drawable/rounded_light_purple_background"
         android:elevation="@dimen/cardview_default_elevation"
-        android:fontFamily="@font/rubik_medium"
-        android:paddingLeft="@dimen/margin_xsmall"
-        android:paddingTop="2dp"
-        android:paddingRight="@dimen/margin_xsmall"
-        android:paddingBottom="2dp"
         android:text="@string/connect_to_website"
-        android:textAllCaps="true"
-        android:textColor="#564AF5"
-        android:textSize="@dimen/text_xsmall"
         app:layout_constraintBottom_toTopOf="@+id/confirmation_view"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/network" />
@@ -124,31 +74,17 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/confirmation_view" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/cancel"
-        style="@style/OutlinedButtonStyle"
-        android:layout_width="0dp"
+    <minerva.android.widget.DappDialogButtons
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:layout_marginEnd="6dp"
+        android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_xbig"
-        android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/connect"
-        app:layout_constraintTop_toBottomOf="@+id/manual" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/connect"
-        style="@style/PurpleButtonStyle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="@dimen/margin_normal"
-        android:text="@string/Connect"
-        app:layout_constraintLeft_toRightOf="@+id/cancel"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cancel" />
+        app:layout_constraintTop_toBottomOf="@+id/manual" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

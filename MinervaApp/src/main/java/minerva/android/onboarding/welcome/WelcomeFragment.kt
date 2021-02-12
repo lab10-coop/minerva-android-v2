@@ -1,33 +1,31 @@
 package minerva.android.onboarding.welcome
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import kotlinx.android.synthetic.main.fragment_welcome.*
 import minerva.android.R
+import minerva.android.databinding.FragmentWelcomeBinding
 import minerva.android.onboarding.base.BaseOnBoardingFragment
 
 
-class WelcomeFragment : BaseOnBoardingFragment() {
+class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_welcome, container, false)
+    private lateinit var binding: FragmentWelcomeBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentWelcomeBinding.bind(view)
         handleCreateWalletButton()
         handleRestoreWalletButton()
     }
 
     private fun handleCreateWalletButton() {
-        createWalletButton.setOnClickListener {
+        binding.createWalletButton.setOnClickListener {
             listener.showCreateWalletFragment()
         }
     }
 
     private fun handleRestoreWalletButton() {
-        restoreWalletButton.setOnClickListener {
+        binding.restoreWalletButton.setOnClickListener {
             listener.showRestoreWalletFragment()
         }
     }

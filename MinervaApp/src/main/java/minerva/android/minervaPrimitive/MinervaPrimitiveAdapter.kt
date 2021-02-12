@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.MinervaPrimitiveListRowBinding
-import minerva.android.extension.gone
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
@@ -77,7 +76,7 @@ class MinervaPrimitiveViewHolder(
             .load(minervaPrimitive.iconUrl)
             .into(minervaPrimitiveLogo)
         setSessionItemsVisibility(true)
-        sessionInfoLabel.text = "${minervaPrimitive.accounName}: ${minervaPrimitive.address}"
+        sessionInfoLabel.text = "${minervaPrimitive.accountName}: ${minervaPrimitive.address}"
         networkLabel.text = minervaPrimitive.networkName
     }
 

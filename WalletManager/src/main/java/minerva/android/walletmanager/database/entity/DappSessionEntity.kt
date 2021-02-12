@@ -17,5 +17,6 @@ data class DappSessionEntity(
     @PrimaryKey @ColumnInfo(name = "peer_id") val peerId: String = String.Empty,
     @ColumnInfo(name = "remote_peer_id") val remotePeerId: String? = String.Empty,
     @ColumnInfo(name = "network_name") val networkName: String = String.Empty,
-    @ColumnInfo(name = "account_name") val accountName: String = String.Empty
+    @ColumnInfo(name = "account_name") val accountName: String = String.Empty,
+    @ColumnInfo(name = "network_short") val networkShort: String = String.Empty
 )

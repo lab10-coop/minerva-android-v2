@@ -5,6 +5,8 @@ import minerva.android.blockchainprovider.repository.freeToken.FreeTokenReposito
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepositoryImpl
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
+import minerva.android.blockchainprovider.repository.signature.SignatureRepository
+import minerva.android.blockchainprovider.repository.signature.SignatureRepositoryImpl
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepositoryImpl
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
@@ -26,4 +28,5 @@ fun createBlockchainProviderModule(
     factory<WebSocketServiceProvider> { WebSocketServiceProviderImpl() }
     factory<WebSocketRepository> { WebSocketRepositoryImpl(get(), wssUrls) }
     factory<FreeTokenRepository> { FreeTokenRepositoryImpl() }
+    factory<SignatureRepository> { SignatureRepositoryImpl() }
 }

@@ -136,8 +136,7 @@ class TokenManagerImpl(
                     it.logoURI = updatedIcons[generateTokenIconKey(NetworkManager.getChainId(key), it.address)]
                 }
             }
-            config.copy(version = config.updateVersion)
-                .let { walletManager.updateWalletConfig(it) }
+            walletManager.updateWalletConfig(config.copy(version = config.updateVersion))
         } ?: Completable.error(NotInitializedWalletConfigThrowable())
 
     @VisibleForTesting

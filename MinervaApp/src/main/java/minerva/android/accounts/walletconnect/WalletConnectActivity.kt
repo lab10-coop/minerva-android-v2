@@ -2,15 +2,12 @@ package minerva.android.accounts.walletconnect
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import minerva.android.R
-import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.databinding.ActivityWalletConnectBinding
 import minerva.android.extension.addFragment
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.main.MainActivity.Companion.ACCOUNT_INDEX
-import minerva.android.utils.exhaustive
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class WalletConnectActivity : AppCompatActivity() {
@@ -32,7 +29,7 @@ class WalletConnectActivity : AppCompatActivity() {
     }
 
     private fun observeViewState() {
-        viewModel.viewStateLiveData.observe(this, Observer {
+        viewModel.stateLiveData.observe(this, Observer {
             if (it == CloseScannerState) {
                 onBackPressed()
             }

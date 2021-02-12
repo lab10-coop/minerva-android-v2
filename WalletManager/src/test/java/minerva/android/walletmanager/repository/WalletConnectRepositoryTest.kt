@@ -4,10 +4,13 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
+import minerva.android.blockchainprovider.repository.signature.SignatureRepository
 import minerva.android.walletConnect.client.WCClient
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.DappSessionDao
 import minerva.android.walletmanager.database.entity.DappSessionEntity
@@ -24,6 +27,7 @@ import kotlin.test.assertEquals
 class WalletConnectRepositoryTest {
 
     private val client: WCClient = mock()
+    private val signatureRepository: SignatureRepository = mock()
     private lateinit var clientMap: ConcurrentHashMap<String, WCClient>
     private lateinit var repository: WalletConnectRepository
 
@@ -47,7 +51,9 @@ class WalletConnectRepositoryTest {
 
         clientMap = ConcurrentHashMap()
         clientMap["peerId"] = client
-        repository = WalletConnectRepositoryImpl(database, client, clientMap)
+        repository = WalletConnectRepositoryImpl(signatureRepository, database, client, clientMap).also {
+            it.currentEthMessage = WCEthereumSignMessage(type = WCEthereumSignMessage.WCSignType.MESSAGE, raw = listOf("test1", "test2"))
+        }
     }
 
     @After
@@ -59,7 +65,7 @@ class WalletConnectRepositoryTest {
     @Test
     fun `is client map empty test`() {
         clientMap = ConcurrentHashMap()
-        repository = WalletConnectRepositoryImpl(database, client, clientMap)
+        repository = WalletConnectRepositoryImpl(signatureRepository, database, client, clientMap)
         val result = repository.isClientMapEmpty
         assertEquals(true, result)
     }
@@ -95,6 +101,21 @@ class WalletConnectRepositoryTest {
         whenever(dappSessionDao.delete(any())).thenReturn(Completable.complete())
         repository.killSession("peerId")
         assertEquals(clientMap.size, 1)
+    }
+
+    @Test
+    fun `reject request test`() {
+        whenever(clientMap["peerId"]?.rejectRequest(any(), any())).thenReturn(true)
+        repository.rejectRequest("peerId")
+        verify(clientMap["peerId"])?.rejectRequest(any(), any())
+    }
+
+    @Test
+    fun `accept request test`() {
+        whenever(clientMap["peerId"]?.approveRequest(any(), eq(""))).thenReturn(true)
+        whenever(signatureRepository.signData(any(), any())).thenReturn("privKey")
+        repository.approveRequest("peerId", "privKey")
+        verify(clientMap["peerId"])?.approveRequest(any(), eq("privKey"))
     }
 
     @Test
@@ -191,6 +212,27 @@ class WalletConnectRepositoryTest {
         whenever(dappSessionDao.getAll()).thenReturn(Flowable.error(error))
         whenever(dappSessionDao.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
         repository.killAllAccountSessions("address1")
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `get session by id test`() {
+        whenever(dappSessionDao.getDapSessionById(any())).thenReturn(Single.just(DappSessionEntity(address = "address1")))
+        repository.getDappSessionById("peerId")
+            .test()
+            .assertNoErrors()
+            .assertComplete()
+            .assertValue {
+                it.address == "address1"
+            }
+    }
+
+    @Test
+    fun `get session by id error test`() {
+        val error = Throwable()
+        whenever(dappSessionDao.getDapSessionById(any())).thenReturn(Single.error(error))
+        repository.getDappSessionById("peerId")
             .test()
             .assertError(error)
     }

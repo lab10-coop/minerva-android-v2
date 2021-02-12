@@ -25,8 +25,8 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     private val repository: WalletConnectRepository = mock()
     private val manager: AccountManager = mock()
     private lateinit var viewModel: WalletConnectViewModel
-    private val viewStateObserver: Observer<WalletConnectViewState> = mock()
-    private val viewStateCaptor: KArgumentCaptor<WalletConnectViewState> = argumentCaptor()
+    private val stateObserver: Observer<WalletConnectState> = mock()
+    private val stateCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
     private val meta = WalletConnectPeerMeta(name = "token", url = "url", description = "dsc")
 
     @Before
@@ -39,10 +39,10 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnConnectionFailure(error, "peerId")))
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+        viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
-        viewStateCaptor.run {
-            verify(viewStateObserver, times(2)).onChanged(capture())
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState &&
                     secondValue is OnError
         }
@@ -53,10 +53,10 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.error(error))
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+        viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
-        viewStateCaptor.run {
-            verify(viewStateObserver).onChanged(capture())
+        stateCaptor.run {
+            verify(stateObserver).onChanged(capture())
             firstValue is OnError
         }
     }
@@ -64,11 +64,11 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on disconnect event test`() {
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnDisconnect(1, "peerID")))
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+            .thenReturn(Flowable.just(OnDisconnect))
+        viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
-        viewStateCaptor.run {
-            verify(viewStateObserver, times(2)).onChanged(capture())
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState &&
                     secondValue is OnDisconnected
         }
@@ -80,10 +80,10 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"))))
         NetworkManager.networks = listOf(Network(full = "Ethereum", chainId = 1))
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+        viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
-        viewStateCaptor.run {
-            verify(viewStateObserver, times(2)).onChanged(capture())
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
             secondValue shouldBeEqualTo OnSessionRequestWithDefinedNetwork(meta, "Ethereum")
         }
@@ -113,11 +113,11 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+        viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.account = Account(1, networkShort = "eth_goerli")
         viewModel.setConnectionStatusFlowable()
-        viewStateCaptor.run {
-            verify(viewStateObserver, times(2)).onChanged(capture())
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
             secondValue shouldBeEqualTo
                     OnSessionRequestWithUndefinedNetwork(meta, "Ethereum (Görli)")
@@ -148,10 +148,10 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
                 )
             )
         viewModel.account = Account(1, networkShort = "eth_mainnet")
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+        viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
-        viewStateCaptor.run {
-            verify(viewStateObserver, times(2)).onChanged(capture())
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState
             secondValue shouldBeEqualTo
                     OnSessionRequestWithUndefinedNetwork(meta, "Ethereum")
@@ -169,20 +169,20 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
                 key = "k"
             )
         )
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+        viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.handleQrCode("wc:123456789")
-        viewStateCaptor.run {
-            verify(viewStateObserver).onChanged(capture())
+        stateCaptor.run {
+            verify(stateObserver).onChanged(capture())
             firstValue shouldBe CorrectQrCodeState
         }
     }
 
     @Test
     fun `handle not wc qr code test`() {
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
+        viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.handleQrCode("qr:123456789")
-        viewStateCaptor.run {
-            verify(viewStateObserver).onChanged(capture())
+        stateCaptor.run {
+            verify(stateObserver).onChanged(capture())
             firstValue shouldBe WrongQrCodeState
         }
     }
@@ -219,9 +219,9 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `kill session test`() {
         whenever(repository.killSession(any())).thenReturn(Completable.complete())
         viewModel.killSession("peerID")
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
-        viewStateCaptor.run {
-            verify(viewStateObserver).onChanged(capture())
+        viewModel.stateLiveData.observeForever(stateObserver)
+        stateCaptor.run {
+            verify(stateObserver).onChanged(capture())
             firstValue is OnSessionDeleted
         }
     }
@@ -239,9 +239,9 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `close scanner test`() {
         viewModel.closeScanner()
-        viewModel.viewStateLiveData.observeForever(viewStateObserver)
-        viewStateCaptor.run {
-            verify(viewStateObserver).onChanged(capture())
+        viewModel.stateLiveData.observeForever(stateObserver)
+        stateCaptor.run {
+            verify(stateObserver).onChanged(capture())
         }
     }
 }

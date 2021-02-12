@@ -82,7 +82,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `crate master seed test`() {
-        val test = repository.createMasterSeed(masterKeysPath).test()
+        val test = repository.createMasterSeed().test()
         test.assertValue { it.first.isNotEmpty() && it.second.isNotEmpty() && it.third.isNotEmpty() }
     }
 
@@ -90,9 +90,7 @@ class CryptographyRepositoryTest {
     fun `restore master seed test`() {
         val test =
             repository.restoreMasterSeed(
-                "hamster change resource act wife lamp tower quick dilemma clay receive attract",
-                masterKeysPath
-            )
+                "hamster change resource act wife lamp tower quick dilemma clay receive attract")
                 .test()
         test.assertValue { it.first == "68a4c6de013faef9b98d7d3e2546ce07" }
     }

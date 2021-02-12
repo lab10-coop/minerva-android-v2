@@ -1,26 +1,23 @@
 package minerva.android.onboarding.create
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import kotlinx.android.synthetic.main.fragment_create_wallet.*
 import minerva.android.R
+import minerva.android.databinding.FragmentCreateWalletBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.onboarding.base.BaseOnBoardingFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class CreateWalletFragment : BaseOnBoardingFragment() {
+class CreateWalletFragment : BaseOnBoardingFragment(R.layout.fragment_create_wallet) {
 
     private val viewModel: CreateWalletViewModel by viewModel()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_create_wallet, container, false)
+    lateinit var binding: FragmentCreateWalletBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentCreateWalletBinding.bind(view)
         setupIdentityItem()
         setupValuesItem()
         setupServicesItem()
@@ -39,24 +36,24 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
         }
     }
 
-    private fun hideLoader() {
+    private fun hideLoader() = with(binding) {
         createWalletButton.visible()
         createWalletProgressBar.invisible()
     }
 
-    private fun showLoader() {
+    private fun showLoader() = with(binding) {
         createWalletProgressBar.visible()
         createWalletButton.invisible()
     }
 
     private fun handleCreateWalletButton() {
-        createWalletButton.setOnClickListener {
+        binding.createWalletButton.setOnClickListener {
             viewModel.createWalletConfig()
         }
     }
 
     private fun setupServicesItem() {
-        servicesItem.apply {
+        binding.servicesItem.apply {
             setIcon(R.drawable.ic_services)
             setTitle(getString(R.string.services))
             setContent(getString(R.string.services_instruction))
@@ -64,7 +61,7 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
     }
 
     private fun setupValuesItem() {
-        valuesItem.apply {
+        binding.valuesItem.apply {
             setIcon(R.drawable.ic_values)
             setTitle(getString(R.string.values))
             setContent(getString(R.string.accounts_instruction))
@@ -72,7 +69,7 @@ class CreateWalletFragment : BaseOnBoardingFragment() {
     }
 
     private fun setupIdentityItem() {
-        identityItem.apply {
+        binding.identityItem.apply {
             setIcon(R.drawable.ic_identities)
             setTitle(getString(R.string.identities))
             setContent(getString(R.string.identity_instruction))

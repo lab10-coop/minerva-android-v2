@@ -62,14 +62,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun View.bindData(account: Account) {
         with(account) {
             binding.apply {
-                card.setCardBackgroundColor(
-                    Color.parseColor(
-                        NetworkManager.getStringColor(
-                            network,
-                            isPending
-                        )
-                    )
-                )
+                card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
                 progress.apply {
                     visibleOrGone(isPending)
                     DrawableCompat.setTint(indeterminateDrawable, Color.parseColor(network.color))

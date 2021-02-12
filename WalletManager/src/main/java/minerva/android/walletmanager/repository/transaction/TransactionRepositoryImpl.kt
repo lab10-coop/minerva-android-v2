@@ -36,17 +36,22 @@ class TransactionRepositoryImpl(
     private val webSocketRepository: WebSocketRepository,
     private val tokenManager: TokenManager
 ) : TransactionRepository {
+    override val masterSeed: MasterSeed
+        get() = walletConfigManager.masterSeed
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
         walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
             return blockchainRepository.refreshBalances(getAddresses(accounts))
-                .zipWith(cryptoApi.getMarkets(MarketUtils.getMarketsIds(accounts), EUR_CURRENCY).onErrorReturnItem(Markets()))
+                .zipWith(
+                    cryptoApi.getMarkets(MarketUtils.getMarketsIds(accounts), EUR_CURRENCY).onErrorReturnItem(Markets())
+                )
                 .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
         }
         throw NotInitializedWalletConfigThrowable()
     }
 
-    private fun accountsFilter(it: Account) = refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
+    private fun accountsFilter(it: Account) =
+        refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
 
     private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> =
         accounts.map { it.network.short to it.address }
@@ -67,7 +72,11 @@ class TransactionRepositoryImpl(
         } ?: Single.error(NotInitializedWalletConfigThrowable())
 
     override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
-        blockchainRepository.transferNativeCoin(network, accountIndex, TransactionToTransactionPayloadMapper.map(transaction))
+        blockchainRepository.transferNativeCoin(
+            network,
+            accountIndex,
+            TransactionToTransactionPayloadMapper.map(transaction)
+        )
             .map { pendingTx ->
                 /*Subscription to web sockets doesn't work with http rpc, hence pending tsx are not saved*/
                 if (NetworkManager.getNetwork(pendingTx.network).wsRpc.isNotEmpty()) {
@@ -91,7 +100,16 @@ class TransactionRepositoryImpl(
     ): Single<TransactionCost> =
         if (NetworkManager.getNetwork(network).gasPriceOracle.isNotEmpty()) {
             cryptoApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
-                .flatMap { gasPrice -> getTxCosts(network, tokenIndex, from, to, amount, gasPrice.fast.divide(BigDecimal.TEN)) }
+                .flatMap { gasPrice ->
+                    getTxCosts(
+                        network,
+                        tokenIndex,
+                        from,
+                        to,
+                        amount,
+                        gasPrice.fast.divide(BigDecimal.TEN)
+                    )
+                }
                 .onErrorResumeNext { getTxCosts(network, tokenIndex, from, to, amount, null) }
 
         } else {
@@ -184,9 +202,7 @@ class TransactionRepositoryImpl(
             .ignoreElement()
 
     private fun saveRecipient(ensName: String, address: String) = localStorage.saveRecipient(Recipient(ensName, address))
-
     override fun loadRecipients(): List<Recipient> = localStorage.getRecipients()
-
     override fun resolveENS(ensName: String): Single<String> = blockchainRepository.resolveENS(ensName)
 
     /**
@@ -207,10 +223,14 @@ class TransactionRepositoryImpl(
             }
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
+    override fun getAccountByAddress(address: String): Account? =
+        walletConfigManager.getWalletConfig()?.accounts?.find {
+            blockchainRepository.toChecksumAddress(it.address) == address
+        }
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
-
     override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
+    override fun getMnemonic(): String = walletConfigManager.getMnemonic()
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1

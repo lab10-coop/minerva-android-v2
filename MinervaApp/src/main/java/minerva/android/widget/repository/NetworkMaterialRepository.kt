@@ -23,8 +23,6 @@ import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
 fun getNetworkIcon(context: Context, networkShort: String, isSafeAccount: Boolean = false): Drawable? =
     prepareSafeAccountBadge(context, getMainIcon(networkShort), isSafeAccount)
 
-fun getMainTokenIcon(context: Context, networkShort: String) = ContextCompat.getDrawable(context, getMainTokenIconRes(networkShort))
-
 private fun getMainIcon(networkShort: String): Int =
     when (networkShort) {
         ATS_SIGMA -> R.drawable.ic_artis_sigma

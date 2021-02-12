@@ -4,7 +4,7 @@ import minerva.android.kotlinUtils.Mapper
 import minerva.android.walletmanager.database.entity.DappSessionEntity
 import minerva.android.walletmanager.model.DappSession
 
-object EntityToDappSessionMapper : Mapper<List<DappSessionEntity>, List<DappSession>> {
+object EntitiesToDappSessionsMapper : Mapper<List<DappSessionEntity>, List<DappSession>> {
     override fun map(input: List<DappSessionEntity>): List<DappSession> =
         mutableListOf<DappSession>().apply {
             input.forEach { entity ->
@@ -21,10 +21,25 @@ object EntityToDappSessionMapper : Mapper<List<DappSessionEntity>, List<DappSess
                             peerId,
                             remotePeerId,
                             networkName,
-                            accountName
+                            accountName,
+                            networkShort
                         )
                     )
                 }
             }
         }
+}
+
+object SessionEntityToDappSessionMapper : Mapper<DappSessionEntity, DappSession> {
+    override fun map(input: DappSessionEntity): DappSession = with(input) {
+        DappSession(
+            address, topic, version, bridge, key, name, icon,
+            peerId,
+            remotePeerId,
+            networkName,
+            accountName,
+            networkShort
+        )
+    }
+
 }
