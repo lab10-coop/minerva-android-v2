@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.repository.transaction
 
+import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -25,6 +26,7 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -61,14 +63,23 @@ class TransactionRepositoryImpl(
     override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
         walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
             return Observable.range(START, accounts.size)
-                .filter { position -> accountsFilter(accounts[position]) }
-                .filter { position -> accounts[position].network.isAvailable() }
+                .filter { position -> accountsFilter(accounts[position]) && accounts[position].network.isAvailable() }
                 .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
                 .toList()
                 .map { it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
                 .map { tokenManager.updateTokensFromLocalStorage(it) }
-                .flatMap { localCheck -> tokenManager.updateTokens(localCheck).onErrorReturn { localCheck.second } }
-                .flatMap { tokenManager.saveTokens(it).andThen(Single.just(it)) }
+                .flatMap { localCheck ->
+                    tokenManager.updateTokens(localCheck).onErrorReturn {
+                        Timber.e(it.message)
+                        localCheck.second
+                    }
+                }
+                .flatMap {
+                    tokenManager.saveTokens(it).onErrorComplete {
+                        Timber.e(it.message)
+                        true
+                    }.andThen(Single.just(it))
+                }
         } ?: Single.error(NotInitializedWalletConfigThrowable())
 
     override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
