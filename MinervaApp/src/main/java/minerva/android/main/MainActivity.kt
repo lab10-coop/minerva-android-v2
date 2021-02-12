@@ -15,7 +15,6 @@ import minerva.android.accounts.transaction.activity.TransactionActivity.Compani
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
 import minerva.android.accounts.transaction.fragment.AccountsFragment
-import minerva.android.accounts.walletconnect.OnEthSendTransactionRequest
 import minerva.android.accounts.walletconnect.OnEthSignRequest
 import minerva.android.accounts.walletconnect.WalletConnectActivity
 import minerva.android.databinding.ActivityMainBinding
@@ -34,7 +33,7 @@ import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
-import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.PendingAccount
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
@@ -109,16 +108,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun prepareObservers() {
         walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
             signDialog?.dismiss()
-            when (it) {
-                is OnEthSignRequest -> {
-                    signDialog = getDappSignDialog(it)
-                }
-                is OnEthSendTransactionRequest -> {
-                    Toast.makeText(this, it.transaction.from, Toast.LENGTH_SHORT).show()
-                }
-                else -> {
-                    signDialog = null
-                }
+            signDialog = if (it is OnEthSignRequest) {
+                getDappSignDialog(it)
+            } else {
+                null
             }
         })
         viewModel.apply {

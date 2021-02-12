@@ -23,7 +23,7 @@ class MasterSeedRepositoryImpl(
     override fun isMasterSeedAvailable(): Boolean = walletConfigManager.isMasterSeedSaved()
 
     override fun restoreMasterSeed(mnemonic: String): Completable =
-        cryptographyRepository.restoreMasterSeed(mnemonic, DerivationPath.MASTER_KEYS_PATH)
+        cryptographyRepository.restoreMasterSeed(mnemonic)
             .flatMapCompletable { (seed, publicKey, privateKey) ->
                 walletConfigManager.restoreWalletConfig(MasterSeed(seed, publicKey, privateKey))
             }
@@ -37,7 +37,7 @@ class MasterSeedRepositoryImpl(
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
 
     override fun createWalletConfig(): Completable =
-        cryptographyRepository.createMasterSeed(DerivationPath.MASTER_KEYS_PATH)
+        cryptographyRepository.createMasterSeed()
             .flatMapCompletable { (seed, publicKey, privateKey) ->
                 walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
             }

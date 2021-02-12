@@ -204,9 +204,7 @@ class MainViewModel(
             transactionRepository.updateTokenIcons()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onError = { Timber.e("Checking last token icons update failed: ${it.message}") }
-                )
+                .subscribeBy(onError = { Timber.e("Checking last token icons update failed: ${it.message}") })
         }
 
     }
