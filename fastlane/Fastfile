@@ -36,20 +36,4 @@ platform :android do
              slack_url: "https://hooks.slack.com/services/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",
                 )
   end
-
-   desc "Submit a new Production Beta Build to Firebase app distribution"
-    lane :firebaseProduction do
-      gradle(task: "clean assembleProductionRelease")
-      firebase_app_distribution(
-                 app: "1:927787980045:android:007fefb4b704a3b0d00c44",
-                 apk_path: "./MinervaApp/build/outputs/apk/staging/release/MinervaApp-production-release.apk",
-                 release_notes: "New build in da house, yo!",
-                 firebase_cli_token: "#{ENV['FIREBASE_TOKEN']}",
-                 groups:  "minerva_testers")
-             slack(
-               message: "Fresh and funky production build is in da house!",
-               channel: "#minerva_wallet_status",
-               slack_url: "https://hooks.slack.com/services/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",
-                  )
-    end
 end
