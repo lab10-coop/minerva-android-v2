@@ -104,11 +104,13 @@ class WalletConfigManagerImpl(
                 localWalletProvider.saveWalletConfig(DefaultWalletConfig.create)
                 completeKeys(masterSeed, DefaultWalletConfig.create)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        Timber.tag("kobe").d("first local version: ${it.version}")
-                        localWalletConfigVersion = it.version
-                        _walletConfigLiveData.value = it
-                    }
+                    .subscribeBy(
+                        onNext = {
+                            Timber.tag("kobe").d("first local version: ${it.version}")
+                            localWalletConfigVersion = it.version
+                            _walletConfigLiveData.value = it
+                        }, onError = { Timber.e(it) }
+                    )
             }
     }
 
@@ -162,9 +164,9 @@ class WalletConfigManagerImpl(
                     Timber.tag("kobe").d("FLATMAP OBSERVABLE")
 
                     if (serverVersion == Int.InvalidValue) {
-                        Timber.tag("kobe").d("invalid value")
+                        Timber.tag("kobe").d("invalid value, oflina")
                         localStorage.isSynced = false
-                        getLocalWalletConfig(masterSeed)
+                        completeKeys(masterSeed, payload)
                     } else {
                         Timber.tag("kobe").d("COOL")
                         localWalletConfigVersion = payload.version
@@ -207,27 +209,17 @@ class WalletConfigManagerImpl(
 
     private fun syncWalletConfig(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> =
         minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
-            .andThen {
-                Timber.tag("kobe").d("SYNCING complete keys")
+            .andThen(completeKeys(masterSeed, payload))
+            .map {
+                Timber.tag("kobe").d("SYNC2")
                 localStorage.isSynced = true
-                completeKeys(masterSeed, payload)
+                it
             }
-            .toObservable<WalletConfig>()
-//            .andThen {
-//                Timber.tag("kobe").d("SETTING flag")
-//                localStorage.isSynced = true
-//            }
-//            .flatMap {
-//                Timber.tag("kobe").d("SYNCING complete keys")
-//                localStorage.isSynced = true
-//                completeKeys(masterSeed, payload)
-//            }
             .onErrorResumeNext { _: Observer<in WalletConfig> ->
-                Timber.tag("kobe").d("LOL")
+                Timber.tag("kobe").d("SYNC3")
                 localStorage.isSynced = false
                 completeKeys(masterSeed, payload)
             }
-
 
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable =
         if (localStorage.isBackupAllowed) {
