@@ -51,4 +51,4 @@ distributeBuild:
       - ./MinervaApp/build/outputs/apk/debug
       - ./MinervaApp/build/outputs/apk/release
       - ./MinervaApp/build/outputs/apk/staging
-      - ./MinervaApp/build/outputs/apk/production
+#      - ./MinervaApp/build/outputs/apk/production
