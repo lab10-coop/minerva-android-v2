@@ -74,7 +74,7 @@ android {
             versionNameSuffix '-release'
 
             buildConfigField "String", "REST_API_URL", '"https://api.minerva.digital"'
-            buildConfigField "String", "API_TOKEN", String.valueOf(System.env.API_TOKEN ?: "\"\"")
+            buildConfigField "String", "API_TOKEN", String.valueOf(System.env.REST_API_TOKEN ?: "\"\"")
         }
     }
 
