@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
 import minerva.android.accounts.enum.ErrorCode
@@ -24,7 +25,6 @@ import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.wrapped.startManageAssetsWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
     AccountsFragmentToAdapterListener {
