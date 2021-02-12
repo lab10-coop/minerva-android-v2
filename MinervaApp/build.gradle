@@ -71,6 +71,7 @@ android {
             versionCode 1
             versionName "1.0"
             dimension 'enviroment'
+            applicationIdSuffix ".release"
             versionNameSuffix '-release'
 
             buildConfigField "String", "REST_API_URL", '"https://api.minerva.digital"'
