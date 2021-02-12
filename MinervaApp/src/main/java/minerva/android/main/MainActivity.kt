@@ -69,16 +69,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             )
         }
         viewModel.updateTokenIcons()
-
-        Timber.tag("kobe").d("main activity")
     }
 
     override fun onResume() {
         super.onResume()
         shouldShowLoadingScreen(false)
         handleExecutedAccounts()
-
-        Timber.tag("kobe").d("main activity onResume")
     }
 
     override fun onAttachFragment(fragment: Fragment) {
@@ -231,8 +227,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     private fun AccountsFragment.updateAccountFragment(updatePending: () -> Unit) {
         updatePending()
-        Timber.tag("kobe").d("main activity refresh balances")
-
         refreshBalances()
     }
 

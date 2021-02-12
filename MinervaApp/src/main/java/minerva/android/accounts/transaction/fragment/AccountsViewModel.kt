@@ -115,7 +115,6 @@ class AccountsViewModel(
     override fun onResume() {
         super.onResume()
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
-        Timber.tag("kobe").d("accounts view model onResume")
         refreshBalances()
         refreshTokenBalance()
         accountManager.getAllAccounts()?.let {
@@ -171,8 +170,6 @@ class AccountsViewModel(
 
     fun refreshBalances() =
         launchDisposable {
-            Timber.tag("kobe").d("refresh banalces view model")
-
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

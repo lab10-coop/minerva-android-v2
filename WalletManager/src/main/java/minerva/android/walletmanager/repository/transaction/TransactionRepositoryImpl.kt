@@ -39,8 +39,6 @@ class TransactionRepositoryImpl(
         get() = walletConfigManager.masterSeed
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
-        Timber.tag("kobe").d("refresh balances repo")
-
         walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
             return blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(
@@ -236,7 +234,7 @@ class TransactionRepositoryImpl(
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
     override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
     override fun getMnemonic(): String {
-       return  walletConfigManager.getMnemonic()
+        return walletConfigManager.getMnemonic()
     }
 
     companion object {

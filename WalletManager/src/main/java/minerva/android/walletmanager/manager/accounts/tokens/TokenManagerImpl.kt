@@ -60,10 +60,8 @@ class TokenManagerImpl(
         cryptoApi.getTokenLastCommitRawData(url = BuildConfig.ERC20_TOKEN_DATA_LAST_COMMIT)
             .flatMap {
                 if (checkUpdates(it)) {
-                    Timber.tag("kobe").d("should update")
                     getTokenIconsURL()
                 } else {
-                    Timber.tag("kobe").d("no need for update")
                     Single.error(AllTokenIconsUpdated())
                 }
             }
@@ -87,7 +85,6 @@ class TokenManagerImpl(
                     it.logoURI = updatedIcons[generateTokenIconKey(NetworkManager.getChainId(key), it.address)]
                 }
             }
-            Timber.tag("kobe").d("updating wallet config")
             walletManager.updateWalletConfig(config.copy(version = config.updateVersion))
         } ?: Completable.error(NotInitializedWalletConfigThrowable())
 
