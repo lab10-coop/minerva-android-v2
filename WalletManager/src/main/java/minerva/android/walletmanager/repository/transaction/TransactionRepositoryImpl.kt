@@ -63,8 +63,8 @@ class TransactionRepositoryImpl(
                 .map { it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
                 .map { tokenManager.updateTokensFromLocalStorage(it) }
                 .flatMap { localCheck -> tokenManager.updateTokens(localCheck).onErrorReturn { localCheck.second } }
-                .flatMap { tokenManager.saveTokens(it).onErrorComplete().andThen(Single.just(it)) }
-        }.orElse { throw NotInitializedWalletConfigThrowable() }
+                .flatMap { tokenManager.saveTokens(it).andThen(Single.just(it)) }
+        } ?: Single.error(NotInitializedWalletConfigThrowable())
 
     override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(network, accountIndex, TransactionToTransactionPayloadMapper.map(transaction))

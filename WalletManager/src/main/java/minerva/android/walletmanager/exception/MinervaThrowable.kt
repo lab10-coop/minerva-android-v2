@@ -16,7 +16,7 @@ class NoAddressPageFragmentThrowable : Throwable("This fragment type is not supp
 class NoBindedCredentialThrowable : Throwable("There is no such Credential binded to any Identity")
 class NoLoggedInIdentityThrowable : Throwable("The provided did does not match to any existed Identity")
 class AllTokenIconsUpdated() : Throwable("All Token Icons are updated")
-class AutomaticBackupFailedThrowable : Throwable()
+class AutomaticBackupFailedThrowable : Throwable("Automatic backup failed")
 class EncodingJwtFailedThrowable : Throwable()
 class InvalidAccountException : Throwable("Invalid Account error")
 class NetworkNotFound : Throwable("Network not found!")

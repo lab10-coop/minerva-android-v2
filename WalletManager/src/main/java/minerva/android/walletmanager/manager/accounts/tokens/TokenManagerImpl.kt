@@ -48,7 +48,6 @@ class TokenManagerImpl(
             ).let { walletManager.updateWalletConfig(it) }
         } ?: Completable.error(NotInitializedWalletConfigThrowable())
 
-    //TODO klop code duplications!
     override fun saveTokens(map: Map<String, List<AccountToken>>): Completable =
         walletManager.getWalletConfig()?.let { config ->
             config.copy(
@@ -156,8 +155,19 @@ class TokenManagerImpl(
 
     private fun updateTokens(map: Map<String, List<AccountToken>>, tokens: MutableMap<String, List<ERC20Token>>) =
         tokens.apply {
-            //TODO klop add updating wallet config here!
             Log.e("klop", "Update wallet config N O W !")
+            map.values.forEach {
+                it.forEach { accountToken ->
+                    val network = NetworkManager.getShort(accountToken.token.chainId)
+                    (this[network] ?: listOf()).toMutableList().let { currentTokens ->
+                        Log.e("klop", "Befrore ${currentTokens.size}")
+                        currentTokens.removeAll { it.address == accountToken.token.address }
+                        currentTokens.add(accountToken.token)
+                        put(network, currentTokens)
+                        Log.e("klop", "After ${currentTokens.size}")
+                    }
+                }
+            }
         }
 
     private fun checkUpdates(list: List<CommitElement>): Boolean =

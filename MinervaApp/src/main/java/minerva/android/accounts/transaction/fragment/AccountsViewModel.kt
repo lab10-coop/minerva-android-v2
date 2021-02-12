@@ -188,11 +188,7 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        Log.e("klop", "Passing new tokens balances N O W !")
-                        //accountManager.
-                            //TODO klop passing tokens to account?
-                        _tokenBalanceLiveData.value = it },
+                    onSuccess = { _tokenBalanceLiveData.value = it },
                     onError = {
                         Timber.e("Refresh asset balance error: ${it.message}")
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
