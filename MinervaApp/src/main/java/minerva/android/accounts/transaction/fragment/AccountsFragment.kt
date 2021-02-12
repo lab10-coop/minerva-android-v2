@@ -24,6 +24,7 @@ import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.wrapped.startManageAssetsWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
     AccountsFragmentToAdapterListener {
@@ -265,6 +266,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     companion object {
         @JvmStatic
         fun newInstance() = AccountsFragment()
-            private const val RECEIVE_TRANSACTION_INDEX = 1
+        private const val RECEIVE_TRANSACTION_INDEX = 1
     }
 }

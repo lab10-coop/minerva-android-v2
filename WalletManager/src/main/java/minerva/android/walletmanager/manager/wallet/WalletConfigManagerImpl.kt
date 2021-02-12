@@ -7,6 +7,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
@@ -84,12 +85,36 @@ class WalletConfigManagerImpl(
 
     override fun getMnemonic(): String = cryptographyRepository.getMnemonicForMasterSeed(masterSeed.seed)
 
-
     override fun saveIsMnemonicRemembered() {
         localStorage.saveIsMnemonicRemembered(true)
     }
 
     override fun isMnemonicRemembered(): Boolean = localStorage.isMnemonicRemembered()
+
+    override fun createWalletConfig(masterSeed: MasterSeed): Completable =
+        minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), DefaultWalletConfig.create)
+            .doOnComplete { localStorage.isSynced = true }
+            .doOnError { localStorage.isSynced = false }
+            .doOnTerminate {
+                this.masterSeed = masterSeed
+                keystoreRepository.encryptMasterSeed(masterSeed)
+                localWalletProvider.saveWalletConfig(DefaultWalletConfig.create)
+                completeKeys(masterSeed, DefaultWalletConfig.create)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            localWalletConfigVersion = it.version
+                            _walletConfigLiveData.value = it
+                        }, onError = { Timber.e(it) }
+                    )
+            }
+
+    override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
+        minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
+            .map {
+                keystoreRepository.encryptMasterSeed(masterSeed)
+                localWalletProvider.saveWalletConfig(it)
+            }.ignoreElement()
 
     override fun initWalletConfig() {
         keystoreRepository.decryptMasterSeed()?.let {
@@ -110,25 +135,64 @@ class WalletConfigManagerImpl(
             )
     }
 
-    override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
-        minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
-            .map {
-                keystoreRepository.encryptMasterSeed(masterSeed)
-                localWalletProvider.saveWalletConfig(it)
-            }.ignoreElement()
+    private fun fetchWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig> =
+        if (localStorage.isBackupAllowed) {
+            localWalletProvider.getWalletConfig()
+                .toObservable()
+                .zipWith(getWalletConfigVersion(masterSeed))
+                .flatMap { (payload, serverVersion) -> handleSync(serverVersion, masterSeed, payload) }
+        } else getLocalWalletConfig(masterSeed)
 
-    override fun createWalletConfig(masterSeed: MasterSeed): Completable =
-        minervaApi.saveWalletConfig(
-            publicKey = encodePublicKey(masterSeed.publicKey),
-            walletConfigPayload = DefaultWalletConfig.create
-        )
-            .doOnComplete { localStorage.isSynced = true }
-            .doOnError { localStorage.isSynced = false }
-            .doOnTerminate {
-                keystoreRepository.encryptMasterSeed(masterSeed)
-                localWalletProvider.saveWalletConfig(DefaultWalletConfig.create)
-                initWalletConfig()
+    private fun handleSync(serverVersion: Int, masterSeed: MasterSeed, payload: WalletConfigPayload) =
+        if (serverVersion == Int.InvalidValue) {
+            completeKeysWhenError(masterSeed, payload)
+        } else {
+            localWalletConfigVersion = payload.version
+            compareVersions(serverVersion, payload)
+        }
+
+    private fun getWalletConfigVersion(masterSeed: MasterSeed) =
+        minervaApi.getWalletConfigVersion(publicKey = encodePublicKey(masterSeed.publicKey))
+            .toObservable()
+            .onErrorReturn { Int.InvalidValue }
+
+    private fun compareVersions(version: Int, payload: WalletConfigPayload): Observable<WalletConfig> =
+        when {
+            shouldBlockBackup(version) -> {
+                localStorage.isBackupAllowed = false
+                completeKeys(masterSeed, payload)
             }
+            shouldSync(version) -> syncWalletConfig(masterSeed, payload)
+            else -> {
+                localStorage.isSynced = true
+                completeKeys(masterSeed, payload)
+            }
+        }
+
+    private fun getLocalWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig> =
+        localWalletProvider.getWalletConfig()
+            .toObservable()
+            .flatMap { completeKeys(masterSeed, it) }
+
+    private fun shouldSync(serverVersion: Int) =
+        serverVersion < localWalletConfigVersion
+
+    private fun shouldBlockBackup(serverVersion: Int) =
+        serverVersion > localWalletConfigVersion
+
+    private fun syncWalletConfig(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> =
+        minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
+            .andThen(completeKeys(masterSeed, payload))
+            .map {
+                localStorage.isSynced = true
+                it
+            }
+            .onErrorResumeNext { _: Observer<in WalletConfig> -> completeKeysWhenError(masterSeed, payload) }
+
+    private fun completeKeysWhenError(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> {
+        localStorage.isSynced = false
+        return completeKeys(masterSeed, payload)
+    }
 
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable =
         if (localStorage.isBackupAllowed) {
@@ -136,10 +200,7 @@ class WalletConfigManagerImpl(
                 walletConfig,
                 WalletConfigToWalletPayloadMapper.map(walletConfig)
             )
-            minervaApi.saveWalletConfig(
-                publicKey = encodePublicKey(masterSeed.publicKey),
-                walletConfigPayload = payload
-            )
+            minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
                 .toSingleDefault(Pair(walletConfig, payload))
                 .map {
                     localStorage.isSynced = true
@@ -237,60 +298,6 @@ class WalletConfigManagerImpl(
     override fun findIdentityByDid(did: String): Identity? =
         getWalletConfig()?.let { config -> config.identities.find { it.did == did } }
 
-    private fun fetchWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig> =
-        if (localStorage.isBackupAllowed) {
-            Observable.mergeDelayError(
-                localWalletProvider.getWalletConfig()
-                    .toObservable()
-                    .doOnNext { localWalletConfigVersion = it.version }
-                    .flatMap { completeKeys(masterSeed, it) },
-                minervaApi.getWalletConfigVersion(publicKey = encodePublicKey(masterSeed.publicKey))
-                    .toObservable()
-                    .flatMap { handleSync(it) }
-            ).onErrorResumeNext { _: Observer<in WalletConfig> ->
-                localStorage.isSynced = false
-                getLocalWalletConfig(masterSeed)
-            }
-        } else {
-            getLocalWalletConfig(masterSeed)
-        }
-
-    private fun handleSync(version: Int): Observable<WalletConfig> =
-        when {
-            shouldBlockBackup(version) -> {
-                localStorage.isBackupAllowed = false
-                getLocalWalletConfig(masterSeed)
-            }
-            shouldSync(version) -> syncWalletConfig(masterSeed)
-            else -> {
-                localStorage.isSynced = true
-                getLocalWalletConfig(masterSeed)
-            }
-        }
-
-    private fun syncWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig> =
-        minervaApi.saveWalletConfig(
-            encodePublicKey(masterSeed.publicKey),
-            localWalletProvider.getWalletConfig().blockingGet()
-        )
-            .andThen { localStorage.isSynced = true }
-            .toObservable<WalletConfig>()
-            .onErrorResumeNext { _: Observer<in WalletConfig> ->
-                localStorage.isSynced = false
-                getLocalWalletConfig(masterSeed)
-            }
-
-    private fun shouldSync(serverVersion: Int) =
-        serverVersion < localWalletConfigVersion
-
-    private fun shouldBlockBackup(serverVersion: Int) =
-        serverVersion > localWalletConfigVersion
-
-    private fun getLocalWalletConfig(masterSeed: MasterSeed): Observable<WalletConfig> =
-        localWalletProvider.getWalletConfig()
-            .toObservable()
-            .flatMap { completeKeys(masterSeed, it) }
-
     private fun completeKeys(
         masterSeed: MasterSeed,
         payload: WalletConfigPayload
@@ -329,13 +336,8 @@ class WalletConfigManagerImpl(
                         ServicesResponseToServicesMapper.map(payload.serviceResponse),
                         CredentialsPayloadToCredentials.map(payload.credentialResponse),
                         payload.erc20TokenResponse.map { (key, value) ->
-                            key to value.map {
-                                ERC20TokenPayloadToERC20TokenMapper.map(
-                                    it
-                                )
-                            }
-                        }
-                            .toMap()
+                            key to value.map { ERC20TokenPayloadToERC20TokenMapper.map(it) }
+                        }.toMap()
                     )
                 }
             ).toObservable()
