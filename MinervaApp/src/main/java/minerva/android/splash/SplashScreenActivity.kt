@@ -66,10 +66,7 @@ class SplashScreenActivity : AppCompatActivity(), PassiveVideoToActivityInteract
 
     override fun onAnimationEnd() {
         viewModel.apply {
-            walletConfigLiveData.observe(this@SplashScreenActivity, Observer {
-                //todo update tokens
-                showMainActivity()
-            })
+            walletConfigLiveData.observe(this@SplashScreenActivity, Observer { showMainActivity() })
             walletConfigErrorLiveData.observe(this@SplashScreenActivity, EventObserver { showOnBoardingActivity() })
         }
     }

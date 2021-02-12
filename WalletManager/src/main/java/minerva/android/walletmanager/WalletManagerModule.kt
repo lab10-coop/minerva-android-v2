@@ -48,11 +48,11 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-fun createWalletManagerModules(isDebug: Boolean, restApiUrl: String, marketsApiUrl: String, token: String) =
+fun createWalletManagerModules(isDebug: Boolean, restApiUrl: String, marketsApiUrl: String) =
     createWalletModules()
         .plus(walletConnectModules)
         .plus(createCryptographyModules())
-        .plus(createWalletConfigProviderModule(isDebug, restApiUrl, token))
+        .plus(createWalletConfigProviderModule(isDebug, restApiUrl))
         .plus(apiProviderModule(isDebug, marketsApiUrl))
         .plus(createBlockchainProviderModule(httpsUrlMap, gasPriceMap, wssUrlMap))
 

@@ -21,7 +21,7 @@ platform :android do
     gradle(task: "test")
   end
 
- desc "Submit a new Staging Beta Build to Firebase app distribution"
+ desc "Submit a new Beta Build to Firebase app distribution"
   lane :firebaseStaging do
     gradle(task: "clean assembleStagingRelease")
     firebase_app_distribution(

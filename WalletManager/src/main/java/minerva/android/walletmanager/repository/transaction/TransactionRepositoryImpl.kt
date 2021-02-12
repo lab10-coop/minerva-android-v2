@@ -23,7 +23,6 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -233,9 +232,7 @@ class TransactionRepositoryImpl(
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
     override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
-    override fun getMnemonic(): String {
-        return walletConfigManager.getMnemonic()
-    }
+    override fun getMnemonic(): String = walletConfigManager.getMnemonic()
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1
