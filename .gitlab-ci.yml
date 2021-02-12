@@ -30,14 +30,11 @@ validateLint:
   script:
     - ./gradlew lint
 
-distributeBuild:
+distributeStagingBuild:
   stage: distribution
   only:
     refs:
       - master
-  #    check if distribution works only on master, this is what I want
-  #      - develop
-  #      - debug
 
   script:
     - ./gradlew build
@@ -48,6 +45,21 @@ distributeBuild:
 
   artifacts:
     paths:
-      - ./MinervaApp/build/outputs/apk/debug
-      - ./MinervaApp/build/outputs/apk/release
       - ./MinervaApp/build/outputs/apk/staging
+
+distributeProductionBuild:
+  stage: distribution
+  only:
+    refs:
+      - master
+
+  script:
+    - ./gradlew build
+    - . /etc/profile.d/rvm.sh
+    - ./BuildScripts/build_fastlane.sh
+    - fastlane firebaseBetaProduction
+    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
+
+  artifacts:
+    paths:
+      - ./MinervaApp/build/outputs/apk/production

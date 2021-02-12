@@ -38,7 +38,7 @@ platform :android do
   end
 
   desc "Submit a new Production Beta Build to Firebase app distribution"
-    lane :firebaseProduction do
+    lane :firebaseBetaProduction do
       gradle(task: "clean assembleProductionRelease")
       firebase_app_distribution(
                  app: "1:927787980045:android:007fefb4b704a3b0d00c44",
