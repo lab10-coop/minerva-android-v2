@@ -59,11 +59,8 @@ class TokenManagerImpl(
     override fun updateTokenIcons(): Completable =
         cryptoApi.getTokenLastCommitRawData(url = BuildConfig.ERC20_TOKEN_DATA_LAST_COMMIT)
             .flatMap {
-                if (checkUpdates(it)) {
-                    getTokenIconsURL()
-                } else {
-                    Single.error(AllTokenIconsUpdated())
-                }
+                if (checkUpdates(it)) getTokenIconsURL()
+                else Single.error(AllTokenIconsUpdated())
             }
             .flatMapCompletable { updateAllTokenIcons(it) }
             .doOnComplete { localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills()) }

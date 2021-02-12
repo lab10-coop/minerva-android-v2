@@ -119,7 +119,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             }
         })
         viewModel.apply {
-//            walletConfigLiveData.observe()
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
                 Toast.makeText(this@MainActivity, getString(R.string.not_existed_identity_message), Toast.LENGTH_LONG)
                     .show()
