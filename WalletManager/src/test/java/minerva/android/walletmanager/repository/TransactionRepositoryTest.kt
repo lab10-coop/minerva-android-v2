@@ -248,55 +248,6 @@ class TransactionRepositoryTest : RxTest() {
     }
 
     @Test
-    fun `get assets balances complete test`() {
-        NetworkManager.initialize(DataProvider.networks)
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
-        whenever(
-            blockchainRegularAccountRepository.refreshTokenBalance(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(
-            Observable.just(Pair("privateKey1", BigDecimal.TEN))
-        )
-        repository.apply {
-            refreshTokenBalance()
-                .test()
-                .assertComplete()
-        }
-    }
-
-    @Test
-    fun `get asset balances when values are empty and there are no assets needed test`() {
-        val error = Throwable()
-        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(
-            0,
-            accounts = emptyList()
-        )
-        whenever(
-            blockchainRegularAccountRepository.refreshTokenBalance(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ) doReturn Observable.error(
-            error
-        )
-        whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed())
-        repository.apply {
-            refreshTokenBalance()
-                .test()
-                .assertComplete()
-                .assertValue {
-                    it.isEmpty()
-                }
-        }
-    }
-
-    @Test
     fun `make ERC20 transfer with ENS resolved success test`() {
         whenever(blockchainRegularAccountRepository.transferERC20Token(any(), any())).thenReturn(
             Completable.complete()

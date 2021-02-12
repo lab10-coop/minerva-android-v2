@@ -74,12 +74,12 @@ class TokenManagerTest : RxTest() {
         val newToken = ERC20Token(1, "SomeToken", "some", "0xt0k3n", "32")
         NetworkShortName.ATS_TAU.let { ATS ->
             val updatedTokens =
-                tokenManager.updateTokens(ATS, newToken, DataProvider.walletConfig.erc20Tokens)
+                tokenManager.updateTokens(ATS, newToken, DataProvider.walletConfig.erc20Tokens.toMutableMap())
             updatedTokens[ATS]?.size shouldBeEqualTo 3
             updatedTokens[ATS]?.get(2)?.name shouldBeEqualTo "SomeToken"
             updatedTokens[ATS]?.get(0)?.name shouldBeEqualTo "CookieTokenATS"
             val secondNewToken = ERC20Token(1, "CookieCoin", "CC", "0xC00k1e", "32")
-            val secondUpdatedToken = tokenManager.updateTokens(ATS, secondNewToken, DataProvider.walletConfig.erc20Tokens)
+            val secondUpdatedToken = tokenManager.updateTokens(ATS, secondNewToken, DataProvider.walletConfig.erc20Tokens.toMutableMap())
             secondUpdatedToken[ATS]?.size shouldBeEqualTo 2
             secondUpdatedToken[ATS]?.get(1)?.name shouldBeEqualTo "CookieCoin"
             secondUpdatedToken[ATS]?.get(0)?.name shouldBeEqualTo "OtherTokenATS"
@@ -90,6 +90,7 @@ class TokenManagerTest : RxTest() {
     fun `Check mapping from raw addresses to tokens`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
+        whenever(blockchainRepository.fromGwei(any())).thenReturn(BigDecimal.ONE)
         val rawTokens = listOf(
             Pair("0xC00k1e", TokenBalance(balance = "1")),
             Pair("0x0th3r", TokenBalance(balance = "10"))

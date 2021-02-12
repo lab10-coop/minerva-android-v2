@@ -144,20 +144,6 @@ class BlockchainRegularAccountRepositoryImpl(
         }
     }
 
-    override fun refreshTokenBalance(
-        privateKey: String,
-        network: String,
-        contractAddress: String,
-        safeAccountAddress: String
-    ): Observable<Pair<String, BigDecimal>> =
-        if (safeAccountAddress.isEmpty()) getERC20Balance(
-            contractAddress,
-            network,
-            privateKey,
-            Credentials.create(privateKey).address
-        )
-        else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
-
     override fun reverseResolveENS(ensAddress: String): Single<String> =
         Single.just(ensAddress).map { ensResolver.reverseResolve(it) }
 
