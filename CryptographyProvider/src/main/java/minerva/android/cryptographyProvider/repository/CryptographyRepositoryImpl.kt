@@ -13,6 +13,7 @@ import me.uport.sdk.jwt.JWTEncodingException
 import me.uport.sdk.jwt.JWTTools
 import me.uport.sdk.signer.KPSigner
 import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
+import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.MASTER_KEYS_PATH
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import org.kethereum.bip39.entropyToMnemonic
@@ -29,17 +30,16 @@ import java.util.*
 
 class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyRepository {
 
-    override fun createMasterSeed(derivationPath: String): Single<Triple<String, String, String>> {
-        ByteArray(ENTROPY_SIZE).run {
+    override fun createMasterSeed(): Single<Triple<String, String, String>> {
+        with(ByteArray(ENTROPY_SIZE)) {
             SecureRandom().nextBytes(this)
-            getMasterKeys(toNoPrefixHexString(), derivationPath).run {
-                return Single.just(Triple(toNoPrefixHexString(), getAddress(), getPrivateKey()))
+            val seed = toNoPrefixHexString()
+            val mnemonic = entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
+            MnemonicWords(mnemonic).toKey(MASTER_KEYS_PATH).keyPair.apply {
+                return Single.just(Triple(seed, getPublicKey(), getPrivateKey()))
             }
         }
     }
-
-    private fun getMasterKeys(seed: String, derivationPath: String): ECKeyPair =
-        MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
 
     override fun getMnemonicForMasterSeed(seed: String): String =
         entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
@@ -52,15 +52,15 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
     ): Single<DerivedKeys> {
         val derivationPath = "${derivationPathPrefix}$index"
         val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
-        val derivedKeys =
-            DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
+        val derivedKeys = DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
         return Single.just(derivedKeys)
     }
 
-    override fun restoreMasterSeed(mnemonic: String, derivationPath: String): Single<Triple<String, String, String>> {
+    override fun restoreMasterSeed(mnemonic: String): Single<Triple<String, String, String>> {
         return try {
             val seed = mnemonicToEntropy(mnemonic, WORDLIST_ENGLISH).toNoPrefixHexString()
-            getMasterKeys(seed, derivationPath).run { Single.just(Triple(seed, getPublicKey(), getPrivateKey())) }
+            val keys = MnemonicWords(mnemonic).toKey(MASTER_KEYS_PATH).keyPair
+            Single.just(Triple(seed, keys.getPublicKey(), keys.getPrivateKey()))
         } catch (exception: IllegalArgumentException) {
             Timber.e(exception)
             Single.error(exception)
