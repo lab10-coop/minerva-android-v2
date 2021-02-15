@@ -38,6 +38,8 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.walletconnect.DappDialog
+import minerva.android.widget.dialog.walletconnect.DappSendTransactionDialog
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
 
@@ -47,7 +49,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private val walletConnectViewModel: WalletConnectInteractionsViewModel by inject()
     private var shouldDisableAddButton = false
     internal lateinit var binding: ActivityMainBinding
-    private var signDialog: DappSignMessageDialog? = null
+    private var dappDialog: DappDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,11 +110,21 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     private fun prepareObservers() {
         walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
-            signDialog?.dismiss()
+            dappDialog?.dismiss()
             when (it) {
-                is OnEthSignRequest -> signDialog = getDappSignDialog(it)
-                is OnEthSendTransactionRequest -> Toast.makeText(this, it.transaction.from, Toast.LENGTH_SHORT).show()
-                else -> signDialog = null
+                is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
+                is OnEthSendTransactionRequest -> {
+                    dappDialog = DappSendTransactionDialog(this, {
+                        Toast.makeText(this@MainActivity, "approve", Toast.LENGTH_LONG)
+                            .show()
+                    }, {
+                        Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG)
+                            .show()
+                    }).apply {
+                        show()
+                    }
+                }
+                else -> dappDialog = null
             }
         })
         viewModel.apply {
@@ -167,11 +179,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         DappSignMessageDialog(this@MainActivity,
             {
                 walletConnectViewModel.acceptRequest()
-                signDialog = null
+                dappDialog = null
             },
             {
                 walletConnectViewModel.rejectRequest()
-                signDialog = null
+                dappDialog = null
             }
         ).apply {
             setContent(it.message, it.session)

@@ -10,17 +10,16 @@ import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 
-class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) : DappDialog(context) {
+class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
+    DappDialog(context, { approve() }, { deny() }) {
 
     private val binding: DappConfirmationDialogBinding = DappConfirmationDialogBinding.inflate(layoutInflater)
     override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
 
     init {
         setContentView(binding.root)
-        with(binding) {
-            confirmationView.hideRequestedData()
-            buttons.setView({ approve() }, { deny() }, { dismiss() })
-        }
+        initButtons(binding.confirmationButtons)
+        binding.confirmationView.hideRequestedData()
     }
 
     fun setView(meta: WalletConnectPeerMeta, networkName: String) = with(binding) {

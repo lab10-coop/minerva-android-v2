@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:showIn="@layout/dapp_sign_message_dialog">
+    tools:showIn="@layout/dapp_confirmation_dialog">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/cancel"
@@ -13,8 +13,10 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="6dp"
         android:text="@string/cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/connect" />
+        app:layout_constraintRight_toLeftOf="@+id/connect"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connect"
@@ -23,7 +25,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="6dp"
         android:text="@string/confirm"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/cancel"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</merge>
+</androidx.constraintlayout.widget.ConstraintLayout>
