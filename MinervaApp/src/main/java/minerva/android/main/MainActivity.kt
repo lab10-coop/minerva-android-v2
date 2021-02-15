@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
@@ -40,6 +41,7 @@ import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.walletconnect.DappDialog
 import minerva.android.widget.dialog.walletconnect.DappSendTransactionDialog
+import minerva.android.widget.dialog.walletconnect.GasPriceDialog
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
 
@@ -172,7 +174,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }, {
             Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG)
                 .show()
-        }).apply {
+        },
+            {
+                //todo activity or dialog
+                GasPriceDialog(this).show()
+            }).apply {
             setContent(it.transaction, it.session, it.account)
             show()
         }

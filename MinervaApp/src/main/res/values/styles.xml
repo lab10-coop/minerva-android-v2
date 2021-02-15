@@ -118,6 +118,12 @@
         <item name="android:windowMinWidthMinor">82%</item>
     </style>
 
+    <style name="MaterialDialogStyle" parent="@style/ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:windowMinWidthMajor">82%</item>
+        <item name="android:windowMinWidthMinor">82%</item>
+    </style>
+
+
     <style name="TabLayoutStyle" parent="Widget.MaterialComponents.TabLayout">
         <item name="tabIndicatorFullWidth">false</item>
         <item name="tabInlineLabel">true</item>

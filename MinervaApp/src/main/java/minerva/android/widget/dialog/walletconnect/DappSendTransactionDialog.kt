@@ -17,7 +17,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 
-class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
+class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () -> Unit, showDialog: () -> Unit) :
     DappDialog(context, { approve() }, { deny() }) {
 
     private val binding: DappSendTransactionDialogBinding = DappSendTransactionDialogBinding.inflate(layoutInflater)
@@ -28,15 +28,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             setContentView(root)
             initButtons(confirmationButtons)
             editTxTime.setOnClickListener {
-
-                //todo activity or dialog
-                MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
-                    .setTitle("test")
-                    .setPositiveButton(R.string.remove) { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                    .show()
+                showDialog()
             }
 
             expandAddressIcon.setOnClickListener {
@@ -60,4 +52,6 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
         }
     }
+
+
 }

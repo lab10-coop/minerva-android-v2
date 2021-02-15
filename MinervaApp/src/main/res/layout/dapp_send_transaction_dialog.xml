@@ -137,11 +137,11 @@
     <ImageView
         android:id="@+id/hide_address_icon"
         android:layout_width="wrap_content"
-        android:visibility="invisible"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginEnd="@dimen/margin_normal"
         android:src="@drawable/ic_visibility_off"
+        android:visibility="invisible"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/transfer_separator"
         tools:ignore="ContentDescription" />
@@ -306,6 +306,7 @@
         android:gravity="center"
         android:text="@string/account_balance_is_to_low"
         android:textAllCaps="true"
+        android:visibility="invisible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_tx_time" />
