@@ -1,4 +1,4 @@
-package minerva.android.widget
+package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
 import androidx.core.content.ContextCompat
@@ -17,7 +17,6 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
 
     init {
         setContentView(binding.root)
-        setCancelable(false)
         with(binding) {
             confirmationView.hideRequestedData()
             buttons.setView({ approve() }, { deny() }, { dismiss() })

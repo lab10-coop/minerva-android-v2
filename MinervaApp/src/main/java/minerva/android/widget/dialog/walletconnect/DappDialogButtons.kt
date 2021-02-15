@@ -1,4 +1,4 @@
-package minerva.android.widget
+package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
 import android.util.AttributeSet

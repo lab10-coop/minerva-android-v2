@@ -36,7 +36,7 @@ import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
-import minerva.android.widget.DappSignMessageDialog
+import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject

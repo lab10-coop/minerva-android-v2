@@ -74,7 +74,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/confirmation_view" />
 
-    <minerva.android.widget.DappDialogButtons
+    <minerva.android.widget.dialog.walletconnect.DappDialogButtons
         android:id="@+id/buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

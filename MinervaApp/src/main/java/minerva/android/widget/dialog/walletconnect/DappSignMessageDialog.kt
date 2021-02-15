@@ -1,10 +1,11 @@
-package minerva.android.widget
+package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
 import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
 import kotlinx.android.synthetic.main.labeled_text_view.view.*
 import minerva.android.R
+import minerva.android.databinding.DappDialogButtonsBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSignMessageDialogBinding
 import minerva.android.walletmanager.model.walletconnect.DappSession
@@ -13,13 +14,15 @@ class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> U
 
     private val binding = DappSignMessageDialogBinding.inflate(layoutInflater)
     override val networkHeader: DappNetworkHeaderBinding = DappNetworkHeaderBinding.bind(binding.root)
+    private val buttons: DappDialogButtonsBinding = DappDialogButtonsBinding.bind(binding.root)
 
     init {
         setContentView(binding.root)
-        setCancelable(false)
 
         with(binding) {
-            buttons.setView({ approve() }, { deny() }, { dismiss() })
+
+//            buttons.setView({ approve() }, { deny() }, { dismiss() })
+
             message.body.apply {
                 maxLines = 8
                 movementMethod = ScrollingMovementMethod()
