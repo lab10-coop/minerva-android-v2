@@ -25,21 +25,21 @@ object DataProvider {
 
     val networks = listOf(
         Network(
-            short = NetworkShortName.ATS_TAU, httpRpc = "address", testNet = true,
+            chainId = 1, short = NetworkShortName.ATS_TAU, httpRpc = "address", testNet = true,
             tokens = listOf(
-                ERC20Token(3, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
-                ERC20Token(3, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
+                ERC20Token(1, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
+                ERC20Token(1, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
             )
         ),
         Network(
-            short = NetworkShortName.ETH_RIN, httpRpc = "address", testNet = true,
+            chainId = 2, short = NetworkShortName.ETH_RIN, httpRpc = "address", testNet = true,
             tokens = listOf(
-                ERC20Token(3, "CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
-                ERC20Token(3, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
+                ERC20Token(2, "CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
+                ERC20Token(2, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
             )
         ),
-        Network(short = NetworkShortName.ATS_SIGMA, httpRpc = "address", testNet = true),
-        Network(short = NetworkShortName.POA_CORE, httpRpc = "address", testNet = true)
+        Network(chainId = 3, short = NetworkShortName.ATS_SIGMA, httpRpc = "address", testNet = true),
+        Network(chainId = 4, short = NetworkShortName.POA_CORE, httpRpc = "address", testNet = true)
     )
 
     val walletConfig = WalletConfig(
@@ -49,26 +49,26 @@ object DataProvider {
             Identity(3, "identityName3", "", "privateKey", "address3", data)
         ),
         listOf(
-            Account(2, "publicKey1", "privateKey1", "address", networkShort = NetworkShortName.ETH_RIN),
-            Account(4, "publicKey2", "privateKey2", "address", networkShort = NetworkShortName.ATS_TAU),
+            Account(1, "publicKey1", "privateKey1", "address1", networkShort = NetworkShortName.ETH_RIN),
+            Account(2, "publicKey2", "privateKey2", "address2", networkShort = NetworkShortName.ATS_TAU),
             Account(
-                5, "publicKey3", "privateKey3", "address", networkShort = NetworkShortName.ATS_TAU,
+                3, "publicKey3", "privateKey3", "address3", networkShort = NetworkShortName.ATS_TAU,
                 owners = listOf("masterOwner")
             ),
             Account(
-                6, "publicKey4", "privateKey4", "address", networkShort = NetworkShortName.ATS_TAU,
+                4, "publicKey4", "privateKey4", "address4", networkShort = NetworkShortName.ATS_TAU,
                 owners = listOf("notMasterOwner", "masterOwner")
             ),
-            Account(7, "publicKey5", "privateKey5", "address", networkShort = NetworkShortName.ATS_TAU),
+            Account(1, "publicKey5", "privateKey5", "address4", networkShort = NetworkShortName.ATS_TAU),
             Account(
-                1,
+                5,
                 "publicKey1Main",
                 "privateKey1Main",
                 "address1Main",
                 networkShort = NetworkShortName.ATS_SIGMA
             ),
             Account(
-                2,
+                6,
                 "publicKey2Main",
                 "privateKey2Main",
                 "address2Main",
@@ -89,13 +89,13 @@ object DataProvider {
         mapOf(
             Pair(
                 NetworkShortName.ATS_TAU, listOf(
-                    ERC20Token(3, "CookieTokenATS", "Cookie", "0xC00k1e", "13"),
-                    ERC20Token(3, "OtherTokenATS", "OtherC", "0x0th3r", "32")
+                    ERC20Token(1, "CookieTokenATS", "Cookie", "0xC00k1e", "13"),
+                    ERC20Token(1, "OtherTokenATS", "OtherC", "0x0th3r", "32")
                 )
             ),
             Pair(NetworkShortName.ETH_RIN, listOf(
-                ERC20Token(3, "OtherTokenETH", "OtherC", "0x0th3r", "32"),
-                ERC20Token(3, "CookieTokenETH", "Cookie", "0xC00k1e", "13")
+                ERC20Token(2, "OtherTokenETH", "OtherC", "0x0th3r", "32", "someLogoURI"),
+                ERC20Token(2, "CookieTokenETH", "Cookie", "0xC00k1e", "13", "someLogoURI_II")
             ))
         )
     )

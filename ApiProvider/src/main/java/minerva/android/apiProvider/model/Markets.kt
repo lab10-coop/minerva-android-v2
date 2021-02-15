@@ -2,6 +2,7 @@ package minerva.android.apiProvider.model
 
 import com.google.gson.annotations.SerializedName
 
+//TODO klop change Price format to just double
 data class Markets(
     @SerializedName(MarketIds.ETHEREUM)
     val ethPrice: Price? = null,

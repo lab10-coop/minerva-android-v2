@@ -115,6 +115,7 @@ class TokenManagerImpl(
             }
         } else Single.just(localCheckResult.second)
 
+
     private fun getTokenIconsURL(): Single<Map<String, String>> =
         cryptoApi.getTokenRawData(url = BuildConfig.ERC20_TOKEN_DATA_URL).map { data ->
             data.associate { generateTokenIconKey(it.chainId, it.address) to it.logoURI }

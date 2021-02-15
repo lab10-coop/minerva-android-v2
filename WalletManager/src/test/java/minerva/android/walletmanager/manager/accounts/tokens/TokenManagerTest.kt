@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
+import com.google.gson.annotations.SerializedName
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -12,7 +13,9 @@ import minerva.android.blockchainprovider.repository.regularAccont.BlockchainReg
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.AccountToken
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
@@ -41,14 +44,14 @@ class TokenManagerTest : RxTest() {
     fun `Test loading tokens list`() {
         NetworkManager.initialize(DataProvider.networks)
         tokenManager.loadTokens("Some").size shouldBeEqualTo 0
-        tokenManager.loadTokens(NetworkShortName.ATS_TAU).let {
+        tokenManager.loadTokens(ATS_TAU).let {
             it.size shouldBeEqualTo 4
             it[0].name shouldBeEqualTo "CookieTokenATS"
             it[1].name shouldBeEqualTo "CookieTokenDATS"
             it[2].name shouldBeEqualTo "OtherTokenATS"
             it[3].name shouldBeEqualTo "SomeSomeTokenDATS"
         }
-        tokenManager.loadTokens(NetworkShortName.ETH_RIN).let {
+        tokenManager.loadTokens(ETH_RIN).let {
             it.size shouldBeEqualTo 3
             it[0].name shouldBeEqualTo "CookieTokenDETH"
             it[1].name shouldBeEqualTo "OtherTokenDETH"
@@ -60,10 +63,81 @@ class TokenManagerTest : RxTest() {
     fun `Test saving tokens for giving network`() {
         NetworkManager.initialize(DataProvider.networks)
         val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "C00")
-        tokenManager.saveToken(NetworkShortName.ATS_TAU, firstToken)
+        tokenManager.saveToken(ATS_TAU, firstToken)
             .test()
             .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
-        tokenManager.saveToken(NetworkShortName.ATS_TAU, firstToken)
+        tokenManager.saveToken(ATS_TAU, firstToken)
+            .test()
+            .assertComplete()
+        verify(walletManager, times(1)).updateWalletConfig(any())
+    }
+
+    @Test
+    fun `Test saving tokens list for giving network`() {
+        NetworkManager.initialize(DataProvider.networks)
+        tokenManager.saveTokens(map)
+            .test()
+            .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
+        tokenManager.saveTokens(map)
+            .test()
+            .assertComplete()
+        verify(walletManager, times(1)).updateWalletConfig(any())
+    }
+
+    @Test
+    fun `Test updating token from local storage`() {
+        NetworkManager.initialize(DataProvider.networks)
+        whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
+        val result = tokenManager.updateTokensFromLocalStorage(map)
+        result.first shouldBeEqualTo true
+        result.second.size shouldBeEqualTo 1
+        result.second[ATS_TAU]?.size shouldBeEqualTo 2
+        result.second[ATS_TAU]?.get(1)?.balance shouldBeEqualTo BigDecimal.TEN
+        result.second[ATS_TAU]?.get(1)?.token?.logoURI shouldBeEqualTo null
+        val resultII = tokenManager.updateTokensFromLocalStorage(mapII)
+        resultII.first shouldBeEqualTo false
+        resultII.second.size shouldBeEqualTo 1
+        resultII.second[ETH_RIN]?.size shouldBeEqualTo 2
+        resultII.second[ETH_RIN]?.get(1)?.balance shouldBeEqualTo BigDecimal.TEN
+        resultII.second[ETH_RIN]?.get(1)?.token?.logoURI shouldBeEqualTo "someLogoURI_II"
+    }
+
+    @Test
+    fun `Test tokens with online logos data without error`() {
+        NetworkManager.initialize(DataProvider.networks)
+        val localUpdatedMap = Pair(false, map)
+        whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.just(tokenRawData))
+        tokenManager.updateTokens(localUpdatedMap).test().assertComplete().assertNoErrors()
+            .assertValue {
+                map == map
+                map[ATS_TAU]?.get(0)?.token?.logoURI == null
+            }
+        val localUpdatedMapII = Pair(true, map)
+        tokenManager.updateTokens(localUpdatedMapII).test().assertComplete().assertNoErrors()
+            .assertValue {
+                map[ATS_TAU]?.get(0)?.token?.logoURI == "someIconAddress"
+                map[ATS_TAU]?.get(1)?.token?.logoURI == "someIconAddressII"
+            }
+    }
+
+    @Test
+    fun `Test tokens with online logos data with error`() {
+        NetworkManager.initialize(DataProvider.networks)
+        val localUpdatedMap = Pair(true, map)
+        whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.error(Throwable("No data here!")))
+        tokenManager.updateTokens(localUpdatedMap).test().assertErrorMessage("No data here!")
+    }
+
+    @Test
+    fun `Test saving tokens data`() {
+        NetworkManager.initialize(DataProvider.networks)
+        val map = mapOf(
+            Pair("Some", listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN)))
+        )
+        tokenManager.saveTokens(map)
+            .test()
+            .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
+        tokenManager.saveTokens(map)
             .test()
             .assertComplete()
         verify(walletManager, times(1)).updateWalletConfig(any())
@@ -72,14 +146,15 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test updating tokens list`() {
         val newToken = ERC20Token(1, "SomeToken", "some", "0xt0k3n", "32")
-        NetworkShortName.ATS_TAU.let { ATS ->
+        ATS_TAU.let { ATS ->
             val updatedTokens =
                 tokenManager.updateTokens(ATS, newToken, DataProvider.walletConfig.erc20Tokens.toMutableMap())
             updatedTokens[ATS]?.size shouldBeEqualTo 3
             updatedTokens[ATS]?.get(2)?.name shouldBeEqualTo "SomeToken"
             updatedTokens[ATS]?.get(0)?.name shouldBeEqualTo "CookieTokenATS"
             val secondNewToken = ERC20Token(1, "CookieCoin", "CC", "0xC00k1e", "32")
-            val secondUpdatedToken = tokenManager.updateTokens(ATS, secondNewToken, DataProvider.walletConfig.erc20Tokens.toMutableMap())
+            val secondUpdatedToken =
+                tokenManager.updateTokens(ATS, secondNewToken, DataProvider.walletConfig.erc20Tokens.toMutableMap())
             secondUpdatedToken[ATS]?.size shouldBeEqualTo 2
             secondUpdatedToken[ATS]?.get(1)?.name shouldBeEqualTo "CookieCoin"
             secondUpdatedToken[ATS]?.get(0)?.name shouldBeEqualTo "OtherTokenATS"
@@ -95,11 +170,11 @@ class TokenManagerTest : RxTest() {
             Pair("0xC00k1e", TokenBalance(balance = "1")),
             Pair("0x0th3r", TokenBalance(balance = "10"))
         )
-        val tokensATS = tokenManager.mapToAccountTokensList(NetworkShortName.ATS_TAU, rawTokens)
+        val tokensATS = tokenManager.mapToAccountTokensList(ATS_TAU, rawTokens)
         tokensATS.size shouldBeEqualTo 2
         tokensATS[0].token.name shouldBeEqualTo "CookieTokenATS"
         tokensATS[1].token.name shouldBeEqualTo "OtherTokenATS"
-        val tokenETH = tokenManager.mapToAccountTokensList(NetworkShortName.ETH_RIN, rawTokens)
+        val tokenETH = tokenManager.mapToAccountTokensList(ETH_RIN, rawTokens)
         tokenETH.size shouldBeEqualTo 2
         tokenETH[0].token.name shouldBeEqualTo "CookieTokenDETH"
         tokenETH[1].token.name shouldBeEqualTo "OtherTokenETH"
@@ -152,5 +227,28 @@ class TokenManagerTest : RxTest() {
     private val data = listOf(
         TokenIconDetails(1, "0x4ddre55", "LogoUri"),
         TokenIconDetails(2, "0x4ddre55", "LogoUri2")
+    )
+
+    private val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "C01")
+    private val secondToken = ERC20Token(1, "CookieTokenII", "COOKiE", "0xC00k1eII", "C02")
+    private val map = mapOf(
+        Pair(
+            ATS_TAU,
+            listOf(AccountToken(firstToken, BigDecimal.ONE), AccountToken(secondToken, BigDecimal.TEN))
+        )
+    )
+
+    private val firstTokenII = ERC20Token(2, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "C11")
+    private val secondTokenII = ERC20Token(2, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "C12")
+    private val mapII = mapOf(
+        Pair(
+            ETH_RIN,
+            listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN))
+        )
+    )
+
+    private val tokenRawData = listOf(
+        TokenIconDetails(1, "0xC00k1e", "someIconAddress"),
+        TokenIconDetails(1, "0xC00k1eII", "someIconAddressII")
     )
 }

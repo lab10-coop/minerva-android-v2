@@ -66,7 +66,9 @@ class TransactionRepositoryImpl(
                 .filter { position -> accountsFilter(accounts[position]) && accounts[position].network.isAvailable() }
                 .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
                 .toList()
-                .map { it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
+                .map { //
+                    it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third)}
+                }
                 .map { tokenManager.updateTokensFromLocalStorage(it) }
                 .flatMap { localCheck ->
                     tokenManager.updateTokens(localCheck).onErrorReturn {
@@ -230,7 +232,7 @@ class TransactionRepositoryImpl(
                 it.tokens.forEach { tokenBalance ->
                     tokensList.add(Pair(tokenBalance.address, tokenBalance))
                 }
-                Triple(account.network.short, account.privateKey, tokensList.toList())
+                Triple(account.network.short, account.privateKey, tokensList)
             }
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)

@@ -10,8 +10,7 @@ import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_R
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
 
-
-//TODO remove short name and use chainId instead
+@Deprecated("Short value is deprecated. Use chainId instead")
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(ATS_TAU, ETH_ROP, ETH_RIN, ETH_KOV, ETH_GOR, POA_SKL, LUKSO_14, ETH_MAIN)
 annotation class NetworkShortName {
