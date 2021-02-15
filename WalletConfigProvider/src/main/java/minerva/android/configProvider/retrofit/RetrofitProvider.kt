@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitProvider {
 
-    fun provideUserHeaderInterceptor(): HeaderInterceptor = HeaderInterceptor()
+    fun provideUserHeaderInterceptor(token: String): HeaderInterceptor = HeaderInterceptor(token)
 
     fun providePrivateOkHttpClient(
         isDebug: Boolean,
