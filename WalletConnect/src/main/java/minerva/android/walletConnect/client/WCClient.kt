@@ -69,7 +69,7 @@ open class WCClient(
         { _, _, _, _ -> }
     var onEthSign: (id: Long, message: WCEthereumSignMessage, peerId: String) -> Unit = { _, _, _ -> }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
-    var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
+    var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction, peerId: String) -> Unit = { _, _, _ -> }
     var onCustomRequest: (id: Long, payload: String) -> Unit = { _, _ -> }
     var onGetAccounts: (id: Long) -> Unit = { _ -> }
     var onWCOpen: (peerId: String) -> Unit = { _ -> }
@@ -331,7 +331,7 @@ open class WCClient(
 
                 val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onEthSendTransaction(request.id, param)
+                onEthSendTransaction(request.id, param, peerId)
             }
             WCMethod.GET_ACCOUNTS -> {
                 onGetAccounts(request.id)

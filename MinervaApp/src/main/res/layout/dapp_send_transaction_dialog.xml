@@ -6,12 +6,259 @@
 
     <include layout="@layout/dapp_network_header" />
 
+    <TextView
+        android:id="@+id/requestLabel"
+        style="@style/RoundedLabelStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/transaction_request"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/network" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/transfer"
+        style="@style/DappLabelStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="55dp"
+        android:text="@string/transfer"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/requestLabel" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="55dp"
+        android:layout_marginEnd="@dimen/margin_xxsmall"
+        android:text="0.24312"
+        android:textColor="@color/dappNameBlack"
+        android:textSize="@dimen/text_large"
+        app:layout_constraintRight_toLeftOf="@+id/unit"
+        app:layout_constraintTop_toBottomOf="@+id/requestLabel" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:text="gETH"
+        android:textColor="@color/dappNameBlack"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintBottom_toBottomOf="@+id/amount"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:text="0.00 EUR"
+        android:textColor="@color/dappLabelColorGray"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/unit" />
+
+    <View
+        android:id="@+id/transfer_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:background="@color/dappSeparatorColor"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/value" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/receiver"
+        style="@style/DappLabelStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/to"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transfer_separator" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/receiver_address"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="150dp"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:ellipsize="middle"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="end"
+        android:singleLine="true"
+        android:text="0x427D0f6f4A670JA9563f0807A9563gf0807427D"
+        android:textColor="@color/dappNameBlack"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintLeft_toRightOf="@+id/receiver"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transfer_separator" />
+
+    <View
+        android:id="@+id/receiver_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_large"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:background="@color/dappSeparatorColor"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/receiver_address" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/from"
+        style="@style/DappLabelStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/from"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/receiver_separator" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/account_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="end"
+        android:text="#3 Ethereum"
+        android:textColor="@color/dappNameBlack"
+        android:textSize="@dimen/text_normal"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/receiver_separator" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/sender_address"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:ellipsize="middle"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="end"
+        android:singleLine="true"
+        android:text="0x427D0f6f4A670JA9563f0807A9563gf0807427D"
+        android:textColor="@color/dappLabelColorGray"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="@+id/account_name"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/account_name" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/balance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:ellipsize="middle"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="end"
+        android:singleLine="true"
+        android:text="11.2654 ETH"
+        android:textColor="@color/dappLabelColorGray"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="@+id/account_name"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sender_address" />
+
+    <View
+        android:id="@+id/sender_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:background="@color/dappSeparatorColor"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/balance" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/transaction_cost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_medium"
+        android:text="0.0121 ETH (31.50 EUR)"
+        android:textColor="@color/dappLabelColorGray"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/transaction_cost_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:fontFamily="@font/rubik_regular"
+        android:text="@string/transaction_cost_label"
+        android:textColor="@color/dappLabelColorGray"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transaction_cost" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/transaction_type"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_small"
+        android:fontFamily="@font/rubik_medium"
+        android:gravity="end"
+        android:text="Rapid"
+        android:textColor="@color/dappLabelColorGray"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/transaction_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:layout_marginEnd="@dimen/margin_small"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="end"
+        android:text="145 Gwei ~ 15 sec"
+        android:textColor="@color/dappLabelColorGray"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transaction_type" />
+
+    <ImageView
+        android:id="@+id/edit_tx_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:src="@drawable/ic_edit"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
+
     <include
         android:id="@+id/confirmation_buttons"
         layout="@layout/dapp_dialog_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_large"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_marginTop="@dimen/margin_xxxlarge"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transaction_cost_label" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,4 +12,4 @@ data class OnSessionRequest(val meta: WalletConnectPeerMeta, val chainId: Int?, 
 data class OnConnectionFailure(val error: Throwable, val peerId: String?) : WalletConnectStatus()
 object OnDisconnect : WalletConnectStatus()
 data class OnEthSign(val message: String, val peerId: String) : WalletConnectStatus()
-data class OnEthSendTransaction(val transaction: WalletConnectTransaction) : WalletConnectStatus()
+data class OnEthSendTransaction(val transaction: WalletConnectTransaction, val peerId: String) : WalletConnectStatus()

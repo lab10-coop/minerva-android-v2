@@ -1,9 +1,10 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
-import minerva.android.databinding.DappDialogButtonsBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSendTransactionDialogBinding
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 
 class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
     DappDialog(context, { approve() }, { deny() }) {
@@ -16,4 +17,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         initButtons(binding.confirmationButtons)
     }
 
+    fun setContent(transaction: WalletConnectTransaction, session: DappSession) = with(binding) {
+        setupHeader(session.name, session.networkName, session.iconUrl)
+    }
 }

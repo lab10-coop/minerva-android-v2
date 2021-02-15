@@ -69,9 +69,14 @@ class WalletConnectRepositoryImpl(
                 status.onNext(OnEthSign(getUserReadableData(message), peerId))
             }
 
-            onEthSendTransaction = { id, transaction ->
+            onEthSendTransaction = { id, transaction, peerId ->
                 currentRequestId = id
-                status.onNext(OnEthSendTransaction(WCEthTransactionToWalletConnectTransactionMapper.map(transaction)))
+                status.onNext(
+                    OnEthSendTransaction(
+                        WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
+                        peerId
+                    )
+                )
             }
 
             connect(

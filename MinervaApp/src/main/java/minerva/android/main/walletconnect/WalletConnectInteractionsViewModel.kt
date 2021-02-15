@@ -63,18 +63,21 @@ class WalletConnectInteractionsViewModel(
     }
 
     private fun mapRequests(it: WalletConnectStatus) = when (it) {
-        is OnEthSign -> onEthSign(it)
+        is OnEthSign ->
+            walletConnectRepository.getDappSessionById(it.peerId)
+                .map { session ->
+                    currentDappSession = session
+                    OnEthSignRequest(it.message, session)
+                }
         is OnDisconnect -> Single.just(OnDisconnected)
-        is OnEthSendTransaction -> Single.just(OnEthSendTransactionRequest(it.transaction))
+        is OnEthSendTransaction ->
+            walletConnectRepository.getDappSessionById(it.peerId)
+                .map { session ->
+                    currentDappSession = session
+                    OnEthSendTransactionRequest(it.transaction, session)
+                }
         else -> Single.just(DefaultRequest)
     }
-
-    private fun onEthSign(it: OnEthSign): Single<OnEthSignRequest> =
-        walletConnectRepository.getDappSessionById(it.peerId)
-            .map { session ->
-                currentDappSession = session
-                OnEthSignRequest(it.message, session)
-            }
 
     fun acceptRequest() {
         transactionRepository.getAccountByAddress(currentDappSession.address)?.let {

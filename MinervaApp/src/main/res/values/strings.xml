@@ -270,4 +270,8 @@
     <string name="show_private_key">Show Private Key</string>
     <string name="hide_private_key">Hide Private Key</string>
     <string name="private_key">Private Key</string>
+    <string name="transaction_request">Transaction Request</string>
+    <string name="transfer">Transfer</string>
+    <string name="to">To</string>
+    <string name="from">From</string>
 </resources>

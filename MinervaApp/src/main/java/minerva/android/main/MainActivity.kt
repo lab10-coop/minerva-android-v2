@@ -111,20 +111,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun prepareObservers() {
         walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
             dappDialog?.dismiss()
-            when (it) {
-                is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
-                is OnEthSendTransactionRequest -> {
-                    dappDialog = DappSendTransactionDialog(this, {
-                        Toast.makeText(this@MainActivity, "approve", Toast.LENGTH_LONG)
-                            .show()
-                    }, {
-                        Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG)
-                            .show()
-                    }).apply {
-                        show()
-                    }
-                }
-                else -> dappDialog = null
+            dappDialog = when (it) {
+                is OnEthSignRequest -> getDappSignDialog(it)
+                is OnEthSendTransactionRequest -> getSendTransactionDialog(it)
+                else -> null
             }
         })
         viewModel.apply {
@@ -174,6 +164,18 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             })
         }
     }
+
+    private fun getSendTransactionDialog(it: OnEthSendTransactionRequest) =
+        DappSendTransactionDialog(this, {
+            Toast.makeText(this@MainActivity, "approve", Toast.LENGTH_LONG)
+                .show()
+        }, {
+            Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG)
+                .show()
+        }).apply {
+            setContent(it.transaction, it.session)
+            show()
+        }
 
     private fun getDappSignDialog(it: OnEthSignRequest) =
         DappSignMessageDialog(this@MainActivity,

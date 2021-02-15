@@ -169,4 +169,10 @@
         <item name="android:textColor">#564AF5</item>
         <item name="android:textSize">@dimen/text_xsmall</item>
     </style>
+
+    <style name="DappLabelStyle">
+        <item name="android:fontFamily">@font/rubik_regular</item>
+        <item name="android:textColor">@color/dappLabelColorGray</item>
+        <item name="android:textSize">@dimen/text_normal</item>
+    </style>
 </resources>

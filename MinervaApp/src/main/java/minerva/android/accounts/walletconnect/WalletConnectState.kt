@@ -21,5 +21,7 @@ data class UpdateDappsState(val dapps: List<DappSession>) : WalletConnectState()
 object HideDappsState : WalletConnectState()
 object OnSessionDeleted : WalletConnectState()
 data class OnEthSignRequest(val message: String, val session: DappSession) : WalletConnectState()
-data class OnEthSendTransactionRequest(val transaction: WalletConnectTransaction) : WalletConnectState()
+data class OnEthSendTransactionRequest(val transaction: WalletConnectTransaction, val session: DappSession) :
+    WalletConnectState()
+
 object DefaultRequest : WalletConnectState()
