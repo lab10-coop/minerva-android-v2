@@ -274,4 +274,6 @@
     <string name="transfer">Transfer</string>
     <string name="to">To</string>
     <string name="from">From</string>
+    <string name="transaction_cost">Transaction cost</string>
+    <string name="account_balance_is_to_low">Account balance is to low</string>
 </resources>

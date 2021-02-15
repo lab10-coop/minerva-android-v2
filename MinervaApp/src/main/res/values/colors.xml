@@ -61,4 +61,5 @@
     <color name="dappLabelColorGray">#908e9f</color>
     <color name="dappDragColorGray">#d8d8d8</color>
     <color name="dappSeparatorColor">#eaeaee</color>
+    <color name="lightRed">#10e42c00</color>
 </resources>

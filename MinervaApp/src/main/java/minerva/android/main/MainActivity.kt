@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG)
                 .show()
         }).apply {
-            setContent(it.transaction, it.session)
+            setContent(it.transaction, it.session, it.account)
             show()
         }
 

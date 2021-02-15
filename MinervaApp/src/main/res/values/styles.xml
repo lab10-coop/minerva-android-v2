@@ -170,6 +170,11 @@
         <item name="android:textSize">@dimen/text_xsmall</item>
     </style>
 
+    <style name="RoundedRedLabelStyle" parent="RoundedLabelStyle">
+        <item name="android:textColor">#e42c00</item>
+        <item name="android:background">@drawable/rounded_light_red_background</item>
+    </style>
+
     <style name="DappLabelStyle">
         <item name="android:fontFamily">@font/rubik_regular</item>
         <item name="android:textColor">@color/dappLabelColorGray</item>

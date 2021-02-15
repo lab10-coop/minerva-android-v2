@@ -239,7 +239,6 @@ class TransactionRepositoryImpl(
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
     override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
-    override fun getMnemonic(): String = walletConfigManager.getMnemonic()
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1

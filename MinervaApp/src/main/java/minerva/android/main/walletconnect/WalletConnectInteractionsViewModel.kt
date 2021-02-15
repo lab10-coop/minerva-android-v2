@@ -74,7 +74,8 @@ class WalletConnectInteractionsViewModel(
             walletConnectRepository.getDappSessionById(it.peerId)
                 .map { session ->
                     currentDappSession = session
-                    OnEthSendTransactionRequest(it.transaction, session)
+                    val account = transactionRepository.getAccountByAddress(currentDappSession.address)
+                    OnEthSendTransactionRequest(it.transaction, session, account)
                 }
         else -> Single.just(DefaultRequest)
     }

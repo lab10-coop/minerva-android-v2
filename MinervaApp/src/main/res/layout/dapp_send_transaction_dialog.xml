@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/send_transaction_dialog"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -34,11 +36,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="55dp"
         android:layout_marginEnd="@dimen/margin_xxsmall"
-        android:text="0.24312"
         android:textColor="@color/dappNameBlack"
         android:textSize="@dimen/text_large"
         app:layout_constraintRight_toLeftOf="@+id/unit"
-        app:layout_constraintTop_toBottomOf="@+id/requestLabel" />
+        app:layout_constraintTop_toBottomOf="@+id/requestLabel"
+        tools:text="0.24312" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/unit"
@@ -92,17 +94,57 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="150dp"
         android:layout_marginTop="@dimen/margin_normal"
-        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_small"
         android:ellipsize="middle"
         android:fontFamily="@font/rubik_regular"
         android:gravity="end"
         android:singleLine="true"
-        android:text="0x427D0f6f4A670JA9563f0807A9563gf0807427D"
         android:textColor="@color/dappNameBlack"
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toRightOf="@+id/receiver"
+        app:layout_constraintRight_toLeftOf="@+id/expand_address_icon"
+        app:layout_constraintTop_toBottomOf="@+id/transfer_separator"
+        tools:text="0x427D0f6f4A670JA9563f0807A9563gf0807427D" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/receiver_address_full"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_xxxlarge"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_small"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="end"
+        android:textColor="@color/dappNameBlack"
+        android:textSize="@dimen/text_normal"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toRightOf="@+id/receiver"
+        app:layout_constraintRight_toLeftOf="@+id/expand_address_icon"
+        app:layout_constraintTop_toBottomOf="@+id/transfer_separator"
+        tools:text="0x427D0f6f4A670JA9563f0807A9563gf0807427D" />
+
+    <ImageView
+        android:id="@+id/expand_address_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:src="@drawable/ic_eye"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/transfer_separator" />
+        app:layout_constraintTop_toBottomOf="@+id/transfer_separator"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/hide_address_icon"
+        android:layout_width="wrap_content"
+        android:visibility="invisible"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:src="@drawable/ic_visibility_off"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transfer_separator"
+        tools:ignore="ContentDescription" />
 
     <View
         android:id="@+id/receiver_separator"
@@ -151,12 +193,12 @@
         android:fontFamily="@font/rubik_regular"
         android:gravity="end"
         android:singleLine="true"
-        android:text="0x427D0f6f4A670JA9563f0807A9563gf0807427D"
         android:textColor="@color/dappLabelColorGray"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintLeft_toLeftOf="@+id/account_name"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/account_name" />
+        app:layout_constraintTop_toBottomOf="@+id/account_name"
+        tools:text="0x427D0f6f4A670JA9563f0807A9563gf0807427D" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/balance"
@@ -168,12 +210,12 @@
         android:fontFamily="@font/rubik_regular"
         android:gravity="end"
         android:singleLine="true"
-        android:text="11.2654 ETH"
         android:textColor="@color/dappLabelColorGray"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintLeft_toLeftOf="@+id/account_name"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sender_address" />
+        app:layout_constraintTop_toBottomOf="@+id/sender_address"
+        tools:text="11.2654 ETH" />
 
     <View
         android:id="@+id/sender_separator"
@@ -207,7 +249,7 @@
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_xxsmall"
         android:fontFamily="@font/rubik_regular"
-        android:text="@string/transaction_cost_label"
+        android:text="@string/transaction_cost"
         android:textColor="@color/dappLabelColorGray"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -250,15 +292,31 @@
         android:layout_marginEnd="@dimen/margin_normal"
         android:src="@drawable/ic_edit"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/balance_to_low_error"
+        style="@style/RoundedRedLabelStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xlarge"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:gravity="center"
+        android:text="@string/account_balance_is_to_low"
+        android:textAllCaps="true"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edit_tx_time" />
 
     <include
         android:id="@+id/confirmation_buttons"
         layout="@layout/dapp_dialog_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_xxxlarge"
+        android:layout_marginTop="@dimen/margin_normal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/transaction_cost_label" />
+        app:layout_constraintTop_toBottomOf="@+id/balance_to_low_error" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
