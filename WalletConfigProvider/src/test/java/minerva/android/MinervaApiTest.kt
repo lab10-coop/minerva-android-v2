@@ -58,7 +58,7 @@ class MinervaApiTest : KoinTest {
         every { Looper.getMainLooper() } returns looper
         koinApplication {
             startKoin {
-                modules(createWalletConfigProviderModule(true, mockServer.url("/").toString()))
+                modules(createWalletConfigProviderModule(true, mockServer.url("/").toString(), "token"))
             }
         }
     }
