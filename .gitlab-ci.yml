@@ -34,8 +34,7 @@ distributeStagingBuild:
   stage: distribution
   only:
     refs:
-      - develop
-#      - master
+      - master
 
   script:
     - ./gradlew build
@@ -52,8 +51,7 @@ distributeProductionBuild:
   stage: distribution
   only:
     refs:
-      - develop
-#      - master
+      - master
 
   script:
     - ./gradlew build
