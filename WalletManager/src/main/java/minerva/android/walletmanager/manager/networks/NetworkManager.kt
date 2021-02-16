@@ -2,7 +2,7 @@ package minerva.android.walletmanager.manager.networks
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.map.value
-import minerva.android.walletmanager.exception.NetworkNotFound
+import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
@@ -29,7 +29,7 @@ object NetworkManager {
         networks.forEach {
             if (it.chainId == chainId) return it.short
         }
-        throw NetworkNotFound()
+        throw NetworkNotFoundThrowable()
     }
 
     fun firstDefaultValueNetwork(): Network = networks[FIRST_DEFAULT_NETWORK_INDEX]

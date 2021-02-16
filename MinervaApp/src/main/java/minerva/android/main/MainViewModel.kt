@@ -199,11 +199,11 @@ class MainViewModel(
     fun updateTokenIcons() {
         launchDisposable {
             transactionRepository.updateTokenIcons()
+                .onErrorComplete()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onError = { Timber.e("Checking last token icons update failed: ${it.message}") })
         }
-
     }
 
     private fun saveWalletAction(walletAction: WalletAction, error: Throwable? = null) {

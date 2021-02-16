@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.repository.transaction
 
+import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -63,11 +64,11 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
             return Observable.range(START, accounts.size)
                 .filter { position -> accountsFilter(accounts[position]) && accounts[position].network.isAvailable() }
-                .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
-                .toList()
-                .map { //
-                    it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third)}
+                .flatMapSingle { position ->
+                    refreshTokensBalance(accounts[position])
                 }
+                .toList()
+                .map { it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
                 .map { tokenManager.updateTokensFromLocalStorage(it) }
                 .flatMap { localCheck ->
                     tokenManager.updateTokens(localCheck).onErrorReturn {
@@ -225,7 +226,7 @@ class TransactionRepositoryImpl(
      */
 
     private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, TokenBalance>>>> =
-        cryptoApi.getTokenBalance(url = String.format(BuildConfig.ADDRESS_TOKEN_BALANCE_URL, account.address))
+        cryptoApi.getTokenBalance(url = tokenManager.getTokensApiURL(account))
             .map {
                 val tokensList = mutableListOf<Pair<String, TokenBalance>>()
                 it.tokens.forEach { tokenBalance ->

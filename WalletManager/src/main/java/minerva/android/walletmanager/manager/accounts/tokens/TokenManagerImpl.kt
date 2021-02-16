@@ -13,11 +13,25 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
 import minerva.android.walletmanager.BuildConfig
+import minerva.android.walletmanager.BuildConfig.*
 import minerva.android.walletmanager.exception.AllTokenIconsUpdated
+import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountToken
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_KOV
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_MAIN
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
@@ -115,9 +129,23 @@ class TokenManagerImpl(
             }
         } else Single.just(localCheckResult.second)
 
+    override fun getTokensApiURL(account: Account): String =
+        String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.networkShort), account.address)
+
+    private fun getTokenBalanceURL(networkShort: String) =
+        when(networkShort) {
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHEREUM_TOKEN_BALANCE_URL
+            ATS_TAU -> ARTIS_TAU_TOKEN_BALANCE_URL
+            ATS_SIGMA -> ARTIS_SIGMA_TOKEN_BALANCE_URL
+            POA_SKL -> POA_SOKOL_TOKEN_BALANCE_URL
+            POA_CORE -> POA_CORE_TOKEN_BALANCE_URL
+            XDAI -> X_DAI_TOKEN_BALANCE_URL
+            LUKSO_14 -> LUKSO_TOKEN_BALANCE_URL
+            else -> throw NetworkNotFoundThrowable()
+        }
 
     private fun getTokenIconsURL(): Single<Map<String, String>> =
-        cryptoApi.getTokenRawData(url = BuildConfig.ERC20_TOKEN_DATA_URL).map { data ->
+        cryptoApi.getTokenRawData(url = ERC20_TOKEN_DATA_URL).map { data ->
             data.associate { generateTokenIconKey(it.chainId, it.address) to it.logoURI }
         }
 
@@ -173,5 +201,6 @@ class TokenManagerImpl(
 
     companion object {
         private const val LAST_UPDATE_INDEX = 0
+        private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
     }
 }

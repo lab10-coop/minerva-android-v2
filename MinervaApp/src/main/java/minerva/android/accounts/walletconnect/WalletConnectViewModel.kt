@@ -12,7 +12,7 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.exception.InvalidAccountException
+import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
@@ -78,7 +78,7 @@ class WalletConnectViewModel(
                     )
             }
         } else {
-            _viewStateLiveData.value = OnError(InvalidAccountException())
+            _viewStateLiveData.value = OnError(InvalidAccountThrowable())
         }
     }
 

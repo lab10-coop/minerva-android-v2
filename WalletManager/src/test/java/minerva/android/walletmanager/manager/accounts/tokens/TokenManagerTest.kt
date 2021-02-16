@@ -10,12 +10,21 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.walletmanager.BuildConfig
+import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountToken
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
@@ -25,6 +34,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
+import kotlin.test.assertFailsWith
 
 class TokenManagerTest : RxTest() {
 
@@ -218,6 +228,27 @@ class TokenManagerTest : RxTest() {
         tokenManager.updateTokenIcons().test().assertComplete()
         tokenManager.updateTokenIcons().test().assertNotComplete()
         tokenManager.updateTokenIcons().test().assertNotComplete()
+    }
+
+    @Test
+    fun `Creating correct token URLs`() {
+        val accountOne = Account(1, networkShort = ATS_TAU, address = "0xADDRESSxONE")
+        val accountTwo = Account(1, networkShort = ETH_ROP, address = "0xADDRESSxTWO")
+        val accountThree = Account(1, networkShort = POA_SKL, address = "0xADDRESSxTHREE")
+        val accountFour = Account(1, networkShort = LUKSO_14, address = "0xADDRESSxFOUR")
+        val accountFive = Account(1, networkShort = ATS_SIGMA, address = "0xADDRESSxFIVE")
+        val accountSix = Account(1, networkShort = XDAI, address = "0xADDRESSxSIX")
+        val accountSeven = Account(1, networkShort = POA_CORE, address = "0xADDRESSxSEVEN")
+        val accountEight = Account(1, networkShort = "empty", address = "0xADDRESSxEMPTY")
+
+        tokenManager.getTokensApiURL(accountOne) shouldBeEqualTo "https://explorer.tau1.artis.network/api?module=account&action=tokenlist&address=0xADDRESSxONE"
+        tokenManager.getTokensApiURL(accountTwo) shouldBeEqualTo "https://explorer.tau1.artis.network/api?module=account&action=tokenlist&address=0xADDRESSxTWO"
+        tokenManager.getTokensApiURL(accountThree) shouldBeEqualTo "https://blockscout.com/poa/sokol/api?module=account&action=tokenlist&address=0xADDRESSxTHREE"
+        tokenManager.getTokensApiURL(accountFour) shouldBeEqualTo "https://blockscout.com/lukso/l14/api?module=account&action=tokenlist&address=0xADDRESSxFOUR"
+        tokenManager.getTokensApiURL(accountFive) shouldBeEqualTo "https://explorer.sigma1.artis.network/api?module=account&action=tokenlist&address=0xADDRESSxFIVE"
+        tokenManager.getTokensApiURL(accountSix) shouldBeEqualTo "https://blockscout.com/poa/xdai/api?module=account&action=tokenlist&address=0xADDRESSxSIX"
+        tokenManager.getTokensApiURL(accountSeven) shouldBeEqualTo "https://blockscout.com/poa/core/api?module=account&action=tokenlist&address=0xADDRESSxSEVEN"
+        assertFailsWith<NetworkNotFoundThrowable> { tokenManager.getTokensApiURL(accountEight) }
     }
 
     private val commitData: List<CommitElement>
