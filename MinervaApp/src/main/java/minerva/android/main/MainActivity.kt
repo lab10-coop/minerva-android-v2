@@ -174,14 +174,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }, {
             Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG)
                 .show()
-        },
-            {
-                //todo activity or dialog
-                GasPriceDialog(this).show()
-            }).apply {
-            setContent(it.transaction, it.session, it.account)
-            show()
-        }
+        })
+            .apply {
+                setContent(it.transaction, it.session, it.account)
+                { GasPriceDialog(context) { gasPrice -> setCustomGasPrice(gasPrice, it.account) }.show() }
+                show()
+            }
 
     private fun getDappSignDialog(it: OnEthSignRequest) =
         DappSignMessageDialog(this@MainActivity,

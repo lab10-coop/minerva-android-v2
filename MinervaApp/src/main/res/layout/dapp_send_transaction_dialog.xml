@@ -47,11 +47,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
-        android:text="gETH"
         android:textColor="@color/dappNameBlack"
         android:textSize="@dimen/text_normal"
         app:layout_constraintBottom_toBottomOf="@+id/amount"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        tools:text="gETH" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/value"
@@ -59,11 +59,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_xxsmall"
         android:layout_marginEnd="@dimen/margin_normal"
-        android:text="0.00 EUR"
         android:textColor="@color/dappLabelColorGray"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/unit" />
+        app:layout_constraintTop_toBottomOf="@+id/unit"
+        tools:text="0.00 EUR" />
 
     <View
         android:id="@+id/transfer_separator"
@@ -231,16 +231,17 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/transaction_cost"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
-        android:text="0.0121 ETH (31.50 EUR)"
         android:textColor="@color/dappLabelColorGray"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
+        app:layout_constraintRight_toLeftOf="@+id/gas_price_selector"
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator"
+        tools:text="0.0121 ETH (31.50 EUR)" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/transaction_cost_label"
@@ -255,19 +256,33 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/transaction_cost" />
 
+    <minerva.android.widget.GasPriceSelector
+        android:id="@+id/gas_price_selector"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/margin_xxlarge"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginEnd="@dimen/margin_small"
+        android:layout_marginBottom="@dimen/margin_small"
+        app:layout_constraintBottom_toTopOf="@+id/balance_to_low_error"
+        app:layout_constraintLeft_toRightOf="@+id/transaction_cost"
+        app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
+
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/transaction_type"
+        android:id="@+id/speed"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_small"
         android:layout_marginEnd="@dimen/margin_small"
         android:fontFamily="@font/rubik_medium"
         android:gravity="end"
-        android:text="Rapid"
         android:textColor="@color/dappLabelColorGray"
         android:textSize="@dimen/text_xsmall"
-        app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
-        app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
+        android:visibility="invisible"
+        app:layout_constraintRight_toLeftOf="@+id/close_custom_time"
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator"
+        android:text="@string/custom" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/transaction_time"
@@ -277,20 +292,32 @@
         android:layout_marginEnd="@dimen/margin_small"
         android:fontFamily="@font/rubik_regular"
         android:gravity="end"
-        android:text="145 Gwei ~ 15 sec"
+        android:text="@string/custom_tx_speed"
         android:textColor="@color/dappLabelColorGray"
         android:textSize="@dimen/text_xsmall"
-        app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/transaction_type" />
+        android:visibility="invisible"
+        app:layout_constraintRight_toLeftOf="@+id/close_custom_time"
+        app:layout_constraintTop_toBottomOf="@+id/speed" />
 
     <ImageView
         android:id="@+id/edit_tx_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xbig"
         android:layout_marginEnd="@dimen/margin_normal"
         android:src="@drawable/ic_edit"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/close_custom_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xbig"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:src="@drawable/ic_close"
+        android:visibility="invisible"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sender_separator"
         tools:ignore="ContentDescription" />
@@ -317,6 +344,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/balance_to_low_error" />
 

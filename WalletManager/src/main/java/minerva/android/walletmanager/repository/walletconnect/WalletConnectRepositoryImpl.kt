@@ -71,6 +71,7 @@ class WalletConnectRepositoryImpl(
 
             onEthSendTransaction = { id, transaction, peerId ->
                 currentRequestId = id
+                Timber.tag("kobe").d("SEND TX")
                 status.onNext(
                     OnEthSendTransaction(
                         WCEthTransactionToWalletConnectTransactionMapper.map(transaction),

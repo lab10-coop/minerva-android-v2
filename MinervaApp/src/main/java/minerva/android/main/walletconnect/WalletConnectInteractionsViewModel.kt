@@ -70,13 +70,18 @@ class WalletConnectInteractionsViewModel(
                     OnEthSignRequest(it.message, session)
                 }
         is OnDisconnect -> Single.just(OnDisconnected)
-        is OnEthSendTransaction ->
+        is OnEthSendTransaction ->{
+            Timber.tag("kobe").d("SEND TX viewModel")
+
             walletConnectRepository.getDappSessionById(it.peerId)
                 .map { session ->
+                    Timber.tag("kobe").d("SEND TX dapp session")
                     currentDappSession = session
                     val account = transactionRepository.getAccountByAddress(currentDappSession.address)
                     OnEthSendTransactionRequest(it.transaction, session, account)
                 }
+        }
+
         else -> Single.just(DefaultRequest)
     }
 

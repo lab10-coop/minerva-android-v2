@@ -276,4 +276,6 @@
     <string name="from">From</string>
     <string name="transaction_cost">Transaction cost</string>
     <string name="account_balance_is_to_low">Account balance is to low</string>
+    <string name="custom">Custom</string>
+    <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
 </resources>

@@ -7,7 +7,8 @@ import android.graphics.drawable.ColorDrawable
 import minerva.android.R
 import minerva.android.databinding.GasPriceDialogBinding
 
-class GasPriceDialog(context: Context) : Dialog(context, R.style.MaterialDialogStyle) {
+class GasPriceDialog(context: Context, approve: (gasPrice: String) -> Unit) :
+    Dialog(context, R.style.MaterialDialogStyle) {
 
     private val binding: GasPriceDialogBinding = GasPriceDialogBinding.inflate(layoutInflater)
 
@@ -20,7 +21,7 @@ class GasPriceDialog(context: Context) : Dialog(context, R.style.MaterialDialogS
             }
 
             buttons.connect.setOnClickListener {
-                //todo get value from edit text
+                approve(binding.amount.text.toString())
                 dismiss()
             }
         }
