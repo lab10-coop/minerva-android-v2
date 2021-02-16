@@ -1,30 +1,29 @@
 package minerva.android.walletmanager.repository
 
-import com.google.gson.annotations.SerializedName
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.GasPrice
+import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.Price
+import minerva.android.apiProvider.model.TokenBalanceResponse
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
-import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
-import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.mappers.ERC20TokenToERC20TokenPayloadMapper
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
@@ -61,17 +60,13 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `refresh balances test success`() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
-            .thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
-        whenever(
-            cryptoApi.getMarkets(
-                any(),
-                any()
-            )
-        ).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.0))))
+            .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.0))))
+
         repository.refreshBalances().test()
             .assertComplete()
             .assertValue {
-                it["address"]?.cryptoBalance == BigDecimal.ONE
+                it["address1"]?.cryptoBalance == BigDecimal.ONE
             }
     }
 
@@ -92,12 +87,12 @@ class TransactionRepositoryTest : RxTest() {
     fun `refresh balances test when crypto api returns error success`() {
         val error = Throwable()
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
-            .thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
+            .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
         repository.refreshBalances().test()
             .assertComplete()
             .assertValue {
-                it["address"]?.cryptoBalance == BigDecimal.ONE
+                it["address1"]?.cryptoBalance == BigDecimal.ONE
             }
     }
 
