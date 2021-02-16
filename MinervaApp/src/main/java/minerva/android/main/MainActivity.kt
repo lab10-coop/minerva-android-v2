@@ -39,6 +39,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.MinervaLoadingDialog
 import minerva.android.widget.dialog.walletconnect.DappDialog
 import minerva.android.widget.dialog.walletconnect.DappSendTransactionDialog
 import minerva.android.widget.dialog.walletconnect.GasPriceDialog
@@ -169,9 +170,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     private fun getSendTransactionDialog(it: OnEthSendTransactionRequest) =
         DappSendTransactionDialog(this, {
-            Toast.makeText(this@MainActivity, "approve", Toast.LENGTH_LONG)
-                .show()
+            //todo handle accept request
         }, {
+            //todo handle deny request
             Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG)
                 .show()
         })

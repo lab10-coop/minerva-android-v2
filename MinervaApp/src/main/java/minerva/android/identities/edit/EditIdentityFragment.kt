@@ -37,8 +37,8 @@ import minerva.android.walletmanager.utils.AddressConverter
 import minerva.android.walletmanager.utils.AddressType
 import minerva.android.widget.LetterLogo
 import minerva.android.widget.ProfileImage
-import minerva.android.widget.ProfileImageDialog
-import minerva.android.widget.ProfileImageDialog.Companion.TAKE_PHOTO_REQUEST
+import minerva.android.widget.dialog.ProfileImageDialog
+import minerva.android.widget.dialog.ProfileImageDialog.Companion.TAKE_PHOTO_REQUEST
 import minerva.android.widget.dialog.ConfirmDataDialog
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import minerva.android.wrapped.WrappedActivity.Companion.POSITION

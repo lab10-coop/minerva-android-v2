@@ -25,7 +25,5 @@ class GasPriceDialog(context: Context, approve: (gasPrice: String) -> Unit) :
                 dismiss()
             }
         }
-
     }
-
 }

@@ -1,4 +1,4 @@
-package minerva.android.widget
+package minerva.android.widget.dialog
 
 import android.Manifest
 import android.app.Dialog
@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.profile_image_menu_layout.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.widget.MinervaFlashbar
 
 class ProfileImageDialog(private val fragment: Fragment) : Dialog(fragment.requireContext(), R.style.DataDialog) {
 

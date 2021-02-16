@@ -29,10 +29,10 @@
             android:id="@+id/main_icon"
             android:layout_width="@dimen/small_logo_size"
             android:layout_height="@dimen/small_logo_size"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_marginLeft="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_normal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription"
             tools:src="@drawable/ic_artis" />
 
@@ -64,11 +64,11 @@
             android:id="@+id/menu"
             android:layout_width="@dimen/clickable_area"
             android:layout_height="@dimen/clickable_area"
+            android:layout_marginRight="@dimen/margin_normal"
             android:scaleType="center"
             android:src="@drawable/ic_three_dots"
-            android:layout_marginRight="@dimen/margin_normal"
-            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/main_icon"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/main_icon"
             tools:ignore="ContentDescription" />
 
@@ -76,8 +76,8 @@
             android:id="@+id/main_token_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_small"
+            android:layout_marginRight="@dimen/margin_normal"
             app:layout_constraintLeft_toLeftOf="@id/main_icon"
             app:layout_constraintRight_toRightOf="@id/menu"
             app:layout_constraintTop_toBottomOf="@id/main_icon" />
@@ -86,8 +86,8 @@
             android:id="@+id/container_background"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="@id/divider_bottom"
             android:background="@color/lightGray"
+            app:layout_constraintBottom_toBottomOf="@id/divider_bottom"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/divider_top" />
@@ -97,11 +97,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone"
             android:paddingLeft="@dimen/margin_normal"
             android:paddingTop="@dimen/margin_xxsmall"
             android:paddingRight="@dimen/margin_normal"
             android:paddingBottom="@dimen/margin_xxsmall"
+            android:visibility="gone"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/divider_top" />
@@ -117,10 +117,10 @@
             android:id="@+id/divider_top"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
             android:layout_marginTop="@dimen/margin_xxsmall"
             android:background="@color/separatorColor"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/main_token_view" />
 
         <View
