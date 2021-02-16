@@ -688,6 +688,7 @@ class TransactionRepositoryTest : RxTest() {
         whenever(cryptoApi.getTokenBalance(any(), any())).thenReturn(Single.just(tokenBalanceResponse))
         whenever(tokenManager.mapToAccountTokensList(any(), any())).thenReturn(accountTokens)
         whenever(tokenManager.updateTokensFromLocalStorage(any())).thenReturn(Pair(false, mapOf()))
+        whenever(tokenManager.getTokensApiURL(any())).thenReturn("")
         whenever(tokenManager.updateTokens(any())).thenReturn(
             Single.just(mapOf()),
             Single.just(mapOf()),

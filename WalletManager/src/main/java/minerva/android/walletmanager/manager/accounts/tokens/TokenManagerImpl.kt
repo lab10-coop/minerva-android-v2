@@ -131,6 +131,7 @@ class TokenManagerImpl(
 
     override fun getTokensApiURL(account: Account): String =
         String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.networkShort), account.address)
+        //String.format(TOKEN_BALANCE_REQUEST, "", account.address)
 
     private fun getTokenBalanceURL(networkShort: String) =
         when(networkShort) {
