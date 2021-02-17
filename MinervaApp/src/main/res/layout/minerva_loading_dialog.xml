@@ -11,16 +11,16 @@
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        android:paddingStart="@dimen/margin_large"
+        android:paddingEnd="@dimen/margin_large">
 
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="95dp"
             android:layout_height="95dp"
             android:layout_gravity="center"
-            android:layout_marginStart="@dimen/margin_large"
             android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginEnd="@dimen/margin_large"
             android:indeterminate="true"
             android:indeterminateBehavior="repeat"
             android:indeterminateDrawable="@drawable/gradient_progress_bar" />
@@ -29,9 +29,7 @@
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_gravity="center"
-            android:layout_marginStart="@dimen/margin_large"
             android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginEnd="@dimen/margin_large"
             android:src="@drawable/ic_minerva_icon"
             tools:ignore="ContentDescription" />
     </FrameLayout>

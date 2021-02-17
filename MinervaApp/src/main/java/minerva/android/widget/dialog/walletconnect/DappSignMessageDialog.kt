@@ -26,7 +26,7 @@ class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> U
             isVerticalScrollBarEnabled = true
             isScrollbarFadingEnabled = false
             gravity = Gravity.CENTER_VERTICAL
-            setLineSpacing(1f, 1f)
+            setLineSpacing(ADD, MULT)
         }
 
     }
@@ -35,5 +35,10 @@ class DappSignMessageDialog(context: Context, approve: () -> Unit, deny: () -> U
         message.setTitleAndBody(context.getString(R.string.message), text)
         accountType.setNetwork(session)
         setupHeader(session.name, session.networkName, session.iconUrl)
+    }
+
+    companion object {
+        private const val ADD = 1f
+        private const val MULT = 1f
     }
 }

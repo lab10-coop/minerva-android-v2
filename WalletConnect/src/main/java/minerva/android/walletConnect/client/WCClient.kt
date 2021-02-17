@@ -20,7 +20,6 @@ import minerva.android.walletConnect.model.session.*
 import minerva.android.walletConnect.utils.WCCipher
 import okhttp3.*
 import okio.ByteString
-import timber.log.Timber
 import java.util.*
 
 const val JSONRPC_VERSION = "2.0"
@@ -282,8 +281,6 @@ open class WCClient(
                 }
             }
             WCMethod.ETH_SIGN -> {
-                Timber.tag("kobe").d("eth sign")
-
                 val params = gson.fromJson<List<String>>(request.params)
                 if (params.size < 2)
                     throw InvalidJsonRpcParamsException(request.id)
@@ -295,8 +292,6 @@ open class WCClient(
                 )
             }
             WCMethod.ETH_PERSONAL_SIGN -> {
-                Timber.tag("kobe").d("eth personal sign")
-
                 val params = gson.fromJson<List<String>>(request.params)
                 if (params.size < 2)
                     throw InvalidJsonRpcParamsException(request.id)
@@ -308,8 +303,6 @@ open class WCClient(
                 )
             }
             WCMethod.ETH_SIGN_TYPE_DATA -> {
-                Timber.tag("kobe").d("eth sign typed data")
-
                 val params = gson.fromJson<List<String>>(request.params)
                 if (params.size < 2)
                     throw InvalidJsonRpcParamsException(request.id)
@@ -320,15 +313,11 @@ open class WCClient(
                 )
             }
             WCMethod.ETH_SIGN_TRANSACTION -> {
-                Timber.tag("kobe").d("eth sign transaction")
-
                 val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 onEthSignTransaction(request.id, param)
             }
             WCMethod.ETH_SEND_TRANSACTION -> {
-                Timber.tag("kobe").d("eth send transaction")
-
                 val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 onEthSendTransaction(request.id, param, peerId)
@@ -337,8 +326,6 @@ open class WCClient(
                 onGetAccounts(request.id)
             }
             WCMethod.SIGN_TRANSACTION -> {
-                Timber.tag("kobe").d("eth send transaction")
-
                 val param = gson.fromJson<List<WCSignTransaction>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 onSignTransaction(request.id, param)

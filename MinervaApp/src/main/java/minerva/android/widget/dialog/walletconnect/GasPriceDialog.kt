@@ -14,14 +14,14 @@ class GasPriceDialog(context: Context, approve: (gasPrice: String) -> Unit) :
 
     init {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        setContentView(binding.root)
         with(binding) {
+            setContentView(root)
             buttons.cancel.setOnClickListener {
                 dismiss()
             }
 
             buttons.connect.setOnClickListener {
-                approve(binding.amount.text.toString())
+                approve(amount.text.toString())
                 dismiss()
             }
         }
