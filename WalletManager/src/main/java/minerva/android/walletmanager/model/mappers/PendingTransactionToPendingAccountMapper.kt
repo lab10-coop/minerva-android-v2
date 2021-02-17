@@ -2,7 +2,7 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.kotlinUtils.Mapper
-import minerva.android.walletmanager.model.PendingAccount
+import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 
 object PendingTransactionToPendingAccountMapper : Mapper<PendingTransaction, PendingAccount> {
     override fun map(input: PendingTransaction): PendingAccount =

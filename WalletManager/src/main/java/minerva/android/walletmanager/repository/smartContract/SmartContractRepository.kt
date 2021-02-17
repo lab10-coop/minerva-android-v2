@@ -2,8 +2,8 @@ package minerva.android.walletmanager.repository.smartContract
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Transaction
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.token.ERC20Token
 
 interface SmartContractRepository {

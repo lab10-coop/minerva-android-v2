@@ -8,6 +8,10 @@ import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.IncognitoIdentity
+import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.wallet.WalletAction
 
 object LoginUtils {
     fun isIdentityValid(identity: Identity, requiredData: List<String>): Boolean {

@@ -6,7 +6,11 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.Manager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletConfig
 
 interface WalletConfigManager : Manager {
     val masterSeed: MasterSeed

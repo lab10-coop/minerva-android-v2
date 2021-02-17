@@ -6,7 +6,7 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
 import minerva.android.utils.AlertDialogHandler
-import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.widget.clubCard.ClubCard
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 

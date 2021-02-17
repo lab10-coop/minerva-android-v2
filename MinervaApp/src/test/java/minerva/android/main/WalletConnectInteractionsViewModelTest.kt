@@ -10,9 +10,9 @@ import minerva.android.accounts.walletconnect.OnDisconnected
 import minerva.android.accounts.walletconnect.OnEthSignRequest
 import minerva.android.accounts.walletconnect.WalletConnectState
 import minerva.android.main.walletconnect.*
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.Topic
-import minerva.android.walletmanager.model.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.Topic
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnEthSign

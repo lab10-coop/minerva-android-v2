@@ -3,7 +3,14 @@ package minerva.android.walletmanager.repository.transaction
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.transactions.Balance
+import minerva.android.walletmanager.model.transactions.Recipient
+import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.wallet.MasterSeed
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -37,6 +44,4 @@ interface TransactionRepository {
     fun isAddressValid(address: String): Boolean
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun updateTokenIcons(): Completable
-
-    fun getMnemonic(): String
 }

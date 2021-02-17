@@ -16,6 +16,11 @@ import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.CredentialType
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.IncognitoIdentity
+import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.mock
 import org.junit.Before

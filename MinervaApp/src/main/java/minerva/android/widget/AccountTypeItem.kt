@@ -6,7 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.AccountTypeItemBinding
-import minerva.android.walletmanager.model.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.widget.repository.getNetworkIcon
 
 class AccountTypeItem @JvmOverloads constructor(

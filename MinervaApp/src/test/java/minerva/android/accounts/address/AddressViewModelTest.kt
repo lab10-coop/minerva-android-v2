@@ -6,9 +6,9 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.identity.IdentityManager
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.wrapped.WrappedFragmentType
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test

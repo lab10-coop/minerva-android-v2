@@ -14,7 +14,7 @@ import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.DappSessionDao
 import minerva.android.walletmanager.database.entity.DappSessionEntity
-import minerva.android.walletmanager.model.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import org.junit.After

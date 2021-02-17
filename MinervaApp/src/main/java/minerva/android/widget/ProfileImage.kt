@@ -4,7 +4,7 @@ import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.NEW_IDENTITY_LOGO_LETTER
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.NEW_IDENTITY_PUBLIC_KEY
 

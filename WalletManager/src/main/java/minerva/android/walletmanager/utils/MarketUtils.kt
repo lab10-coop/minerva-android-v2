@@ -5,8 +5,8 @@ import minerva.android.apiProvider.model.Markets
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Balance
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE

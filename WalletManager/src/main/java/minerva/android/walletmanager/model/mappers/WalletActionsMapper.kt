@@ -2,8 +2,8 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
 import minerva.android.kotlinUtils.Mapper
-import minerva.android.walletmanager.model.WalletAction
-import minerva.android.walletmanager.model.WalletActionClustered
+import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletActionClustered
 
 object WalletActionsMapper : Mapper<List<WalletActionClusteredPayload>, List<WalletActionClustered>> {
 

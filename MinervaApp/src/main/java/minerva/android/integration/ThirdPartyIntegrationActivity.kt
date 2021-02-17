@@ -18,8 +18,8 @@ import minerva.android.integration.listener.PaymentCommunicationListener
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.CredentialRequest
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.SIGNED_PAYLOAD
 import minerva.android.walletmanager.model.state.ConnectionRequest
 import org.koin.androidx.viewmodel.ext.android.viewModel

@@ -1,7 +1,7 @@
 package minerva.android.walletmanager.model.mappers
 
 import minerva.android.kotlinUtils.Mapper
-import minerva.android.walletmanager.model.Payment
+import minerva.android.walletmanager.model.transactions.Payment
 import minerva.android.walletmanager.model.defs.PaymentRequest
 
 object PaymentMapper : Mapper<Map<String, Any?>, Payment> {

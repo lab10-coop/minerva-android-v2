@@ -270,4 +270,13 @@
     <string name="show_private_key">Show Private Key</string>
     <string name="hide_private_key">Hide Private Key</string>
     <string name="private_key">Private Key</string>
+    <string name="transaction_request">Transaction Request</string>
+    <string name="transfer">Transfer</string>
+    <string name="to">To</string>
+    <string name="from">From</string>
+    <string name="transaction_cost">Transaction cost</string>
+    <string name="account_balance_is_to_low">Account balance is to low</string>
+    <string name="custom">Custom</string>
+    <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
+    <string name="sending">Sending</string>
 </resources>

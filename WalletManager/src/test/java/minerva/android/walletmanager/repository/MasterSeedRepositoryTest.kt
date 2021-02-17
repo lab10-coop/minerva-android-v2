@@ -5,7 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.MasterSeed
+import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.shouldBeEqualTo

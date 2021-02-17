@@ -12,7 +12,7 @@ import androidx.annotation.LayoutRes
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.model.Recipient
+import minerva.android.walletmanager.model.transactions.Recipient
 
 
 class RecipientAdapter(context: Context, @LayoutRes private val layoutResource: Int, private val recipients: List<Recipient>) :

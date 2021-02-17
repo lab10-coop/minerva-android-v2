@@ -19,10 +19,10 @@ import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
-import minerva.android.walletmanager.model.MasterSeed
+import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils
 import minerva.android.walletmanager.utils.DataProvider
