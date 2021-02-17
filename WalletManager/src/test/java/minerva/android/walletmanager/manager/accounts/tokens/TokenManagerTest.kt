@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import com.google.gson.annotations.SerializedName
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -10,7 +9,6 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
-import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -53,15 +51,15 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test loading tokens list`() {
         NetworkManager.initialize(DataProvider.networks)
-        tokenManager.loadTokens("Some").size shouldBeEqualTo 0
-        tokenManager.loadTokens(ATS_TAU).let {
+        tokenManager.loadCurrentTokens("Some").size shouldBeEqualTo 0
+        tokenManager.loadCurrentTokens(ATS_TAU).let {
             it.size shouldBeEqualTo 4
             it[0].name shouldBeEqualTo "CookieTokenATS"
             it[1].name shouldBeEqualTo "CookieTokenDATS"
             it[2].name shouldBeEqualTo "OtherTokenATS"
             it[3].name shouldBeEqualTo "SomeSomeTokenDATS"
         }
-        tokenManager.loadTokens(ETH_RIN).let {
+        tokenManager.loadCurrentTokens(ETH_RIN).let {
             it.size shouldBeEqualTo 3
             it[0].name shouldBeEqualTo "CookieTokenDETH"
             it[1].name shouldBeEqualTo "OtherTokenDETH"

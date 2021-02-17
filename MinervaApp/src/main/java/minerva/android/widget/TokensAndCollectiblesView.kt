@@ -3,6 +3,7 @@ package minerva.android.widget
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -81,7 +82,9 @@ class TokensAndCollectiblesView(
             tokensContainer.removeAllViews()
             account.accountTokens
                     //TODO the order should be done by fiat balance, but now fiat balance is not supported
-                .sortedByDescending { it.balance }
+                .sortedBy {
+                    Log.e("klop", "Going to sort N O W! ")
+                    it.token.name }
                 .forEachIndexed { index, _ ->
                     tokensContainer.addView(TokenView(context).apply {
                         initView(account, callback, index)

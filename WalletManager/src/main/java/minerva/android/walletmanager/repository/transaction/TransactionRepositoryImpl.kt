@@ -219,18 +219,16 @@ class TransactionRepositoryImpl(
     /**
      *
      * return statement: Single<Triple<String, String, List<Pair<String, BigDecimal>>>>
-     *                   Single<Triple<Network, AccountPrivateKey, List<ContractAddress, BalanceOnContract>>>>
+     *                   Single<Triple<Network, AccountPrivateKey, Map<ContractAddress, BalanceOnContract>>>>
      *
      */
 
-    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, TokenBalance>>>> =
+    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, Map<String, TokenBalance>>> =
         cryptoApi.getTokenBalance(url = tokenManager.getTokensApiURL(account))
             .map {
-                val tokensList = mutableListOf<Pair<String, TokenBalance>>()
-                it.tokens.forEach { tokenBalance ->
-                    tokensList.add(Pair(tokenBalance.address, tokenBalance))
-                }
-                Triple(account.network.short, account.privateKey, tokensList)
+                val tokenMap = mutableMapOf<String, TokenBalance>()
+                it.tokens.forEach { tokenBalance -> tokenMap[tokenBalance.address] = tokenBalance }
+                Triple(account.network.short, account.privateKey, tokenMap)
             }
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)

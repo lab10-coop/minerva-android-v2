@@ -1,5 +1,6 @@
 package minerva.android.accounts.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -65,8 +66,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
             .forEachIndexed { index, account ->
                 accountTokenBalances[account.privateKey]?.let { accountsList ->
                     //TODO klop should we assing account Tokens in Adapter??
+                    Log.e("klop", "Assing NO W")
                     account.accountTokens = accountsList
-                        //.filter { it.balance > NO_FUNDS }
                         .filter {
                             listener.isTokenVisible(account.address, it.token.address)
                                 ?.let { visibility ->
@@ -122,7 +123,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun onWalletConnect(index: Int) = listener.onWalletConnect(index)
 
     override fun onManageTokens(index: Int) = listener.onManageTokens(index)
-    
+
     override fun onExportPrivateKey(account: Account) = listener.onExportPrivateKey(account)
 
     override fun onOpenOrClose(index: Int, isOpen: Boolean) {

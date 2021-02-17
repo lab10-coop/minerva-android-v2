@@ -33,9 +33,9 @@ import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_C
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
 import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
+import java.math.BigDecimal
 
 class TokenManagerImpl(
     private val walletManager: WalletConfigManager,
@@ -46,11 +46,12 @@ class TokenManagerImpl(
 
     private val currentTimeProvider = CurrentTimeProviderImpl()
 
-    override fun loadTokens(network: String): List<ERC20Token> =
+    override fun loadCurrentTokens(network: String): List<ERC20Token> =
         walletManager.getWalletConfig()?.let {
             NetworkManager.getTokens(network)
                 .mergeWithoutDuplicates(it.erc20Tokens[network] ?: listOf())
-                .sortedBy { it.name }
+            //todo klop sorting is not needed here I think
+            //.sortedBy { it.name }
         } ?: listOf()
 
     override fun saveToken(network: String, token: ERC20Token): Completable =
@@ -70,7 +71,7 @@ class TokenManagerImpl(
         } ?: Completable.error(NotInitializedWalletConfigThrowable())
 
     override fun updateTokenIcons(): Completable =
-        cryptoApi.getTokenLastCommitRawData(url = BuildConfig.ERC20_TOKEN_DATA_LAST_COMMIT)
+        cryptoApi.getTokenLastCommitRawData(url = ERC20_TOKEN_DATA_LAST_COMMIT)
             .flatMap {
                 if (checkUpdates(it)) getTokenIconsURL()
                 else Single.error(AllTokenIconsUpdated())
@@ -79,17 +80,34 @@ class TokenManagerImpl(
             .doOnComplete { localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills()) }
 
     override fun getTokenIconURL(chainId: Int, address: String): Single<String> =
-        cryptoApi.getTokenRawData(url = BuildConfig.ERC20_TOKEN_DATA_URL).map { data ->
+        cryptoApi.getTokenRawData(url = ERC20_TOKEN_DATA_URL).map { data ->
             data.find { chainId == it.chainId && address == it.address }?.logoURI ?: String.Empty
         }
 
+    //todo klop test it
     override fun mapToAccountTokensList(
         network: String,
-        tokenList: List<Pair<String, TokenBalance>>
+        tokenMap: Map<String, TokenBalance>
     ): List<AccountToken> =
-        loadTokens(network).let { allNetworkTokens ->
-            tokenList.map { getTokenFromPair(network, allNetworkTokens, it) }
+        mutableListOf<AccountToken>().apply {
+            loadCurrentTokens(network).forEach {
+                tokenMap[it.address]?.let { tokenBalance ->
+                    add(mapToERC20Token(network, tokenBalance))
+                }.orElse { add(AccountToken(it, BigDecimal.ZERO)) }
+            }
+            tokenMap.values.forEach { tokenBalance ->
+                if (find { it.token.address == tokenBalance.address } == null) {
+                    add(mapToERC20Token(network, tokenBalance))
+                }
+            }
         }
+
+    //todo klop make mapper for this
+    private fun mapToERC20Token(network: String, token: TokenBalance): AccountToken =
+        AccountToken(
+            ERC20Token(NetworkManager.getChainId(network), token.name, token.symbol, token.address, token.decimals),
+            blockchainRepository.fromGwei(token.balance.toBigDecimal())
+        )
 
     override fun updateTokensFromLocalStorage(map: Map<String, List<AccountToken>>): Pair<Boolean, Map<String, List<AccountToken>>> =
         walletManager.getWalletConfig()?.erc20Tokens?.let { localTokens ->
@@ -106,6 +124,7 @@ class TokenManagerImpl(
             }
             Pair(updateTokens, map)
         }.orElse { throw NotInitializedWalletConfigThrowable() }
+
 
     override fun updateTokens(localCheckResult: Pair<Boolean, Map<String, List<AccountToken>>>): Single<Map<String, List<AccountToken>>> =
         if (localCheckResult.first) {
@@ -131,10 +150,9 @@ class TokenManagerImpl(
 
     override fun getTokensApiURL(account: Account): String =
         String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.networkShort), account.address)
-        //String.format(TOKEN_BALANCE_REQUEST, "", account.address)
 
     private fun getTokenBalanceURL(networkShort: String) =
-        when(networkShort) {
+        when (networkShort) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHEREUM_TOKEN_BALANCE_URL
             ATS_TAU -> ARTIS_TAU_TOKEN_BALANCE_URL
             ATS_SIGMA -> ARTIS_SIGMA_TOKEN_BALANCE_URL
@@ -148,14 +166,6 @@ class TokenManagerImpl(
     private fun getTokenIconsURL(): Single<Map<String, String>> =
         cryptoApi.getTokenRawData(url = ERC20_TOKEN_DATA_URL).map { data ->
             data.associate { generateTokenIconKey(it.chainId, it.address) to it.logoURI }
-        }
-
-    private fun getTokenFromPair(network: String, allTokens: List<Token>, raw: Pair<String, TokenBalance>): AccountToken =
-        with(raw.second) {
-            ((allTokens.find { (it as? ERC20Token)?.address == raw.first } as? ERC20Token)
-                ?: ERC20Token(NetworkManager.getChainId(network), name, symbol, address, decimals)).let {
-                AccountToken(it, blockchainRepository.fromGwei(balance.toBigDecimal()))
-            }
         }
 
     private fun updateAllTokenIcons(updatedIcons: Map<String, String>): Completable =
