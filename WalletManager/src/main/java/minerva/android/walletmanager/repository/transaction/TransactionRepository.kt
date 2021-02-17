@@ -35,10 +35,11 @@ interface TransactionRepository {
     fun getTransactions(): Single<List<PendingAccount>>
     fun getTransactionCosts(
         network: String,
-        assetIndex: Int,
+        tokenIndex: Int,
         from: String,
         to: String,
-        amount: BigDecimal
+        amount: BigDecimal,
+        chainId: Int
     ): Single<TransactionCost>
 
     fun isAddressValid(address: String): Boolean

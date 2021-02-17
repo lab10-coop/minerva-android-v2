@@ -6,7 +6,7 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPrice
+import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.Price
 import minerva.android.blockchainprovider.model.ExecutedTransaction
@@ -578,7 +578,7 @@ class TransactionRepositoryTest : RxTest() {
         ).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
         )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, account.network.chainId)
             .test()
             .assertComplete()
             .assertValue {
@@ -603,7 +603,7 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any()
             )
-        ).thenReturn(Single.just(GasPrice(BigDecimal.TEN)))
+        ).thenReturn(Single.just(GasPrices(BigDecimal.TEN)))
         whenever(
             blockchainRegularAccountRepository.getTransactionCosts(
                 any(),
@@ -623,7 +623,7 @@ class TransactionRepositoryTest : RxTest() {
                     )
                 )
             )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, account.network.chainId)
             .test()
             .assertComplete()
             .assertValue {
@@ -654,7 +654,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
             .doReturn(Single.error(error))
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, account.network.chainId)
             .test()
             .assertError(error)
     }
@@ -692,7 +692,7 @@ class TransactionRepositoryTest : RxTest() {
                     )
                 )
             )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, account.network.chainId)
             .test()
             .assertComplete()
             .assertValue {

@@ -6,6 +6,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.apiProvider.api.CryptoApi
+import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
@@ -100,25 +101,20 @@ class TransactionRepositoryImpl(
         tokenIndex: Int,
         from: String,
         to: String,
-        amount: BigDecimal
+        amount: BigDecimal,
+        chainId: Int
     ): Single<TransactionCost> =
-        if (NetworkManager.getNetwork(network).gasPriceOracle.isNotEmpty()) {
+        if (shouldGetGasPriceFromApi(network)) {
             cryptoApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
                 .flatMap { gasPrice ->
-                    getTxCosts(
-                        network,
-                        tokenIndex,
-                        from,
-                        to,
-                        amount,
-                        gasPrice.fast.divide(BigDecimal.TEN)
-                    )
-                }
-                .onErrorResumeNext { getTxCosts(network, tokenIndex, from, to, amount, null) }
-
+                    getTxCosts(network, tokenIndex, from, to, amount, gasPrice, chainId)
+                }.onErrorResumeNext { getTxCosts(network, tokenIndex, from, to, amount, null, chainId) }
         } else {
-            getTxCosts(network, tokenIndex, from, to, amount, null)
+            getTxCosts(network, tokenIndex, from, to, amount, null, chainId)
         }
+
+    private fun shouldGetGasPriceFromApi(network: String) =
+        NetworkManager.getNetwork(network).gasPriceOracle.isNotEmpty()
 
     private fun getTxCosts(
         network: String,
@@ -126,9 +122,14 @@ class TransactionRepositoryImpl(
         from: String,
         to: String,
         amount: BigDecimal,
-        gasPrice: BigDecimal?
-    ) = blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice)
-        .map { TransactionCostPayloadToTransactionCost.map(it) }
+        gasPrice: GasPrices?,
+        chainId: Int
+    ): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice?.speed?.fast)
+            .map { payload ->
+                TransactionCostPayloadToTransactionCost(gasPrice, chainId) { blockchainRepository.fromWei(it) }
+                    .map(payload)
+            }
 
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)

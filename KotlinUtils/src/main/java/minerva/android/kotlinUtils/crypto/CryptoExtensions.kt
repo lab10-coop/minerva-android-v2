@@ -3,6 +3,7 @@ package minerva.android.kotlinUtils.crypto
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.math.BigDecimal
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 

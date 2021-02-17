@@ -3,7 +3,10 @@ package minerva.android.main.walletconnect.transaction
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import minerva.android.R
 import minerva.android.databinding.TransactionSpeedItemBinding
+import minerva.android.walletmanager.model.defs.TxType
+import minerva.android.walletmanager.model.transactions.TxSpeed
 
 class TransactionSpeedAdapter : RecyclerView.Adapter<TransactionSpeedViewHolder>() {
 
@@ -30,7 +33,14 @@ class TransactionSpeedViewHolder(private val binding: TransactionSpeedItemBindin
     RecyclerView.ViewHolder(binding.root) {
 
     fun bindView(txSpeed: TxSpeed) = with(binding) {
-        speed.text = txSpeed.type
-        "${txSpeed.value} ${txSpeed.time}".also { transactionTime.text = it }
+        val resId: Int = when (txSpeed.type) {
+            TxType.RAPID -> R.string.rapid
+            TxType.FAST -> R.string.fast
+            TxType.STANDARD -> R.string.standard
+            TxType.SLOW -> R.string.slow
+            else -> R.string.standard
+        }
+        speed.text = root.context.getString(resId)
+        transactionTime.text = txSpeed.label
     }
 }

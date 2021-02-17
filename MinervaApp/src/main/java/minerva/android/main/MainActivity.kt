@@ -169,10 +169,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun getSendTransactionDialog(it: OnEthSendTransactionRequest) =
         DappSendTransactionDialog(this, {
             //todo handle accept request
+            Toast.makeText(this@MainActivity, "accept", Toast.LENGTH_LONG).show()
         }, {
             //todo handle deny request
-            Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG)
-                .show()
+            Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG).show()
         })
             .apply {
                 setContent(it.transaction, it.session, it.account)

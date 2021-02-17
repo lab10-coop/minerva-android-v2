@@ -43,4 +43,5 @@ interface BlockchainRegularAccountRepository {
     fun getERC20TokenName(privateKey: String, network: String, tokenAddress: String): Observable<String>
     fun getERC20TokenSymbol(privateKey: String, network: String, tokenAddress: String): Observable<String>
     fun getERC20TokenDecimals(privateKey: String, network: String, tokenAddress: String): Observable<BigInteger>
+    fun fromWei(value: BigDecimal): BigDecimal
 }

@@ -8,11 +8,13 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.walletconnect.*
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import timber.log.Timber
+import java.math.BigDecimal
 
 class WalletConnectInteractionsViewModel(
     private val transactionRepository: TransactionRepository,
@@ -62,24 +64,37 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    private fun mapRequests(it: WalletConnectStatus) = when (it) {
-        is OnEthSign ->
-            walletConnectRepository.getDappSessionById(it.peerId)
-                .map { session ->
-                    currentDappSession = session
-                    OnEthSignRequest(it.message, session)
-                }
-        is OnDisconnect -> Single.just(OnDisconnected)
-        is OnEthSendTransaction -> {
-            walletConnectRepository.getDappSessionById(it.peerId)
-                .map { session ->
-                    currentDappSession = session
-                    val account = transactionRepository.getAccountByAddress(currentDappSession.address)
-                    OnEthSendTransactionRequest(it.transaction, session, account)
-                }
+    private fun mapRequests(status: WalletConnectStatus) =
+        when (status) {
+            is OnEthSign ->
+                walletConnectRepository.getDappSessionById(status.peerId)
+                    .map { session ->
+                        currentDappSession = session
+                        OnEthSignRequest(status.message, session)
+                    }
+            is OnDisconnect -> Single.just(OnDisconnected)
+            is OnEthSendTransaction ->
+                walletConnectRepository.getDappSessionById(status.peerId)
+                    .flatMap { session -> getTransactionCosts(session, status) }
+            else -> Single.just(DefaultRequest)
         }
 
-        else -> Single.just(DefaultRequest)
+    private fun getTransactionCosts(
+        session: DappSession,
+        status: OnEthSendTransaction
+    ): Single<OnEthSendTransactionRequest> {
+        currentDappSession = session
+        val account = transactionRepository.getAccountByAddress(currentDappSession.address)
+        return transactionRepository.getTransactionCosts(
+            account?.network?.short!!,
+            Int.InvalidIndex,
+            status.transaction.from,
+            status.transaction.to,
+            if (status.transaction.value == "0x0") BigDecimal.ZERO else status.transaction.value.toBigDecimal(),
+            session.chainId
+        ).map {
+            OnEthSendTransactionRequest(status.transaction.copy(txCost = it), session, account)
+        }
     }
 
     fun acceptRequest() {

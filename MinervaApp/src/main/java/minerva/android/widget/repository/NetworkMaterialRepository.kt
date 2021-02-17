@@ -50,8 +50,9 @@ fun getMainTokenIconRes(networkShort: String): Int =
         else -> R.drawable.ic_default_token
     }
 
-
-private fun prepareSafeAccountBadge(context: Context, mainIconRes: Int, isSafeAccount: Boolean): Drawable? {
+private fun prepareSafeAccountBadge(context: Context, mainIconRes: Int, isSafeAccount: Boolean)
+        : Drawable
+? {
     ContextCompat.getDrawable(context, mainIconRes)?.let { mainIcon ->
         ContextCompat.getDrawable(context, R.drawable.ic_safe_account)?.let { safeBadge ->
             return if (!isSafeAccount) mainIcon
@@ -63,4 +64,5 @@ private fun prepareSafeAccountBadge(context: Context, mainIconRes: Int, isSafeAc
     return null
 }
 
-private const val BADGE_INDEX = 1
+private const
+val BADGE_INDEX = 1

@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.model.defs
 
+import androidx.annotation.IntDef
 import androidx.annotation.StringDef
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR

@@ -8,8 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayoutMediator
 import minerva.android.R
 import minerva.android.databinding.GasPriceSelectorBinding
+import minerva.android.extension.invisible
 import minerva.android.main.walletconnect.transaction.TransactionSpeedAdapter
-import minerva.android.main.walletconnect.transaction.TxSpeed
+import minerva.android.walletmanager.model.transactions.TxSpeed
 
 class GasPriceSelector @JvmOverloads constructor(
     context: Context,
@@ -35,6 +36,7 @@ class GasPriceSelector @JvmOverloads constructor(
 
     fun setAdapter(speeds: List<TxSpeed>) = with(binding) {
         adapter = TransactionSpeedAdapter()
+        if (speeds.size == 1) tabLayout.invisible()
         txSpeedViewPager.adapter = adapter
         adapter.updateSpeeds(speeds)
         TabLayoutMediator(tabLayout, txSpeedViewPager) { _, _ -> }.attach()

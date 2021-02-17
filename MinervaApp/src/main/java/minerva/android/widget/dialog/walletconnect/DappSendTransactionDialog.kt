@@ -6,7 +6,6 @@ import androidx.core.view.isVisible
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSendTransactionDialogBinding
 import minerva.android.extension.visibleOrInvisible
-import minerva.android.main.walletconnect.transaction.TxSpeed
 import minerva.android.utils.BalanceUtils
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
@@ -56,20 +55,13 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             unit.text = it.network.token
             accountName.text = it.name
             "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
-            //todo set tx cost
+        }
+        editTxTime.setOnClickListener { showGasPriceDialog() }
+        transaction.txCost?.txSpeeds?.let {
+            gasPriceSelector.setAdapter(it)
         }
 
-        editTxTime.setOnClickListener { showGasPriceDialog() }
-
-//todo get list of speeds from api
-        gasPriceSelector.setAdapter(
-            listOf(
-                TxSpeed("Rapid", "~15sec", "23 Gwei"),
-                TxSpeed("Fast", "~1min", "24 Gwei"),
-                TxSpeed("Standard", "~3min", "25 Gwei"),
-                TxSpeed("Slow", ">10min", "26 Gwei")
-            )
-        )
+        //todo set transaction cost
     }
 
     fun setCustomGasPrice(gasPrice: String, account: Account?) = with(binding) {

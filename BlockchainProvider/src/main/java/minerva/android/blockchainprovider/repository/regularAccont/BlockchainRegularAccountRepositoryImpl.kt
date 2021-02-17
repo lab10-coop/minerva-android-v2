@@ -204,6 +204,8 @@ class BlockchainRegularAccountRepositoryImpl(
 
     override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
 
+    override fun fromWei(value: BigDecimal): BigDecimal = fromWei(value, Convert.Unit.GWEI)
+
     override fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal =
         fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)
 
@@ -278,14 +280,18 @@ class BlockchainRegularAccountRepositoryImpl(
     ): Single<TransactionCostPayload> =
         Single.just(
             TransactionCostPayload(
-                gasPrice ?: fromWei(BigDecimal(gasPrices.value(network)), Convert.Unit.GWEI),
+                convertGasPrice(gasPrice, network),
                 gasLimit,
                 getTransactionCostInEth(getGasPrice(gasPrice, network), BigDecimal(gasLimit))
             )
         )
 
+    private fun convertGasPrice(gasPrice: BigDecimal?, network: String) =
+        if (gasPrice == null) fromWei(BigDecimal(gasPrices.value(network)), Convert.Unit.GWEI)
+        else fromWei(gasPrice, Convert.Unit.GWEI)
+
     private fun getGasPrice(gasPrice: BigDecimal?, network: String) =
-        gasPrice?.let { toGwei(it) } ?: BigDecimal(gasPrices.value(network))
+        gasPrice ?: BigDecimal(gasPrices.value(network))
 
     private fun getSignedTransaction(count: BigInteger, transactionPayload: TransactionPayload, chainId: Long): String? =
         Numeric.toHexString(
