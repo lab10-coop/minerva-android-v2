@@ -8,7 +8,10 @@ data class WalletConnectTransaction(
     val nonce: String?,
     val gasPrice: String?,
     val gasLimit: String?,
-    val value: String,
+    var value: String,
+    val fiatValue: Double?,
     val data: String,
     val txCost: TransactionCost?
-)
+) {
+    val fiatWithUnit = "${fiatValue.toString()} EUR"
+}

@@ -7,6 +7,7 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.GasPrices
+import minerva.android.apiProvider.model.MarketIds
 import minerva.android.apiProvider.model.Markets
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
@@ -18,6 +19,7 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.mappers.PendingTransactionToPendingAccountMapper
 import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTransactionCost
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
@@ -95,6 +97,13 @@ class TransactionRepositoryImpl(
     override fun getTransactions(): Single<List<PendingAccount>> =
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
+
+    override fun getEurRate(chainId: Int): Single<Double> =
+        if (chainId == ChainId.ETH_MAIN) {
+            cryptoApi.getMarkets(MarketIds.ETHEREUM, EUR_CURRENCY).map { it.ethPrice?.value }
+        } else {
+            Single.just(0.0)
+        }
 
     override fun getTransactionCosts(
         network: String,

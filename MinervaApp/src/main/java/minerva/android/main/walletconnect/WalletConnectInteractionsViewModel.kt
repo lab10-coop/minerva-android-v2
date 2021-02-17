@@ -9,6 +9,8 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.walletconnect.*
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.utils.BalanceUtils
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -85,16 +87,27 @@ class WalletConnectInteractionsViewModel(
     ): Single<OnEthSendTransactionRequest> {
         currentDappSession = session
         val account = transactionRepository.getAccountByAddress(currentDappSession.address)
-        return transactionRepository.getTransactionCosts(
-            account?.network?.short!!,
-            Int.InvalidIndex,
-            status.transaction.from,
-            status.transaction.to,
-            if (status.transaction.value == "0x0") BigDecimal.ZERO else status.transaction.value.toBigDecimal(),
-            session.chainId
-        ).map {
-            OnEthSendTransactionRequest(status.transaction.copy(txCost = it), session, account)
-        }
+        if (status.transaction.value == "0x0") status.transaction.value = "0"
+            return transactionRepository.getTransactionCosts(
+                account?.network?.short!!,
+                Int.InvalidIndex,
+                status.transaction.from,
+                status.transaction.to,
+                status.transaction.value.toBigDecimal(),
+                session.chainId
+            ).flatMap { transactionCost ->
+                transactionRepository.getEurRate(session.chainId)
+                    .map {
+                        val valueInFiat = status.transaction.value.toDouble() * it
+                        val costInFiat = transactionCost.cost.multiply(BigDecimal(it))
+                        OnEthSendTransactionRequest(
+                            status.transaction.copy(
+                                fiatValue = valueInFiat,
+                                txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat) )
+                            ), session, account
+                        )
+                    }
+            }
     }
 
     fun acceptRequest() {
@@ -106,4 +119,6 @@ class WalletConnectInteractionsViewModel(
     fun rejectRequest() {
         walletConnectRepository.rejectRequest(currentDappSession.peerId)
     }
+
+    companion object
 }

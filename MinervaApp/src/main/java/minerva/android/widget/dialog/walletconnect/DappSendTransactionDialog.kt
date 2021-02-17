@@ -60,8 +60,10 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         transaction.txCost?.txSpeeds?.let {
             gasPriceSelector.setAdapter(it)
         }
-
-        //todo set transaction cost
+        "${transaction.txCost?.cost} ${account?.network?.token} (${transaction.txCost?.fiatCost})".also {
+            transactionCost.text = it
+        }
+        value.text = transaction.fiatWithUnit
     }
 
     fun setCustomGasPrice(gasPrice: String, account: Account?) = with(binding) {
