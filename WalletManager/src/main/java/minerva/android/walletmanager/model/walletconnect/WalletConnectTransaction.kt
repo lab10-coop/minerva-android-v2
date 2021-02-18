@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model.walletconnect
 
 import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.utils.BalanceUtils
 
 data class WalletConnectTransaction(
     val from: String,

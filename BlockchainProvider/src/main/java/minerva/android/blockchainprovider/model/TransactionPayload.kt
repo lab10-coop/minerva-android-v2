@@ -12,7 +12,8 @@ data class TransactionPayload(
     val amount: BigDecimal = BigDecimal.ONE,
     val gasPrice: BigDecimal = BigDecimal.ONE,
     val gasLimit: BigInteger = BigInteger.ZERO,
-    val contractAddress: String = String.Empty
+    val contractAddress: String = String.Empty,
+    val data: String = String.Empty
 ) {
     val gasPriceWei: BigInteger
         get() = Convert.toWei(gasPrice, Convert.Unit.GWEI).toBigInteger()

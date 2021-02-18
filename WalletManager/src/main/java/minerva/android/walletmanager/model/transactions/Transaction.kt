@@ -11,5 +11,6 @@ data class Transaction(
     val amount: BigDecimal = BigDecimal.ZERO,
     val gasPrice: BigDecimal = BigDecimal.ZERO,
     val gasLimit: BigInteger = BigInteger.ZERO,
-    val contractAddress: String = String.Empty
+    val contractAddress: String = String.Empty,
+    val data: String = String.Empty
 )

@@ -10,6 +10,7 @@ import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.MarketIds
 import minerva.android.apiProvider.model.Markets
 import minerva.android.blockchainprovider.model.ExecutedTransaction
+import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
@@ -52,7 +53,8 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
             return blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(
-                    cryptoApi.getMarkets(MarketUtils.getMarketsIds(accounts), EUR_CURRENCY).onErrorReturnItem(Markets())
+                    cryptoApi.getMarkets(MarketUtils.getMarketsIds(accounts), EUR_CURRENCY)
+                        .onErrorReturnItem(Markets())
                 )
                 .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
         }
@@ -105,6 +107,11 @@ class TransactionRepositoryImpl(
         } else {
             Single.just(0.0)
         }
+
+    override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
+
+    override fun sendTransaction(network: String, transaction: Transaction): Single<String> =
+        blockchainRepository.sendTransaction(network, TransactionToTransactionPayloadMapper.map(transaction))
 
     override fun getTransactionCosts(
         network: String,

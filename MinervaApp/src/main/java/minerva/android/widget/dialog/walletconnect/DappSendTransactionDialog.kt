@@ -50,14 +50,9 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
         }
         editTxTime.setOnClickListener { showGasPriceDialog() }
-
-        gasPriceSelector.setAdapter(transaction.txCost.txSpeeds) {
-            setTxCost(recalculateTxCost(it.value), account)
-        }
-
+        gasPriceSelector.setAdapter(transaction.txCost.txSpeeds) { setTxCost(recalculateTxCost(it.value), account) }
         setTxCost(transaction, account)
         value.text = transaction.fiatWithUnit
-
         closeCustomTime.setOnClickListener {
             TransitionManager.beginDelayedTransition(sendTransactionDialog)
             closeCustomTime.visibleOrInvisible(false)

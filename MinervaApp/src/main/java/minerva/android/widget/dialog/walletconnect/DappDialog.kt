@@ -8,7 +8,7 @@ import minerva.android.R
 import minerva.android.databinding.DappDialogButtonsBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 
-abstract class DappDialog(context: Context, val approve: () -> Unit, val deny: () -> Unit) :
+abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val deny: () -> Unit = {}) :
     BottomSheetDialog(context, R.style.CustomBottomSheetDialog) {
 
     abstract val networkHeader: DappNetworkHeaderBinding

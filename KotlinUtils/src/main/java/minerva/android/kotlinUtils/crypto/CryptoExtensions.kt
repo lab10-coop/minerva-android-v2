@@ -1,9 +1,11 @@
 package minerva.android.kotlinUtils.crypto
 
+import android.text.TextUtils
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
@@ -19,6 +21,28 @@ val String.getFormattedMessage: String
     } else {
         this
     }
+
+fun hexToBigInteger(input: String, def: BigDecimal): BigDecimal {
+    val value: BigDecimal? = hexToBigInteger(input)
+    return value ?: def
+}
+
+private fun hexToBigInteger(input: String): BigDecimal? {
+    var hex = input
+    return if (TextUtils.isEmpty(hex)) {
+        null
+    } else try {
+        val isHex: Boolean = containsHexPrefix(hex)
+        if (isHex) {
+            hex = cleanHexPrefix(input)
+        }
+        BigInteger(hex, if (isHex) 16 else 10).toBigDecimal()
+    } catch (ex: NullPointerException) {
+        null
+    } catch (ex: NumberFormatException) {
+        null
+    }
+}
 
 private val String.isJSONValid: Boolean
     get() {

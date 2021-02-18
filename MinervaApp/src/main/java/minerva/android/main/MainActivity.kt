@@ -15,9 +15,7 @@ import minerva.android.accounts.transaction.activity.TransactionActivity.Compani
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
 import minerva.android.accounts.transaction.fragment.AccountsFragment
-import minerva.android.accounts.walletconnect.OnEthSendTransactionRequest
-import minerva.android.accounts.walletconnect.OnEthSignRequest
-import minerva.android.accounts.walletconnect.WalletConnectActivity
+import minerva.android.accounts.walletconnect.*
 import minerva.android.databinding.ActivityMainBinding
 import minerva.android.extension.*
 import minerva.android.identities.IdentitiesFragment
@@ -37,12 +35,14 @@ import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.MinervaLoadingDialog
 import minerva.android.widget.dialog.walletconnect.DappDialog
 import minerva.android.widget.dialog.walletconnect.DappSendTransactionDialog
 import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.dialog.walletconnect.GasPriceDialog
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private var shouldDisableAddButton = false
     internal lateinit var binding: ActivityMainBinding
     private var dappDialog: DappDialog? = null
+    private var loadingDialog: MinervaLoadingDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,10 +114,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun prepareObservers() {
         walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
             dappDialog?.dismiss()
-            dappDialog = when (it) {
-                is OnEthSignRequest -> getDappSignDialog(it)
-                is OnEthSendTransactionRequest -> getSendTransactionDialog(it)
-                else -> null
+            when (it) {
+                is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
+                is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(it)
+                is OnError -> MinervaFlashbar.showError(this, it.error)
+                is ProgressBarState -> handleLoadingDialog(it)
+                else -> dappDialog = null
             }
         })
         viewModel.apply {
@@ -167,21 +170,31 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }
     }
 
+    private fun handleLoadingDialog(it: ProgressBarState) {
+        if (it.show) {
+            loadingDialog = MinervaLoadingDialog(this).apply { show() }
+        } else {
+            loadingDialog?.dismiss()
+        }
+    }
+
     private fun getSendTransactionDialog(it: OnEthSendTransactionRequest) =
-        DappSendTransactionDialog(this, {
-            //todo handle accept request
-            Toast.makeText(this@MainActivity, "accept", Toast.LENGTH_LONG).show()
-        }, {
-            //todo handle deny request
-            Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG).show()
-        })
-            .apply {
-                setContent(it.transaction, it.session, it.account,
-                    { showGasPriceDialog(it) },
-                    { gasPrice -> walletConnectViewModel.recalculateTxCost(gasPrice, it.transaction) }
-                )
-                show()
-            }
+        DappSendTransactionDialog(
+            this,
+            {
+                walletConnectViewModel.sendTransaction()
+                dappDialog = null
+            },
+            {
+                walletConnectViewModel.rejectRequest()
+                dappDialog = null
+            }).apply {
+            setContent(it.transaction, it.session, it.account,
+                { showGasPriceDialog(it) },
+                { gasPrice -> walletConnectViewModel.recalculateTxCost(gasPrice, it.transaction) }
+            )
+            show()
+        }
 
     private fun DappSendTransactionDialog.showGasPriceDialog(it: OnEthSendTransactionRequest) {
         GasPriceDialog(context) { gasPrice ->
@@ -190,11 +203,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     private fun getDappSignDialog(it: OnEthSignRequest) =
-        DappSignMessageDialog(this@MainActivity,
-            {
-                walletConnectViewModel.acceptRequest()
-                dappDialog = null
-            },
+        DappSignMessageDialog(this@MainActivity, {
+            walletConnectViewModel.acceptRequest()
+            dappDialog = null
+        },
             {
                 walletConnectViewModel.rejectRequest()
                 dappDialog = null

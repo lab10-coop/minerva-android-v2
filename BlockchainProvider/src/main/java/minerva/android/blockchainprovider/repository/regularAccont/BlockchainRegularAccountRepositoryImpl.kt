@@ -4,9 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.zipWith
-import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -30,6 +28,7 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
 import org.web3j.utils.Numeric
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -71,7 +70,7 @@ class BlockchainRegularAccountRepositoryImpl(
             .flatMap {
                 web3j.value(network)
                     .ethSendRawTransaction(
-                        getSignedTransaction(
+                        getSignedEtherTransaction(
                             it.first.transactionCount,
                             transactionPayload,
                             it.second.netVersion.toLong()
@@ -94,6 +93,35 @@ class BlockchainRegularAccountRepositoryImpl(
                         } else Single.error(Throwable(response.error.message))
                     }
             }.firstOrError()
+
+    override fun sendTransaction(network: String, transactionPayload: TransactionPayload): Single<String> =
+        web3j.value(network)
+            .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .zipWith(getChainId(network))
+            .flatMap {
+                web3j.value(network)
+                    .ethSendRawTransaction(
+                        getSignedTransaction(
+                            it.first.transactionCount,
+                            transactionPayload,
+                            it.second.netVersion.toLong(),
+                            Numeric.hexStringToByteArray(transactionPayload.data)
+                        )
+                    )
+                    .flowable()
+                    .zipWith(getCurrentBlockNumber(network))
+                    .flatMapSingle { (response, _) ->
+                        if (response.error == null) {
+                            Timber.tag("kobe").d("SUCCESS ${response.transactionHash}")
+                            Single.just(response.transactionHash)
+                        } else {
+                            Timber.tag("kobe").d("ERROR: ${response.error}")
+                            Single.error(Throwable(response.error.message))
+                        }
+                    }
+            }.firstOrError()
+
 
     override fun getCurrentBlockNumber(network: String): Flowable<BigInteger> =
         web3j.value(network)
@@ -203,11 +231,11 @@ class BlockchainRegularAccountRepositoryImpl(
         } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
 
     override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
-
     override fun fromWei(value: BigDecimal): BigDecimal = fromWei(value, Convert.Unit.GWEI)
+    override fun toEther(value: BigDecimal): BigDecimal = fromWei(value, Convert.Unit.ETHER)
 
     override fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal =
-        fromWei((gasPrice * gasLimit), Convert.Unit.ETHER).setScale(SCALE, RoundingMode.HALF_EVEN)
+        toEther((gasPrice * gasLimit)).setScale(SCALE, RoundingMode.HALF_EVEN)
 
     private fun loadERC20(privateKey: String, network: String, address: String, chainId: NetVersion) =
         ERC20.load(
@@ -223,7 +251,7 @@ class BlockchainRegularAccountRepositoryImpl(
     private fun getBalance(network: String, address: String): Single<Pair<String, BigDecimal>> =
         web3j.value(network).ethGetBalance(address, DefaultBlockParameterName.LATEST)
             .flowable()
-            .map { Pair(address, fromWei(BigDecimal(it.balance), Convert.Unit.ETHER)) }
+            .map { Pair(address, toEther(BigDecimal(it.balance))) }
             .firstOrError()
 
     private fun getERC20Balance(
@@ -293,15 +321,42 @@ class BlockchainRegularAccountRepositoryImpl(
     private fun getGasPrice(gasPrice: BigDecimal?, network: String) =
         gasPrice ?: BigDecimal(gasPrices.value(network))
 
-    private fun getSignedTransaction(count: BigInteger, transactionPayload: TransactionPayload, chainId: Long): String? =
+    private fun getSignedEtherTransaction(
+        count: BigInteger,
+        transactionPayload: TransactionPayload,
+        chainId: Long
+    ): String? =
         Numeric.toHexString(
             TransactionEncoder.signMessage(
-                createTransaction(count, transactionPayload), chainId,
+                createEtherTransaction(count, transactionPayload), chainId,
                 Credentials.create(transactionPayload.privateKey)
             )
         )
 
-    private fun createTransaction(count: BigInteger, payload: TransactionPayload): RawTransaction? =
+    private fun getSignedTransaction(
+        count: BigInteger,
+        transactionPayload: TransactionPayload,
+        chainId: Long,
+        data: ByteArray
+    ): String? =
+        Numeric.toHexString(
+            TransactionEncoder.signMessage(
+                createTransaction(count, transactionPayload, data), chainId,
+                Credentials.create(transactionPayload.privateKey)
+            )
+        )
+
+    private fun createTransaction(count: BigInteger, payload: TransactionPayload, data: ByteArray): RawTransaction =
+        RawTransaction.createTransaction(
+            count,
+            toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger(),
+            payload.gasLimit,
+            payload.receiverAddress,
+            toWei(payload.amount, Convert.Unit.ETHER).toBigInteger(),
+            Numeric.toHexString(data)
+        )
+
+    private fun createEtherTransaction(count: BigInteger, payload: TransactionPayload): RawTransaction? =
         RawTransaction.createEtherTransaction(
             count,
             toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger(),

@@ -3,6 +3,8 @@ package minerva.android.walletmanager.repository.transaction
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import minerva.android.blockchainprovider.model.PendingTransaction
+import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
@@ -46,4 +48,6 @@ interface TransactionRepository {
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun updateTokenIcons(): Completable
     fun getEurRate(chainId: Int): Single<Double>
+    fun toEther(value: BigDecimal): BigDecimal
+    fun sendTransaction(network: String, transaction: Transaction): Single<String>
 }
