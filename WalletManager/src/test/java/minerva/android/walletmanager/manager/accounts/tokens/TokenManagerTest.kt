@@ -54,10 +54,10 @@ class TokenManagerTest : RxTest() {
         tokenManager.loadCurrentTokens("Some").size shouldBeEqualTo 0
         tokenManager.loadCurrentTokens(ATS_TAU).let {
             it.size shouldBeEqualTo 4
-            it[0].name shouldBeEqualTo "CookieTokenATS"
-            it[1].name shouldBeEqualTo "CookieTokenDATS"
-            it[2].name shouldBeEqualTo "OtherTokenATS"
-            it[3].name shouldBeEqualTo "SomeSomeTokenDATS"
+            it[0].name shouldBeEqualTo "CookieTokenDATS"
+            it[1].name shouldBeEqualTo "SomeSomeTokenDATS"
+            it[2].name shouldBeEqualTo "CookieTokenATS"
+            it[3].name shouldBeEqualTo "OtherTokenATS"
         }
         tokenManager.loadCurrentTokens(ETH_RIN).let {
             it.size shouldBeEqualTo 3
@@ -173,19 +173,32 @@ class TokenManagerTest : RxTest() {
     fun `Check mapping from raw addresses to tokens`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
-        whenever(blockchainRepository.fromGwei(any())).thenReturn(BigDecimal.ONE)
-        val rawTokens = listOf(
-            Pair("0xC00k1e", TokenBalance(balance = "1")),
-            Pair("0x0th3r", TokenBalance(balance = "10"))
+        whenever(blockchainRepository.fromGwei(any())).thenReturn(BigDecimal.ONE, BigDecimal.TEN, BigDecimal.ONE, BigDecimal.TEN)
+        val rawTokens = mapOf(
+            Pair("0xC00k1e", TokenBalance(balance = "1", name = "CookieTokenATS", address = "0xC00k1e")),
+            Pair("0x0th3r2", TokenBalance(balance = "10", name = "CookieTokenOther2ATS", address = "0x0th3r2"))
         )
-        val tokensATS = tokenManager.mapToAccountTokensList(ATS_TAU, rawTokens)
-        tokensATS.size shouldBeEqualTo 2
-        tokensATS[0].token.name shouldBeEqualTo "CookieTokenATS"
-        tokensATS[1].token.name shouldBeEqualTo "OtherTokenATS"
+        val tokensATS = tokenManager.mapToAccountTokensList(ATS_SIGMA, rawTokens)
+        tokensATS.size shouldBeEqualTo 4
+        tokensATS[0].token.name shouldBeEqualTo "CookieTokenOther2ATS"
+        tokensATS[0].balance shouldBeEqualTo BigDecimal.TEN
+        tokensATS[1].token.name shouldBeEqualTo "CookieTokenATS"
+        tokensATS[1].balance shouldBeEqualTo BigDecimal.ONE
+        tokensATS[2].token.name shouldBeEqualTo "SecondOtherATS"
+        tokensATS[2].balance shouldBeEqualTo BigDecimal.ZERO
+        tokensATS[3].token.name shouldBeEqualTo "OtherTokenATS"
+        tokensATS[3].balance shouldBeEqualTo BigDecimal.ZERO
+
         val tokenETH = tokenManager.mapToAccountTokensList(ETH_RIN, rawTokens)
-        tokenETH.size shouldBeEqualTo 2
-        tokenETH[0].token.name shouldBeEqualTo "CookieTokenDETH"
-        tokenETH[1].token.name shouldBeEqualTo "OtherTokenETH"
+        tokenETH.size shouldBeEqualTo 4
+        tokenETH[0].token.name shouldBeEqualTo "CookieTokenOther2ATS"
+        tokenETH[0].balance shouldBeEqualTo BigDecimal.TEN
+        tokenETH[1].token.name shouldBeEqualTo "CookieTokenATS"
+        tokenETH[1].balance shouldBeEqualTo BigDecimal.ONE
+        tokenETH[2].token.name shouldBeEqualTo "OtherTokenDETH"
+        tokenETH[2].balance shouldBeEqualTo BigDecimal.ZERO
+        tokenETH[3].token.name shouldBeEqualTo "OtherTokenETH"
+        tokenETH[3].balance shouldBeEqualTo BigDecimal.ZERO
     }
 
     @Test

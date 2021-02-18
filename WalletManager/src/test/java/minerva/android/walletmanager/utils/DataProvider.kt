@@ -7,6 +7,10 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identityRespon
 import minerva.android.walletmanager.model.WalletConfigTestValues.onlineIdentityResponse
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
 import minerva.android.walletmanager.model.token.ERC20Token
 
 object DataProvider {
@@ -25,21 +29,21 @@ object DataProvider {
 
     val networks = listOf(
         Network(
-            chainId = 1, short = NetworkShortName.ATS_TAU, httpRpc = "address", testNet = true,
+            chainId = 1, short = ATS_TAU, httpRpc = "address", testNet = true,
             tokens = listOf(
                 ERC20Token(1, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
                 ERC20Token(1, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
             )
         ),
         Network(
-            chainId = 2, short = NetworkShortName.ETH_RIN, httpRpc = "address", testNet = true,
+            chainId = 2, short = ETH_RIN, httpRpc = "address", testNet = true,
             tokens = listOf(
                 ERC20Token(2, "CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
                 ERC20Token(2, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
             )
         ),
-        Network(chainId = 3, short = NetworkShortName.ATS_SIGMA, httpRpc = "address", testNet = true),
-        Network(chainId = 4, short = NetworkShortName.POA_CORE, httpRpc = "address", testNet = true)
+        Network(chainId = 3, short = ATS_SIGMA, httpRpc = "address", testNet = true),
+        Network(chainId = 4, short = POA_CORE, httpRpc = "address", testNet = true)
     )
 
     val walletConfig = WalletConfig(
@@ -88,14 +92,19 @@ object DataProvider {
         ),
         mapOf(
             Pair(
-                NetworkShortName.ATS_TAU, listOf(
+                ATS_TAU, listOf(
                     ERC20Token(1, "CookieTokenATS", "Cookie", "0xC00k1e", "13"),
                     ERC20Token(1, "OtherTokenATS", "OtherC", "0x0th3r", "32")
                 )
             ),
-            Pair(NetworkShortName.ETH_RIN, listOf(
+            Pair(ETH_RIN, listOf(
                 ERC20Token(2, "OtherTokenETH", "OtherC", "0x0th3r", "32", "someLogoURI"),
                 ERC20Token(2, "CookieTokenETH", "Cookie", "0xC00k1e", "13", "someLogoURI_II")
+            )),
+            Pair(ATS_SIGMA, listOf(
+                ERC20Token(3, "CookieTokenATS", "Cookie", "0xC00k1e", "13"),
+                ERC20Token(3, "SecondOtherATS", "Other22", "0x0th3r22", "22"),
+                ERC20Token(3, "OtherTokenATS", "OtherC", "0x0th3r", "32")
             ))
         )
     )

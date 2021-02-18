@@ -50,8 +50,6 @@ class TokenManagerImpl(
         walletManager.getWalletConfig()?.let {
             NetworkManager.getTokens(network)
                 .mergeWithoutDuplicates(it.erc20Tokens[network] ?: listOf())
-            //todo klop sorting is not needed here I think
-            //.sortedBy { it.name }
         } ?: listOf()
 
     override fun saveToken(network: String, token: ERC20Token): Completable =
@@ -84,7 +82,6 @@ class TokenManagerImpl(
             data.find { chainId == it.chainId && address == it.address }?.logoURI ?: String.Empty
         }
 
-    //todo klop test it
     override fun mapToAccountTokensList(
         network: String,
         tokenMap: Map<String, TokenBalance>
@@ -100,9 +97,9 @@ class TokenManagerImpl(
                     add(mapToERC20Token(network, tokenBalance))
                 }
             }
-        }
+            //TODO need to be sorted by fiat value, when getting values will be implemented
+        }.sortedByDescending { it.balance }
 
-    //todo klop make mapper for this
     private fun mapToERC20Token(network: String, token: TokenBalance): AccountToken =
         AccountToken(
             ERC20Token(NetworkManager.getChainId(network), token.name, token.symbol, token.address, token.decimals),
