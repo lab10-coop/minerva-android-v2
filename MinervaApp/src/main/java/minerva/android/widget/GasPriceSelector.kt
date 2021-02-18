@@ -22,7 +22,15 @@ class GasPriceSelector @JvmOverloads constructor(
         GasPriceSelectorBinding.bind(inflate(context, R.layout.gas_price_selector, this))
     private lateinit var adapter: TransactionSpeedAdapter
 
-    init {
+    fun setAdapter(speeds: List<TxSpeed>, recalculateTxCost: (TxSpeed) -> Unit) = with(binding) {
+        adapter = TransactionSpeedAdapter()
+        if (speeds.size == 1) tabLayout.invisible()
+        txSpeedViewPager.adapter = adapter
+        adapter.updateSpeeds(speeds)
+        TabLayoutMediator(tabLayout, txSpeedViewPager) { _, _ -> }.attach()
+        (txSpeedViewPager.children.first() as RecyclerView).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+
+
         with(binding) {
             overlay.setOnClickListener {
                 if (txSpeedViewPager.currentItem == MAX_POSITION) {
@@ -30,17 +38,9 @@ class GasPriceSelector @JvmOverloads constructor(
                 } else {
                     txSpeedViewPager.currentItem = txSpeedViewPager.currentItem + 1
                 }
+                recalculateTxCost(adapter.getCurrentTxSpeed(txSpeedViewPager.currentItem))
             }
         }
-    }
-
-    fun setAdapter(speeds: List<TxSpeed>) = with(binding) {
-        adapter = TransactionSpeedAdapter()
-        if (speeds.size == 1) tabLayout.invisible()
-        txSpeedViewPager.adapter = adapter
-        adapter.updateSpeeds(speeds)
-        TabLayoutMediator(tabLayout, txSpeedViewPager) { _, _ -> }.attach()
-        (txSpeedViewPager.children.first() as RecyclerView).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
     }
 
     companion object {

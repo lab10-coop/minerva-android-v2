@@ -33,7 +33,12 @@ class TransactionCostPayloadToTransactionCost(
             }
         }.orElse {
             input.run {
-                TransactionCost(gasPrice, gasLimit, cost, txSpeeds = listOf(TxSpeed(getTransactionType(chainId), input.gasPrice)))
+                TransactionCost(
+                    gasPrice,
+                    gasLimit,
+                    cost,
+                    txSpeeds = listOf(TxSpeed(getTransactionType(chainId), input.gasPrice))
+                )
             }
         }
     }

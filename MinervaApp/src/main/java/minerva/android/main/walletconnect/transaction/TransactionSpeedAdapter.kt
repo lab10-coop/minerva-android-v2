@@ -27,6 +27,8 @@ class TransactionSpeedAdapter : RecyclerView.Adapter<TransactionSpeedViewHolder>
         this.speeds = speeds
         notifyDataSetChanged()
     }
+
+    fun getCurrentTxSpeed(position: Int): TxSpeed = speeds[position]
 }
 
 class TransactionSpeedViewHolder(private val binding: TransactionSpeedItemBinding) :

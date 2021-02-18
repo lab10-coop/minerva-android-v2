@@ -35,6 +35,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.RoundingMode
 
 class TransactionRepositoryImpl(
     private val blockchainRepository: BlockchainRegularAccountRepository,
@@ -134,10 +135,11 @@ class TransactionRepositoryImpl(
         gasPrice: GasPrices?,
         chainId: Int
     ): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice?.speed?.fast)
+        blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice?.speed?.rapid)
             .map { payload ->
-                TransactionCostPayloadToTransactionCost(gasPrice, chainId) { blockchainRepository.fromWei(it) }
-                    .map(payload)
+                TransactionCostPayloadToTransactionCost(gasPrice, chainId) {
+                    blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
+                }.map(payload)
             }
 
     override fun isAddressValid(address: String): Boolean =

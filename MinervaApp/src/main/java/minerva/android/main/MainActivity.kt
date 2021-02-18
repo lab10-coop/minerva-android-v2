@@ -43,6 +43,7 @@ import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.dialog.walletconnect.GasPriceDialog
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
+import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
@@ -175,10 +176,18 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             Toast.makeText(this@MainActivity, "deny", Toast.LENGTH_LONG).show()
         })
             .apply {
-                setContent(it.transaction, it.session, it.account)
-                { GasPriceDialog(context) { gasPrice -> setCustomGasPrice(gasPrice, it.account) }.show() }
+                setContent(it.transaction, it.session, it.account,
+                    { showGasPriceDialog(it) },
+                    { gasPrice -> walletConnectViewModel.recalculateTxCost(gasPrice, it.transaction) }
+                )
                 show()
             }
+
+    private fun DappSendTransactionDialog.showGasPriceDialog(it: OnEthSendTransactionRequest) {
+        GasPriceDialog(context) { gasPrice ->
+            setCustomGasPrice(walletConnectViewModel.recalculateTxCost(BigDecimal(gasPrice), it.transaction), it.account)
+        }.show()
+    }
 
     private fun getDappSignDialog(it: OnEthSignRequest) =
         DappSignMessageDialog(this@MainActivity,

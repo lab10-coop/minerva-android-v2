@@ -11,7 +11,7 @@ data class WalletConnectTransaction(
     var value: String,
     val fiatValue: Double?,
     val data: String,
-    val txCost: TransactionCost?
+    val txCost: TransactionCost = TransactionCost()
 ) {
     val fiatWithUnit = "${fiatValue.toString()} EUR"
 }
