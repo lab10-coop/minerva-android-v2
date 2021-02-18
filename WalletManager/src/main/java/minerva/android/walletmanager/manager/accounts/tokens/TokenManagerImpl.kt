@@ -1,18 +1,19 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.TokenBalance
+import minerva.android.apiProvider.model.TokenTx
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
-import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.BuildConfig.*
 import minerva.android.walletmanager.exception.AllTokenIconsUpdated
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
@@ -93,18 +94,11 @@ class TokenManagerImpl(
                 }.orElse { add(AccountToken(it, BigDecimal.ZERO)) }
             }
             tokenMap.values.forEach { tokenBalance ->
-                if (find { it.token.address == tokenBalance.address } == null) {
+                if (find { it.token.address == tokenBalance.address } == null)
                     add(mapToERC20Token(network, tokenBalance))
-                }
             }
             //TODO need to be sorted by fiat value, when getting values will be implemented
         }.sortedByDescending { it.balance }
-
-    private fun mapToERC20Token(network: String, token: TokenBalance): AccountToken =
-        AccountToken(
-            ERC20Token(NetworkManager.getChainId(network), token.name, token.symbol, token.address, token.decimals),
-            blockchainRepository.fromGwei(token.balance.toBigDecimal())
-        )
 
     override fun updateTokensFromLocalStorage(map: Map<String, List<AccountToken>>): Pair<Boolean, Map<String, List<AccountToken>>> =
         walletManager.getWalletConfig()?.erc20Tokens?.let { localTokens ->
@@ -145,12 +139,48 @@ class TokenManagerImpl(
             }
         } else Single.just(localCheckResult.second)
 
-    override fun getTokensApiURL(account: Account): String =
+    override fun getTokenBalance(account: Account): Single<List<TokenBalance>> =
+        when (account.networkShort) {
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokenBalance(account)
+            else -> cryptoApi.getTokenBalance(url = getTokensApiURL(account)).map { it.tokens }
+        }
+
+    //TODO finish implementing it
+    private fun getEthereumTokenBalance(account: Account): Single<List<TokenBalance>> =
+        cryptoApi.getTokenTx(url = getTokenTxApiURL(account))
+            .map {
+                Log.e("klop", "Raw response H E R E ! ${it.tokens.size}")
+                val tokensMap = it.tokens.map { it.address to it }
+                Log.e("klop", "Tokens Map: ${tokensMap.size}")
+                listOf<TokenBalance>()
+            }
+
+    private fun getTokenTxApiURL(account: Account) =
+        //TODO klop USE CORRECT DATA
+        String.format(
+            ETHEREUM_TOKENTX_REQUEST,
+            getTokenBalanceURL(ETH_GOR),
+            "0x30B125d5Fc58c1b8E3cCB2F1C71a1Cc847f024eE",
+            ETHERSCAN_KEY
+        )
+
+    @VisibleForTesting
+     fun getTokensApiURL(account: Account) =
         String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.networkShort), account.address)
+
+    private fun mapToERC20Token(network: String, token: TokenBalance): AccountToken =
+        AccountToken(
+            ERC20Token(NetworkManager.getChainId(network), token.name, token.symbol, token.address, token.decimals),
+            blockchainRepository.fromGwei(token.balance.toBigDecimal())
+        )
 
     private fun getTokenBalanceURL(networkShort: String) =
         when (networkShort) {
-            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHEREUM_TOKEN_BALANCE_URL
+            ETH_MAIN -> ETHEREUM_MAINNET_TOKEN_BALANCE_URL
+            ETH_RIN -> ETHEREUM_RINKEBY_TOKEN_BALANCE_URL
+            ETH_ROP -> ETHEREUM_ROPSTEN_TOKEN_BALANCE_URL
+            ETH_KOV -> ETHEREUM_KOVAN_TOKEN_BALANCE_URL
+            ETH_GOR -> ETHEREUM_GOERLI_TOKEN_BALANCE_URL
             ATS_TAU -> ARTIS_TAU_TOKEN_BALANCE_URL
             ATS_SIGMA -> ARTIS_SIGMA_TOKEN_BALANCE_URL
             POA_SKL -> POA_SOKOL_TOKEN_BALANCE_URL
@@ -210,5 +240,7 @@ class TokenManagerImpl(
     companion object {
         private const val LAST_UPDATE_INDEX = 0
         private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
+        private const val ETHEREUM_TOKENTX_REQUEST =
+            "%sapi?module=account&action=tokentx&address=%s&startblock=0&endblock=999999999&sort=asc&apikey=%s"
     }
 }

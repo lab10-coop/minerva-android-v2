@@ -224,10 +224,10 @@ class TransactionRepositoryImpl(
      */
 
     private fun refreshTokensBalance(account: Account): Single<Triple<String, String, Map<String, TokenBalance>>> =
-        cryptoApi.getTokenBalance(url = tokenManager.getTokensApiURL(account))
+        tokenManager.getTokenBalance(account)
             .map {
                 val tokenMap = mutableMapOf<String, TokenBalance>()
-                it.tokens.forEach { tokenBalance -> tokenMap[tokenBalance.address] = tokenBalance }
+                it.forEach { tokenBalance -> tokenMap[tokenBalance.address] = tokenBalance }
                 Triple(account.network.short, account.privateKey, tokenMap)
             }
 

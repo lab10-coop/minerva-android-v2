@@ -3,6 +3,7 @@ package minerva.android.walletmanager.manager.accounts.tokens
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.apiProvider.model.TokenBalance
+import minerva.android.apiProvider.model.TokenBalanceResponse
 import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -17,5 +18,5 @@ interface TokenManager {
     fun mapToAccountTokensList(network: String, tokenList: Map<String, TokenBalance>): List<AccountToken>
     fun updateTokensFromLocalStorage(map: Map<String, List<AccountToken>>): Pair<Boolean, Map<String, List<AccountToken>>>
     fun updateTokens(localCheckResult: Pair<Boolean, Map<String, List<AccountToken>>>): Single<Map<String, List<AccountToken>>>
-    fun getTokensApiURL(account: Account): String
+    fun getTokenBalance(account: Account): Single<List<TokenBalance>>
 }

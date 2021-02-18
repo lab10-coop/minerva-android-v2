@@ -10,9 +10,18 @@ import java.math.BigInteger
 
 object NetworkManager {
     lateinit var networks: List<Network>
-    private val networkMap: Map<String, Network> get() = networks.associateBy { it.short }
+
+    @Deprecated("Network short is deprecated. Use chainId instead", ReplaceWith("Map<chainId(Int), Network>"))
+    private val networkMap: Map<String, Network>
+        get() = networks.associateBy { it.short }
+
+    @Deprecated("Network short is deprecated. Use chainId instead")
     val httpsUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.httpRpc } }
+
+    @Deprecated("Network short is deprecated. Use chainId instead")
     val wssUrlMap: Map<String, String> by lazy { networks.associate { it.short to it.wsRpc } }
+
+    @Deprecated("Network short is deprecated. Use chainId instead")
     val gasPriceMap: Map<String, BigInteger> by lazy { networks.associate { it.short to it.gasPrice } }
 
     fun initialize(networks: List<Network>) {
@@ -20,8 +29,10 @@ object NetworkManager {
         this.networks = networks.filter { isActiveNetwork(it) } + networks.filter { !isActiveNetwork(it) }
     }
 
+    @Deprecated("Network short is deprecated. Use chainId instead")
     fun getNetwork(type: String): Network = networkMap.value(type)
 
+    @Deprecated("Network short is deprecated. Use chainId instead")
     fun getChainId(type: String): Int = networkMap.value(type).chainId
 
     @Deprecated("Network short is deprecated. Use chainId instead")
@@ -45,6 +56,7 @@ object NetworkManager {
         }
     }
 
+    @Deprecated("Network short is deprecated. Use chainId instead")
     fun getTokens(network: String) = networkMap[network]?.tokens ?: listOf()
 
     private fun isActiveNetwork(network: Network): Boolean = network.httpRpc != String.Empty

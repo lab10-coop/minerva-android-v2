@@ -253,7 +253,7 @@ class TokenManagerTest : RxTest() {
         val accountEight = Account(1, networkShort = "empty", address = "0xADDRESSxEMPTY")
 
         tokenManager.getTokensApiURL(accountOne) shouldBeEqualTo "https://explorer.tau1.artis.network/api?module=account&action=tokenlist&address=0xADDRESSxONE"
-        tokenManager.getTokensApiURL(accountTwo) shouldBeEqualTo "https://explorer.tau1.artis.network/api?module=account&action=tokenlist&address=0xADDRESSxTWO"
+        tokenManager.getTokensApiURL(accountTwo) shouldBeEqualTo "https://api-ropsten.etherscan.io/api?module=account&action=tokenlist&address=0xADDRESSxTWO"
         tokenManager.getTokensApiURL(accountThree) shouldBeEqualTo "https://blockscout.com/poa/sokol/api?module=account&action=tokenlist&address=0xADDRESSxTHREE"
         tokenManager.getTokensApiURL(accountFour) shouldBeEqualTo "https://blockscout.com/lukso/l14/api?module=account&action=tokenlist&address=0xADDRESSxFOUR"
         tokenManager.getTokensApiURL(accountFive) shouldBeEqualTo "https://explorer.sigma1.artis.network/api?module=account&action=tokenlist&address=0xADDRESSxFIVE"
