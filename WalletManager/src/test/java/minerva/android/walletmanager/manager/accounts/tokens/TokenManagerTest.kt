@@ -180,7 +180,7 @@ class TokenManagerTest : RxTest() {
             ))
 
 
-        val tokensATS = tokenManager.mapToAccountTokensList(ATS_SIGMA, rawTokens)
+        val tokensATS = tokenManager.prepareCurrentTokenList(ATS_SIGMA, rawTokens)
         tokensATS.size shouldBeEqualTo 4
         tokensATS[0].token.name shouldBeEqualTo "CookieTokenOther2ATS"
         tokensATS[0].balance shouldBeEqualTo BigDecimal.TEN
@@ -191,7 +191,7 @@ class TokenManagerTest : RxTest() {
         tokensATS[3].token.name shouldBeEqualTo "OtherTokenATS"
         tokensATS[3].balance shouldBeEqualTo BigDecimal.ZERO
 
-        val tokenETH = tokenManager.mapToAccountTokensList(ETH_RIN, rawTokens)
+        val tokenETH = tokenManager.prepareCurrentTokenList(ETH_RIN, rawTokens)
         tokenETH.size shouldBeEqualTo 4
         tokenETH[0].token.name shouldBeEqualTo "CookieTokenOther2ATS"
         tokenETH[0].balance shouldBeEqualTo BigDecimal.TEN

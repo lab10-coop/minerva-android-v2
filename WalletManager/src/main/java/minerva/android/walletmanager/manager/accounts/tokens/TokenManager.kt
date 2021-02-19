@@ -15,7 +15,7 @@ interface TokenManager {
     fun saveToken(network: String, token: ERC20Token): Completable
     fun saveTokens(map: Map<String, List<AccountToken>>): Completable
     fun getTokenIconURL(chainId: Int, address: String): Single<String>
-    fun mapToAccountTokensList(network: String, tokenList: Map<String, AccountToken>): List<AccountToken>
+    fun prepareCurrentTokenList(network: String, tokenList: Map<String, AccountToken>): List<AccountToken>
     fun updateTokensFromLocalStorage(map: Map<String, List<AccountToken>>): Pair<Boolean, Map<String, List<AccountToken>>>
     fun updateTokens(localCheckResult: Pair<Boolean, Map<String, List<AccountToken>>>): Single<Map<String, List<AccountToken>>>
     fun refreshTokenBalance(account: Account): Single<List<AccountToken>>

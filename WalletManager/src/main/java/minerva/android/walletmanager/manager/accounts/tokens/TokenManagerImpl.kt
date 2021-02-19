@@ -3,6 +3,7 @@ package minerva.android.walletmanager.manager.accounts.tokens
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
@@ -82,7 +83,7 @@ class TokenManagerImpl(
             data.find { chainId == it.chainId && address == it.address }?.logoURI ?: String.Empty
         }
 
-    override fun mapToAccountTokensList(
+    override fun prepareCurrentTokenList(
         network: String,
         tokenMap: Map<String, AccountToken>
     ): List<AccountToken> =
@@ -150,40 +151,31 @@ class TokenManagerImpl(
             }
         }
 
-    //TODO finish implementing it
     private fun getEthereumTokenBalance(account: Account): Single<List<AccountToken>> =
         cryptoApi.getTokenTx(url = getTokenTxApiURL(account))
-            .map {
-                Log.e("klop", "Raw response H E R E ! ${it.tokens.size}")
-                val tokensMap = it.tokens.map { it.address to it }
-                Log.e("klop", "Tokens Map: ${tokensMap.size}")
-                listOf<AccountToken>()
+            .map { response -> response.tokens.map { it.address to it }.toMap().values.toList() }
+            .flatMap { tokens ->
+                Observable.range(FIRST_INDEX, tokens.size).flatMap { position ->
+                    blockchainRepository.refreshTokenBalance(
+                        account.privateKey,
+                        account.networkShort,
+                        tokens[position].address,
+                        account.address
+                    )
+                }.toList()
+                    .map {
+                        mutableListOf<AccountToken>().apply {
+                            it.forEach { balance ->
+                                tokens.find { it.address == balance.first }?.let { tokenTx ->
+                                    add(AccountToken(ERC20Token(account.network.chainId, tokenTx), balance.second))
+                                }
+                            }
+                        }
+                    }
             }
 
-
-//    private fun refreshEthereumTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, BigDecimal>>>> =
-//        tokenManager.loadCurrentTokens(account.network.short).let { tokens ->
-//            return Observable.range(TransactionRepositoryImpl.START, tokens.size)
-//                .flatMap {
-//                    blockchainRepository.refreshTokenBalance(
-//                        account.privateKey,
-//                        account.network.short,
-//                        tokens[it].address,
-//                        account.address
-//                    )
-//                }
-//                .toList()
-//                .map { Triple(account.network.short, account.privateKey, it) }
-//        }
-
     private fun getTokenTxApiURL(account: Account) =
-        //TODO klop USE CORRECT DATA
-        String.format(
-            ETHEREUM_TOKENTX_REQUEST,
-            getTokenBalanceURL(ETH_GOR),
-            "0x30B125d5Fc58c1b8E3cCB2F1C71a1Cc847f024eE",
-            ETHERSCAN_KEY
-        )
+        String.format(ETHEREUM_TOKENTX_REQUEST, getTokenBalanceURL(account.networkShort), account.address, ETHERSCAN_KEY)
 
     @VisibleForTesting
     fun getTokensApiURL(account: Account) =
@@ -260,6 +252,7 @@ class TokenManagerImpl(
 
     companion object {
         private const val LAST_UPDATE_INDEX = 0
+        private const val FIRST_INDEX = 0
         private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
         private const val ETHEREUM_TOKENTX_REQUEST =
             "%sapi?module=account&action=tokentx&address=%s&startblock=0&endblock=999999999&sort=asc&apikey=%s"

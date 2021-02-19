@@ -65,8 +65,6 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         activeAccounts.filter { !it.isPending }
             .forEachIndexed { index, account ->
                 accountTokenBalances[account.privateKey]?.let { accountsList ->
-                    //TODO klop should we assing account Tokens in Adapter??
-                    Log.e("klop", "Assing NO W")
                     account.accountTokens = accountsList
                         .filter {
                             listener.isTokenVisible(account.address, it.token.address)

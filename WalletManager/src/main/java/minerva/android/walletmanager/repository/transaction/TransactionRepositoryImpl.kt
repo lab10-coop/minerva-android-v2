@@ -7,7 +7,6 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.TokenBalance
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
@@ -64,7 +63,7 @@ class TransactionRepositoryImpl(
                 .filter { position -> accountsFilter(accounts[position]) && accounts[position].network.isAvailable() }
                 .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
                 .toList()
-                .map { it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
+                .map { it.associate { it.second to tokenManager.prepareCurrentTokenList(it.first, it.third) } }
                 .map { tokenManager.updateTokensFromLocalStorage(it) }
                 .flatMap { localCheck ->
                     tokenManager.updateTokens(localCheck).onErrorReturn {
