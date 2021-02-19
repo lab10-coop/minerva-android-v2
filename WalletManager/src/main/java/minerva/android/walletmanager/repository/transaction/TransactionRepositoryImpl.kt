@@ -10,7 +10,6 @@ import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.MarketIds
 import minerva.android.apiProvider.model.Markets
 import minerva.android.blockchainprovider.model.ExecutedTransaction
-import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty

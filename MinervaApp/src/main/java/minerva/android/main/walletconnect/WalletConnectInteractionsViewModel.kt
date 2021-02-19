@@ -101,7 +101,7 @@ class WalletConnectInteractionsViewModel(
         status.transaction.value = valueInEther.toPlainString()
         return transactionRepository.getTransactionCosts(
             currentAccount.network.short,
-            Int.InvalidIndex,
+            getTokenIndex(status),
             status.transaction.from,
             status.transaction.to,
             valueInEther,
@@ -120,6 +120,10 @@ class WalletConnectInteractionsViewModel(
                 }
         }
     }
+
+    private fun getTokenIndex(status: OnEthSendTransaction) =
+        if (hexToBigInteger(status.transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO) Int.InvalidIndex
+        else DEFAULT_TOKE_INDEX
 
     fun sendTransaction() {
         launchDisposable {
@@ -179,4 +183,8 @@ class WalletConnectInteractionsViewModel(
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =
         balance < cost || balance == BigDecimal.ZERO
+
+    companion object {
+        private const val DEFAULT_TOKE_INDEX = 1
+    }
 }
