@@ -5,21 +5,29 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
-import minerva.android.accounts.walletconnect.DefaultRequest
-import minerva.android.accounts.walletconnect.OnDisconnected
-import minerva.android.accounts.walletconnect.OnEthSignRequest
-import minerva.android.accounts.walletconnect.WalletConnectState
+import minerva.android.accounts.walletconnect.*
+import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.main.walletconnect.*
+import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.TxType
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.transactions.TxSpeed
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnEthSign
-import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.repository.walletconnect.*
+import minerva.android.walletmanager.utils.CryptoUtils
 import org.amshove.kluent.any
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeIn
 import org.junit.Test
+import java.math.BigDecimal
+import java.math.BigInteger
+import kotlin.test.assertEquals
 
 class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
@@ -96,5 +104,166 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             verify(requestObserver).onChanged(capture())
             firstValue is OnDisconnected
         }
+    }
+
+    @Test
+    fun `reconnect to saved sessions and handle on eth send transaction test`() {
+        val transition = WalletConnectTransaction("from", "to", value = "100000000", data = "0x0")
+        val account =
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), networkShort = "eth_mainnet")
+        NetworkManager.initialize(listOf(Network(short = "eth_mainnet", httpRpc = "url")))
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+        )
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
+        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any()))
+            .thenReturn(
+                Single.just(
+                    TransactionCost(
+                        BigDecimal.TEN, BigInteger.TEN, BigDecimal.TEN, "12",
+                        listOf(TxSpeed(TxType.FAST, BigDecimal(1)))
+                    )
+                )
+            )
+        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel.currentAccount = account
+        viewModel.currentDappSession = DappSession(address = "address1")
+        viewModel.walletConnectStatus.observeForever(requestObserver)
+        requestCaptor.run {
+            verify(requestObserver).onChanged(capture())
+            firstValue is OnEthSendTransactionRequest
+            transition.txCost.cost shouldBeEqualTo BigDecimal.ZERO
+            transition.txCost.formattedCryptoCost shouldBeEqualTo "0.000000"
+            transition.data shouldBeEqualTo "0x0"
+            transition.value shouldBeEqualTo "10"
+            transition.from shouldBeEqualTo "from"
+        }
+    }
+
+    @Test
+    fun `send transaction test success`() {
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnSessionRequest(WalletConnectPeerMeta(), 1, Topic()))
+        )
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
+
+        whenever(transactionRepository.sendTransaction(any(), any())).thenReturn(Single.just("txHash"))
+        doNothing().whenever(walletConnectRepository).approveTransactionRequest(any(), any())
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
+        viewModel.walletConnectStatus.observeForever(requestObserver)
+        requestCaptor.run {
+            verify(requestObserver).onChanged(capture())
+            firstValue is ProgressBarState
+        }
+    }
+
+    @Test
+    fun `send transaction test error`() {
+        val error = Throwable()
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnSessionRequest(WalletConnectPeerMeta(), 1, Topic()))
+        )
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        doNothing().whenever(walletConnectRepository).rejectRequest(any())
+
+        whenever(transactionRepository.sendTransaction(any(), any())).thenReturn(Single.error(error))
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
+        viewModel.walletConnectStatus.observeForever(requestObserver)
+        requestCaptor.run {
+            verify(requestObserver).onChanged(capture())
+            firstValue is OnError
+        }
+    }
+
+    @Test
+    fun `recalculate tx cost`() {
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnSessionRequest(WalletConnectPeerMeta(), 1, Topic()))
+        )
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
+        whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+
+        val result = viewModel.recalculateTxCost(
+            BigDecimal.TEN,
+            WalletConnectTransaction(txCost = TransactionCost(gasLimit = BigInteger.ONE))
+        )
+        assertEquals(result.txCost.cost, BigDecimal.TEN)
+    }
+
+    @Test
+    fun `is balance to low`() {
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnSessionRequest(WalletConnectPeerMeta(), 1, Topic()))
+        )
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
+        whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+
+        val result = viewModel.isBalanceTooLow(BigDecimal.TEN, BigDecimal.ONE)
+        assertEquals(result, false)
+
+        val result2 = viewModel.isBalanceTooLow(BigDecimal.ONE, BigDecimal.TEN)
+        assertEquals(result2, true)
+    }
+
+    @Test
+    fun `approve request test`() {
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnSessionRequest(WalletConnectPeerMeta(), 1, Topic()))
+        )
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
+        whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(Account(1))
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
+        viewModel.acceptRequest()
+        verify(walletConnectRepository).approveRequest(any(), any())
+    }
+
+    @Test
+    fun `reject request test`() {
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnSessionRequest(WalletConnectPeerMeta(), 1, Topic()))
+        )
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
+        whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
+        viewModel.rejectRequest()
+        verify(walletConnectRepository).rejectRequest(any())
     }
 }

@@ -28,10 +28,10 @@ class WalletConnectInteractionsViewModel(
     private val walletConnectRepository: WalletConnectRepository
 ) : BaseViewModel() {
 
-    lateinit var currentDappSession: DappSession
+    internal lateinit var currentDappSession: DappSession
     private var currentRate: Double = Double.InvalidValue
     private lateinit var currentTransaction: WalletConnectTransaction
-    private lateinit var currentAccount: Account
+    internal lateinit var currentAccount: Account
 
     private val _walletConnectStatus = MutableLiveData<WalletConnectState>()
     val walletConnectStatus: LiveData<WalletConnectState> get() = _walletConnectStatus
@@ -85,7 +85,9 @@ class WalletConnectInteractionsViewModel(
             is OnDisconnect -> Single.just(OnDisconnected)
             is OnEthSendTransaction ->
                 walletConnectRepository.getDappSessionById(status.peerId)
-                    .flatMap { session -> getTransactionCosts(session, status) }
+                    .flatMap { session ->
+                        getTransactionCosts(session, status)
+                    }
             else -> Single.just(DefaultRequest)
         }
 
@@ -105,7 +107,6 @@ class WalletConnectInteractionsViewModel(
             valueInEther,
             session.chainId
         ).flatMap { transactionCost ->
-            Timber.tag("kobe").d("RECALCULATED gasLimit: ${transactionCost.gasLimit}")
             transactionRepository.getEurRate(session.chainId)
                 .map {
                     currentRate = it
@@ -120,29 +121,10 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    fun recalculateTxCost(gasPrice: BigDecimal, transaction: WalletConnectTransaction): WalletConnectTransaction {
-        val txCost = transactionRepository.calculateTransactionCost(gasPrice, transaction.txCost.gasLimit)
-        val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(BigDecimal(currentRate)))
-        currentTransaction = transaction.copy(txCost = transaction.txCost.copy(cost = txCost, fiatCost = fiatTxCost))
-        return currentTransaction
-    }
-
-    fun acceptRequest() {
-        transactionRepository.getAccountByAddress(currentDappSession.address)?.let {
-            walletConnectRepository.approveRequest(currentDappSession.peerId, it.privateKey)
-        }
-    }
-
-    fun rejectRequest() {
-        walletConnectRepository.rejectRequest(currentDappSession.peerId)
-    }
-
     fun sendTransaction() {
         launchDisposable {
-            Timber.tag("kobe").d("SEND GAS LIMIT: ${currentTransaction.txCost.gasLimit}")
             transactionRepository.sendTransaction(currentAccount.network.short, transaction)
                 .map {
-                    Timber.tag("kobe").d("TX HASH: $it")
                     walletConnectRepository.approveTransactionRequest(currentDappSession.peerId, it)
                     it
                 }
@@ -162,6 +144,23 @@ class WalletConnectInteractionsViewModel(
                 )
 
         }
+    }
+
+    fun recalculateTxCost(gasPrice: BigDecimal, transaction: WalletConnectTransaction): WalletConnectTransaction {
+        val txCost = transactionRepository.calculateTransactionCost(gasPrice, transaction.txCost.gasLimit)
+        val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(BigDecimal(currentRate)))
+        currentTransaction = transaction.copy(txCost = transaction.txCost.copy(cost = txCost, fiatCost = fiatTxCost))
+        return currentTransaction
+    }
+
+    fun acceptRequest() {
+        transactionRepository.getAccountByAddress(currentDappSession.address)?.let {
+            walletConnectRepository.approveRequest(currentDappSession.peerId, it.privateKey)
+        }
+    }
+
+    fun rejectRequest() {
+        walletConnectRepository.rejectRequest(currentDappSession.peerId)
     }
 
     private val transaction
