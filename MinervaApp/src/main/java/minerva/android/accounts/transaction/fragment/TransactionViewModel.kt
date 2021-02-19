@@ -116,6 +116,7 @@ class TransactionViewModel(
     fun getAccount(accountIndex: Int, tokenIndex: Int) {
         transactionRepository.getAccount(accountIndex)?.let {
             account = it
+            Timber.tag("lebron").d("Crypto balance: $account")
             this.tokenIndex = tokenIndex
         }
     }

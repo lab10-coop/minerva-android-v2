@@ -87,7 +87,6 @@ class AccountsViewModel(
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
             hasActiveAccount = it.hasActiveAccount
-            getSessions(it.accounts)
             it.accounts
         }
 
@@ -122,24 +121,23 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
-        accountManager.getAllAccounts()?.let {
-            getSessions(it)
-        }
     }
 
-    internal fun getSessions(accounts: List<Account>) {
-        launchDisposable {
-            walletConnectRepository.getSessionsFlowable()
-                .map { sessions -> updateSessions(sessions, accounts) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = {
-                        _dappSessions.value = if (it.isNotEmpty()) it
-                        else accountManager.getAllAccounts()
-                    },
-                    onError = { _errorLiveData.value = Event(it) }
-                )
+    internal fun getSessions() {
+        accountManager.getAllAccounts()?.let {
+            launchDisposable {
+                walletConnectRepository.getSessionsFlowable()
+                    .map { sessions -> updateSessions(sessions, it) }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onNext = {
+                            _dappSessions.value = if (it.isNotEmpty()) it
+                            else accountManager.getAllAccounts()
+                        },
+                        onError = { _errorLiveData.value = Event(it) }
+                    )
+            }
         }
     }
 
@@ -178,6 +176,7 @@ class AccountsViewModel(
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doAfterTerminate { getSessions() }
                 .subscribeBy(
                     onSuccess = { _balanceLiveData.value = it },
                     onError = {
