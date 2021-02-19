@@ -105,13 +105,14 @@ class WalletConnectInteractionsViewModel(
             valueInEther,
             session.chainId
         ).flatMap { transactionCost ->
+            Timber.tag("kobe").d("RECALCULATED gasLimit: ${transactionCost.gasLimit}")
             transactionRepository.getEurRate(session.chainId)
                 .map {
                     currentRate = it
-                    val valueInFiat = status.transaction.value.toDouble() * currentRate
+                    val valueInFiat = (status.transaction.value.toDouble() * currentRate).toBigDecimal()
                     val costInFiat = transactionCost.cost.multiply(BigDecimal(currentRate))
                     currentTransaction = status.transaction.copy(
-                        fiatValue = valueInFiat,
+                        fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
                         txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat))
                     )
                     OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
@@ -138,14 +139,20 @@ class WalletConnectInteractionsViewModel(
 
     fun sendTransaction() {
         launchDisposable {
+            Timber.tag("kobe").d("SEND GAS LIMIT: ${currentTransaction.txCost.gasLimit}")
             transactionRepository.sendTransaction(currentAccount.network.short, transaction)
                 .map {
+                    Timber.tag("kobe").d("TX HASH: $it")
                     walletConnectRepository.approveTransactionRequest(currentDappSession.peerId, it)
                     it
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _walletConnectStatus.value = ProgressBarState(true) }
+                .doOnError {
+                    walletConnectRepository.rejectRequest(currentDappSession.peerId)
+                    _walletConnectStatus.value = ProgressBarState(false)
+                }
                 .subscribeBy(
                     onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
                     onError = {
@@ -170,4 +177,7 @@ class WalletConnectInteractionsViewModel(
                 data
             )
         }
+
+    fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =
+        balance < cost || balance == BigDecimal.ZERO
 }

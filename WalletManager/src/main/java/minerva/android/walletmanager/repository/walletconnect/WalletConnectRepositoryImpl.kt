@@ -75,7 +75,10 @@ class WalletConnectRepositoryImpl(
                 currentRequestId = id
 
                 Timber.tag("kobe").d("DATA: ${transaction.data}")
-                Timber.tag("kobe").d("VALUE: ${ hexToBigInteger(transaction.value, BigDecimal.ZERO)}")
+                Timber.tag("kobe").d("VALUE: ${hexToBigInteger(transaction.value, BigDecimal.ZERO)}")
+                Timber.tag("kobe").d("GAS LIMIT: ${transaction.gasLimit}")
+                Timber.tag("kobe").d("FROM: ${transaction.from}")
+                Timber.tag("kobe").d("TO: ${transaction.to}")
 
                 status.onNext(
                     OnEthSendTransaction(

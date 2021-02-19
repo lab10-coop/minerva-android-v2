@@ -42,7 +42,6 @@ import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.dialog.walletconnect.GasPriceDialog
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
-import timber.log.Timber
 import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
@@ -189,16 +188,22 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 walletConnectViewModel.rejectRequest()
                 dappDialog = null
             }).apply {
-            setContent(it.transaction, it.session, it.account,
+            setContent(
+                it.transaction, it.session, it.account,
                 { showGasPriceDialog(it) },
-                { gasPrice -> walletConnectViewModel.recalculateTxCost(gasPrice, it.transaction) }
+                { gasPrice -> walletConnectViewModel.recalculateTxCost(gasPrice, it.transaction) },
+                { balance, cost -> walletConnectViewModel.isBalanceTooLow(balance, cost) }
+
             )
             show()
         }
 
     private fun DappSendTransactionDialog.showGasPriceDialog(it: OnEthSendTransactionRequest) {
         GasPriceDialog(context) { gasPrice ->
-            setCustomGasPrice(walletConnectViewModel.recalculateTxCost(BigDecimal(gasPrice), it.transaction), it.account)
+            setCustomGasPrice(
+                walletConnectViewModel.recalculateTxCost(BigDecimal(gasPrice), it.transaction),
+                it.account
+            ) { balance, cost -> walletConnectViewModel.isBalanceTooLow(balance, cost) }
         }.show()
     }
 

@@ -86,14 +86,12 @@ class TransactionRepositoryImpl(
             network,
             accountIndex,
             TransactionToTransactionPayloadMapper.map(transaction)
-        )
-            .map { pendingTx ->
-                /*Subscription to web sockets doesn't work with http rpc, hence pending tsx are not saved*/
-                if (NetworkManager.getNetwork(pendingTx.network).wsRpc.isNotEmpty()) {
-                    localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx))
-                }
+        ).map { pendingTx ->
+            /*Subscription to web sockets doesn't work with http rpc, hence pending tsx are not saved*/
+            if (NetworkManager.getNetwork(pendingTx.network).wsRpc.isNotEmpty()) {
+                localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx))
             }
-            .flatMap { blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty } }
+        }.flatMap { blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty } }
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
 
@@ -142,7 +140,7 @@ class TransactionRepositoryImpl(
         gasPrice: GasPrices?,
         chainId: Int
     ): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice?.speed?.rapid)
+        blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice?.speed?.standard)
             .map { payload ->
                 TransactionCostPayloadToTransactionCost(gasPrice, chainId) {
                     blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)

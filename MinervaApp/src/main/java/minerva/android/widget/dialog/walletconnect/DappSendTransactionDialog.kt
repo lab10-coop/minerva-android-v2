@@ -3,12 +3,14 @@ package minerva.android.widget.dialog.walletconnect
 import android.content.Context
 import android.transition.TransitionManager
 import androidx.core.view.isVisible
+import minerva.android.R
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSendTransactionDialogBinding
+import minerva.android.extension.invisible
+import minerva.android.extension.visible
 import minerva.android.extension.visibleOrInvisible
 import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.transactions.TxSpeed
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 import java.math.BigDecimal
@@ -37,7 +39,8 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         session: DappSession,
         account: Account?,
         showGasPriceDialog: () -> Unit,
-        recalculateTxCost: (BigDecimal) -> WalletConnectTransaction
+        recalculateTxCost: (BigDecimal) -> WalletConnectTransaction,
+        isBalanceTooLow: (balance: BigDecimal, cost: BigDecimal) -> Boolean
     ) = with(binding) {
         setupHeader(session.name, session.networkName, session.iconUrl)
         amount.text = transaction.value
@@ -48,6 +51,11 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             unit.text = it.network.token
             accountName.text = it.name
             "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
+
+            if (isBalanceTooLow(it.cryptoBalance, transaction.txCost.cost)) {
+                balanceToLowError.visible()
+                balance.setTextColor(context.getColor(R.color.errorRed))
+            }
         }
         editTxTime.setOnClickListener { showGasPriceDialog() }
         gasPriceSelector.setAdapter(transaction.txCost.txSpeeds) { setTxCost(recalculateTxCost(it.value), account) }
@@ -61,17 +69,40 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             speed.visibleOrInvisible(false)
             transactionTime.visibleOrInvisible(false)
             setTxCost(transaction, account)
+            handleBalanceTooLow(account, isBalanceTooLow, transaction)
         }
     }
 
-    fun setCustomGasPrice(transaction: WalletConnectTransaction, account: Account?) = with(binding) {
-        TransitionManager.beginDelayedTransition(sendTransactionDialog)
-        closeCustomTime.visibleOrInvisible(true)
-        editTxTime.visibleOrInvisible(false)
-        speed.visibleOrInvisible(true)
-        transactionTime.visibleOrInvisible(true)
-        gasPriceSelector.visibleOrInvisible(false)
-        setTxCost(transaction, account)
+    fun setCustomGasPrice(
+        transaction: WalletConnectTransaction,
+        account: Account?,
+        isBalanceToLow: (balance: BigDecimal, cost: BigDecimal) -> Boolean
+    ) =
+        with(binding) {
+            TransitionManager.beginDelayedTransition(sendTransactionDialog)
+            closeCustomTime.visibleOrInvisible(true)
+            editTxTime.visibleOrInvisible(false)
+            speed.visibleOrInvisible(true)
+            transactionTime.visibleOrInvisible(true)
+            gasPriceSelector.visibleOrInvisible(false)
+            setTxCost(transaction, account)
+            handleBalanceTooLow(account, isBalanceToLow, transaction)
+        }
+
+    private fun handleBalanceTooLow(
+        account: Account?,
+        isBalanceTooLow: (balance: BigDecimal, cost: BigDecimal) -> Boolean,
+        transaction: WalletConnectTransaction
+    ) = with(binding) {
+        account?.let {
+            if (isBalanceTooLow(it.cryptoBalance, transaction.txCost.cost)) {
+                balanceToLowError.visible()
+                balance.setTextColor(context.getColor(R.color.errorRed))
+            } else {
+                balanceToLowError.invisible()
+                balance.setTextColor(context.getColor(R.color.dappLabelColorGray))
+            }
+        }
     }
 
     private fun setTxCost(transaction: WalletConnectTransaction, account: Account?) = with(binding) {

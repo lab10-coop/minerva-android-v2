@@ -110,8 +110,7 @@ class BlockchainRegularAccountRepositoryImpl(
                         )
                     )
                     .flowable()
-                    .zipWith(getCurrentBlockNumber(network))
-                    .flatMapSingle { (response, _) ->
+                    .flatMapSingle { response ->
                         if (response.error == null) {
                             Timber.tag("kobe").d("SUCCESS ${response.transactionHash}")
                             Single.just(response.transactionHash)
@@ -219,7 +218,9 @@ class BlockchainRegularAccountRepositoryImpl(
                     web3j.value(network)
                         .ethEstimateGas(getTransaction(from, count, address, amount))
                         .flowable()
-                        .flatMapSingle { handleGasLimit(network, it, gasPrice) }
+                        .flatMapSingle {
+                            handleGasLimit(network, it, gasPrice)
+                        }
                 }
                 .firstOrError()
                 .timeout(
@@ -285,16 +286,27 @@ class BlockchainRegularAccountRepositoryImpl(
         it: EthEstimateGas,
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
-        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
+        //todo what to do with the gasLimit for eth tx with contract byte code
+//        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
+        val gasLimit = it.error?.let {
+            Timber.tag("kobe").d("error: ${it.message}")
+            Operation.TRANSFER_ERC20.gasLimit
+        } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(network, gasLimit, gasPrice)
     }
 
-    private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
-        if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
+    private fun estimateGasLimit(gasLimit: BigInteger): BigInteger {
+
+        Timber.tag("kobe").d("Estimate gasLimit")
+
+        return if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
+            Timber.tag("kobe").d("Default: $gasLimit")
             gasLimit
         } else {
+            Timber.tag("kobe").d("Increased: ${increaseGasLimitByTenPercent(gasLimit)}")
             increaseGasLimitByTenPercent(gasLimit)
         }
+    }
 
     private fun increaseGasLimitByTenPercent(gasLimit: BigInteger) = gasLimit.add(getBuffer(gasLimit))
 
@@ -305,14 +317,16 @@ class BlockchainRegularAccountRepositoryImpl(
         network: String,
         gasLimit: BigInteger,
         gasPrice: BigDecimal?
-    ): Single<TransactionCostPayload> =
-        Single.just(
+    ): Single<TransactionCostPayload> {
+        Timber.tag("kobe").d("calculate tx cost: $gasLimit")
+        return Single.just(
             TransactionCostPayload(
                 convertGasPrice(gasPrice, network),
                 gasLimit,
                 getTransactionCostInEth(getGasPrice(gasPrice, network), BigDecimal(gasLimit))
             )
         )
+    }
 
     private fun convertGasPrice(gasPrice: BigDecimal?, network: String) =
         if (gasPrice == null) fromWei(BigDecimal(gasPrices.value(network)), Convert.Unit.GWEI)
