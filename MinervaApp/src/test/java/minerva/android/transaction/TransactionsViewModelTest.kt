@@ -272,7 +272,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `fetch gas limit success`() {
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), account.network.chainId)).doReturn(
+        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any())).doReturn(
             Single.just(
                 TransactionCost(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
             )
@@ -299,7 +299,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 any(),
                 any(),
                 any(),
-                account.network.chainId
+                any()
             )
         ).doReturn(Single.error(error))
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))

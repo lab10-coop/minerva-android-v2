@@ -142,9 +142,9 @@ class TransactionRepositoryImpl(
     ): Single<TransactionCost> =
         blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice?.speed?.standard)
             .map { payload ->
-                TransactionCostPayloadToTransactionCost(gasPrice, chainId) {
+                TransactionCostPayloadToTransactionCost.map(payload, gasPrice, chainId) {
                     blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
-                }.map(payload)
+                }
             }
 
     override fun isAddressValid(address: String): Boolean =

@@ -9,6 +9,7 @@ import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.Price
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -578,7 +579,7 @@ class TransactionRepositoryTest : RxTest() {
         ).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
         )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, account.network.chainId)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
             .test()
             .assertComplete()
             .assertValue {
@@ -598,12 +599,11 @@ class TransactionRepositoryTest : RxTest() {
                 )
             )
         )
-        whenever(
-            cryptoApi.getGasPrice(
-                any(),
-                any()
+        whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(
+            Single.just(
+                GasPrices("code", TransactionSpeed(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN))
             )
-        ).thenReturn(Single.just(GasPrices(BigDecimal.TEN)))
+        )
         whenever(
             blockchainRegularAccountRepository.getTransactionCosts(
                 any(),
@@ -611,19 +611,11 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
-                eq(BigDecimal.ONE)
+                any()
             )
-        )
-            .doReturn(
-                Single.just(
-                    TransactionCostPayload(
-                        BigDecimal.TEN,
-                        BigInteger.ONE,
-                        BigDecimal.TEN
-                    )
-                )
-            )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, account.network.chainId)
+        ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
+        whenever(blockchainRegularAccountRepository.fromWei(any())).thenReturn(BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
             .test()
             .assertComplete()
             .assertValue {
@@ -654,7 +646,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
             .doReturn(Single.error(error))
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, account.network.chainId)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
             .test()
             .assertError(error)
     }
@@ -692,7 +684,7 @@ class TransactionRepositoryTest : RxTest() {
                     )
                 )
             )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, account.network.chainId)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
             .test()
             .assertComplete()
             .assertValue {

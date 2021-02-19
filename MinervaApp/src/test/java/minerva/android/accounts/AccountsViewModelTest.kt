@@ -110,6 +110,10 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `refresh balances success`() {
+        whenever(walletConnectRepository.getSessionsFlowable())
+            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshBalances()).thenReturn(
             Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
         )
@@ -124,6 +128,10 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `refresh balances error`() {
         val error = Throwable()
+        whenever(walletConnectRepository.getSessionsFlowable())
+            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshBalances()).thenReturn(Single.error(error))
         viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
         viewModel.refreshBalances()
@@ -314,7 +322,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `Check if calling getTokenVisibility() method is calling the method` () {
+    fun `Check if calling getTokenVisibility() method is calling the method`() {
         viewModel.tokenVisibilitySettings = mock()
         viewModel.tokenVisibilitySettings.let { settings ->
             whenever(settings.getTokenVisibility(any(), any())).thenReturn(false)

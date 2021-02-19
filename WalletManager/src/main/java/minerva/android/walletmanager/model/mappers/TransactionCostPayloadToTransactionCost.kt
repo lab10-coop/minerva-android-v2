@@ -10,14 +10,15 @@ import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxSpeed
 import java.math.BigDecimal
 
-class TransactionCostPayloadToTransactionCost(
-    private val gasPrices: GasPrices?,
-    private val chainId: Int,
-    val convert: (value: BigDecimal) -> BigDecimal
-) : Mapper<TransactionCostPayload, TransactionCost> {
+object TransactionCostPayloadToTransactionCost {
 
-    override fun map(input: TransactionCostPayload): TransactionCost {
-        return gasPrices?.let {
+    fun map(
+        input: TransactionCostPayload,
+        gasPrices: GasPrices?,
+        chainId: Int,
+        convert: (value: BigDecimal) -> BigDecimal
+    ): TransactionCost =
+        gasPrices?.let {
             input.run {
                 TransactionCost(
                     gasPrice = gasPrice,
@@ -41,5 +42,4 @@ class TransactionCostPayloadToTransactionCost(
                 )
             }
         }
-    }
 }

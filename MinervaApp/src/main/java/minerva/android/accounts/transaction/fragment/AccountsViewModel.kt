@@ -123,21 +123,19 @@ class AccountsViewModel(
         refreshTokenBalance()
     }
 
-    internal fun getSessions() {
-        accountManager.getAllAccounts()?.let {
-            launchDisposable {
-                walletConnectRepository.getSessionsFlowable()
-                    .map { sessions -> updateSessions(sessions, it) }
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onNext = {
-                            _dappSessions.value = if (it.isNotEmpty()) it
-                            else accountManager.getAllAccounts()
-                        },
-                        onError = { _errorLiveData.value = Event(it) }
-                    )
-            }
+    internal fun getSessions(accounts: List<Account>) {
+        launchDisposable {
+            walletConnectRepository.getSessionsFlowable()
+                .map { sessions -> updateSessions(sessions, accounts) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onNext = {
+                        _dappSessions.value = if (it.isNotEmpty()) it
+                        else accountManager.getAllAccounts()
+                    },
+                    onError = { _errorLiveData.value = Event(it) }
+                )
         }
     }
 
@@ -176,7 +174,7 @@ class AccountsViewModel(
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doAfterTerminate { getSessions() }
+                .doAfterTerminate { accountManager.getAllAccounts()?.let { getSessions(it) } }
                 .subscribeBy(
                     onSuccess = { _balanceLiveData.value = it },
                     onError = {
