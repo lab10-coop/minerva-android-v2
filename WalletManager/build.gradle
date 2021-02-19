@@ -6,6 +6,9 @@ plugins {
 }
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
+def properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -33,7 +36,7 @@ android {
         buildConfigField "String", "POA_CORE_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/core/"'
         buildConfigField "String", "X_DAI_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/xdai/"'
         buildConfigField "String", "LUKSO_TOKEN_BALANCE_URL", '"https://blockscout.com/lukso/l14/"'
-        buildConfigField "String", "ETHERSCAN_KEY", String.valueOf(System.env.KEY ?: new Properties().getProperty('etherscan.key'))
+        buildConfigField "String", "ETHERSCAN_KEY", String.valueOf(System.env.ETHERSCAN_KEY ?: properties.getProperty('etherscan.key'))
     }
 
     buildTypes {
