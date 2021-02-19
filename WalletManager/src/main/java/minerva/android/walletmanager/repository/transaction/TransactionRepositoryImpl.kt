@@ -62,9 +62,7 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
             return Observable.range(START, accounts.size)
                 .filter { position -> accountsFilter(accounts[position]) && accounts[position].network.isAvailable() }
-                .flatMapSingle { position ->
-                    refreshTokensBalance(accounts[position])
-                }
+                .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
                 .toList()
                 .map { it.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
                 .map { tokenManager.updateTokensFromLocalStorage(it) }
@@ -223,13 +221,16 @@ class TransactionRepositoryImpl(
      *
      */
 
-    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, Map<String, TokenBalance>>> =
-        tokenManager.getTokenBalance(account)
+    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, Map<String, AccountToken>>> =
+        tokenManager.refreshTokenBalance(account)
             .map {
-                val tokenMap = mutableMapOf<String, TokenBalance>()
-                it.forEach { tokenBalance -> tokenMap[tokenBalance.address] = tokenBalance }
+                val tokenMap = mutableMapOf<String, AccountToken>()
+                it.forEach { accountToken ->
+                    tokenMap[accountToken.token.address] = accountToken
+                }
                 Triple(account.network.short, account.privateKey, tokenMap)
             }
+
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
     override fun getAccountByAddress(address: String): Account? =

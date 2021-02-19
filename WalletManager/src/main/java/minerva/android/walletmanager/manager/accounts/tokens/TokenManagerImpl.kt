@@ -7,7 +7,6 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.TokenBalance
-import minerva.android.apiProvider.model.TokenTx
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
@@ -85,17 +84,17 @@ class TokenManagerImpl(
 
     override fun mapToAccountTokensList(
         network: String,
-        tokenMap: Map<String, TokenBalance>
+        tokenMap: Map<String, AccountToken>
     ): List<AccountToken> =
         mutableListOf<AccountToken>().apply {
             loadCurrentTokens(network).forEach {
-                tokenMap[it.address]?.let { tokenBalance ->
-                    add(mapToERC20Token(network, tokenBalance))
+                tokenMap[it.address]?.let { accountToken ->
+                    add(accountToken)
                 }.orElse { add(AccountToken(it, BigDecimal.ZERO)) }
             }
-            tokenMap.values.forEach { tokenBalance ->
-                if (find { it.token.address == tokenBalance.address } == null)
-                    add(mapToERC20Token(network, tokenBalance))
+            tokenMap.values.forEach { accountToken ->
+                if (find { it.token.address == accountToken.token.address } == null)
+                    add(accountToken)
             }
             //TODO need to be sorted by fiat value, when getting values will be implemented
         }.sortedByDescending { it.balance }
@@ -139,21 +138,43 @@ class TokenManagerImpl(
             }
         } else Single.just(localCheckResult.second)
 
-    override fun getTokenBalance(account: Account): Single<List<TokenBalance>> =
+    override fun refreshTokenBalance(account: Account): Single<List<AccountToken>> =
         when (account.networkShort) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokenBalance(account)
-            else -> cryptoApi.getTokenBalance(url = getTokensApiURL(account)).map { it.tokens }
+            else -> cryptoApi.getTokenBalance(url = getTokensApiURL(account)).map {
+                mutableListOf<AccountToken>().apply {
+                    it.tokens.forEach {
+                        add(mapToAccountToken(account.networkShort, it))
+                    }
+                }
+            }
         }
 
     //TODO finish implementing it
-    private fun getEthereumTokenBalance(account: Account): Single<List<TokenBalance>> =
+    private fun getEthereumTokenBalance(account: Account): Single<List<AccountToken>> =
         cryptoApi.getTokenTx(url = getTokenTxApiURL(account))
             .map {
                 Log.e("klop", "Raw response H E R E ! ${it.tokens.size}")
                 val tokensMap = it.tokens.map { it.address to it }
                 Log.e("klop", "Tokens Map: ${tokensMap.size}")
-                listOf<TokenBalance>()
+                listOf<AccountToken>()
             }
+
+
+//    private fun refreshEthereumTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, BigDecimal>>>> =
+//        tokenManager.loadCurrentTokens(account.network.short).let { tokens ->
+//            return Observable.range(TransactionRepositoryImpl.START, tokens.size)
+//                .flatMap {
+//                    blockchainRepository.refreshTokenBalance(
+//                        account.privateKey,
+//                        account.network.short,
+//                        tokens[it].address,
+//                        account.address
+//                    )
+//                }
+//                .toList()
+//                .map { Triple(account.network.short, account.privateKey, it) }
+//        }
 
     private fun getTokenTxApiURL(account: Account) =
         //TODO klop USE CORRECT DATA
@@ -165,10 +186,10 @@ class TokenManagerImpl(
         )
 
     @VisibleForTesting
-     fun getTokensApiURL(account: Account) =
+    fun getTokensApiURL(account: Account) =
         String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.networkShort), account.address)
 
-    private fun mapToERC20Token(network: String, token: TokenBalance): AccountToken =
+    private fun mapToAccountToken(network: String, token: TokenBalance): AccountToken =
         AccountToken(
             ERC20Token(NetworkManager.getChainId(network), token.name, token.symbol, token.address, token.decimals),
             blockchainRepository.fromGwei(token.balance.toBigDecimal())

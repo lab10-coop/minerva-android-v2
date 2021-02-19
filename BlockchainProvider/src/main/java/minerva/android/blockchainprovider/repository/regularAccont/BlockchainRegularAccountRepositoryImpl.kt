@@ -186,6 +186,21 @@ class BlockchainRegularAccountRepositoryImpl(
 
         } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
 
+    override fun refreshTokenBalance(
+        privateKey: String,
+        network: String,
+        contractAddress: String,
+        safeAccountAddress: String
+    ): Observable<Pair<String, BigDecimal>> =
+        if (safeAccountAddress.isEmpty()) getERC20Balance(
+            contractAddress,
+            network,
+            privateKey,
+            Credentials.create(privateKey).address
+        )
+        else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
+
+
     override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
 
     override fun fromGwei(amount: BigDecimal): BigDecimal = fromWei(amount, Convert.Unit.ETHER)
