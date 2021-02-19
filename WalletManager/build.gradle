@@ -5,10 +5,8 @@ plugins {
     id 'kotlin-kapt'
 }
 apply from: "$rootProject.projectDir/dependencies.gradle"
+Properties properties = new Properties()
 
-def localPropertiesFile = rootProject.file("local.properties")
-def apikeyProperties = new Properties()
-apikeyProperties.load(new FileInputStream(localPropertiesFile))
 
 android {
     compileSdkVersion 29
@@ -37,7 +35,7 @@ android {
         buildConfigField "String", "POA_CORE_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/core/"'
         buildConfigField "String", "X_DAI_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/xdai/"'
         buildConfigField "String", "LUKSO_TOKEN_BALANCE_URL", '"https://blockscout.com/lukso/l14/"'
-        buildConfigField "String", "ETHERSCAN_KEY", String.valueOf(System.env.ETHERSCAN_KEY ?: apikeyProperties['ETHERSCAN_KEY'])
+        buildConfigField "String", "API_TOKEN", String.valueOf(System.env.KEY ?: properties.getProperty('etherscan.key'))
     }
 
     buildTypes {
