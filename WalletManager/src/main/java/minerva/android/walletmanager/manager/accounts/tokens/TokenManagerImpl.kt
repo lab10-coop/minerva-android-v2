@@ -82,7 +82,6 @@ class TokenManagerImpl(
             data.find { chainId == it.chainId && address == it.address }?.logoURI ?: String.Empty
         }
 
-    //TODO klop refactor it
     override fun prepareCurrentTokenList(
         network: String,
         tokenList: List<AccountToken>
@@ -95,15 +94,6 @@ class TokenManagerImpl(
                     add(token)
                 }
             }
-//            loadCurrentTokens(network).forEach {
-//                tokenList[it.address]?.let { accountToken ->
-//                    add(accountToken)
-//                }.orElse { add(AccountToken(it, BigDecimal.ZERO)) }
-//            }
-//            tokenList.values.forEach { accountToken ->
-//                if (find { it.token.address == accountToken.token.address } == null)
-//                    add(accountToken)
-//            }
             //TODO need to be sorted by fiat value, when getting values will be implemented
         }.sortedByDescending { it.balance }
 
