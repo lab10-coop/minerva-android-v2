@@ -18,7 +18,9 @@ import minerva.android.kotlinUtils.map.value
 import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
+import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.EthEstimateGas
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
@@ -206,15 +208,15 @@ class BlockchainRegularAccountRepositoryImpl(
         from: String,
         to: String,
         amount: BigDecimal,
-        gasPrice: BigDecimal?
+        gasPrice: BigDecimal?,
+        contractData: String
     ): Single<TransactionCostPayload> =
         if (assetIndex == Int.InvalidIndex) {
             web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
                 .flowable()
                 .zipWith(resolveENS(to).toFlowable())
                 .flatMap { (count, address) ->
-                    web3j.value(network)
-                        .ethEstimateGas(getTransaction(from, count, address, amount))
+                    web3j.value(network).ethEstimateGas(getTransaction(from, count, address, amount, contractData))
                         .flowable()
                         .flatMapSingle { handleGasLimit(network, it, gasPrice) }
                 }
@@ -226,6 +228,16 @@ class BlockchainRegularAccountRepositoryImpl(
                 )
 
         } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+
+
+    private fun handleGasLimit(
+        network: String,
+        it: EthEstimateGas,
+        gasPrice: BigDecimal?
+    ): Single<TransactionCostPayload> {
+        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
+        return calculateTransactionCosts(network, gasLimit, gasPrice)
+    }
 
     override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
     override fun fromWei(value: BigDecimal): BigDecimal = fromWei(value, Convert.Unit.GWEI)
@@ -266,7 +278,13 @@ class BlockchainRegularAccountRepositoryImpl(
     private fun getChainId(network: String): Flowable<NetVersion> =
         web3j.value(network).netVersion().flowable()
 
-    private fun getTransaction(from: String, count: EthGetTransactionCount, to: String, amount: BigDecimal) =
+    private fun getTransaction(
+        from: String,
+        count: EthGetTransactionCount,
+        to: String,
+        amount: BigDecimal,
+        contractData: String
+    ) =
         Transaction(
             from,
             count.transactionCount,
@@ -274,17 +292,8 @@ class BlockchainRegularAccountRepositoryImpl(
             BigInteger.ZERO,
             to,
             toWei(amount, Convert.Unit.ETHER).toBigInteger(),
-            String.Empty
+            contractData
         )
-
-    private fun handleGasLimit(
-        network: String,
-        it: EthEstimateGas,
-        gasPrice: BigDecimal?
-    ): Single<TransactionCostPayload> {
-        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
-        return calculateTransactionCosts(network, gasLimit, gasPrice)
-    }
 
     private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
         if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {

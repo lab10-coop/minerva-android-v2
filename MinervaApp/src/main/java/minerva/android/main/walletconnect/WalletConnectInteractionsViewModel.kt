@@ -101,11 +101,12 @@ class WalletConnectInteractionsViewModel(
         status.transaction.value = valueInEther.toPlainString()
         return transactionRepository.getTransactionCosts(
             currentAccount.network.short,
-            getTokenIndex(status),
+            Int.InvalidIndex,
             status.transaction.from,
             status.transaction.to,
             valueInEther,
-            session.chainId
+            session.chainId,
+            getContractData(status.transaction)
         ).flatMap { transactionCost ->
             transactionRepository.getEurRate(session.chainId)
                 .map {
@@ -121,9 +122,9 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    private fun getTokenIndex(status: OnEthSendTransaction) =
-        if (hexToBigInteger(status.transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO) Int.InvalidIndex
-        else DEFAULT_TOKE_INDEX
+    private fun getContractData(transaction: WalletConnectTransaction): String =
+        if (hexToBigInteger(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO) String.Empty
+        else transaction.data
 
     fun sendTransaction() {
         launchDisposable {

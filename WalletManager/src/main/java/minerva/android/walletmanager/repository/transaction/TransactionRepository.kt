@@ -5,6 +5,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
@@ -41,7 +42,8 @@ interface TransactionRepository {
         from: String,
         to: String,
         amount: BigDecimal,
-        chainId: Int
+        chainId: Int,
+        contractData: String = String.Empty
     ): Single<TransactionCost>
 
     fun isAddressValid(address: String): Boolean

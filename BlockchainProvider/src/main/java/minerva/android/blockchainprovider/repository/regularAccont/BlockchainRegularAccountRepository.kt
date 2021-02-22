@@ -38,7 +38,8 @@ interface BlockchainRegularAccountRepository {
         from: String,
         to: String,
         amount: BigDecimal,
-        gasPrice: BigDecimal? = null
+        gasPrice: BigDecimal? = null,
+        contractData: String = String.Empty
     ): Single<TransactionCostPayload>
 
     fun isAddressValid(address: String): Boolean

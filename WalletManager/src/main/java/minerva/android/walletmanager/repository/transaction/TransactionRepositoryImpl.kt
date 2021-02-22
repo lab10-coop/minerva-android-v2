@@ -45,6 +45,7 @@ class TransactionRepositoryImpl(
     private val webSocketRepository: WebSocketRepository,
     private val tokenManager: TokenManager
 ) : TransactionRepository {
+
     override val masterSeed: MasterSeed
         get() = walletConfigManager.masterSeed
 
@@ -116,15 +117,16 @@ class TransactionRepositoryImpl(
         from: String,
         to: String,
         amount: BigDecimal,
-        chainId: Int
+        chainId: Int,
+        contractData: String
     ): Single<TransactionCost> =
         if (shouldGetGasPriceFromApi(network)) {
             cryptoApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
                 .flatMap { gasPrice ->
-                    getTxCosts(network, tokenIndex, from, to, amount, gasPrice, chainId)
-                }.onErrorResumeNext { getTxCosts(network, tokenIndex, from, to, amount, null, chainId) }
+                    getTxCosts(network, tokenIndex, from, to, amount, gasPrice, chainId, contractData)
+                }.onErrorResumeNext { getTxCosts(network, tokenIndex, from, to, amount, null, chainId, contractData) }
         } else {
-            getTxCosts(network, tokenIndex, from, to, amount, null, chainId)
+            getTxCosts(network, tokenIndex, from, to, amount, null, chainId, contractData)
         }
 
     private fun shouldGetGasPriceFromApi(network: String) =
@@ -137,14 +139,22 @@ class TransactionRepositoryImpl(
         to: String,
         amount: BigDecimal,
         gasPrice: GasPrices?,
-        chainId: Int
+        chainId: Int,
+        contractData: String
     ): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(network, tokenIndex, from, to, amount, gasPrice?.speed?.standard)
-            .map { payload ->
-                TransactionCostPayloadToTransactionCost.map(payload, gasPrice, chainId) {
-                    blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
-                }
+        blockchainRepository.getTransactionCosts(
+            network,
+            tokenIndex,
+            from,
+            to,
+            amount,
+            gasPrice?.speed?.standard,
+            contractData
+        ).map { payload ->
+            TransactionCostPayloadToTransactionCost.map(payload, gasPrice, chainId) {
+                blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
             }
+        }
 
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)
