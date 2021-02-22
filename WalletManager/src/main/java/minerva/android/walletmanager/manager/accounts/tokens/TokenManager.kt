@@ -2,12 +2,9 @@ package minerva.android.walletmanager.manager.accounts.tokens
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.apiProvider.model.TokenBalance
-import minerva.android.apiProvider.model.TokenBalanceResponse
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
-import java.math.BigDecimal
 
 interface TokenManager {
     fun updateTokenIcons(): Completable

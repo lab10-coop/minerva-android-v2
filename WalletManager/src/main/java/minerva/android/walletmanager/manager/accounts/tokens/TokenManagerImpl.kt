@@ -19,7 +19,6 @@ import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
@@ -32,6 +31,7 @@ import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
