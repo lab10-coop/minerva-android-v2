@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -86,18 +85,25 @@ class TokenManagerImpl(
     //TODO klop refactor it
     override fun prepareCurrentTokenList(
         network: String,
-        tokenMap: Map<String, AccountToken>
+        tokenList: List<AccountToken>
     ): List<AccountToken> =
         mutableListOf<AccountToken>().apply {
+            addAll(tokenList)
             loadCurrentTokens(network).forEach {
-                tokenMap[it.address]?.let { accountToken ->
-                    add(accountToken)
-                }.orElse { add(AccountToken(it, BigDecimal.ZERO)) }
+                val token = AccountToken(it, BigDecimal.ZERO)
+                if(!contains(token)) {
+                    add(token)
+                }
             }
-            tokenMap.values.forEach { accountToken ->
-                if (find { it.token.address == accountToken.token.address } == null)
-                    add(accountToken)
-            }
+//            loadCurrentTokens(network).forEach {
+//                tokenList[it.address]?.let { accountToken ->
+//                    add(accountToken)
+//                }.orElse { add(AccountToken(it, BigDecimal.ZERO)) }
+//            }
+//            tokenList.values.forEach { accountToken ->
+//                if (find { it.token.address == accountToken.token.address } == null)
+//                    add(accountToken)
+//            }
             //TODO need to be sorted by fiat value, when getting values will be implemented
         }.sortedByDescending { it.balance }
 

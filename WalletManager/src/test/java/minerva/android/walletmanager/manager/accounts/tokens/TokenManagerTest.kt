@@ -174,10 +174,10 @@ class TokenManagerTest : RxTest() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
         whenever(blockchainRepository.fromGwei(any())).thenReturn(BigDecimal.ONE, BigDecimal.TEN, BigDecimal.ONE, BigDecimal.TEN)
-        val rawTokens = mapOf(
-            Pair("0xC00k1e", AccountToken(ERC20Token(chainId = 0, name = "CookieTokenATS", address = "0xC00k1e"), BigDecimal.ONE)),
-            Pair("0x0th3r2", AccountToken(ERC20Token(chainId = 0, name = "CookieTokenOther2ATS", address = "0x0th3r2"), BigDecimal.TEN)
-            ))
+        val rawTokens = listOf(
+            AccountToken(ERC20Token(chainId = 0, name = "CookieTokenATS", address = "0xC00k1e"), BigDecimal.ONE),
+            AccountToken(ERC20Token(chainId = 0, name = "CookieTokenOther2ATS", address = "0x0th3r2"), BigDecimal.TEN)
+        )
 
 
         val tokensATS = tokenManager.prepareCurrentTokenList(ATS_SIGMA, rawTokens)

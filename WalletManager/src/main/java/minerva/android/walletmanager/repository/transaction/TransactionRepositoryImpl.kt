@@ -88,19 +88,19 @@ class TransactionRepositoryImpl(
 
 
     private fun refreshTokensBalanceWithBuffer(accounts: List<Account>):
-            Single<List<Triple<String, String, Map<String, AccountToken>>>> =
+            Single<List<Triple<String, String, List<AccountToken>>>> =
         Observable.range(START, accounts.size)
             .map { accounts[it] }
             .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
             .flatMapSingle { refreshTokensBalance(it) }
             .toList()
             .map { balances ->
-                mutableListOf<Triple<String, String, Map<String, AccountToken>>>().apply {
+                mutableListOf<Triple<String, String, List<AccountToken>>>().apply {
                     balances.forEach { addAll(it) }
                 }
             }
 
-    private fun refreshTokensBalance(accounts: List<Account>): Single<List<Triple<String, String, Map<String, AccountToken>>>> =
+    private fun refreshTokensBalance(accounts: List<Account>): Single<List<Triple<String, String, List<AccountToken>>>> =
         Observable.range(START, accounts.size)
             .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
             .toList()
@@ -246,15 +246,9 @@ class TransactionRepositoryImpl(
      *
      */
 
-    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, Map<String, AccountToken>>> =
+    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<AccountToken>>> =
         tokenManager.refreshTokenBalance(account)
-            .map {
-                val tokenMap = mutableMapOf<String, AccountToken>()
-                it.forEach { accountToken ->
-                    tokenMap[accountToken.token.address] = accountToken
-                }
-                Triple(account.network.short, account.privateKey, tokenMap)
-            }
+            .map { Triple(account.network.short, account.privateKey, it) }
 
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
