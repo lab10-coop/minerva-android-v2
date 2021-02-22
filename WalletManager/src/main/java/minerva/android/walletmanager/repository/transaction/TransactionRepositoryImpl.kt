@@ -241,8 +241,8 @@ class TransactionRepositoryImpl(
 
     /**
      *
-     * return statement: Single<Triple<String, String, List<Pair<String, BigDecimal>>>>
-     *                   Single<Triple<Network, AccountPrivateKey, Map<ContractAddress, BalanceOnContract>>>>
+     * return statement: Single<Triple<String, String, List<AccountToken>>>
+     *                   Single<Triple<Network, AccountPrivateKey, List<AccountToken>>>>
      *
      */
 

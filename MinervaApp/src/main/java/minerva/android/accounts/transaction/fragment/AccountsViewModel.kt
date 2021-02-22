@@ -1,6 +1,5 @@
 package minerva.android.accounts.transaction.fragment
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

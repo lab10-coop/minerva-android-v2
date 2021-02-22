@@ -3,7 +3,6 @@ package minerva.android.widget
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.transition.TransitionManager
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
