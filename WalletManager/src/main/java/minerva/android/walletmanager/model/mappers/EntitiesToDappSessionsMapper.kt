@@ -2,7 +2,7 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.kotlinUtils.Mapper
 import minerva.android.walletmanager.database.entity.DappSessionEntity
-import minerva.android.walletmanager.model.DappSession
+import minerva.android.walletmanager.model.walletconnect.DappSession
 
 object EntitiesToDappSessionsMapper : Mapper<List<DappSessionEntity>, List<DappSession>> {
     override fun map(input: List<DappSessionEntity>): List<DappSession> =

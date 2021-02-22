@@ -10,9 +10,9 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.inBounds
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.AccountToken
-import minerva.android.walletmanager.model.Balance
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.transactions.Balance
 import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :

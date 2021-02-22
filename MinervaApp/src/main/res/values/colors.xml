@@ -58,5 +58,8 @@
     <color name="scannerMaskBlack">#95000000</color>
     <color name="dappNameBlack">#3f3f4c</color>
     <color name="dappStatusColorGray">#908d9f</color>
+    <color name="dappLabelColorGray">#908e9f</color>
     <color name="dappDragColorGray">#d8d8d8</color>
+    <color name="dappSeparatorColor">#eaeaee</color>
+    <color name="lightRed">#10e42c00</color>
 </resources>

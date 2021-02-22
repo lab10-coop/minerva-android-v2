@@ -15,9 +15,9 @@ import minerva.android.extension.rotate180
 import minerva.android.extension.rotate180back
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.utils.AddressConverter
 import minerva.android.walletmanager.utils.AddressType
 import minerva.android.widget.IdentityDataContent.Companion.FIELD_DESCRIPTION_LIMIT

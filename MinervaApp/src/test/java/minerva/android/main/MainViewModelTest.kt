@@ -12,9 +12,10 @@ import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo

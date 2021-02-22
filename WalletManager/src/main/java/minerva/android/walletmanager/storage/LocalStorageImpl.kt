@@ -6,9 +6,9 @@ import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_DATA
-import minerva.android.walletmanager.model.TokenVisibilitySettings
-import minerva.android.walletmanager.model.PendingAccount
-import minerva.android.walletmanager.model.Recipient
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.transactions.Recipient
 
 //TODO move saving object to Room - MinervaDatabase, handle primitives only here
 class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : LocalStorage {

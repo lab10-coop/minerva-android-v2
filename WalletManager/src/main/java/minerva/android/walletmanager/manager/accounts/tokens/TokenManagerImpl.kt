@@ -20,7 +20,7 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.AccountToken
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR

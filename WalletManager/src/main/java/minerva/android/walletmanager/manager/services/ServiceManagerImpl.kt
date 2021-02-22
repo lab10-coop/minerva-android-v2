@@ -16,7 +16,14 @@ import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 import minerva.android.walletmanager.model.mappers.CredentialRequestMapper
 import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.IncognitoIdentity
+import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
+import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequirements
 import minerva.android.walletmanager.model.state.ConnectionRequest
+import minerva.android.walletmanager.model.wallet.WalletConfig
 
 class ServiceManagerImpl(
     private val walletConfigManager: WalletConfigManager,

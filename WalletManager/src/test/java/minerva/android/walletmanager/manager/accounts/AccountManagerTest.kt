@@ -12,6 +12,10 @@ import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider

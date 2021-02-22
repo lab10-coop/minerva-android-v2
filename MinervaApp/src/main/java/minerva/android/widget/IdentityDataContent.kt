@@ -15,10 +15,10 @@ import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.identities.data.getIdentityDataLabel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.DateUtils.DATE_FORMAT
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.widget.clubCard.ClubCard
 
 class IdentityDataContent(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {

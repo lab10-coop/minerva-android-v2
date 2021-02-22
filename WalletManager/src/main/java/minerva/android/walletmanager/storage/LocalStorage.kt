@@ -1,8 +1,8 @@
 package minerva.android.walletmanager.storage
 
-import minerva.android.walletmanager.model.TokenVisibilitySettings
-import minerva.android.walletmanager.model.PendingAccount
-import minerva.android.walletmanager.model.Recipient
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.transactions.Recipient
 
 interface LocalStorage {
     fun saveIsMnemonicRemembered(isRemembered: Boolean)

@@ -23,6 +23,9 @@ import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository

@@ -10,7 +10,7 @@ import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletActions.adapter.WalletActionsAdapter
-import minerva.android.walletmanager.model.WalletActionClustered
+import minerva.android.walletmanager.model.wallet.WalletActionClustered
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

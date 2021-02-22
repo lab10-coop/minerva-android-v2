@@ -6,18 +6,12 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.accounts.walletconnect.DefaultRequest
-import minerva.android.accounts.walletconnect.OnDisconnected
-import minerva.android.accounts.walletconnect.OnEthSignRequest
-import minerva.android.accounts.walletconnect.WalletConnectState
+import minerva.android.accounts.walletconnect.*
 import minerva.android.base.BaseViewModel
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.WalletConnectSession
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnEthSign
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectStatus
+import minerva.android.walletmanager.repository.walletconnect.*
 import timber.log.Timber
 
 class WalletConnectInteractionsViewModel(
@@ -29,7 +23,6 @@ class WalletConnectInteractionsViewModel(
 
     private val _walletConnectStatus = MutableLiveData<WalletConnectState>()
     val walletConnectStatus: LiveData<WalletConnectState> get() = _walletConnectStatus
-
 
     fun dispose() {
         walletConnectRepository.dispose()
@@ -70,14 +63,22 @@ class WalletConnectInteractionsViewModel(
     }
 
     private fun mapRequests(it: WalletConnectStatus) = when (it) {
-        is OnEthSign -> {
+        is OnEthSign ->
             walletConnectRepository.getDappSessionById(it.peerId)
                 .map { session ->
                     currentDappSession = session
                     OnEthSignRequest(it.message, session)
                 }
-        }
         is OnDisconnect -> Single.just(OnDisconnected)
+        is OnEthSendTransaction -> {
+            walletConnectRepository.getDappSessionById(it.peerId)
+                .map { session ->
+                    currentDappSession = session
+                    val account = transactionRepository.getAccountByAddress(currentDappSession.address)
+                    OnEthSendTransactionRequest(it.transaction, session, account)
+                }
+        }
+
         else -> Single.just(DefaultRequest)
     }
 

@@ -5,8 +5,11 @@ import io.reactivex.Completable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.exception.NotSupportedAccountThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.minervaprimitives.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.wallet.WalletConfig
 
 class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : OrderManager {
 

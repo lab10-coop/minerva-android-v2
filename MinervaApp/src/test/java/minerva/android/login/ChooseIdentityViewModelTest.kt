@@ -9,7 +9,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Test

@@ -17,10 +17,10 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.services.listener.MinervaPrimitiveClickListener
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
 
 class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) :
     RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {

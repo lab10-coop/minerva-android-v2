@@ -19,6 +19,12 @@ import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.transactions.Recipient
+import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage

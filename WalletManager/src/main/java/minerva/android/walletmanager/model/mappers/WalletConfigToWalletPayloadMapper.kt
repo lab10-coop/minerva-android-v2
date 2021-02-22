@@ -3,7 +3,7 @@ package minerva.android.walletmanager.model.mappers
 import minerva.android.configProvider.BuildConfig
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.kotlinUtils.Mapper
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.wallet.WalletConfig
 
 object WalletConfigToWalletPayloadMapper : Mapper<WalletConfig, WalletConfigPayload> {
     override fun map(input: WalletConfig): WalletConfigPayload =

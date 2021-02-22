@@ -5,9 +5,9 @@ import minerva.android.BaseViewModelTest
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.AccountToken
-import minerva.android.walletmanager.model.TokenVisibilitySettings
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.storage.LocalStorage
@@ -73,7 +73,9 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         viewModel.account = Account(0)
         viewModel.tokenVisibilitySettings = mock()
         whenever(localStorage.saveTokenVisibilitySettings(any())).thenReturn(TokenVisibilitySettings())
-        whenever(viewModel.tokenVisibilitySettings.updateTokenVisibility(any(), any(), any())).thenReturn(TokenVisibilitySettings())
+        whenever(viewModel.tokenVisibilitySettings.updateTokenVisibility(any(), any(), any())).thenReturn(
+            TokenVisibilitySettings()
+        )
         viewModel.saveTokenVisibilitySettings("", false)
 
         verify(localStorage, times(1)).saveTokenVisibilitySettings(any())

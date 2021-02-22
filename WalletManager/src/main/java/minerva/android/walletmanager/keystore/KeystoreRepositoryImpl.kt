@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import android.util.Base64
 import com.google.gson.Gson
 import minerva.android.kotlinUtils.NO_DATA
-import minerva.android.walletmanager.model.MasterSeed
+import minerva.android.walletmanager.model.wallet.MasterSeed
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 

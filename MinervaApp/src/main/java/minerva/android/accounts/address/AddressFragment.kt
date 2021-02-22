@@ -2,9 +2,7 @@ package minerva.android.accounts.address
 
 import android.os.Bundle
 import android.transition.TransitionManager
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -18,8 +16,8 @@ import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.widget.ProfileImage
 import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton

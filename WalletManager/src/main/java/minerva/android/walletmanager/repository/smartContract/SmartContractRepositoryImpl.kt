@@ -9,9 +9,9 @@ import minerva.android.blockchainprovider.repository.smartContract.BlockchainSaf
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.Recipient
-import minerva.android.walletmanager.model.Transaction
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.transactions.Recipient
+import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.mappers.TransactionMapper
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.storage.LocalStorage

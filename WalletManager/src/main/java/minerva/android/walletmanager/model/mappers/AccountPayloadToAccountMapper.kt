@@ -2,8 +2,7 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 
 object AccountPayloadToAccountMapper {
     fun map(

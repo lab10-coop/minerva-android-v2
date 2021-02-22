@@ -15,8 +15,12 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.Topic
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.walletconnect.*
 import timber.log.Timber
 

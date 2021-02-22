@@ -3,7 +3,7 @@ package minerva.android.walletmanager.utils
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.Price
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.NetworkShortName
 import org.junit.Test

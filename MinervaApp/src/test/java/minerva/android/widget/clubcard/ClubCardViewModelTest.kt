@@ -8,7 +8,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.widget.clubCard.CacheStorage
 import minerva.android.widget.clubCard.ClubCardStateCallback
 import minerva.android.widget.clubCard.ClubCardViewModel

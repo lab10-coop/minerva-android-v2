@@ -2,8 +2,8 @@ package minerva.android.walletmanager.walletActions
 
 import io.reactivex.Completable
 import io.reactivex.Observable
-import minerva.android.walletmanager.model.WalletAction
-import minerva.android.walletmanager.model.WalletActionClustered
+import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletActionClustered
 
 interface WalletActionsRepository {
     fun getWalletActions(): Observable<List<WalletActionClustered>>
