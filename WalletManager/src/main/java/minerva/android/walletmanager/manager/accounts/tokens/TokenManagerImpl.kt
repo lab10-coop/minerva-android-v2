@@ -83,6 +83,7 @@ class TokenManagerImpl(
             data.find { chainId == it.chainId && address == it.address }?.logoURI ?: String.Empty
         }
 
+    //TODO klop refactor it
     override fun prepareCurrentTokenList(
         network: String,
         tokenMap: Map<String, AccountToken>
@@ -155,7 +156,9 @@ class TokenManagerImpl(
         cryptoApi.getTokenTx(url = getTokenTxApiURL(account))
             .map { response -> response.tokens.map { it.address to it }.toMap().values.toList() }
             .flatMap { tokens ->
-                Observable.range(FIRST_INDEX, tokens.size).flatMap { position ->
+                Observable.range(FIRST_INDEX, tokens.size)
+                    //.buffer(1L, java.util.concurrent.TimeUnit.SECONDS, 5)
+                    .flatMap { position ->
                     blockchainRepository.refreshTokenBalance(
                         account.privateKey,
                         account.networkShort,

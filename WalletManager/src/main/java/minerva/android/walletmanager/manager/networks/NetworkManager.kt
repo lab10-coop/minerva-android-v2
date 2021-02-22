@@ -6,6 +6,15 @@ import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_KOV
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_MAIN
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
 import java.math.BigInteger
 
 object NetworkManager {
@@ -58,6 +67,12 @@ object NetworkManager {
 
     @Deprecated("Network short is deprecated. Use chainId instead")
     fun getTokens(network: String) = networkMap[network]?.tokens ?: listOf()
+
+    fun isUsingEtherScan(network: String): Boolean =
+        when (network) {
+            ETH_MAIN, ETH_ROP, ETH_RIN, ETH_KOV, ETH_GOR -> true
+            else -> false
+        }
 
     private fun isActiveNetwork(network: Network): Boolean = network.httpRpc != String.Empty
 

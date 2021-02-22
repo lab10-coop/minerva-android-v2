@@ -33,7 +33,7 @@ android {
         buildConfigField "String", "POA_CORE_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/core/"'
         buildConfigField "String", "X_DAI_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/xdai/"'
         buildConfigField "String", "LUKSO_TOKEN_BALANCE_URL", '"https://blockscout.com/lukso/l14/"'
-        buildConfigField "String", "ETHERSCAN_KEY", String.valueOf(System.env.ETHERSCAN_KEY ?: localProperty('etherscan.key'))
+        buildConfigField "String", "ETHERSCAN_KEY", System.env.ETHERSCAN_KEY ?: localProperty("etherscan.key")
     }
 
     buildTypes {
