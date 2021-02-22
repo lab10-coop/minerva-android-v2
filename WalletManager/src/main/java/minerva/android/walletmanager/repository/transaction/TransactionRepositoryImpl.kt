@@ -52,10 +52,7 @@ class TransactionRepositoryImpl(
     override fun refreshBalances(): Single<HashMap<String, Balance>> {
         walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
             return blockchainRepository.refreshBalances(getAddresses(accounts))
-                .zipWith(
-                    cryptoApi.getMarkets(MarketUtils.getMarketsIds(accounts), EUR_CURRENCY)
-                        .onErrorReturnItem(Markets())
-                )
+                .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
                 .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
         }
         throw NotInitializedWalletConfigThrowable()
@@ -100,11 +97,14 @@ class TransactionRepositoryImpl(
             .map { getPendingAccountsWithBlockHashes(it) }
 
     override fun getEurRate(chainId: Int): Single<Double> =
-        if (chainId == ChainId.ETH_MAIN) {
-            cryptoApi.getMarkets(MarketIds.ETHEREUM, EUR_CURRENCY).map { it.ethPrice?.value }
-        } else {
-            Single.just(0.0)
+        when (chainId) {
+            ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.value }
+            ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaPrice?.value }
+            ChainId.XDAI -> getRate(MarketIds.DAI).map { it.daiPrice?.value }
+            else -> Single.just(0.0)
         }
+
+    private fun getRate(id: String): Single<Markets> = cryptoApi.getMarkets(id, EUR_CURRENCY)
 
     override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
 

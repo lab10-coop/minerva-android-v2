@@ -729,4 +729,53 @@ class TransactionRepositoryTest : RxTest() {
         val result = repository.getAccountByAddress("address")
         assertEquals(result?.address, "address")
     }
+
+    @Test
+    fun `get eur rate test`() {
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.2))))
+        repository.getEurRate(2)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it == 0.0
+            }
+    }
+
+    @Test
+    fun `get eur rate for eth test`() {
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.2))))
+        repository.getEurRate(1)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it == 1.2
+            }
+    }
+
+    @Test
+    fun `to ether conversions test`() {
+        whenever(blockchainRegularAccountRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        val result = repository.toEther(BigDecimal.TEN)
+        assertEquals(result, BigDecimal.TEN)
+    }
+
+    @Test
+    fun `send transaction success`() {
+        whenever(blockchainRegularAccountRepository.sendTransaction(any(), any())).thenReturn(Single.just("txHash"))
+        repository.sendTransaction("network", Transaction(address = "address"))
+            .test()
+            .assertComplete()
+            .assertValue {
+                it == "txHash"
+            }
+    }
+
+    @Test
+    fun `send transaction error`() {
+        val error = Throwable()
+        whenever(blockchainRegularAccountRepository.sendTransaction(any(), any())).thenReturn(Single.error(error))
+        repository.sendTransaction("network", Transaction(address = "address"))
+            .test()
+            .assertError(error)
+    }
 }
