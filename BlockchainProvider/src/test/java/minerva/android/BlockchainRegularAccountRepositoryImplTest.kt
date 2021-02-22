@@ -265,7 +265,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     }
 
     @Test
-    fun `Getting Free ATS request` () {
+    fun `Getting Free ATS request`() {
         every { freeTokenRepository.getFreeATS("some address") } returns "txHash: 0xCookie"
         repository.getFreeATS("some address")
             .test()
@@ -274,11 +274,56 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     }
 
     @Test
-    fun `Getting free ATS request error` () {
+    fun `Getting free ATS request error`() {
         val response = "Wrong txHash for: 0xCookie"
         every { freeTokenRepository.getFreeATS("some address") } returns response
         repository.getFreeATS("some address")
             .test()
             .assertErrorMessage(response)
+    }
+
+    @Test
+    fun `send transaction from wallet connect test success`() {
+        val transactionCount = EthGetTransactionCount()
+        transactionCount.result = "0x1"
+        val sendTransaction = EthSendTransaction()
+        sendTransaction.result = "0x2"
+        val netVersion = NetVersion()
+        netVersion.result = "124"
+        val ethBlockNumber = EthBlockNumber()
+        ethBlockNumber.result = "0x1"
+        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
+        every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.just(sendTransaction)
+        every { web3J.netVersion().flowable() } returns Flowable.just(netVersion)
+        every { web3J.ethBlockNumber().flowable() } returns Flowable.just(ethBlockNumber)
+        repository.sendTransaction(ETH, TransactionPayload("address", "0x2313"))
+            .test()
+            .assertComplete()
+    }
+
+    @Test
+    fun `send transaction from wallet connect test error`() {
+        val error = Throwable()
+        val transactionCount = EthGetTransactionCount()
+        transactionCount.result = "0x1"
+        val sendTransaction = EthSendTransaction()
+        sendTransaction.result = "0x2"
+        val netVersion = NetVersion()
+        netVersion.result = "124"
+        val ethBlockNumber = EthBlockNumber()
+        ethBlockNumber.result = "0x1"
+        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
+        every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.error(error)
+        every { web3J.netVersion().flowable() } returns Flowable.just(netVersion)
+        every { web3J.ethBlockNumber().flowable() } returns Flowable.just(ethBlockNumber)
+        repository.sendTransaction(ETH, TransactionPayload("address", "0x2313"))
+            .test()
+            .assertError(error)
+    }
+
+    @Test
+    fun `to ether conversion test`() {
+        val result = repository.toEther(BigDecimal.valueOf(1000000000000000000))
+        assertEquals(result, BigDecimal.ONE)
     }
 }
