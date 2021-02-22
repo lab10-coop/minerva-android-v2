@@ -574,7 +574,8 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
-                eq(null)
+                eq(null),
+                any()
             )
         ).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
@@ -611,6 +612,7 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
@@ -642,7 +644,8 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
-                eq(null)
+                eq(null),
+                any()
             )
         )
             .doReturn(Single.error(error))
@@ -672,7 +675,8 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
-                eq(null)
+                eq(null),
+                any()
             )
         )
             .doReturn(

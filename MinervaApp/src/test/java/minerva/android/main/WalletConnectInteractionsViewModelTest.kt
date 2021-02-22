@@ -122,7 +122,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
         whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any()))
+        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(
                 Single.just(
                     TransactionCost(

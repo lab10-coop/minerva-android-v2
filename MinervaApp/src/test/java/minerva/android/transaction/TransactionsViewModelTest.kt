@@ -272,7 +272,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `fetch gas limit success`() {
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any())).doReturn(
+        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any(), any())).doReturn(
             Single.just(
                 TransactionCost(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
             )
@@ -294,6 +294,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         whenever(
             transactionRepository.getTransactionCosts(
+                any(),
                 any(),
                 any(),
                 any(),
