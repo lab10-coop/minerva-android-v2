@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.repository.walletconnect
 
-import minerva.android.walletConnect.model.ethereum.WCEthereumTransaction
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction

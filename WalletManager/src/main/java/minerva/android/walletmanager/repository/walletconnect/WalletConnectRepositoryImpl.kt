@@ -12,6 +12,7 @@ import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
+import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
@@ -24,6 +25,7 @@ import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.model.mappers.*
 import timber.log.Timber
+import java.math.BigDecimal
 import java.util.concurrent.ConcurrentHashMap
 
 class WalletConnectRepositoryImpl(
@@ -135,6 +137,10 @@ class WalletConnectRepositoryImpl(
 
     override fun approveRequest(peerId: String, privateKey: String) {
         clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
+    }
+
+    override fun approveTransactionRequest(peerId: String, message: String) {
+        clientMap[peerId]?.approveRequest(currentRequestId, message)
     }
 
     private fun signData(privateKey: String) = if (currentEthMessage.type == TYPED_MESSAGE) {

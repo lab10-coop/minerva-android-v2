@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model.walletconnect
 
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 
 data class DappSession(
@@ -15,5 +16,6 @@ data class DappSession(
     val remotePeerId: String? = String.Empty,
     val networkName: String = String.Empty,
     val accountName: String = String.Empty,
-    override val networkShort: String = String.Empty
+    override val networkShort: String = String.Empty,
+    val chainId: Int = Int.InvalidValue
 ) : MinervaPrimitive(address = address, name = name, iconUrl = iconUrl, networkShort = networkShort)

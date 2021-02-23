@@ -6,8 +6,8 @@ import android.widget.RelativeLayout
 import minerva.android.R
 import minerva.android.databinding.TokenViewBinding
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.utils.BalanceUtils.getCryptoBalance
-import minerva.android.utils.BalanceUtils.getFiatBalance
+import minerva.android.walletmanager.utils.BalanceUtils.getCryptoBalance
+import minerva.android.walletmanager.utils.BalanceUtils.getFiatBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.widget.repository.getMainTokenIconRes

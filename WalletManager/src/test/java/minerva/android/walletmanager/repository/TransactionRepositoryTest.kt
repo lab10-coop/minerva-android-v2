@@ -5,10 +5,11 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPrice
+import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.Price
 import minerva.android.apiProvider.model.TokenBalanceResponse
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -523,12 +524,13 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
-                eq(null)
+                eq(null),
+                any()
             )
         ).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
         )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
             .test()
             .assertComplete()
             .assertValue {
@@ -548,12 +550,11 @@ class TransactionRepositoryTest : RxTest() {
                 )
             )
         )
-        whenever(
-            cryptoApi.getGasPrice(
-                any(),
-                any()
+        whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(
+            Single.just(
+                GasPrices("code", TransactionSpeed(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN))
             )
-        ).thenReturn(Single.just(GasPrice(BigDecimal.TEN)))
+        )
         whenever(
             blockchainRegularAccountRepository.getTransactionCosts(
                 any(),
@@ -561,19 +562,12 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
-                eq(BigDecimal.ONE)
+                any(),
+                any()
             )
-        )
-            .doReturn(
-                Single.just(
-                    TransactionCostPayload(
-                        BigDecimal.TEN,
-                        BigInteger.ONE,
-                        BigDecimal.TEN
-                    )
-                )
-            )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+        ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
+        whenever(blockchainRegularAccountRepository.fromWei(any())).thenReturn(BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
             .test()
             .assertComplete()
             .assertValue {
@@ -600,11 +594,12 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
-                eq(null)
+                eq(null),
+                any()
             )
         )
             .doReturn(Single.error(error))
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
             .test()
             .assertError(error)
     }
@@ -630,7 +625,8 @@ class TransactionRepositoryTest : RxTest() {
                 any(),
                 any(),
                 any(),
-                eq(null)
+                eq(null),
+                any()
             )
         )
             .doReturn(
@@ -642,7 +638,7 @@ class TransactionRepositoryTest : RxTest() {
                     )
                 )
             )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN)
+        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
             .test()
             .assertComplete()
             .assertValue {
@@ -682,6 +678,55 @@ class TransactionRepositoryTest : RxTest() {
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
         val result = repository.getAccountByAddress("address")
         assertEquals(result?.address, "address")
+    }
+
+    @Test
+    fun `get eur rate test`() {
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.2))))
+        repository.getEurRate(2)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it == 0.0
+            }
+    }
+
+    @Test
+    fun `get eur rate for eth test`() {
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.2))))
+        repository.getEurRate(1)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it == 1.2
+            }
+    }
+
+    @Test
+    fun `to ether conversions test`() {
+        whenever(blockchainRegularAccountRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        val result = repository.toEther(BigDecimal.TEN)
+        assertEquals(result, BigDecimal.TEN)
+    }
+
+    @Test
+    fun `send transaction success`() {
+        whenever(blockchainRegularAccountRepository.sendTransaction(any(), any())).thenReturn(Single.just("txHash"))
+        repository.sendTransaction("network", Transaction(address = "address"))
+            .test()
+            .assertComplete()
+            .assertValue {
+                it == "txHash"
+            }
+    }
+
+    @Test
+    fun `send transaction error`() {
+        val error = Throwable()
+        whenever(blockchainRegularAccountRepository.sendTransaction(any(), any())).thenReturn(Single.error(error))
+        repository.sendTransaction("network", Transaction(address = "address"))
+            .test()
+            .assertError(error)
     }
 
     @Test

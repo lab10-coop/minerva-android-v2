@@ -15,7 +15,12 @@ interface BlockchainRegularAccountRepository {
     fun refreshBalances(networkAddress: List<Pair<String, String>>): Single<List<Pair<String, BigDecimal>>>
 
     fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal
-    fun transferNativeCoin(network: String, accountIndex: Int, transactionPayload: TransactionPayload): Single<PendingTransaction>
+    fun transferNativeCoin(
+        network: String,
+        accountIndex: Int,
+        transactionPayload: TransactionPayload
+    ): Single<PendingTransaction>
+
     fun toGwei(amount: BigDecimal): BigDecimal
     fun fromGwei(amount: BigDecimal): BigDecimal
     fun transferERC20Token(network: String, payload: TransactionPayload): Completable
@@ -28,7 +33,8 @@ interface BlockchainRegularAccountRepository {
         from: String,
         to: String,
         amount: BigDecimal,
-        gasPrice: BigDecimal? = null
+        gasPrice: BigDecimal? = null,
+        contractData: String = String.Empty
     ): Single<TransactionCostPayload>
 
     fun isAddressValid(address: String): Boolean
@@ -38,6 +44,9 @@ interface BlockchainRegularAccountRepository {
     fun getERC20TokenName(privateKey: String, network: String, tokenAddress: String): Observable<String>
     fun getERC20TokenSymbol(privateKey: String, network: String, tokenAddress: String): Observable<String>
     fun getERC20TokenDecimals(privateKey: String, network: String, tokenAddress: String): Observable<BigInteger>
+    fun fromWei(value: BigDecimal): BigDecimal
+    fun toEther(value: BigDecimal): BigDecimal
+    fun sendTransaction(network: String, transactionPayload: TransactionPayload): Single<String>
     fun refreshTokenBalance(
         privateKey: String,
         network: String,

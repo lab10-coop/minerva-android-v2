@@ -177,7 +177,7 @@
     </style>
 
     <style name="RoundedRedLabelStyle" parent="RoundedLabelStyle">
-        <item name="android:textColor">#e42c00</item>
+        <item name="android:textColor">@color/errorRed</item>
         <item name="android:background">@drawable/rounded_light_red_background</item>
     </style>
 

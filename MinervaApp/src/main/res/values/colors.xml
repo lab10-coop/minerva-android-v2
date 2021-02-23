@@ -62,4 +62,5 @@
     <color name="dappDragColorGray">#d8d8d8</color>
     <color name="dappSeparatorColor">#eaeaee</color>
     <color name="lightRed">#10e42c00</color>
+    <color name="errorRed">#e42c00</color>
 </resources>

@@ -26,7 +26,6 @@ data class OnEthSendTransactionRequest(
     val transaction: WalletConnectTransaction,
     val session: DappSession,
     val account: Account?
-) :
-    WalletConnectState()
+) : WalletConnectState()
 
 object DefaultRequest : WalletConnectState()

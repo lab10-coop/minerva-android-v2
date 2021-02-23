@@ -1,4 +1,4 @@
-package minerva.android.utils
+package minerva.android.walletmanager.utils
 
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidValue

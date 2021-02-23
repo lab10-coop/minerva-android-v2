@@ -8,8 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayoutMediator
 import minerva.android.R
 import minerva.android.databinding.GasPriceSelectorBinding
+import minerva.android.extension.invisible
 import minerva.android.main.walletconnect.transaction.TransactionSpeedAdapter
-import minerva.android.main.walletconnect.transaction.TxSpeed
+import minerva.android.walletmanager.model.transactions.TxSpeed
 
 class GasPriceSelector @JvmOverloads constructor(
     context: Context,
@@ -21,7 +22,15 @@ class GasPriceSelector @JvmOverloads constructor(
         GasPriceSelectorBinding.bind(inflate(context, R.layout.gas_price_selector, this))
     private lateinit var adapter: TransactionSpeedAdapter
 
-    init {
+    fun setAdapter(speeds: List<TxSpeed>, recalculateTxCost: (TxSpeed) -> Unit) = with(binding) {
+        adapter = TransactionSpeedAdapter()
+        if (speeds.size == 1) tabLayout.invisible()
+        txSpeedViewPager.adapter = adapter
+        adapter.updateSpeeds(speeds)
+        TabLayoutMediator(tabLayout, txSpeedViewPager) { _, _ -> }.attach()
+        (txSpeedViewPager.children.first() as RecyclerView).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+
+
         with(binding) {
             overlay.setOnClickListener {
                 if (txSpeedViewPager.currentItem == MAX_POSITION) {
@@ -29,16 +38,9 @@ class GasPriceSelector @JvmOverloads constructor(
                 } else {
                     txSpeedViewPager.currentItem = txSpeedViewPager.currentItem + 1
                 }
+                recalculateTxCost(adapter.getCurrentTxSpeed(txSpeedViewPager.currentItem))
             }
         }
-    }
-
-    fun setAdapter(speeds: List<TxSpeed>) = with(binding) {
-        adapter = TransactionSpeedAdapter()
-        txSpeedViewPager.adapter = adapter
-        adapter.updateSpeeds(speeds)
-        TabLayoutMediator(tabLayout, txSpeedViewPager) { _, _ -> }.attach()
-        (txSpeedViewPager.children.first() as RecyclerView).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
     }
 
     companion object {

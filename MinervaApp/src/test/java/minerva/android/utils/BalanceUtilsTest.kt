@@ -1,6 +1,7 @@
 package minerva.android.utils
 
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.utils.BalanceUtils
 import org.junit.Test
 import java.math.BigDecimal
 import kotlin.test.assertEquals
