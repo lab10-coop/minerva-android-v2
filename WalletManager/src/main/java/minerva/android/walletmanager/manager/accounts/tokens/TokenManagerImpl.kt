@@ -113,7 +113,6 @@ class TokenManagerImpl(
             Pair(updateTokens, map)
         }.orElse { throw NotInitializedWalletConfigThrowable() }
 
-    //TODO klop add correct namig in lambdas
     override fun updateTokens(localCheckResult: Pair<Boolean, Map<String, List<AccountToken>>>): Single<Map<String, List<AccountToken>>> =
         if (localCheckResult.first) {
             getTokenIconsURL().map { logoUrls ->

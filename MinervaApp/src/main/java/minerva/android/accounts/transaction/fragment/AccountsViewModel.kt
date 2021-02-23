@@ -191,7 +191,6 @@ class AccountsViewModel(
                 .subscribeBy(
                     onSuccess = { _tokenBalanceLiveData.value = it },
                     onError = {
-                        //TODO klop add logging errors - FirebaseCrashlytics.getInstance().log("Some")
                         Timber.e("Refresh asset balance error: ${it.message}")
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
                     }

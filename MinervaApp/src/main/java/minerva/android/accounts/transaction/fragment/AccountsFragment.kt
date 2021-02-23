@@ -1,13 +1,11 @@
 package minerva.android.accounts.transaction.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
 import minerva.android.accounts.enum.ErrorCode
@@ -126,7 +124,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 setOnRefreshListener {
                     with(viewModel) {
                         refreshBalances()
-                        Log.e("klop", "Setting listener")
                         refreshTokenBalance()
                     }
                 }
