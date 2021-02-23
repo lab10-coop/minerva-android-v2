@@ -270,22 +270,21 @@ class TokenManagerTest : RxTest() {
         val notEtherscanAccount = Account(1, networkShort = ATS_TAU, address = "0xADDRESSxONE")
         val etherscanAccount = Account(1, networkShort = ETH_RIN, address = "0xADDRESSxTWO")
         val tokenBalances = listOf(
-            TokenBalance("t01", "s01", "name01", "10", "0xC00KiE01", "1"),
-            TokenBalance("t02", "s02", "name02", "10", "0xC00KiE02", "10")
+            TokenBalance("t01", "s01", "name01", "2", "0xC00KiE01", "1000"),
+            TokenBalance("t02", "s02", "name02", "3", "0xC00KiE02", "100000")
         )
         val tokenResponse = TokenBalanceResponse("OK", tokenBalances, "response N O W !")
 
         val tokenTXs = listOf(
-            TokenTx(tokenName = "name03", address = "0xC00KiE03"),
-            TokenTx(tokenName = "name04", address = "0xC00KiE04")
+            TokenTx(tokenName = "name03", address = "0xC00KiE03", tokenDecimal = "3"),
+            TokenTx(tokenName = "name04", address = "0xC00KiE04", tokenDecimal = "6")
         )
 
         val tokenTxResponse = TokenTxResponse("OK", tokenTXs, "response N O W !")
-        val refreshTokenResponse01 = Observable.just(Pair("0xC00KiE03", BigDecimal.TEN))
-        val refreshTokenResponse02 = Observable.just(Pair("0xC00KiE04", BigDecimal.ONE))
+        val refreshTokenResponse01 = Observable.just(Pair("0xC00KiE03", 10000.toBigDecimal()))
+        val refreshTokenResponse02 = Observable.just(Pair("0xC00KiE04", 100000000.toBigDecimal()))
 
         NetworkManager.initialize(DataProvider.networks)
-        whenever(blockchainRepository.fromGwei(any())).thenReturn(BigDecimal.ONE, BigDecimal.TEN)
         whenever(cryptoApi.getTokenBalance(any(), any())).thenReturn(Single.just(tokenResponse))
         whenever(blockchainRepository.refreshTokenBalance(any(), any(), any(), any())).thenReturn(
             refreshTokenResponse01,
@@ -298,9 +297,9 @@ class TokenManagerTest : RxTest() {
             .assertValue {
                 it.size == 2
                 it[0].token.name == "name01"
-                it[0].balance == BigDecimal.ONE
+                it[0].balance == 10.toBigDecimal()
                 it[1].token.name == "name02"
-                it[1].balance == BigDecimal.TEN
+                it[1].balance == 100.toBigDecimal()
             }
         tokenManager.refreshTokenBalance(etherscanAccount)
             .test()
@@ -308,9 +307,9 @@ class TokenManagerTest : RxTest() {
             .assertValue {
                 it.size == 2
                 it[0].token.name == "name03"
-                it[0].balance == BigDecimal.TEN
+                it[0].balance == 10.toBigDecimal()
                 it[1].token.name == "name04"
-                it[1].balance == BigDecimal.ONE
+                //it[1].balance == 100.toBigDecimal()
             }
 
     }

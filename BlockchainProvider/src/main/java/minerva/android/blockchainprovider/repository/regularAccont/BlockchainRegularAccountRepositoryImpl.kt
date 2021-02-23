@@ -275,7 +275,7 @@ class BlockchainRegularAccountRepositoryImpl(
         getChainId(network)
             .flatMap {
                 loadERC20(privateKey, network, contractAddress, it).balanceOf(address).flowable()
-                    .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
+                    .map { balance -> Pair(contractAddress, balance.toBigDecimal()) }
             }.toObservable()
 
     private fun getChainId(network: String): Flowable<NetVersion> =

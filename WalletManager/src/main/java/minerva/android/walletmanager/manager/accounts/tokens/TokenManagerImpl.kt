@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -31,10 +32,12 @@ import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
+import minerva.android.walletmanager.model.mappers.TokenBalanceToAccountToken
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.utils.BalanceUtils
 import java.math.BigDecimal
 
 class TokenManagerImpl(
@@ -90,7 +93,7 @@ class TokenManagerImpl(
             addAll(tokenList)
             loadCurrentTokens(network).forEach {
                 val token = AccountToken(it, BigDecimal.ZERO)
-                if(!contains(token)) {
+                if (!contains(token)) {
                     add(token)
                 }
             }
@@ -141,7 +144,7 @@ class TokenManagerImpl(
             else -> cryptoApi.getTokenBalance(url = getTokensApiURL(account)).map {
                 mutableListOf<AccountToken>().apply {
                     it.tokens.forEach {
-                        add(mapToAccountToken(account.networkShort, it))
+                        add(TokenBalanceToAccountToken.map(account.networkShort, it))
                     }
                 }
             }
@@ -153,18 +156,23 @@ class TokenManagerImpl(
             .flatMap { tokens ->
                 Observable.range(FIRST_INDEX, tokens.size)
                     .flatMap { position ->
-                    blockchainRepository.refreshTokenBalance(
-                        account.privateKey,
-                        account.networkShort,
-                        tokens[position].address,
-                        account.address
-                    )
-                }.toList()
+                        blockchainRepository.refreshTokenBalance(
+                            account.privateKey,
+                            account.networkShort,
+                            tokens[position].address,
+                            account.address
+                        )
+                    }.toList()
                     .map {
                         mutableListOf<AccountToken>().apply {
-                            it.forEach { balance ->
-                                tokens.find { it.address == balance.first }?.let { tokenTx ->
-                                    add(AccountToken(ERC20Token(account.network.chainId, tokenTx), balance.second))
+                            it.forEach { (address, balance) ->
+                                tokens.find { it.address == address }?.let { tokenTx ->
+                                    add(
+                                        AccountToken(
+                                            ERC20Token(account.network.chainId, tokenTx),
+                                            BalanceUtils.fromWei(balance, tokenTx.tokenDecimal.toInt())
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -177,12 +185,6 @@ class TokenManagerImpl(
     @VisibleForTesting
     fun getTokensApiURL(account: Account) =
         String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.networkShort), account.address)
-
-    private fun mapToAccountToken(network: String, token: TokenBalance): AccountToken =
-        AccountToken(
-            ERC20Token(NetworkManager.getChainId(network), token.name, token.symbol, token.address, token.decimals),
-            blockchainRepository.fromGwei(token.balance.toBigDecimal())
-        )
 
     private fun getTokenBalanceURL(networkShort: String) =
         when (networkShort) {
