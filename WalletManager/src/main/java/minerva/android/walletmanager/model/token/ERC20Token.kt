@@ -15,7 +15,7 @@ data class ERC20Token(
 
     override fun equals(other: Any?): Boolean =
         (other as? ERC20Token)?.let {
-            this.address.equals(it.address, true)
+            address.equals(it.address, true)
         }.orElse { false }
 
     constructor(chainId: Int, tokenTx: TokenTx) : this(

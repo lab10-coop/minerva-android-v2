@@ -113,7 +113,7 @@ class TokenManagerImpl(
             Pair(updateTokens, map)
         }.orElse { throw NotInitializedWalletConfigThrowable() }
 
-
+    //TODO klop add correct namig in lambdas
     override fun updateTokens(localCheckResult: Pair<Boolean, Map<String, List<AccountToken>>>): Single<Map<String, List<AccountToken>>> =
         if (localCheckResult.first) {
             getTokenIconsURL().map { logoUrls ->
@@ -153,7 +153,6 @@ class TokenManagerImpl(
             .map { response -> response.tokens.map { it.address to it }.toMap().values.toList() }
             .flatMap { tokens ->
                 Observable.range(FIRST_INDEX, tokens.size)
-                    //.buffer(1L, java.util.concurrent.TimeUnit.SECONDS, 5)
                     .flatMap { position ->
                     blockchainRepository.refreshTokenBalance(
                         account.privateKey,
@@ -220,6 +219,11 @@ class TokenManagerImpl(
     @VisibleForTesting
     fun generateTokenIconKey(chainId: Int, address: String) = "$chainId$address"
 
+    /**
+     * arguments: tokens MutableMap<NetworkShort, List<ERC20Token>>
+     * return statement: Map<NetworkShort, List<ERC20Token>>
+     */
+
     @VisibleForTesting
     fun updateTokens(network: String, token: ERC20Token, tokens: MutableMap<String, List<ERC20Token>>) =
         tokens.apply {
@@ -229,6 +233,12 @@ class TokenManagerImpl(
                 put(network, currentTokens)
             }
         }
+
+    /**
+     *
+     * arguments: map - downloaded tokens - Map<AccountPrivateKey, List<AccountToken>>, tokens - MutableMap<NetworkShort, List<ERC20Token>>
+     * return statement: Map<NetworkShort, List<ERC20Token>>
+     */
 
     private fun updateTokens(map: Map<String, List<AccountToken>>, tokens: MutableMap<String, List<ERC20Token>>) =
         tokens.apply {

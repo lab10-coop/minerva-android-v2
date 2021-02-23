@@ -11,6 +11,6 @@ data class AccountToken(
 ) {
     override fun equals(other: Any?): Boolean =
         (other as? AccountToken)?.let {
-            this.token.address.equals(it.token.address, true)
+            token.address.equals(it.token.address, true)
         }.orElse { false }
 }

@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
@@ -262,6 +263,56 @@ class TokenManagerTest : RxTest() {
         tokenManager.getTokensApiURL(accountSix) shouldBeEqualTo "https://blockscout.com/poa/xdai/api?module=account&action=tokenlist&address=0xADDRESSxSIX"
         tokenManager.getTokensApiURL(accountSeven) shouldBeEqualTo "https://blockscout.com/poa/core/api?module=account&action=tokenlist&address=0xADDRESSxSEVEN"
         assertFailsWith<NetworkNotFoundThrowable> { tokenManager.getTokensApiURL(accountEight) }
+    }
+
+    @Test
+    fun `Test refreshing token balance`() {
+        val notEtherscanAccount = Account(1, networkShort = ATS_TAU, address = "0xADDRESSxONE")
+        val etherscanAccount = Account(1, networkShort = ETH_RIN, address = "0xADDRESSxTWO")
+        val tokenBalances = listOf(
+            TokenBalance("t01", "s01", "name01", "10", "0xC00KiE01", "1"),
+            TokenBalance("t02", "s02", "name02", "10", "0xC00KiE02", "10")
+        )
+        val tokenResponse = TokenBalanceResponse("OK", tokenBalances, "response N O W !")
+
+        val tokenTXs = listOf(
+            TokenTx(tokenName = "name03", address = "0xC00KiE03"),
+            TokenTx(tokenName = "name04", address = "0xC00KiE04")
+        )
+
+        val tokenTxResponse = TokenTxResponse("OK", tokenTXs, "response N O W !")
+        val refreshTokenResponse01 = Observable.just(Pair("0xC00KiE03", BigDecimal.TEN))
+        val refreshTokenResponse02 = Observable.just(Pair("0xC00KiE04", BigDecimal.ONE))
+
+        NetworkManager.initialize(DataProvider.networks)
+        whenever(blockchainRepository.fromGwei(any())).thenReturn(BigDecimal.ONE, BigDecimal.TEN)
+        whenever(cryptoApi.getTokenBalance(any(), any())).thenReturn(Single.just(tokenResponse))
+        whenever(blockchainRepository.refreshTokenBalance(any(), any(), any(), any())).thenReturn(
+            refreshTokenResponse01,
+            refreshTokenResponse02
+        )
+        whenever(cryptoApi.getTokenTx(any(), any())).thenReturn(Single.just(tokenTxResponse))
+        tokenManager.refreshTokenBalance(notEtherscanAccount)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.size == 2
+                it[0].token.name == "name01"
+                it[0].balance == BigDecimal.ONE
+                it[1].token.name == "name02"
+                it[1].balance == BigDecimal.TEN
+            }
+        tokenManager.refreshTokenBalance(etherscanAccount)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.size == 2
+                it[0].token.name == "name03"
+                it[0].balance == BigDecimal.TEN
+                it[1].token.name == "name04"
+                it[1].balance == BigDecimal.ONE
+            }
+
     }
 
     private val commitData: List<CommitElement>

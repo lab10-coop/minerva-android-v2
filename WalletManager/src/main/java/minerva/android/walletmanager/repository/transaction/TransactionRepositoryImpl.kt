@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.repository.transaction
 
-import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -74,25 +73,31 @@ class TransactionRepositoryImpl(
                 accounts.filter { !NetworkManager.isUsingEtherScan(it.networkShort) }.let { notEtherscanAccounts ->
                     refreshTokensBalanceWithBuffer(etherscanAccounts)
                         .zipWith(refreshTokensBalance(notEtherscanAccounts))
-                        .map { it.first + it.second }
-                        .map { it.associate { it.second to tokenManager.prepareCurrentTokenList(it.first, it.third) } }
+                        .map { (etherscanTokensBalance, notEtherscanTokenBalance) -> etherscanTokensBalance + notEtherscanTokenBalance }
+                        .map {
+                            it.associate { it.second to tokenManager.prepareCurrentTokenList(it.first, it.third) } }
                         .map { tokenManager.updateTokensFromLocalStorage(it) }
-                        .flatMap { localCheck ->
-                            tokenManager.updateTokens(localCheck).onErrorReturn {
-                                Timber.e(it.message)
-                                localCheck.second
+                        .flatMap { locallyCheckedAccountTokens -> //Map<AccountPrivateKey, List<AccountToken>>
+                            tokenManager.updateTokens(locallyCheckedAccountTokens).onErrorReturn {
+                                Timber.e(it)
+                                locallyCheckedAccountTokens.second
                             }
                         }
-                        .flatMap {
-                            tokenManager.saveTokens(it).onErrorComplete {
-                                Timber.e(it.message)
+                        .flatMap { automaticTokenUpdateMap -> // Map<isUpdateNeeded, Map<AccountPrivateKey, List<AccountToken>>
+                            tokenManager.saveTokens(automaticTokenUpdateMap).onErrorComplete {
+                                Timber.e(it)
                                 true
-                            }.andThen(Single.just(it))
+                            }.andThen(Single.just(automaticTokenUpdateMap))
                         }
                 }
             }
         } ?: Single.error(NotInitializedWalletConfigThrowable())
 
+    /**
+     *
+     *  return statement: List<Triple<Network, AccountPrivateKey, List<AccountToken>>>>
+     *
+     */
 
     private fun refreshTokensBalanceWithBuffer(accounts: List<Account>):
             Single<List<Triple<String, String, List<AccountToken>>>> =
@@ -102,9 +107,7 @@ class TransactionRepositoryImpl(
             .flatMapSingle { refreshTokensBalance(it) }
             .toList()
             .map { balances ->
-                mutableListOf<Triple<String, String, List<AccountToken>>>().apply {
-                    balances.forEach { addAll(it) }
-                }
+                mutableListOf<Triple<String, String, List<AccountToken>>>().apply { balances.forEach { addAll(it) } }
             }
 
     private fun refreshTokensBalance(accounts: List<Account>): Single<List<Triple<String, String, List<AccountToken>>>> =

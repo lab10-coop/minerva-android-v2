@@ -45,7 +45,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     fun updateList(data: List<Account>, areMainNetsEnabled: Boolean) {
         rawAccounts = data
-        activeAccounts = data.filter { !it.isDeleted }.filter { it.network.testNet == !areMainNetsEnabled }
+        activeAccounts = data.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
         openAccounts = activeAccounts.map { false }.toMutableList()
         notifyDataSetChanged()
     }

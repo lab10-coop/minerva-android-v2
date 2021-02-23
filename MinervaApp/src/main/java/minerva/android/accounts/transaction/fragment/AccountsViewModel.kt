@@ -84,10 +84,12 @@ class AccountsViewModel(
     var hasActiveAccount: Boolean = false
 
     val accountsLiveData: LiveData<List<Account>> =
-        Transformations.map(accountManager.walletConfigLiveData) {
-            hasActiveAccount = it.hasActiveAccount
-            getSessions(it.accounts)
-            it.accounts
+        Transformations.map(accountManager.walletConfigLiveData) { walletConfig ->
+            hasActiveAccount = walletConfig.hasActiveAccount
+            with(walletConfig.accounts) {
+                getSessions(this)
+                this
+            }
         }
 
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
@@ -194,6 +196,7 @@ class AccountsViewModel(
                 .subscribeBy(
                     onSuccess = { _tokenBalanceLiveData.value = it },
                     onError = {
+                        //TODO klop add logging errors - FirebaseCrashlytics.getInstance().log("Some")
                         Timber.e("Refresh asset balance error: ${it.message}")
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
                     }
