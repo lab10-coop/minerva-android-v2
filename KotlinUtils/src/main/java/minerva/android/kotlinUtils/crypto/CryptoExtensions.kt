@@ -36,13 +36,16 @@ private fun hexToBigInteger(input: String): BigDecimal? {
         if (isHex) {
             hex = cleanHexPrefix(input)
         }
-        BigInteger(hex, if (isHex) 16 else 10).toBigDecimal()
+        BigInteger(hex, if (isHex) HEX else DEC).toBigDecimal()
     } catch (ex: NullPointerException) {
         null
     } catch (ex: NumberFormatException) {
         null
     }
 }
+
+private const val HEX = 16
+private const val DEC = 10
 
 private val String.isJSONValid: Boolean
     get() {
