@@ -87,7 +87,6 @@ class AccountsViewModel(
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
             hasActiveAccount = it.hasActiveAccount
-            getSessions(it.accounts)
             it.accounts
         }
 
@@ -122,9 +121,6 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
-        accountManager.getAllAccounts()?.let {
-            getSessions(it)
-        }
     }
 
     internal fun getSessions(accounts: List<Account>) {
@@ -178,6 +174,7 @@ class AccountsViewModel(
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doAfterTerminate { accountManager.getAllAccounts()?.let { getSessions(it) } }
                 .subscribeBy(
                     onSuccess = { _balanceLiveData.value = it },
                     onError = {

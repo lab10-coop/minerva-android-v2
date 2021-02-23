@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 
 @Entity(tableName = "dapp_sessions")
 data class DappSessionEntity(
@@ -18,5 +19,6 @@ data class DappSessionEntity(
     @ColumnInfo(name = "remote_peer_id") val remotePeerId: String? = String.Empty,
     @ColumnInfo(name = "network_name") val networkName: String = String.Empty,
     @ColumnInfo(name = "account_name") val accountName: String = String.Empty,
-    @ColumnInfo(name = "network_short") val networkShort: String = String.Empty
+    @ColumnInfo(name = "network_short") val networkShort: String = String.Empty,
+    @ColumnInfo(name = "chain_id") val chainId: Int = Int.InvalidValue
 )

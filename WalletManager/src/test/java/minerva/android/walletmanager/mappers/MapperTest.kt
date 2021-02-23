@@ -1,5 +1,7 @@
 package minerva.android.walletmanager.mappers
 
+import minerva.android.apiProvider.model.GasPrices
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
@@ -278,9 +280,17 @@ class MapperTest {
     @Test
     fun `map transaction cost payload to transaction cost test`() {
         val input = TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
+        val response = TransactionCostPayloadToTransactionCost.map(input, GasPrices("code", TransactionSpeed()), 1) { it }
+        response.gasLimit shouldBeEqualTo input.gasLimit
+        response.gasPrice shouldBeEqualTo input.gasPrice
+        response.cost shouldBeEqualTo input.cost
+        response.txSpeeds[0].value shouldBeEqualTo BigDecimal.ZERO
+    }
 
-        val response = TransactionCostPayloadToTransactionCost.map(input)
-
+    @Test
+    fun `map transaction cost payload to transaction cost test when gas prices is null`() {
+        val input = TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
+        val response = TransactionCostPayloadToTransactionCost.map(input, null, 1) { it }
         response.gasLimit shouldBeEqualTo input.gasLimit
         response.gasPrice shouldBeEqualTo input.gasPrice
         response.cost shouldBeEqualTo input.cost

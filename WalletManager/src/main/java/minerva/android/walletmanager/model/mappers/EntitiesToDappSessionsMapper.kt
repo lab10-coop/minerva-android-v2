@@ -38,7 +38,8 @@ object SessionEntityToDappSessionMapper : Mapper<DappSessionEntity, DappSession>
             remotePeerId,
             networkName,
             accountName,
-            networkShort
+            networkShort,
+            chainId
         )
     }
 

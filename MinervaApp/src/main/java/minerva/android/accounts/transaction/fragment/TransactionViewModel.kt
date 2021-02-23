@@ -128,7 +128,7 @@ class TransactionViewModel(
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {
-            transactionRepository.getTransactionCosts(network.short, tokenIndex, account.address, to, amount)
+            transactionRepository.getTransactionCosts(network.short, tokenIndex, account.address, to, amount, account.network.chainId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
