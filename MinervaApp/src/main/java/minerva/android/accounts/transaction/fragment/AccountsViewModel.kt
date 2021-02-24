@@ -52,8 +52,7 @@ class AccountsViewModel(
     private val _refreshBalancesErrorLiveData = MutableLiveData<Event<ErrorCode>>()
     val refreshBalancesErrorLiveData: LiveData<Event<ErrorCode>> get() = _refreshBalancesErrorLiveData
 
-    private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData =
-        MutableLiveData<Event<Throwable>>()
+    private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData = MutableLiveData<Event<Throwable>>()
     val balanceIsNotEmptyAndHasMoreOwnersErrorLiveData: LiveData<Event<Throwable>> get() = _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData
 
     private val _balanceIsNotEmptyErrorLiveData = MutableLiveData<Event<Throwable>>()

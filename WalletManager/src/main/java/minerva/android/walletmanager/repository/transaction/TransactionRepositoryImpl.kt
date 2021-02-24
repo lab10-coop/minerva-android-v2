@@ -33,8 +33,10 @@ import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.util.concurrent.TimeUnit
 import java.math.RoundingMode
 
 class TransactionRepositoryImpl(
@@ -66,17 +68,58 @@ class TransactionRepositoryImpl(
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
-    override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> {
-        walletConfigManager.getWalletConfig()?.accounts?.let { accounts ->
-            return Observable.range(START, accounts.size)
-                .filter { position -> refreshBalanceFilter(accounts[position]) }
-                .filter { position -> accounts[position].network.isAvailable() }
-                .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
-                .toList()
-                .map { list -> list.associate { it.second to tokenManager.mapToAccountTokensList(it.first, it.third) } }
-        }
-        throw NotInitializedWalletConfigThrowable()
-    }
+    override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
+        walletConfigManager.getWalletConfig()?.accounts?.filter { account ->
+            accountsFilter(account) && account.network.isAvailable()
+        }?.let { accounts ->
+            accounts.filter { NetworkManager.isUsingEtherScan(it.networkShort) }.let { etherscanAccounts ->
+                accounts.filter { !NetworkManager.isUsingEtherScan(it.networkShort) }.let { notEtherscanAccounts ->
+                    refreshTokensBalanceWithBuffer(etherscanAccounts)
+                        .zipWith(refreshTokensBalance(notEtherscanAccounts))
+                        .map { (etherscanTokensBalance, notEtherscanTokenBalance) -> etherscanTokensBalance + notEtherscanTokenBalance }
+                        .map {
+                            it.associate { (network, privateKey, accountTokens) ->
+                                privateKey to tokenManager.prepareCurrentTokenList(network, accountTokens)
+                            }
+                        }
+                        .map { tokenManager.updateTokensFromLocalStorage(it) }
+                        .flatMap { (shouldBeUpdated, accountTokens) ->
+                            tokenManager.updateTokens(shouldBeUpdated, accountTokens).onErrorReturn {
+                                Timber.e(it)
+                                accountTokens
+                            }
+                        }
+                        .flatMap { automaticTokenUpdateMap -> // Map<isUpdateNeeded, Map<AccountPrivateKey, List<AccountToken>>
+                            tokenManager.saveTokens(automaticTokenUpdateMap).onErrorComplete {
+                                Timber.e(it)
+                                true
+                            }.andThen(Single.just(automaticTokenUpdateMap))
+                        }
+                }
+            }
+        } ?: Single.error(NotInitializedWalletConfigThrowable())
+
+    /**
+     *
+     *  return statement: List<Triple<Network, AccountPrivateKey, List<AccountToken>>>>
+     *
+     */
+
+    private fun refreshTokensBalanceWithBuffer(accounts: List<Account>):
+            Single<List<Triple<String, String, List<AccountToken>>>> =
+        Observable.range(START, accounts.size)
+            .map { accounts[it] }
+            .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
+            .flatMapSingle { refreshTokensBalance(it) }
+            .toList()
+            .map { balances ->
+                mutableListOf<Triple<String, String, List<AccountToken>>>().apply { balances.forEach { addAll(it) } }
+            }
+
+    private fun refreshTokensBalance(accounts: List<Account>): Single<List<Triple<String, String, List<AccountToken>>>> =
+        Observable.range(START, accounts.size)
+            .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
+            .toList()
 
     override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(
@@ -237,25 +280,14 @@ class TransactionRepositoryImpl(
 
     /**
      *
-     * return statement: Single<Pair<String, List<Pair<String, BigDecimal>>>>
-     *                   Single<Triple<Network, ValuePrivateKey, List<ContractAddress, BalanceOnContract>>>>
+     * return statement: Single<Triple<String, String, List<AccountToken>>>
+     *                   Single<Triple<Network, AccountPrivateKey, List<AccountToken>>>>
      *
      */
 
-    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<Pair<String, BigDecimal>>>> =
-        tokenManager.loadTokens(account.network.short).let { tokens ->
-            return Observable.range(START, tokens.size)
-                .flatMap {
-                    blockchainRepository.refreshTokenBalance(
-                        account.privateKey,
-                        account.network.short,
-                        tokens[it].address,
-                        account.address
-                    )
-                }
-                .toList()
-                .map { Triple(account.network.short, account.privateKey, it) }
-        }
+    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<AccountToken>>> =
+        tokenManager.refreshTokenBalance(account).map { Triple(account.network.short, account.privateKey, it) }
+
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
     override fun getAccountByAddress(address: String): Account? =
@@ -271,5 +303,7 @@ class TransactionRepositoryImpl(
         private const val PENDING_NETWORK_LIMIT = 2
         private const val START = 0
         private const val EUR_CURRENCY = "eur"
+        private const val ETHERSCAN_REQUEST_TIMESPAN = 1L
+        private const val ETHERSCAN_REQUEST_PACKAGE = 5
     }
 }

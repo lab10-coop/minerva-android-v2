@@ -13,12 +13,6 @@ import java.math.BigInteger
 
 interface BlockchainRegularAccountRepository {
     fun refreshBalances(networkAddress: List<Pair<String, String>>): Single<List<Pair<String, BigDecimal>>>
-    fun refreshTokenBalance(
-        privateKey: String,
-        network: String,
-        contractAddress: String,
-        safeAccountAddress: String = String.Empty
-    ): Observable<Pair<String, BigDecimal>>
 
     fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal
     fun transferNativeCoin(
@@ -28,6 +22,7 @@ interface BlockchainRegularAccountRepository {
     ): Single<PendingTransaction>
 
     fun toGwei(amount: BigDecimal): BigDecimal
+    fun fromGwei(amount: BigDecimal): BigDecimal
     fun transferERC20Token(network: String, payload: TransactionPayload): Completable
     fun reverseResolveENS(ensAddress: String): Single<String>
     fun resolveENS(ensName: String): Single<String>
@@ -52,4 +47,10 @@ interface BlockchainRegularAccountRepository {
     fun fromWei(value: BigDecimal): BigDecimal
     fun toEther(value: BigDecimal): BigDecimal
     fun sendTransaction(network: String, transactionPayload: TransactionPayload): Single<String>
+    fun refreshTokenBalance(
+        privateKey: String,
+        network: String,
+        contractAddress: String,
+        safeAccountAddress: String
+    ): Observable<Pair<String, BigDecimal>>
 }

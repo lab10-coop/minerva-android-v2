@@ -173,20 +173,6 @@ class BlockchainRegularAccountRepositoryImpl(
         }
     }
 
-    override fun refreshTokenBalance(
-        privateKey: String,
-        network: String,
-        contractAddress: String,
-        safeAccountAddress: String
-    ): Observable<Pair<String, BigDecimal>> =
-        if (safeAccountAddress.isEmpty()) getERC20Balance(
-            contractAddress,
-            network,
-            privateKey,
-            Credentials.create(privateKey).address
-        )
-        else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
-
     override fun reverseResolveENS(ensAddress: String): Single<String> =
         Single.just(ensAddress).map { ensResolver.reverseResolve(it) }
 
@@ -239,9 +225,26 @@ class BlockchainRegularAccountRepositoryImpl(
         return calculateTransactionCosts(network, gasLimit, gasPrice)
     }
 
+    override fun refreshTokenBalance(
+        privateKey: String,
+        network: String,
+        contractAddress: String,
+        safeAccountAddress: String
+    ): Observable<Pair<String, BigDecimal>> =
+        if (safeAccountAddress.isEmpty()) getERC20Balance(
+            contractAddress,
+            network,
+            privateKey,
+            Credentials.create(privateKey).address
+        )
+        else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
+
+
     override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
     override fun fromWei(value: BigDecimal): BigDecimal = fromWei(value, Convert.Unit.GWEI)
     override fun toEther(value: BigDecimal): BigDecimal = fromWei(value, Convert.Unit.ETHER)
+
+    override fun fromGwei(amount: BigDecimal): BigDecimal = fromWei(amount, Convert.Unit.ETHER)
 
     override fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal =
         toEther((gasPrice * gasLimit)).setScale(SCALE, RoundingMode.HALF_EVEN)
@@ -272,11 +275,10 @@ class BlockchainRegularAccountRepositoryImpl(
         getChainId(network)
             .flatMap {
                 loadERC20(privateKey, network, contractAddress, it).balanceOf(address).flowable()
-                    .map { balance -> Pair(contractAddress, fromWei(balance.toString(), Convert.Unit.ETHER)) }
+                    .map { balance -> Pair(contractAddress, balance.toBigDecimal()) }
             }.toObservable()
 
-    private fun getChainId(network: String): Flowable<NetVersion> =
-        web3j.value(network).netVersion().flowable()
+    private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
 
     private fun getTransaction(
         from: String,

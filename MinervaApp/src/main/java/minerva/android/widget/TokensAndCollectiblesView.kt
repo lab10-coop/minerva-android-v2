@@ -79,10 +79,7 @@ class TokensAndCollectiblesView(
     private fun initTokensList() {
         binding.apply {
             tokensContainer.removeAllViews()
-            account.accountTokens
-                    //TODO the order should be done by fiat balance, but now fiat balance is not supported
-                .sortedByDescending { it.balance }
-                .forEachIndexed { index, _ ->
+            account.accountTokens.forEachIndexed { index, _ ->
                     tokensContainer.addView(TokenView(context).apply {
                         initView(account, callback, index)
                     })

@@ -3,6 +3,7 @@ package minerva.android.apiProvider.api
 import io.reactivex.Single
 import minerva.android.apiProvider.api.ServicesApi.Companion.APPLICATION_JSON
 import minerva.android.apiProvider.api.ServicesApi.Companion.CONTENT_TYPE
+import minerva.android.apiProvider.model.*
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
@@ -24,16 +25,16 @@ interface CryptoApi {
     ): Single<GasPrices>
 
     @GET
-    fun getTokenRawData(
-        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Url url: String
-    ) : Single<List<TokenIconDetails>>
+    fun getTokenRawData(@Url url: String) : Single<List<TokenIconDetails>>
 
     @GET
-    fun getTokenLastCommitRawData(
-        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Url url: String
-    ) : Single<List<CommitElement>>
+    fun getTokenLastCommitRawData(@Url url: String) : Single<List<CommitElement>>
+
+    @GET
+    fun getTokenBalance(@Url url: String) : Single<TokenBalanceResponse>
+
+    @GET
+    fun getTokenTx(@Url url: String) : Single<TokenTxResponse>
 
     companion object {
         private const val IDS = "ids"

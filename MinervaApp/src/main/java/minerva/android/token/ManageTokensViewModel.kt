@@ -26,7 +26,7 @@ class ManageTokensViewModel(
     }
 
     fun loadTokens() = account.network.let {
-        listOf(NativeToken(it.chainId, it.full, it.token, logoRes = getMainTokenIconRes(it.short))) + tokenManager.loadTokens(it.short)
+        listOf(NativeToken(it.chainId, it.full, it.token, logoRes = getMainTokenIconRes(it.short))) + tokenManager.loadCurrentTokens(it.short)
     }
 
     fun getTokenVisibilitySettings(assetAddress: String): Boolean =

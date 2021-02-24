@@ -51,24 +51,17 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager creates new regular account`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
-        whenever(
-            cryptographyRepository.calculateDerivedKeys(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(
-            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
-        )
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1")))
+
         val test = manager.createRegularAccount(Network()).test()
         test.assertNoErrors()
         manager.loadAccount(1).apply {
-            id shouldBeEqualTo 4
+            id shouldBeEqualTo 2
             publicKey shouldBeEqualTo "publicKey2"
             privateKey shouldBeEqualTo "privateKey2"
-            address shouldBeEqualTo "address"
+            address shouldBeEqualTo "address1"
         }
     }
 
@@ -103,50 +96,36 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager removes correct empty value`() {
         val account = Account(2)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(
-            cryptographyRepository.calculateDerivedKeys(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(
-            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
         manager.removeAccount(account).test()
         val removedValue = manager.loadAccount(0)
         val notRemovedValue = manager.loadAccount(1)
-        removedValue.id shouldBeEqualTo 2
+        removedValue.id shouldBeEqualTo 1
         removedValue.isDeleted shouldBeEqualTo false
-        notRemovedValue.id shouldBeEqualTo 4
+        notRemovedValue.id shouldBeEqualTo 2
         notRemovedValue.isDeleted shouldBeEqualTo false
     }
 
     @Test
     fun `Check that wallet manager removes correct not empty value`() {
-        val account = Account(2)
+        val account = Account(1)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(
-            cryptographyRepository.calculateDerivedKeys(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(
-            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
-        )
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey1", "privateKey1", "address1")))
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
         doNothing().whenever(walletConfigManager).initWalletConfig()
+
         manager.removeAccount(account).test()
         val removedValue = manager.loadAccount(0)
         val notRemovedValue = manager.loadAccount(1)
-        removedValue.id shouldBeEqualTo 2
+        removedValue.id shouldBeEqualTo 1
         removedValue.isDeleted shouldBeEqualTo false
-        notRemovedValue.id shouldBeEqualTo 4
+        notRemovedValue.id shouldBeEqualTo 2
         notRemovedValue.isDeleted shouldBeEqualTo false
     }
 
@@ -163,19 +142,19 @@ class AccountManagerTest : RxTest() {
                 any()
             )
         ).thenReturn(
-            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
+            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
         manager.removeAccount(account).test()
         manager.removeAccount(account2).test()
         manager.loadAccount(2).apply {
-            id shouldBeEqualTo 5
+            id shouldBeEqualTo 3
             publicKey shouldBeEqualTo "publicKey3"
             isDeleted shouldBeEqualTo false
         }
         manager.loadAccount(3).apply {
-            id shouldBeEqualTo 6
+            id shouldBeEqualTo 4
             publicKey shouldBeEqualTo "publicKey4"
             isDeleted shouldBeEqualTo false
         }
@@ -186,28 +165,21 @@ class AccountManagerTest : RxTest() {
         val account = Account(5)
         val account2 = Account(6)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(
-            cryptographyRepository.calculateDerivedKeys(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(
-            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
-        )
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1")))
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address")
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
         doNothing().whenever(walletConfigManager).initWalletConfig()
+
         manager.removeAccount(account).test()
         manager.removeAccount(account2).test()
         manager.loadAccount(2).apply {
-            id shouldBeEqualTo 5
+            id shouldBeEqualTo 3
             publicKey shouldBeEqualTo "publicKey3"
             isDeleted shouldBeEqualTo false
         }
         manager.loadAccount(3).apply {
-            id shouldBeEqualTo 6
+            id shouldBeEqualTo 4
             publicKey shouldBeEqualTo "publicKey4"
             isDeleted shouldBeEqualTo false
         }

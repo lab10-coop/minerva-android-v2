@@ -3,25 +3,27 @@ package minerva.android.walletmanager.repository
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.Price
+import minerva.android.apiProvider.model.TokenBalanceResponse
 import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
-import minerva.android.walletmanager.utils.RxTest
+import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.wallet.MasterSeed
@@ -29,6 +31,7 @@ import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
@@ -58,24 +61,20 @@ class TransactionRepositoryTest : RxTest() {
     @Before
     fun initialize() {
         NetworkManager.initialize(DataProvider.networks)
-        whenever(walletConfigManager.getWalletConfig()) doReturn DataProvider.walletConfig
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 
     @Test
     fun `refresh balances test success`() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
-            .thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
-        whenever(
-            cryptoApi.getMarkets(
-                any(),
-                any()
-            )
-        ).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.0))))
+            .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.0))))
+
         repository.refreshBalances().test()
             .assertComplete()
             .assertValue {
-                it["address"]?.cryptoBalance == BigDecimal.ONE
+                it["address1"]?.cryptoBalance == BigDecimal.ONE
             }
     }
 
@@ -96,12 +95,12 @@ class TransactionRepositoryTest : RxTest() {
     fun `refresh balances test when crypto api returns error success`() {
         val error = Throwable()
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
-            .thenReturn(Single.just(listOf(Pair("address", BigDecimal.ONE))))
+            .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
         repository.refreshBalances().test()
             .assertComplete()
             .assertValue {
-                it["address"]?.cryptoBalance == BigDecimal.ONE
+                it["address1"]?.cryptoBalance == BigDecimal.ONE
             }
     }
 
@@ -252,55 +251,6 @@ class TransactionRepositoryTest : RxTest() {
         )
             .test()
             .assertError(error)
-    }
-
-    @Test
-    fun `get assets balances complete test`() {
-        NetworkManager.initialize(DataProvider.networks)
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
-        whenever(
-            blockchainRegularAccountRepository.refreshTokenBalance(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(
-            Observable.just(Pair("privateKey1", BigDecimal.TEN))
-        )
-        repository.apply {
-            refreshTokenBalance()
-                .test()
-                .assertComplete()
-        }
-    }
-
-    @Test
-    fun `get asset balances when values are empty and there are no assets needed test`() {
-        val error = Throwable()
-        whenever(walletConfigManager.getWalletConfig()) doReturn WalletConfig(
-            0,
-            accounts = emptyList()
-        )
-        whenever(
-            blockchainRegularAccountRepository.refreshTokenBalance(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ) doReturn Observable.error(
-            error
-        )
-        whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed())
-        repository.apply {
-            refreshTokenBalance()
-                .test()
-                .assertComplete()
-                .assertValue {
-                    it.isEmpty()
-                }
-        }
     }
 
     @Test
@@ -777,5 +727,39 @@ class TransactionRepositoryTest : RxTest() {
         repository.sendTransaction("network", Transaction(address = "address"))
             .test()
             .assertError(error)
+    }
+
+    @Test
+    fun `Checking refreshing token balances`() {
+        val tokenBalanceResponse = TokenBalanceResponse("OK", listOf(), "C00KiE!")
+        val accountTokens = listOf(
+            AccountToken(ERC20Token(3), BigDecimal.TEN)
+        )
+
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(null, DataProvider.walletConfig)
+        whenever(cryptoApi.getTokenBalance(any())).thenReturn(Single.just(tokenBalanceResponse))
+        whenever(tokenManager.prepareCurrentTokenList(any(), any())).thenReturn(accountTokens)
+        whenever(tokenManager.updateTokensFromLocalStorage(any())).thenReturn(Pair(false, mapOf()))
+        whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(listOf()))
+        whenever(tokenManager.updateTokens(any(), any())).thenReturn(
+            Single.just(mapOf()),
+            Single.just(mapOf()),
+            Single.error(Throwable("error")),
+            Single.just(mapOf()),
+            Single.error(Throwable("error"))
+        )
+        whenever(tokenManager.saveTokens(any())).thenReturn(
+            Completable.complete(),
+            Completable.complete(),
+            Completable.complete(),
+            Completable.error(Throwable("error")),
+            Completable.error(Throwable("error"))
+        )
+
+        repository.refreshTokenBalance().test().assertErrorMessage(NotInitializedWalletConfigThrowable().message)
+        repository.refreshTokenBalance().test().assertComplete()
+        repository.refreshTokenBalance().test().assertComplete()
+        repository.refreshTokenBalance().test().assertComplete()
+        repository.refreshTokenBalance().test().assertComplete()
     }
 }

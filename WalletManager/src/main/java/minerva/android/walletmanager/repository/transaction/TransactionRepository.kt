@@ -20,6 +20,10 @@ import java.math.BigInteger
 interface TransactionRepository {
     val masterSeed: MasterSeed
     fun refreshBalances(): Single<HashMap<String, Balance>>
+
+    /**
+     * return statement: Map<AccountPrivateKey, List<AccountToken>>
+     */
     fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable
