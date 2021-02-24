@@ -12,11 +12,15 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.exception.InvalidAccountException
+import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.Topic
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.walletconnect.*
 import timber.log.Timber
 
@@ -78,7 +82,7 @@ class WalletConnectViewModel(
                     )
             }
         } else {
-            _viewStateLiveData.value = OnError(InvalidAccountException())
+            _viewStateLiveData.value = OnError(InvalidAccountThrowable())
         }
     }
 
@@ -113,14 +117,15 @@ class WalletConnectViewModel(
 
     fun approveSession(meta: WalletConnectPeerMeta) {
         launchDisposable {
-            repository.approveSession(listOf(account.address), account.network.chainId, topic.peerId, getDapp(meta))
+            val chainId = account.network.chainId
+            repository.approveSession(listOf(account.address), chainId, topic.peerId, getDapp(meta, chainId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onError = { OnError(it) })
         }
     }
 
-    private fun getDapp(meta: WalletConnectPeerMeta) = DappSession(
+    private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int) = DappSession(
         account.address,
         currentSession.topic,
         currentSession.version,
@@ -132,7 +137,8 @@ class WalletConnectViewModel(
         topic.remotePeerId,
         requestedNetwork,
         account.name,
-        account.network.short
+        account.network.short,
+        chainId
     )
 
     private fun getIcon(icons: List<String>) =

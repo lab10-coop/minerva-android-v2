@@ -5,8 +5,8 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.walletConnect.client.WCClient
 
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.WalletConnectSession
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -33,4 +33,5 @@ interface WalletConnectRepository {
     fun getDappSessionById(peerId: String): Single<DappSession>
     fun approveRequest(peerId: String, privateKey: String)
     fun rejectRequest(peerId: String)
+    fun approveTransactionRequest(peerId: String, message: String)
 }

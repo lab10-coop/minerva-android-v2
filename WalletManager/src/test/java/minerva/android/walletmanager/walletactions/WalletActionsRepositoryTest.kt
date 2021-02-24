@@ -15,8 +15,8 @@ import minerva.android.configProvider.model.walletActions.WalletActionsConfigPay
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.MasterSeed
-import minerva.android.walletmanager.model.WalletAction
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.walletActions.WalletActionsRepositoryImpl
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 import org.amshove.kluent.mock

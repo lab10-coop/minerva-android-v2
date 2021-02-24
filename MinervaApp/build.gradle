@@ -57,8 +57,8 @@ android {
     productFlavors {
         flavorDimensions 'enviroment'
         staging {
-            versionCode 17
-            versionName "1.0.17"
+            versionCode 18
+            versionName "1.0.18"
             dimension 'enviroment'
             applicationIdSuffix ".staging"
             versionNameSuffix '-staging'
@@ -84,6 +84,10 @@ android {
 
     dexOptions {
         javaMaxHeapSize "4g"
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 

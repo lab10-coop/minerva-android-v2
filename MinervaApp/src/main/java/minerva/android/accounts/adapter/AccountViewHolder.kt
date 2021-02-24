@@ -18,13 +18,12 @@ import minerva.android.databinding.AccountListRowBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.token.TokenView
 import minerva.android.widget.TokensAndCollectiblesView
 import minerva.android.widget.repository.getNetworkIcon
 
-class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) :
-    TokenView.TokenViewCallback,
+class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
     RecyclerView.ViewHolder(view) {
 
     private var binding = AccountListRowBinding.bind(view)
@@ -190,7 +189,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun isCreatingSafeAccountAvailable(account: Account) = !isSafeAccount(account) && account.network.isSafeAccountAvailable
+    private fun isCreatingSafeAccountAvailable(account: Account) =
+        !isSafeAccount(account) && account.network.isSafeAccountAvailable
 
     private fun isExportSafeAccountAvailable(account: Account) = !isSafeAccount(account)
 

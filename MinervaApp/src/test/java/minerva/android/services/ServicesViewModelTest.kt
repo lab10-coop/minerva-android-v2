@@ -8,9 +8,9 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Before

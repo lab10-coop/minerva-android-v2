@@ -14,6 +14,11 @@ import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.CryptoUtils
@@ -192,9 +197,7 @@ class AccountManagerImpl(
 
     private fun areFundsOnValue(balance: BigDecimal, accountTokens: List<AccountToken>): Boolean {
         accountTokens.forEach {
-            if (blockchainRepository.toGwei(it.balance)
-                    .toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
-            ) return true
+            if (blockchainRepository.toGwei(it.balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
         return blockchainRepository.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
     }

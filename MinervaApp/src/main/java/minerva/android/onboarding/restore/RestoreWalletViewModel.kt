@@ -8,7 +8,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import timber.log.Timber
 import java.util.*

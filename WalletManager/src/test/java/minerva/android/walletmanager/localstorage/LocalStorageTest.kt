@@ -3,8 +3,8 @@ package minerva.android.walletmanager.localstorage
 import android.content.SharedPreferences
 import io.mockk.*
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.walletmanager.model.Recipient
-import minerva.android.walletmanager.model.TokenVisibilitySettings
+import minerva.android.walletmanager.model.transactions.Recipient
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.storage.LocalStorageImpl
 import org.junit.Test
 

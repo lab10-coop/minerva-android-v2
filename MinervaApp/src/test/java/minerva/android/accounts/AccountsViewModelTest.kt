@@ -12,7 +12,11 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.transactions.Balance
+import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
@@ -106,6 +110,10 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `refresh balances success`() {
+        whenever(walletConnectRepository.getSessionsFlowable())
+            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshBalances()).thenReturn(
             Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
         )
@@ -120,6 +128,10 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `refresh balances error`() {
         val error = Throwable()
+        whenever(walletConnectRepository.getSessionsFlowable())
+            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshBalances()).thenReturn(Single.error(error))
         viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
         viewModel.refreshBalances()
@@ -310,7 +322,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `Check if calling getTokenVisibility() method is calling the method` () {
+    fun `Check if calling getTokenVisibility() method is calling the method`() {
         viewModel.tokenVisibilitySettings = mock()
         viewModel.tokenVisibilitySettings.let { settings ->
             whenever(settings.getTokenVisibility(any(), any())).thenReturn(false)

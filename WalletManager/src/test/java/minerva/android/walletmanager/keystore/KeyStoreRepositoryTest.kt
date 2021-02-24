@@ -3,7 +3,7 @@ package minerva.android.walletmanager.keystore
 import android.content.SharedPreferences
 import android.util.Base64
 import io.mockk.*
-import minerva.android.walletmanager.model.MasterSeed
+import minerva.android.walletmanager.model.wallet.MasterSeed
 import org.junit.Before
 import org.junit.Test
 import javax.crypto.Cipher

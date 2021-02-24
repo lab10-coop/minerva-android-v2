@@ -7,7 +7,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.NoAddressPageFragmentThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.identity.IdentityManager
-import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.wrapped.WrappedFragmentType
 
 class AddressViewModel(private val identityManager: IdentityManager, private val accountManager: AccountManager) :

@@ -1,17 +1,15 @@
 package minerva.android.services
 
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
 import minerva.android.utils.AlertDialogHandler
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class ServicesFragment : MinervaPrimitiveListFragment() {
 

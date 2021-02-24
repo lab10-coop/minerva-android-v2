@@ -21,7 +21,7 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
-import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.ADDRESS_1
 import minerva.android.walletmanager.model.defs.IdentityField.Companion.ADDRESS_2
@@ -37,8 +37,8 @@ import minerva.android.walletmanager.utils.AddressConverter
 import minerva.android.walletmanager.utils.AddressType
 import minerva.android.widget.LetterLogo
 import minerva.android.widget.ProfileImage
-import minerva.android.widget.ProfileImageDialog
-import minerva.android.widget.ProfileImageDialog.Companion.TAKE_PHOTO_REQUEST
+import minerva.android.widget.dialog.ProfileImageDialog
+import minerva.android.widget.dialog.ProfileImageDialog.Companion.TAKE_PHOTO_REQUEST
 import minerva.android.widget.dialog.ConfirmDataDialog
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import minerva.android.wrapped.WrappedActivity.Companion.POSITION

@@ -16,7 +16,7 @@ import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.QrCode
 import minerva.android.walletmanager.model.ServiceQrCode
-import minerva.android.walletmanager.model.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED

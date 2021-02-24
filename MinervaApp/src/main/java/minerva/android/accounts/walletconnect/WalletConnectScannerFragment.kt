@@ -13,9 +13,9 @@ import minerva.android.extension.invisible
 import minerva.android.extension.margin
 import minerva.android.extension.visible
 import minerva.android.services.login.scanner.BaseScannerFragment
-import minerva.android.walletmanager.exception.InvalidAccountException
-import minerva.android.walletmanager.model.WalletConnectPeerMeta
-import minerva.android.widget.DappConfirmationDialog
+import minerva.android.walletmanager.exception.InvalidAccountThrowable
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.widget.dialog.walletconnect.DappConfirmationDialog
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
@@ -68,7 +68,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     private fun getErrorMessage(it: OnError) =
-        if (it.error is InvalidAccountException) {
+        if (it.error is InvalidAccountThrowable) {
             getString(R.string.invalid_account_message)
         } else {
             it.error.message
@@ -127,14 +127,9 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
 
     private fun DappConfirmationDialog.handleNetwork(isNetworkDefined: Boolean) {
         when {
-            !isNetworkDefined && !viewModel.shouldChangeNetwork -> setNotDefinedNetwork()
-            !isNetworkDefined && viewModel.shouldChangeNetwork -> setNotDefinedNetworkWarning()
-            isNetworkDefined && viewModel.shouldChangeNetwork -> setWrongNetworkMessage(
-                getString(
-                    R.string.wrong_network_message,
-                    viewModel.requestedNetwork
-                )
-            )
+            !isNetworkDefined -> setNotDefinedNetworkWarning()
+            isNetworkDefined && viewModel.shouldChangeNetwork ->
+                setWrongNetworkMessage(getString(R.string.wrong_network_message, viewModel.requestedNetwork))
         }
     }
 

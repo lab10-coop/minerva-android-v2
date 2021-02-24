@@ -2,7 +2,7 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.kotlinUtils.Mapper
-import minerva.android.walletmanager.model.Transaction
+import minerva.android.walletmanager.model.transactions.Transaction
 
 object TransactionToTransactionPayloadMapper : Mapper<Transaction, TransactionPayload> {
     override fun map(input: Transaction): TransactionPayload =
@@ -14,7 +14,8 @@ object TransactionToTransactionPayloadMapper : Mapper<Transaction, TransactionPa
                 amount,
                 gasPrice,
                 gasLimit,
-                contractAddress
+                contractAddress,
+                data
             )
         }
 }

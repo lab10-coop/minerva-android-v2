@@ -9,9 +9,9 @@ import minerva.android.integration.ThirdPartyRequestViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.CredentialRequest
-import minerva.android.walletmanager.model.Payment
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
+import minerva.android.walletmanager.model.transactions.Payment
 import minerva.android.walletmanager.model.state.ConnectionRequest
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository

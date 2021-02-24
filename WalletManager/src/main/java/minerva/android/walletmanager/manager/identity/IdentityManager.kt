@@ -4,9 +4,9 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.Manager
-import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
-import minerva.android.walletmanager.model.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 
 interface IdentityManager : Manager {
     fun loadIdentity(position: Int, defaultName: String = String.Empty): Identity

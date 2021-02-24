@@ -10,9 +10,9 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.inBounds
-import minerva.android.walletmanager.model.Account
-import minerva.android.walletmanager.model.AccountToken
-import minerva.android.walletmanager.model.Balance
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.transactions.Balance
 import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
@@ -28,8 +28,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun getItemCount(): Int = activeAccounts.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
-        AccountViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder = AccountViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
             parent
         )
@@ -46,8 +45,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     fun updateList(data: List<Account>, areMainNetsEnabled: Boolean) {
         rawAccounts = data
-        activeAccounts =
-            data.filter { !it.isDeleted }.filter { it.network.testNet == !areMainNetsEnabled }
+        activeAccounts = data.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
         openAccounts = activeAccounts.map { false }.toMutableList()
         notifyDataSetChanged()
     }
@@ -67,7 +65,6 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
             .forEachIndexed { index, account ->
                 accountTokenBalances[account.privateKey]?.let { accountsList ->
                     account.accountTokens = accountsList
-                        .filter { it.balance > NO_FUNDS }
                         .filter {
                             listener.isTokenVisible(account.address, it.token.address)
                                 ?.let { visibility ->
@@ -123,7 +120,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun onWalletConnect(index: Int) = listener.onWalletConnect(index)
 
     override fun onManageTokens(index: Int) = listener.onManageTokens(index)
-    
+
     override fun onExportPrivateKey(account: Account) = listener.onExportPrivateKey(account)
 
     override fun onOpenOrClose(index: Int, isOpen: Boolean) {

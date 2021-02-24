@@ -8,10 +8,10 @@ import minerva.android.databinding.RecyclerViewLayoutBinding
 import minerva.android.kotlinUtils.Empty
 import minerva.android.main.base.BaseFragment
 import minerva.android.services.listener.MinervaPrimitiveClickListener
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
 
 abstract class MinervaPrimitiveListFragment : BaseFragment(R.layout.recycler_view_layout), MinervaPrimitiveClickListener {
 

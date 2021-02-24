@@ -14,10 +14,10 @@ import minerva.android.walletmanager.exception.NoIdentityToRemoveThrowable
 import minerva.android.walletmanager.exception.NoLoggedInIdentityThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
-import minerva.android.walletmanager.model.Identity
-import minerva.android.walletmanager.model.WalletConfig
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 import minerva.android.walletmanager.storage.LocalStorage
 

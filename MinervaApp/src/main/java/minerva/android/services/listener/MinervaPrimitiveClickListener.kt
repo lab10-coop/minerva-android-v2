@@ -1,6 +1,6 @@
 package minerva.android.services.listener
 
-import minerva.android.walletmanager.model.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 
 interface MinervaPrimitiveClickListener {
     fun onRemoved(minervaPrimitive: MinervaPrimitive)

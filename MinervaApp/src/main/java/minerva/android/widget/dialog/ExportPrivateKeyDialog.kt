@@ -10,7 +10,7 @@ import android.view.Window
 import minerva.android.R
 import minerva.android.databinding.ExportPrivateKeyDialogBinding
 import minerva.android.extension.toggleVisibleOrGone
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton
 

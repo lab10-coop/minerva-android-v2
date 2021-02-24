@@ -2,7 +2,7 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.kotlinUtils.Mapper
-import minerva.android.walletmanager.model.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 
 object CredentialsPayloadToCredentials : Mapper<List<CredentialsPayload>, List<Credential>> {
     override fun map(input: List<CredentialsPayload>): List<Credential> =

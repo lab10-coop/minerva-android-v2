@@ -6,7 +6,7 @@ import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.WalletActionItemListRowBinding
 import minerva.android.kotlinUtils.DateUtils
-import minerva.android.walletmanager.model.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.UNDEFINED
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ACCEPTED

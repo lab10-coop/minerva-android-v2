@@ -3,13 +3,27 @@ package minerva.android.walletmanager.repository.transaction
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import minerva.android.walletmanager.model.*
+import minerva.android.blockchainprovider.model.PendingTransaction
+import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.kotlinUtils.Empty
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.transactions.Balance
+import minerva.android.walletmanager.model.transactions.Recipient
+import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.wallet.MasterSeed
 import java.math.BigDecimal
 import java.math.BigInteger
 
 interface TransactionRepository {
     val masterSeed: MasterSeed
     fun refreshBalances(): Single<HashMap<String, Balance>>
+
+    /**
+     * return statement: Map<AccountPrivateKey, List<AccountToken>>
+     */
     fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable
@@ -28,15 +42,18 @@ interface TransactionRepository {
     fun getTransactions(): Single<List<PendingAccount>>
     fun getTransactionCosts(
         network: String,
-        assetIndex: Int,
+        tokenIndex: Int,
         from: String,
         to: String,
-        amount: BigDecimal
+        amount: BigDecimal,
+        chainId: Int,
+        contractData: String = String.Empty
     ): Single<TransactionCost>
 
     fun isAddressValid(address: String): Boolean
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun updateTokenIcons(): Completable
-
-    fun getMnemonic(): String
+    fun getEurRate(chainId: Int): Single<Double>
+    fun toEther(value: BigDecimal): BigDecimal
+    fun sendTransaction(network: String, transaction: Transaction): Single<String>
 }

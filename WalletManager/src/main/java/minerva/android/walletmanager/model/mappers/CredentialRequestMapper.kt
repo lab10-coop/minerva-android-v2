@@ -2,9 +2,9 @@ package minerva.android.walletmanager.model.mappers
 
 import com.google.gson.Gson
 import minerva.android.kotlinUtils.Mapper
-import minerva.android.walletmanager.model.CredentialRequest
-import minerva.android.walletmanager.model.CredentialRequirements
-import minerva.android.walletmanager.model.RequestedService
+import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
+import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequirements
+import minerva.android.walletmanager.model.minervaprimitives.service.RequestedService
 
 object CredentialRequestMapper : Mapper<Map<String, Any?>, CredentialRequest> {
     override fun map(input: Map<String, Any?>): CredentialRequest {

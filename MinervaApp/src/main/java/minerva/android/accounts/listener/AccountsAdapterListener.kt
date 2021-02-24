@@ -1,6 +1,6 @@
 package minerva.android.accounts.listener
 
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 
 interface AccountsAdapterListener {
     fun onSendAccountClicked(account: Account)

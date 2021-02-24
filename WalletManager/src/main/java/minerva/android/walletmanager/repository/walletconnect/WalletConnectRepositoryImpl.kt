@@ -12,6 +12,7 @@ import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
+import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
@@ -19,11 +20,12 @@ import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSign
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.Topic
-import minerva.android.walletmanager.model.WalletConnectSession
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.Topic
+import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.model.mappers.*
 import timber.log.Timber
+import java.math.BigDecimal
 import java.util.concurrent.ConcurrentHashMap
 
 class WalletConnectRepositoryImpl(
@@ -32,51 +34,22 @@ class WalletConnectRepositoryImpl(
     private var wcClient: WCClient = WCClient(),
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
-
     private var currentRequestId: Long = Long.InvalidValue
     internal lateinit var currentEthMessage: WCEthereumSignMessage
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
-    override val connectionStatusFlowable: Flowable<WalletConnectStatus>
-        get() = status.toFlowable(BackpressureStrategy.BUFFER)
-
-    override val isClientMapEmpty: Boolean
-        get() = clientMap.isEmpty()
-
-    override val walletConnectClients: ConcurrentHashMap<String, WCClient>
-        get() = clientMap
-
+    override val connectionStatusFlowable: Flowable<WalletConnectStatus> get() = status.toFlowable(BackpressureStrategy.BUFFER)
+    override val isClientMapEmpty: Boolean get() = clientMap.isEmpty()
+    override val walletConnectClients: ConcurrentHashMap<String, WCClient> get() = clientMap
     private var disposable: Disposable? = null
-
     private val dappDao = minervaDatabase.dappDao()
-
-    override fun saveDappSession(dappSession: DappSession): Completable =
-        dappDao.insert(DappSessionToEntityMapper.map(dappSession))
-
-    override fun deleteDappSession(peerId: String): Completable =
-        dappDao.delete(peerId)
-
-    override fun getSessions(): Single<List<DappSession>> =
-        dappDao.getAll().firstOrError().map { EntitiesToDappSessionsMapper.map(it) }
-
-    override fun getSessionsFlowable(): Flowable<List<DappSession>> =
-        dappDao.getAll().map { EntitiesToDappSessionsMapper.map(it) }
-
-    override fun getDappSessionById(peerId: String): Single<DappSession> =
-        dappDao.getDapSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
 
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?) {
         wcClient = WCClient()
         with(wcClient) {
-
             onWCOpen = { peerId -> clientMap[peerId] = this }
-
             onSessionRequest = { remotePeerId, meta, chainId, peerId ->
                 status.onNext(
-                    OnSessionRequest(
-                        WCPeerToWalletConnectPeerMetaMapper.map(meta),
-                        chainId,
-                        Topic(peerId, remotePeerId)
-                    )
+                    OnSessionRequest(WCPeerToWalletConnectPeerMetaMapper.map(meta), chainId, Topic(peerId, remotePeerId))
                 )
             }
             onFailure = { error, peerId ->
@@ -98,6 +71,16 @@ class WalletConnectRepositoryImpl(
                 status.onNext(OnEthSign(getUserReadableData(message), peerId))
             }
 
+            onEthSendTransaction = { id, transaction, peerId ->
+                currentRequestId = id
+                status.onNext(
+                    OnEthSendTransaction(
+                        WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
+                        peerId
+                    )
+                )
+            }
+
             connect(
                 WalletConnectSessionMapper.map(session),
                 peerMeta = WCPeerMeta(),
@@ -106,6 +89,21 @@ class WalletConnectRepositoryImpl(
             )
         }
     }
+
+    override fun saveDappSession(dappSession: DappSession): Completable =
+        dappDao.insert(DappSessionToEntityMapper.map(dappSession))
+
+    override fun deleteDappSession(peerId: String): Completable =
+        dappDao.delete(peerId)
+
+    override fun getSessions(): Single<List<DappSession>> =
+        dappDao.getAll().firstOrError().map { EntitiesToDappSessionsMapper.map(it) }
+
+    override fun getSessionsFlowable(): Flowable<List<DappSession>> =
+        dappDao.getAll().map { EntitiesToDappSessionsMapper.map(it) }
+
+    override fun getDappSessionById(peerId: String): Single<DappSession> =
+        dappDao.getDapSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
 
     private fun getUserReadableData(message: WCEthereumSignMessage) =
         when (message.type) {
@@ -139,6 +137,10 @@ class WalletConnectRepositoryImpl(
 
     override fun approveRequest(peerId: String, privateKey: String) {
         clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
+    }
+
+    override fun approveTransactionRequest(peerId: String, message: String) {
+        clientMap[peerId]?.approveRequest(currentRequestId, message)
     }
 
     private fun signData(privateKey: String) = if (currentEthMessage.type == TYPED_MESSAGE) {

@@ -11,10 +11,10 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.DappSession
-import minerva.android.walletmanager.model.MinervaPrimitive
-import minerva.android.walletmanager.model.Service
-import minerva.android.walletmanager.model.WalletAction
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType

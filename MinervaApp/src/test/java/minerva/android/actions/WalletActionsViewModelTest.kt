@@ -7,8 +7,8 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletActions.WalletActionsViewModel
-import minerva.android.walletmanager.model.WalletAction
-import minerva.android.walletmanager.model.WalletActionClustered
+import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletActionClustered
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.junit.Test
 

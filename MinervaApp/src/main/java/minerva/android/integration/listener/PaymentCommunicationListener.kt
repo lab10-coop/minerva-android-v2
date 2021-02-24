@@ -1,7 +1,7 @@
 package minerva.android.integration.listener
 
-import minerva.android.walletmanager.model.Credential
-import minerva.android.walletmanager.model.CredentialRequest
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
 
 interface PaymentCommunicationListener {
     fun showConfirmTransactionScreen()

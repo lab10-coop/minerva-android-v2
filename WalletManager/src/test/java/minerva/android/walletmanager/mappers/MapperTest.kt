@@ -1,10 +1,15 @@
 package minerva.android.walletmanager.mappers
 
+import com.google.gson.annotations.SerializedName
+import minerva.android.apiProvider.model.GasPrices
+import minerva.android.apiProvider.model.TokenBalance
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
 import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.WalletConfigTestValues.accounts
@@ -13,8 +18,15 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identities
 import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
 import minerva.android.walletmanager.model.WalletConfigTestValues.networks
 import minerva.android.walletmanager.model.WalletConfigTestValues.tokens
+import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.model.mappers.*
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -272,9 +284,17 @@ class MapperTest {
     @Test
     fun `map transaction cost payload to transaction cost test`() {
         val input = TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
+        val response = TransactionCostPayloadToTransactionCost.map(input, GasPrices("code", TransactionSpeed()), 1) { it }
+        response.gasLimit shouldBeEqualTo input.gasLimit
+        response.gasPrice shouldBeEqualTo input.gasPrice
+        response.cost shouldBeEqualTo input.cost
+        response.txSpeeds[0].value shouldBeEqualTo BigDecimal.ZERO
+    }
 
-        val response = TransactionCostPayloadToTransactionCost.map(input)
-
+    @Test
+    fun `map transaction cost payload to transaction cost test when gas prices is null`() {
+        val input = TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
+        val response = TransactionCostPayloadToTransactionCost.map(input, null, 1) { it }
         response.gasLimit shouldBeEqualTo input.gasLimit
         response.gasPrice shouldBeEqualTo input.gasPrice
         response.cost shouldBeEqualTo input.cost
@@ -357,5 +377,21 @@ class MapperTest {
                     token == "token" &&
                     identityFields == "touring"
         }
+    }
+
+    @Test
+    fun `map TokenBalance to AccountToken`() {
+        NetworkManager.initialize(DataProvider.networks)
+        val tokenBalance = TokenBalance(
+            "type",
+            "symbol",
+            "Cookie Token",
+            "10",
+            "0xC00KiE",
+            "10000000000000")
+        val result = TokenBalanceToAccountToken.map(NetworkShortName.ATS_TAU, tokenBalance)
+        result.token.name shouldBeEqualTo "Cookie Token"
+        result.token.address shouldBeEqualTo "0xC00KiE"
+        result.balance shouldBeEqualTo 1000.toBigDecimal()
     }
 }

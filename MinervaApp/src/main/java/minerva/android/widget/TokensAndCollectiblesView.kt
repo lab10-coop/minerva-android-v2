@@ -13,7 +13,7 @@ import minerva.android.extension.toggleVisibleOrGone
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_PADDING
-import minerva.android.walletmanager.model.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.Collectible
 import minerva.android.widget.token.TokenView
 
@@ -79,10 +79,7 @@ class TokensAndCollectiblesView(
     private fun initTokensList() {
         binding.apply {
             tokensContainer.removeAllViews()
-            account.accountTokens
-                    //TODO the order should be done by fiat balance, but now fiat balance is not supported
-                .sortedByDescending { it.balance }
-                .forEachIndexed { index, _ ->
+            account.accountTokens.forEachIndexed { index, _ ->
                     tokensContainer.addView(TokenView(context).apply {
                         initView(account, callback, index)
                     })
