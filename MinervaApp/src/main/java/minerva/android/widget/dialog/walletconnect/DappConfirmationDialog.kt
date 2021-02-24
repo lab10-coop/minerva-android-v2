@@ -36,7 +36,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
 
 
-    fun setNotDefinedNetwork() {
+    private fun setNotDefinedNetworkHeader() {
         with(networkHeader.network) {
             background = context.getDrawable(R.drawable.network_not_defined_background)
             setCompoundDrawablesWithIntrinsicBounds(
@@ -50,12 +50,13 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     }
 
     fun setNotDefinedNetworkWarning() = with(binding) {
+        setNotDefinedNetworkHeader()
         showWaring()
-        setNotDefinedNetwork()
     }
 
     fun setWrongNetworkMessage(message: String) = with(binding) {
         warning.text = message
+        binding.confirmationButtons.connect.isEnabled = false
         showWaring()
     }
 

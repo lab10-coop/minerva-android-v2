@@ -258,7 +258,7 @@
     <string name="all_my_assets">All my Assets</string>
     <string name="free_ats_warning">You can only get 5 tATS per day and you need to have at least one ARTIS (τ1) account.</string>
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
-    <string name="dapp_connection_warning">The website doesn’t provide the network. Please make sure that your account is on the same network.</string>
+    <string name="dapp_connection_warning">This WalletConnect Session provides no information on the needed network. Please make sure you selected the correct account/network.</string>
     <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
     <string name="dapp_disconnected">Dapp disconnected</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
