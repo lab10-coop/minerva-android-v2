@@ -139,8 +139,14 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
                 bundle.getString(NETWORK, String.Empty)
             )
         }
-        binding.tokenAddress.onRightDrawableClicked {
-            listener.showScanner(AddressScannerFragment.newInstance())
+        binding.apply {
+            with(tokenAddress) {
+                onRightDrawableClicked {
+                    if (text.toString().isEmpty())
+                        listener.showScanner(AddressScannerFragment.newInstance())
+                }
+            }
+            supportText.text = String.format(getString(R.string.minerva_support), viewModel.getNetworkName())
         }
     }
 
