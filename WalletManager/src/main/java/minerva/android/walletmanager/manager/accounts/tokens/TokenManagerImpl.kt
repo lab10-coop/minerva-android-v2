@@ -1,13 +1,11 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
-import minerva.android.apiProvider.model.TokenBalance
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
@@ -20,7 +18,6 @@ import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR
@@ -34,10 +31,10 @@ import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_S
 import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
 import minerva.android.walletmanager.model.mappers.TokenBalanceToAccountToken
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.BalanceUtils
 import java.math.BigDecimal
 
 class TokenManagerImpl(
@@ -116,7 +113,10 @@ class TokenManagerImpl(
             Pair(updateTokens, map)
         }.orElse { throw NotInitializedWalletConfigThrowable() }
 
-    override fun updateTokens(shouldBeUpdated: Boolean, accountTokens: Map<String, List<AccountToken>>): Single<Map<String, List<AccountToken>>> =
+    override fun updateTokens(
+        shouldBeUpdated: Boolean,
+        accountTokens: Map<String, List<AccountToken>>
+    ): Single<Map<String, List<AccountToken>>> =
         if (shouldBeUpdated) {
             getTokenIconsURL().map { logoUrls ->
                 val updatedTokensMap = mutableMapOf<String, List<ERC20Token>>()
@@ -167,12 +167,7 @@ class TokenManagerImpl(
                         mutableListOf<AccountToken>().apply {
                             it.forEach { (address, balance) ->
                                 tokens.find { it.address == address }?.let { tokenTx ->
-                                    add(
-                                        AccountToken(
-                                            ERC20Token(account.network.chainId, tokenTx),
-                                            BalanceUtils.fromWei(balance, tokenTx.tokenDecimal.toInt())
-                                        )
-                                    )
+                                    add(AccountToken(ERC20Token(account.network.chainId, tokenTx), balance))
                                 }
                             }
                         }
