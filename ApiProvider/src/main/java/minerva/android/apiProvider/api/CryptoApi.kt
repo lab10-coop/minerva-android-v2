@@ -25,28 +25,16 @@ interface CryptoApi {
     ): Single<GasPrices>
 
     @GET
-    fun getTokenRawData(
-        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Url url: String
-    ) : Single<List<TokenIconDetails>>
+    fun getTokenRawData(@Url url: String) : Single<List<TokenIconDetails>>
 
     @GET
-    fun getTokenLastCommitRawData(
-        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Url url: String
-    ) : Single<List<CommitElement>>
+    fun getTokenLastCommitRawData(@Url url: String) : Single<List<CommitElement>>
 
     @GET
-    fun getTokenBalance(
-        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Url url: String
-    ) : Single<TokenBalanceResponse>
+    fun getTokenBalance(@Url url: String) : Single<TokenBalanceResponse>
 
     @GET
-    fun getTokenTx(
-        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Url url: String
-    ) : Single<TokenTxResponse>
+    fun getTokenTx(@Url url: String) : Single<TokenTxResponse>
 
     companion object {
         private const val IDS = "ids"

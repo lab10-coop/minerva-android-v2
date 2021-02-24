@@ -78,12 +78,15 @@ class TransactionRepositoryImpl(
                         .zipWith(refreshTokensBalance(notEtherscanAccounts))
                         .map { (etherscanTokensBalance, notEtherscanTokenBalance) -> etherscanTokensBalance + notEtherscanTokenBalance }
                         .map {
-                            it.associate { it.second to tokenManager.prepareCurrentTokenList(it.first, it.third) } }
+                            it.associate { (network, privateKey, accountTokens) ->
+                                privateKey to tokenManager.prepareCurrentTokenList(network, accountTokens)
+                            }
+                        }
                         .map { tokenManager.updateTokensFromLocalStorage(it) }
-                        .flatMap { locallyCheckedAccountTokens -> //Map<AccountPrivateKey, List<AccountToken>>
-                            tokenManager.updateTokens(locallyCheckedAccountTokens).onErrorReturn {
+                        .flatMap { (shouldBeUpdated, accountTokens) ->
+                            tokenManager.updateTokens(shouldBeUpdated, accountTokens).onErrorReturn {
                                 Timber.e(it)
-                                locallyCheckedAccountTokens.second
+                                accountTokens
                             }
                         }
                         .flatMap { automaticTokenUpdateMap -> // Map<isUpdateNeeded, Map<AccountPrivateKey, List<AccountToken>>
@@ -283,8 +286,7 @@ class TransactionRepositoryImpl(
      */
 
     private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<AccountToken>>> =
-        tokenManager.refreshTokenBalance(account)
-            .map { Triple(account.network.short, account.privateKey, it) }
+        tokenManager.refreshTokenBalance(account).map { Triple(account.network.short, account.privateKey, it) }
 
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)

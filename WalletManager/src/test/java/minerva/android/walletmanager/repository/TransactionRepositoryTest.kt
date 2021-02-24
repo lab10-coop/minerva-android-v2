@@ -737,11 +737,11 @@ class TransactionRepositoryTest : RxTest() {
         )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(null, DataProvider.walletConfig)
-        whenever(cryptoApi.getTokenBalance(any(), any())).thenReturn(Single.just(tokenBalanceResponse))
+        whenever(cryptoApi.getTokenBalance(any())).thenReturn(Single.just(tokenBalanceResponse))
         whenever(tokenManager.prepareCurrentTokenList(any(), any())).thenReturn(accountTokens)
         whenever(tokenManager.updateTokensFromLocalStorage(any())).thenReturn(Pair(false, mapOf()))
         whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(listOf()))
-        whenever(tokenManager.updateTokens(any())).thenReturn(
+        whenever(tokenManager.updateTokens(any(), any())).thenReturn(
             Single.just(mapOf()),
             Single.just(mapOf()),
             Single.error(Throwable("error")),

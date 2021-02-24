@@ -114,15 +114,13 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test tokens with online logos data without error`() {
         NetworkManager.initialize(DataProvider.networks)
-        val localUpdatedMap = Pair(false, map)
-        whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.just(tokenRawData))
-        tokenManager.updateTokens(localUpdatedMap).test().assertComplete().assertNoErrors()
+        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(tokenRawData))
+        tokenManager.updateTokens(false, map).test().assertComplete().assertNoErrors()
             .assertValue {
                 map == map
                 map[ATS_TAU]?.get(0)?.token?.logoURI == null
             }
-        val localUpdatedMapII = Pair(true, map)
-        tokenManager.updateTokens(localUpdatedMapII).test().assertComplete().assertNoErrors()
+        tokenManager.updateTokens(true, map).test().assertComplete().assertNoErrors()
             .assertValue {
                 map[ATS_TAU]?.get(0)?.token?.logoURI == "someIconAddress"
                 map[ATS_TAU]?.get(1)?.token?.logoURI == "someIconAddressII"
@@ -132,9 +130,8 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test tokens with online logos data with error`() {
         NetworkManager.initialize(DataProvider.networks)
-        val localUpdatedMap = Pair(true, map)
-        whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.error(Throwable("No data here!")))
-        tokenManager.updateTokens(localUpdatedMap).test().assertErrorMessage("No data here!")
+        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.error(Throwable("No data here!")))
+        tokenManager.updateTokens(true, map).test().assertErrorMessage("No data here!")
     }
 
     @Test
@@ -207,7 +204,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Check getting Token Icon URL method`() {
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.just(data), Single.just(listOf()))
+        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(data), Single.just(listOf()))
         tokenManager.getTokenIconURL(1, "0x4ddre55")
             .test()
             .assertComplete()
@@ -221,7 +218,7 @@ class TokenManagerTest : RxTest() {
                 it.first() shouldBeEqualTo ""
             }
 
-        verify(cryptoApi, times(2)).getTokenRawData(any(), any())
+        verify(cryptoApi, times(2)).getTokenRawData(any())
     }
 
     @Test
@@ -235,8 +232,8 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Check mapping last commit data to last commit timestamp`() {
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenLastCommitRawData(any(), any())).thenReturn(Single.just(commitData))
-        whenever(cryptoApi.getTokenRawData(any(), any())).thenReturn(Single.just(data))
+        whenever(cryptoApi.getTokenLastCommitRawData(any())).thenReturn(Single.just(commitData))
+        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(data))
         whenever(localStorage.loadTokenIconsUpdateTimestamp()).thenReturn(333L, 1611950162000, 1611950162333)
         whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
         tokenManager.updateTokenIcons().test().assertComplete()
@@ -285,12 +282,12 @@ class TokenManagerTest : RxTest() {
         val refreshTokenResponse02 = Observable.just(Pair("0xC00KiE04", 100000000.toBigDecimal()))
 
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenBalance(any(), any())).thenReturn(Single.just(tokenResponse))
+        whenever(cryptoApi.getTokenBalance(any())).thenReturn(Single.just(tokenResponse))
         whenever(blockchainRepository.refreshTokenBalance(any(), any(), any(), any())).thenReturn(
             refreshTokenResponse01,
             refreshTokenResponse02
         )
-        whenever(cryptoApi.getTokenTx(any(), any())).thenReturn(Single.just(tokenTxResponse))
+        whenever(cryptoApi.getTokenTx(any())).thenReturn(Single.just(tokenTxResponse))
         tokenManager.refreshTokenBalance(notEtherscanAccount)
             .test()
             .assertComplete()
@@ -309,7 +306,7 @@ class TokenManagerTest : RxTest() {
                 it[0].token.name == "name03"
                 it[0].balance == 10.toBigDecimal()
                 it[1].token.name == "name04"
-                //it[1].balance == 100.toBigDecimal()
+                it[1].balance == 100.toBigDecimal()
             }
 
     }

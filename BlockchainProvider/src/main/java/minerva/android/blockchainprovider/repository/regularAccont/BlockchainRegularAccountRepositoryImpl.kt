@@ -278,8 +278,7 @@ class BlockchainRegularAccountRepositoryImpl(
                     .map { balance -> Pair(contractAddress, balance.toBigDecimal()) }
             }.toObservable()
 
-    private fun getChainId(network: String): Flowable<NetVersion> =
-        web3j.value(network).netVersion().flowable()
+    private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
 
     private fun getTransaction(
         from: String,

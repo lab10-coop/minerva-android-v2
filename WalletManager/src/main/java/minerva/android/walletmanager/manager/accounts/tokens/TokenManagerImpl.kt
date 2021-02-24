@@ -116,11 +116,11 @@ class TokenManagerImpl(
             Pair(updateTokens, map)
         }.orElse { throw NotInitializedWalletConfigThrowable() }
 
-    override fun updateTokens(localCheckResult: Pair<Boolean, Map<String, List<AccountToken>>>): Single<Map<String, List<AccountToken>>> =
-        if (localCheckResult.first) {
+    override fun updateTokens(shouldBeUpdated: Boolean, accountTokens: Map<String, List<AccountToken>>): Single<Map<String, List<AccountToken>>> =
+        if (shouldBeUpdated) {
             getTokenIconsURL().map { logoUrls ->
                 val updatedTokensMap = mutableMapOf<String, List<ERC20Token>>()
-                localCheckResult.second.values.forEach { accountTokens ->
+                accountTokens.values.forEach { accountTokens ->
                     var network = String.Empty
                     val updatedTokens = mutableListOf<ERC20Token>()
                     accountTokens.forEach {
@@ -134,9 +134,9 @@ class TokenManagerImpl(
                     }
                     if (updatedTokens.isNotEmpty()) updatedTokensMap[network] = updatedTokens
                 }
-                localCheckResult.second
+                accountTokens
             }
-        } else Single.just(localCheckResult.second)
+        } else Single.just(accountTokens)
 
     override fun refreshTokenBalance(account: Account): Single<List<AccountToken>> =
         when (account.networkShort) {

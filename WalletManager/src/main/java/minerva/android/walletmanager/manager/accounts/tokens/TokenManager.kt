@@ -26,6 +26,6 @@ interface TokenManager {
     /**
      * return statement: Map<AccountPrivateKey, List<AccountToken>>
      */
-    fun updateTokens(localCheckResult: Pair<Boolean, Map<String, List<AccountToken>>>): Single<Map<String, List<AccountToken>>>
+    fun updateTokens(shouldBeUpdated: Boolean, accountTokens: Map<String, List<AccountToken>>): Single<Map<String, List<AccountToken>>>
     fun refreshTokenBalance(account: Account): Single<List<AccountToken>>
 }
