@@ -42,6 +42,7 @@ import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.dialog.walletconnect.GasPriceDialog
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
@@ -97,6 +98,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                         )
                     )
                 }
+
+                Timber.tag("kobe").d("handleExecutedAccounts")
+
                 stopPendingAccounts()
                 clear()
                 viewModel.clearAndUnsubscribe()
@@ -227,9 +231,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
         )
         (getCurrentFragment() as? AccountsFragment)?.apply {
-            updateAccountFragment() {
-                setPendingAccount(it.index, false)
-            }
+
+            Timber.tag("kobe").d("Update pending account")
+
+            updateAccountFragment() { setPendingAccount(it.index, false) }
         }
         viewModel.clearWebSocketSubscription()
     }
@@ -265,6 +270,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     private fun AccountsFragment.updateAccountFragment(updatePending: () -> Unit) {
+        Timber.tag("kobe").d("PENDING")
         updatePending()
         refreshBalances()
     }

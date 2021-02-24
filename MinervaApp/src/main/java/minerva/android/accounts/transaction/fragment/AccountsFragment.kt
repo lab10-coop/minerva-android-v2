@@ -24,6 +24,7 @@ import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.wrapped.startManageAssetsWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
     AccountsFragmentToAdapterListener {
@@ -122,6 +123,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     R.color.colorSetNine
                 )
                 setOnRefreshListener {
+                    Timber.tag("kobe").d("init swipe to refresh")
                     with(viewModel) {
                         refreshBalances()
                         refreshTokenBalance()
