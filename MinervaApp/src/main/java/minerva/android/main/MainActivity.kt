@@ -42,7 +42,6 @@ import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
 import minerva.android.widget.dialog.walletconnect.GasPriceDialog
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
-import timber.log.Timber
 import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity(), FragmentInteractorListener {
