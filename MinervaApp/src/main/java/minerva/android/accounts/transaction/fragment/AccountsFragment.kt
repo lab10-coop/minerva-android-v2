@@ -123,7 +123,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     R.color.colorSetNine
                 )
                 setOnRefreshListener {
-                    Timber.tag("kobe").d("init swipe to refresh")
                     with(viewModel) {
                         refreshBalances()
                         refreshTokenBalance()

@@ -98,9 +98,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                         )
                     )
                 }
-
-                Timber.tag("kobe").d("handleExecutedAccounts")
-
                 stopPendingAccounts()
                 clear()
                 viewModel.clearAndUnsubscribe()
@@ -231,9 +228,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
         )
         (getCurrentFragment() as? AccountsFragment)?.apply {
-
-            Timber.tag("kobe").d("Update pending account")
-
             updateAccountFragment() { setPendingAccount(it.index, false) }
         }
         viewModel.clearWebSocketSubscription()
@@ -270,7 +264,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     private fun AccountsFragment.updateAccountFragment(updatePending: () -> Unit) {
-        Timber.tag("kobe").d("PENDING")
         updatePending()
         refreshBalances()
     }
