@@ -29,8 +29,8 @@ import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.repository.getMainTokenIconRes
 import timber.log.Timber
@@ -128,7 +128,14 @@ class TransactionViewModel(
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {
-            transactionRepository.getTransactionCosts(network.short, tokenIndex, account.address, to, amount, account.network.chainId)
+            transactionRepository.getTransactionCosts(
+                network.short,
+                tokenIndex,
+                account.address,
+                to,
+                amount,
+                account.network.chainId
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -195,7 +202,12 @@ class TransactionViewModel(
 
     }
 
-    private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+    private fun sendSafeAccountMainTransaction(
+        receiverKey: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ) {
         launchDisposable {
             val ownerPrivateKey =
                 account.masterOwnerAddress.let {
@@ -268,7 +280,13 @@ class TransactionViewModel(
         }
     }
 
-    private fun sendTokenTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+    private fun sendTokenTransaction(
+        receiverKey: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ) {
+        Timber.tag("kobe").d("Token transaction")
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, tokenAddress)
                 .flatMapCompletable { transactionRepository.transferERC20Token(account.network.short, it) }
@@ -278,9 +296,13 @@ class TransactionViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = {
+                        Timber.tag("kobe").d("Token transaction success")
                         _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
                     },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = {
+                        Timber.tag("kobe").d("Token transaction error: $it")
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }
@@ -357,5 +379,6 @@ class TransactionViewModel(
         gasPrice: BigDecimal,
         gasLimit: BigInteger,
         contractAddress: String = String.Empty
-    ): Transaction = Transaction(account.address, account.privateKey, receiverKey, amount, gasPrice, gasLimit, contractAddress)
+    ): Transaction =
+        Transaction(account.address, account.privateKey, receiverKey, amount, gasPrice, gasLimit, contractAddress)
 }

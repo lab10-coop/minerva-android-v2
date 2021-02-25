@@ -18,9 +18,7 @@ import minerva.android.kotlinUtils.map.value
 import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.EthEstimateGas
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
@@ -213,7 +211,10 @@ class BlockchainRegularAccountRepositoryImpl(
                     calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
                 )
 
-        } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+        } else {
+            Timber.tag("kobe").d("estimate gas for ERC20")
+            calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+        }
 
 
     private fun handleGasLimit(
@@ -221,7 +222,11 @@ class BlockchainRegularAccountRepositoryImpl(
         it: EthEstimateGas,
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
-        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
+        Timber.tag("kobe").d("estimate gas")
+        val gasLimit = it.error?.let {
+            Timber.tag("kobe").d("estimate gas error: ${it.message}")
+            Operation.TRANSFER_NATIVE.gasLimit
+        } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(network, gasLimit, gasPrice)
     }
 
@@ -286,21 +291,22 @@ class BlockchainRegularAccountRepositoryImpl(
         to: String,
         amount: BigDecimal,
         contractData: String
-    ) =
-        Transaction(
-            from,
-            count.transactionCount,
-            BigInteger.ZERO,
-            BigInteger.ZERO,
-            to,
-            toWei(amount, Convert.Unit.ETHER).toBigInteger(),
-            contractData
-        )
+    ) = Transaction(
+        from,
+        count.transactionCount,
+        BigInteger.ZERO,
+        BigInteger.ZERO,
+        to,
+        toWei(amount, Convert.Unit.ETHER).toBigInteger(),
+        contractData
+    )
 
     private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
         if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
+            Timber.tag("kobe").d("default gasLimit: $gasLimit")
             gasLimit
         } else {
+            Timber.tag("kobe").d("calculated gasLimit: ${increaseGasLimitByTenPercent(gasLimit)}")
             increaseGasLimitByTenPercent(gasLimit)
         }
 
