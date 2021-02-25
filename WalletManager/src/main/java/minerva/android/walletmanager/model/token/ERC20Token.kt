@@ -9,6 +9,7 @@ data class ERC20Token(
     override val name: String = String.Empty,
     override val symbol: String = String.Empty,
     val address: String = String.Empty,
+    //TODO change to int
     val decimals: String = String.Empty,
     var logoURI: String? = null
 ) : Token {

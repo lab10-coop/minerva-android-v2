@@ -82,4 +82,6 @@ class AddTokenViewModel(
                         _errorLiveData.value = Event(it)
                     })
         }
+
+    fun getNetworkName() = NetworkManager.getNetwork(network).full
 }

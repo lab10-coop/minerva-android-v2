@@ -41,13 +41,17 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
         showFragmentListener = (activity as WrappedActivity)
         onBackListener = (activity as WrappedActivity)
         initFragment()
-        prepareAddressListener()
         prepareLiveData()
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         listener = context as AddressScannerListener
+    }
+
+    override fun onResume() {
+        super.onResume()
+        prepareAddressListener()
     }
 
     override fun onPause() {
@@ -64,19 +68,21 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
 
     private fun showTokenData(token: ERC20Token) {
         binding.apply {
-            TransitionManager.beginDelayedTransition(root)
-            tokenImage.initView(token)
-            addTokenButton.isEnabled = true
-            supportText.gone()
-            address.apply {
-                setDataOrHide(getString(R.string.address), token.address)
-                setEllipsize(TextUtils.TruncateAt.MIDDLE)
-            }
-            name.setDataOrHide(getString(R.string.name), token.name)
-            symbol.setDataOrHide(getString(R.string.symbol), token.symbol)
-            decimals.setDataOrHide(getString(R.string.decimals), token.decimals)
-            addTokenButton.setOnClickListener {
-                viewModel.addToken(token)
+            if (tokenAddress.text.toString() == token.address) {
+                TransitionManager.beginDelayedTransition(root)
+                tokenImage.initView(token)
+                addTokenButton.isEnabled = true
+                supportText.gone()
+                address.apply {
+                    setDataOrHide(getString(R.string.address), token.address)
+                    setEllipsize(TextUtils.TruncateAt.MIDDLE)
+                }
+                name.setDataOrHide(getString(R.string.name), token.name)
+                symbol.setDataOrHide(getString(R.string.symbol), token.symbol)
+                decimals.setDataOrHide(getString(R.string.decimals), token.decimals)
+                addTokenButton.setOnClickListener {
+                    viewModel.addToken(token)
+                }
             }
         }
     }
@@ -133,8 +139,14 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
                 bundle.getString(NETWORK, String.Empty)
             )
         }
-        binding.tokenAddress.onRightDrawableClicked {
-            listener.showScanner(AddressScannerFragment.newInstance())
+        binding.apply {
+            with(tokenAddress) {
+                onRightDrawableClicked {
+                    if (text.toString().isEmpty())
+                        listener.showScanner(AddressScannerFragment.newInstance())
+                }
+            }
+            supportText.text = String.format(getString(R.string.minerva_support), viewModel.getNetworkName())
         }
     }
 

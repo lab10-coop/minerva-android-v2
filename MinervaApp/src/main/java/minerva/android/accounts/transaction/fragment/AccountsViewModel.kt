@@ -191,7 +191,7 @@ class AccountsViewModel(
                 .subscribeBy(
                     onSuccess = { _tokenBalanceLiveData.value = it },
                     onError = {
-                        Timber.e("Refresh asset balance error: ${it.message}")
+                        Timber.e(it)
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
                     }
                 )
