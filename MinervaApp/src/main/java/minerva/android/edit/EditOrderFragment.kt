@@ -58,7 +58,7 @@ class EditOrderFragment : BaseFragment(R.layout.fragment_edit_order) {
             DragManageAdapter(
                 orderAdapter,
                 ItemTouchHelper.UP.or(ItemTouchHelper.DOWN),
-                ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT)
+                NO_SWIPE
             ).let { drag -> ItemTouchHelper(drag).attachToRecyclerView(it) }
         }
     }
@@ -77,6 +77,7 @@ class EditOrderFragment : BaseFragment(R.layout.fragment_edit_order) {
 
     companion object {
         private const val TYPE = "type"
+        private const val NO_SWIPE = 0
 
         @JvmStatic
         fun newInstance(type: Int) =
