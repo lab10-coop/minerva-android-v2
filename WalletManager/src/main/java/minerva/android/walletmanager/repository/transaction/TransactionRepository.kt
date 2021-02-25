@@ -3,8 +3,6 @@ package minerva.android.walletmanager.repository.transaction
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.model.PendingTransaction
-import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
@@ -47,6 +45,7 @@ interface TransactionRepository {
         to: String,
         amount: BigDecimal,
         chainId: Int,
+        tokenAddress: String = String.Empty,
         contractData: String = String.Empty
     ): Single<TransactionCost>
 

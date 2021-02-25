@@ -34,6 +34,7 @@ interface BlockchainRegularAccountRepository {
         to: String,
         amount: BigDecimal,
         gasPrice: BigDecimal? = null,
+        tokenAddress: String,
         contractData: String = String.Empty
     ): Single<TransactionCostPayload>
 

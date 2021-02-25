@@ -13,7 +13,12 @@ import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
+import org.web3j.abi.FunctionEncoder
+import org.web3j.abi.datatypes.Address
+import org.web3j.abi.datatypes.Function
+import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
@@ -146,12 +151,12 @@ class BlockchainRegularAccountRepositoryImpl(
 
     override fun getERC20TokenName(privateKey: String, network: String, tokenAddress: String): Observable<String> =
         getChainId(network).flatMap {
-            loadERC20(privateKey, network, tokenAddress, it).name().flowable()
+            loadERC20(privateKey, network, tokenAddress, it.netVersion.toLong()).name().flowable()
         }.toObservable()
 
     override fun getERC20TokenSymbol(privateKey: String, network: String, tokenAddress: String): Observable<String> =
         getChainId(network).flatMap {
-            loadERC20(privateKey, network, tokenAddress, it).symbol().flowable()
+            loadERC20(privateKey, network, tokenAddress, it.netVersion.toLong()).symbol().flowable()
         }.toObservable()
 
     override fun getERC20TokenDecimals(
@@ -160,7 +165,7 @@ class BlockchainRegularAccountRepositoryImpl(
         tokenAddress: String
     ): Observable<BigInteger> =
         getChainId(network).flatMap {
-            loadERC20(privateKey, network, tokenAddress, it).decimals().flowable()
+            loadERC20(privateKey, network, tokenAddress, it.netVersion.toLong()).decimals().flowable()
         }.toObservable()
 
     override fun getFreeATS(address: String): Completable = Completable.create {
@@ -179,7 +184,7 @@ class BlockchainRegularAccountRepositoryImpl(
 
     override fun transferERC20Token(network: String, payload: TransactionPayload): Completable =
         getChainId(network).flatMapCompletable {
-            loadERC20(payload.privateKey, network, payload.contractAddress, it)
+            loadERC20(payload.privateKey, network, payload.contractAddress, it.netVersion.toLong())
                 .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
                 .flowable()
                 .ignoreElements()
@@ -192,46 +197,73 @@ class BlockchainRegularAccountRepositoryImpl(
         to: String,
         amount: BigDecimal,
         gasPrice: BigDecimal?,
+        tokenAddress: String,
         contractData: String
     ): Single<TransactionCostPayload> =
-//        if (assetIndex == Int.InvalidIndex) {
-        web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .zipWith(resolveENS(to).toFlowable())
-            .flatMap { (count, address) ->
-                val tx = getTransaction(from, count, address, amount, contractData)
-                Transaction.createContractTransaction(
-                    from,
-                    count.transactionCount,
-                    BigInteger.ZERO,
-                    BigInteger.ZERO,
-                    toWei(amount, Convert.Unit.ETHER).toBigInteger(),
-                    ""
+        if (assetIndex == Int.InvalidIndex) {
+            web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
+                .flowable()
+                .zipWith(resolveENS(to).toFlowable())
+                .flatMap { (count, address) ->
+
+                    web3j.value(network).ethEstimateGas(
+                        getTransaction(
+                            from,
+                            count,
+                            address,
+                            amount,
+                            contractData
+                        )
+                    ) //contractData == contractAddress??
+                        .flowable()
+                        .flatMapSingle { handleGasLimit(network, it, gasPrice) }
+                }
+                .firstOrError()
+                .timeout(
+                    TIMEOUT,
+                    TimeUnit.SECONDS,
+                    calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
                 )
 
-                web3j.value(network).ethEstimateGas(
-                    getTransaction(
-                        from,
-                        count,
-                        address,
-                        amount,
-                        contractData
-                    )
-                ) //contractData == contractAddress??
-                    .flowable()
-                    .flatMapSingle { handleGasLimit(network, it, gasPrice) }
-            }
-            .firstOrError()
-            .timeout(
-                TIMEOUT,
-                TimeUnit.SECONDS,
-                calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
-            )
+        } else {
+            web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
+                .flowable()
+                .zipWith(resolveENS(to).toFlowable())
+                .flatMap { (count, address) ->
 
-//        } else {
+//                    val token = loadERC20(privateKey, network, tokenAddress, chainId.toLong())
+
+                    val function =
+                        Function(
+                            ERC20.FUNC_TRANSFER,
+                            listOf(Address(to), Uint256(toWei(amount, Convert.Unit.ETHER).toBigInteger())),
+                            emptyList()
+                        )
+                    val txData: String = FunctionEncoder.encode(function)
+
+                    val transaction = Transaction.createFunctionCallTransaction(
+                        from,
+                        count.transactionCount,
+                        BigInteger.ZERO,
+                        BigInteger.ZERO,
+                        address,
+                        toWei(amount, Convert.Unit.ETHER).toBigInteger(),
+                        txData
+                    )
+
+                    web3j.value(network).ethEstimateGas(transaction)
+                        .flowable()
+                        .flatMapSingle { handleGasLimit(network, it, gasPrice) }
+                }
+                .firstOrError()
+                .timeout(
+                    TIMEOUT,
+                    TimeUnit.SECONDS,
+                    calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
+                )
 //            Timber.tag("kobe").d("estimate gas for ERC20")
 //            calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
-//        }
+        }
 
     private fun getTransaction(
         from: String,
@@ -256,12 +288,22 @@ class BlockchainRegularAccountRepositoryImpl(
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
         Timber.tag("kobe").d("estimate gas")
+
         val gasLimit = it.error?.let {
             Timber.tag("kobe").d("estimate gas error: ${it.message}")
             Operation.TRANSFER_NATIVE.gasLimit
         } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(network, gasLimit, gasPrice)
     }
+
+    private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
+        if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
+            Timber.tag("kobe").d("default gasLimit: $gasLimit")
+            gasLimit
+        } else {
+            Timber.tag("kobe").d("calculated gasLimit: ${increaseGasLimitByTenPercent(gasLimit)}")
+            increaseGasLimitByTenPercent(gasLimit)
+        }
 
     override fun refreshTokenBalance(
         privateKey: String,
@@ -287,13 +329,13 @@ class BlockchainRegularAccountRepositoryImpl(
     override fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal =
         toEther((gasPrice * gasLimit)).setScale(SCALE, RoundingMode.HALF_EVEN)
 
-    private fun loadERC20(privateKey: String, network: String, address: String, chainId: NetVersion) =
+    private fun loadERC20(privateKey: String, network: String, address: String, chainId: Long) =
         ERC20.load(
             address, web3j.value(network),
             RawTransactionManager(
                 web3j.value(network),
                 Credentials.create(privateKey),
-                chainId.netVersion.toLong()
+                chainId
             ),
             ContractGasProvider(gasPrices.value(network), Operation.TRANSFER_ERC20.gasLimit)
         )
@@ -312,20 +354,11 @@ class BlockchainRegularAccountRepositoryImpl(
     ): Observable<Pair<String, BigDecimal>> =
         getChainId(network)
             .flatMap {
-                loadERC20(privateKey, network, contractAddress, it).balanceOf(address).flowable()
+                loadERC20(privateKey, network, contractAddress, it.netVersion.toLong()).balanceOf(address).flowable()
                     .map { balance -> Pair(contractAddress, balance.toBigDecimal()) }
             }.toObservable()
 
     private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
-
-    private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
-        if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
-            Timber.tag("kobe").d("default gasLimit: $gasLimit")
-            gasLimit
-        } else {
-            Timber.tag("kobe").d("calculated gasLimit: ${increaseGasLimitByTenPercent(gasLimit)}")
-            increaseGasLimitByTenPercent(gasLimit)
-        }
 
     private fun increaseGasLimitByTenPercent(gasLimit: BigInteger) = gasLimit.add(getBuffer(gasLimit))
 

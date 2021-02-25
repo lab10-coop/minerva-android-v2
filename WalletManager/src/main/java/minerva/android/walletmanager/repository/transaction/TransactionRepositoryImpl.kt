@@ -36,8 +36,8 @@ import minerva.android.walletmanager.utils.MarketUtils
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.util.concurrent.TimeUnit
 import java.math.RoundingMode
+import java.util.concurrent.TimeUnit
 
 class TransactionRepositoryImpl(
     private val blockchainRepository: BlockchainRegularAccountRepository,
@@ -161,15 +161,28 @@ class TransactionRepositoryImpl(
         to: String,
         amount: BigDecimal,
         chainId: Int,
+        tokenAddress: String,
         contractData: String
     ): Single<TransactionCost> =
         if (shouldGetGasPriceFromApi(network)) {
             cryptoApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
                 .flatMap { gasPrice ->
-                    getTxCosts(network, tokenIndex, from, to, amount, gasPrice, chainId, contractData)
-                }.onErrorResumeNext { getTxCosts(network, tokenIndex, from, to, amount, null, chainId, contractData) }
+                    getTxCosts(network, tokenIndex, from, to, amount, gasPrice, chainId, tokenAddress, contractData)
+                }.onErrorResumeNext {
+                    getTxCosts(
+                        network,
+                        tokenIndex,
+                        from,
+                        to,
+                        amount,
+                        null,
+                        chainId,
+                        tokenAddress,
+                        contractData
+                    )
+                }
         } else {
-            getTxCosts(network, tokenIndex, from, to, amount, null, chainId, contractData)
+            getTxCosts(network, tokenIndex, from, to, amount, null, chainId, tokenAddress, contractData)
         }
 
     private fun shouldGetGasPriceFromApi(network: String) =
@@ -183,6 +196,7 @@ class TransactionRepositoryImpl(
         amount: BigDecimal,
         gasPrice: GasPrices?,
         chainId: Int,
+        tokenAddress: String,
         contractData: String
     ): Single<TransactionCost> =
         blockchainRepository.getTransactionCosts(
@@ -192,6 +206,7 @@ class TransactionRepositoryImpl(
             to,
             amount,
             gasPrice?.speed?.standard,
+            tokenAddress,
             contractData
         ).map { payload ->
             TransactionCostPayloadToTransactionCost.map(payload, gasPrice, chainId) {

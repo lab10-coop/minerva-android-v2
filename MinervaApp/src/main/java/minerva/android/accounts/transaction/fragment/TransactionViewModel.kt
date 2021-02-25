@@ -134,7 +134,8 @@ class TransactionViewModel(
                 account.address,
                 to,
                 amount,
-                account.network.chainId
+                account.network.chainId,
+                tokenAddress
             )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
