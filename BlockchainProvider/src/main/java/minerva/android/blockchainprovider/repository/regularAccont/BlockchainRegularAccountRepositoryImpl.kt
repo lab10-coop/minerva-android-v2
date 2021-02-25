@@ -13,7 +13,6 @@ import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
 import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
@@ -195,26 +194,60 @@ class BlockchainRegularAccountRepositoryImpl(
         gasPrice: BigDecimal?,
         contractData: String
     ): Single<TransactionCostPayload> =
-        if (assetIndex == Int.InvalidIndex) {
-            web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
-                .flowable()
-                .zipWith(resolveENS(to).toFlowable())
-                .flatMap { (count, address) ->
-                    web3j.value(network).ethEstimateGas(getTransaction(from, count, address, amount, contractData))
-                        .flowable()
-                        .flatMapSingle { handleGasLimit(network, it, gasPrice) }
-                }
-                .firstOrError()
-                .timeout(
-                    TIMEOUT,
-                    TimeUnit.SECONDS,
-                    calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
+//        if (assetIndex == Int.InvalidIndex) {
+        web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .zipWith(resolveENS(to).toFlowable())
+            .flatMap { (count, address) ->
+                val tx = getTransaction(from, count, address, amount, contractData)
+                Transaction.createContractTransaction(
+                    from,
+                    count.transactionCount,
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    toWei(amount, Convert.Unit.ETHER).toBigInteger(),
+                    ""
                 )
 
-        } else {
-            Timber.tag("kobe").d("estimate gas for ERC20")
-            calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
-        }
+                web3j.value(network).ethEstimateGas(
+                    getTransaction(
+                        from,
+                        count,
+                        address,
+                        amount,
+                        contractData
+                    )
+                ) //contractData == contractAddress??
+                    .flowable()
+                    .flatMapSingle { handleGasLimit(network, it, gasPrice) }
+            }
+            .firstOrError()
+            .timeout(
+                TIMEOUT,
+                TimeUnit.SECONDS,
+                calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
+            )
+
+//        } else {
+//            Timber.tag("kobe").d("estimate gas for ERC20")
+//            calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+//        }
+
+    private fun getTransaction(
+        from: String,
+        count: EthGetTransactionCount,
+        to: String,
+        amount: BigDecimal,
+        contractData: String
+    ) = Transaction(
+        from,
+        count.transactionCount,
+        BigInteger.ZERO,
+        BigInteger.ZERO,
+        to,
+        toWei(amount, Convert.Unit.ETHER).toBigInteger(),
+        contractData
+    )
 
 
     private fun handleGasLimit(
@@ -284,22 +317,6 @@ class BlockchainRegularAccountRepositoryImpl(
             }.toObservable()
 
     private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
-
-    private fun getTransaction(
-        from: String,
-        count: EthGetTransactionCount,
-        to: String,
-        amount: BigDecimal,
-        contractData: String
-    ) = Transaction(
-        from,
-        count.transactionCount,
-        BigInteger.ZERO,
-        BigInteger.ZERO,
-        to,
-        toWei(amount, Convert.Unit.ETHER).toBigInteger(),
-        contractData
-    )
 
     private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
         if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
