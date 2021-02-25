@@ -10,13 +10,9 @@ open class MinervaPrimitive(
     open var name: String = String.Empty,
     open var isDeleted: Boolean = false,
     open val bindedOwner: String = String.Empty,
-    open val networkShort: String = String.Empty,
     open var lastUsed: Long = Long.InvalidValue,
     open val iconUrl: String? = String.Empty
 ) {
     val isSafeAccount: Boolean
         get() = bindedOwner != String.Empty
-
-    val network: Network
-        get() = NetworkManager.getNetwork(networkShort)
 }

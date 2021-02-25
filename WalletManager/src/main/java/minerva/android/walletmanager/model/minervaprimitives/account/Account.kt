@@ -2,6 +2,8 @@ package minerva.android.walletmanager.model.minervaprimitives.account
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.token.AccountToken
 import java.math.BigDecimal
@@ -12,7 +14,7 @@ data class Account(
     var privateKey: String = String.Empty,
     override var address: String = String.Empty,
     override var name: String = String.Empty,
-    override val networkShort: String = String.Empty,
+    val networkShort: String = String.Empty,
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = BigDecimal.ZERO,
     var accountTokens: List<AccountToken> = listOf(),
@@ -22,7 +24,7 @@ data class Account(
     var isPending: Boolean = false,
     var dappSessionCount: Int = 0,
     override val bindedOwner: String = String.Empty
-) : MinervaPrimitive(address, name, isDeleted, bindedOwner, networkShort) {
+) : MinervaPrimitive(address, name, isDeleted, bindedOwner) {
     constructor(account: Account, isDeleted: Boolean) : this(
         account.id,
         account.publicKey,
@@ -38,4 +40,7 @@ data class Account(
 
     val masterOwnerAddress: String
         get() = owners?.last().orEmpty()
+
+    val network: Network
+        get() = NetworkManager.getNetwork(networkShort)
 }
