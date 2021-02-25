@@ -241,7 +241,7 @@
     <string name="rearrange_assets">Rearrange Assets</string>
     <string name="add_asset">Add Asset</string>
     <string name="contract_address_or_name">Contract Address or name</string>
-    <string name="minerva_support">Minerva supports all ARTIS ∑1 Tokens. Please enter Token Name or Token Contract Address.</string>
+    <string name="minerva_support">Minerva supports all %s Tokens. Please enter Token Name or Token Contract Address.</string>
     <string name="add_token">Add Token</string>
     <string name="symbol">Symbol</string>
     <string name="decimals">Decimals</string>

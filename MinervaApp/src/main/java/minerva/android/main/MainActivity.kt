@@ -227,9 +227,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
         )
         (getCurrentFragment() as? AccountsFragment)?.apply {
-            updateAccountFragment() {
-                setPendingAccount(it.index, false)
-            }
+            updateAccountFragment() { setPendingAccount(it.index, false) }
         }
         viewModel.clearWebSocketSubscription()
     }

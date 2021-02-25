@@ -116,7 +116,7 @@ class MainViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _handleTimeoutOnPendingTransactionsLiveData.value = Event(it) },
+                    onSuccess = { if (it.isNotEmpty()) _handleTimeoutOnPendingTransactionsLiveData.value = Event(it) },
                     onError = {
                         Timber.e("Pending transactions timeout error: $it")
                         _updatePendingTransactionErrorLiveData.value = Event(it)

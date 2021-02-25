@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.mappers
 
-import com.google.gson.annotations.SerializedName
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.TokenBalance
 import minerva.android.apiProvider.model.TransactionSpeed
@@ -9,7 +8,6 @@ import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
 import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
-import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.WalletConfigTestValues.accounts
@@ -19,6 +17,7 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
 import minerva.android.walletmanager.model.WalletConfigTestValues.networks
 import minerva.android.walletmanager.model.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
@@ -28,6 +27,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.utils.DataProvider
+import org.amshove.kluent.should
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigDecimal
@@ -382,16 +382,28 @@ class MapperTest {
     @Test
     fun `map TokenBalance to AccountToken`() {
         NetworkManager.initialize(DataProvider.networks)
-        val tokenBalance = TokenBalance(
+        val tokenBalance01 = TokenBalance(
             "type",
             "symbol",
             "Cookie Token",
             "10",
-            "0xC00KiE",
+            "0xC00KiE01",
             "10000000000000")
-        val result = TokenBalanceToAccountToken.map(NetworkShortName.ATS_TAU, tokenBalance)
-        result.token.name shouldBeEqualTo "Cookie Token"
-        result.token.address shouldBeEqualTo "0xC00KiE"
-        result.balance shouldBeEqualTo 1000.toBigDecimal()
+        val tokenBalance02 = TokenBalance(
+            "type",
+            "symbol",
+            "Cookie Token 2",
+            "18",
+            "0xC00KiE02",
+            "200000000000000000"
+        )
+        val result01 = TokenBalanceToAccountToken.map(ATS_TAU, tokenBalance01)
+        result01.token.name shouldBeEqualTo "Cookie Token"
+        result01.token.address shouldBeEqualTo "0xC00KiE01"
+        result01.balance shouldBeEqualTo 1000.toBigDecimal()
+        val result02 = TokenBalanceToAccountToken.map(ATS_TAU, tokenBalance02)
+        result02.token.name shouldBeEqualTo "Cookie Token 2"
+        result02.token.address shouldBeEqualTo "0xC00KiE02"
+        result02.balance shouldBeEqualTo 0.2.toBigDecimal()
     }
 }
