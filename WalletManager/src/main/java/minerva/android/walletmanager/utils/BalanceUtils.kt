@@ -16,9 +16,10 @@ object BalanceUtils {
         if (fiatBalance != Int.InvalidValue.toBigDecimal()) String.format(Locale.ROOT, CURRENCY_FORMAT, fiatBalance)
         else NO_FIAT_VALUE
 
-    fun fromWei(balance: BigDecimal, decimals: Int) =
-        balance / (10.0.pow(decimals)).toBigDecimal()
+    fun fromWei(balance: BigDecimal, decimals: Int): BigDecimal =
+        balance.divide(TEN.pow(decimals).toBigDecimal()).stripTrailingZeros()
 
     private const val CURRENCY_FORMAT = "€ %.2f"
     private const val NO_FIAT_VALUE = "€ -.--"
+    private const val TEN = 10.0
 }

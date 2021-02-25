@@ -101,13 +101,13 @@ class TokenManagerTest : RxTest() {
         result.first shouldBeEqualTo true
         result.second.size shouldBeEqualTo 1
         result.second[ATS_TAU]?.size shouldBeEqualTo 2
-        result.second[ATS_TAU]?.get(1)?.balance shouldBeEqualTo BigDecimal.TEN
+        result.second[ATS_TAU]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
         result.second[ATS_TAU]?.get(1)?.token?.logoURI shouldBeEqualTo null
         val resultII = tokenManager.updateTokensFromLocalStorage(mapII)
         resultII.first shouldBeEqualTo false
         resultII.second.size shouldBeEqualTo 1
         resultII.second[ETH_RIN]?.size shouldBeEqualTo 2
-        resultII.second[ETH_RIN]?.get(1)?.balance shouldBeEqualTo BigDecimal.TEN
+        resultII.second[ETH_RIN]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
         resultII.second[ETH_RIN]?.get(1)?.token?.logoURI shouldBeEqualTo "someLogoURI_II"
     }
 
@@ -171,34 +171,38 @@ class TokenManagerTest : RxTest() {
     fun `Check mapping from raw addresses to tokens`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
-        whenever(blockchainRepository.fromGwei(any())).thenReturn(BigDecimal.ONE, BigDecimal.TEN, BigDecimal.ONE, BigDecimal.TEN)
         val rawTokens = listOf(
-            AccountToken(ERC20Token(chainId = 0, name = "CookieTokenATS", address = "0xC00k1e"), BigDecimal.ONE),
-            AccountToken(ERC20Token(chainId = 0, name = "CookieTokenOther2ATS", address = "0x0th3r2"), BigDecimal.TEN)
+            AccountToken(
+                ERC20Token(chainId = 0, name = "CookieTokenATS", address = "0xC00k1e", decimals = "2"),
+                10000.toBigDecimal()
+            ),
+            AccountToken(
+                ERC20Token(chainId = 0, name = "CookieTokenOther2ATS", address = "0x0th3r2", decimals = "3"),
+                1000000000.toBigDecimal()
+            )
         )
-
 
         val tokensATS = tokenManager.prepareCurrentTokenList(ATS_SIGMA, rawTokens)
         tokensATS.size shouldBeEqualTo 4
         tokensATS[0].token.name shouldBeEqualTo "CookieTokenOther2ATS"
-        tokensATS[0].balance shouldBeEqualTo BigDecimal.TEN
+        tokensATS[0].balance.toPlainString() shouldBeEqualTo "1000000"
         tokensATS[1].token.name shouldBeEqualTo "CookieTokenATS"
-        tokensATS[1].balance shouldBeEqualTo BigDecimal.ONE
+        tokensATS[1].balance.toPlainString() shouldBeEqualTo "100"
         tokensATS[2].token.name shouldBeEqualTo "SecondOtherATS"
-        tokensATS[2].balance shouldBeEqualTo BigDecimal.ZERO
+        tokensATS[2].balance.toPlainString() shouldBeEqualTo "0"
         tokensATS[3].token.name shouldBeEqualTo "OtherTokenATS"
         tokensATS[3].balance shouldBeEqualTo BigDecimal.ZERO
 
         val tokenETH = tokenManager.prepareCurrentTokenList(ETH_RIN, rawTokens)
         tokenETH.size shouldBeEqualTo 4
         tokenETH[0].token.name shouldBeEqualTo "CookieTokenOther2ATS"
-        tokenETH[0].balance shouldBeEqualTo BigDecimal.TEN
+        tokenETH[0].balance.toPlainString() shouldBeEqualTo "1000000"
         tokenETH[1].token.name shouldBeEqualTo "CookieTokenATS"
-        tokenETH[1].balance shouldBeEqualTo BigDecimal.ONE
+        tokenETH[1].balance.toPlainString() shouldBeEqualTo "100"
         tokenETH[2].token.name shouldBeEqualTo "OtherTokenDETH"
-        tokenETH[2].balance shouldBeEqualTo BigDecimal.ZERO
+        tokenETH[2].balance.toPlainString() shouldBeEqualTo "0"
         tokenETH[3].token.name shouldBeEqualTo "OtherTokenETH"
-        tokenETH[3].balance shouldBeEqualTo BigDecimal.ZERO
+        tokenETH[3].balance.toPlainString() shouldBeEqualTo "0"
     }
 
     @Test
@@ -294,9 +298,9 @@ class TokenManagerTest : RxTest() {
             .assertValue {
                 it.size == 2
                 it[0].token.name == "name01"
-                it[0].balance == 10.toBigDecimal()
+                it[0].balance.toPlainString() == "10"
                 it[1].token.name == "name02"
-                it[1].balance == 100.toBigDecimal()
+                it[1].balance.toPlainString() == "100"
             }
         tokenManager.refreshTokenBalance(etherscanAccount)
             .test()
@@ -304,9 +308,9 @@ class TokenManagerTest : RxTest() {
             .assertValue {
                 it.size == 2
                 it[0].token.name == "name03"
-                it[0].balance == 10.toBigDecimal()
+                it[0].balance.toPlainString() == "10"
                 it[1].token.name == "name04"
-                it[1].balance == 100.toBigDecimal()
+                it[1].balance.toPlainString() == "100"
             }
 
     }
@@ -320,17 +324,19 @@ class TokenManagerTest : RxTest() {
         TokenIconDetails(2, "0x4ddre55", "LogoUri2")
     )
 
-    private val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "C01")
-    private val secondToken = ERC20Token(1, "CookieTokenII", "COOKiE", "0xC00k1eII", "C02")
+    private val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "1")
+    private val secondToken = ERC20Token(1, "CookieTokenII", "COOKiE", "0xC00k1eII", "2")
     private val map = mapOf(
         Pair(
             ATS_TAU,
-            listOf(AccountToken(firstToken, BigDecimal.ONE), AccountToken(secondToken, BigDecimal.TEN))
+            listOf(
+                AccountToken(firstToken, BigDecimal.ONE),
+                AccountToken(secondToken, BigDecimal.TEN))
         )
     )
 
-    private val firstTokenII = ERC20Token(2, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "C11")
-    private val secondTokenII = ERC20Token(2, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "C12")
+    private val firstTokenII = ERC20Token(2, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
+    private val secondTokenII = ERC20Token(2, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
     private val mapII = mapOf(
         Pair(
             ETH_RIN,

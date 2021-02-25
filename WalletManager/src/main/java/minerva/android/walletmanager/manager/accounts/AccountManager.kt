@@ -4,10 +4,10 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.walletmanager.manager.Manager
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.wallet.MasterSeed
-import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.model.wallet.MasterSeed
 
 interface AccountManager : Manager {
     val masterSeed: MasterSeed
