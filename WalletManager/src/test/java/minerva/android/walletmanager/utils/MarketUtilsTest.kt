@@ -5,7 +5,6 @@ import minerva.android.apiProvider.model.Price
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.defs.NetworkShortName
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.RoundingMode

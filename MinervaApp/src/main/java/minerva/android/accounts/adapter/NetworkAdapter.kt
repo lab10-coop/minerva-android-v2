@@ -37,7 +37,7 @@ class NetworkViewHolder(private val view: View) : RecyclerView.ViewHolder(view) 
 
     fun setData(network: Network, isChecked: Boolean) {
         view.apply {
-            networkIcon.setImageDrawable(getNetworkIcon(context, network.short))
+            networkIcon.setImageDrawable(getNetworkIcon(context, network.chainId))
             checkButton.isEnabled = isChecked
             setNetworkName(network)
         }

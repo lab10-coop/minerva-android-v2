@@ -9,6 +9,7 @@ import minerva.android.apiProvider.model.CommitElement
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
@@ -18,17 +19,17 @@ import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_KOV
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_MAIN
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_ROP
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO_14
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.mappers.TokenBalanceToAccountToken
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
@@ -46,17 +47,17 @@ class TokenManagerImpl(
 
     private val currentTimeProvider = CurrentTimeProviderImpl()
 
-    override fun loadCurrentTokens(network: String): List<ERC20Token> =
+    override fun loadCurrentTokens(chainId: Int): List<ERC20Token> =
         walletManager.getWalletConfig()?.let {
-            NetworkManager.getTokens(network)
-                .mergeWithoutDuplicates(it.erc20Tokens[network] ?: listOf())
+            NetworkManager.getTokens(chainId)
+                .mergeWithoutDuplicates(it.erc20Tokens[chainId] ?: listOf())
         } ?: listOf()
 
-    override fun saveToken(network: String, token: ERC20Token): Completable =
+    override fun saveToken(chainId: Int, token: ERC20Token): Completable =
         walletManager.getWalletConfig()?.let { config ->
             config.copy(
                 version = config.updateVersion,
-                erc20Tokens = updateTokens(network, token, config.erc20Tokens.toMutableMap())
+                erc20Tokens = updateTokens(chainId, token, config.erc20Tokens.toMutableMap())
             ).let { walletManager.updateWalletConfig(it) }
         } ?: Completable.error(NotInitializedWalletConfigThrowable())
 
@@ -83,12 +84,12 @@ class TokenManagerImpl(
         }
 
     override fun prepareCurrentTokenList(
-        network: String,
+        chainId: Int,
         tokenList: List<AccountToken>
     ): List<AccountToken> =
         mutableListOf<AccountToken>().apply {
             addAll(tokenList)
-            loadCurrentTokens(network).forEach {
+            loadCurrentTokens(chainId).forEach {
                 val token = AccountToken(it, BigDecimal.ZERO)
                 if (!contains(token)) {
                     add(token)
@@ -102,11 +103,9 @@ class TokenManagerImpl(
             var updateTokens = false
             map.values.forEach { accountTokenList ->
                 accountTokenList.forEach { accountToken ->
-                    NetworkManager.getShort(accountToken.token.chainId).let { network ->
-                        localTokens[network]?.find { it == accountToken.token }?.logoURI.let {
-                            accountToken.token.logoURI = it
-                            if (it == null) updateTokens = true
-                        }
+                    localTokens[accountToken.token.chainId]?.find { it == accountToken.token }?.logoURI.let {
+                        accountToken.token.logoURI = it
+                        if (it == null) updateTokens = true
                     }
                 }
             }
@@ -119,32 +118,32 @@ class TokenManagerImpl(
     ): Single<Map<String, List<AccountToken>>> =
         if (shouldBeUpdated) {
             getTokenIconsURL().map { logoUrls ->
-                val updatedTokensMap = mutableMapOf<String, List<ERC20Token>>()
+                val updatedTokensMap = mutableMapOf<Int, List<ERC20Token>>()
                 accountTokens.values.forEach { accountTokens ->
-                    var network = String.Empty
+                    var currentChainId = Int.InvalidId
                     val updatedTokens = mutableListOf<ERC20Token>()
                     accountTokens.forEach {
                         it.token.apply {
                             if (logoURI == null) {
-                                network = NetworkManager.getShort(chainId)
+                                currentChainId = chainId
                                 logoURI = logoUrls[generateTokenIconKey(chainId, address)]
                                 updatedTokens.add(this)
                             }
                         }
                     }
-                    if (updatedTokens.isNotEmpty()) updatedTokensMap[network] = updatedTokens
+                    if (updatedTokens.isNotEmpty()) updatedTokensMap[currentChainId] = updatedTokens
                 }
                 accountTokens
             }
         } else Single.just(accountTokens)
 
     override fun refreshTokenBalance(account: Account): Single<List<AccountToken>> =
-        when (account.networkShort) {
+        when (account.chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokenBalance(account)
             else -> cryptoApi.getTokenBalance(url = getTokensApiURL(account)).map {
                 mutableListOf<AccountToken>().apply {
                     it.tokens.forEach {
-                        add(TokenBalanceToAccountToken.map(account.networkShort, it))
+                        add(TokenBalanceToAccountToken.map(account.chainId, it))
                     }
                 }
             }
@@ -158,7 +157,7 @@ class TokenManagerImpl(
                     .flatMap { position ->
                         blockchainRepository.refreshTokenBalance(
                             account.privateKey,
-                            account.networkShort,
+                            account.chainId,
                             tokens[position].address,
                             account.address
                         )
@@ -175,14 +174,14 @@ class TokenManagerImpl(
             }
 
     private fun getTokenTxApiURL(account: Account) =
-        String.format(ETHEREUM_TOKENTX_REQUEST, getTokenBalanceURL(account.networkShort), account.address, ETHERSCAN_KEY)
+        String.format(ETHEREUM_TOKENTX_REQUEST, getTokenBalanceURL(account.chainId), account.address, ETHERSCAN_KEY)
 
     @VisibleForTesting
     fun getTokensApiURL(account: Account) =
-        String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.networkShort), account.address)
+        String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.chainId), account.address)
 
-    private fun getTokenBalanceURL(networkShort: String) =
-        when (networkShort) {
+    private fun getTokenBalanceURL(chainId: Int) =
+        when (chainId) {
             ETH_MAIN -> ETHEREUM_MAINNET_TOKEN_BALANCE_URL
             ETH_RIN -> ETHEREUM_RINKEBY_TOKEN_BALANCE_URL
             ETH_ROP -> ETHEREUM_ROPSTEN_TOKEN_BALANCE_URL
@@ -206,7 +205,7 @@ class TokenManagerImpl(
         walletManager.getWalletConfig()?.let { config ->
             config.erc20Tokens.forEach { (key, value) ->
                 value.forEach {
-                    it.logoURI = updatedIcons[generateTokenIconKey(NetworkManager.getChainId(key), it.address)]
+                    it.logoURI = updatedIcons[generateTokenIconKey(key, it.address)]
                 }
             }
             walletManager.updateWalletConfig(config.copy(version = config.updateVersion))
@@ -221,12 +220,12 @@ class TokenManagerImpl(
      */
 
     @VisibleForTesting
-    fun updateTokens(network: String, token: ERC20Token, tokens: MutableMap<String, List<ERC20Token>>) =
+    fun updateTokens(chainId: Int, token: ERC20Token, tokens: MutableMap<Int, List<ERC20Token>>) =
         tokens.apply {
-            (this[network] ?: listOf()).toMutableList().let { currentTokens ->
+            (this[chainId] ?: listOf()).toMutableList().let { currentTokens ->
                 currentTokens.removeAll { it.address == token.address }
                 currentTokens.add(token)
-                put(network, currentTokens)
+                put(chainId, currentTokens)
             }
         }
 
@@ -236,15 +235,15 @@ class TokenManagerImpl(
      * return statement: Map<NetworkShort, List<ERC20Token>>
      */
 
-    private fun updateTokens(map: Map<String, List<AccountToken>>, tokens: MutableMap<String, List<ERC20Token>>) =
+    private fun updateTokens(map: Map<String, List<AccountToken>>, tokens: MutableMap<Int, List<ERC20Token>>) =
         tokens.apply {
             map.values.forEach {
                 it.forEach { accountToken ->
-                    val network = NetworkManager.getShort(accountToken.token.chainId)
-                    (this[network] ?: listOf()).toMutableList().let { currentTokens ->
+                    //TODO klop refactor it
+                    (this[accountToken.token.chainId] ?: listOf()).toMutableList().let { currentTokens ->
                         currentTokens.removeAll { it.address == accountToken.token.address }
                         currentTokens.add(accountToken.token)
-                        put(network, currentTokens)
+                        put(accountToken.token.chainId, currentTokens)
                     }
                 }
             }

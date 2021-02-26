@@ -8,14 +8,14 @@ import minerva.android.walletmanager.model.token.ERC20Token
 
 interface TokenManager {
     fun updateTokenIcons(): Completable
-    fun loadCurrentTokens(network: String): List<ERC20Token>
-    fun saveToken(network: String, token: ERC20Token): Completable
+    fun loadCurrentTokens(chainId: Int): List<ERC20Token>
+    fun saveToken(chainId: Int, token: ERC20Token): Completable
     /**
      * return statement: Map<AccountPrivateKey, List<AccountToken>>
      */
     fun saveTokens(map: Map<String, List<AccountToken>>): Completable
     fun getTokenIconURL(chainId: Int, address: String): Single<String>
-    fun prepareCurrentTokenList(network: String, tokenList: List<AccountToken>): List<AccountToken>
+    fun prepareCurrentTokenList(chainId: Int, tokenList: List<AccountToken>): List<AccountToken>
 
     /**
      * arguments: Map<AccountPrivateKey, List<AccountToken>>

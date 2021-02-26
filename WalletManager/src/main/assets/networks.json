@@ -1,7 +1,6 @@
 [
   {
     "full": "ARTIS (τ1)",
-    "short": "artis_tau1",
     "token": "tATS",
     "isSafeAccountAvailable": "true",
     "httpRpc": "https://rpc.tau1.artis.network",
@@ -15,7 +14,6 @@
   },
   {
     "full": "Ethereum (Rinkeby)",
-    "short": "eth_rinkeby",
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -29,7 +27,6 @@
   },
   {
     "full": "ARTIS Σ1",
-    "short": "artis_sigma1",
     "token": "ATS",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.sigma1.artis.network",
@@ -43,7 +40,6 @@
   },
   {
     "full": "xDai Chain",
-    "short": "xdai",
     "token": "xDAI",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.xdaichain.com",
@@ -57,7 +53,6 @@
   },
   {
     "full": "POA Sokol",
-    "short": "poa_sokol",
     "token": "tPOA",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://sokol.poa.network",
@@ -71,7 +66,6 @@
   },
   {
     "full": "LUKSO (L14 Testnet)",
-    "short": "lukso_l14",
     "token": "tLYX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.l14.lukso.network",
@@ -85,7 +79,6 @@
   },
   {
     "full": "Ethereum (Kovan)",
-    "short": "eth_kovan",
     "token": "kETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://kovan.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -99,7 +92,6 @@
   },
   {
     "full": "Ethereum (Görli)",
-    "short": "eth_goerli",
     "token": "gETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://goerli.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -113,7 +105,6 @@
   },
   {
     "full": "Ethereum (Ropsten)",
-    "short": "eth_ropsten",
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -127,7 +118,6 @@
   },
   {
     "full": "Ethereum",
-    "short": "eth_mainnet",
     "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -141,7 +131,6 @@
   },
   {
     "full": "POA Core",
-    "short": "poa_core",
     "token": "POA",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://core.poanetwork.dev",

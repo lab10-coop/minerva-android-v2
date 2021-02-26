@@ -15,7 +15,6 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.wallet.WalletConfig
-import minerva.android.walletmanager.model.defs.NetworkShortName
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider

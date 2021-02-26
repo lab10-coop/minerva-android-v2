@@ -100,14 +100,14 @@ fun startSafeAccountWrappedActivity(
     context: Context,
     subtitle: String,
     position: Int,
-    networkShort: String,
+    chainId: Int,
     isSafeAccount: Boolean
 ) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.SAFE_ACCOUNT_SETTINGS)
         putExtra(WrappedActivity.SUBTITLE, subtitle)
         putExtra(WrappedActivity.INDEX, position)
-        putExtra(WrappedActivity.NETWORK, networkShort)
+        putExtra(WrappedActivity.NETWORK, chainId)
         putExtra(WrappedActivity.IS_SAFE_ACCOUNT, isSafeAccount)
     }
 }

@@ -100,7 +100,6 @@ class WalletConnectInteractionsViewModel(
         val valueInEther = transactionRepository.toEther(hexToBigInteger(status.transaction.value, BigDecimal.ZERO))
         status.transaction.value = valueInEther.toPlainString()
         return transactionRepository.getTransactionCosts(
-            currentAccount.network.short,
             Int.InvalidIndex,
             status.transaction.from,
             status.transaction.to,
@@ -128,7 +127,7 @@ class WalletConnectInteractionsViewModel(
 
     fun sendTransaction() {
         launchDisposable {
-            transactionRepository.sendTransaction(currentAccount.network.short, transaction)
+            transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map {
                     walletConnectRepository.approveTransactionRequest(currentDappSession.peerId, it)
                     it

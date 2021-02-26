@@ -22,7 +22,7 @@ class AccountTypeItem @JvmOverloads constructor(
         accountName.text = session.accountName
         address.text = session.address
         Glide.with(root.context)
-            .load(getNetworkIcon(context, session.networkShort))
+            .load(getNetworkIcon(context, session.chainId))
             .into(logo)
     }
 }

@@ -7,8 +7,6 @@ import java.math.BigInteger
 
 data class Network(
     val full: String = String.Empty,
-    @Deprecated("Network short is deprecated. Use chainId instead")
-    val short: String = String.Empty,
     val token: String = String.Empty,
     val httpRpc: String = String.Empty,
     val wsRpc: String = String.Empty,

@@ -17,6 +17,7 @@ import minerva.android.extension.addFragmentWithBackStack
 import minerva.android.extension.getCurrentFragment
 import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.token.AddTokenFragment
@@ -146,7 +147,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             val isSafeAccount = intent.getBooleanExtra(IS_SAFE_ACCOUNT, false)
 
             setDisplayHomeAsUpEnabled(true)
-            intent.getStringExtra(NETWORK)?.let {
+            intent.getIntExtra(NETWORK, Int.InvalidId)?.let {
                 setDisplayShowHomeEnabled(true)
                 setDisplayUseLogoEnabled(true)
                 setLogo(getNetworkIcon(this@WrappedActivity, it, isSafeAccount))

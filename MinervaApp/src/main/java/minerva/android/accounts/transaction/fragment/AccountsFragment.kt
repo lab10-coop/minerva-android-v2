@@ -77,7 +77,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             requireContext(),
             account.name,
             position,
-            account.network.short,
+            account.network.chainId,
             account.isSafeAccount
         )
 

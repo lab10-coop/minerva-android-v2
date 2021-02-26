@@ -8,6 +8,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -23,7 +24,7 @@ class AddTokenViewModel(
 ) : BaseViewModel() {
 
     private var privateKey = String.Empty
-    private var network = String.Empty
+    private var chainId = Int.InvalidId
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -37,17 +38,17 @@ class AddTokenViewModel(
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
-    fun initViewModel(privateKey: String, network: String) {
+    fun initViewModel(privateKey: String, chainId: Int) {
         this.privateKey = privateKey
-        this.network = network
+        this.chainId = chainId
     }
 
     fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address)
 
     fun getTokenDetails(address: String) =
         launchDisposable {
-            smartContractRepository.getERC20TokenDetails(privateKey, network, address)
-                .zipWith(tokenManager.getTokenIconURL(NetworkManager.getChainId(network), address),
+            smartContractRepository.getERC20TokenDetails(privateKey, chainId, address)
+                .zipWith(tokenManager.getTokenIconURL(chainId, address),
                     BiFunction<ERC20Token, String, ERC20Token> { token, logoURI ->
                         token.apply {
                             this.logoURI = if(logoURI != String.Empty) logoURI
@@ -72,7 +73,7 @@ class AddTokenViewModel(
 
     fun addToken(token: ERC20Token) =
         launchDisposable {
-            tokenManager.saveToken(network, token)
+            tokenManager.saveToken(chainId, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -83,5 +84,5 @@ class AddTokenViewModel(
                     })
         }
 
-    fun getNetworkName() = NetworkManager.getNetwork(network).full
+    fun getNetworkName() = NetworkManager.getNetwork(chainId).full
 }
