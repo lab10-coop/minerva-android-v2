@@ -13,7 +13,6 @@ import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.transactions.Balance
-import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
@@ -29,9 +28,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun getItemCount(): Int = activeAccounts.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder = AccountViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
-            parent
-        )
+        LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
+        parent
+    )
 
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
         activeAccounts[position].let {
@@ -50,6 +49,15 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         notifyDataSetChanged()
     }
 
+    fun updateSessionCount(accounts: HashMap<String, Int>) {
+        activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
+            account.apply {
+                dappSessionCount = accounts[address] ?: 0
+                notifyItemChanged(index)
+            }
+        }
+    }
+
     fun updateBalances(balances: HashMap<String, Balance>) {
         activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
             account.apply {
@@ -66,10 +74,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
                 accountTokenBalances[account.privateKey]?.let { accountsList ->
                     account.accountTokens = accountsList
                         .filter {
-                            listener.isTokenVisible(account.address, it.token.address)
-                                ?.let { visibility ->
-                                    visibility
-                                }.orElse {
+                            listener.isTokenVisible(account.address, it.token.address).orElse {
                                     listener.saveTokenVisibility(
                                         account.address,
                                         it.token.address,
@@ -125,10 +130,6 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun onOpenOrClose(index: Int, isOpen: Boolean) {
         if (openAccounts.inBounds(index)) openAccounts[index] = isOpen
-    }
-
-    companion object {
-        private val NO_FUNDS = BigDecimal.valueOf(0)
     }
 }
 

@@ -11,7 +11,7 @@ import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -46,8 +46,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
-    private val dappSessionObserver: Observer<List<Account>> = mock()
-    private val dappSessionCaptor: KArgumentCaptor<List<Account>> = argumentCaptor()
+    private val dappSessionObserver: Observer<HashMap<String, Int>> = mock()
+    private val dappSessionCaptor: KArgumentCaptor<HashMap<String, Int>> = argumentCaptor()
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
@@ -295,7 +295,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {
             verify(dappSessionObserver).onChanged(capture())
-            firstValue[0].dappSessionCount == 1
+            firstValue["address"] == 1
         }
     }
 
