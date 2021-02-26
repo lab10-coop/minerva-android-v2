@@ -98,26 +98,37 @@ class BlockchainRegularAccountRepositoryImpl(
                     }
             }.firstOrError()
 
+    private var txData = String.Empty
+
     override fun sendTransaction(network: String, transactionPayload: TransactionPayload): Single<String> =
         web3j.value(network)
             .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
             .flowable()
             .zipWith(getChainId(network))
             .flatMap {
+
+                Timber.tag("kobe").d("SEND 2 txData: $txData")
+
                 web3j.value(network)
                     .ethSendRawTransaction(
                         getSignedTransaction(
                             it.first.transactionCount,
                             transactionPayload,
                             it.second.netVersion.toLong(),
+//                            Numeric.hexStringToByteArray(txData)
                             Numeric.hexStringToByteArray(transactionPayload.data)
                         )
                     )
                     .flowable()
                     .flatMapSingle { response ->
                         if (response.error == null) {
+                            Timber.tag("kobe").d("Transfer: ${response.transactionHash}")
+
                             Single.just(response.transactionHash)
                         } else {
+                            Timber.tag("kobe").d("Transfer error message: ${response.error.message}")
+                            Timber.tag("kobe").d("Transfer error data: ${response.error.data}")
+
                             Single.error(Throwable(response.error.message))
                         }
                     }
@@ -187,6 +198,9 @@ class BlockchainRegularAccountRepositoryImpl(
             loadERC20(payload.privateKey, network, payload.contractAddress, it.netVersion.toLong())
                 .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
                 .flowable()
+                .map {
+                    Timber.tag("kobe").d("ERC20 Token transfer: ${it.transactionHash}")
+                }
                 .ignoreElements()
         }
 
@@ -226,22 +240,32 @@ class BlockchainRegularAccountRepositoryImpl(
                 )
 
         } else {
+            //from -> native coin address
             web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
                 .flowable()
                 .zipWith(resolveENS(to).toFlowable())
                 .flatMap { (count, address) ->
 
+                    Timber.tag("kobe").d("Amount to send: $amount")
+                    Timber.tag("kobe").d("Amount to send in BIGInteger: ${amount.toBigInteger()}")
+                    Timber.tag("kobe").d("Amount to send in ETH: ${toWei(amount, Convert.Unit.ETHER).toBigInteger()}")
+                    Timber.tag("kobe").d("To: $address")
+                    Timber.tag("kobe").d("From: $from")
+                    Timber.tag("kobe").d("TokenAddress: $tokenAddress")
 //                    val token = loadERC20(privateKey, network, tokenAddress, chainId.toLong())
 
                     val function =
                         Function(
                             ERC20.FUNC_TRANSFER,
-                            listOf(Address(to), Uint256(toWei(amount, Convert.Unit.ETHER).toBigInteger())),
+                            listOf(Address(address), Uint256(toWei(amount, Convert.Unit.ETHER).toBigInteger())),
                             emptyList()
                         )
-                    val txData: String = FunctionEncoder.encode(function)
 
-                    val transaction = Transaction.createFunctionCallTransaction(
+                    txData = FunctionEncoder.encode(function)
+
+                    Timber.tag("kobe").d("1 TxData: $txData")
+
+                    val functionCallTransaction = Transaction.createFunctionCallTransaction(
                         from,
                         count.transactionCount,
                         BigInteger.ZERO,
@@ -251,9 +275,25 @@ class BlockchainRegularAccountRepositoryImpl(
                         txData
                     )
 
-                    web3j.value(network).ethEstimateGas(transaction)
+//                    val transaction = getTransaction(from, count, address, amount, txData)
+
+                    web3j.value(network).ethEstimateGas(functionCallTransaction)
                         .flowable()
-                        .flatMapSingle { handleGasLimit(network, it, gasPrice) }
+                        .zipWith(
+                            web3j.value(network).ethCall(functionCallTransaction, DefaultBlockParameterName.LATEST)
+                                .flowable()
+                        )
+                        .flatMapSingle { (gas, eth) ->
+
+                            Timber.tag("kobe").d("Revert reason: ${eth.revertReason}")
+                            if (eth.error != null) {
+                                Timber.tag("kobe").d("Error data: ${eth.error.data}")
+                                Timber.tag("kobe").d("Error message: ${eth.error.message}")
+                            }
+                            Timber.tag("kobe").d("Raw response: ${eth.rawResponse}")
+
+                            handleGasLimit(network, gas, gasPrice)
+                        }
                 }
                 .firstOrError()
                 .timeout(
@@ -281,16 +321,13 @@ class BlockchainRegularAccountRepositoryImpl(
         contractData
     )
 
-
     private fun handleGasLimit(
         network: String,
         it: EthEstimateGas,
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
-        Timber.tag("kobe").d("estimate gas")
-
         val gasLimit = it.error?.let {
-            Timber.tag("kobe").d("estimate gas error: ${it.message}")
+            Timber.tag("kobe").d("estimate gas error: ${it.message}, data: ${it.data}")
             Operation.TRANSFER_NATIVE.gasLimit
         } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(network, gasLimit, gasPrice)
