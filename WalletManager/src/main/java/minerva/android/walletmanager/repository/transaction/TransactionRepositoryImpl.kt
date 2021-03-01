@@ -23,13 +23,11 @@ import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.mappers.PendingTransactionToPendingAccountMapper
 import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTransactionCost
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
+import minerva.android.walletmanager.model.mappers.TxCostPayloadToTxCostDataMapper
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.transactions.Balance
-import minerva.android.walletmanager.model.transactions.Recipient
-import minerva.android.walletmanager.model.transactions.Transaction
-import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.transactions.*
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
@@ -154,65 +152,26 @@ class TransactionRepositoryImpl(
     override fun sendTransaction(network: String, transaction: Transaction): Single<String> =
         blockchainRepository.sendTransaction(network, TransactionToTransactionPayloadMapper.map(transaction))
 
-    override fun getTransactionCosts(
-        network: String,
-        tokenIndex: Int,
-        from: String,
-        to: String,
-        amount: BigDecimal,
-        chainId: Int,
-        tokenAddress: String,
-        contractData: String
-    ): Single<TransactionCost> =
-        if (shouldGetGasPriceFromApi(network)) {
-            cryptoApi.getGasPrice(url = NetworkManager.getNetwork(network).gasPriceOracle)
-                .flatMap { gasPrice ->
-                    getTxCosts(network, tokenIndex, from, to, amount, gasPrice, chainId, tokenAddress, contractData)
-                }.onErrorResumeNext {
-                    getTxCosts(
-                        network,
-                        tokenIndex,
-                        from,
-                        to,
-                        amount,
-                        null,
-                        chainId,
-                        tokenAddress,
-                        contractData
-                    )
-                }
+    override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
+        if (shouldGetGasPriceFromApi(networkShort)) {
+            cryptoApi.getGasPrice(url = NetworkManager.getNetwork(networkShort).gasPriceOracle)
+                .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice) }
+                .onErrorResumeNext { getTxCosts(txCostPayload, null) }
         } else {
-            getTxCosts(network, tokenIndex, from, to, amount, null, chainId, tokenAddress, contractData)
+            getTxCosts(txCostPayload, null)
         }
+    }
 
     private fun shouldGetGasPriceFromApi(network: String) =
         NetworkManager.getNetwork(network).gasPriceOracle.isNotEmpty()
 
-    private fun getTxCosts(
-        network: String,
-        tokenIndex: Int,
-        from: String,
-        to: String,
-        amount: BigDecimal,
-        gasPrice: GasPrices?,
-        chainId: Int,
-        tokenAddress: String,
-        contractData: String
-    ): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(
-            network,
-            tokenIndex,
-            from,
-            to,
-            amount,
-            gasPrice?.speed?.standard,
-            tokenAddress,
-            contractData
-        ).map { payload ->
-            TransactionCostPayloadToTransactionCost.map(payload, gasPrice, chainId) {
-                blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
+    private fun getTxCosts(payload: TxCostPayload, gasPrice: GasPrices?): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), gasPrice?.speed?.standard)
+            .map { txCost ->
+                TransactionCostPayloadToTransactionCost.map(txCost, gasPrice, payload.chainId) {
+                    blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
+                }
             }
-        }
 
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)
@@ -284,7 +243,10 @@ class TransactionRepositoryImpl(
         localStorage.getPendingAccounts()
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
-        blockchainRepository.transferERC20Token(network, TransactionToTransactionPayloadMapper.map(transaction)) //.ignoreElement()
+        blockchainRepository.transferERC20Token(
+            network,
+            TransactionToTransactionPayloadMapper.map(transaction)
+        ) //.ignoreElement()
             .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()

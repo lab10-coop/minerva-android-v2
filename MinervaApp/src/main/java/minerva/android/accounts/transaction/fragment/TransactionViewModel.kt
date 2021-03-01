@@ -28,6 +28,7 @@ import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -107,8 +108,11 @@ class TransactionViewModel(
     private val isSafeAccountTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && account.isSafeAccount
 
-    private val tokenAddress
-        get() = account.accountTokens[tokenIndex].token.address
+    private val contractAddress
+        get() = when (tokenIndex) {
+            Int.InvalidIndex -> String.Empty
+            else -> account.accountTokens[tokenIndex].token.address
+        }
 
     val cryptoBalance: BigDecimal
         get() = if (tokenIndex == Int.InvalidIndex) account.cryptoBalance else account.accountTokens[tokenIndex].balance
@@ -128,15 +132,7 @@ class TransactionViewModel(
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {
-            transactionRepository.getTransactionCosts(
-                network.short,
-                tokenIndex,
-                account.address,
-                to,
-                amount,
-                account.network.chainId,
-                tokenAddress
-            )
+            transactionRepository.getTransactionCosts(getTxCostPayload(to, amount))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -182,7 +178,7 @@ class TransactionViewModel(
                             smartContractRepository.transferERC20Token(
                                 network.short,
                                 it,
-                                tokenAddress
+                                contractAddress
                             ).toSingleDefault(it)
                         }
                 }
@@ -289,7 +285,7 @@ class TransactionViewModel(
     ) {
         Timber.tag("kobe").d("Token transaction")
         launchDisposable {
-            resolveENS(receiverKey, amount, gasPrice, gasLimit, tokenAddress)
+            resolveENS(receiverKey, amount, gasPrice, gasLimit, contractAddress)
                 .flatMapCompletable { transactionRepository.transferERC20Token(account.network.short, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -382,4 +378,15 @@ class TransactionViewModel(
         contractAddress: String = String.Empty
     ): Transaction =
         Transaction(account.address, account.privateKey, receiverKey, amount, gasPrice, gasLimit, contractAddress)
+
+    private fun getTxCostPayload(to: String, amount: BigDecimal): TxCostPayload =
+        TxCostPayload(
+            network.short,
+            tokenIndex,
+            account.address,
+            to,
+            amount,
+            account.network.chainId,
+            contractAddress
+        )
 }

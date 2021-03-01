@@ -13,6 +13,7 @@ import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
@@ -97,30 +98,35 @@ class WalletConnectInteractionsViewModel(
     ): Single<OnEthSendTransactionRequest> {
         currentDappSession = session
         transactionRepository.getAccountByAddress(currentDappSession.address)?.let { currentAccount = it }
-        val valueInEther = transactionRepository.toEther(hexToBigInteger(status.transaction.value, BigDecimal.ZERO))
-        status.transaction.value = valueInEther.toPlainString()
-        return transactionRepository.getTransactionCosts(
+        val value = transactionRepository.toEther(hexToBigInteger(status.transaction.value, BigDecimal.ZERO))
+        status.transaction.value = value.toPlainString()
+        return transactionRepository.getTransactionCosts(getTxCostPayload(currentDappSession.chainId, status, value))
+            .flatMap { transactionCost ->
+                transactionRepository.getEurRate(session.chainId)
+                    .map {
+                        currentRate = it
+                        val valueInFiat = (status.transaction.value.toDouble() * currentRate).toBigDecimal()
+                        val costInFiat = transactionCost.cost.multiply(BigDecimal(currentRate))
+                        currentTransaction = status.transaction.copy(
+                            fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
+                            txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat))
+                        )
+                        OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
+                    }
+            }
+    }
+
+    private fun getTxCostPayload(chainId: Int, status: OnEthSendTransaction, value: BigDecimal): TxCostPayload =
+        TxCostPayload(
             currentAccount.network.short,
-            DEFAULT_TOKE_INDEX, //Int.InvalidIndex,
+            DEFAULT_TOKE_INDEX, // todo check if its token -> token transaction, add enum types
             status.transaction.from,
             status.transaction.to,
-            valueInEther,
-            session.chainId,
+            value,
+            chainId,
             getContractData(status.transaction)
-        ).flatMap { transactionCost ->
-            transactionRepository.getEurRate(session.chainId)
-                .map {
-                    currentRate = it
-                    val valueInFiat = (status.transaction.value.toDouble() * currentRate).toBigDecimal()
-                    val costInFiat = transactionCost.cost.multiply(BigDecimal(currentRate))
-                    currentTransaction = status.transaction.copy(
-                        fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
-                        txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat))
-                    )
-                    OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
-                }
-        }
-    }
+        )
+
 
     private fun getContractData(transaction: WalletConnectTransaction): String =
         if (hexToBigInteger(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO) String.Empty

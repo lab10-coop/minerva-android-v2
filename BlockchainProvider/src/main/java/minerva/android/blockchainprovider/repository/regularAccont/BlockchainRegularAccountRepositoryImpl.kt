@@ -9,6 +9,7 @@ import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.blockchainprovider.model.TxCostData
 import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.smartContracts.ERC20
@@ -156,60 +157,34 @@ class BlockchainRegularAccountRepositoryImpl(
         if (ensName.contains(DOT)) Single.just(ensName).map { ensResolver.resolve(it) }.onErrorReturnItem(ensName)
         else Single.just(ensName)
 
-    private var txData = String.Empty
-
-    //EOA (with contract byte code) -> TOKEN
-    //use it for:
-    //token to token
-    //sth to token
-    //token to sth
     override fun sendTransaction(network: String, transactionPayload: TransactionPayload): Single<String> =
         web3j.value(network)
             .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
             .flowable()
             .zipWith(getChainId(network))
             .flatMap {
-
-                Timber.tag("kobe").d("GasLimit: ${transactionPayload.gasLimit}")
-
-                Timber.tag("kobe").d("SEND 2 txData: $txData")
-
-
                 web3j.value(network)
                     .ethSendRawTransaction(
                         getSignedTransaction(
                             it.first.transactionCount,
                             transactionPayload,
                             it.second.netVersion.toLong(),
-//                            Numeric.hexStringToByteArray(txData)
                             Numeric.hexStringToByteArray(transactionPayload.data)
                         )
                     )
                     .flowable()
                     .flatMapSingle { response ->
                         if (response.error == null) {
-                            Timber.tag("kobe").d("Transfer: ${response.transactionHash}")
-
                             Single.just(response.transactionHash)
                         } else {
-                            Timber.tag("kobe").d("Transfer error message: ${response.error.message}")
-                            Timber.tag("kobe").d("Transfer error data: ${response.error.data}")
-
                             Single.error(Throwable(response.error.message))
                         }
                     }
             }.firstOrError()
 
-    //TOKEN -> TOKEN
-    override fun transferERC20Token(network: String, payload: TransactionPayload): Completable =//Single<String> =
+    override fun transferERC20Token(network: String, payload: TransactionPayload): Completable =
         getChainId(network).flatMapCompletable {
-
-            Timber.tag("kobe").d("GasLimit transfer: ${payload.gasLimit}")
-            Timber.tag("kobe").d("GasPrice transfer: ${payload.gasPrice}")
-
-
             loadTransactionERC20(payload.privateKey, network, payload.contractAddress, it.netVersion.toLong(), payload)
-
                 .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
                 .flowable()
                 .map {
@@ -219,111 +194,53 @@ class BlockchainRegularAccountRepositoryImpl(
 
         }
 
-    override fun getTransactionCosts(
-        network: String,
-        assetIndex: Int,
-        from: String,
-        to: String,
-        amount: BigDecimal,
-        gasPrice: BigDecimal?,
-        contractAddress: String,
-        contractData: String
-    ): Single<TransactionCostPayload> =
-        if (assetIndex == Int.InvalidIndex) {
-            Timber.tag("kobe").d("native coin: $assetIndex")
-            //eth -> eth
-            //eth -> token
-            web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
+    override fun getTransactionCosts(txCostData: TxCostData, gasPrice: BigDecimal?): Single<TransactionCostPayload> =
+        with(txCostData) {
+            web3j.value(networkShort).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
                 .flowable()
                 .zipWith(resolveENS(to).toFlowable())
                 .flatMap { (count, address) ->
-
-                    web3j.value(network).ethEstimateGas(
-                        getTransaction(
-                            from,
-                            count,
-                            address,
-                            amount,
-                            contractData
-                        )
-                    )
-                        .flowable()
-                        .flatMapSingle { handleGasLimit(network, it, gasPrice) }
-                }
-                .firstOrError()
-                .timeout(
-                    TIMEOUT,
-                    TimeUnit.SECONDS,
-                    calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
-                )
-
-        } else {
-            //token to token
-            web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
-                .flowable()
-//                .zipWith(resolveENS(to).toFlowable())
-                .flatMap { count ->
-
-                    Timber.tag("kobe").d("Amount to send: $amount")
-                    Timber.tag("kobe").d("Amount to send in BIGInteger: ${amount.toBigInteger()}")
-                    Timber.tag("kobe").d("Amount to send in ETH: ${toWei(amount, Convert.Unit.ETHER).toBigInteger()}")
-                    Timber.tag("kobe").d("To: $to")
-                    Timber.tag("kobe").d("From: $from")
-                    Timber.tag("kobe").d("ContractAddress: $contractAddress")
-
-                    //address - receiver token address
-                    //smart contract address
-
-                    val function =
-                        Function(
-                            ERC20.FUNC_TRANSFER,
-                            listOf(Address(to), Uint256(toWei(amount, Convert.Unit.ETHER).toBigInteger())),
-                            emptyList()
-                        )
-
-                    txData = FunctionEncoder.encode(function)
-
-                    //czy token address to smartContract address
-                    //
-
-                    Timber.tag("kobe").d("1 TxData: $txData")
-
-                    val functionCallTransaction = Transaction.createFunctionCallTransaction(
-                        from, //xDai address
-                        count.transactionCount,
-                        BigInteger.ZERO, //gasPrice
-                        BigInteger.ZERO, //gasLimit
-                        contractAddress,//HNY token contractAddress     //token smart contract address
-                        BigInteger.ZERO, //value of native coin
-                        txData // amount of HNY token and receiver address (xDai address )
-                    )
-
-
-                    web3j.value(network).ethEstimateGas(functionCallTransaction)
+                    val transaction: Transaction = prepareTransaction(count, address, this)
+                    web3j.value(networkShort).ethEstimateGas(transaction)
                         .flowable()
                         .zipWith(
-                            web3j.value(network).ethCall(functionCallTransaction, DefaultBlockParameterName.LATEST)
+                            web3j.value(networkShort)
+                                .ethCall(transaction, DefaultBlockParameterName.LATEST)
                                 .flowable()
                         )
-                        .flatMapSingle { (gas, eth) ->
-
-                            Timber.tag("kobe").d("Revert reason: ${eth.revertReason}")
-                            if (eth.error != null) {
-                                Timber.tag("kobe").d("Error data: ${eth.error.data}")
-                                Timber.tag("kobe").d("Error message: ${eth.error.message}")
-                            }
-                            Timber.tag("kobe").d("Raw response: ${eth.rawResponse}")
-
-                            handleGasLimit(network, gas, gasPrice)
-                        }
+                        .flatMapSingle { (gas, _) -> handleGasLimit(networkShort, gas, gasPrice) }
                 }
                 .firstOrError()
                 .timeout(
                     TIMEOUT,
                     TimeUnit.SECONDS,
-                    calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+                    calculateTransactionCosts(networkShort, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
                 )
         }
+
+    private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
+        //todo use enum types to txcosts
+        when (costData.tokenIndex) {
+            Int.InvalidIndex -> getTransaction(costData.from, count, address, costData.amount, costData.contractData)
+            else -> {
+                Transaction.createFunctionCallTransaction(
+                    costData.from,
+                    count.transactionCount,
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    costData.contractAddress,//token smart contract address
+                    BigInteger.ZERO, //value of native coin
+                    FunctionEncoder.encode(getTokenFunctionCall(address, costData))
+                )
+            }
+        }
+
+    private fun getTokenFunctionCall(address: String, costData: TxCostData) =
+        Function(
+            ERC20.FUNC_TRANSFER,
+            listOf(Address(address), Uint256(toWei(costData.amount, Convert.Unit.ETHER).toBigInteger())),
+            emptyList()
+        )
 
     private fun getTransaction(
         from: String,
@@ -346,25 +263,17 @@ class BlockchainRegularAccountRepositoryImpl(
         it: EthEstimateGas,
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
-        val gasLimit = it.error?.let {
-            Timber.tag("kobe").d("estimate gas error: ${it.message}, data: ${it.data}")
-            Operation.TRANSFER_NATIVE.gasLimit
-        } ?: it.amountUsed//estimateGasLimit(it.amountUsed)
-
-        Timber.tag("kobe").d("SEND gasLimit: $gasLimit")
-        Timber.tag("kobe").d("calculated gasLimit: ${increaseGasLimitByTenPercent(gasLimit)}")
-
-
+        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(network, increaseGasLimitByTenPercent(gasLimit), gasPrice)
     }
 
     private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
-        if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
-            Timber.tag("kobe").d("default gasLimit: $gasLimit")
-            gasLimit
-        } else {
-            Timber.tag("kobe").d("calculated gasLimit: ${increaseGasLimitByTenPercent(gasLimit)}")
-            increaseGasLimitByTenPercent(gasLimit)
+        when (gasLimit) {
+            Operation.DEFAULT_LIMIT.gasLimit -> {
+                Timber.tag("kobe").d("default gasLimit: $gasLimit")
+                gasLimit
+            }
+            else -> increaseGasLimitByTenPercent(gasLimit)
         }
 
     override fun refreshTokenBalance(
@@ -373,13 +282,14 @@ class BlockchainRegularAccountRepositoryImpl(
         contractAddress: String,
         safeAccountAddress: String
     ): Observable<Pair<String, BigDecimal>> =
-        if (safeAccountAddress.isEmpty()) getERC20Balance(
-            contractAddress,
-            network,
-            privateKey,
+        getERC20Balance(contractAddress, network, privateKey, getAddress(safeAccountAddress, privateKey))
+
+    private fun getAddress(safeAccountAddress: String, privateKey: String): String =
+        if (safeAccountAddress.isEmpty()) {
             Credentials.create(privateKey).address
-        )
-        else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
+        } else {
+            safeAccountAddress
+        }
 
 
     override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
