@@ -147,10 +147,12 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             val isSafeAccount = intent.getBooleanExtra(IS_SAFE_ACCOUNT, false)
 
             setDisplayHomeAsUpEnabled(true)
-            intent.getIntExtra(NETWORK, Int.InvalidId)?.let {
-                setDisplayShowHomeEnabled(true)
-                setDisplayUseLogoEnabled(true)
-                setLogo(getNetworkIcon(this@WrappedActivity, it, isSafeAccount))
+            intent.getIntExtra(CHAIN_ID, Int.InvalidId).let { chainId ->
+                if(chainId != Int.InvalidId) {
+                    setDisplayShowHomeEnabled(true)
+                    setDisplayUseLogoEnabled(true)
+                    setLogo(getNetworkIcon(this@WrappedActivity, chainId, isSafeAccount))
+                }
             }
         }
     }
@@ -165,7 +167,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
         const val INDEX = "index"
         const val POSITION = "position"
         const val FRAGMENT = "fragment"
-        const val NETWORK = "network"
+        const val CHAIN_ID = "network"
         const val FRAGMENT_TYPE = "type"
         const val SERVICE_QR_CODE = "service_qr_code"
         const val IS_SAFE_ACCOUNT = "is_safe_account"

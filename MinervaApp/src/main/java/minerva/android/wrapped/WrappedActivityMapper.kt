@@ -90,7 +90,7 @@ fun startSafeAccountWrappedActivity(
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.SAFE_ACCOUNT_SETTINGS)
         putExtra(WrappedActivity.SUBTITLE, subtitle)
         putExtra(WrappedActivity.INDEX, position)
-        putExtra(WrappedActivity.NETWORK, chainId)
+        putExtra(WrappedActivity.CHAIN_ID, chainId)
         putExtra(WrappedActivity.IS_SAFE_ACCOUNT, isSafeAccount)
     }
 }
