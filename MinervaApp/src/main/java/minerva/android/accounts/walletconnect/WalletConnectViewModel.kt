@@ -150,22 +150,17 @@ class WalletConnectViewModel(
 
     private fun handleSessionRequest(it: OnSessionRequest): WalletConnectState =
         it.chainId?.let { id ->
-            requestedNetwork = getNetworkName(id).orElse { String.Empty }
+            requestedNetwork = getNetworkName(id)
             OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
         }.orElse {
-            requestedNetwork = getNetworkName(it.chainId).orElse { String.Empty }
+            requestedNetwork = getNetworkWhenChainIdNotDefined()
             OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
         }
 
-    private fun getNetworkName(chainId: Int?): String? {
-        chainId?.let {
-            return NetworkManager.networks.find { it.chainId == chainId }?.full.orElse { getNetworkWhenChainIdNotDefined() }
-        }.orElse {
-            return getNetworkWhenChainIdNotDefined()
-        }
-    }
+    private fun getNetworkName(chainId: Int) = NetworkManager.networks.find { it.chainId == chainId }?.full.orElse { String.Empty }
 
-    private fun getNetworkWhenChainIdNotDefined(): String? =
-        if (account.network.testNet) NetworkManager.networks.find { it.chainId == ETH_GOR }?.full
-        else NetworkManager.networks.find { it.chainId == ETH_MAIN }?.full
+
+    private fun getNetworkWhenChainIdNotDefined(): String =
+        if (account.network.testNet) NetworkManager.networks.find { it.chainId == ETH_GOR }?.full ?: String.Empty
+        else NetworkManager.networks.find { it.chainId == ETH_MAIN }?.full ?: String.Empty
 }

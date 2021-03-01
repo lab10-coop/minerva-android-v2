@@ -12,6 +12,8 @@ import minerva.android.blockchainprovider.repository.regularAccont.BlockchainReg
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.defs.ChainId
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.wallet.WalletConfig
@@ -53,7 +55,7 @@ class SmartContractRepositoryTest {
     fun `create safe account success`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(blockchainSafeAccountRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.just("address"))
-        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE, networkShort = "eth_rinkeby")).test()
+        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE, chainId = 4)).test()
             .assertNoErrors()
             .assertComplete()
             .assertValue {
@@ -66,7 +68,7 @@ class SmartContractRepositoryTest {
         val error = Throwable()
         NetworkManager.initialize(DataProvider.networks)
         whenever(blockchainSafeAccountRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.error(error))
-        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE, networkShort = "eth_rinkeby")).test()
+        smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE, chainId = 4)).test()
             .assertError(error)
     }
 
@@ -75,7 +77,7 @@ class SmartContractRepositoryTest {
         whenever(blockchainSafeAccountRepository.transferNativeCoin(any(), any())) doReturn Completable.complete()
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())) doReturn Single.just("tom")
         doNothing().whenever(localStorage).saveRecipient(any())
-        smartContractRepository.transferNativeCoin("network", Transaction())
+        smartContractRepository.transferNativeCoin(0, Transaction())
             .test()
             .assertComplete()
             .assertNoErrors()
@@ -87,7 +89,7 @@ class SmartContractRepositoryTest {
         whenever(blockchainSafeAccountRepository.transferNativeCoin(any(), any())) doReturn Completable.error(error)
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())) doReturn Single.error(error)
         doNothing().whenever(localStorage).saveRecipient(any())
-        smartContractRepository.transferNativeCoin("network", Transaction())
+        smartContractRepository.transferNativeCoin(0, Transaction())
             .test()
             .assertError(error)
     }
@@ -96,7 +98,7 @@ class SmartContractRepositoryTest {
     fun `get safe account owners success`() {
         whenever(blockchainSafeAccountRepository.getGnosisSafeOwners(any(), any(), any())) doReturn Single.just(listOf("owner"))
         whenever(walletConfigManager.updateSafeAccountOwners(any(), any())) doReturn Single.just(listOf("owner"))
-        smartContractRepository.getSafeAccountOwners("123", "ETH", "456", value)
+        smartContractRepository.getSafeAccountOwners("123", 0, "456", value)
             .test()
             .assertNoErrors()
     }
@@ -105,7 +107,7 @@ class SmartContractRepositoryTest {
     fun `get safe account owners error`() {
         val error = Throwable()
         whenever(blockchainSafeAccountRepository.getGnosisSafeOwners(any(), any(), any())) doReturn Single.error(error)
-        smartContractRepository.getSafeAccountOwners("123", "ETH", "456", value)
+        smartContractRepository.getSafeAccountOwners("123", 0, "456", value)
             .test()
             .assertError(error)
     }
@@ -115,7 +117,7 @@ class SmartContractRepositoryTest {
         whenever(blockchainSafeAccountRepository.addSafeAccountOwner(any(), any(), any(), any())) doReturn Completable.complete()
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.complete()
         whenever(walletConfigManager.updateSafeAccountOwners(any(), any())) doReturn Single.just(listOf("test"))
-        smartContractRepository.addSafeAccountOwner("owner", "123", "eth", "567", value)
+        smartContractRepository.addSafeAccountOwner("owner", "123", 0, "567", value)
             .test()
             .assertComplete()
             .assertValue {
@@ -136,7 +138,7 @@ class SmartContractRepositoryTest {
         ) doReturn Completable.error(error)
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.error(error)
         whenever(walletConfigManager.updateSafeAccountOwners(any(), any())) doReturn Single.error(error)
-        smartContractRepository.addSafeAccountOwner("owner", "123", "eth", "567", value)
+        smartContractRepository.addSafeAccountOwner("owner", "123", 0, "567", value)
             .test()
             .assertError(error)
     }
@@ -153,7 +155,7 @@ class SmartContractRepositoryTest {
         ) doReturn Completable.complete()
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.complete()
         whenever(walletConfigManager.updateSafeAccountOwners(any(), any())) doReturn Single.just(listOf("test"))
-        smartContractRepository.removeSafeAccountOwner("owner", "123", "eth", "567", value)
+        smartContractRepository.removeSafeAccountOwner("owner", "123", 0, "567", value)
             .test()
             .assertComplete()
     }
@@ -166,7 +168,7 @@ class SmartContractRepositoryTest {
         )
         whenever(walletConfigManager.updateWalletConfig(any())) doReturn Completable.error(error)
         whenever(walletConfigManager.updateSafeAccountOwners(any(), any())) doReturn Single.error(error)
-        smartContractRepository.removeSafeAccountOwner("owner", "123", "eth", "567", value)
+        smartContractRepository.removeSafeAccountOwner("owner", "123", 0, "567", value)
             .test()
             .assertError(error)
     }
@@ -176,7 +178,7 @@ class SmartContractRepositoryTest {
         whenever(blockchainSafeAccountRepository.transferERC20Token(any(), any(), any())) doReturn Completable.complete()
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())) doReturn Single.just("tom")
         doNothing().whenever(localStorage).saveRecipient(any())
-        smartContractRepository.transferERC20Token("network", Transaction(), "address")
+        smartContractRepository.transferERC20Token(0, Transaction(), "address")
             .test()
             .assertComplete()
             .assertNoErrors()
@@ -188,7 +190,7 @@ class SmartContractRepositoryTest {
         whenever(blockchainSafeAccountRepository.transferERC20Token(any(), any(), any())) doReturn Completable.error(error)
         whenever(blockchainRegularAccountRepository.reverseResolveENS(any())) doReturn Single.error(error)
         doNothing().whenever(localStorage).saveRecipient(any())
-        smartContractRepository.transferERC20Token("network", Transaction(), "address")
+        smartContractRepository.transferERC20Token(0, Transaction(), "address")
             .test()
             .assertError(error)
     }
@@ -243,15 +245,15 @@ class SmartContractRepositoryTest {
             )
         }
         smartContractRepository.run {
-            getERC20TokenDetails("privateKey", NetworkShortName.ATS_TAU, "address").test().assertComplete()
+            getERC20TokenDetails("privateKey", ATS_TAU, "address").test().assertComplete()
                 .assertValue {
                     it.name == name
                     it.symbol == symbol
                     it.decimals == decimal.toString()
                 }
-            getERC20TokenDetails("privateKey", NetworkShortName.ATS_TAU, "address").test().assertError(error)
-            getERC20TokenDetails("privateKey", NetworkShortName.ATS_TAU, "address").test().assertError(error)
-            getERC20TokenDetails("privateKey", NetworkShortName.ATS_TAU, "address").test().assertError(error)
+            getERC20TokenDetails("privateKey", ATS_TAU, "address").test().assertError(error)
+            getERC20TokenDetails("privateKey", ATS_TAU, "address").test().assertError(error)
+            getERC20TokenDetails("privateKey", ATS_TAU, "address").test().assertError(error)
         }
     }
 }

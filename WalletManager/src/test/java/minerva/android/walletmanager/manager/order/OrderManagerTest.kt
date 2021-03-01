@@ -31,9 +31,9 @@ class OrderManagerTest : RxTest() {
     )
 
     private val values = listOf(
-        Account(10, name = "Value1", networkShort = "net1"),
-        Account(11, name = "Value2", networkShort = "net2"),
-        Account(12, name = "Value3", networkShort = "net3")
+        Account(10, name = "Value1", chainId = 1),
+        Account(11, name = "Value2", chainId = 2),
+        Account(12, name = "Value3", chainId = 3)
     )
 
     private val services = listOf(
@@ -41,9 +41,9 @@ class OrderManagerTest : RxTest() {
     )
 
     private val networks = listOf(
-        Network(short = "net1", httpRpc = "some"),
-        Network(short = "net2", httpRpc = "some"),
-        Network(short = "net3", httpRpc = "some")
+        Network(chainId = 1, httpRpc = "some"),
+        Network(chainId = 2, httpRpc = "some"),
+        Network(chainId = 3, httpRpc = "some")
     )
 
     private val walletConfig = WalletConfig(0, identities, values, services)

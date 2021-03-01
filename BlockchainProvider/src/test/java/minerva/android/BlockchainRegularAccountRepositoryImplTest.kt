@@ -1,6 +1,5 @@
 package minerva.android
 
-import com.nhaarman.mockitokotlin2.whenever
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Flowable
@@ -9,7 +8,6 @@ import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.blockchainprovider.smartContracts.ERC20
 import org.junit.Test
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
@@ -24,13 +22,13 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     private val AtsGasPrice = BigInteger.valueOf(100_000_000_000)
     private val EthGasPrice = BigInteger.valueOf(20_000_000_000)
 
-    private val ETH = "ETH"
-    private val ATS = "ATS"
+    private val ETH = 2
+    private val ATS = 1
     private val web3J = mockk<Web3j>()
     private val ensResolver = mockk<EnsResolver>()
     private val freeTokenRepository = mockk<FreeTokenRepository>()
-    private val web3Js: Map<String, Web3j> = mapOf(Pair(ETH, web3J))
-    private val gasPrice: Map<String, BigInteger> =
+    private val web3Js: Map<Int, Web3j> = mapOf(Pair(ETH, web3J))
+    private val gasPrice: Map<Int, BigInteger> =
         mapOf(Pair(ETH, EthGasPrice), Pair(ATS, AtsGasPrice))
 
     private val repository: BlockchainRegularAccountRepositoryImpl =

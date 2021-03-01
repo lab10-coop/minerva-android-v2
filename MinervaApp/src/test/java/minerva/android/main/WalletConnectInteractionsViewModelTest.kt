@@ -10,6 +10,7 @@ import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.main.walletconnect.*
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.TransactionCost
@@ -110,8 +111,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     fun `reconnect to saved sessions and handle on eth send transaction test`() {
         val transition = WalletConnectTransaction("from", "to", value = "100000000", data = "0x0")
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), networkShort = "eth_mainnet")
-        NetworkManager.initialize(listOf(Network(short = "eth_mainnet", httpRpc = "url")))
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransaction(transition, "peerId"))
         )
@@ -122,7 +123,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
         whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any(), any()))
+        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any()))
             .thenReturn(
                 Single.just(
                     TransactionCost(

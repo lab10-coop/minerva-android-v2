@@ -19,6 +19,4 @@ data class Network(
     val chainId: Int = Int.InvalidValue
 ) {
     fun isAvailable(): Boolean = httpRpc != String.Empty
-
-    fun getTokensAddresses(): List<String> = tokens.map { it.address }
 }

@@ -26,9 +26,9 @@ class NetworkManagerTest {
     @Test
     fun `Check from string works properly`() {
         NetworkManager.initialize(testNetworks1)
-        NetworkManager.getNetwork("SN1").full shouldBeEqualTo "FullName1"
-        NetworkManager.getNetwork("SN3").full shouldBeEqualTo "FullName3"
-        val exception = assertFails { NetworkManager.getNetwork("###") }
+        NetworkManager.getNetwork(1).full shouldBeEqualTo "FullName1"
+        NetworkManager.getNetwork(3).full shouldBeEqualTo "FullName3"
+        val exception = assertFails { NetworkManager.getNetwork(-1) }
         exception.message shouldBeEqualTo "Value not found"
     }
 
@@ -79,15 +79,15 @@ class NetworkManagerTest {
     @Test
     fun `Getting correct tokens for network`() {
         NetworkManager.initialize(testNetworks1)
-        val tokensSet1 = NetworkManager.getTokens("SN1")
+        val tokensSet1 = NetworkManager.getTokens(1)
         tokensSet1.size shouldBeEqualTo 3
         tokensSet1[0].name shouldBeEqualTo "token1"
-        val tokensSet2 = NetworkManager.getTokens("SN2")
+        val tokensSet2 = NetworkManager.getTokens(2)
         tokensSet2.size shouldBeEqualTo 3
         tokensSet2[0].name shouldBeEqualTo "token4"
-        val tokensSet3 = NetworkManager.getTokens("SN3")
+        val tokensSet3 = NetworkManager.getTokens(3)
         tokensSet3.size shouldBeEqualTo 0
-        val tokenSet4 = NetworkManager.getTokens("SN0")
+        val tokenSet4 = NetworkManager.getTokens(0)
         tokenSet4.size shouldBeEqualTo 0
     }
 
@@ -104,27 +104,27 @@ class NetworkManagerTest {
     )
 
     private val testNetworks1 = listOf(
-        Network("FullName1", "SN1", "WT1", "someAddress1", "someAddress1", false, BigInteger.TEN, "", tokenSet1, "#FF223344"),
-        Network("FullName2", "SN2", "WT2", "", "someAddress2", false, BigInteger.TEN, "", tokenSet2, "#223344"),
-        Network("FullName3", "SN3", "WT3", "someAddress3", "someAddress3", false, BigInteger.TEN, "", listOf(), "#FF223344"),
-        Network("FullName4", "SN4", "WT4", "", "someAddress4", true, BigInteger.TEN, "", listOf(), "#223344", false),
-        Network("FullName5", "SN5", "WT5", "someAddress5", "someAddress5", true, BigInteger.TEN, "", listOf(), "#FF223344", false)
+        Network("FullName1", "WT1", "someAddress1", "someAddress1", false, BigInteger.TEN, "", tokenSet1, "#FF223344", chainId = 1),
+        Network("FullName2", "WT2", "", "someAddress2", false, BigInteger.TEN, "", tokenSet2, "#223344", chainId = 2),
+        Network("FullName3", "WT3", "someAddress3", "someAddress3", false, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 3),
+        Network("FullName4", "WT4", "", "someAddress4", true, BigInteger.TEN, "", listOf(), "#223344", false, chainId = 4),
+        Network("FullName5", "WT5", "someAddress5", "someAddress5", true, BigInteger.TEN, "", listOf(), "#FF223344", false, chainId = 5)
     )
 
     private val testNetworks2 = listOf(
-        Network("FullName1", "SN1", "WT1", "", "", false, BigInteger.TEN, "", listOf(), "#223344"),
-        Network("FullName2", "SN2", "WT2", "", "", false, BigInteger.TEN, "", listOf(), "#FF223344"),
-        Network("FullName3", "SN3", "WT3", "someAddress3", "someAddress4", false, BigInteger.TEN, "", listOf(), "#FF223344"),
-        Network("FullName4", "SN4", "WT4", "", "", true, BigInteger.TEN, "", listOf(), "#223344"),
-        Network("FullName5", "SN5", "WT5", "", "", true, BigInteger.TEN, "", listOf(), "#223344")
+        Network("FullName1", "WT1", "", "", false, BigInteger.TEN, "", listOf(), "#223344", chainId = 1),
+        Network("FullName2", "WT2", "", "", false, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 2),
+        Network("FullName3", "WT3", "someAddress3", "someAddress4", false, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 3),
+        Network("FullName4", "WT4", "", "", true, BigInteger.TEN, "", listOf(), "#223344", chainId = 4),
+        Network("FullName5", "WT5", "", "", true, BigInteger.TEN, "", listOf(), "#223344", chainId = 5)
     )
 
     private val testNetworks3 = listOf(
-        Network("FullName1", "SN1", "WT1", "", "", false, BigInteger.TEN, "", listOf(), "#223344"),
-        Network("FullName2", "SN2", "WT2", "", "", false, BigInteger.TEN, "", listOf(), "#FF223344"),
-        Network("FullName3", "SN3", "WT3", "", "", false, BigInteger.TEN, "", listOf(), "#223344"),
-        Network("FullName4", "SN4", "WT4", "", "", true, BigInteger.TEN, "", listOf(), "#223344"),
-        Network("FullName5", "SN5", "WT5", "", "", true, BigInteger.TEN, "", listOf(), "#223344")
+        Network("FullName1", "WT1", "", "", false, BigInteger.TEN, "", listOf(), "#223344", chainId = 1),
+        Network("FullName2", "WT2", "", "", false, BigInteger.TEN, "", listOf(), "#FF223344", chainId = 2),
+        Network("FullName3", "WT3", "", "", false, BigInteger.TEN, "", listOf(), "#223344", chainId = 3),
+        Network("FullName4", "WT4", "", "", true, BigInteger.TEN, "", listOf(), "#223344", chainId = 4),
+        Network("FullName5", "WT5", "", "", true, BigInteger.TEN, "", listOf(), "#223344", chainId = 5)
     )
 
     private val testNetworks4 = listOf<Network>()

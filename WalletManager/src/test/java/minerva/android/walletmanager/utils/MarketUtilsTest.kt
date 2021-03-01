@@ -5,6 +5,8 @@ import minerva.android.apiProvider.model.Price
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -14,21 +16,21 @@ class MarketUtilsTest {
 
     private val cryptoBalances: List<Pair<String, BigDecimal>> =
         listOf(Pair("address1", BigDecimal(12)), Pair("address2", BigDecimal(10)))
-    private val poaNetwork = Network(testNet = false, short = NetworkShortName.POA_CORE, httpRpc = "some")
-    private val xdaiNetwork = Network(testNet = false, short = NetworkShortName.XDAI, httpRpc = "some")
+    private val poaNetwork = Network(testNet = false, chainId = POA_CORE, httpRpc = "some")
+    private val xdaiNetwork = Network(testNet = false, chainId = XDAI, httpRpc = "some")
 
-    private val poaTestNetwork = Network(testNet = true, short = NetworkShortName.POA_CORE)
-    private val xdaiTestNetwork = Network(testNet = true, short = NetworkShortName.XDAI)
+    private val poaTestNetwork = Network(testNet = true, chainId = POA_CORE)
+    private val xdaiTestNetwork = Network(testNet = true, chainId = XDAI)
 
     private val testNetworksAccount =
         listOf(
-            Account(1, address = "address1", networkShort = poaTestNetwork.short),
-            Account(2, address = "address2", networkShort = xdaiTestNetwork.short)
+            Account(1, address = "address1", chainId = poaTestNetwork.chainId),
+            Account(2, address = "address2", chainId = xdaiTestNetwork.chainId)
         )
     private val accounts: List<Account> =
         listOf(
-            Account(1, address = "address1", networkShort = poaNetwork.short),
-            Account(2, address = "address2", networkShort = xdaiNetwork.short)
+            Account(1, address = "address1", chainId = poaNetwork.chainId),
+            Account(2, address = "address2", chainId = xdaiNetwork.chainId)
         )
     private val markets = Markets(poaPrice = Price(value = 0.5), daiPrice = Price(2.0))
 
@@ -53,16 +55,16 @@ class MarketUtilsTest {
     fun `get market ids test`() {
         NetworkManager.initialize(
             listOf(
-                Network(short = "eth_mainnet", httpRpc = "some"),
-                Network(short = "poa_core", httpRpc = "some"),
-                Network(short = "xdai", httpRpc = "some")
+                Network(chainId = 1, httpRpc = "some"),
+                Network(chainId = 99, httpRpc = "some"),
+                Network(chainId = 100, httpRpc = "some")
             )
         )
         val accounts =
             listOf(
-                Account(1, networkShort = "eth_mainnet"),
-                Account(2, networkShort = "poa_core"),
-                Account(3, networkShort = "xdai")
+                Account(1, chainId = 1),
+                Account(2, chainId = 99),
+                Account(3, chainId = 100)
             )
         val result = MarketUtils.getMarketsIds(accounts)
         assertEquals("ethereum,poa-network,dai,", result)
