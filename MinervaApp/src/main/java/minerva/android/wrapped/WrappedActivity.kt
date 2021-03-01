@@ -117,7 +117,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             )
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
             WrappedFragmentType.CREDENTIAL_ORDER -> EditOrderFragment.newInstance(WalletActionType.CREDENTIAL)
-            WrappedFragmentType.MANAGE_ASSETS -> ManageTokensFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.MANAGE_TOKENS -> ManageTokensFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
         }
         addFragment(R.id.container, fragment)
     }
@@ -132,7 +132,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> getString(R.string.settings)
             WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
             WrappedFragmentType.CREDENTIAL_ORDER -> getString(R.string.edit_credentials_order)
-            WrappedFragmentType.MANAGE_ASSETS -> getString(R.string.manage_token)
+            WrappedFragmentType.MANAGE_TOKENS -> getString(R.string.manage_token)
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
@@ -183,5 +183,5 @@ enum class WrappedFragmentType {
     CREDENTIAL_ORDER,
     SAFE_ACCOUNT_SETTINGS,
     SERVICE_ORDER,
-    MANAGE_ASSETS
+    MANAGE_TOKENS
 }
