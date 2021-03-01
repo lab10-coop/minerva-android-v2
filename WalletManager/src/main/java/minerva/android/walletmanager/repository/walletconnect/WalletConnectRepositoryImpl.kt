@@ -12,7 +12,6 @@ import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
-import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
@@ -20,12 +19,11 @@ import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSign
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
+import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
-import minerva.android.walletmanager.model.mappers.*
 import timber.log.Timber
-import java.math.BigDecimal
 import java.util.concurrent.ConcurrentHashMap
 
 class WalletConnectRepositoryImpl(
@@ -54,7 +52,7 @@ class WalletConnectRepositoryImpl(
             }
             onFailure = { error, peerId ->
                 Timber.e(error)
-                status.onNext(OnConnectionFailure(error, peerId))
+                status.onNext(OnFailure(error, peerId))
             }
             onDisconnect = { _, peerId ->
                 peerId?.let {

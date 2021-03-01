@@ -284,8 +284,7 @@ class TransactionRepositoryImpl(
         localStorage.getPendingAccounts()
 
     override fun transferERC20Token(network: String, transaction: Transaction): Completable =
-//        blockchainRepository.sendTransaction(network, TransactionToTransactionPayloadMapper.map(transaction))
-        blockchainRepository.transferERC20Token(network, TransactionToTransactionPayloadMapper.map(transaction))
+        blockchainRepository.transferERC20Token(network, TransactionToTransactionPayloadMapper.map(transaction)) //.ignoreElement()
             .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()

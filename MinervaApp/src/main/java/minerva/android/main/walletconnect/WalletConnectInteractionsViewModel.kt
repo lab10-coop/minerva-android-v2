@@ -9,7 +9,6 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.walletconnect.*
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -88,6 +87,7 @@ class WalletConnectInteractionsViewModel(
                     .flatMap { session ->
                         getTransactionCosts(session, status)
                     }
+            is OnFailure -> Single.just(OnError(status.error))
             else -> Single.just(DefaultRequest)
         }
 
@@ -101,7 +101,7 @@ class WalletConnectInteractionsViewModel(
         status.transaction.value = valueInEther.toPlainString()
         return transactionRepository.getTransactionCosts(
             currentAccount.network.short,
-            Int.InvalidIndex,
+            DEFAULT_TOKE_INDEX, //Int.InvalidIndex,
             status.transaction.from,
             status.transaction.to,
             valueInEther,

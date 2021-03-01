@@ -21,7 +21,10 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
-import minerva.android.walletmanager.repository.walletconnect.*
+import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
+import minerva.android.walletmanager.repository.walletconnect.OnFailure
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import timber.log.Timber
 
 class WalletConnectViewModel(
@@ -50,7 +53,7 @@ class WalletConnectViewModel(
                                 topic = it.topic
                                 handleSessionRequest(it)
                             }
-                            is OnConnectionFailure -> OnError(it.error)
+                            is OnFailure -> OnError(it.error)
                             is OnDisconnect -> OnDisconnected
                             else -> DefaultRequest
                         }

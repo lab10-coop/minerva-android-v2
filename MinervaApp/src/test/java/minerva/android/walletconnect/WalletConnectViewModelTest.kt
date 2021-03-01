@@ -6,18 +6,18 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
-import minerva.android.walletmanager.repository.walletconnect.OnConnectionFailure
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
+import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
+import minerva.android.walletmanager.repository.walletconnect.OnFailure
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -43,7 +43,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on connection failure event test`() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnConnectionFailure(error, "peerId")))
+            .thenReturn(Flowable.just(OnFailure(error, "peerId")))
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
