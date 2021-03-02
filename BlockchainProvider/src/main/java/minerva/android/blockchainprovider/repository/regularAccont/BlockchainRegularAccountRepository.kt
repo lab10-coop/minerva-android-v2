@@ -12,23 +12,23 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 interface BlockchainRegularAccountRepository {
-    fun refreshBalances(networkAddress: List<Pair<String, String>>): Single<List<Pair<String, BigDecimal>>>
+    fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Pair<String, BigDecimal>>>
 
     fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal
     fun transferNativeCoin(
-        network: String,
+        chainId: Int,
         accountIndex: Int,
         transactionPayload: TransactionPayload
     ): Single<PendingTransaction>
 
     fun toGwei(amount: BigDecimal): BigDecimal
     fun fromGwei(amount: BigDecimal): BigDecimal
-    fun transferERC20Token(network: String, payload: TransactionPayload): Completable
+    fun transferERC20Token(chainId: Int, payload: TransactionPayload): Completable
     fun reverseResolveENS(ensAddress: String): Single<String>
     fun resolveENS(ensName: String): Single<String>
-    fun getTransactions(pendingHashes: List<Pair<String, String>>): Single<List<Pair<String, String?>>>
+    fun getTransactions(pendingHashes: List<Pair<Int, String>>): Single<List<Pair<String, String?>>>
     fun getTransactionCosts(
-        network: String,
+        chainId: Int,
         assetIndex: Int,
         from: String,
         to: String,
@@ -38,18 +38,18 @@ interface BlockchainRegularAccountRepository {
     ): Single<TransactionCostPayload>
 
     fun isAddressValid(address: String): Boolean
-    fun getCurrentBlockNumber(network: String): Flowable<BigInteger>
+    fun getCurrentBlockNumber(chainId: Int): Flowable<BigInteger>
     fun toChecksumAddress(address: String): String
     fun getFreeATS(address: String): Completable
-    fun getERC20TokenName(privateKey: String, network: String, tokenAddress: String): Observable<String>
-    fun getERC20TokenSymbol(privateKey: String, network: String, tokenAddress: String): Observable<String>
-    fun getERC20TokenDecimals(privateKey: String, network: String, tokenAddress: String): Observable<BigInteger>
+    fun getERC20TokenName(privateKey: String, chainId: Int, tokenAddress: String): Observable<String>
+    fun getERC20TokenSymbol(privateKey: String, chainId: Int, tokenAddress: String): Observable<String>
+    fun getERC20TokenDecimals(privateKey: String, chainId: Int, tokenAddress: String): Observable<BigInteger>
     fun fromWei(value: BigDecimal): BigDecimal
     fun toEther(value: BigDecimal): BigDecimal
-    fun sendTransaction(network: String, transactionPayload: TransactionPayload): Single<String>
+    fun sendTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String>
     fun refreshTokenBalance(
         privateKey: String,
-        network: String,
+        chainId: Int,
         contractAddress: String,
         safeAccountAddress: String
     ): Observable<Pair<String, BigDecimal>>

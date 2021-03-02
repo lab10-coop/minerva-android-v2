@@ -96,10 +96,10 @@ class OrderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
     private fun prepareIcon(element: MinervaPrimitive) {
         binding.apply {
-            when {
-                element.network.short != String.Empty -> mainIcon.setImageDrawable(getNetworkIcon(context, element.network.short))
-                element is Service -> mainIcon.loadImageUrl(element.iconUrl, R.drawable.ic_services)
-                element is Credential -> mainIcon.loadImageUrl(element.iconUrl, R.drawable.ic_default_credential)
+            when (element) {
+                is Account -> mainIcon.setImageDrawable(getNetworkIcon(context, element.network.chainId))
+                is Service -> mainIcon.loadImageUrl(element.iconUrl, R.drawable.ic_services)
+                is Credential -> mainIcon.loadImageUrl(element.iconUrl, R.drawable.ic_default_credential)
                 else -> ProfileImage.load(mainIcon, element as Identity)
             }
         }

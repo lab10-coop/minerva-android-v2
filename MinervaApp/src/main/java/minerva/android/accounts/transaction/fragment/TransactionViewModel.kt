@@ -88,7 +88,7 @@ class TransactionViewModel(
     val tokensList: List<Token>
         get() = mutableListOf<Token>().apply {
             with(account.network) {
-                add(NativeToken(chainId, account.name, token, getMainTokenIconRes(short)))
+                add(NativeToken(chainId, account.name, token, getMainTokenIconRes(chainId)))
                 account.accountTokens.forEach {
                     add(ERC20Token(chainId, symbol = it.token.symbol, address = it.token.address))
                 }
@@ -128,7 +128,7 @@ class TransactionViewModel(
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {
-            transactionRepository.getTransactionCosts(network.short, tokenIndex, account.address, to, amount, account.network.chainId)
+            transactionRepository.getTransactionCosts(tokenIndex, account.address, to, amount, account.network.chainId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -172,7 +172,7 @@ class TransactionViewModel(
                         .flatMap {
                             transaction = it
                             smartContractRepository.transferERC20Token(
-                                network.short,
+                                network.chainId,
                                 it,
                                 tokenAddress
                             ).toSingleDefault(it)
@@ -206,7 +206,7 @@ class TransactionViewModel(
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferNativeCoin(network.short, it).toSingleDefault(it)
+                            smartContractRepository.transferNativeCoin(network.chainId, it).toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
@@ -250,7 +250,7 @@ class TransactionViewModel(
             resolveENS(receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
                     transaction = it
-                    transactionRepository.transferNativeCoin(network.short, account.id, it).toSingleDefault(it)
+                    transactionRepository.transferNativeCoin(network.chainId, account.id, it).toSingleDefault(it)
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
@@ -271,7 +271,7 @@ class TransactionViewModel(
     private fun sendTokenTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, tokenAddress)
-                .flatMapCompletable { transactionRepository.transferERC20Token(account.network.short, it) }
+                .flatMapCompletable { transactionRepository.transferERC20Token(account.network.chainId, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }

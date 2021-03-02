@@ -14,14 +14,14 @@ import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_ROP
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO_14
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -52,7 +52,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test loading tokens list`() {
         NetworkManager.initialize(DataProvider.networks)
-        tokenManager.loadCurrentTokens("Some").size shouldBeEqualTo 0
+        tokenManager.loadCurrentTokens(246785).size shouldBeEqualTo 0
         tokenManager.loadCurrentTokens(ATS_TAU).let {
             it.size shouldBeEqualTo 4
             it[0].name shouldBeEqualTo "CookieTokenDATS"
@@ -100,15 +100,15 @@ class TokenManagerTest : RxTest() {
         val result = tokenManager.updateTokensFromLocalStorage(map)
         result.first shouldBeEqualTo true
         result.second.size shouldBeEqualTo 1
-        result.second[ATS_TAU]?.size shouldBeEqualTo 2
-        result.second[ATS_TAU]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
-        result.second[ATS_TAU]?.get(1)?.token?.logoURI shouldBeEqualTo null
+        result.second["ATS_TAU"]?.size shouldBeEqualTo 2
+        result.second["ATS_TAU"]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
+        result.second["ATS_TAU"]?.get(1)?.token?.logoURI shouldBeEqualTo null
         val resultII = tokenManager.updateTokensFromLocalStorage(mapII)
         resultII.first shouldBeEqualTo false
         resultII.second.size shouldBeEqualTo 1
-        resultII.second[ETH_RIN]?.size shouldBeEqualTo 2
-        resultII.second[ETH_RIN]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
-        resultII.second[ETH_RIN]?.get(1)?.token?.logoURI shouldBeEqualTo "someLogoURI_II"
+        resultII.second["ETH_RIN"]?.size shouldBeEqualTo 2
+        resultII.second["ETH_RIN"]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
+        resultII.second["ETH_RIN"]?.get(1)?.token?.logoURI shouldBeEqualTo "someLogoURI_II"
     }
 
     @Test
@@ -118,12 +118,12 @@ class TokenManagerTest : RxTest() {
         tokenManager.updateTokens(false, map).test().assertComplete().assertNoErrors()
             .assertValue {
                 map == map
-                map[ATS_TAU]?.get(0)?.token?.logoURI == null
+                map["ATS_TAU"]?.get(0)?.token?.logoURI == null
             }
         tokenManager.updateTokens(true, map).test().assertComplete().assertNoErrors()
             .assertValue {
-                map[ATS_TAU]?.get(0)?.token?.logoURI == "someIconAddress"
-                map[ATS_TAU]?.get(1)?.token?.logoURI == "someIconAddressII"
+                map["ATS_TAU"]?.get(0)?.token?.logoURI == "someIconAddress"
+                map["ATS_TAU"]?.get(1)?.token?.logoURI == "someIconAddressII"
             }
     }
 
@@ -247,14 +247,14 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `Creating correct token URLs`() {
-        val accountOne = Account(1, networkShort = ATS_TAU, address = "0xADDRESSxONE")
-        val accountTwo = Account(1, networkShort = ETH_ROP, address = "0xADDRESSxTWO")
-        val accountThree = Account(1, networkShort = POA_SKL, address = "0xADDRESSxTHREE")
-        val accountFour = Account(1, networkShort = LUKSO_14, address = "0xADDRESSxFOUR")
-        val accountFive = Account(1, networkShort = ATS_SIGMA, address = "0xADDRESSxFIVE")
-        val accountSix = Account(1, networkShort = XDAI, address = "0xADDRESSxSIX")
-        val accountSeven = Account(1, networkShort = POA_CORE, address = "0xADDRESSxSEVEN")
-        val accountEight = Account(1, networkShort = "empty", address = "0xADDRESSxEMPTY")
+        val accountOne = Account(1, chainId = ATS_TAU, address = "0xADDRESSxONE")
+        val accountTwo = Account(1, chainId = ETH_ROP, address = "0xADDRESSxTWO")
+        val accountThree = Account(1, chainId = POA_SKL, address = "0xADDRESSxTHREE")
+        val accountFour = Account(1, chainId = LUKSO_14, address = "0xADDRESSxFOUR")
+        val accountFive = Account(1, chainId = ATS_SIGMA, address = "0xADDRESSxFIVE")
+        val accountSix = Account(1, chainId = XDAI, address = "0xADDRESSxSIX")
+        val accountSeven = Account(1, chainId = POA_CORE, address = "0xADDRESSxSEVEN")
+        val accountEight = Account(1, chainId = -1, address = "0xADDRESSxEMPTY")
 
         tokenManager.getTokensApiURL(accountOne) shouldBeEqualTo "https://explorer.tau1.artis.network/api?module=account&action=tokenlist&address=0xADDRESSxONE"
         tokenManager.getTokensApiURL(accountTwo) shouldBeEqualTo "https://api-ropsten.etherscan.io/api?module=account&action=tokenlist&address=0xADDRESSxTWO"
@@ -268,8 +268,8 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `Test refreshing token balance`() {
-        val notEtherscanAccount = Account(1, networkShort = ATS_TAU, address = "0xADDRESSxONE")
-        val etherscanAccount = Account(1, networkShort = ETH_RIN, address = "0xADDRESSxTWO")
+        val notEtherscanAccount = Account(1, chainId = ATS_TAU, address = "0xADDRESSxONE")
+        val etherscanAccount = Account(1, chainId = ETH_RIN, address = "0xADDRESSxTWO")
         val tokenBalances = listOf(
             TokenBalance("t01", "s01", "name01", "2", "0xC00KiE01", "1000"),
             TokenBalance("t02", "s02", "name02", "3", "0xC00KiE02", "100000")
@@ -324,28 +324,28 @@ class TokenManagerTest : RxTest() {
         TokenIconDetails(2, "0x4ddre55", "LogoUri2")
     )
 
-    private val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "1")
-    private val secondToken = ERC20Token(1, "CookieTokenII", "COOKiE", "0xC00k1eII", "2")
+    private val firstToken = ERC20Token(ATS_TAU, "CookieToken", "COOKiE", "0xC00k1e", "1")
+    private val secondToken = ERC20Token(ATS_TAU, "CookieTokenII", "COOKiE", "0xC00k1eII", "2")
     private val map = mapOf(
         Pair(
-            ATS_TAU,
+            "ATS_TAU",
             listOf(
                 AccountToken(firstToken, BigDecimal.ONE),
                 AccountToken(secondToken, BigDecimal.TEN))
         )
     )
 
-    private val firstTokenII = ERC20Token(2, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
-    private val secondTokenII = ERC20Token(2, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
+    private val firstTokenII = ERC20Token(ETH_RIN, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
+    private val secondTokenII = ERC20Token(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
     private val mapII = mapOf(
         Pair(
-            ETH_RIN,
+            "ETH_RIN",
             listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN))
         )
     )
 
     private val tokenRawData = listOf(
-        TokenIconDetails(1, "0xC00k1e", "someIconAddress"),
-        TokenIconDetails(1, "0xC00k1eII", "someIconAddressII")
+        TokenIconDetails(ATS_TAU, "0xC00k1e", "someIconAddress"),
+        TokenIconDetails(ATS_TAU, "0xC00k1eII", "someIconAddressII")
     )
 }

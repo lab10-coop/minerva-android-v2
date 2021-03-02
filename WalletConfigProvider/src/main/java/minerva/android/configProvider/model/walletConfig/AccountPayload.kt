@@ -3,6 +3,7 @@ package minerva.android.configProvider.model.walletConfig
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidValue
 
 data class AccountPayload(
     @SerializedName("index")
@@ -10,7 +11,7 @@ data class AccountPayload(
     @SerializedName("name")
     private val _name: String? = String.Empty,
     @SerializedName("network")
-    private val _network: String? = String.Empty,
+    private val _chainId: Int? = Int.InvalidValue,
     @SerializedName("isDeleted")
     private val _isDeleted: Boolean? = false,
     @SerializedName("owners")
@@ -24,8 +25,8 @@ data class AccountPayload(
         get() = _index ?: Int.InvalidId
     val name: String
         get() = _name ?: String.Empty
-    val network: String
-        get() = _network ?: String.Empty
+    val chainId: Int
+        get() = _chainId ?: Int.InvalidValue
     val isDeleted: Boolean
         get() = _isDeleted ?: false
     val owners: List<String>?

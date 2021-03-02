@@ -13,7 +13,7 @@ data class WalletConfig(
     val accounts: List<Account> = listOf(),
     val services: List<Service> = listOf(),
     val credentials: List<Credential> = listOf(),
-    val erc20Tokens: Map<String, List<ERC20Token>> = mapOf()
+    val erc20Tokens: Map<Int, List<ERC20Token>> = mapOf()
 ) {
     val updateVersion: Int
         get() = version + 1

@@ -47,7 +47,7 @@ class AccountManagerImpl(
                 val newAccount = Account(
                     index,
                     name = accountName,
-                    networkShort = network.short,
+                    chainId = network.chainId,
                     publicKey = keys.publicKey,
                     privateKey = keys.privateKey,
                     address = blockchainRepository.toChecksumAddress(keys.address)
@@ -76,7 +76,7 @@ class AccountManagerImpl(
                 val newAccount = Account(
                     index,
                     name = getSafeAccountName(account),
-                    networkShort = account.network.short,
+                    chainId = account.network.chainId,
                     bindedOwner = ownerAddress,
                     publicKey = keys.publicKey,
                     privateKey = keys.privateKey,

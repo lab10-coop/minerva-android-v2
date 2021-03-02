@@ -26,8 +26,8 @@ interface TransactionRepository {
      */
     fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
-    fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable
-    fun transferERC20Token(network: String, transaction: Transaction): Completable
+    fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable
+    fun transferERC20Token(chainId: Int, transaction: Transaction): Completable
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
     fun getAccount(accountIndex: Int): Account?
@@ -41,7 +41,6 @@ interface TransactionRepository {
     fun getPendingAccount(accountIndex: Int): PendingAccount?
     fun getTransactions(): Single<List<PendingAccount>>
     fun getTransactionCosts(
-        network: String,
         tokenIndex: Int,
         from: String,
         to: String,
@@ -55,5 +54,5 @@ interface TransactionRepository {
     fun updateTokenIcons(): Completable
     fun getEurRate(chainId: Int): Single<Double>
     fun toEther(value: BigDecimal): BigDecimal
-    fun sendTransaction(network: String, transaction: Transaction): Single<String>
+    fun sendTransaction(chainId: Int, transaction: Transaction): Single<String>
 }

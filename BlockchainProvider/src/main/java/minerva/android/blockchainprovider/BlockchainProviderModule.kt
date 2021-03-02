@@ -17,9 +17,9 @@ import org.koin.dsl.module
 import java.math.BigInteger
 
 fun createBlockchainProviderModule(
-    httpUrls: Map<String, String>,
-    gasPrice: Map<String, BigInteger>,
-    wssUrls: Map<String, String>
+    httpUrls: Map<Int, String>,
+    gasPrice: Map<Int, BigInteger>,
+    wssUrls: Map<Int, String>
 ) = module {
     factory { Web3jProvider.provideWeb3j(httpUrls.toMutableMap(), get()) }
     factory { Web3jProvider.provideEnsResolver(get()) }

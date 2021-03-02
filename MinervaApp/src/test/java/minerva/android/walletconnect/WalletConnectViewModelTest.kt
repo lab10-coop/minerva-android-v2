@@ -84,7 +84,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on session request event test with defined chainId on test net`() {
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"))))
-        NetworkManager.networks = listOf(Network(full = "Ethereum", chainId = 1))
+        NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1))
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
@@ -97,35 +97,28 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on session request event test with not defined chainId on test net`() {
         val meta = WalletConnectPeerMeta(name = "token", url = "url", description = "dsc")
-        NetworkManager.networks =
+        val networks =
             listOf(
                 Network(
-                    full = "Ethereum (Görli)",
-                    chainId = 1,
-                    short = "eth_goerli",
+                    name = "Ethereum (Görli)",
+                    chainId = 5,
                     httpRpc = "someaddress",
                     testNet = true
                 )
             )
-
-        whenever(repository.connectionStatusFlowable)
-            .thenReturn(
-                Flowable.just(
-                    OnSessionRequest(
-                        meta,
-                        null,
-                        Topic("peerID", "remotePeerID")
-                    )
+        NetworkManager.initialize(networks)
+        whenever(repository.connectionStatusFlowable).thenReturn(
+            Flowable.just(
+                    OnSessionRequest(meta, null, Topic("peerID", "remotePeerID"))
                 )
             )
         viewModel.stateLiveData.observeForever(stateObserver)
-        viewModel.account = Account(1, networkShort = "eth_goerli")
+        viewModel.account = Account(1, chainId = 5)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo
-                    OnSessionRequestWithUndefinedNetwork(meta, "Ethereum (Görli)")
+            secondValue shouldBeEqualTo OnSessionRequestWithUndefinedNetwork(meta, "Ethereum (Görli)")
         }
     }
 
@@ -145,22 +138,20 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.networks =
             listOf(
                 Network(
-                    full = "Ethereum",
+                    name = "Ethereum",
                     chainId = 1,
-                    short = "eth_mainnet",
                     testNet = false,
                     httpRpc = "url"
                 )
             )
-        viewModel.account = Account(1, networkShort = "eth_mainnet")
+        viewModel.account = Account(1, chainId = 1)
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState
-            secondValue shouldBeEqualTo
-                    OnSessionRequestWithUndefinedNetwork(meta, "Ethereum")
-            viewModel.requestedNetwork shouldBe "Ethereum"
+            secondValue shouldBeEqualTo OnSessionRequestWithUndefinedNetwork(meta, "Ethereum")
+            viewModel.requestedNetwork shouldBeEqualTo "Ethereum"
         }
     }
 
@@ -197,9 +188,8 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    full = "Ethereum",
-                    chainId = 1,
-                    short = "eth_mainnet",
+                    name = "Ethereum",
+                    chainId = 2,
                     testNet = false,
                     httpRpc = "url"
                 )
@@ -207,7 +197,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         )
         viewModel.topic = Topic()
         viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
-        viewModel.account = Account(1, networkShort = "eth_mainnet")
+        viewModel.account = Account(1, chainId = 2)
         whenever(repository.approveSession(any(), any(), any(), any())).thenReturn(Completable.complete())
         viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"))
         verify(repository).approveSession(any(), any(), any(), any())
