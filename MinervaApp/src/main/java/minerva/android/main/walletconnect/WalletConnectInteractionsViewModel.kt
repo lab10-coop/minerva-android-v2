@@ -11,6 +11,7 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.hexToBigInteger
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TxCostPayload
@@ -118,8 +119,8 @@ class WalletConnectInteractionsViewModel(
 
     private fun getTxCostPayload(chainId: Int, status: OnEthSendTransaction, value: BigDecimal): TxCostPayload =
         TxCostPayload(
+            getTransferType(status, value),
             currentAccount.network.short,
-            DEFAULT_TOKE_INDEX, // todo check if its token -> token transaction, add enum types
             status.transaction.from,
             status.transaction.to,
             value,
@@ -127,10 +128,20 @@ class WalletConnectInteractionsViewModel(
             getContractData(status.transaction)
         )
 
+    //TODO include other transaction types (token transfer, token swap)
+    private fun getTransferType(status: OnEthSendTransaction, value: BigDecimal): TransferType =
+        when {
+            isContractDataEmpty(status.transaction) -> TransferType.COIN_TRANSFER
+            !isContractDataEmpty(status.transaction) && value != BigDecimal.ZERO -> TransferType.COIN_SWAP
+            else -> TransferType.UNDEFINED
+        }
 
     private fun getContractData(transaction: WalletConnectTransaction): String =
-        if (hexToBigInteger(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO) String.Empty
+        if (isContractDataEmpty(transaction)) String.Empty
         else transaction.data
+
+    private fun isContractDataEmpty(transaction: WalletConnectTransaction) =
+        hexToBigInteger(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO
 
     fun sendTransaction() {
         launchDisposable {

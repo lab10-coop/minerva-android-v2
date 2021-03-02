@@ -5,6 +5,7 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
+import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -14,7 +15,6 @@ import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
@@ -63,47 +63,6 @@ class BlockchainRegularAccountRepositoryImpl(
                 ethTransaction.transaction.ifPresent { blockHash = it.blockHash }
                 Pair(txHash, blockHash)
             }.firstOrError()
-
-    override fun transferNativeCoin(
-        network: String,
-        accountIndex: Int,
-        transactionPayload: TransactionPayload
-    ): Single<PendingTransaction> =
-        web3j.value(network).ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .zipWith(getChainId(network))
-            .flatMap {
-                web3j.value(network)
-                    .ethSendRawTransaction(
-                        getSignedEtherTransaction(
-                            it.first.transactionCount,
-                            transactionPayload,
-                            it.second.netVersion.toLong()
-                        )
-                    )
-                    .flowable()
-                    .zipWith(getCurrentBlockNumber(network))
-                    .flatMapSingle { (response, blockNumber) ->
-                        if (response.error == null) {
-                            val pendingTx = PendingTransaction(
-                                accountIndex,
-                                response.transactionHash,
-                                network,
-                                transactionPayload.senderAddress,
-                                String.Empty,
-                                transactionPayload.amount,
-                                blockNumber.subtract(BigInteger.valueOf(BLOCK_NUMBER_OFFSET)) //get n-5 block number, where n is current block number
-                            )
-                            Single.just(pendingTx)
-                        } else Single.error(Throwable(response.error.message))
-                    }
-            }.firstOrError()
-
-    override fun getCurrentBlockNumber(network: String): Flowable<BigInteger> =
-        web3j.value(network)
-            .ethBlockNumber()
-            .flowable()
-            .map { it.blockNumber }
 
     /**
      * List arguments: first - network short name, second - wallet address (public)
@@ -157,6 +116,47 @@ class BlockchainRegularAccountRepositoryImpl(
         if (ensName.contains(DOT)) Single.just(ensName).map { ensResolver.resolve(it) }.onErrorReturnItem(ensName)
         else Single.just(ensName)
 
+    override fun transferNativeCoin(
+        network: String,
+        accountIndex: Int,
+        transactionPayload: TransactionPayload
+    ): Single<PendingTransaction> =
+        web3j.value(network).ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .zipWith(getChainId(network))
+            .flatMap {
+                web3j.value(network)
+                    .ethSendRawTransaction(
+                        getSignedEtherTransaction(
+                            it.first.transactionCount,
+                            transactionPayload,
+                            it.second.netVersion.toLong()
+                        )
+                    )
+                    .flowable()
+                    .zipWith(getCurrentBlockNumber(network))
+                    .flatMapSingle { (response, blockNumber) ->
+                        if (response.error == null) {
+                            val pendingTx = PendingTransaction(
+                                accountIndex,
+                                response.transactionHash,
+                                network,
+                                transactionPayload.senderAddress,
+                                String.Empty,
+                                transactionPayload.amount,
+                                blockNumber.subtract(BigInteger.valueOf(BLOCK_NUMBER_OFFSET)) //get n-5 block number, where n is current block number
+                            )
+                            Single.just(pendingTx)
+                        } else Single.error(Throwable(response.error.message))
+                    }
+            }.firstOrError()
+
+    override fun getCurrentBlockNumber(network: String): Flowable<BigInteger> =
+        web3j.value(network)
+            .ethBlockNumber()
+            .flowable()
+            .map { it.blockNumber }
+
     override fun sendTransaction(network: String, transactionPayload: TransactionPayload): Single<String> =
         web3j.value(network)
             .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
@@ -196,32 +196,47 @@ class BlockchainRegularAccountRepositoryImpl(
 
     override fun getTransactionCosts(txCostData: TxCostData, gasPrice: BigDecimal?): Single<TransactionCostPayload> =
         with(txCostData) {
-            web3j.value(networkShort).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
-                .flowable()
-                .zipWith(resolveENS(to).toFlowable())
-                .flatMap { (count, address) ->
-                    val transaction: Transaction = prepareTransaction(count, address, this)
-                    web3j.value(networkShort).ethEstimateGas(transaction)
-                        .flowable()
-                        .zipWith(
-                            web3j.value(networkShort)
-                                .ethCall(transaction, DefaultBlockParameterName.LATEST)
-                                .flowable()
-                        )
-                        .flatMapSingle { (gas, _) -> handleGasLimit(networkShort, gas, gasPrice) }
-                }
-                .firstOrError()
-                .timeout(
-                    TIMEOUT,
-                    TimeUnit.SECONDS,
-                    calculateTransactionCosts(networkShort, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
-                )
+            if (!isSafeAccountTransaction(txCostData)) {
+                web3j.value(networkShort).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
+                    .flowable()
+                    .zipWith(resolveENS(to).toFlowable())
+                    .flatMap { (count, address) ->
+                        val transaction: Transaction = prepareTransaction(count, address, this)
+                        web3j.value(networkShort).ethEstimateGas(transaction)
+                            .flowable()
+                            .zipWith(
+                                web3j.value(networkShort)
+                                    .ethCall(transaction, DefaultBlockParameterName.LATEST)
+                                    .flowable()
+                            )
+                            .flatMapSingle { (gas, call) ->
+                                if (call.error != null) {
+                                    Timber.tag("kobe")
+                                        .d("error gasLimit: ${call.error.message} + ${call.error.data} + ${call.error}")
+                                }
+                                handleGasLimit(networkShort, gas, gasPrice)
+                            }
+                    }
+                    .firstOrError()
+                    .timeout(
+                        TIMEOUT,
+                        TimeUnit.SECONDS,
+                        calculateTransactionCosts(networkShort, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+                    )
+            } else {
+                //TODO implement getting gasLimit for Safe Account transaction fro Blockchain
+                calculateTransactionCosts(networkShort, Operation.SAFE_ACCOUNT_TXS.gasLimit, gasPrice)
+            }
         }
 
+    private fun isSafeAccountTransaction(txCostData: TxCostData) =
+        txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_TOKEN_TRANSFER ||
+                txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER
+
     private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
-        //todo use enum types to txcosts
-        when (costData.tokenIndex) {
-            Int.InvalidIndex -> getTransaction(costData.from, count, address, costData.amount, costData.contractData)
+        when (costData.transferType) {
+            BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP ->
+                getTransaction(costData.from, count, address, costData.amount, costData.contractData)
             else -> {
                 Transaction.createFunctionCallTransaction(
                     costData.from,
@@ -263,14 +278,16 @@ class BlockchainRegularAccountRepositoryImpl(
         it: EthEstimateGas,
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
-        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
+        val gasLimit = it.error?.let {
+            Timber.tag("kobe").d("error gasLimit: ${it.data} + ${it.message}")
+            Operation.TRANSFER_NATIVE.gasLimit
+        } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(network, increaseGasLimitByTenPercent(gasLimit), gasPrice)
     }
 
     private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
         when (gasLimit) {
             Operation.DEFAULT_LIMIT.gasLimit -> {
-                Timber.tag("kobe").d("default gasLimit: $gasLimit")
                 gasLimit
             }
             else -> increaseGasLimitByTenPercent(gasLimit)

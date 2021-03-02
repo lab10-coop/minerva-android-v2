@@ -1,11 +1,12 @@
 package minerva.android.blockchainprovider.model
 
+import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.kotlinUtils.Empty
 import java.math.BigDecimal
 
 data class TxCostData(
+    val transferType: BlockchainTransactionType,
     val networkShort: String,
-    val tokenIndex: Int,
     val from: String,
     val to: String,
     val amount: BigDecimal,

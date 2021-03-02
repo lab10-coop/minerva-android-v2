@@ -15,6 +15,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.EmptyBalance
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.RECEIVER
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.TOKEN
@@ -152,12 +153,34 @@ class TransactionViewModel(
         }
     }
 
+    private fun getTxCostPayload(to: String, amount: BigDecimal): TxCostPayload =
+        TxCostPayload(
+            transferType,
+            network.short,
+            account.address,
+            to,
+            amount,
+            account.network.chainId,
+            contractAddress
+        )
+
+    private val transferType: TransferType
+        get() = when {
+            isMainTransaction -> TransferType.COIN_TRANSFER
+            isTokenTransaction -> TransferType.TOKEN_TRANSFER
+            isSafeAccountMainTransaction -> TransferType.SAFE_ACCOUNT_COIN_TRANSFER
+            isSafeAccountTokenTransaction -> TransferType.SAFE_ACCOUNT_TOKEN_TRANSFER
+            else -> TransferType.UNDEFINED
+        }
+
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
-        when {
-            isMainTransaction -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-            isSafeAccountMainTransaction -> sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-            isTokenTransaction -> sendTokenTransaction(receiverKey, amount, gasPrice, gasLimit)
-            isSafeAccountTokenTransaction -> sendSafeAccountTokenTransaction(receiverKey, amount, gasPrice, gasLimit)
+        when (transferType) {
+            TransferType.COIN_TRANSFER -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            TransferType.SAFE_ACCOUNT_COIN_TRANSFER ->
+                sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            TransferType.TOKEN_TRANSFER -> sendTokenTransaction(receiverKey, amount, gasPrice, gasLimit)
+            TransferType.SAFE_ACCOUNT_TOKEN_TRANSFER ->
+                sendSafeAccountTokenTransaction(receiverKey, amount, gasPrice, gasLimit)
         }
     }
 
@@ -283,7 +306,6 @@ class TransactionViewModel(
         gasPrice: BigDecimal,
         gasLimit: BigInteger
     ) {
-        Timber.tag("kobe").d("Token transaction")
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, contractAddress)
                 .flatMapCompletable { transactionRepository.transferERC20Token(account.network.short, it) }
@@ -378,15 +400,4 @@ class TransactionViewModel(
         contractAddress: String = String.Empty
     ): Transaction =
         Transaction(account.address, account.privateKey, receiverKey, amount, gasPrice, gasLimit, contractAddress)
-
-    private fun getTxCostPayload(to: String, amount: BigDecimal): TxCostPayload =
-        TxCostPayload(
-            network.short,
-            tokenIndex,
-            account.address,
-            to,
-            amount,
-            account.network.chainId,
-            contractAddress
-        )
 }
