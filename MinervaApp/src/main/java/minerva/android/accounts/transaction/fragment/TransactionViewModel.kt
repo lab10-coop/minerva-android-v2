@@ -128,7 +128,14 @@ class TransactionViewModel(
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {
-            transactionRepository.getTransactionCosts(network.short, tokenIndex, account.address, to, amount, account.network.chainId)
+            transactionRepository.getTransactionCosts(
+                network.short,
+                tokenIndex,
+                account.address,
+                to,
+                amount,
+                account.network.chainId
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -297,8 +304,11 @@ class TransactionViewModel(
         }
     }
 
+
+    //TODO klop recalculate it!
     val recalculateAmount: BigDecimal
-        get() = cryptoBalance.minus(transactionCost)
+        get() = if (isMainTransaction) cryptoBalance.minus(transactionCost)
+        else cryptoBalance
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
