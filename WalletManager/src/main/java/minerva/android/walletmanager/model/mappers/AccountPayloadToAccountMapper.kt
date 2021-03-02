@@ -17,7 +17,7 @@ object AccountPayloadToAccountMapper {
             privateKey,
             address,
             response.name,
-            response.network,
+            response.chainId,
             response.isDeleted,
             owners = response.owners,
             contractAddress = response.contractAddress,

@@ -23,16 +23,16 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
     private val viewModel = ManageTokensViewModel(accountManager, localStorage, tokenManager)
 
     private val networks = listOf(
-        Network(short = "net1", httpRpc = "address", testNet = true),
-        Network(short = "net2", httpRpc = "address", testNet = true),
-        Network(short = "net3", httpRpc = "address", testNet = true, token = "cookie")
+        Network(chainId = 1, httpRpc = "address", testNet = true),
+        Network(chainId = 2, httpRpc = "address", testNet = true),
+        Network(chainId = 3, httpRpc = "address", testNet = true, token = "cookie")
     )
 
     private val account = Account(
         id = 0,
         publicKey = "12",
         privateKey = "12",
-        networkShort = "net3",
+        chainId = 3,
         address = "address",
         contractAddress = "aa",
         bindedOwner = "binded",

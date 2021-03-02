@@ -67,7 +67,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                     DrawableCompat.setTint(indeterminateDrawable, Color.parseColor(network.color))
                 }
                 pendingMask.visibleOrGone(isPending)
-                mainIcon.setImageDrawable(getNetworkIcon(context, network.short, isSafeAccount))
+                mainIcon.setImageDrawable(getNetworkIcon(context, network.chainId, isSafeAccount))
                 accountName.text = name
                 mainTokenView.initView(account, this@AccountViewHolder)
             }

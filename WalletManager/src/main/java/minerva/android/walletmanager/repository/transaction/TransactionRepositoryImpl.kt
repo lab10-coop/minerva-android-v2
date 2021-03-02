@@ -61,8 +61,8 @@ class TransactionRepositoryImpl(
     private fun accountsFilter(it: Account) =
         refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
 
-    private fun getAddresses(accounts: List<Account>): List<Pair<String, String>> =
-        accounts.map { it.network.short to it.address }
+    private fun getAddresses(accounts: List<Account>): List<Pair<Int, String>> =
+        accounts.map { it.network.chainId to it.address }
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
@@ -70,14 +70,14 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig()?.accounts?.filter { account ->
             accountsFilter(account) && account.network.isAvailable()
         }?.let { accounts ->
-            accounts.filter { NetworkManager.isUsingEtherScan(it.networkShort) }.let { etherscanAccounts ->
-                accounts.filter { !NetworkManager.isUsingEtherScan(it.networkShort) }.let { notEtherscanAccounts ->
+            accounts.filter { NetworkManager.isUsingEtherScan(it.chainId) }.let { etherscanAccounts ->
+                accounts.filter { !NetworkManager.isUsingEtherScan(it.chainId) }.let { notEtherscanAccounts ->
                     refreshTokensBalanceWithBuffer(etherscanAccounts)
                         .zipWith(refreshTokensBalance(notEtherscanAccounts))
                         .map { (etherscanTokensBalance, notEtherscanTokenBalance) -> etherscanTokensBalance + notEtherscanTokenBalance }
                         .map {
-                            it.associate { (network, privateKey, accountTokens) ->
-                                privateKey to tokenManager.prepareCurrentTokenList(network, accountTokens)
+                            it.associate { (chainId, privateKey, accountTokens) ->
+                                privateKey to tokenManager.prepareCurrentTokenList(chainId, accountTokens)
                             }
                         }
                         .map { tokenManager.updateTokensFromLocalStorage(it) }
@@ -99,34 +99,34 @@ class TransactionRepositoryImpl(
 
     /**
      *
-     *  return statement: List<Triple<Network, AccountPrivateKey, List<AccountToken>>>>
+     *  return statement: List<Triple<ChainId, AccountPrivateKey, List<AccountToken>>>>
      *
      */
 
     private fun refreshTokensBalanceWithBuffer(accounts: List<Account>):
-            Single<List<Triple<String, String, List<AccountToken>>>> =
+            Single<List<Triple<Int, String, List<AccountToken>>>> =
         Observable.range(START, accounts.size)
             .map { accounts[it] }
             .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
             .flatMapSingle { refreshTokensBalance(it) }
             .toList()
             .map { balances ->
-                mutableListOf<Triple<String, String, List<AccountToken>>>().apply { balances.forEach { addAll(it) } }
+                mutableListOf<Triple<Int, String, List<AccountToken>>>().apply { balances.forEach { addAll(it) } }
             }
 
-    private fun refreshTokensBalance(accounts: List<Account>): Single<List<Triple<String, String, List<AccountToken>>>> =
+    private fun refreshTokensBalance(accounts: List<Account>): Single<List<Triple<Int, String, List<AccountToken>>>> =
         Observable.range(START, accounts.size)
             .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
             .toList()
 
-    override fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable =
+    override fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(
-            network,
+            chainId,
             accountIndex,
             TransactionToTransactionPayloadMapper.map(transaction)
         ).map { pendingTx ->
             /*Subscription to web sockets doesn't work with http rpc, hence pending tsx are not saved*/
-            if (NetworkManager.getNetwork(pendingTx.network).wsRpc.isNotEmpty()) {
+            if (NetworkManager.getNetwork(pendingTx.chainId).wsRpc.isNotEmpty()) {
                 localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx))
             }
         }.flatMap { blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty } }
@@ -149,11 +149,11 @@ class TransactionRepositoryImpl(
 
     override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
 
-    override fun sendTransaction(network: String, transaction: Transaction): Single<String> =
-        blockchainRepository.sendTransaction(network, TransactionToTransactionPayloadMapper.map(transaction))
+    override fun sendTransaction(chainId: Int, transaction: Transaction): Single<String> =
+        blockchainRepository.sendTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
-        if (shouldGetGasPriceFromApi(networkShort)) {
+        if (shouldGetGasPriceFromApi(txCostPayload.chainId)) {
             cryptoApi.getGasPrice(url = NetworkManager.getNetwork(networkShort).gasPriceOracle)
                 .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice) }
                 .onErrorResumeNext { getTxCosts(txCostPayload, null) }
@@ -162,8 +162,7 @@ class TransactionRepositoryImpl(
         }
     }
 
-    private fun shouldGetGasPriceFromApi(network: String) =
-        NetworkManager.getNetwork(network).gasPriceOracle.isNotEmpty()
+    private fun shouldGetGasPriceFromApi(chainId: Int) = NetworkManager.getNetwork(chainId).gasPriceOracle.isNotEmpty()
 
     private fun getTxCosts(payload: TxCostPayload, gasPrice: GasPrices?): Single<TransactionCost> =
         blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), gasPrice?.speed?.standard)
@@ -192,34 +191,34 @@ class TransactionRepositoryImpl(
         return pendingList
     }
 
-    private fun getTxHashes(): MutableList<Pair<String, String>> {
-        val txHashes = mutableListOf<Pair<String, String>>()
+    private fun getTxHashes(): MutableList<Pair<Int, String>> {
+        val txHashes = mutableListOf<Pair<Int, String>>()
         localStorage.getPendingAccounts().forEach {
-            txHashes.add(Pair(it.network, it.txHash))
+            txHashes.add(Pair(it.chainId, it.txHash))
         }
         return txHashes
     }
 
     override fun shouldOpenNewWssConnection(accountIndex: Int): Boolean {
-        val network = getPendingAccount(accountIndex).network
+        val chainId = getPendingAccount(accountIndex).chainId
         return when {
-            getPendingAccounts().size == ONE_PENDING_ACCOUNT -> isFirstAccountPending(accountIndex, network)
-            getPendingAccounts().size > ONE_PENDING_ACCOUNT -> isNetworkAlreadyPending(network)
+            getPendingAccounts().size == ONE_PENDING_ACCOUNT -> isFirstAccountPending(accountIndex, chainId)
+            getPendingAccounts().size > ONE_PENDING_ACCOUNT -> isNetworkAlreadyPending(chainId)
             else -> false
         }
     }
 
-    private fun isFirstAccountPending(accountIndex: Int, network: String) =
-        getPendingAccounts().find { it.index == accountIndex && it.network == network } != null
+    private fun isFirstAccountPending(accountIndex: Int, chainId: Int) =
+        getPendingAccounts().find { it.index == accountIndex && it.chainId == chainId } != null
 
-    private fun isNetworkAlreadyPending(network: String) =
-        getPendingAccounts().filter { it.network == network }.size < PENDING_NETWORK_LIMIT &&
-                getPendingAccounts().first().network != network
+    private fun isNetworkAlreadyPending(chainId: Int) =
+        getPendingAccounts().filter { it.chainId == chainId }.size < PENDING_NETWORK_LIMIT &&
+                getPendingAccounts().first().chainId != chainId
 
 
     override fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount> {
         val pendingAccount = getPendingAccount(accountIndex)
-        return webSocketRepository.subscribeToExecutedTransactions(pendingAccount.network, pendingAccount.blockNumber)
+        return webSocketRepository.subscribeToExecutedTransactions(pendingAccount.chainId, pendingAccount.blockNumber)
             .filter { findPendingAccount(it) != null }
             .map { findPendingAccount(it) }
     }
@@ -242,11 +241,8 @@ class TransactionRepositoryImpl(
     override fun getPendingAccounts(): List<PendingAccount> =
         localStorage.getPendingAccounts()
 
-    override fun transferERC20Token(network: String, transaction: Transaction): Completable =
-        blockchainRepository.transferERC20Token(
-            network,
-            TransactionToTransactionPayloadMapper.map(transaction)
-        ) //.ignoreElement()
+    override fun transferERC20Token(chainId: Int, transaction: Transaction): Completable =
+        blockchainRepository.transferERC20Token(chainId, TransactionToTransactionPayloadMapper.map(transaction))
             .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
@@ -258,12 +254,12 @@ class TransactionRepositoryImpl(
     /**
      *
      * return statement: Single<Triple<String, String, List<AccountToken>>>
-     *                   Single<Triple<Network, AccountPrivateKey, List<AccountToken>>>>
+     *                   Single<Triple<ChainId, AccountPrivateKey, List<AccountToken>>>>
      *
      */
 
-    private fun refreshTokensBalance(account: Account): Single<Triple<String, String, List<AccountToken>>> =
-        tokenManager.refreshTokenBalance(account).map { Triple(account.network.short, account.privateKey, it) }
+    private fun refreshTokensBalance(account: Account): Single<Triple<Int, String, List<AccountToken>>> =
+        tokenManager.refreshTokenBalance(account).map { Triple(account.network.chainId, account.privateKey, it) }
 
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)

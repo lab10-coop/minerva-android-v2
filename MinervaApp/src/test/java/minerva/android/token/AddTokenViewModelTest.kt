@@ -28,7 +28,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
     private val addTokenCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
     private val networks = listOf(
-        Network(chainId = 1, httpRpc = "some_rpc", short = "")
+        Network(chainId = 1, httpRpc = "some_rpc")
     )
 
     @Test

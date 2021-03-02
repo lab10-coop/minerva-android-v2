@@ -17,6 +17,7 @@ import minerva.android.extension.addFragmentWithBackStack
 import minerva.android.extension.getCurrentFragment
 import minerva.android.identities.edit.EditIdentityFragment
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.token.AddTokenFragment
@@ -116,7 +117,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             )
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
             WrappedFragmentType.CREDENTIAL_ORDER -> EditOrderFragment.newInstance(WalletActionType.CREDENTIAL)
-            WrappedFragmentType.MANAGE_ASSETS -> ManageTokensFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.MANAGE_TOKENS -> ManageTokensFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
         }
         addFragment(R.id.container, fragment)
     }
@@ -131,7 +132,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> getString(R.string.settings)
             WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
             WrappedFragmentType.CREDENTIAL_ORDER -> getString(R.string.edit_credentials_order)
-            WrappedFragmentType.MANAGE_ASSETS -> getString(R.string.manage_token)
+            WrappedFragmentType.MANAGE_TOKENS -> getString(R.string.manage_token)
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
@@ -146,10 +147,12 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             val isSafeAccount = intent.getBooleanExtra(IS_SAFE_ACCOUNT, false)
 
             setDisplayHomeAsUpEnabled(true)
-            intent.getStringExtra(NETWORK)?.let {
-                setDisplayShowHomeEnabled(true)
-                setDisplayUseLogoEnabled(true)
-                setLogo(getNetworkIcon(this@WrappedActivity, it, isSafeAccount))
+            intent.getIntExtra(CHAIN_ID, Int.InvalidId).let { chainId ->
+                if(chainId != Int.InvalidId) {
+                    setDisplayShowHomeEnabled(true)
+                    setDisplayUseLogoEnabled(true)
+                    setLogo(getNetworkIcon(this@WrappedActivity, chainId, isSafeAccount))
+                }
             }
         }
     }
@@ -164,7 +167,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
         const val INDEX = "index"
         const val POSITION = "position"
         const val FRAGMENT = "fragment"
-        const val NETWORK = "network"
+        const val CHAIN_ID = "chainId"
         const val FRAGMENT_TYPE = "type"
         const val SERVICE_QR_CODE = "service_qr_code"
         const val IS_SAFE_ACCOUNT = "is_safe_account"
@@ -182,5 +185,5 @@ enum class WrappedFragmentType {
     CREDENTIAL_ORDER,
     SAFE_ACCOUNT_SETTINGS,
     SERVICE_ORDER,
-    MANAGE_ASSETS
+    MANAGE_TOKENS
 }

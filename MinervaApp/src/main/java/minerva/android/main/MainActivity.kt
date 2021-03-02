@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                         getString(
                             R.string.transaction_success_message,
                             it.amount,
-                            getNetwork(it.network).token
+                            getNetwork(it.chainId).token
                         )
                     )
                 }
@@ -224,7 +224,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun updatePendingAccount(it: PendingAccount) {
         showFlashbar(
             getString(R.string.transaction_success_title),
-            getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
+            getString(R.string.transaction_success_message, it.amount, getNetwork(it.chainId).token)
         )
         (getCurrentFragment() as? AccountsFragment)?.apply {
             updateAccountFragment() { setPendingAccount(it.index, false) }
@@ -243,7 +243,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 getString(
                     R.string.transaction_success_message,
                     account.amount,
-                    getNetwork(account.network).token
+                    getNetwork(account.chainId).token
                 )
             )
         } else {
@@ -252,7 +252,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 getString(
                     R.string.transaction_error_details_message,
                     account.amount,
-                    account.network
+                    account.chainId
                 )
             )
         }

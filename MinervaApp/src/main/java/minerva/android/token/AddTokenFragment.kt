@@ -16,12 +16,13 @@ import minerva.android.databinding.FragmentAddTokenBinding
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity
-import minerva.android.wrapped.WrappedActivity.Companion.NETWORK
+import minerva.android.wrapped.WrappedActivity.Companion.CHAIN_ID
 import minerva.android.wrapped.WrappedActivity.Companion.PRIVATE_KEY
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -136,7 +137,7 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
         arguments?.let { bundle ->
             viewModel.initViewModel(
                 bundle.getString(PRIVATE_KEY, String.Empty),
-                bundle.getString(NETWORK, String.Empty)
+                bundle.getInt(CHAIN_ID, Int.InvalidId)
             )
         }
         binding.apply {
@@ -151,10 +152,10 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
     }
 
     companion object {
-        fun newInstance(privateKey: String, network: String) = AddTokenFragment().apply {
+        fun newInstance(privateKey: String, chainId: Int) = AddTokenFragment().apply {
             arguments = Bundle().apply {
                 putString(PRIVATE_KEY, privateKey)
-                putString(NETWORK, network)
+                putInt(CHAIN_ID, chainId)
             }
         }
     }

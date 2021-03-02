@@ -145,7 +145,7 @@ class WalletConnectInteractionsViewModel(
 
     fun sendTransaction() {
         launchDisposable {
-            transactionRepository.sendTransaction(currentAccount.network.short, transaction)
+            transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map {
                     walletConnectRepository.approveTransactionRequest(currentDappSession.peerId, it)
                     it

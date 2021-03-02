@@ -7,24 +7,23 @@ import android.view.Gravity
 import androidx.core.content.ContextCompat
 import minerva.android.R
 import minerva.android.kotlinUtils.InvalidId
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_GOR
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_KOV
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_MAIN
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_RIN
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_ROP
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.LUKSO_14
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_SKL
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 
-//TODO downloading network icon need will be refactored
-fun getNetworkIcon(context: Context, networkShort: String, isSafeAccount: Boolean = false): Drawable? =
-    prepareSafeAccountBadge(context, getMainIcon(networkShort), isSafeAccount)
+fun getNetworkIcon(context: Context, chainId: Int, isSafeAccount: Boolean = false): Drawable? =
+    prepareSafeAccountBadge(context, getMainIcon(chainId), isSafeAccount)
 
-private fun getMainIcon(networkShort: String): Int =
-    when (networkShort) {
+private fun getMainIcon(chainId: Int): Int =
+    when (chainId) {
         ATS_SIGMA -> R.drawable.ic_artis_sigma
         ETH_MAIN -> R.drawable.ic_ethereum
         XDAI -> R.drawable.ic_xdai
@@ -37,8 +36,8 @@ private fun getMainIcon(networkShort: String): Int =
         else -> Int.InvalidId
     }
 
-fun getMainTokenIconRes(networkShort: String): Int =
-    when (networkShort) {
+fun getMainTokenIconRes(chainId: Int): Int =
+    when (chainId) {
         ATS_SIGMA -> R.drawable.ic_artis_sigma_token
         ETH_MAIN -> R.drawable.ic_ethereum_token
         XDAI -> R.drawable.ic_xdai_token
@@ -50,9 +49,7 @@ fun getMainTokenIconRes(networkShort: String): Int =
         else -> R.drawable.ic_default_token
     }
 
-private fun prepareSafeAccountBadge(context: Context, mainIconRes: Int, isSafeAccount: Boolean)
-        : Drawable
-? {
+private fun prepareSafeAccountBadge(context: Context, mainIconRes: Int, isSafeAccount: Boolean): Drawable? {
     ContextCompat.getDrawable(context, mainIconRes)?.let { mainIcon ->
         ContextCompat.getDrawable(context, R.drawable.ic_safe_account)?.let { safeBadge ->
             return if (!isSafeAccount) mainIcon
@@ -64,5 +61,4 @@ private fun prepareSafeAccountBadge(context: Context, mainIconRes: Int, isSafeAc
     return null
 }
 
-private const
-val BADGE_INDEX = 1
+private const val BADGE_INDEX = 1
