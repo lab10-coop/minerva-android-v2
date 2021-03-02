@@ -147,10 +147,10 @@ class BlockchainRegularAccountRepositoryImpl(
                 (Keys.toChecksumAddress(address) == address || address.toLowerCase(Locale.ROOT) == address)
 
     override fun getERC20TokenName(privateKey: String, chainId: Int, tokenAddress: String): Observable<String> =
-            loadERC20(privateKey, chainId, tokenAddress).name().flowable().toObservable()
+        loadERC20(privateKey, chainId, tokenAddress).name().flowable().toObservable()
 
     override fun getERC20TokenSymbol(privateKey: String, chainId: Int, tokenAddress: String): Observable<String> =
-            loadERC20(privateKey, chainId, tokenAddress).symbol().flowable().toObservable()
+        loadERC20(privateKey, chainId, tokenAddress).symbol().flowable().toObservable()
 
     override fun getERC20TokenDecimals(
         privateKey: String,
@@ -182,35 +182,31 @@ class BlockchainRegularAccountRepositoryImpl(
     override fun getTransactionCosts(txCostData: TxCostData, gasPrice: BigDecimal?): Single<TransactionCostPayload> =
         with(txCostData) {
             if (!isSafeAccountTransaction(txCostData)) {
-                web3j.value(networkShort).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
+                web3j.value(chainId).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
                     .flowable()
                     .zipWith(resolveENS(to).toFlowable())
                     .flatMap { (count, address) ->
                         val transaction: Transaction = prepareTransaction(count, address, this)
-                        web3j.value(networkShort).ethEstimateGas(transaction)
+                        web3j.value(chainId).ethEstimateGas(transaction)
                             .flowable()
                             .zipWith(
-                                web3j.value(networkShort)
+                                web3j.value(chainId)
                                     .ethCall(transaction, DefaultBlockParameterName.LATEST)
                                     .flowable()
                             )
                             .flatMapSingle { (gas, call) ->
-                                if (call.error != null) {
-                                    Timber.tag("kobe")
-                                        .d("error gasLimit: ${call.error.message} + ${call.error.data} + ${call.error}")
-                                }
-                                handleGasLimit(networkShort, gas, gasPrice)
+                                handleGasLimit(chainId, gas, gasPrice)
                             }
                     }
                     .firstOrError()
                     .timeout(
                         TIMEOUT,
                         TimeUnit.SECONDS,
-                        calculateTransactionCosts(networkShort, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+                        calculateTransactionCosts(chainId, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
                     )
             } else {
                 //TODO implement getting gasLimit for Safe Account transaction fro Blockchain
-                calculateTransactionCosts(networkShort, Operation.SAFE_ACCOUNT_TXS.gasLimit, gasPrice)
+                calculateTransactionCosts(chainId, Operation.SAFE_ACCOUNT_TXS.gasLimit, gasPrice)
             }
         }
 
@@ -263,10 +259,7 @@ class BlockchainRegularAccountRepositoryImpl(
         it: EthEstimateGas,
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
-        val gasLimit = it.error?.let {
-            Timber.tag("kobe").d("error gasLimit: ${it.data} + ${it.message}")
-            Operation.TRANSFER_NATIVE.gasLimit
-        } ?: estimateGasLimit(it.amountUsed)
+        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(chainId, increaseGasLimitByTenPercent(gasLimit), gasPrice)
     }
 

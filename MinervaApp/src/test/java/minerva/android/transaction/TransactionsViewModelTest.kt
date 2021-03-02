@@ -275,11 +275,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val account = Account(
             id = 0,
             publicKey = "12",
-            privateKey = "12",
-            networkShort = "net3",
-            address = "address",
-            contractAddress = "aa",
-            bindedOwner = "binded",
+            chainId = 1,
             accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol"), BigDecimal.ZERO))
         )
         whenever(transactionRepository.getTransactionCosts(any())).doReturn(

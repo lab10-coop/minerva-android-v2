@@ -10,7 +10,6 @@ object TxCostPayloadToTxCostDataMapper : Mapper<TxCostPayload, TxCostData> {
     override fun map(input: TxCostPayload): TxCostData = with(input) {
         TxCostData(
             mapTransactionType(transferType),
-            networkShort,
             from,
             to,
             amount,

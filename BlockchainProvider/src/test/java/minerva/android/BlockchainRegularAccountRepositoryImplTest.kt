@@ -9,7 +9,6 @@ import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.model.TxCostData
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
-import minerva.android.kotlinUtils.InvalidIndex
 import org.junit.Test
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
@@ -78,7 +77,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         every { web3J.ethCall(any(), any()).flowable() } returns Flowable.just(ethCall)
         val ethCostPayload =
             repository.getTransactionCosts(
-                TxCostData(BlockchainTransactionType.COIN_TRANSFER, ETH, from = "from", amount = BigDecimal.TEN),
+                TxCostData(BlockchainTransactionType.COIN_TRANSFER, from = "from", amount = BigDecimal.TEN, chainId = ETH),
                 BigDecimal.TEN
             )
         ethCostPayload.test()
@@ -103,10 +102,10 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
             repository.getTransactionCosts(
                 TxCostData(
                     BlockchainTransactionType.TOKEN_TRANSFER,
-                    ETH,
                     from = "from",
                     amount = BigDecimal.TEN,
-                    to = "0x12345"
+                    to = "0x12345",
+                    chainId = ETH
                 ),
                 BigDecimal.TEN
             )
@@ -123,7 +122,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
             repository.getTransactionCosts(
                 TxCostData(
                     BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER,
-                    ETH,
+                    chainId = 1,
                     from = "from",
                     amount = BigDecimal.TEN
                 ),

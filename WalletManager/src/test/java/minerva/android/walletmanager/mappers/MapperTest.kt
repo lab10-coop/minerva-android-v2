@@ -3,6 +3,7 @@ package minerva.android.walletmanager.mappers
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.TokenBalance
 import minerva.android.apiProvider.model.TransactionSpeed
+import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
@@ -18,7 +19,7 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
 import minerva.android.walletmanager.model.WalletConfigTestValues.networks
 import minerva.android.walletmanager.model.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
@@ -26,6 +27,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.shouldBeEqualTo

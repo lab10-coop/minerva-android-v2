@@ -153,8 +153,8 @@ class TransactionRepositoryImpl(
         blockchainRepository.sendTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
-        if (shouldGetGasPriceFromApi(txCostPayload.chainId)) {
-            cryptoApi.getGasPrice(url = NetworkManager.getNetwork(networkShort).gasPriceOracle)
+        if (shouldGetGasPriceFromApi(chainId)) {
+            cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                 .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice) }
                 .onErrorResumeNext { getTxCosts(txCostPayload, null) }
         } else {

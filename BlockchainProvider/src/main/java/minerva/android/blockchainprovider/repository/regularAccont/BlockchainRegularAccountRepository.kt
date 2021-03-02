@@ -27,16 +27,6 @@ interface BlockchainRegularAccountRepository {
     fun reverseResolveENS(ensAddress: String): Single<String>
     fun resolveENS(ensName: String): Single<String>
     fun getTransactions(pendingHashes: List<Pair<Int, String>>): Single<List<Pair<String, String?>>>
-    fun getTransactionCosts(
-        chainId: Int,
-        assetIndex: Int,
-        from: String,
-        to: String,
-        amount: BigDecimal,
-        gasPrice: BigDecimal? = null,
-        contractData: String = String.Empty
-    ): Single<TransactionCostPayload>
-
     fun getTransactionCosts(txCostData: TxCostData, gasPrice: BigDecimal? = null): Single<TransactionCostPayload>
 
     fun isAddressValid(address: String): Boolean

@@ -156,7 +156,6 @@ class TransactionViewModel(
     private fun getTxCostPayload(to: String, amount: BigDecimal): TxCostPayload =
         TxCostPayload(
             transferType,
-            network.short,
             account.address,
             to,
             amount,

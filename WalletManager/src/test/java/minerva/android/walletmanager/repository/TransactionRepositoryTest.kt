@@ -520,7 +520,7 @@ class TransactionRepositoryTest : RxTest() {
         ).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
         )
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, 1))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertComplete()
             .assertValue {
@@ -549,7 +549,7 @@ class TransactionRepositoryTest : RxTest() {
             blockchainRegularAccountRepository.getTransactionCosts(any(), any())
         ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
         whenever(blockchainRegularAccountRepository.fromWei(any())).thenReturn(BigDecimal.TEN)
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, 1))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertComplete()
             .assertValue {
@@ -570,7 +570,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), eq(null))).doReturn(Single.error(error))
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, 1))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertError(error)
     }
@@ -599,7 +599,7 @@ class TransactionRepositoryTest : RxTest() {
                     )
                 )
             )
-        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, 1))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertComplete()
             .assertValue {

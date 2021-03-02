@@ -7,7 +7,6 @@ import java.math.BigDecimal
 
 data class TxCostData(
     val transferType: BlockchainTransactionType,
-    val networkShort: String = String.Empty,
     val from: String = String.Empty,
     val to: String = String.Empty,
     val amount: BigDecimal = BigDecimal.ZERO,

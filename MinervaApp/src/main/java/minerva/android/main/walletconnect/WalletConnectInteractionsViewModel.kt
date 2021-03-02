@@ -120,7 +120,6 @@ class WalletConnectInteractionsViewModel(
     private fun getTxCostPayload(chainId: Int, status: OnEthSendTransaction, value: BigDecimal): TxCostPayload =
         TxCostPayload(
             getTransferType(status, value),
-            currentAccount.network.short,
             status.transaction.from,
             status.transaction.to,
             value,
