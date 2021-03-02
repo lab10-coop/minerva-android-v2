@@ -5,11 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPrices
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.Price
-import minerva.android.apiProvider.model.TokenBalanceResponse
-import minerva.android.apiProvider.model.TransactionSpeed
+import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -20,12 +16,14 @@ import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
@@ -510,7 +508,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    short = "eth_mainnet",
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri",
                     gasPriceOracle = ""
@@ -518,19 +516,11 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(
-            blockchainRegularAccountRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                eq(null),
-                any()
-            )
+            blockchainRegularAccountRepository.getTransactionCosts(any(), eq(null))
         ).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
         )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, "eth_mainnet"))
             .test()
             .assertComplete()
             .assertValue {
@@ -543,7 +533,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    short = "eth_mainnet",
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri",
                     gasPriceOracle = "url"
@@ -556,18 +546,10 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(
-            blockchainRegularAccountRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
+            blockchainRegularAccountRepository.getTransactionCosts(any(), any())
         ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
         whenever(blockchainRegularAccountRepository.fromWei(any())).thenReturn(BigDecimal.TEN)
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, "eth_mainnet"))
             .test()
             .assertComplete()
             .assertValue {
@@ -581,25 +563,14 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    short = "eth_mainnet",
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri"
                 )
             )
         )
-        whenever(
-            blockchainRegularAccountRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                eq(null),
-                any()
-            )
-        )
-            .doReturn(Single.error(error))
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), eq(null))).doReturn(Single.error(error))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, "eth_mainnet"))
             .test()
             .assertError(error)
     }
@@ -610,7 +581,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    short = "eth_mainnet",
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri",
                     gasPriceOracle = "url"
@@ -618,17 +589,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(Single.error(error))
-        whenever(
-            blockchainRegularAccountRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                eq(null),
-                any()
-            )
-        )
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), eq(null)))
             .doReturn(
                 Single.just(
                     TransactionCostPayload(
@@ -638,7 +599,7 @@ class TransactionRepositoryTest : RxTest() {
                     )
                 )
             )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, "eth_mainnet"))
             .test()
             .assertComplete()
             .assertValue {

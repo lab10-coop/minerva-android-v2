@@ -1,15 +1,14 @@
 package minerva.android
 
-import com.nhaarman.mockitokotlin2.whenever
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Flowable
+import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.blockchainprovider.model.TxCostData
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
-import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.blockchainprovider.smartContracts.ERC20
 import org.junit.Test
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
@@ -71,36 +70,68 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         transactionCount.result = "0x1"
         val ethEstimateGas = EthEstimateGas()
         ethEstimateGas.result = "0x1"
+        val ethCall = EthCall()
+        ethCall.result = "0x1"
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethEstimateGas(any()).flowable() } returns Flowable.just(ethEstimateGas)
-        val ethCostPayload = repository.getTransactionCosts(
-            ETH,
-            Int.InvalidIndex,
-            "from",
-            "to",
-            BigDecimal.TEN
-        )
+        every { web3J.ethCall(any(), any()).flowable() } returns Flowable.just(ethCall)
+        val ethCostPayload =
+            repository.getTransactionCosts(
+                TxCostData(BlockchainTransactionType.COIN_TRANSFER, ETH, from = "from", amount = BigDecimal.TEN),
+                BigDecimal.TEN
+            )
         ethCostPayload.test()
             .assertComplete()
             .assertValue {
-                it.gasPrice == BigDecimal(20)
-
+                it.gasLimit == BigInteger.ONE
             }
     }
 
     @Test
     fun `get transaction costs for asset tx success test`() {
-        val ethCostPayload = repository.getTransactionCosts(
-            ETH,
-            1,
-            "from",
-            "to",
-            BigDecimal.TEN
-        )
+        val transactionCount = EthGetTransactionCount()
+        transactionCount.result = "0x1"
+        val ethEstimateGas = EthEstimateGas()
+        ethEstimateGas.result = "0x1"
+        val ethCall = EthCall()
+        ethCall.result = "0x1"
+        every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
+        every { web3J.ethEstimateGas(any()).flowable() } returns Flowable.just(ethEstimateGas)
+        every { web3J.ethCall(any(), any()).flowable() } returns Flowable.just(ethCall)
+        val ethCostPayload =
+            repository.getTransactionCosts(
+                TxCostData(
+                    BlockchainTransactionType.TOKEN_TRANSFER,
+                    ETH,
+                    from = "from",
+                    amount = BigDecimal.TEN,
+                    to = "0x12345"
+                ),
+                BigDecimal.TEN
+            )
         ethCostPayload.test()
             .assertComplete()
             .assertValue {
-                it.gasLimit == Operation.TRANSFER_ERC20.gasLimit
+                it.gasLimit == BigInteger.ONE
+            }
+    }
+
+    @Test
+    fun `get transaction costs for safe accounts tx success test`() {
+        val ethCostPayload =
+            repository.getTransactionCosts(
+                TxCostData(
+                    BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER,
+                    ETH,
+                    from = "from",
+                    amount = BigDecimal.TEN
+                ),
+                BigDecimal.TEN
+            )
+        ethCostPayload.test()
+            .assertComplete()
+            .assertValue {
+                it.gasLimit == Operation.SAFE_ACCOUNT_TXS.gasLimit
             }
     }
 

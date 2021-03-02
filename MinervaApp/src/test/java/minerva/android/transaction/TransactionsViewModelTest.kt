@@ -9,13 +9,13 @@ import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.TransactionCost
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -45,6 +45,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     private val networks = listOf(
         Network(short = "net1", httpRpc = "address", testNet = true),
+        Network(short = "eth_mainnet", httpRpc = "address", testNet = false),
         Network(short = "net2", httpRpc = "address", testNet = true),
         Network(short = "net3", httpRpc = "address", testNet = true, token = "cookie")
     )
@@ -272,15 +273,25 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `fetch gas limit success`() {
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any(), any())).doReturn(
+        val account = Account(
+            id = 0,
+            publicKey = "12",
+            privateKey = "12",
+            networkShort = "net3",
+            address = "address",
+            contractAddress = "aa",
+            bindedOwner = "binded",
+            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol"), BigDecimal.ZERO))
+        )
+        whenever(transactionRepository.getTransactionCosts(any())).doReturn(
             Single.just(
                 TransactionCost(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
             )
         )
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(account)
         viewModel.run {
             transactionCostLiveData.observeForever(getGasLimitObserver)
-            getAccount(1, 1)
+            getAccount(1, 0)
             getTransactionCosts("address", BigDecimal.TEN)
         }
         getGasLimitCaptor.run {
@@ -292,17 +303,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `fetch gas limit error`() {
         val error = Throwable()
-        whenever(
-            transactionRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).doReturn(Single.error(error))
+        whenever(transactionRepository.getTransactionCosts(any())).doReturn(Single.error(error))
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))
         viewModel.run {
             getAccount(0, -1)

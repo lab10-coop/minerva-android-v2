@@ -2,15 +2,16 @@ package minerva.android.blockchainprovider.model
 
 import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import java.math.BigDecimal
 
 data class TxCostData(
     val transferType: BlockchainTransactionType,
-    val networkShort: String,
-    val from: String,
-    val to: String,
-    val amount: BigDecimal,
-    val chainId: Int,
-    val contractAddress: String,
+    val networkShort: String = String.Empty,
+    val from: String = String.Empty,
+    val to: String = String.Empty,
+    val amount: BigDecimal = BigDecimal.ZERO,
+    val chainId: Int = Int.InvalidValue,
+    val contractAddress: String = String.Empty,
     val contractData: String = String.Empty
 )

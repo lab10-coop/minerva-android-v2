@@ -6,8 +6,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
-import minerva.android.kotlinUtils.crypto.hexToBigInteger
-import minerva.android.main.walletconnect.*
+import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.TxType
@@ -20,10 +19,8 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
-import minerva.android.walletmanager.utils.CryptoUtils
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeIn
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -122,7 +119,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
         whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any(), any()))
+        whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
                     TransactionCost(
