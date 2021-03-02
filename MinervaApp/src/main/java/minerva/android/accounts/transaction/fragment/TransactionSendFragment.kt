@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -114,7 +115,6 @@ class TransactionSendFragment : Fragment() {
             transactionCostLayout.isEnabled = true
             arrow.visible()
         }
-
         handleGasLimitDefaultValue(it)
         if (shouldOverrideTransactionCost) {
             txCostObservable = it.cost
@@ -173,11 +173,26 @@ class TransactionSendFragment : Fragment() {
                     )
                 }
                 .subscribeBy(
-                    onNext = { sendButton.isEnabled = it },
-                    onError = { sendButton.isEnabled = false }
+                    onNext = {
+                        viewModel.isTransactionAvailable(it).let { isAvailable ->
+                            sendButton.isEnabled = isAvailable
+                            balanceToLowError.visibleOrGone(!isAvailable)
+                            transactionCostAmount.setTextColor(getTransactionCostColor(isAvailable))
+                        }
+                    },
+                    onError = {
+                        sendButton.isEnabled = false
+                        balanceToLowError.visibleOrGone(false)
+                    }
                 )
         }
     }
+
+    private fun getTransactionCostColor(isAvailable: Boolean) =
+        (if (isAvailable) R.color.gray
+        else R.color.errorRed).let {
+            ContextCompat.getColor(requireContext(), it)
+        }
 
     private fun prepareTokenDropdown() {
         binding.apply {
@@ -194,6 +209,7 @@ class TransactionSendFragment : Fragment() {
                             viewModel.tokenIndex = position - ONE_ELEMENT
                             setupTexts()
                         }
+
                         override fun onNothingSelected(adapterView: AdapterView<*>?) = setSelection(spinnerPosition, true)
                     }
                 }

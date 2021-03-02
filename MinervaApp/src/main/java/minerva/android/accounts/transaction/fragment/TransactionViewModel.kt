@@ -164,6 +164,13 @@ class TransactionViewModel(
         }
     }
 
+    fun isTransactionAvailable(isValidated: Boolean) =
+        when {
+            isMainTransaction -> isValidated
+            isTokenTransaction -> isValidated && transactionCost < account.cryptoBalance
+            else -> isValidated && transactionCost < smartContractRepository.getSafeAccountMasterOwnerBalance(account.masterOwnerAddress)
+        }
+
     private fun sendSafeAccountTokenTransaction(
         receiverKey: String,
         amount: BigDecimal,
@@ -293,15 +300,11 @@ class TransactionViewModel(
     }
 
     fun getAllAvailableFunds(): String {
-        if (tokenIndex != Int.InvalidIndex) return account.accountTokens[tokenIndex].balance.toPlainString()
-        if (account.isSafeAccount) return account.cryptoBalance.toPlainString()
+//        if (tokenIndex != Int.InvalidIndex) return account.accountTokens[tokenIndex].balance.toPlainString()
+//        if (account.isSafeAccount) return account.cryptoBalance.toPlainString()
 
-        val allAvailableFunds = account.cryptoBalance.minus(transactionCost)
-        return if (allAvailableFunds < BigDecimal.ZERO) {
-            String.EmptyBalance
-        } else {
-            allAvailableFunds.toPlainString()
-        }
+        return if (recalculateAmount < BigDecimal.ZERO) String.EmptyBalance
+        else recalculateAmount.toPlainString()
     }
 
 

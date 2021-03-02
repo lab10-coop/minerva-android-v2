@@ -5,6 +5,7 @@ import io.reactivex.Single
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.token.ERC20Token
+import java.math.BigDecimal
 
 interface SmartContractRepository {
     fun createSafeAccount(account: Account): Single<String>
@@ -25,6 +26,7 @@ interface SmartContractRepository {
     fun transferNativeCoin(network: String, transaction: Transaction): Completable
     fun transferERC20Token(network: String, transaction: Transaction, erc20Address: String): Completable
     fun getSafeAccountMasterOwnerPrivateKey(address: String?): String
+    fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal
     fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>>
     fun getERC20TokenDetails(privateKey: String, network: String, tokenAddress: String): Single<ERC20Token>
 }

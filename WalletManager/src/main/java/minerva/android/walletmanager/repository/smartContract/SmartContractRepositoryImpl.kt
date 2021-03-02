@@ -15,6 +15,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.mappers.TransactionMapper
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.storage.LocalStorage
+import java.math.BigDecimal
 import java.math.BigInteger
 
 class SmartContractRepositoryImpl(
@@ -74,6 +75,9 @@ class SmartContractRepositoryImpl(
 
     override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String =
         walletConfigManager.getSafeAccountMasterOwnerPrivateKey(address)
+
+    override fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal =
+        walletConfigManager.getSafeAccountMasterOwnerBalance(address)
 
     override fun getERC20TokenDetails(privateKey: String, network: String, tokenAddress: String): Single<ERC20Token> =
         (blockchainRegularAccountRepository).run {
