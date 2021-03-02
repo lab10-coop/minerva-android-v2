@@ -6,7 +6,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 import java.math.BigInteger
 
 data class Network(
-    val full: String = String.Empty,
+    val name: String = String.Empty,
     val token: String = String.Empty,
     val httpRpc: String = String.Empty,
     val wsRpc: String = String.Empty,

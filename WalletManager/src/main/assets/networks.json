@@ -1,6 +1,6 @@
 [
   {
-    "full": "ARTIS (τ1)",
+    "name": "ARTIS (τ1)",
     "token": "tATS",
     "isSafeAccountAvailable": "true",
     "httpRpc": "https://rpc.tau1.artis.network",
@@ -13,7 +13,7 @@
     "chainId": 246785
   },
   {
-    "full": "Ethereum (Rinkeby)",
+    "name": "Ethereum (Rinkeby)",
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -26,7 +26,7 @@
     "chainId": 4
   },
   {
-    "full": "ARTIS Σ1",
+    "name": "ARTIS Σ1",
     "token": "ATS",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.sigma1.artis.network",
@@ -39,7 +39,7 @@
     "chainId": 246529
   },
   {
-    "full": "xDai Chain",
+    "name": "xDai Chain",
     "token": "xDAI",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.xdaichain.com",
@@ -52,7 +52,7 @@
     "chainId": 100
   },
   {
-    "full": "POA Sokol",
+    "name": "POA Sokol",
     "token": "tPOA",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://sokol.poa.network",
@@ -65,7 +65,7 @@
     "chainId": 77
   },
   {
-    "full": "LUKSO (L14 Testnet)",
+    "name": "LUKSO (L14 Testnet)",
     "token": "tLYX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.l14.lukso.network",
@@ -78,7 +78,7 @@
     "chainId": 22
   },
   {
-    "full": "Ethereum (Kovan)",
+    "name": "Ethereum (Kovan)",
     "token": "kETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://kovan.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -91,7 +91,7 @@
     "chainId": 42
   },
   {
-    "full": "Ethereum (Görli)",
+    "name": "Ethereum (Görli)",
     "token": "gETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://goerli.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -104,7 +104,7 @@
     "chainId": 5
   },
   {
-    "full": "Ethereum (Ropsten)",
+    "name": "Ethereum (Ropsten)",
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -117,7 +117,7 @@
     "chainId": 3
   },
   {
-    "full": "Ethereum",
+    "name": "Ethereum",
     "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -130,7 +130,7 @@
     "chainId": 1
   },
   {
-    "full": "POA Core",
+    "name": "POA Core",
     "token": "POA",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://core.poanetwork.dev",

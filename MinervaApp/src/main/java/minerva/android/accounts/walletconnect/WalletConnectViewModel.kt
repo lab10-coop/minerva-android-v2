@@ -146,7 +146,7 @@ class WalletConnectViewModel(
         else icons[FIRST_ICON]
 
     val shouldChangeNetwork: Boolean
-        get() = account.network.full != requestedNetwork
+        get() = account.network.name != requestedNetwork
 
     private fun handleSessionRequest(it: OnSessionRequest): WalletConnectState =
         it.chainId?.let { id ->
@@ -157,10 +157,10 @@ class WalletConnectViewModel(
             OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
         }
 
-    private fun getNetworkName(chainId: Int) = NetworkManager.networks.find { it.chainId == chainId }?.full.orElse { String.Empty }
+    private fun getNetworkName(chainId: Int) = NetworkManager.networks.find { it.chainId == chainId }?.name.orElse { String.Empty }
 
 
     private fun getNetworkWhenChainIdNotDefined(): String =
-        if (account.network.testNet) NetworkManager.networks.find { it.chainId == ETH_GOR }?.full ?: String.Empty
-        else NetworkManager.networks.find { it.chainId == ETH_MAIN }?.full ?: String.Empty
+        if (account.network.testNet) NetworkManager.networks.find { it.chainId == ETH_GOR }?.name ?: String.Empty
+        else NetworkManager.networks.find { it.chainId == ETH_MAIN }?.name ?: String.Empty
 }

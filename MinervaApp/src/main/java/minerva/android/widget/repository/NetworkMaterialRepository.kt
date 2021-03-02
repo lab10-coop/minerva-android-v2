@@ -19,7 +19,6 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 
-//TODO downloading network icon need will be refactored
 fun getNetworkIcon(context: Context, chainId: Int, isSafeAccount: Boolean = false): Drawable? =
     prepareSafeAccountBadge(context, getMainIcon(chainId), isSafeAccount)
 

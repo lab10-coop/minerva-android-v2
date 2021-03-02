@@ -84,7 +84,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on session request event test with defined chainId on test net`() {
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"))))
-        NetworkManager.networks = listOf(Network(full = "Ethereum", chainId = 1))
+        NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1))
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
@@ -100,7 +100,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         val networks =
             listOf(
                 Network(
-                    full = "Ethereum (Görli)",
+                    name = "Ethereum (Görli)",
                     chainId = 5,
                     httpRpc = "someaddress",
                     testNet = true
@@ -138,7 +138,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.networks =
             listOf(
                 Network(
-                    full = "Ethereum",
+                    name = "Ethereum",
                     chainId = 1,
                     testNet = false,
                     httpRpc = "url"
@@ -188,7 +188,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    full = "Ethereum",
+                    name = "Ethereum",
                     chainId = 2,
                     testNet = false,
                     httpRpc = "url"

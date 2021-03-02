@@ -2,7 +2,6 @@ package minerva.android.walletmanager.manager.networks
 
 
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
-import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.token.ERC20Token
 import org.amshove.kluent.shouldBeEqualTo
@@ -26,8 +25,8 @@ class NetworkManagerTest {
     @Test
     fun `Check from string works properly`() {
         NetworkManager.initialize(testNetworks1)
-        NetworkManager.getNetwork(1).full shouldBeEqualTo "FullName1"
-        NetworkManager.getNetwork(3).full shouldBeEqualTo "FullName3"
+        NetworkManager.getNetwork(1).name shouldBeEqualTo "FullName1"
+        NetworkManager.getNetwork(3).name shouldBeEqualTo "FullName3"
         val exception = assertFails { NetworkManager.getNetwork(-1) }
         exception.message shouldBeEqualTo "Value not found"
     }
@@ -45,18 +44,18 @@ class NetworkManagerTest {
     @Test
     fun `Check getting first default Account network correctly`() {
         NetworkManager.initialize(testNetworks1)
-        NetworkManager.firstDefaultValueNetwork().full shouldBeEqualTo "FullName1"
+        NetworkManager.firstDefaultValueNetwork().name shouldBeEqualTo "FullName1"
         NetworkManager.initialize(testNetworks2)
-        NetworkManager.firstDefaultValueNetwork().full shouldBeEqualTo "FullName3"
+        NetworkManager.firstDefaultValueNetwork().name shouldBeEqualTo "FullName3"
     }
 
     @Test
     fun `Check getting second default Account network correctly`() {
         NetworkManager.initialize(testNetworks1)
-        NetworkManager.getNetworkByIndex(2).full shouldBeEqualTo "FullName5"
+        NetworkManager.getNetworkByIndex(2).name shouldBeEqualTo "FullName5"
         NetworkManager.initialize(testNetworks2)
-        NetworkManager.getNetworkByIndex(2).full shouldBeEqualTo "FullName3"
-        NetworkManager.getNetworkByIndex(3).full shouldBeEqualTo "FullName3"
+        NetworkManager.getNetworkByIndex(2).name shouldBeEqualTo "FullName3"
+        NetworkManager.getNetworkByIndex(3).name shouldBeEqualTo "FullName3"
     }
 
     @Test

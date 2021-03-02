@@ -101,7 +101,7 @@ class TransactionRepositoryImpl(
 
     /**
      *
-     *  return statement: List<Triple<Network, AccountPrivateKey, List<AccountToken>>>>
+     *  return statement: List<Triple<ChainId, AccountPrivateKey, List<AccountToken>>>>
      *
      */
 
@@ -278,7 +278,7 @@ class TransactionRepositoryImpl(
     /**
      *
      * return statement: Single<Triple<String, String, List<AccountToken>>>
-     *                   Single<Triple<Network, AccountPrivateKey, List<AccountToken>>>>
+     *                   Single<Triple<ChainId, AccountPrivateKey, List<AccountToken>>>>
      *
      */
 

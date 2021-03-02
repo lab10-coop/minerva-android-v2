@@ -84,5 +84,5 @@ class AddTokenViewModel(
                     })
         }
 
-    fun getNetworkName() = NetworkManager.getNetwork(chainId).full
+    fun getNetworkName() = NetworkManager.getNetwork(chainId).name
 }

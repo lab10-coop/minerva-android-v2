@@ -8,7 +8,6 @@ import java.math.BigInteger
 data class PendingTransaction(
     val index: Int,
     val txHash: String = String.Empty,
-    //TODO adding invalid value seems to be dangerous
     val chainId: Int = Int.InvalidValue,
     val senderAddress: String = String.Empty,
     val blockHash: String = String.Empty,

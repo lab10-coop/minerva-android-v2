@@ -15,9 +15,6 @@ import java.math.BigInteger
 object NetworkManager {
     lateinit var networks: List<Network>
 
-
-    //TODO change full to name in networks.json
-
     private val networkMap: Map<Int, Network>
         get() = networks.associateBy { it.chainId }
 

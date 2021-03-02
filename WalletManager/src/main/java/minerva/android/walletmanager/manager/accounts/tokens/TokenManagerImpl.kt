@@ -215,8 +215,8 @@ class TokenManagerImpl(
     fun generateTokenIconKey(chainId: Int, address: String) = "$chainId$address"
 
     /**
-     * arguments: tokens MutableMap<NetworkShort, List<ERC20Token>>
-     * return statement: Map<NetworkShort, List<ERC20Token>>
+     * arguments: tokens MutableMap<ChainId, List<ERC20Token>>
+     * return statement: Map<ChainId, List<ERC20Token>>
      */
 
     @VisibleForTesting
@@ -231,15 +231,14 @@ class TokenManagerImpl(
 
     /**
      *
-     * arguments: map - downloaded tokens - Map<AccountPrivateKey, List<AccountToken>>, tokens - MutableMap<NetworkShort, List<ERC20Token>>
-     * return statement: Map<NetworkShort, List<ERC20Token>>
+     * arguments: map - downloaded tokens - Map<AccountPrivateKey, List<AccountToken>>, tokens - MutableMap<ChainId, List<ERC20Token>>
+     * return statement: Map<ChainId, List<ERC20Token>>
      */
 
     private fun updateTokens(map: Map<String, List<AccountToken>>, tokens: MutableMap<Int, List<ERC20Token>>) =
         tokens.apply {
             map.values.forEach {
                 it.forEach { accountToken ->
-                    //TODO klop refactor it
                     (this[accountToken.token.chainId] ?: listOf()).toMutableList().let { currentTokens ->
                         currentTokens.removeAll { it.address == accountToken.token.address }
                         currentTokens.add(accountToken.token)

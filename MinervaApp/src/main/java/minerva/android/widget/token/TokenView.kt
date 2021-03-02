@@ -51,7 +51,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
                 }
             else
                 with(account.network) {
-                    tokenLogo.initView(NativeToken(chainId, full, token, getMainTokenIconRes(chainId)))
+                    tokenLogo.initView(NativeToken(chainId, name, token, getMainTokenIconRes(chainId)))
                     tokenName.text = token
                 }
         }
