@@ -5,12 +5,12 @@ import minerva.android.apiProvider.model.Markets
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Balance
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ATS_SIGMA
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.ETH_MAIN
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.POA_CORE
-import minerva.android.walletmanager.model.defs.NetworkShortName.Companion.XDAI
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -29,7 +29,7 @@ object MarketUtils {
             if (it.isNotEmpty()) {
                 cryptoBalances.forEachIndexed { index, cryptoBalance ->
                     if (cryptoBalance.first == it[index]?.address) {
-                        getBalance(balancesMap, cryptoBalance, getRate(accounts[index].network.short, markets))
+                        getBalance(balancesMap, cryptoBalance, getRate(accounts[index].network.chainId, markets))
                     }
                 }
             }
@@ -47,8 +47,8 @@ object MarketUtils {
             .orElse { Int.InvalidValue.toBigDecimal() }
 
 
-    private fun getRate(network: String, markets: Markets): Double? =
-        when (network) {
+    private fun getRate(chainId: Int, markets: Markets): Double? =
+        when (chainId) {
             ATS_SIGMA -> ATS_EURO
             POA_CORE -> markets.poaPrice?.value
             ETH_MAIN -> markets.ethPrice?.value
@@ -59,7 +59,7 @@ object MarketUtils {
     fun getMarketsIds(accounts: List<Account>?): String {
         var ids = String.Empty
         accounts?.distinctBy { it.network }?.forEach {
-            when (it.network.short) {
+            when (it.network.chainId) {
                 ETH_MAIN -> ids = "$ids${MarketIds.ETHEREUM},"
                 POA_CORE -> ids = "$ids${MarketIds.POA_NETWORK},"
                 XDAI -> ids = "$ids${MarketIds.DAI},"

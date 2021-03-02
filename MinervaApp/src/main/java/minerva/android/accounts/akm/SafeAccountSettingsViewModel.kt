@@ -37,7 +37,7 @@ class SafeAccountSettingsViewModel(
     fun loadAccount(index: Int) {
         account = accountManager.loadAccount(index)
         _ownersLiveData.value = account.owners?.reversed()
-        getOwners(account.address, account.network.short, account.privateKey)
+        getOwners(account.address, account.network.chainId, account.privateKey)
 
         val masterOwnerAddress = account.masterOwnerAddress
         smartContractRepository.getSafeAccountMasterOwnerPrivateKey(masterOwnerAddress).apply {
@@ -54,7 +54,7 @@ class SafeAccountSettingsViewModel(
             smartContractRepository.addSafeAccountOwner(
                 owner,
                 account.address,
-                account.network.short,
+                account.network.chainId,
                 masterOwnerPrivateKey,
                 account
             )
@@ -84,7 +84,7 @@ class SafeAccountSettingsViewModel(
             smartContractRepository.removeSafeAccountOwner(
                 removeAddress,
                 account.address,
-                account.network.short,
+                account.network.chainId,
                 masterOwnerPrivateKey,
                 account
             )
@@ -110,11 +110,11 @@ class SafeAccountSettingsViewModel(
     private fun isMasterOwner(removeAddress: String) = account.masterOwnerAddress == removeAddress
 
     @VisibleForTesting
-    fun getOwners(contractAddress: String, network: String, privateKey: String) {
+    fun getOwners(contractAddress: String, chainId: Int, privateKey: String) {
         launchDisposable {
             smartContractRepository.getSafeAccountOwners(
                 contractAddress,
-                network,
+                chainId,
                 privateKey,
                 account
             )

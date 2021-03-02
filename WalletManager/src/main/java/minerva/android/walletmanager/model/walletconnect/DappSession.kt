@@ -16,6 +16,5 @@ data class DappSession(
     val remotePeerId: String? = String.Empty,
     val networkName: String = String.Empty,
     val accountName: String = String.Empty,
-    val networkShort: String = String.Empty,
     val chainId: Int = Int.InvalidValue
 ) : MinervaPrimitive(address = address, name = name, iconUrl = iconUrl)

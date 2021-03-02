@@ -42,13 +42,13 @@ object WalletConfigTestValues {
     val tokens =
         mapOf(
             Pair(
-                "user01", listOf(
+                1, listOf(
                     ERC20Token(1, "CookieCoin", "COOKiE", "0xC00k13", "13"),
                     ERC20Token(2, "otherCoin", "OC", "0x0th3rC01n", "32")
                 )
             ),
             Pair(
-                "user02", listOf(
+                2, listOf(
                     ERC20Token(2, "diffCoin", "DiFF", "0xD1FF", "13")
                 )
             )
@@ -56,17 +56,17 @@ object WalletConfigTestValues {
 
 
     val networks = listOf(
-        Network(short = "artis_tau1", httpRpc = "httpRpc"),
-        Network(short = "eth_rinkeby", httpRpc = "httpRpc")
+        Network(chainId = 246785, httpRpc = "httpRpc"),
+        Network(chainId = 4, httpRpc = "httpRpc")
     )
 
     val accounts = listOf(
-        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", networks[0].short, contractAddress = "test"),
-        Account(2, "publicKey", "privateKey", "address", "ValuePayload2", networks[1].short)
+        Account(1, "publicKey", "privateKey", "address", "ValuePayload1", networks[0].chainId, contractAddress = "test"),
+        Account(2, "publicKey", "privateKey", "address", "ValuePayload2", networks[1].chainId)
     )
 
     val accountsResponse = listOf(
-        AccountPayload(1, "ValuePayload1", networks[0].short, false, _contractAddress = "contractAddress"),
-        AccountPayload(2, "ValuePayload2", networks[1].short, false, _contractAddress = "contractAddress")
+        AccountPayload(1, "ValuePayload1", networks[0].chainId, false, _contractAddress = "contractAddress"),
+        AccountPayload(2, "ValuePayload2", networks[1].chainId, false, _contractAddress = "contractAddress")
     )
 }

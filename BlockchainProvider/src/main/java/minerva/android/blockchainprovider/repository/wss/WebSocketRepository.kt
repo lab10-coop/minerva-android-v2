@@ -5,5 +5,5 @@ import minerva.android.blockchainprovider.model.ExecutedTransaction
 import java.math.BigInteger
 
 interface WebSocketRepository {
-    fun subscribeToExecutedTransactions(network: String, blockNumber: BigInteger): Flowable<ExecutedTransaction>
+    fun subscribeToExecutedTransactions(chainId: Int, blockNumber: BigInteger): Flowable<ExecutedTransaction>
 }

@@ -14,7 +14,7 @@ data class Account(
     var privateKey: String = String.Empty,
     override var address: String = String.Empty,
     override var name: String = String.Empty,
-    val networkShort: String = String.Empty,
+    val chainId: Int = Int.InvalidValue,
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = BigDecimal.ZERO,
     var accountTokens: List<AccountToken> = listOf(),
@@ -31,7 +31,7 @@ data class Account(
         account.privateKey,
         account.address,
         String.Empty,
-        account.networkShort,
+        account.chainId,
         isDeleted,
         owners = account.owners,
         isPending = false,
@@ -42,5 +42,5 @@ data class Account(
         get() = owners?.last().orEmpty()
 
     val network: Network
-        get() = NetworkManager.getNetwork(networkShort)
+        get() = NetworkManager.getNetwork(chainId)
 }

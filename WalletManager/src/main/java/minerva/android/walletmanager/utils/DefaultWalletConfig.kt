@@ -32,22 +32,22 @@ object DefaultWalletConfig {
                     AccountPayload(
                         FIRST_DEFAULT_NETWORK_INDEX,
                         CryptoUtils.prepareName(firstDefaultTestNetwork, FIRST_DEFAULT_NETWORK_INDEX),
-                        firstDefaultTestNetwork.short
+                        firstDefaultTestNetwork.chainId
                     ),
                     AccountPayload(
                         SECOND_DEFAULT_NETWORK_INDEX,
                         CryptoUtils.prepareName(secondDefaultTestNetwork, SECOND_DEFAULT_NETWORK_INDEX),
-                        secondDefaultTestNetwork.short
+                        secondDefaultTestNetwork.chainId
                     ),
                     AccountPayload(
                         FIRST_DEFAULT_MAIN_NETWORK_INDEX,
                         CryptoUtils.prepareName(firstDefaultMainNetwork, FIRST_DEFAULT_MAIN_NETWORK_INDEX),
-                        firstDefaultMainNetwork.short
+                        firstDefaultMainNetwork.chainId
                     ),
                     AccountPayload(
                         SECOND_DEFAULT_MAIN_NETWORK_INDEX,
                         CryptoUtils.prepareName(secondDefaultMainNetwork, SECOND_DEFAULT_MAIN_NETWORK_INDEX),
-                        secondDefaultMainNetwork.short
+                        secondDefaultMainNetwork.chainId
                     )
                 )
             )

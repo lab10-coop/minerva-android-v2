@@ -277,7 +277,7 @@ class AccountsViewModel(
 
     fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
         shouldGetFreeAts() &&
-                accounts.any { it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short }
+                accounts.any { it.network.chainId == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].chainId }
 
     private fun shouldGetFreeAts() =
         ((accountManager.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(24L)) < accountManager.currentTimeMills())
@@ -286,7 +286,7 @@ class AccountsViewModel(
     @VisibleForTesting
     fun getAccountForFreeATS(accounts: List<Account>): Account {
         accounts.forEach {
-            if (it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short)
+            if (it.network.chainId == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].chainId)
                 return it
         }
         return Account(Int.InvalidId)
