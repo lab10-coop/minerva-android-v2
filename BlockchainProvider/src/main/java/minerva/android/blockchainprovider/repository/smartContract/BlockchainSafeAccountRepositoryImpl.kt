@@ -149,8 +149,7 @@ class BlockchainSafeAccountRepositoryImpl(
                     Credentials.create(transactionPayload.privateKey).address,
                     DefaultBlockParameterName.LATEST
                 ).flowable()
-
-            ).zipWith(getNetVersion(chainId))
+            )
             .flatMapCompletable {
                 web3j.value(chainId).ethSendRawTransaction(
                     getSignedTransaction(
@@ -158,8 +157,8 @@ class BlockchainSafeAccountRepositoryImpl(
                         receiver,
                         transactionPayload,
                         amount,
-                        it.first,
-                        it.second.netVersion.toLong(),
+                        it,
+                        chainId.toLong(),
                         signedData
                     )
                 )
@@ -170,8 +169,6 @@ class BlockchainSafeAccountRepositoryImpl(
                     }
             }
     }
-
-    private fun getNetVersion(chainId: Int): Flowable<NetVersion> = web3j.value(chainId).netVersion().flowable()
 
     private fun getSignedTransaction(
         gnosisSafe: GnosisSafe,
