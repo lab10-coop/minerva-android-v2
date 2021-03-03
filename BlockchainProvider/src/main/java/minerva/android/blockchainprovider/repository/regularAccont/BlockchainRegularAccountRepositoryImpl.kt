@@ -223,6 +223,13 @@ class BlockchainRegularAccountRepositoryImpl(
             BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP ->
                 getTransaction(costData.from, count, address, costData.amount, costData.contractData)
             else -> {
+                Timber.tag("kobe").d("Sender address: ${costData.from}")
+                Timber.tag("kobe").d("Contract address: ${costData.contractAddress}")
+                Timber.tag("kobe").d("Receiver token address: $address")
+                Timber.tag("kobe").d("Value of native coin: 0")
+                Timber.tag("kobe")
+                    .d("Value of token to send: ${toWei(costData.amount, Convert.Unit.ETHER).toBigInteger()}")
+
                 Transaction.createFunctionCallTransaction(
                     costData.from,
                     count.transactionCount,
@@ -267,6 +274,7 @@ class BlockchainRegularAccountRepositoryImpl(
             Timber.tag("kobe").d("Error: ${it.message}")
             Operation.TRANSFER_NATIVE.gasLimit
         } ?: estimateGasLimit(it.amountUsed)
+        Timber.tag("kobe").d("GasLimit: $gasLimit")
         return calculateTransactionCosts(chainId, increaseGasLimitByTenPercent(gasLimit), gasPrice)
     }
 
