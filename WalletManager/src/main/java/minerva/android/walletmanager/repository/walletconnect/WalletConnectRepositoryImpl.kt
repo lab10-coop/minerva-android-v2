@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.repository.walletconnect
 
+import com.prettymuchbryce.abidecoder.Decoder
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -10,6 +11,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
+import minerva.android.blockchainprovider.smartContracts.ERC20Json
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
@@ -52,9 +54,12 @@ class WalletConnectRepositoryImpl(
             }
             onFailure = { error, _ ->
                 Timber.e(error)
+                Timber.tag("kobe").d("Error: ${error}")
+
                 status.onError(error)
             }
             onDisconnect = { _, peerId ->
+                Timber.tag("kobe").d("Error: disconnected")
                 peerId?.let {
                     if (walletConnectClients.containsKey(peerId)) {
                         deleteSession(peerId)
@@ -72,7 +77,18 @@ class WalletConnectRepositoryImpl(
             onEthSendTransaction = { id, transaction, peerId ->
                 currentRequestId = id
 
+                val decoder = Decoder()
+                decoder.addAbi(ERC20Json.json)
+                val result: Decoder.DecodedMethod? = decoder.decodeMethod(transaction.data)
+                result?.params?.get(0)?.value
+
                 Timber.tag("kobe").d("DATA: ${transaction.data}")
+                Timber.tag("kobe").d("From: ${transaction.from}")
+                Timber.tag("kobe").d("To: ${transaction.to}")
+                Timber.tag("kobe").d("Coin value: ${transaction.value}")
+                Timber.tag("kobe").d("Gas price: ${transaction.gasPrice}")
+                Timber.tag("kobe").d("Gas limit: ${transaction.gasLimit}")
+
                 status.onNext(
                     OnEthSendTransaction(
                         WCEthTransactionToWalletConnectTransactionMapper.map(transaction),

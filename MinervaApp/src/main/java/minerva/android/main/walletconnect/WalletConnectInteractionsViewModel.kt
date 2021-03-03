@@ -104,9 +104,7 @@ class WalletConnectInteractionsViewModel(
     ): Single<OnEthSendTransactionRequest> {
         currentDappSession = session
         transactionRepository.getAccountByAddress(currentDappSession.address)?.let { currentAccount = it }
-
         val value = transactionRepository.toEther(hexToBigInteger(status.transaction.value, BigDecimal.ZERO))
-
         status.transaction.value = value.toPlainString()
         return transactionRepository.getTransactionCosts(getTxCostPayload(currentDappSession.chainId, status, value))
             .flatMap { transactionCost ->
