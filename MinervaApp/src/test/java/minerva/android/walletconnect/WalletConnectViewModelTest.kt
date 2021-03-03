@@ -6,6 +6,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
@@ -15,7 +16,6 @@ import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnFailure
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import org.amshove.kluent.mock
@@ -32,6 +32,8 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     private lateinit var viewModel: WalletConnectViewModel
     private val stateObserver: Observer<WalletConnectState> = mock()
     private val stateCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
+    private val errorObserver: Observer<Event<Throwable>> = mock()
+    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
     private val meta = WalletConnectPeerMeta(name = "token", url = "url", description = "dsc")
 
     @Before
@@ -43,13 +45,11 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on connection failure event test`() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnFailure(error, "peerId")))
-        viewModel.stateLiveData.observeForever(stateObserver)
+            .thenReturn(Flowable.error(error))
+        viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.setConnectionStatusFlowable()
-        stateCaptor.run {
-            verify(stateObserver, times(2)).onChanged(capture())
-            firstValue is ProgressBarState &&
-                    secondValue is OnError
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
         }
     }
 
@@ -58,11 +58,10 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.error(error))
-        viewModel.stateLiveData.observeForever(stateObserver)
+        viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.setConnectionStatusFlowable()
-        stateCaptor.run {
-            verify(stateObserver).onChanged(capture())
-            firstValue is OnError
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
         }
     }
 

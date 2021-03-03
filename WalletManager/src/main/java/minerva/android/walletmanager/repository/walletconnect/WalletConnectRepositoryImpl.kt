@@ -50,9 +50,9 @@ class WalletConnectRepositoryImpl(
                     OnSessionRequest(WCPeerToWalletConnectPeerMetaMapper.map(meta), chainId, Topic(peerId, remotePeerId))
                 )
             }
-            onFailure = { error, peerId ->
+            onFailure = { error, _ ->
                 Timber.e(error)
-                status.onNext(OnFailure(error, peerId))
+                status.onError(error)
             }
             onDisconnect = { _, peerId ->
                 peerId?.let {

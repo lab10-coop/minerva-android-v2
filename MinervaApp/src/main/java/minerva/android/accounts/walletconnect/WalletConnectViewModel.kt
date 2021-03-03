@@ -11,6 +11,7 @@ import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Compa
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
@@ -23,7 +24,6 @@ import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnFailure
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import timber.log.Timber
@@ -41,6 +41,9 @@ class WalletConnectViewModel(
     private val _viewStateLiveData = MutableLiveData<WalletConnectState>()
     val stateLiveData: LiveData<WalletConnectState> get() = _viewStateLiveData
 
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
+
     fun setConnectionStatusFlowable() {
         launchDisposable {
             repository.connectionStatusFlowable
@@ -54,14 +57,11 @@ class WalletConnectViewModel(
                                 topic = it.topic
                                 handleSessionRequest(it)
                             }
-                            is OnFailure -> OnError(it.error)
                             is OnDisconnect -> OnDisconnected
                             else -> DefaultRequest
                         }
                     },
-                    onError = {
-                        _viewStateLiveData.value = OnError(it)
-                    }
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
@@ -160,7 +160,8 @@ class WalletConnectViewModel(
             OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
         }
 
-    private fun getNetworkName(chainId: Int) = NetworkManager.networks.find { it.chainId == chainId }?.name.orElse { String.Empty }
+    private fun getNetworkName(chainId: Int) =
+        NetworkManager.networks.find { it.chainId == chainId }?.name.orElse { String.Empty }
 
 
     private fun getNetworkWhenChainIdNotDefined(): String =

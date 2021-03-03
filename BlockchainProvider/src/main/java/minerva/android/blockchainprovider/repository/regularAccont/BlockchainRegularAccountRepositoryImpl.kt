@@ -265,9 +265,7 @@ class BlockchainRegularAccountRepositoryImpl(
 
     private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
         when (gasLimit) {
-            Operation.DEFAULT_LIMIT.gasLimit -> {
-                gasLimit
-            }
+            Operation.DEFAULT_LIMIT.gasLimit -> gasLimit
             else -> increaseGasLimitByTenPercent(gasLimit)
         }
 
