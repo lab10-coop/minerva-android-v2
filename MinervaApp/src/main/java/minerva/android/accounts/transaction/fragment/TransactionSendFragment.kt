@@ -49,14 +49,11 @@ class TransactionSendFragment : Fragment() {
         get() = viewModel.tokenIndex + ONE_ELEMENT
 
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
-        binding.transactionCostAmount.text =
-            getString(R.string.transaction_cost_amount, newValue.toPlainString(), viewModel.token)
-        if (allPressed && oldValue != newValue) {
-            val recalculatedAmount = viewModel.recalculateAmount
-            if (recalculatedAmount <= BigDecimal.ZERO) {
-                binding.amount.setText(BigDecimal.ZERO.toPlainString())
-            } else {
-                binding.amount.setText(recalculatedAmount.toPlainString())
+        binding.apply {
+            transactionCostAmount.text = getString(R.string.transaction_cost_amount, newValue.toPlainString(), viewModel.token)
+            if (allPressed && oldValue != newValue) {
+                if (viewModel.recalculateAmount <= BigDecimal.ZERO) amount.setText(BigDecimal.ZERO.toPlainString())
+                else amount.setText(viewModel.recalculateAmount.toPlainString())
             }
         }
     }
@@ -145,9 +142,12 @@ class TransactionSendFragment : Fragment() {
     private fun prepareTextListeners() {
         with(binding) {
             validationDisposable = Observable.combineLatest(
-                amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.cryptoBalance) },
-                receiver.getValidationObservable(receiverInputLayout)
-                { Validator.validateAddress(it, viewModel.isAddressValid(it), R.string.invalid_account_address) },
+                amount.getValidationObservable(amountInputLayout) {
+                    Validator.validateAmountField(it, viewModel.cryptoBalance)
+                },
+                receiver.getValidationObservable(receiverInputLayout) {
+                    Validator.validateAddress(it, viewModel.isAddressValid(it), R.string.invalid_account_address)
+                },
                 BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid -> isAmountValid && isAddressValid })
                 .map { areFieldsValid ->
                     if (areFieldsValid) {

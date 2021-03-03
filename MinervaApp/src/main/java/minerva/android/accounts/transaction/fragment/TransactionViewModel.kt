@@ -166,8 +166,7 @@ class TransactionViewModel(
 
     fun isTransactionAvailable(isValidated: Boolean) =
         when {
-            isMainTransaction -> isValidated
-            isTokenTransaction -> isValidated && transactionCost < account.cryptoBalance
+            isMainTransaction || isTokenTransaction -> isValidated && transactionCost < account.cryptoBalance
             else -> isValidated && transactionCost < smartContractRepository.getSafeAccountMasterOwnerBalance(account.masterOwnerAddress)
         }
 
@@ -299,16 +298,10 @@ class TransactionViewModel(
         }
     }
 
-    fun getAllAvailableFunds(): String {
-//        if (tokenIndex != Int.InvalidIndex) return account.accountTokens[tokenIndex].balance.toPlainString()
-//        if (account.isSafeAccount) return account.cryptoBalance.toPlainString()
-
-        return if (recalculateAmount < BigDecimal.ZERO) String.EmptyBalance
+    fun getAllAvailableFunds(): String =
+        if (recalculateAmount < BigDecimal.ZERO) String.EmptyBalance
         else recalculateAmount.toPlainString()
-    }
 
-
-    //TODO klop recalculate it!
     val recalculateAmount: BigDecimal
         get() = if (isMainTransaction) cryptoBalance.minus(transactionCost)
         else cryptoBalance
