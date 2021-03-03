@@ -377,7 +377,7 @@ class WalletConfigManagerImpl(
         keys: List<DerivedKeys>,
         accountPayload: AccountPayload
     ): DerivedKeys {
-        val isTestNet = NetworkManager.getNetwork(accountPayload.network).testNet
+        val isTestNet = NetworkManager.getNetwork(accountPayload.chainId).testNet
         keys.forEach { derivedKeys ->
             if (derivedKeys.index == accountPayload.index && derivedKeys.isTestNet == isTestNet) {
                 return derivedKeys
@@ -394,7 +394,7 @@ class WalletConfigManagerImpl(
         }
 
     private fun isTestNet(accountsResponse: List<AccountPayload>, index: Int) =
-        NetworkManager.getNetwork(accountsResponse[index].network).testNet
+        NetworkManager.getNetwork(accountsResponse[index].chainId).testNet
 
     private fun completeIdentitiesKeys(
         walletConfigPayload: WalletConfigPayload,

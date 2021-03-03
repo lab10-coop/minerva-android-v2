@@ -30,16 +30,16 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     private val viewModel: SafeAccountSettingsViewModel =
         SafeAccountSettingsViewModel(accountManager, smartContractRepository)
 
-    private val mockValue = Account(0, networkShort = "networkThree").apply {
+    private val mockValue = Account(0, chainId = 3).apply {
         contractAddress = "0x123"
         owners = listOf("0x456")
     }
 
     val networks = listOf(
-        Network(short = "networkOne", httpRpc = "address", testNet = true),
-        Network(short = "networkTwo", httpRpc = "address", testNet = true),
-        Network(short = "networkThree", httpRpc = "address", testNet = true),
-        Network(short = "networkFour", httpRpc = "address", testNet = true)
+        Network(chainId = 1, httpRpc = "address", testNet = true),
+        Network(chainId = 2, httpRpc = "address", testNet = true),
+        Network(chainId = 3, httpRpc = "address", testNet = true),
+        Network(chainId = 4, httpRpc = "address", testNet = true)
     )
 
     @Test
@@ -75,7 +75,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
         )
         viewModel.run {
             loadAccount(0)
-            getOwners("0x303", "", "")
+            getOwners("0x303", 0, "")
             ownersLiveData.observeForever(addOwnerObserver)
         }
         kArgumentCaptor.run {
@@ -165,7 +165,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
         ) doReturn Single.just(listOf("tom", "beata"))
         viewModel.run {
             ownersLiveData.observeForever(ownersObserver)
-            account = Account(id = 0, owners = listOf("tom", "beata"), networkShort = "networkThree")
+            account = Account(id = 0, owners = listOf("tom", "beata"), chainId = 3)
             removeOwner("tom")
         }
         kArgumentCaptor.run {
@@ -180,7 +180,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
         whenever(smartContractRepository.removeSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.error(error)
         viewModel.run {
             errorLiveData.observeForever(errorObserver)
-            account = Account(id = 0, owners = listOf("tom", "beata"), networkShort = "networkThree")
+            account = Account(id = 0, owners = listOf("tom", "beata"), chainId = 3)
             removeOwner("tom")
             errorLiveData.observeLiveDataEvent(Event(error))
         }

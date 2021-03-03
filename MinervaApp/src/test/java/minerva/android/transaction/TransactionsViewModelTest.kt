@@ -44,9 +44,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
 
     private val networks = listOf(
-        Network(short = "net1", httpRpc = "address", testNet = true),
-        Network(short = "net2", httpRpc = "address", testNet = true),
-        Network(short = "net3", httpRpc = "address", testNet = true, token = "cookie")
+        Network(chainId = 1, httpRpc = "address", testNet = true),
+        Network(chainId = 2, httpRpc = "address", testNet = true),
+        Network(chainId = 3, httpRpc = "address", testNet = true, token = "cookie")
     )
 
     @Before
@@ -60,7 +60,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             id = 0,
             publicKey = "12",
             privateKey = "12",
-            networkShort = "net3",
+            chainId = 3,
             address = "address",
             contractAddress = "aa",
             bindedOwner = "binded",
@@ -78,8 +78,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "aaa"))
-        NetworkManager.initialize(listOf(Network(short = "aaa", httpRpc = "some")))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1))
+        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             getAccount(0, -1)
@@ -96,7 +96,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
             getAccount(0, -1)
@@ -112,7 +112,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             getAccount(0, -1)
@@ -129,7 +129,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             getAccount(0, -1)
@@ -148,7 +148,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             owners = listOf("tom", "beata", "bogdan"),
             publicKey = "12",
             privateKey = "12",
-            networkShort = "net3",
+            chainId = 3,
             address = "address",
             contractAddress = "aa",
             bindedOwner = "binded"
@@ -173,7 +173,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 publicKey = "12",
                 privateKey = "12",
                 address = "address",
-                networkShort = "net1",
+                chainId = 1,
                 contractAddress = "aa",
                 accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
             )
@@ -196,7 +196,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.apply {
             account = Account(
                 id = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                networkShort = "net3", accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
+                chainId = 3, accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
             )
             tokenIndex = 0
         }
@@ -217,7 +217,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             publicKey = "12",
             privateKey = "12",
             address = "address",
-            networkShort = "net3",
+            chainId = 3,
             contractAddress = "aa"
         )
         viewModel.tokenIndex = 0
@@ -240,7 +240,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
             publicKey = "12",
             privateKey = "12",
-            networkShort = "net3",
+            chainId = 3,
             address = "address",
             contractAddress = "aa"
         )
@@ -272,12 +272,12 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `fetch gas limit success`() {
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any(), any())).doReturn(
+        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any())).doReturn(
             Single.just(
                 TransactionCost(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
             )
         )
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             transactionCostLiveData.observeForever(getGasLimitObserver)
             getAccount(1, 1)
@@ -299,11 +299,10 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 any(),
                 any(),
                 any(),
-                any(),
                 any()
             )
         ).doReturn(Single.error(error))
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, networkShort = "net3"))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             getAccount(0, -1)
             getTransactionCosts("address", BigDecimal.TEN)

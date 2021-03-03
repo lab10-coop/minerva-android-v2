@@ -29,43 +29,43 @@ class SmartContractRepositoryImpl(
         blockchainSafeAccountRepository.deployGnosisSafeContract(
             account.privateKey,
             account.address,
-            account.network.short
+            account.network.chainId
         )
 
     override fun getSafeAccountOwners(
         contractAddress: String,
-        network: String,
+        chainId: Int,
         privateKey: String,
         account: Account
     ): Single<List<String>> =
-        blockchainSafeAccountRepository.getGnosisSafeOwners(contractAddress, network, privateKey)
+        blockchainSafeAccountRepository.getGnosisSafeOwners(contractAddress, chainId, privateKey)
             .flatMap { walletConfigManager.updateSafeAccountOwners(account.id, it) }
 
     override fun addSafeAccountOwner(
         owner: String,
         address: String,
-        network: String,
+        chainId: Int,
         privateKey: String,
         account: Account
     ): Single<List<String>> =
-        blockchainSafeAccountRepository.addSafeAccountOwner(owner, address, network, privateKey)
+        blockchainSafeAccountRepository.addSafeAccountOwner(owner, address, chainId, privateKey)
             .andThen(walletConfigManager.updateSafeAccountOwners(account.id, prepareAddedOwnerList(owner, account)))
 
     override fun removeSafeAccountOwner(
         removeAddress: String, address: String,
-        network: String, privateKey: String, account: Account
+        chainId: Int, privateKey: String, account: Account
     ): Single<List<String>> =
-        blockchainSafeAccountRepository.removeSafeAccountOwner(removeAddress, address, network, privateKey)
+        blockchainSafeAccountRepository.removeSafeAccountOwner(removeAddress, address, chainId, privateKey)
             .andThen(walletConfigManager.updateSafeAccountOwners(account.id, prepareRemovedOwnerList(removeAddress, account)))
 
-    override fun transferNativeCoin(network: String, transaction: Transaction): Completable =
-        blockchainSafeAccountRepository.transferNativeCoin(network, TransactionMapper.map(transaction))
+    override fun transferNativeCoin(chainId: Int, transaction: Transaction): Completable =
+        blockchainSafeAccountRepository.transferNativeCoin(chainId, TransactionMapper.map(transaction))
             .andThen(blockchainRegularAccountRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
 
-    override fun transferERC20Token(network: String, transaction: Transaction, erc20Address: String): Completable =
-        blockchainSafeAccountRepository.transferERC20Token(network, TransactionMapper.map(transaction), erc20Address)
+    override fun transferERC20Token(chainId: Int, transaction: Transaction, erc20Address: String): Completable =
+        blockchainSafeAccountRepository.transferERC20Token(chainId, TransactionMapper.map(transaction), erc20Address)
             .andThen(blockchainRegularAccountRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
@@ -79,14 +79,14 @@ class SmartContractRepositoryImpl(
     override fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal =
         walletConfigManager.getSafeAccountMasterOwnerBalance(address)
 
-    override fun getERC20TokenDetails(privateKey: String, network: String, tokenAddress: String): Single<ERC20Token> =
+    override fun getERC20TokenDetails(privateKey: String, chainId: Int, tokenAddress: String): Single<ERC20Token> =
         (blockchainRegularAccountRepository).run {
             Observable.zip(
-                getERC20TokenName(privateKey, network, tokenAddress),
-                getERC20TokenSymbol(privateKey, network, tokenAddress),
-                getERC20TokenDecimals(privateKey, network, tokenAddress),
+                getERC20TokenName(privateKey, chainId, tokenAddress),
+                getERC20TokenSymbol(privateKey, chainId, tokenAddress),
+                getERC20TokenDecimals(privateKey, chainId, tokenAddress),
                 Function3<String, String, BigInteger, ERC20Token> { name, symbol, decimals ->
-                    ERC20Token(NetworkManager.getChainId(network), name, symbol, tokenAddress, decimals.toString())
+                    ERC20Token(chainId, name, symbol, tokenAddress, decimals.toString())
                 }
             ).firstOrError()
         }

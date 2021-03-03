@@ -6,10 +6,10 @@ import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 
 object TokenBalanceToAccountToken {
-    fun map(network: String, token: TokenBalance): AccountToken =
+    fun map(chainId: Int, token: TokenBalance): AccountToken =
         AccountToken(
             ERC20Token(
-                NetworkManager.getChainId(network), token.name, token.symbol, token.address, token.decimals),
+                chainId, token.name, token.symbol, token.address, token.decimals),
                 token.balance.toBigDecimal()
             )
 }
