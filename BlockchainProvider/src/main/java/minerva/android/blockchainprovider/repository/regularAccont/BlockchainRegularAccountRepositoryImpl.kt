@@ -32,6 +32,7 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
 import org.web3j.utils.Numeric
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -174,7 +175,7 @@ class BlockchainRegularAccountRepositoryImpl(
         else Single.just(ensName)
 
     override fun transferERC20Token(chainId: Int, payload: TransactionPayload): Completable =
-        loadERC20(payload.privateKey, chainId, payload.contractAddress)
+        loadTransactionERC20(payload.privateKey, chainId, payload.contractAddress, payload)
             .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
             .flowable()
             .ignoreElements()
@@ -195,6 +196,9 @@ class BlockchainRegularAccountRepositoryImpl(
                                     .flowable()
                             )
                             .flatMapSingle { (gas, call) ->
+                                if (call.error != null) {
+                                    Timber.tag("kobe").d("Error: ${call.error.message}")
+                                }
                                 handleGasLimit(chainId, gas, gasPrice)
                             }
                     }
@@ -259,7 +263,10 @@ class BlockchainRegularAccountRepositoryImpl(
         it: EthEstimateGas,
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> {
-        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
+        val gasLimit = it.error?.let {
+            Timber.tag("kobe").d("Error: ${it.message}")
+            Operation.TRANSFER_NATIVE.gasLimit
+        } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(chainId, increaseGasLimitByTenPercent(gasLimit), gasPrice)
     }
 
