@@ -148,17 +148,20 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     accountAdapter.updateList(accounts, areMainNetsEnabled)
                     setTatsButtonListener(accountAdapter.activeAccountsList)
                 })
+
                 dappSessions.observe(viewLifecycleOwner, Observer {
-                    accountAdapter.updateList(it, areMainNetsEnabled)
+                    accountAdapter.updateSessionCount(it)
                 })
+
                 balanceLiveData.observe(viewLifecycleOwner, Observer {
                     accountAdapter.updateBalances(it)
                     swipeRefresh.isRefreshing = false
                 })
             }
-            tokenBalanceLiveData.observe(
-                viewLifecycleOwner,
-                Observer { accountAdapter.updateTokenBalances(it) })
+            tokenBalanceLiveData.observe(viewLifecycleOwner, Observer {
+                accountAdapter.updateTokenBalances(it)
+            })
+
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 refreshFreeATSButton()
                 showErrorFlashbar(

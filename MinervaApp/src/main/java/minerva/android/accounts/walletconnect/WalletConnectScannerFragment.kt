@@ -12,6 +12,7 @@ import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.margin
 import minerva.android.extension.visible
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
@@ -40,12 +41,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             when (it) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
-                is OnError -> {
-                    shouldScan = true
-                    showToast(getErrorMessage(it))
-                }
-                is OnDisconnected ->
-                    showToast(getString(R.string.dapp_disconnected))
+                is OnDisconnected -> showToast(getString(R.string.dapp_disconnected))
                 is ProgressBarState -> {
                     if (!it.show) {
                         binding.scannerProgressBar.invisible()
@@ -65,13 +61,17 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is OnSessionDeleted -> showToast(getString(R.string.dapp_deleted))
             }
         })
+        viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver {
+            shouldScan = true
+            showToast(getErrorMessage(it))
+        })
     }
 
-    private fun getErrorMessage(it: OnError) =
-        if (it.error is InvalidAccountThrowable) {
+    private fun getErrorMessage(it: Throwable) =
+        if (it is InvalidAccountThrowable) {
             getString(R.string.invalid_account_message)
         } else {
-            it.error.message
+            it.message
         }
 
     private fun showToast(message: String?) {
