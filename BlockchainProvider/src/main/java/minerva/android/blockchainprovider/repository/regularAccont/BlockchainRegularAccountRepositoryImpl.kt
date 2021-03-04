@@ -14,6 +14,7 @@ import minerva.android.blockchainprovider.model.TxCostData
 import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.smartContracts.ERC20
+import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.map.value
 import org.web3j.abi.FunctionEncoder
@@ -32,7 +33,6 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
 import org.web3j.utils.Numeric
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -159,7 +159,6 @@ class BlockchainRegularAccountRepositoryImpl(
         tokenAddress: String
     ): Observable<BigInteger> = loadERC20(privateKey, chainId, tokenAddress).decimals().flowable().toObservable()
 
-
     override fun getFreeATS(address: String): Completable = Completable.create {
         freeTokenRepository.getFreeATS(address).let { responseText ->
             if (responseText.startsWith(CORRECT_ATS_FREE_PREFIX)) it.onComplete()
@@ -176,7 +175,10 @@ class BlockchainRegularAccountRepositoryImpl(
 
     override fun transferERC20Token(chainId: Int, payload: TransactionPayload): Completable =
         loadTransactionERC20(payload.privateKey, chainId, payload.contractAddress, payload)
-            .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
+            .transfer(
+                payload.receiverAddress,
+                CryptoUtils.convertTokenAmount(payload.amount, payload.tokenDecimals)
+            )
             .flowable()
             .ignoreElements()
 
@@ -195,12 +197,7 @@ class BlockchainRegularAccountRepositoryImpl(
                                     .ethCall(transaction, DefaultBlockParameterName.LATEST)
                                     .flowable()
                             )
-                            .flatMapSingle { (gas, call) ->
-                                if (call.error != null) {
-                                    Timber.tag("kobe").d("Error: ${call.error.message}")
-                                }
-                                handleGasLimit(chainId, gas, gasPrice)
-                            }
+                            .flatMapSingle { (gas, _) -> handleGasLimit(chainId, gas, gasPrice, txCostData.transferType) }
                     }
                     .firstOrError()
                     .timeout(
@@ -223,13 +220,6 @@ class BlockchainRegularAccountRepositoryImpl(
             BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP ->
                 getTransaction(costData.from, count, address, costData.amount, costData.contractData)
             else -> {
-                Timber.tag("kobe").d("Sender address: ${costData.from}")
-                Timber.tag("kobe").d("Contract address: ${costData.contractAddress}")
-                Timber.tag("kobe").d("Receiver token address: $address")
-                Timber.tag("kobe").d("Value of native coin: 0")
-                Timber.tag("kobe")
-                    .d("Value of token to send: ${toWei(costData.amount, Convert.Unit.ETHER).toBigInteger()}")
-
                 Transaction.createFunctionCallTransaction(
                     costData.from,
                     count.transactionCount,
@@ -237,15 +227,20 @@ class BlockchainRegularAccountRepositoryImpl(
                     BigInteger.ZERO,
                     costData.contractAddress,//token smart contract address
                     BigInteger.ZERO, //value of native coin
-                    FunctionEncoder.encode(getTokenFunctionCall(address, costData))
+                    FunctionEncoder.encode(
+                        getTokenFunctionCall(
+                            address,
+                            CryptoUtils.convertTokenAmount(costData.amount, costData.tokenDecimals)
+                        )
+                    )
                 )
             }
         }
 
-    private fun getTokenFunctionCall(address: String, costData: TxCostData) =
+    private fun getTokenFunctionCall(address: String, value: BigInteger) =
         Function(
             ERC20.FUNC_TRANSFER,
-            listOf(Address(address), Uint256(toWei(costData.amount, Convert.Unit.ETHER).toBigInteger())),
+            listOf(Address(address), Uint256(value)),
             emptyList()
         )
 
@@ -268,13 +263,16 @@ class BlockchainRegularAccountRepositoryImpl(
     private fun handleGasLimit(
         chainId: Int,
         it: EthEstimateGas,
-        gasPrice: BigDecimal?
+        gasPrice: BigDecimal?,
+        transferType: BlockchainTransactionType
     ): Single<TransactionCostPayload> {
         val gasLimit = it.error?.let {
-            Timber.tag("kobe").d("Error: ${it.message}")
-            Operation.TRANSFER_NATIVE.gasLimit
+            when (transferType) {
+                BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP -> Operation.TRANSFER_NATIVE.gasLimit
+                else -> Operation.TRANSFER_ERC20.gasLimit
+            }
         } ?: estimateGasLimit(it.amountUsed)
-        Timber.tag("kobe").d("GasLimit: $gasLimit")
+
         return calculateTransactionCosts(chainId, increaseGasLimitByTenPercent(gasLimit), gasPrice)
     }
 
