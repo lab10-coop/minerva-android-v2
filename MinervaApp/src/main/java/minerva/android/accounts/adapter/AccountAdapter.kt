@@ -29,9 +29,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun getItemCount(): Int = activeAccounts.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder = AccountViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
-            parent
-        )
+        LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
+        parent
+    )
 
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
         activeAccounts[position].let {
@@ -66,17 +66,12 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
                 accountTokenBalances[account.privateKey]?.let { accountsList ->
                     account.accountTokens = accountsList
                         .filter {
-                            listener.isTokenVisible(account.address, it.token.address)
-                                ?.let { visibility ->
-                                    visibility
-                                }.orElse {
-                                    listener.saveTokenVisibility(
-                                        account.address,
-                                        it.token.address,
-                                        true
-                                    )
-                                    true
-                                }
+                            listener.isTokenVisible(account.address, it.token.address)?.let { visibility ->
+                                visibility && it.balance > BigDecimal.ZERO
+                            }.orElse {
+                                listener.saveTokenVisibility(account.address, it.token.address, true)
+                                true
+                            }
                         }
                     notifyItemChanged(index)
                 }
