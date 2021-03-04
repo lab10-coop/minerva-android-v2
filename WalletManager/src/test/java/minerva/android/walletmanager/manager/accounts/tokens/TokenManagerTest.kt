@@ -354,7 +354,6 @@ class TokenManagerTest : RxTest() {
 
     private val firstTokenII = ERC20Token(ETH_RIN, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
     private val secondTokenII = ERC20Token(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
-
     private val mapII = mapOf(
         Pair(
             "ETH_RIN",
@@ -363,7 +362,6 @@ class TokenManagerTest : RxTest() {
     )
 
     private val firstTokenIII = ERC20Token(ETH_RIN, "CookieTokenTINIII", "COOKiERINIII", "0x000000", "3")
-
     private val mapIII = mapOf(
         Pair(
             "ETH_RIN",
