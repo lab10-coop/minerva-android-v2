@@ -31,9 +31,9 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.mappers.*
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
@@ -204,6 +204,8 @@ class WalletConfigManagerImpl(
                 walletConfig,
                 WalletConfigToWalletPayloadMapper.map(walletConfig)
             )
+            _walletConfigLiveData.value = config
+            localWalletProvider.saveWalletConfig(payload)
             minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
                 .toSingleDefault(Pair(walletConfig, payload))
                 .map {
@@ -213,10 +215,7 @@ class WalletConfigManagerImpl(
                 .handleAutomaticBackupFailedError(Pair(config, payload), localStorage)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess { (config, payload) ->
-                    _walletConfigLiveData.value = config
-                    localWalletProvider.saveWalletConfig(payload)
-                }.ignoreElement()
+                .ignoreElement()
         } else Completable.error(AutomaticBackupFailedThrowable())
 
     override fun dispose() {

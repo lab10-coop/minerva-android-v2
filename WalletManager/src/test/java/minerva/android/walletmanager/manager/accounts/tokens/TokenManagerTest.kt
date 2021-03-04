@@ -22,9 +22,14 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
+import minerva.android.walletmanager.model.defs.CredentialType
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
@@ -84,10 +89,13 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test saving tokens list for giving network`() {
         NetworkManager.initialize(DataProvider.networks)
-        tokenManager.saveTokens(map)
+        tokenManager.saveTokens(true, map)
             .test()
             .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
-        tokenManager.saveTokens(map)
+        tokenManager.saveTokens(true, map)
+            .test()
+            .assertComplete()
+        tokenManager.saveTokens(false, map)
             .test()
             .assertComplete()
         verify(walletManager, times(1)).updateWalletConfig(any())
@@ -109,18 +117,24 @@ class TokenManagerTest : RxTest() {
         resultII.second["ETH_RIN"]?.size shouldBeEqualTo 2
         resultII.second["ETH_RIN"]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
         resultII.second["ETH_RIN"]?.get(1)?.token?.logoURI shouldBeEqualTo "someLogoURI_II"
+        val resultIII = tokenManager.updateTokensFromLocalStorage(mapIII)
+        resultIII.first shouldBeEqualTo true
+        resultIII.second.size shouldBeEqualTo 1
+        resultIII.second["ETH_RIN"]?.size shouldBeEqualTo 3
+        resultIII.second["ETH_RIN"]?.get(1)?.token?.logoURI shouldBeEqualTo "someLogoURI_II"
+        resultIII.second["ETH_RIN"]?.get(2)?.token?.logoURI shouldBeEqualTo null
     }
 
     @Test
     fun `Test tokens with online logos data without error`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(tokenRawData))
-        tokenManager.updateTokens(false, map).test().assertComplete().assertNoErrors()
+        tokenManager.updateTokenIcons(false, map).test().assertComplete().assertNoErrors()
             .assertValue {
                 map == map
                 map["ATS_TAU"]?.get(0)?.token?.logoURI == null
             }
-        tokenManager.updateTokens(true, map).test().assertComplete().assertNoErrors()
+        tokenManager.updateTokenIcons(true, map).test().assertComplete().assertNoErrors()
             .assertValue {
                 map["ATS_TAU"]?.get(0)?.token?.logoURI == "someIconAddress"
                 map["ATS_TAU"]?.get(1)?.token?.logoURI == "someIconAddressII"
@@ -131,7 +145,7 @@ class TokenManagerTest : RxTest() {
     fun `Test tokens with online logos data with error`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.error(Throwable("No data here!")))
-        tokenManager.updateTokens(true, map).test().assertErrorMessage("No data here!")
+        tokenManager.updateTokenIcons(true, map).test().assertErrorMessage("No data here!")
     }
 
     @Test
@@ -140,10 +154,13 @@ class TokenManagerTest : RxTest() {
         val map = mapOf(
             Pair("Some", listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN)))
         )
-        tokenManager.saveTokens(map)
+        tokenManager.saveTokens(true, map)
             .test()
             .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
-        tokenManager.saveTokens(map)
+        tokenManager.saveTokens(true, map)
+            .test()
+            .assertComplete()
+        tokenManager.saveTokens(false, map)
             .test()
             .assertComplete()
         verify(walletManager, times(1)).updateWalletConfig(any())
@@ -337,10 +354,20 @@ class TokenManagerTest : RxTest() {
 
     private val firstTokenII = ERC20Token(ETH_RIN, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
     private val secondTokenII = ERC20Token(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
+
     private val mapII = mapOf(
         Pair(
             "ETH_RIN",
             listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN))
+        )
+    )
+
+    private val firstTokenIII = ERC20Token(ETH_RIN, "CookieTokenTINIII", "COOKiERINIII", "0x000000", "3")
+
+    private val mapIII = mapOf(
+        Pair(
+            "ETH_RIN",
+            listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN), AccountToken(firstTokenIII, BigDecimal.ZERO))
         )
     )
 

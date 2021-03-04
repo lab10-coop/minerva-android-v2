@@ -199,14 +199,10 @@ class AccountsViewModel(
 
     private fun handleRemoveAccountErrors(it: Throwable) {
         when (it) {
-            is BalanceIsNotEmptyThrowable ->
-                _balanceIsNotEmptyErrorLiveData.value = Event(it)
-            is BalanceIsNotEmptyAndHasMoreOwnersThrowable ->
-                _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
-            is IsNotSafeAccountMasterOwnerThrowable ->
-                _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
-            is AutomaticBackupFailedThrowable ->
-                _automaticBackupErrorLiveData.value = Event(it)
+            is BalanceIsNotEmptyThrowable -> _balanceIsNotEmptyErrorLiveData.value = Event(it)
+            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
+            is IsNotSafeAccountMasterOwnerThrowable -> _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
+            is AutomaticBackupFailedThrowable -> _automaticBackupErrorLiveData.value = Event(it)
             else -> _errorLiveData.value = Event(Throwable(it.message))
         }
     }
