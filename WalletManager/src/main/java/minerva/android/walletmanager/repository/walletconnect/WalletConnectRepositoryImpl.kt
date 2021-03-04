@@ -11,7 +11,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
-import minerva.android.blockchainprovider.smartContracts.ERC20Json
+import minerva.android.blockchainprovider.smartContracts.TokenStandardJson
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
@@ -78,7 +78,7 @@ class WalletConnectRepositoryImpl(
                 currentRequestId = id
 
                 val decoder = Decoder()
-                decoder.addAbi(ERC20Json.json)
+                decoder.addAbi(TokenStandardJson.erc20Abi)
                 val result: Decoder.DecodedMethod? = decoder.decodeMethod(transaction.data)
                 result?.params?.get(0)?.value
 
@@ -88,6 +88,8 @@ class WalletConnectRepositoryImpl(
                 Timber.tag("kobe").d("Coin value: ${transaction.value}")
                 Timber.tag("kobe").d("Gas price: ${transaction.gasPrice}")
                 Timber.tag("kobe").d("Gas limit: ${transaction.gasLimit}")
+
+                Timber.tag("kobe").d("Parsed: ${result.toString()}")
 
                 status.onNext(
                     OnEthSendTransaction(
