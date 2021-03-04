@@ -5,6 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.kotlinUtils.Empty
@@ -21,7 +22,6 @@ import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.CryptoUtils
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -39,7 +39,7 @@ class AccountManagerImpl(
     override fun createRegularAccount(network: Network): Single<String> {
         walletManager.getWalletConfig()?.let { config ->
             val (index, derivationPath) = getIndexWithDerivationPath(network, config)
-            val accountName = CryptoUtils.prepareName(network, index)
+            val accountName = CryptoUtils.prepareName(network.name, index)
             return cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
                 index, derivationPath, network.testNet

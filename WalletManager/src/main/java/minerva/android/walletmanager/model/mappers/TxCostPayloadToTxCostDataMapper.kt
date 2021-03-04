@@ -14,6 +14,7 @@ object TxCostPayloadToTxCostDataMapper : Mapper<TxCostPayload, TxCostData> {
             to,
             amount,
             chainId,
+            tokenDecimals,
             contractAddress,
             contractData
         )

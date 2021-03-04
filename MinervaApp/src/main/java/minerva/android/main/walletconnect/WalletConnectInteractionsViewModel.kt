@@ -128,8 +128,8 @@ class WalletConnectInteractionsViewModel(
             status.transaction.from,
             status.transaction.to,
             value,
-            chainId,
-            getContractData(status.transaction)
+            chainId, //todo handle token decimals ??
+            contractAddress = getContractData(status.transaction)
         )
 
     //TODO include other transaction types (token transfer, token swap)

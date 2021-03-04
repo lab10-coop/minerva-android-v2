@@ -10,10 +10,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.extension.validator.Validator
-import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.EmptyBalance
-import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
@@ -109,10 +106,16 @@ class TransactionViewModel(
     private val isSafeAccountTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && account.isSafeAccount
 
-    private val contractAddress
+    private val contractAddress: String
         get() = when (tokenIndex) {
             Int.InvalidIndex -> String.Empty
             else -> account.accountTokens[tokenIndex].token.address
+        }
+
+    private val tokenDecimals: Int
+        get() = when (tokenIndex) {
+            Int.InvalidIndex -> Int.InvalidValue
+            else -> account.accountTokens[tokenIndex].token.decimals.toInt()
         }
 
     val cryptoBalance: BigDecimal
@@ -160,6 +163,7 @@ class TransactionViewModel(
             to,
             amount,
             account.network.chainId,
+            tokenDecimals,
             contractAddress
         )
 
@@ -394,5 +398,14 @@ class TransactionViewModel(
         gasLimit: BigInteger,
         contractAddress: String = String.Empty
     ): Transaction =
-        Transaction(account.address, account.privateKey, receiverKey, amount, gasPrice, gasLimit, contractAddress)
+        Transaction(
+            account.address,
+            account.privateKey,
+            receiverKey,
+            amount,
+            gasPrice,
+            gasLimit,
+            contractAddress,
+            tokenDecimals = tokenDecimals
+        )
 }
