@@ -175,7 +175,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 address = "address",
                 chainId = 1,
                 contractAddress = "aa",
-                accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
+                accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3")))
             )
             tokenIndex = 0
         }
@@ -196,7 +196,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.apply {
             account = Account(
                 id = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                chainId = 3, accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
+                chainId = 3, accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3")))
             )
             tokenIndex = 0
         }
@@ -213,7 +213,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account asset transaction test success`() {
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3"))),
             publicKey = "12",
             privateKey = "12",
             address = "address",
@@ -237,7 +237,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3"))),
             publicKey = "12",
             privateKey = "12",
             chainId = 3,
@@ -276,7 +276,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             id = 0,
             publicKey = "12",
             chainId = 1,
-            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol"), BigDecimal.ZERO))
+            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol", decimals = "2"), BigDecimal.ZERO))
         )
         whenever(transactionRepository.getTransactionCosts(any())).doReturn(
             Single.just(
