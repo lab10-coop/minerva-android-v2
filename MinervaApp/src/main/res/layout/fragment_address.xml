@@ -3,8 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/address_view"
-    android:fillViewport="true"
-    android:clipToPadding="false"
     android:paddingBottom="@dimen/margin_xbig"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">

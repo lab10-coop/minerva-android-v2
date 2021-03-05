@@ -10,11 +10,9 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.extension.validator.Validator
-import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.EmptyBalance
-import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.RECEIVER
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.TOKEN
@@ -28,9 +26,10 @@ import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.repository.getMainTokenIconRes
 import timber.log.Timber
@@ -107,8 +106,17 @@ class TransactionViewModel(
     private val isSafeAccountTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && account.isSafeAccount
 
-    private val tokenAddress
-        get() = account.accountTokens[tokenIndex].token.address
+    private val contractAddress: String
+        get() = when (tokenIndex) {
+            Int.InvalidIndex -> String.Empty
+            else -> account.accountTokens[tokenIndex].token.address
+        }
+
+    private val tokenDecimals: Int
+        get() = when (tokenIndex) {
+            Int.InvalidIndex -> Int.InvalidValue
+            else -> account.accountTokens[tokenIndex].token.decimals.toInt()
+        }
 
     val cryptoBalance: BigDecimal
         get() = if (tokenIndex == Int.InvalidIndex) account.cryptoBalance else account.accountTokens[tokenIndex].balance
@@ -128,7 +136,7 @@ class TransactionViewModel(
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {
-            transactionRepository.getTransactionCosts(tokenIndex, account.address, to, amount, account.network.chainId)
+            transactionRepository.getTransactionCosts(getTxCostPayload(to, amount))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -148,14 +156,42 @@ class TransactionViewModel(
         }
     }
 
+    private fun getTxCostPayload(to: String, amount: BigDecimal): TxCostPayload =
+        TxCostPayload(
+            transferType,
+            account.address,
+            to,
+            amount,
+            account.network.chainId,
+            tokenDecimals,
+            contractAddress
+        )
+
+    private val transferType: TransferType
+        get() = when {
+            isMainTransaction -> TransferType.COIN_TRANSFER
+            isTokenTransaction -> TransferType.TOKEN_TRANSFER
+            isSafeAccountMainTransaction -> TransferType.SAFE_ACCOUNT_COIN_TRANSFER
+            isSafeAccountTokenTransaction -> TransferType.SAFE_ACCOUNT_TOKEN_TRANSFER
+            else -> TransferType.UNDEFINED
+        }
+
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
-        when {
-            isMainTransaction -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-            isSafeAccountMainTransaction -> sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
-            isTokenTransaction -> sendTokenTransaction(receiverKey, amount, gasPrice, gasLimit)
-            isSafeAccountTokenTransaction -> sendSafeAccountTokenTransaction(receiverKey, amount, gasPrice, gasLimit)
+        when (transferType) {
+            TransferType.COIN_TRANSFER -> sendMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            TransferType.SAFE_ACCOUNT_COIN_TRANSFER ->
+                sendSafeAccountMainTransaction(receiverKey, amount, gasPrice, gasLimit)
+            TransferType.TOKEN_TRANSFER -> sendTokenTransaction(receiverKey, amount, gasPrice, gasLimit)
+            TransferType.SAFE_ACCOUNT_TOKEN_TRANSFER ->
+                sendSafeAccountTokenTransaction(receiverKey, amount, gasPrice, gasLimit)
         }
     }
+
+    fun isTransactionAvailable(isValidated: Boolean) =
+        when {
+            isMainTransaction || isTokenTransaction -> isValidated && transactionCost < account.cryptoBalance
+            else -> isValidated && transactionCost < smartContractRepository.getSafeAccountMasterOwnerBalance(account.masterOwnerAddress)
+        }
 
     private fun sendSafeAccountTokenTransaction(
         receiverKey: String,
@@ -174,7 +210,7 @@ class TransactionViewModel(
                             smartContractRepository.transferERC20Token(
                                 network.chainId,
                                 it,
-                                tokenAddress
+                                contractAddress
                             ).toSingleDefault(it)
                         }
                 }
@@ -195,7 +231,12 @@ class TransactionViewModel(
 
     }
 
-    private fun sendSafeAccountMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+    private fun sendSafeAccountMainTransaction(
+        receiverKey: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ) {
         launchDisposable {
             val ownerPrivateKey =
                 account.masterOwnerAddress.let {
@@ -268,9 +309,14 @@ class TransactionViewModel(
         }
     }
 
-    private fun sendTokenTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+    private fun sendTokenTransaction(
+        receiverKey: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ) {
         launchDisposable {
-            resolveENS(receiverKey, amount, gasPrice, gasLimit, tokenAddress)
+            resolveENS(receiverKey, amount, gasPrice, gasLimit, contractAddress)
                 .flatMapCompletable { transactionRepository.transferERC20Token(account.network.chainId, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -285,20 +331,13 @@ class TransactionViewModel(
         }
     }
 
-    fun getAllAvailableFunds(): String {
-        if (tokenIndex != Int.InvalidIndex) return account.accountTokens[tokenIndex].balance.toPlainString()
-        if (account.isSafeAccount) return account.cryptoBalance.toPlainString()
-
-        val allAvailableFunds = account.cryptoBalance.minus(transactionCost)
-        return if (allAvailableFunds < BigDecimal.ZERO) {
-            String.EmptyBalance
-        } else {
-            allAvailableFunds.toPlainString()
-        }
-    }
+    fun getAllAvailableFunds(): String =
+        if (recalculateAmount < BigDecimal.ZERO) String.EmptyBalance
+        else recalculateAmount.toPlainString()
 
     val recalculateAmount: BigDecimal
-        get() = cryptoBalance.minus(transactionCost)
+        get() = if (isMainTransaction) cryptoBalance.minus(transactionCost)
+        else cryptoBalance
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
@@ -357,5 +396,15 @@ class TransactionViewModel(
         gasPrice: BigDecimal,
         gasLimit: BigInteger,
         contractAddress: String = String.Empty
-    ): Transaction = Transaction(account.address, account.privateKey, receiverKey, amount, gasPrice, gasLimit, contractAddress)
+    ): Transaction =
+        Transaction(
+            account.address,
+            account.privateKey,
+            receiverKey,
+            amount,
+            gasPrice,
+            gasLimit,
+            contractAddress,
+            tokenDecimals = tokenDecimals
+        )
 }

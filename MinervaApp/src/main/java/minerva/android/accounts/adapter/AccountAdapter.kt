@@ -13,7 +13,6 @@ import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.transactions.Balance
-import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
@@ -48,6 +47,15 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         activeAccounts = data.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
         openAccounts = activeAccounts.map { false }.toMutableList()
         notifyDataSetChanged()
+    }
+
+    fun updateSessionCount(accounts: HashMap<String, Int>) {
+        activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
+            account.apply {
+                dappSessionCount = accounts[address] ?: 0
+                notifyItemChanged(index)
+            }
+        }
     }
 
     fun updateBalances(balances: HashMap<String, Balance>) {
@@ -120,10 +128,6 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun onOpenOrClose(index: Int, isOpen: Boolean) {
         if (openAccounts.inBounds(index)) openAccounts[index] = isOpen
-    }
-
-    companion object {
-        private val NO_FUNDS = BigDecimal.valueOf(0)
     }
 }
 

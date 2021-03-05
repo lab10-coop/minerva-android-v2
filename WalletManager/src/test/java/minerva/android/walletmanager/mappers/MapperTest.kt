@@ -3,13 +3,15 @@ package minerva.android.walletmanager.mappers
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.TokenBalance
 import minerva.android.apiProvider.model.TransactionSpeed
+import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
+import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
-import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.WalletConfigTestValues.accounts
 import minerva.android.walletmanager.model.WalletConfigTestValues.accountsResponse
 import minerva.android.walletmanager.model.WalletConfigTestValues.identities
@@ -17,13 +19,15 @@ import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
 import minerva.android.walletmanager.model.WalletConfigTestValues.networks
 import minerva.android.walletmanager.model.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.mappers.*
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.utils.DataProvider
 import org.amshove.kluent.shouldBeEqualTo
@@ -386,7 +390,8 @@ class MapperTest {
             "Cookie Token",
             "10",
             "0xC00KiE01",
-            "10000000000000")
+            "10000000000000"
+        )
         val tokenBalance02 = TokenBalance(
             "type",
             "symbol",
@@ -403,5 +408,19 @@ class MapperTest {
         result02.token.name shouldBeEqualTo "Cookie Token 2"
         result02.token.address shouldBeEqualTo "0xC00KiE02"
         result02.balance shouldBeEqualTo 0.2.toBigDecimal()
+    }
+
+    @Test
+    fun `map tx cost payload to tx cost data test`() {
+        val result = TxCostPayloadToTxCostDataMapper.map(
+            TxCostPayload(
+                TransferType.COIN_TRANSFER,
+                from = "address1",
+                to = "address2"
+            )
+        )
+        result.transferType shouldBeEqualTo BlockchainTransactionType.COIN_TRANSFER
+        result.from shouldBeEqualTo "address1"
+        result.to shouldBeEqualTo "address2"
     }
 }

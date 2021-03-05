@@ -9,13 +9,13 @@ import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.TransactionCost
-import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -175,7 +175,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 address = "address",
                 chainId = 1,
                 contractAddress = "aa",
-                accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
+                accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3")))
             )
             tokenIndex = 0
         }
@@ -196,7 +196,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.apply {
             account = Account(
                 id = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                chainId = 3, accountTokens = listOf(AccountToken(ERC20Token(3, "name")))
+                chainId = 3, accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3")))
             )
             tokenIndex = 0
         }
@@ -213,7 +213,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account asset transaction test success`() {
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3"))),
             publicKey = "12",
             privateKey = "12",
             address = "address",
@@ -237,7 +237,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token(3, "name"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3"))),
             publicKey = "12",
             privateKey = "12",
             chainId = 3,
@@ -272,15 +272,22 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `fetch gas limit success`() {
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any())).doReturn(
+        val account = Account(
+            id = 0,
+            publicKey = "12",
+            chainId = 1,
+            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol", decimals = "2"), BigDecimal.ZERO))
+        )
+        whenever(transactionRepository.getTransactionCosts(any())).doReturn(
             Single.just(
                 TransactionCost(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
             )
         )
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
+        whenever(transactionRepository.getAccount(any())).thenReturn(account)
         viewModel.run {
             transactionCostLiveData.observeForever(getGasLimitObserver)
-            getAccount(1, 1)
+            getAccount(1, 0)
             getTransactionCosts("address", BigDecimal.TEN)
         }
         getGasLimitCaptor.run {
@@ -292,17 +299,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `fetch gas limit error`() {
         val error = Throwable()
-        whenever(
-            transactionRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).doReturn(Single.error(error))
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
+        whenever(transactionRepository.getTransactionCosts(any())).doReturn(Single.error(error))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1))
         viewModel.run {
             getAccount(0, -1)
             getTransactionCosts("address", BigDecimal.TEN)
