@@ -71,7 +71,9 @@
             android:id="@+id/transaction_cost_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_normal"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal"
             android:orientation="horizontal"
             tools:ignore="UseCompoundDrawables">
 
@@ -147,13 +149,26 @@
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:id="@+id/balance_to_low_error"
+            style="@style/RoundedRedLabelStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_xlarge"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:gravity="center"
+            android:text="@string/account_balance_is_to_low"
+            android:textAllCaps="true"
+            android:visibility="gone" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/send_button"
             style="@style/PurpleButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginTop="@dimen/margin_big"
+            android:layout_marginTop="@dimen/margin_normal"
             android:enabled="false" />
     </LinearLayout>
 
@@ -162,6 +177,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
-        android:layout_marginBottom="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
         android:visibility="gone" />
 </LinearLayout>

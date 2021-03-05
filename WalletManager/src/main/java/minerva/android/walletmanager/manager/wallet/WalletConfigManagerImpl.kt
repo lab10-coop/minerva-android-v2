@@ -41,6 +41,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DefaultWalletConfig
 import minerva.android.walletmanager.utils.handleAutomaticBackupFailedError
 import timber.log.Timber
+import java.math.BigDecimal
 import kotlin.properties.Delegates
 
 class WalletConfigManagerImpl(
@@ -233,11 +234,15 @@ class WalletConfigManagerImpl(
         return safeAccountNumber
     }
 
-    override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String {
+    override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String = getAccount(address).privateKey
+
+    override fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal = getAccount(address).cryptoBalance
+
+    private fun getAccount(address: String?): Account {
         getWalletConfig()?.accounts?.forEach {
-            if (it.address == address) return it.privateKey
+            if (it.address == address) return it
         }
-        return String.Empty
+        return Account(Int.InvalidIndex)
     }
 
     override fun updateSafeAccountOwners(
