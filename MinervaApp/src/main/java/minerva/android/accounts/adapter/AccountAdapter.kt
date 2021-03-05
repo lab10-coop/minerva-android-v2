@@ -75,9 +75,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
                 accountTokenBalances[account.privateKey]?.let { accountsList ->
                     account.accountTokens = accountsList
                         .filter {
-                            listener.isTokenVisible(account.address, it.token.address)?.let { visibility ->
-                                visibility && it.balance > BigDecimal.ZERO
-                            }.orElse {
+                            listener.isTokenVisible(account.address, it).orElse {
                                 listener.saveTokenVisibility(account.address, it.token.address, true)
                                 true
                             }

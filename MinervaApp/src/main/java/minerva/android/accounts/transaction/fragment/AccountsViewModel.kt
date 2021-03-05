@@ -176,7 +176,6 @@ class AccountsViewModel(
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-//                .doAfterTerminate { accountManager.getAllAccounts()?.let { getSessions(it) } }
                 .subscribeBy(
                     onSuccess = { _balanceLiveData.value = it },
                     onError = {
@@ -281,7 +280,6 @@ class AccountsViewModel(
     private fun shouldGetFreeAts() =
         ((accountManager.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(24L)) < accountManager.currentTimeMills())
 
-
     @VisibleForTesting
     fun getAccountForFreeATS(accounts: List<Account>): Account {
         accounts.forEach {
@@ -291,8 +289,10 @@ class AccountsViewModel(
         return Account(Int.InvalidId)
     }
 
-    fun isTokenVisible(networkAddress: String, tokenAddress: String) =
-        tokenVisibilitySettings.getTokenVisibility(networkAddress, tokenAddress)
+    fun isTokenVisible(networkAddress: String, accountToken: AccountToken) =
+        tokenVisibilitySettings.getTokenVisibility(networkAddress, accountToken.token.address)?.let {
+            it && accountToken.balance > BigDecimal.ZERO
+        }
 
     fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
