@@ -68,7 +68,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager don't save new regular account`() {
         val error = Throwable()
-        val network = Network(short = "eth_rinkeby", httpRpc = "some")
+        val network = Network(chainId = 4, httpRpc = "some")
         NetworkManager.initialize(DataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn(String.Empty)
@@ -223,7 +223,7 @@ class AccountManagerTest : RxTest() {
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
-        manager.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
+        manager.createSafeAccount(Account(1, chainId = 4), "contract")
             .test()
             .assertComplete()
     }
@@ -235,7 +235,7 @@ class AccountManagerTest : RxTest() {
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
-        manager.createSafeAccount(Account(1, networkShort = "eth_rinkeby"), "contract")
+        manager.createSafeAccount(Account(1, chainId = 4), "contract")
             .test()
             .assertError(error)
     }

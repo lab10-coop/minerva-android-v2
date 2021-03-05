@@ -11,17 +11,21 @@ import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Compa
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.defs.NetworkShortName
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
-import minerva.android.walletmanager.repository.walletconnect.*
+import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import timber.log.Timber
 
 class WalletConnectViewModel(
@@ -37,6 +41,9 @@ class WalletConnectViewModel(
     private val _viewStateLiveData = MutableLiveData<WalletConnectState>()
     val stateLiveData: LiveData<WalletConnectState> get() = _viewStateLiveData
 
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
+
     fun setConnectionStatusFlowable() {
         launchDisposable {
             repository.connectionStatusFlowable
@@ -50,14 +57,11 @@ class WalletConnectViewModel(
                                 topic = it.topic
                                 handleSessionRequest(it)
                             }
-                            is OnConnectionFailure -> OnError(it.error)
                             is OnDisconnect -> OnDisconnected
                             else -> DefaultRequest
                         }
                     },
-                    onError = {
-                        _viewStateLiveData.value = OnError(it)
-                    }
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
@@ -137,7 +141,6 @@ class WalletConnectViewModel(
         topic.remotePeerId,
         requestedNetwork,
         account.name,
-        account.network.short,
         chainId
     )
 
@@ -146,29 +149,22 @@ class WalletConnectViewModel(
         else icons[FIRST_ICON]
 
     val shouldChangeNetwork: Boolean
-        get() = account.network.full != requestedNetwork
+        get() = account.network.name != requestedNetwork
 
     private fun handleSessionRequest(it: OnSessionRequest): WalletConnectState =
         it.chainId?.let { id ->
-            requestedNetwork = getNetworkName(id).orElse { String.Empty }
+            requestedNetwork = getNetworkName(id)
             OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
         }.orElse {
-            requestedNetwork = getNetworkName(it.chainId).orElse { String.Empty }
+            requestedNetwork = getNetworkWhenChainIdNotDefined()
             OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
         }
 
-    private fun getNetworkName(chainId: Int?): String? {
-        chainId?.let {
-            return NetworkManager.networks.find { it.chainId == chainId }?.full.orElse { getNetworkWhenChainIdNotDefined() }
-        }.orElse {
-            return getNetworkWhenChainIdNotDefined()
-        }
-    }
+    private fun getNetworkName(chainId: Int) =
+        NetworkManager.networks.find { it.chainId == chainId }?.name.orElse { String.Empty }
 
-    private fun getNetworkWhenChainIdNotDefined(): String? =
-        if (account.network.testNet) {
-            NetworkManager.networks.find { it.short == NetworkShortName.ETH_GOR }?.full
-        } else {
-            NetworkManager.networks.find { it.short == NetworkShortName.ETH_MAIN }?.full
-        }
+
+    private fun getNetworkWhenChainIdNotDefined(): String =
+        if (account.network.testNet) NetworkManager.networks.find { it.chainId == ETH_GOR }?.name ?: String.Empty
+        else NetworkManager.networks.find { it.chainId == ETH_MAIN }?.name ?: String.Empty
 }

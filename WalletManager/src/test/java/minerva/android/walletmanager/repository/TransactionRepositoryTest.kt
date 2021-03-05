@@ -5,11 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPrices
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.Price
-import minerva.android.apiProvider.model.TokenBalanceResponse
-import minerva.android.apiProvider.model.TransactionSpeed
+import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -20,12 +16,14 @@ import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
@@ -106,14 +104,14 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `send transaction success with resolved ENS test when there isno  wss uri available`() {
-        NetworkManager.initialize(listOf(Network(short = "ATS", httpRpc = "httpRpc", wsRpc = "")))
+        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "httpRpc", wsRpc = "")))
         whenever(blockchainRegularAccountRepository.transferNativeCoin(any(), any(), any()))
             .thenReturn(
                 Single.just(
                     PendingTransaction(
                         index = 1,
                         txHash = "hash",
-                        network = "ATS"
+                        chainId = 1
                     )
                 )
             )
@@ -123,7 +121,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         repository.transferNativeCoin(
-            "",
+            0,
             1,
             Transaction(
                 "address",
@@ -143,7 +141,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    chainId = 1,
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri"
                 )
@@ -155,7 +153,7 @@ class TransactionRepositoryTest : RxTest() {
                     PendingTransaction(
                         index = 1,
                         txHash = "hash",
-                        network = "ATS"
+                        chainId = 1
                     )
                 )
             )
@@ -165,7 +163,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         repository.transferNativeCoin(
-            "",
+            0,
             1,
             Transaction(
                 "address",
@@ -185,7 +183,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    chainId = 1,
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri"
                 )
@@ -197,7 +195,7 @@ class TransactionRepositoryTest : RxTest() {
                     PendingTransaction(
                         index = 1,
                         txHash = "hash",
-                        network = "ATS"
+                        chainId = 1
                     )
                 )
             )
@@ -207,7 +205,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         repository.transferNativeCoin(
-            "",
+            0,
             1,
             Transaction(
                 "address",
@@ -238,7 +236,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         repository.transferNativeCoin(
-            "",
+            0,
             1,
             Transaction(
                 "address",
@@ -263,7 +261,7 @@ class TransactionRepositoryTest : RxTest() {
                 "didi.eth"
             )
         )
-        repository.transferERC20Token("", Transaction())
+        repository.transferERC20Token(0, Transaction())
             .test()
             .assertComplete()
     }
@@ -278,7 +276,7 @@ class TransactionRepositoryTest : RxTest() {
                 Throwable()
             )
         )
-        repository.transferERC20Token("", Transaction()).test().assertComplete()
+        repository.transferERC20Token(0, Transaction()).test().assertComplete()
     }
 
     @Test
@@ -292,7 +290,7 @@ class TransactionRepositoryTest : RxTest() {
                 "didi.eth"
             )
         )
-        repository.transferERC20Token("", Transaction()).test().assertError(error)
+        repository.transferERC20Token(0, Transaction()).test().assertError(error)
     }
 
     @Test
@@ -377,7 +375,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `subscribe to pending transactions success test`() {
         val pendingAccount =
-            PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
+            PendingAccount(1, chainId = 11, txHash = "hash", senderAddress = "sender")
         whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
         whenever(webSocketRepositoryImpl.subscribeToExecutedTransactions(any(), any())).thenReturn(
             Flowable.just(
@@ -398,7 +396,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `subscribe to pending transactions error test`() {
         val pendingAccount =
-            PendingAccount(1, network = "abc", txHash = "hash", senderAddress = "sender")
+            PendingAccount(1, chainId = 11, txHash = "hash", senderAddress = "sender")
         val error = Throwable()
         whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
         whenever(webSocketRepositoryImpl.subscribeToExecutedTransactions(any(), any())).thenReturn(
@@ -412,7 +410,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `should open wss connection when there is only one pending account test success`() {
         val pendingAccount =
-            PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+            PendingAccount(1, chainId = 11, txHash = "hash", senderAddress = "sender")
         whenever(localStorage.getPendingAccounts()).thenReturn(listOf(pendingAccount))
         val result = repository.shouldOpenNewWssConnection(1)
         assertEquals(true, result)
@@ -421,9 +419,9 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `should open wss connection when there are more than one pending accounts with the same network test success`() {
         val pendingAccountAts1 =
-            PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+            PendingAccount(1, chainId = 11, txHash = "hash", senderAddress = "sender")
         val pendingAccountAts2 =
-            PendingAccount(2, network = "ats", txHash = "hash", senderAddress = "sender")
+            PendingAccount(2, chainId = 11, txHash = "hash", senderAddress = "sender")
 
         whenever(localStorage.getPendingAccounts()).thenReturn(
             listOf(
@@ -438,11 +436,11 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `should open wss connection when there are two pending accounts with the different network test`() {
         val pendingAccount =
-            PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+            PendingAccount(1, chainId = 11, txHash = "hash", senderAddress = "sender")
         val pendingAccount1 =
-            PendingAccount(2, network = "ats", txHash = "hash", senderAddress = "sender")
+            PendingAccount(2, chainId = 11, txHash = "hash", senderAddress = "sender")
         val pendingAccountPoa =
-            PendingAccount(3, network = "poa", txHash = "hash", senderAddress = "sender")
+            PendingAccount(3, chainId = 12, txHash = "hash", senderAddress = "sender")
 
         whenever(localStorage.getPendingAccounts()).thenReturn(
             listOf(
@@ -458,11 +456,11 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `should not open wss connection when there are two pending accounts with the same network test`() {
         val pendingAccount =
-            PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+            PendingAccount(1, chainId = 11, txHash = "hash", senderAddress = "sender")
         val pendingAccountPoa1 =
-            PendingAccount(2, network = "poa", txHash = "hash", senderAddress = "sender")
+            PendingAccount(2, chainId = 12, txHash = "hash", senderAddress = "sender")
         val pendingAccountPoa2 =
-            PendingAccount(3, network = "poa", txHash = "hash", senderAddress = "sender")
+            PendingAccount(3, chainId = 12, txHash = "hash", senderAddress = "sender")
 
         whenever(localStorage.getPendingAccounts()).thenReturn(
             listOf(
@@ -478,13 +476,13 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `should not open wss connection when there are two pending accounts with the same network and the first one is already opened test`() {
         val pendingAccount =
-            PendingAccount(1, network = "ats", txHash = "hash", senderAddress = "sender")
+            PendingAccount(1, chainId = 11, txHash = "hash", senderAddress = "sender")
         val pendingAccountPoa1 =
-            PendingAccount(2, network = "poa", txHash = "hash", senderAddress = "sender")
+            PendingAccount(2, chainId = 12, txHash = "hash", senderAddress = "sender")
         val pendingAccountPoa2 =
-            PendingAccount(3, network = "poa", txHash = "hash", senderAddress = "sender")
+            PendingAccount(3, chainId = 12, txHash = "hash", senderAddress = "sender")
         val pendingAccountEth =
-            PendingAccount(4, network = "eth", txHash = "hash", senderAddress = "sender")
+            PendingAccount(4, chainId = 13, txHash = "hash", senderAddress = "sender")
 
         whenever(localStorage.getPendingAccounts()).thenReturn(
             listOf(
@@ -510,7 +508,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    chainId = 1,
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri",
                     gasPriceOracle = ""
@@ -518,19 +516,11 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(
-            blockchainRegularAccountRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                eq(null),
-                any()
-            )
+            blockchainRegularAccountRepository.getTransactionCosts(any(), eq(null))
         ).doReturn(
             Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN))
         )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertComplete()
             .assertValue {
@@ -543,7 +533,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    chainId = 1,
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri",
                     gasPriceOracle = "url"
@@ -556,18 +546,10 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(
-            blockchainRegularAccountRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
+            blockchainRegularAccountRepository.getTransactionCosts(any(), any())
         ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
         whenever(blockchainRegularAccountRepository.fromWei(any())).thenReturn(BigDecimal.TEN)
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertComplete()
             .assertValue {
@@ -581,25 +563,14 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    chainId = 1,
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri"
                 )
             )
         )
-        whenever(
-            blockchainRegularAccountRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                eq(null),
-                any()
-            )
-        )
-            .doReturn(Single.error(error))
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), eq(null))).doReturn(Single.error(error))
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertError(error)
     }
@@ -610,7 +581,7 @@ class TransactionRepositoryTest : RxTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    short = "ATS",
+                    chainId = 1,
                     httpRpc = "httpRpc",
                     wsRpc = "wssuri",
                     gasPriceOracle = "url"
@@ -618,17 +589,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(Single.error(error))
-        whenever(
-            blockchainRegularAccountRepository.getTransactionCosts(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                eq(null),
-                any()
-            )
-        )
+        whenever(blockchainRegularAccountRepository.getTransactionCosts(any(), eq(null)))
             .doReturn(
                 Single.just(
                     TransactionCostPayload(
@@ -638,7 +599,7 @@ class TransactionRepositoryTest : RxTest() {
                     )
                 )
             )
-        repository.getTransactionCosts("ATS", 1, "from", "to", BigDecimal.TEN, 1)
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
             .test()
             .assertComplete()
             .assertValue {
@@ -712,7 +673,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `send transaction success`() {
         whenever(blockchainRegularAccountRepository.sendTransaction(any(), any())).thenReturn(Single.just("txHash"))
-        repository.sendTransaction("network", Transaction(address = "address"))
+        repository.sendTransaction(111, Transaction(address = "address"))
             .test()
             .assertComplete()
             .assertValue {
@@ -724,7 +685,7 @@ class TransactionRepositoryTest : RxTest() {
     fun `send transaction error`() {
         val error = Throwable()
         whenever(blockchainRegularAccountRepository.sendTransaction(any(), any())).thenReturn(Single.error(error))
-        repository.sendTransaction("network", Transaction(address = "address"))
+        repository.sendTransaction(111, Transaction(address = "address"))
             .test()
             .assertError(error)
     }

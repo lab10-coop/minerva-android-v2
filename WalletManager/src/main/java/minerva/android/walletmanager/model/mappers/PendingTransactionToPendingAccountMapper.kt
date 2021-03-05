@@ -9,7 +9,7 @@ object PendingTransactionToPendingAccountMapper : Mapper<PendingTransaction, Pen
         PendingAccount(
             input.index,
             input.txHash,
-            input.network,
+            input.chainId,
             input.senderAddress,
             input.blockHash,
             input.amount,

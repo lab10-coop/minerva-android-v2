@@ -49,7 +49,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
             addToken.setOnClickListener {
                 viewModel.account.let {
                     showFragmentListener.showFragment(
-                        AddTokenFragment.newInstance(it.privateKey, it.network.short),
+                        AddTokenFragment.newInstance(it.privateKey, it.network.chainId),
                         R.animator.slide_in_left,
                         R.animator.slide_out_right,
                         getString(R.string.add_asset)

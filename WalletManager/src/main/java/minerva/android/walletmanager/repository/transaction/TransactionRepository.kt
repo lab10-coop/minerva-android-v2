@@ -3,16 +3,10 @@ package minerva.android.walletmanager.repository.transaction
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.model.PendingTransaction
-import minerva.android.blockchainprovider.model.TransactionPayload
-import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.transactions.Balance
-import minerva.android.walletmanager.model.transactions.Recipient
-import minerva.android.walletmanager.model.transactions.Transaction
-import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.transactions.*
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -26,8 +20,8 @@ interface TransactionRepository {
      */
     fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
-    fun transferNativeCoin(network: String, accountIndex: Int, transaction: Transaction): Completable
-    fun transferERC20Token(network: String, transaction: Transaction): Completable
+    fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable
+    fun transferERC20Token(chainId: Int, transaction: Transaction): Completable
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
     fun getAccount(accountIndex: Int): Account?
@@ -40,20 +34,12 @@ interface TransactionRepository {
     fun getPendingAccounts(): List<PendingAccount>
     fun getPendingAccount(accountIndex: Int): PendingAccount?
     fun getTransactions(): Single<List<PendingAccount>>
-    fun getTransactionCosts(
-        network: String,
-        tokenIndex: Int,
-        from: String,
-        to: String,
-        amount: BigDecimal,
-        chainId: Int,
-        contractData: String = String.Empty
-    ): Single<TransactionCost>
+    fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost>
 
     fun isAddressValid(address: String): Boolean
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun updateTokenIcons(): Completable
     fun getEurRate(chainId: Int): Single<Double>
     fun toEther(value: BigDecimal): BigDecimal
-    fun sendTransaction(network: String, transaction: Transaction): Single<String>
+    fun sendTransaction(chainId: Int, transaction: Transaction): Single<String>
 }

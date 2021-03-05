@@ -1,6 +1,7 @@
 package minerva.android.blockchainprovider.model
 
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import org.web3j.utils.Convert
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -13,7 +14,8 @@ data class TransactionPayload(
     val gasPrice: BigDecimal = BigDecimal.ONE,
     val gasLimit: BigInteger = BigInteger.ZERO,
     val contractAddress: String = String.Empty,
-    val data: String = String.Empty
+    val data: String = String.Empty,
+    val tokenDecimals: Int = Int.InvalidValue
 ) {
     val gasPriceWei: BigInteger
         get() = Convert.toWei(gasPrice, Convert.Unit.GWEI).toBigInteger()

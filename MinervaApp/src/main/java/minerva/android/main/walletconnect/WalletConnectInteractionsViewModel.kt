@@ -9,11 +9,12 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.walletconnect.*
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.hexToBigInteger
+import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
@@ -29,12 +30,15 @@ class WalletConnectInteractionsViewModel(
 ) : BaseViewModel() {
 
     internal lateinit var currentDappSession: DappSession
-    private var currentRate: Double = Double.InvalidValue
+    private var currentRate: BigDecimal = BigDecimal.ZERO
     private lateinit var currentTransaction: WalletConnectTransaction
     internal lateinit var currentAccount: Account
 
     private val _walletConnectStatus = MutableLiveData<WalletConnectState>()
     val walletConnectStatus: LiveData<WalletConnectState> get() = _walletConnectStatus
+
+    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
+    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
     fun dispose() {
         walletConnectRepository.dispose()
@@ -69,7 +73,10 @@ class WalletConnectInteractionsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = { _walletConnectStatus.value = it },
-                    onError = { Timber.e(it) }
+                    onError = {
+                        Timber.e(it)
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }
@@ -97,38 +104,54 @@ class WalletConnectInteractionsViewModel(
     ): Single<OnEthSendTransactionRequest> {
         currentDappSession = session
         transactionRepository.getAccountByAddress(currentDappSession.address)?.let { currentAccount = it }
-        val valueInEther = transactionRepository.toEther(hexToBigInteger(status.transaction.value, BigDecimal.ZERO))
-        status.transaction.value = valueInEther.toPlainString()
-        return transactionRepository.getTransactionCosts(
-            currentAccount.network.short,
-            Int.InvalidIndex,
-            status.transaction.from,
-            status.transaction.to,
-            valueInEther,
-            session.chainId,
-            getContractData(status.transaction)
-        ).flatMap { transactionCost ->
-            transactionRepository.getEurRate(session.chainId)
-                .map {
-                    currentRate = it
-                    val valueInFiat = (status.transaction.value.toDouble() * currentRate).toBigDecimal()
-                    val costInFiat = transactionCost.cost.multiply(BigDecimal(currentRate))
-                    currentTransaction = status.transaction.copy(
-                        fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
-                        txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat))
-                    )
-                    OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
-                }
-        }
+
+        val value = transactionRepository.toEther(hexToBigInteger(status.transaction.value, BigDecimal.ZERO))
+
+        status.transaction.value = value.toPlainString()
+        return transactionRepository.getTransactionCosts(getTxCostPayload(currentDappSession.chainId, status, value))
+            .flatMap { transactionCost ->
+                transactionRepository.getEurRate(session.chainId)
+                    .map {
+                        currentRate = it.toBigDecimal()
+                        val valueInFiat = status.transaction.value.toBigDecimal().multiply(currentRate)
+                        val costInFiat = transactionCost.cost.multiply(currentRate)
+                        currentTransaction = status.transaction.copy(
+                            fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
+                            txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat))
+                        )
+                        OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
+                    }
+            }
     }
 
+    private fun getTxCostPayload(chainId: Int, status: OnEthSendTransaction, value: BigDecimal): TxCostPayload =
+        TxCostPayload(
+            getTransferType(status, value),
+            status.transaction.from,
+            status.transaction.to,
+            value,
+            chainId, //todo handle token decimals ??
+            contractAddress = getContractData(status.transaction)
+        )
+
+    //TODO include other transaction types (token transfer, token swap)
+    private fun getTransferType(status: OnEthSendTransaction, value: BigDecimal): TransferType =
+        when {
+            isContractDataEmpty(status.transaction) -> TransferType.COIN_TRANSFER
+            !isContractDataEmpty(status.transaction) && value != BigDecimal.ZERO -> TransferType.COIN_SWAP
+            else -> TransferType.UNDEFINED
+        }
+
     private fun getContractData(transaction: WalletConnectTransaction): String =
-        if (hexToBigInteger(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO) String.Empty
+        if (isContractDataEmpty(transaction)) String.Empty
         else transaction.data
+
+    private fun isContractDataEmpty(transaction: WalletConnectTransaction) =
+        hexToBigInteger(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO
 
     fun sendTransaction() {
         launchDisposable {
-            transactionRepository.sendTransaction(currentAccount.network.short, transaction)
+            transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map {
                     walletConnectRepository.approveTransactionRequest(currentDappSession.peerId, it)
                     it
@@ -153,7 +176,7 @@ class WalletConnectInteractionsViewModel(
 
     fun recalculateTxCost(gasPrice: BigDecimal, transaction: WalletConnectTransaction): WalletConnectTransaction {
         val txCost = transactionRepository.calculateTransactionCost(gasPrice, transaction.txCost.gasLimit)
-        val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(BigDecimal(currentRate)))
+        val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(currentRate))
         currentTransaction = transaction.copy(txCost = transaction.txCost.copy(cost = txCost, fiatCost = fiatTxCost))
         return currentTransaction
     }
@@ -184,8 +207,4 @@ class WalletConnectInteractionsViewModel(
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =
         balance < cost || balance == BigDecimal.ZERO
-
-    companion object {
-        private const val DEFAULT_TOKE_INDEX = 1
-    }
 }

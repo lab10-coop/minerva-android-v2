@@ -6,9 +6,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 import java.math.BigInteger
 
 data class Network(
-    val full: String = String.Empty,
-    @Deprecated("Network short is deprecated. Use chainId instead")
-    val short: String = String.Empty,
+    val name: String = String.Empty,
     val token: String = String.Empty,
     val httpRpc: String = String.Empty,
     val wsRpc: String = String.Empty,
@@ -21,6 +19,4 @@ data class Network(
     val chainId: Int = Int.InvalidValue
 ) {
     fun isAvailable(): Boolean = httpRpc != String.Empty
-
-    fun getTokensAddresses(): List<String> = tokens.map { it.address }
 }

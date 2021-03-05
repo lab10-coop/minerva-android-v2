@@ -79,8 +79,8 @@ class AccountsViewModel(
     private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
     val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
 
-    private val _dappSessions = MutableLiveData<List<Account>>()
-    val dappSessions: LiveData<List<Account>> get() = _dappSessions
+    private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
+    val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
     var hasActiveAccount: Boolean = false
 
     val accountsLiveData: LiveData<List<Account>> =
@@ -120,6 +120,7 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
+        accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
     internal fun getSessions(accounts: List<Account>) {
@@ -129,26 +130,28 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onNext = {
-                        _dappSessions.value = if (it.isNotEmpty()) it
-                        else accountManager.getAllAccounts()
-                    },
+                    onNext = { _dappSessions.value = it },
                     onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
 
-    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>) =
+    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>): HashMap<String, Int> =
         if (sessions.isNotEmpty()) {
-            mutableListOf<Account>().apply {
+            hashMapOf<String, Int>().apply {
                 accounts.forEach { account ->
-                    val count = sessions.count { it.address == accountManager.toChecksumAddress(account.address) }
-                    add(account.copy(dappSessionCount = count))
+                    if (isCurrentSession(sessions, account)) {
+                        val count = sessions.count { it.address == accountManager.toChecksumAddress(account.address) }
+                        this[account.address] = count
+                    }
                 }
             }
         } else {
-            emptyList<Account>()
+            hashMapOf()
         }
+
+    private fun isCurrentSession(sessions: List<DappSession>, account: Account) =
+        sessions.find { it.address == accountManager.toChecksumAddress(account.address) } != null
 
     fun removeAccount(account: Account) {
         launchDisposable {
@@ -173,7 +176,7 @@ class AccountsViewModel(
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doAfterTerminate { accountManager.getAllAccounts()?.let { getSessions(it) } }
+//                .doAfterTerminate { accountManager.getAllAccounts()?.let { getSessions(it) } }
                 .subscribeBy(
                     onSuccess = { _balanceLiveData.value = it },
                     onError = {
@@ -277,7 +280,7 @@ class AccountsViewModel(
 
     fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
         shouldGetFreeAts() &&
-                accounts.any { it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short }
+                accounts.any { it.network.chainId == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].chainId }
 
     private fun shouldGetFreeAts() =
         ((accountManager.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(24L)) < accountManager.currentTimeMills())
@@ -286,7 +289,7 @@ class AccountsViewModel(
     @VisibleForTesting
     fun getAccountForFreeATS(accounts: List<Account>): Account {
         accounts.forEach {
-            if (it.network.short == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].short)
+            if (it.network.chainId == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].chainId)
                 return it
         }
         return Account(Int.InvalidId)

@@ -11,7 +11,7 @@ import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -46,8 +46,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
-    private val dappSessionObserver: Observer<List<Account>> = mock()
-    private val dappSessionCaptor: KArgumentCaptor<List<Account>> = argumentCaptor()
+    private val dappSessionObserver: Observer<HashMap<String, Int>> = mock()
+    private val dappSessionCaptor: KArgumentCaptor<HashMap<String, Int>> = argumentCaptor()
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
@@ -295,7 +295,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {
             verify(dappSessionObserver).onChanged(capture())
-            firstValue[0].dappSessionCount == 1
+            firstValue["address"] == 1
         }
     }
 
@@ -332,20 +332,20 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     private val accounts = listOf(
-        Account(1, networkShort = "second_network"),
-        Account(2, networkShort = "first_network"),
-        Account(3, networkShort = "first_network"),
-        Account(4, networkShort = "some_other_network")
+        Account(1, chainId = 2),
+        Account(2, chainId = 1),
+        Account(3, chainId = 1),
+        Account(4, chainId = 3)
     )
 
     private val accountsWithoutPrimaryAccount = listOf(
-        Account(1, networkShort = "second_network"),
-        Account(4, networkShort = "some_other_network")
+        Account(1, chainId = 2),
+        Account(4, chainId = 3)
     )
 
     private val networks = listOf(
-        Network(httpRpc = "some_rpc", short = "first_network"),
-        Network(httpRpc = "some_rpc", short = "second_network"),
-        Network(httpRpc = "some_rpc", short = "some_other_network")
+        Network(httpRpc = "some_rpc", chainId = 1),
+        Network(httpRpc = "some_rpc", chainId = 2),
+        Network(httpRpc = "some_rpc", chainId = 3)
     )
 }

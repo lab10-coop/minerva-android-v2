@@ -21,7 +21,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
-import minerva.android.wrapped.startManageAssetsWrappedActivity
+import minerva.android.wrapped.startManageTokensWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -77,14 +77,13 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             requireContext(),
             account.name,
             position,
-            account.network.short,
+            account.network.chainId,
             account.isSafeAccount
         )
 
     override fun onWalletConnect(index: Int) = interactor.showWalletConnectScanner(index)
 
-    override fun onManageTokens(index: Int) =
-        startManageAssetsWrappedActivity(requireContext(), index)
+    override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
 
     override fun onExportPrivateKey(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
 
@@ -149,17 +148,20 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     accountAdapter.updateList(accounts, areMainNetsEnabled)
                     setTatsButtonListener(accountAdapter.activeAccountsList)
                 })
+
                 dappSessions.observe(viewLifecycleOwner, Observer {
-                    accountAdapter.updateList(it, areMainNetsEnabled)
+                    accountAdapter.updateSessionCount(it)
                 })
+
                 balanceLiveData.observe(viewLifecycleOwner, Observer {
                     accountAdapter.updateBalances(it)
                     swipeRefresh.isRefreshing = false
                 })
             }
-            tokenBalanceLiveData.observe(
-                viewLifecycleOwner,
-                Observer { accountAdapter.updateTokenBalances(it) })
+            tokenBalanceLiveData.observe(viewLifecycleOwner, Observer {
+                accountAdapter.updateTokenBalances(it)
+            })
+
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 refreshFreeATSButton()
                 showErrorFlashbar(

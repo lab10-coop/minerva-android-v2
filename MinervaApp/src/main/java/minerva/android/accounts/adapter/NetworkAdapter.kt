@@ -37,7 +37,7 @@ class NetworkViewHolder(private val view: View) : RecyclerView.ViewHolder(view) 
 
     fun setData(network: Network, isChecked: Boolean) {
         view.apply {
-            networkIcon.setImageDrawable(getNetworkIcon(context, network.short))
+            networkIcon.setImageDrawable(getNetworkIcon(context, network.chainId))
             checkButton.isEnabled = isChecked
             setNetworkName(network)
         }
@@ -45,13 +45,13 @@ class NetworkViewHolder(private val view: View) : RecyclerView.ViewHolder(view) 
 
     private fun View.setNetworkName(network: Network) {
         networkName.text = if (network.httpRpc.isEmpty())
-            setDisabledNetwork(network) else network.full
+            setDisabledNetwork(network) else network.name
     }
 
     private fun View.setDisabledNetwork(network: Network): String {
         isEnabled = false
         checkButton.gone()
         networkName.setTextColor(context.getColor(R.color.titleColor))
-        return "${network.full} - ${context.getString(R.string.soon)}"
+        return "${network.name} - ${context.getString(R.string.soon)}"
     }
 }

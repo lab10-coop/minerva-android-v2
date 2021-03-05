@@ -6,18 +6,18 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
-import minerva.android.walletmanager.repository.walletconnect.OnConnectionFailure
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
+import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -32,6 +32,8 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     private lateinit var viewModel: WalletConnectViewModel
     private val stateObserver: Observer<WalletConnectState> = mock()
     private val stateCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
+    private val errorObserver: Observer<Event<Throwable>> = mock()
+    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
     private val meta = WalletConnectPeerMeta(name = "token", url = "url", description = "dsc")
 
     @Before
@@ -43,13 +45,11 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on connection failure event test`() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnConnectionFailure(error, "peerId")))
-        viewModel.stateLiveData.observeForever(stateObserver)
+            .thenReturn(Flowable.error(error))
+        viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.setConnectionStatusFlowable()
-        stateCaptor.run {
-            verify(stateObserver, times(2)).onChanged(capture())
-            firstValue is ProgressBarState &&
-                    secondValue is OnError
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
         }
     }
 
@@ -58,11 +58,10 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.error(error))
-        viewModel.stateLiveData.observeForever(stateObserver)
+        viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.setConnectionStatusFlowable()
-        stateCaptor.run {
-            verify(stateObserver).onChanged(capture())
-            firstValue is OnError
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
         }
     }
 
@@ -84,7 +83,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on session request event test with defined chainId on test net`() {
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"))))
-        NetworkManager.networks = listOf(Network(full = "Ethereum", chainId = 1))
+        NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1))
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
@@ -97,35 +96,28 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on session request event test with not defined chainId on test net`() {
         val meta = WalletConnectPeerMeta(name = "token", url = "url", description = "dsc")
-        NetworkManager.networks =
+        val networks =
             listOf(
                 Network(
-                    full = "Ethereum (Görli)",
-                    chainId = 1,
-                    short = "eth_goerli",
+                    name = "Ethereum (Görli)",
+                    chainId = 5,
                     httpRpc = "someaddress",
                     testNet = true
                 )
             )
-
-        whenever(repository.connectionStatusFlowable)
-            .thenReturn(
-                Flowable.just(
-                    OnSessionRequest(
-                        meta,
-                        null,
-                        Topic("peerID", "remotePeerID")
-                    )
+        NetworkManager.initialize(networks)
+        whenever(repository.connectionStatusFlowable).thenReturn(
+            Flowable.just(
+                    OnSessionRequest(meta, null, Topic("peerID", "remotePeerID"))
                 )
             )
         viewModel.stateLiveData.observeForever(stateObserver)
-        viewModel.account = Account(1, networkShort = "eth_goerli")
+        viewModel.account = Account(1, chainId = 5)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo
-                    OnSessionRequestWithUndefinedNetwork(meta, "Ethereum (Görli)")
+            secondValue shouldBeEqualTo OnSessionRequestWithUndefinedNetwork(meta, "Ethereum (Görli)")
         }
     }
 
@@ -145,22 +137,20 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.networks =
             listOf(
                 Network(
-                    full = "Ethereum",
+                    name = "Ethereum",
                     chainId = 1,
-                    short = "eth_mainnet",
                     testNet = false,
                     httpRpc = "url"
                 )
             )
-        viewModel.account = Account(1, networkShort = "eth_mainnet")
+        viewModel.account = Account(1, chainId = 1)
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState
-            secondValue shouldBeEqualTo
-                    OnSessionRequestWithUndefinedNetwork(meta, "Ethereum")
-            viewModel.requestedNetwork shouldBe "Ethereum"
+            secondValue shouldBeEqualTo OnSessionRequestWithUndefinedNetwork(meta, "Ethereum")
+            viewModel.requestedNetwork shouldBeEqualTo "Ethereum"
         }
     }
 
@@ -197,9 +187,8 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(
             listOf(
                 Network(
-                    full = "Ethereum",
-                    chainId = 1,
-                    short = "eth_mainnet",
+                    name = "Ethereum",
+                    chainId = 2,
                     testNet = false,
                     httpRpc = "url"
                 )
@@ -207,7 +196,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         )
         viewModel.topic = Topic()
         viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
-        viewModel.account = Account(1, networkShort = "eth_mainnet")
+        viewModel.account = Account(1, chainId = 2)
         whenever(repository.approveSession(any(), any(), any(), any())).thenReturn(Completable.complete())
         viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"))
         verify(repository).approveSession(any(), any(), any(), any())

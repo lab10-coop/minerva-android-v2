@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.utils
 
+import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.configProvider.BuildConfig
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
@@ -31,23 +32,23 @@ object DefaultWalletConfig {
                 _accountPayloads = listOf(
                     AccountPayload(
                         FIRST_DEFAULT_NETWORK_INDEX,
-                        CryptoUtils.prepareName(firstDefaultTestNetwork, FIRST_DEFAULT_NETWORK_INDEX),
-                        firstDefaultTestNetwork.short
+                        CryptoUtils.prepareName(firstDefaultTestNetwork.name, FIRST_DEFAULT_NETWORK_INDEX),
+                        firstDefaultTestNetwork.chainId
                     ),
                     AccountPayload(
                         SECOND_DEFAULT_NETWORK_INDEX,
-                        CryptoUtils.prepareName(secondDefaultTestNetwork, SECOND_DEFAULT_NETWORK_INDEX),
-                        secondDefaultTestNetwork.short
+                        CryptoUtils.prepareName(secondDefaultTestNetwork.name, SECOND_DEFAULT_NETWORK_INDEX),
+                        secondDefaultTestNetwork.chainId
                     ),
                     AccountPayload(
                         FIRST_DEFAULT_MAIN_NETWORK_INDEX,
-                        CryptoUtils.prepareName(firstDefaultMainNetwork, FIRST_DEFAULT_MAIN_NETWORK_INDEX),
-                        firstDefaultMainNetwork.short
+                        CryptoUtils.prepareName(firstDefaultMainNetwork.name, FIRST_DEFAULT_MAIN_NETWORK_INDEX),
+                        firstDefaultMainNetwork.chainId
                     ),
                     AccountPayload(
                         SECOND_DEFAULT_MAIN_NETWORK_INDEX,
-                        CryptoUtils.prepareName(secondDefaultMainNetwork, SECOND_DEFAULT_MAIN_NETWORK_INDEX),
-                        secondDefaultMainNetwork.short
+                        CryptoUtils.prepareName(secondDefaultMainNetwork.name, SECOND_DEFAULT_MAIN_NETWORK_INDEX),
+                        secondDefaultMainNetwork.chainId
                     )
                 )
             )

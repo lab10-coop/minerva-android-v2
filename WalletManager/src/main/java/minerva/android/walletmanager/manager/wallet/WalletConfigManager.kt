@@ -11,6 +11,7 @@ import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
+import java.math.BigDecimal
 
 interface WalletConfigManager : Manager {
     val masterSeed: MasterSeed
@@ -26,6 +27,7 @@ interface WalletConfigManager : Manager {
 
     fun getSafeAccountNumber(ownerAddress: String): Int
     fun getSafeAccountMasterOwnerPrivateKey(address: String?): String
+    fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal
     fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>>
     fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>>
 

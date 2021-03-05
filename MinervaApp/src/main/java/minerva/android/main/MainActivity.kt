@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                         getString(
                             R.string.transaction_success_message,
                             it.amount,
-                            getNetwork(it.network).token
+                            getNetwork(it.chainId).token
                         )
                     )
                 }
@@ -116,10 +116,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             when (it) {
                 is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(it)
-                is OnError -> MinervaFlashbar.showError(this, it.error)
                 is ProgressBarState -> handleLoadingDialog(it)
                 else -> dappDialog = null
             }
+        })
+        walletConnectViewModel.errorLiveData.observe(this, EventObserver {
+            MinervaFlashbar.showError(this, it)
         })
         viewModel.apply {
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
@@ -224,16 +226,16 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun updatePendingAccount(it: PendingAccount) {
         showFlashbar(
             getString(R.string.transaction_success_title),
-            getString(R.string.transaction_success_message, it.amount, getNetwork(it.network).token)
+            getString(R.string.transaction_success_message, it.amount, getNetwork(it.chainId).token)
         )
         (getCurrentFragment() as? AccountsFragment)?.apply {
-            updateAccountFragment() { setPendingAccount(it.index, false) }
+            updateAccountFragment { setPendingAccount(it.index, false) }
         }
         viewModel.clearWebSocketSubscription()
     }
 
     private fun stopPendingAccounts() {
-        (getCurrentFragment() as? AccountsFragment)?.apply { updateAccountFragment() { stopPendingTransactions() } }
+        (getCurrentFragment() as? AccountsFragment)?.apply { updateAccountFragment { stopPendingTransactions() } }
     }
 
     private fun handlePendingAccountsResults(account: PendingAccount) {
@@ -243,7 +245,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 getString(
                     R.string.transaction_success_message,
                     account.amount,
-                    getNetwork(account.network).token
+                    getNetwork(account.chainId).token
                 )
             )
         } else {
@@ -252,7 +254,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 getString(
                     R.string.transaction_error_details_message,
                     account.amount,
-                    account.network
+                    account.chainId
                 )
             )
         }
@@ -385,7 +387,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         binding.bottomNavigation.removeBadge(R.id.settings)
 
     override fun showWalletConnectScanner(index: Int) {
-        launchActivity<WalletConnectActivity>() {
+        launchActivity<WalletConnectActivity> {
             putExtra(ACCOUNT_INDEX, index)
         }
     }

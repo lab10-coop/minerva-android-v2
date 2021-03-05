@@ -6,10 +6,10 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
-import minerva.android.kotlinUtils.crypto.hexToBigInteger
-import minerva.android.main.walletconnect.*
+import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.TransactionCost
@@ -20,10 +20,8 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
-import minerva.android.walletmanager.utils.CryptoUtils
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeIn
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -110,8 +108,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     fun `reconnect to saved sessions and handle on eth send transaction test`() {
         val transition = WalletConnectTransaction("from", "to", value = "100000000", data = "0x0")
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), networkShort = "eth_mainnet")
-        NetworkManager.initialize(listOf(Network(short = "eth_mainnet", httpRpc = "url")))
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransaction(transition, "peerId"))
         )
@@ -122,7 +120,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
         whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
-        whenever(transactionRepository.getTransactionCosts(any(), any(), any(), any(), any(), any(), any()))
+        whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
                     TransactionCost(

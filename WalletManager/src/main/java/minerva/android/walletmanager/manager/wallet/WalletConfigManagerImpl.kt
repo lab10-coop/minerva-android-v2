@@ -10,6 +10,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
+import minerva.android.blockchainprovider.utils.CryptoUtils.encodePublicKey
 import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
@@ -31,16 +32,16 @@ import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowab
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.mappers.*
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.utils.DefaultWalletConfig
 import minerva.android.walletmanager.utils.handleAutomaticBackupFailedError
 import timber.log.Timber
+import java.math.BigDecimal
 import kotlin.properties.Delegates
 
 class WalletConfigManagerImpl(
@@ -233,11 +234,15 @@ class WalletConfigManagerImpl(
         return safeAccountNumber
     }
 
-    override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String {
+    override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String = getAccount(address).privateKey
+
+    override fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal = getAccount(address).cryptoBalance
+
+    private fun getAccount(address: String?): Account {
         getWalletConfig()?.accounts?.forEach {
-            if (it.address == address) return it.privateKey
+            if (it.address == address) return it
         }
-        return String.Empty
+        return Account(Int.InvalidIndex)
     }
 
     override fun updateSafeAccountOwners(
@@ -251,8 +256,7 @@ class WalletConfigManagerImpl(
                     version = config.updateVersion,
                     accounts = config.accounts
                 )
-            )
-                .andThen(Single.just(owners))
+            ).andThen(Single.just(owners))
         }
         throw NotInitializedWalletConfigThrowable()
     }
@@ -372,7 +376,7 @@ class WalletConfigManagerImpl(
         keys: List<DerivedKeys>,
         accountPayload: AccountPayload
     ): DerivedKeys {
-        val isTestNet = NetworkManager.getNetwork(accountPayload.network).testNet
+        val isTestNet = NetworkManager.getNetwork(accountPayload.chainId).testNet
         keys.forEach { derivedKeys ->
             if (derivedKeys.index == accountPayload.index && derivedKeys.isTestNet == isTestNet) {
                 return derivedKeys
@@ -389,7 +393,7 @@ class WalletConfigManagerImpl(
         }
 
     private fun isTestNet(accountsResponse: List<AccountPayload>, index: Int) =
-        NetworkManager.getNetwork(accountsResponse[index].network).testNet
+        NetworkManager.getNetwork(accountsResponse[index].chainId).testNet
 
     private fun completeIdentitiesKeys(
         walletConfigPayload: WalletConfigPayload,

@@ -2,7 +2,6 @@ package minerva.android.walletmanager.model.mappers
 
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.blockchainprovider.model.TransactionCostPayload
-import minerva.android.kotlinUtils.Mapper
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.defs.getTransactionType

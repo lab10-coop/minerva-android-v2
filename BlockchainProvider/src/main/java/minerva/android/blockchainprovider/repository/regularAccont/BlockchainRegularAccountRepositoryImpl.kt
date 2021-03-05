@@ -5,32 +5,34 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
+import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.model.TransactionPayload
+import minerva.android.blockchainprovider.model.TxCostData
 import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.smartContracts.ERC20
+import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.map.value
+import org.web3j.abi.FunctionEncoder
+import org.web3j.abi.datatypes.Address
+import org.web3j.abi.datatypes.Function
+import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.crypto.*
 import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.EthEstimateGas
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
-import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.tx.RawTransactionManager
 import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
 import org.web3j.utils.Numeric
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -39,21 +41,21 @@ import java.util.concurrent.TimeUnit
 import kotlin.Pair
 
 class BlockchainRegularAccountRepositoryImpl(
-    private val web3j: Map<String, Web3j>,
-    private val gasPrices: Map<String, BigInteger>,
+    private val web3j: Map<Int, Web3j>,
+    private val gasPrices: Map<Int, BigInteger>,
     private val ensResolver: EnsResolver,
     private val freeTokenRepository: FreeTokenRepository
 ) : BlockchainRegularAccountRepository {
 
-    override fun getTransactions(pendingHashes: List<Pair<String, String>>): Single<List<Pair<String, String?>>> =
+    override fun getTransactions(pendingHashes: List<Pair<Int, String>>): Single<List<Pair<String, String?>>> =
         Observable.range(START, pendingHashes.size)
             .flatMapSingle { position ->
                 getTransaction(pendingHashes[position].first, pendingHashes[position].second)
             }
             .toList()
 
-    private fun getTransaction(network: String, txHash: String): Single<Pair<String, String?>> =
-        web3j.value(network).ethGetTransactionByHash(txHash)
+    private fun getTransaction(chainId: Int, txHash: String): Single<Pair<String, String?>> =
+        web3j.value(chainId).ethGetTransactionByHash(txHash)
             .flowable()
             .map { ethTransaction ->
                 var blockHash: String? = null
@@ -62,30 +64,29 @@ class BlockchainRegularAccountRepositoryImpl(
             }.firstOrError()
 
     override fun transferNativeCoin(
-        network: String,
+        chainId: Int,
         accountIndex: Int,
         transactionPayload: TransactionPayload
     ): Single<PendingTransaction> =
-        web3j.value(network).ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
+        web3j.value(chainId).ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
             .flowable()
-            .zipWith(getChainId(network))
             .flatMap {
-                web3j.value(network)
+                web3j.value(chainId)
                     .ethSendRawTransaction(
                         getSignedEtherTransaction(
-                            it.first.transactionCount,
+                            it.transactionCount,
                             transactionPayload,
-                            it.second.netVersion.toLong()
+                            chainId.toLong()
                         )
                     )
                     .flowable()
-                    .zipWith(getCurrentBlockNumber(network))
+                    .zipWith(getCurrentBlockNumber(chainId))
                     .flatMapSingle { (response, blockNumber) ->
                         if (response.error == null) {
                             val pendingTx = PendingTransaction(
                                 accountIndex,
                                 response.transactionHash,
-                                network,
+                                chainId,
                                 transactionPayload.senderAddress,
                                 String.Empty,
                                 transactionPayload.amount,
@@ -96,18 +97,17 @@ class BlockchainRegularAccountRepositoryImpl(
                     }
             }.firstOrError()
 
-    override fun sendTransaction(network: String, transactionPayload: TransactionPayload): Single<String> =
-        web3j.value(network)
+    override fun sendTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String> =
+        web3j.value(chainId)
             .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
             .flowable()
-            .zipWith(getChainId(network))
             .flatMap {
-                web3j.value(network)
+                web3j.value(chainId)
                     .ethSendRawTransaction(
                         getSignedTransaction(
-                            it.first.transactionCount,
+                            it.transactionCount,
                             transactionPayload,
-                            it.second.netVersion.toLong(),
+                            chainId.toLong(),
                             Numeric.hexStringToByteArray(transactionPayload.data)
                         )
                     )
@@ -122,8 +122,8 @@ class BlockchainRegularAccountRepositoryImpl(
             }.firstOrError()
 
 
-    override fun getCurrentBlockNumber(network: String): Flowable<BigInteger> =
-        web3j.value(network)
+    override fun getCurrentBlockNumber(chainId: Int): Flowable<BigInteger> =
+        web3j.value(chainId)
             .ethBlockNumber()
             .flowable()
             .map { it.blockNumber }
@@ -131,7 +131,7 @@ class BlockchainRegularAccountRepositoryImpl(
     /**
      * List arguments: first - network short name, second - wallet address (public)
      */
-    override fun refreshBalances(networkAddress: List<Pair<String, String>>): Single<List<Pair<String, BigDecimal>>> =
+    override fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Pair<String, BigDecimal>>> =
         Observable.range(START, networkAddress.size)
             .flatMapSingle { position ->
                 getBalance(
@@ -147,24 +147,17 @@ class BlockchainRegularAccountRepositoryImpl(
         WalletUtils.isValidAddress(address) &&
                 (Keys.toChecksumAddress(address) == address || address.toLowerCase(Locale.ROOT) == address)
 
-    override fun getERC20TokenName(privateKey: String, network: String, tokenAddress: String): Observable<String> =
-        getChainId(network).flatMap {
-            loadERC20(privateKey, network, tokenAddress, it).name().flowable()
-        }.toObservable()
+    override fun getERC20TokenName(privateKey: String, chainId: Int, tokenAddress: String): Observable<String> =
+        loadERC20(privateKey, chainId, tokenAddress).name().flowable().toObservable()
 
-    override fun getERC20TokenSymbol(privateKey: String, network: String, tokenAddress: String): Observable<String> =
-        getChainId(network).flatMap {
-            loadERC20(privateKey, network, tokenAddress, it).symbol().flowable()
-        }.toObservable()
+    override fun getERC20TokenSymbol(privateKey: String, chainId: Int, tokenAddress: String): Observable<String> =
+        loadERC20(privateKey, chainId, tokenAddress).symbol().flowable().toObservable()
 
     override fun getERC20TokenDecimals(
         privateKey: String,
-        network: String,
+        chainId: Int,
         tokenAddress: String
-    ): Observable<BigInteger> =
-        getChainId(network).flatMap {
-            loadERC20(privateKey, network, tokenAddress, it).decimals().flowable()
-        }.toObservable()
+    ): Observable<BigInteger> = loadERC20(privateKey, chainId, tokenAddress).decimals().flowable().toObservable()
 
     override fun getFreeATS(address: String): Completable = Completable.create {
         freeTokenRepository.getFreeATS(address).let { responseText ->
@@ -180,64 +173,128 @@ class BlockchainRegularAccountRepositoryImpl(
         if (ensName.contains(DOT)) Single.just(ensName).map { ensResolver.resolve(it) }.onErrorReturnItem(ensName)
         else Single.just(ensName)
 
-    override fun transferERC20Token(network: String, payload: TransactionPayload): Completable =
-        getChainId(network).flatMapCompletable {
-            loadERC20(payload.privateKey, network, payload.contractAddress, it)
-                .transfer(payload.receiverAddress, toWei(payload.amount, Convert.Unit.ETHER).toBigInteger())
-                .flowable()
-                .ignoreElements()
+    override fun transferERC20Token(chainId: Int, payload: TransactionPayload): Completable =
+        loadTransactionERC20(payload.privateKey, chainId, payload.contractAddress, payload)
+            .transfer(
+                payload.receiverAddress,
+                CryptoUtils.convertTokenAmount(payload.amount, payload.tokenDecimals)
+            )
+            .flowable()
+            .ignoreElements()
+
+    override fun getTransactionCosts(txCostData: TxCostData, gasPrice: BigDecimal?): Single<TransactionCostPayload> =
+        with(txCostData) {
+            if (!isSafeAccountTransaction(txCostData)) {
+                web3j.value(chainId).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
+                    .flowable()
+                    .zipWith(resolveENS(to).toFlowable())
+                    .flatMap { (count, address) ->
+                        val transaction: Transaction = prepareTransaction(count, address, this)
+                        web3j.value(chainId).ethEstimateGas(transaction)
+                            .flowable()
+                            .zipWith(
+                                web3j.value(chainId)
+                                    .ethCall(transaction, DefaultBlockParameterName.LATEST)
+                                    .flowable()
+                            )
+                            .flatMapSingle { (gas, _) -> handleGasLimit(chainId, gas, gasPrice, txCostData.transferType) }
+                    }
+                    .firstOrError()
+                    .timeout(
+                        TIMEOUT,
+                        TimeUnit.SECONDS,
+                        calculateTransactionCosts(chainId, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+                    )
+            } else {
+                //TODO implement getting gasLimit for Safe Account transaction fro Blockchain
+                calculateTransactionCosts(chainId, Operation.SAFE_ACCOUNT_TXS.gasLimit, gasPrice)
+            }
         }
 
-    override fun getTransactionCosts(
-        network: String,
-        assetIndex: Int,
+    private fun isSafeAccountTransaction(txCostData: TxCostData) =
+        txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_TOKEN_TRANSFER ||
+                txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER
+
+    private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
+        when (costData.transferType) {
+            BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP ->
+                getTransaction(costData.from, count, address, costData.amount, costData.contractData)
+            else -> {
+                Transaction.createFunctionCallTransaction(
+                    costData.from,
+                    count.transactionCount,
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    costData.contractAddress,//token smart contract address
+                    BigInteger.ZERO, //value of native coin
+                    FunctionEncoder.encode(
+                        getTokenFunctionCall(
+                            address,
+                            CryptoUtils.convertTokenAmount(costData.amount, costData.tokenDecimals)
+                        )
+                    )
+                )
+            }
+        }
+
+    private fun getTokenFunctionCall(address: String, value: BigInteger) =
+        Function(
+            ERC20.FUNC_TRANSFER,
+            listOf(Address(address), Uint256(value)),
+            emptyList()
+        )
+
+    private fun getTransaction(
         from: String,
+        count: EthGetTransactionCount,
         to: String,
         amount: BigDecimal,
-        gasPrice: BigDecimal?,
         contractData: String
-    ): Single<TransactionCostPayload> =
-        if (assetIndex == Int.InvalidIndex) {
-            web3j.value(network).ethGetTransactionCount(from, DefaultBlockParameterName.LATEST)
-                .flowable()
-                .zipWith(resolveENS(to).toFlowable())
-                .flatMap { (count, address) ->
-                    web3j.value(network).ethEstimateGas(getTransaction(from, count, address, amount, contractData))
-                        .flowable()
-                        .flatMapSingle { handleGasLimit(network, it, gasPrice) }
-                }
-                .firstOrError()
-                .timeout(
-                    TIMEOUT,
-                    TimeUnit.SECONDS,
-                    calculateTransactionCosts(network, Operation.TRANSFER_NATIVE.gasLimit, gasPrice)
-                )
-
-        } else calculateTransactionCosts(network, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
-
+    ) = Transaction(
+        from,
+        count.transactionCount,
+        BigInteger.ZERO,
+        BigInteger.ZERO,
+        to,
+        toWei(amount, Convert.Unit.ETHER).toBigInteger(),
+        contractData
+    )
 
     private fun handleGasLimit(
-        network: String,
+        chainId: Int,
         it: EthEstimateGas,
-        gasPrice: BigDecimal?
+        gasPrice: BigDecimal?,
+        transferType: BlockchainTransactionType
     ): Single<TransactionCostPayload> {
-        val gasLimit = it.error?.let { Operation.TRANSFER_NATIVE.gasLimit } ?: estimateGasLimit(it.amountUsed)
-        return calculateTransactionCosts(network, gasLimit, gasPrice)
+        val gasLimit = it.error?.let {
+            when (transferType) {
+                BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP -> Operation.TRANSFER_NATIVE.gasLimit
+                else -> Operation.TRANSFER_ERC20.gasLimit
+            }
+        } ?: estimateGasLimit(it.amountUsed)
+
+        return calculateTransactionCosts(chainId, increaseGasLimitByTenPercent(gasLimit), gasPrice)
     }
+
+    private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
+        when (gasLimit) {
+            Operation.DEFAULT_LIMIT.gasLimit -> gasLimit
+            else -> increaseGasLimitByTenPercent(gasLimit)
+        }
 
     override fun refreshTokenBalance(
         privateKey: String,
-        network: String,
+        chainId: Int,
         contractAddress: String,
         safeAccountAddress: String
     ): Observable<Pair<String, BigDecimal>> =
         if (safeAccountAddress.isEmpty()) getERC20Balance(
             contractAddress,
-            network,
+            chainId,
             privateKey,
             Credentials.create(privateKey).address
         )
-        else getERC20Balance(contractAddress, network, privateKey, safeAccountAddress)
+        else getERC20Balance(contractAddress, chainId, privateKey, safeAccountAddress)
 
 
     override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
@@ -249,60 +306,47 @@ class BlockchainRegularAccountRepositoryImpl(
     override fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal =
         toEther((gasPrice * gasLimit)).setScale(SCALE, RoundingMode.HALF_EVEN)
 
-    private fun loadERC20(privateKey: String, network: String, address: String, chainId: NetVersion) =
+    private fun loadERC20(privateKey: String, chainId: Int, address: String) =
         ERC20.load(
-            address, web3j.value(network),
+            address, web3j.value(chainId),
             RawTransactionManager(
-                web3j.value(network),
+                web3j.value(chainId),
                 Credentials.create(privateKey),
-                chainId.netVersion.toLong()
+                chainId.toLong()
             ),
-            ContractGasProvider(gasPrices.value(network), Operation.TRANSFER_ERC20.gasLimit)
+            ContractGasProvider(gasPrices.value(chainId), Operation.TRANSFER_ERC20.gasLimit)
         )
 
-    private fun getBalance(network: String, address: String): Single<Pair<String, BigDecimal>> =
-        web3j.value(network).ethGetBalance(address, DefaultBlockParameterName.LATEST)
+    //todo will be removed within the MNR-403
+    private fun loadTransactionERC20(
+        privateKey: String,
+        chainId: Int,
+        address: String,
+        payload: TransactionPayload
+    ) = ERC20.load(
+        address, web3j.value(chainId),
+        RawTransactionManager(
+            web3j.value(chainId),
+            Credentials.create(privateKey),
+            chainId.toLong()
+        ),
+        ContractGasProvider(payload.gasPriceWei, payload.gasLimit)
+    )
+
+    private fun getBalance(chainId: Int, address: String): Single<Pair<String, BigDecimal>> =
+        web3j.value(chainId).ethGetBalance(address, DefaultBlockParameterName.LATEST)
             .flowable()
             .map { Pair(address, toEther(BigDecimal(it.balance))) }
             .firstOrError()
 
     private fun getERC20Balance(
         contractAddress: String,
-        network: String,
+        chainId: Int,
         privateKey: String,
         address: String
     ): Observable<Pair<String, BigDecimal>> =
-        getChainId(network)
-            .flatMap {
-                loadERC20(privateKey, network, contractAddress, it).balanceOf(address).flowable()
-                    .map { balance -> Pair(contractAddress, balance.toBigDecimal()) }
-            }.toObservable()
-
-    private fun getChainId(network: String): Flowable<NetVersion> = web3j.value(network).netVersion().flowable()
-
-    private fun getTransaction(
-        from: String,
-        count: EthGetTransactionCount,
-        to: String,
-        amount: BigDecimal,
-        contractData: String
-    ) =
-        Transaction(
-            from,
-            count.transactionCount,
-            BigInteger.ZERO,
-            BigInteger.ZERO,
-            to,
-            toWei(amount, Convert.Unit.ETHER).toBigInteger(),
-            contractData
-        )
-
-    private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
-        if (gasLimit == Operation.DEFAULT_LIMIT.gasLimit) {
-            gasLimit
-        } else {
-            increaseGasLimitByTenPercent(gasLimit)
-        }
+        loadERC20(privateKey, chainId, contractAddress).balanceOf(address).flowable()
+            .map { balance -> Pair(contractAddress, balance.toBigDecimal()) }.toObservable()
 
     private fun increaseGasLimitByTenPercent(gasLimit: BigInteger) = gasLimit.add(getBuffer(gasLimit))
 
@@ -310,24 +354,24 @@ class BlockchainRegularAccountRepositoryImpl(
         gasLimit.multiply(BigInteger.valueOf(10)).divide(BigInteger.valueOf(100))
 
     private fun calculateTransactionCosts(
-        network: String,
+        chainId: Int,
         gasLimit: BigInteger,
         gasPrice: BigDecimal?
     ): Single<TransactionCostPayload> =
         Single.just(
             TransactionCostPayload(
-                convertGasPrice(gasPrice, network),
+                convertGasPrice(gasPrice, chainId),
                 gasLimit,
-                getTransactionCostInEth(getGasPrice(gasPrice, network), BigDecimal(gasLimit))
+                getTransactionCostInEth(getGasPrice(gasPrice, chainId), BigDecimal(gasLimit))
             )
         )
 
-    private fun convertGasPrice(gasPrice: BigDecimal?, network: String) =
-        if (gasPrice == null) fromWei(BigDecimal(gasPrices.value(network)), Convert.Unit.GWEI)
+    private fun convertGasPrice(gasPrice: BigDecimal?, chainId: Int) =
+        if (gasPrice == null) fromWei(BigDecimal(gasPrices.value(chainId)), Convert.Unit.GWEI)
         else fromWei(gasPrice, Convert.Unit.GWEI)
 
-    private fun getGasPrice(gasPrice: BigDecimal?, network: String) =
-        gasPrice ?: BigDecimal(gasPrices.value(network))
+    private fun getGasPrice(gasPrice: BigDecimal?, chainId: Int) =
+        gasPrice ?: BigDecimal(gasPrices.value(chainId))
 
     private fun getSignedEtherTransaction(
         count: BigInteger,
