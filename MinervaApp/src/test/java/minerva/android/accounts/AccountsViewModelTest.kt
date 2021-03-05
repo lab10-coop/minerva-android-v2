@@ -22,6 +22,7 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -325,9 +326,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `Check if calling getTokenVisibility() method is calling the method`() {
         viewModel.tokenVisibilitySettings = mock()
         viewModel.tokenVisibilitySettings.let { settings ->
-            whenever(settings.getTokenVisibility(any(), any())).thenReturn(false)
-            viewModel.isTokenVisible("", "")
-            verify(settings, times(1)).getTokenVisibility(any(), any())
+            val erc20Token = ERC20Token(1, address = "0xC00KiE", decimals = "2")
+            whenever(settings.getTokenVisibility(any(), any())).thenReturn(false, false, true, true, null)
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo false
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ZERO)) shouldBeEqualTo false
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo true
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ZERO)) shouldBeEqualTo false
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo null
+            verify(settings, times(5)).getTokenVisibility(any(), any())
         }
     }
 

@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -48,14 +49,11 @@ class TransactionSendFragment : Fragment() {
         get() = viewModel.tokenIndex + ONE_ELEMENT
 
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
-        binding.transactionCostAmount.text =
-            getString(R.string.transaction_cost_amount, newValue.toPlainString(), viewModel.token)
-        if (allPressed && oldValue != newValue) {
-            val recalculatedAmount = viewModel.recalculateAmount
-            if (recalculatedAmount <= BigDecimal.ZERO) {
-                binding.amount.setText(BigDecimal.ZERO.toPlainString())
-            } else {
-                binding.amount.setText(recalculatedAmount.toPlainString())
+        binding.apply {
+            transactionCostAmount.text = getString(R.string.transaction_cost_amount, newValue.toPlainString(), viewModel.token)
+            if (allPressed && oldValue != newValue) {
+                if (viewModel.recalculateAmount <= BigDecimal.ZERO) amount.setText(BigDecimal.ZERO.toPlainString())
+                else amount.setText(viewModel.recalculateAmount.toPlainString())
             }
         }
     }
@@ -114,7 +112,6 @@ class TransactionSendFragment : Fragment() {
             transactionCostLayout.isEnabled = true
             arrow.visible()
         }
-
         handleGasLimitDefaultValue(it)
         if (shouldOverrideTransactionCost) {
             txCostObservable = it.cost
@@ -145,9 +142,12 @@ class TransactionSendFragment : Fragment() {
     private fun prepareTextListeners() {
         with(binding) {
             validationDisposable = Observable.combineLatest(
-                amount.getValidationObservable(amountInputLayout) { Validator.validateAmountField(it, viewModel.cryptoBalance) },
-                receiver.getValidationObservable(receiverInputLayout)
-                { Validator.validateAddress(it, viewModel.isAddressValid(it), R.string.invalid_account_address) },
+                amount.getValidationObservable(amountInputLayout) {
+                    Validator.validateAmountField(it, viewModel.cryptoBalance)
+                },
+                receiver.getValidationObservable(receiverInputLayout) {
+                    Validator.validateAddress(it, viewModel.isAddressValid(it), R.string.invalid_account_address)
+                },
                 BiFunction<Boolean, Boolean, Boolean> { isAmountValid, isAddressValid -> isAmountValid && isAddressValid })
                 .map { areFieldsValid ->
                     if (areFieldsValid) {
@@ -173,11 +173,26 @@ class TransactionSendFragment : Fragment() {
                     )
                 }
                 .subscribeBy(
-                    onNext = { sendButton.isEnabled = it },
-                    onError = { sendButton.isEnabled = false }
+                    onNext = {
+                        viewModel.isTransactionAvailable(it).let { isAvailable ->
+                            sendButton.isEnabled = isAvailable
+                            balanceToLowError.visibleOrGone(!isAvailable)
+                            transactionCostAmount.setTextColor(getTransactionCostColor(isAvailable))
+                        }
+                    },
+                    onError = {
+                        sendButton.isEnabled = false
+                        balanceToLowError.visibleOrGone(false)
+                    }
                 )
         }
     }
+
+    private fun getTransactionCostColor(isAvailable: Boolean) =
+        (if (isAvailable) R.color.gray
+        else R.color.errorRed).let {
+            ContextCompat.getColor(requireContext(), it)
+        }
 
     private fun prepareTokenDropdown() {
         binding.apply {
@@ -194,6 +209,7 @@ class TransactionSendFragment : Fragment() {
                             viewModel.tokenIndex = position - ONE_ELEMENT
                             setupTexts()
                         }
+
                         override fun onNothingSelected(adapterView: AdapterView<*>?) = setSelection(spinnerPosition, true)
                     }
                 }

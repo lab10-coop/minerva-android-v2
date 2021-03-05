@@ -247,8 +247,8 @@ class WalletConfigManagerTest {
     fun `update wallet config success`() {
         mockWallet()
         walletManager.initWalletConfig()
-        walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
         walletManager.updateWalletConfig(WalletConfig())
+        walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
         walletConfigCaptor.run {
             verify(walletConfigObserver).onChanged(capture())
         }

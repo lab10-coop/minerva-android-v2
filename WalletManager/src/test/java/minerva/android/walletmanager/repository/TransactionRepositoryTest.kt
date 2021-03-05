@@ -702,14 +702,14 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.prepareCurrentTokenList(any(), any())).thenReturn(accountTokens)
         whenever(tokenManager.updateTokensFromLocalStorage(any())).thenReturn(Pair(false, mapOf()))
         whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(listOf()))
-        whenever(tokenManager.updateTokens(any(), any())).thenReturn(
-            Single.just(mapOf()),
-            Single.just(mapOf()),
+        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
+            Single.just(Pair(true, mapOf())),
+            Single.just(Pair(true, mapOf())),
             Single.error(Throwable("error")),
-            Single.just(mapOf()),
+            Single.just(Pair(true, mapOf())),
             Single.error(Throwable("error"))
         )
-        whenever(tokenManager.saveTokens(any())).thenReturn(
+        whenever(tokenManager.saveTokens(any(), any())).thenReturn(
             Completable.complete(),
             Completable.complete(),
             Completable.complete(),

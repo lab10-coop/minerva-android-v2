@@ -10,10 +10,11 @@ interface TokenManager {
     fun updateTokenIcons(): Completable
     fun loadCurrentTokens(chainId: Int): List<ERC20Token>
     fun saveToken(chainId: Int, token: ERC20Token): Completable
+
     /**
      * return statement: Map<AccountPrivateKey, List<AccountToken>>
      */
-    fun saveTokens(map: Map<String, List<AccountToken>>): Completable
+    fun saveTokens(shouldBeSaved: Boolean, map: Map<String, List<AccountToken>>): Completable
     fun getTokenIconURL(chainId: Int, address: String): Single<String>
     fun prepareCurrentTokenList(chainId: Int, tokenList: List<AccountToken>): List<AccountToken>
 
@@ -26,6 +27,10 @@ interface TokenManager {
     /**
      * return statement: Map<AccountPrivateKey, List<AccountToken>>
      */
-    fun updateTokens(shouldBeUpdated: Boolean, accountTokens: Map<String, List<AccountToken>>): Single<Map<String, List<AccountToken>>>
+    fun updateTokenIcons(
+        shouldBeUpdated: Boolean,
+        accountTokens: Map<String, List<AccountToken>>
+    ): Single<Pair<Boolean, Map<String, List<AccountToken>>>>
+
     fun refreshTokenBalance(account: Account): Single<List<AccountToken>>
 }

@@ -13,6 +13,7 @@ import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.transactions.Balance
+import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
@@ -74,14 +75,10 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
                 accountTokenBalances[account.privateKey]?.let { accountsList ->
                     account.accountTokens = accountsList
                         .filter {
-                            listener.isTokenVisible(account.address, it.token.address).orElse {
-                                    listener.saveTokenVisibility(
-                                        account.address,
-                                        it.token.address,
-                                        true
-                                    )
-                                    true
-                                }
+                            listener.isTokenVisible(account.address, it).orElse {
+                                listener.saveTokenVisibility(account.address, it.token.address, true)
+                                true
+                            }
                         }
                     notifyItemChanged(index)
                 }

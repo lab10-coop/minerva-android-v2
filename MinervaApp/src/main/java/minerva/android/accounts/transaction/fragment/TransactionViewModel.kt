@@ -187,6 +187,12 @@ class TransactionViewModel(
         }
     }
 
+    fun isTransactionAvailable(isValidated: Boolean) =
+        when {
+            isMainTransaction || isTokenTransaction -> isValidated && transactionCost < account.cryptoBalance
+            else -> isValidated && transactionCost < smartContractRepository.getSafeAccountMasterOwnerBalance(account.masterOwnerAddress)
+        }
+
     private fun sendSafeAccountTokenTransaction(
         receiverKey: String,
         amount: BigDecimal,
@@ -325,20 +331,13 @@ class TransactionViewModel(
         }
     }
 
-    fun getAllAvailableFunds(): String {
-        if (tokenIndex != Int.InvalidIndex) return account.accountTokens[tokenIndex].balance.toPlainString()
-        if (account.isSafeAccount) return account.cryptoBalance.toPlainString()
-
-        val allAvailableFunds = account.cryptoBalance.minus(transactionCost)
-        return if (allAvailableFunds < BigDecimal.ZERO) {
-            String.EmptyBalance
-        } else {
-            allAvailableFunds.toPlainString()
-        }
-    }
+    fun getAllAvailableFunds(): String =
+        if (recalculateAmount < BigDecimal.ZERO) String.EmptyBalance
+        else recalculateAmount.toPlainString()
 
     val recalculateAmount: BigDecimal
-        get() = cryptoBalance.minus(transactionCost)
+        get() = if (isMainTransaction) cryptoBalance.minus(transactionCost)
+        else cryptoBalance
 
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
