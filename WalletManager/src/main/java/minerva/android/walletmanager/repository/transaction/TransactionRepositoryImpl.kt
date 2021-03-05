@@ -82,13 +82,13 @@ class TransactionRepositoryImpl(
                         }
                         .map { tokenManager.updateTokensFromLocalStorage(it) }
                         .flatMap { (shouldBeUpdated, accountTokens) ->
-                            tokenManager.updateTokens(shouldBeUpdated, accountTokens).onErrorReturn {
+                            tokenManager.updateTokenIcons(shouldBeUpdated, accountTokens).onErrorReturn {
                                 Timber.e(it)
-                                accountTokens
+                                Pair(false, accountTokens)
                             }
                         }
-                        .flatMap { automaticTokenUpdateMap -> // Map<isUpdateNeeded, Map<AccountPrivateKey, List<AccountToken>>
-                            tokenManager.saveTokens(automaticTokenUpdateMap).onErrorComplete {
+                        .flatMap { (shouldBeSaved, automaticTokenUpdateMap) ->
+                            tokenManager.saveTokens(shouldBeSaved, automaticTokenUpdateMap).onErrorComplete {
                                 Timber.e(it)
                                 true
                             }.andThen(Single.just(automaticTokenUpdateMap))
