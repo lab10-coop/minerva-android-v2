@@ -23,21 +23,19 @@ import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.mappers.PendingTransactionToPendingAccountMapper
 import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTransactionCost
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
+import minerva.android.walletmanager.model.mappers.TxCostPayloadToTxCostDataMapper
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.transactions.Balance
-import minerva.android.walletmanager.model.transactions.Recipient
-import minerva.android.walletmanager.model.transactions.Transaction
-import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.transactions.*
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.util.concurrent.TimeUnit
 import java.math.RoundingMode
+import java.util.concurrent.TimeUnit
 
 class TransactionRepositoryImpl(
     private val blockchainRepository: BlockchainRegularAccountRepository,
@@ -84,13 +82,13 @@ class TransactionRepositoryImpl(
                         }
                         .map { tokenManager.updateTokensFromLocalStorage(it) }
                         .flatMap { (shouldBeUpdated, accountTokens) ->
-                            tokenManager.updateTokens(shouldBeUpdated, accountTokens).onErrorReturn {
+                            tokenManager.updateTokenIcons(shouldBeUpdated, accountTokens).onErrorReturn {
                                 Timber.e(it)
-                                accountTokens
+                                Pair(false, accountTokens)
                             }
                         }
-                        .flatMap { automaticTokenUpdateMap -> // Map<isUpdateNeeded, Map<AccountPrivateKey, List<AccountToken>>
-                            tokenManager.saveTokens(automaticTokenUpdateMap).onErrorComplete {
+                        .flatMap { (shouldBeSaved, automaticTokenUpdateMap) ->
+                            tokenManager.saveTokens(shouldBeSaved, automaticTokenUpdateMap).onErrorComplete {
                                 Timber.e(it)
                                 true
                             }.andThen(Single.just(automaticTokenUpdateMap))
@@ -154,47 +152,25 @@ class TransactionRepositoryImpl(
     override fun sendTransaction(chainId: Int, transaction: Transaction): Single<String> =
         blockchainRepository.sendTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
 
-    override fun getTransactionCosts(
-        tokenIndex: Int,
-        from: String,
-        to: String,
-        amount: BigDecimal,
-        chainId: Int,
-        contractData: String
-    ): Single<TransactionCost> =
+    override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         if (shouldGetGasPriceFromApi(chainId)) {
             cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
-                .flatMap { gasPrice ->
-                    getTxCosts(tokenIndex, from, to, amount, gasPrice, chainId, contractData)
-                }.onErrorResumeNext { getTxCosts(tokenIndex, from, to, amount, null, chainId, contractData) }
+                .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice) }
+                .onErrorResumeNext { getTxCosts(txCostPayload, null) }
         } else {
-            getTxCosts(tokenIndex, from, to, amount, null, chainId, contractData)
+            getTxCosts(txCostPayload, null)
         }
+    }
 
     private fun shouldGetGasPriceFromApi(chainId: Int) = NetworkManager.getNetwork(chainId).gasPriceOracle.isNotEmpty()
 
-    private fun getTxCosts(
-        tokenIndex: Int,
-        from: String,
-        to: String,
-        amount: BigDecimal,
-        gasPrice: GasPrices?,
-        chainId: Int,
-        contractData: String
-    ): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(
-            chainId,
-            tokenIndex,
-            from,
-            to,
-            amount,
-            gasPrice?.speed?.standard,
-            contractData
-        ).map { payload ->
-            TransactionCostPayloadToTransactionCost.map(payload, gasPrice, chainId) {
-                blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
+    private fun getTxCosts(payload: TxCostPayload, gasPrice: GasPrices?): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), gasPrice?.speed?.standard)
+            .map { txCost ->
+                TransactionCostPayloadToTransactionCost.map(txCost, gasPrice, payload.chainId) {
+                    blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
+                }
             }
-        }
 
     override fun isAddressValid(address: String): Boolean =
         blockchainRepository.isAddressValid(address)

@@ -6,15 +6,6 @@
     android:layout_height="wrap_content"
     tools:ignore="PrivateResource">
 
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="0dp"
-        android:src="@drawable/minerva_card_background"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
     <minerva.android.widget.ConnectionView
         android:id="@+id/connection_view"
         android:layout_width="match_parent"

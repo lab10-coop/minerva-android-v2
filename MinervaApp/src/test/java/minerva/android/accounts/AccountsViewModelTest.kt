@@ -11,7 +11,7 @@ import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -22,6 +22,7 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -46,8 +47,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
-    private val dappSessionObserver: Observer<List<Account>> = mock()
-    private val dappSessionCaptor: KArgumentCaptor<List<Account>> = argumentCaptor()
+    private val dappSessionObserver: Observer<HashMap<String, Int>> = mock()
+    private val dappSessionCaptor: KArgumentCaptor<HashMap<String, Int>> = argumentCaptor()
 
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
@@ -295,7 +296,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {
             verify(dappSessionObserver).onChanged(capture())
-            firstValue[0].dappSessionCount == 1
+            firstValue["address"] == 1
         }
     }
 
@@ -325,9 +326,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `Check if calling getTokenVisibility() method is calling the method`() {
         viewModel.tokenVisibilitySettings = mock()
         viewModel.tokenVisibilitySettings.let { settings ->
-            whenever(settings.getTokenVisibility(any(), any())).thenReturn(false)
-            viewModel.isTokenVisible("", "")
-            verify(settings, times(1)).getTokenVisibility(any(), any())
+            val erc20Token = ERC20Token(1, address = "0xC00KiE", decimals = "2")
+            whenever(settings.getTokenVisibility(any(), any())).thenReturn(false, false, true, true, null)
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo false
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ZERO)) shouldBeEqualTo false
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo true
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ZERO)) shouldBeEqualTo false
+            viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo null
+            verify(settings, times(5)).getTokenVisibility(any(), any())
         }
     }
 

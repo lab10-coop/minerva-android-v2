@@ -9,7 +9,6 @@ import minerva.android.apiProvider.model.CommitElement
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
@@ -61,13 +60,15 @@ class TokenManagerImpl(
             ).let { walletManager.updateWalletConfig(it) }
         } ?: Completable.error(NotInitializedWalletConfigThrowable())
 
-    override fun saveTokens(map: Map<String, List<AccountToken>>): Completable =
-        walletManager.getWalletConfig()?.let { config ->
-            config.copy(
-                version = config.updateVersion,
-                erc20Tokens = updateTokens(map, config.erc20Tokens.toMutableMap())
-            ).let { walletManager.updateWalletConfig(it) }
-        } ?: Completable.error(NotInitializedWalletConfigThrowable())
+    override fun saveTokens(shouldBeSaved: Boolean, map: Map<String, List<AccountToken>>): Completable =
+        if (shouldBeSaved) {
+            walletManager.getWalletConfig()?.let { config ->
+                config.copy(
+                    version = config.updateVersion,
+                    erc20Tokens = updateTokens(map, config.erc20Tokens.toMutableMap())
+                ).let { walletManager.updateWalletConfig(it) }
+            } ?: Completable.error(NotInitializedWalletConfigThrowable())
+        } else Completable.complete()
 
     override fun updateTokenIcons(): Completable =
         cryptoApi.getTokenLastCommitRawData(url = ERC20_TOKEN_DATA_LAST_COMMIT)
@@ -112,30 +113,26 @@ class TokenManagerImpl(
             Pair(updateTokens, map)
         }.orElse { throw NotInitializedWalletConfigThrowable() }
 
-    override fun updateTokens(
+    override fun updateTokenIcons(
         shouldBeUpdated: Boolean,
         accountTokens: Map<String, List<AccountToken>>
-    ): Single<Map<String, List<AccountToken>>> =
+    ): Single<Pair<Boolean, Map<String, List<AccountToken>>>> =
         if (shouldBeUpdated) {
+            var shouldBeSaved = false
             getTokenIconsURL().map { logoUrls ->
-                val updatedTokensMap = mutableMapOf<Int, List<ERC20Token>>()
                 accountTokens.values.forEach { accountTokens ->
-                    var currentChainId = Int.InvalidId
-                    val updatedTokens = mutableListOf<ERC20Token>()
                     accountTokens.forEach {
                         it.token.apply {
-                            if (logoURI == null) {
-                                currentChainId = chainId
-                                logoURI = logoUrls[generateTokenIconKey(chainId, address)]
-                                updatedTokens.add(this)
+                            logoUrls[generateTokenIconKey(chainId, address)]?.let { newLogoURI ->
+                                logoURI = newLogoURI
+                                shouldBeSaved = true
                             }
                         }
                     }
-                    if (updatedTokens.isNotEmpty()) updatedTokensMap[currentChainId] = updatedTokens
                 }
-                accountTokens
+                Pair(shouldBeSaved, accountTokens)
             }
-        } else Single.just(accountTokens)
+        } else Single.just(Pair(false, accountTokens))
 
     override fun refreshTokenBalance(account: Account): Single<List<AccountToken>> =
         when (account.chainId) {

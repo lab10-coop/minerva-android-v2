@@ -3,6 +3,7 @@ package minerva.android.walletmanager.walletActions
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Observer
+import minerva.android.blockchainprovider.utils.CryptoUtils.encodePublicKey
 import minerva.android.configProvider.model.walletActions.WalletActionClusteredPayload
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
@@ -11,12 +12,11 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.DateUtils.isTheSameDay
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
+import minerva.android.walletmanager.model.mappers.WalletActionsMapper
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.wallet.WalletActionClustered
-import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
-import minerva.android.walletmanager.model.mappers.WalletActionsMapper
-import minerva.android.walletmanager.utils.CryptoUtils.encodePublicKey
 import minerva.android.walletmanager.walletActions.localProvider.LocalWalletActionsConfigProvider
 
 class WalletActionsRepositoryImpl(
