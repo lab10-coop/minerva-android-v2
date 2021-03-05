@@ -205,8 +205,7 @@ class WalletConfigManagerImpl(
                 walletConfig,
                 WalletConfigToWalletPayloadMapper.map(walletConfig)
             )
-            _walletConfigLiveData.value = config
-            localWalletProvider.saveWalletConfig(payload)
+
             minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
                 .toSingleDefault(Pair(walletConfig, payload))
                 .map {
@@ -215,6 +214,11 @@ class WalletConfigManagerImpl(
                 }
                 .handleAutomaticBackupFailedError(Pair(config, payload), localStorage)
                 .subscribeOn(Schedulers.io())
+                .doOnSubscribe {
+                    _walletConfigLiveData.value = config
+                    localWalletProvider.saveWalletConfig(payload)
+                }
+                .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .ignoreElement()
         } else Completable.error(AutomaticBackupFailedThrowable())
