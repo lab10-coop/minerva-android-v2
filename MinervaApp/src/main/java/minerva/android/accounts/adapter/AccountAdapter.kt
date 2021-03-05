@@ -13,6 +13,7 @@ import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.transactions.Balance
+import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
