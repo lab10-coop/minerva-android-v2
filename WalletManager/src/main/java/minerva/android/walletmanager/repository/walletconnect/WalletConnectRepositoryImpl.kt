@@ -14,6 +14,7 @@ import minerva.android.blockchainprovider.repository.signature.SignatureReposito
 import minerva.android.blockchainprovider.smartContracts.TokenStandardJson
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
+import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
@@ -26,6 +27,7 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import timber.log.Timber
+import java.math.BigDecimal
 import java.util.concurrent.ConcurrentHashMap
 
 class WalletConnectRepositoryImpl(
@@ -85,7 +87,7 @@ class WalletConnectRepositoryImpl(
                 Timber.tag("kobe").d("DATA: ${transaction.data}")
                 Timber.tag("kobe").d("From: ${transaction.from}")
                 Timber.tag("kobe").d("To: ${transaction.to}")
-                Timber.tag("kobe").d("Coin value: ${transaction.value}")
+                Timber.tag("kobe").d("Coin value: ${hexToBigInteger(transaction.value, BigDecimal.ZERO)}")
                 Timber.tag("kobe").d("Gas price: ${transaction.gasPrice}")
                 Timber.tag("kobe").d("Gas limit: ${transaction.gasLimit}")
 

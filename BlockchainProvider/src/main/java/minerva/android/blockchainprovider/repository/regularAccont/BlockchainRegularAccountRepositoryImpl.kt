@@ -33,6 +33,7 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
 import org.web3j.utils.Numeric
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -197,7 +198,20 @@ class BlockchainRegularAccountRepositoryImpl(
                                     .ethCall(transaction, DefaultBlockParameterName.LATEST)
                                     .flowable()
                             )
-                            .flatMapSingle { (gas, _) -> handleGasLimit(chainId, gas, gasPrice, txCostData.transferType) }
+                            .flatMapSingle { (gas, call) ->
+
+                                if (call.error != null) {
+                                    Timber.tag("kobe")
+                                        .d("EthCall Error: ${call.error}, message: ${call.error.message}, data${call.error.data}")
+                                }
+
+                                if (gas.error != null) {
+                                    Timber.tag("kobe")
+                                        .d("EstimateGas Error: ${gas.error}, message: ${gas.error.message}, data${gas.error.data}")
+                                }
+
+                                handleGasLimit(chainId, gas, gasPrice, txCostData.transferType)
+                            }
                     }
                     .firstOrError()
                     .timeout(
@@ -210,10 +224,6 @@ class BlockchainRegularAccountRepositoryImpl(
                 calculateTransactionCosts(chainId, Operation.SAFE_ACCOUNT_TXS.gasLimit, gasPrice)
             }
         }
-
-    private fun isSafeAccountTransaction(txCostData: TxCostData) =
-        txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_TOKEN_TRANSFER ||
-                txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER
 
     private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
         when (costData.transferType) {
@@ -243,6 +253,10 @@ class BlockchainRegularAccountRepositoryImpl(
             listOf(Address(address), Uint256(value)),
             emptyList()
         )
+
+    private fun isSafeAccountTransaction(txCostData: TxCostData) =
+        txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_TOKEN_TRANSFER ||
+                txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER
 
     private fun getTransaction(
         from: String,
