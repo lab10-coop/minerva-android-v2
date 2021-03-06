@@ -205,6 +205,7 @@ class WalletConfigManagerImpl(
                 walletConfig,
                 WalletConfigToWalletPayloadMapper.map(walletConfig)
             )
+
             minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
                 .toSingleDefault(Pair(walletConfig, payload))
                 .map {
