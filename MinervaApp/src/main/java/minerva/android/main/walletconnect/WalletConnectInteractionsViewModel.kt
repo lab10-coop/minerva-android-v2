@@ -2,6 +2,7 @@ package minerva.android.main.walletconnect
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.prettymuchbryce.abidecoder.Decoder
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
@@ -9,8 +10,12 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.walletconnect.*
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.model.contract.ERC20Method
+import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
@@ -33,6 +38,7 @@ class WalletConnectInteractionsViewModel(
     private var currentRate: BigDecimal = BigDecimal.ZERO
     private lateinit var currentTransaction: WalletConnectTransaction
     internal lateinit var currentAccount: Account
+    private var tokenDecimal: Int = Int.InvalidValue
 
     private val _walletConnectStatus = MutableLiveData<WalletConnectState>()
     val walletConnectStatus: LiveData<WalletConnectState> get() = _walletConnectStatus
@@ -104,42 +110,118 @@ class WalletConnectInteractionsViewModel(
     ): Single<OnEthSendTransactionRequest> {
         currentDappSession = session
         transactionRepository.getAccountByAddress(currentDappSession.address)?.let { currentAccount = it }
-        val value = transactionRepository.toEther(hexToBigInteger(status.transaction.value, BigDecimal.ZERO))
+        val value = getTransactionValue(status)
+        val transferType = getTransferType(status, value)
         status.transaction.value = value.toPlainString()
-        return transactionRepository.getTransactionCosts(getTxCostPayload(currentDappSession.chainId, status, value))
+        val txCostPayload = getTxCostPayload(currentDappSession.chainId, status, value, transferType)
+        return transactionRepository.getTransactionCosts(txCostPayload)
             .flatMap { transactionCost ->
                 transactionRepository.getEurRate(session.chainId)
                     .onErrorResumeNext { Single.just(0.0) }
                     .map {
                         currentRate = it.toBigDecimal()
-                        val valueInFiat = status.transaction.value.toBigDecimal().multiply(currentRate)
+                        val valueInFiat = status.transaction.value?.toBigDecimal()?.multiply(currentRate)!!
                         val costInFiat = transactionCost.cost.multiply(currentRate)
                         currentTransaction = status.transaction.copy(
                             fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
-                            txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat))
+                            txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat)),
+                            transactionType = transferType
                         )
                         OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
                     }
             }
     }
 
-    private fun getTxCostPayload(chainId: Int, status: OnEthSendTransaction, value: BigDecimal): TxCostPayload =
-        TxCostPayload(
-            getTransferType(status, value),
-            status.transaction.from,
-            status.transaction.to,
-            value,
-            chainId, //todo handle token decimals ??
-            contractData = getContractData(status.transaction)
-        )
+    private fun getTransactionValue(status: OnEthSendTransaction) =
+        status.transaction.value?.let {
+            transactionRepository.toEther(hexToBigInteger(it, BigDecimal.ZERO))
+        }.orElse {
+            BigDecimal.ZERO
+        }
 
-    //TODO include other transaction types (token transfer, token swap)
     private fun getTransferType(status: OnEthSendTransaction, value: BigDecimal): TransferType =
         when {
             isContractDataEmpty(status.transaction) -> TransferType.COIN_TRANSFER
             !isContractDataEmpty(status.transaction) && value != BigDecimal.ZERO -> TransferType.COIN_SWAP
+            !isContractDataEmpty(status.transaction) && value == BigDecimal.ZERO -> handleTokenTransactions(status)
             else -> TransferType.UNDEFINED
         }
+
+    private fun handleTokenTransactions(status: OnEthSendTransaction): TransferType {
+        return try {
+            val decoder = Decoder()
+            decoder.addAbi(TokenStandardJson.erc20Abi)
+
+            val result: Decoder.DecodedMethod? = decoder.decodeMethod(status.transaction.data)
+
+            Timber.tag("kobe").d("Parsed: ${result.toString()}")
+            Timber.tag("kobe").d("Method type: ${result?.name}")
+
+            Timber.tag("kobe").d("Method name: ${result?.params?.get(0)?.name}")
+            Timber.tag("kobe").d("Method value: ${result?.params?.get(0)?.value}")
+
+            Timber.tag("kobe").d("Method name: ${result?.params?.get(1)?.name}")
+            Timber.tag("kobe").d("Method name: ${result?.params?.get(1)?.value}")
+
+            result?.let { decoded ->
+                when (decoded.name) {
+                    ERC20Method.APPROVE.type -> handleApproveAllowance(status, decoded)
+                    else -> TransferType.TOKEN_SWAP
+                }
+            }.orElse {
+                TransferType.UNDEFINED
+            }
+
+        } catch (e: RuntimeException) {
+            Timber.e(e)
+            TransferType.UNDEFINED
+        }
+    }
+
+    private fun handleApproveAllowance(status: OnEthSendTransaction, decoded: Decoder.DecodedMethod): TransferType {
+        currentAccount.accountTokens
+            .find { it.token.address == status.transaction.to }
+            ?.let {
+                status.transaction.tokenSymbol = it.token.symbol
+                tokenDecimal = it.token.decimals.toInt()
+            }
+
+        return if (decoded.params.size > 1) {
+            getTransactionTypeBasedOnAllowance(decoded, status)
+        } else {
+            TransferType.UNDEFINED
+        }
+    }
+
+    private fun getTransactionTypeBasedOnAllowance(decoded: Decoder.DecodedMethod, status: OnEthSendTransaction) =
+        if ((decoded.params[1].value as? String) == UNLIMITED) {
+            status.transaction.allowance = Int.InvalidValue.toBigDecimal()
+            TransferType.TOKEN_SWAP_APPROVAL
+        } else {
+            (decoded.params[1].value as? String)?.toBigDecimal()?.let {
+                status.transaction.allowance = transactionRepository.toEther(it)
+                TransferType.TOKEN_SWAP_APPROVAL
+            }.orElse {
+                TransferType.UNDEFINED
+            }
+        }
+
+    private fun getTxCostPayload(
+        chainId: Int,
+        status: OnEthSendTransaction,
+        value: BigDecimal,
+        transferType: TransferType
+    ): TxCostPayload =
+        TxCostPayload(
+            transferType,
+            status.transaction.from,
+            status.transaction.to,
+            value,
+            status.transaction.allowance,
+            chainId,
+            tokenDecimal,
+            contractData = getContractData(status.transaction)
+        )
 
     private fun getContractData(transaction: WalletConnectTransaction): String =
         if (isContractDataEmpty(transaction)) String.Empty
@@ -169,7 +251,6 @@ class WalletConnectInteractionsViewModel(
                         _walletConnectStatus.value = OnError(it)
                     }
                 )
-
         }
     }
 
@@ -206,4 +287,8 @@ class WalletConnectInteractionsViewModel(
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =
         balance < cost || balance == BigDecimal.ZERO
+
+    companion object {
+        private const val UNLIMITED = "-1"
+    }
 }

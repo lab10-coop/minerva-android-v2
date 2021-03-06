@@ -162,9 +162,9 @@ class TransactionViewModel(
             account.address,
             to,
             amount,
-            account.network.chainId,
-            tokenDecimals,
-            contractAddress
+            chainId = account.network.chainId,
+            tokenDecimals = tokenDecimals,
+            contractAddress = contractAddress
         )
 
     private val transferType: TransferType

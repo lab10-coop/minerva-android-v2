@@ -53,11 +53,6 @@ dependencies {
     implementation project(':BlockchainProvider')
     implementation project(':WalletConnect')
 
-    implementation('com.github.prettymuchbryce:abidecoder:master-SNAPSHOT') {
-        exclude group: 'org.iq80.leveldb', module: 'leveldb-api'
-    }
-
-
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
     implementation coreDependencies.values()

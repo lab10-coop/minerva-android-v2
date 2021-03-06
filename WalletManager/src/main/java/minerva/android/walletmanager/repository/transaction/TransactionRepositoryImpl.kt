@@ -150,7 +150,7 @@ class TransactionRepositoryImpl(
     override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
 
     override fun sendTransaction(chainId: Int, transaction: Transaction): Single<String> =
-        blockchainRepository.sendTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
+        blockchainRepository.sendWalletConnectTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         if (shouldGetGasPriceFromApi(chainId)) {

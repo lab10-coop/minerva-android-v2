@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.repository.walletconnect
 
-import com.prettymuchbryce.abidecoder.Decoder
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -11,7 +10,6 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
-import minerva.android.blockchainprovider.smartContracts.TokenStandardJson
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
@@ -77,19 +75,12 @@ class WalletConnectRepositoryImpl(
             onEthSendTransaction = { id, transaction, peerId ->
                 currentRequestId = id
 
-                val decoder = Decoder()
-                decoder.addAbi(TokenStandardJson.erc20Abi)
-                val result: Decoder.DecodedMethod? = decoder.decodeMethod(transaction.data)
-                result?.params?.get(0)?.value
-
                 Timber.tag("kobe").d("DATA: ${transaction.data}")
                 Timber.tag("kobe").d("From: ${transaction.from}")
                 Timber.tag("kobe").d("To: ${transaction.to}")
                 Timber.tag("kobe").d("Coin value: ${transaction.value}}")
                 Timber.tag("kobe").d("Gas price: ${transaction.gasPrice}")
                 Timber.tag("kobe").d("Gas limit: ${transaction.gasLimit}")
-
-                Timber.tag("kobe").d("Parsed: ${result.toString()}")
 
                 status.onNext(
                     OnEthSendTransaction(

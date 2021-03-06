@@ -18,6 +18,7 @@ import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialog
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import timber.log.Timber
 
 open class WalletConnectScannerFragment : BaseScannerFragment() {
 
@@ -62,6 +63,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             }
         })
         viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver {
+            Timber.tag("kobe").d("Error: ${it.message}, ${it.cause}")
             shouldScan = true
             showToast(getErrorMessage(it))
         })

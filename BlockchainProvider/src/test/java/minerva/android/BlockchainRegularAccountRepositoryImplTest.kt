@@ -327,7 +327,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.just(sendTransaction)
         every { web3J.netVersion().flowable() } returns Flowable.just(netVersion)
         every { web3J.ethBlockNumber().flowable() } returns Flowable.just(ethBlockNumber)
-        repository.sendTransaction(ETH, TransactionPayload("address", "0x2313"))
+        repository.sendWalletConnectTransaction(ETH, TransactionPayload("address", "0x2313"))
             .test()
             .assertComplete()
     }
@@ -347,7 +347,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         every { web3J.ethSendRawTransaction(any()).flowable() } returns Flowable.error(error)
         every { web3J.netVersion().flowable() } returns Flowable.just(netVersion)
         every { web3J.ethBlockNumber().flowable() } returns Flowable.just(ethBlockNumber)
-        repository.sendTransaction(ETH, TransactionPayload("address", "0x2313"))
+        repository.sendWalletConnectTransaction(ETH, TransactionPayload("address", "0x2313"))
             .test()
             .assertError(error)
     }

@@ -9,10 +9,13 @@ import minerva.android.databinding.DappSendTransactionDialogBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrInvisible
-import minerva.android.walletmanager.utils.BalanceUtils
+import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
+import minerva.android.walletmanager.utils.BalanceUtils
+import timber.log.Timber
 import java.math.BigDecimal
 
 class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
@@ -42,13 +45,15 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         recalculateTxCost: (BigDecimal) -> WalletConnectTransaction,
         isBalanceTooLow: (balance: BigDecimal, cost: BigDecimal) -> Boolean
     ) = with(binding) {
+
+        Timber.tag("kobe").d("Dapp Dialog Transfer type: ${transaction.transactionType.name}")
+
         setupHeader(session.name, session.networkName, session.iconUrl)
-        amount.text = transaction.value
+        prepareTransactions(transaction, account)
         senderAddress.text = transaction.from
         receiverAddress.text = transaction.to
         receiverAddressFull.text = transaction.to
         account?.let {
-            unit.text = it.network.token
             accountName.text = it.name
             "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
 
@@ -70,6 +75,29 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             transactionTime.visibleOrInvisible(false)
             setTxCost(transaction, account)
             handleBalanceTooLow(account, isBalanceTooLow, transaction)
+        }
+    }
+
+    private fun prepareTransactions(transaction: WalletConnectTransaction, account: Account?) = with(binding) {
+        when (transaction.transactionType) {
+            TransferType.TOKEN_SWAP_APPROVAL -> {
+                value.invisible()
+                unit.text = transaction.tokenSymbol
+                requestLabel.text = context.getString(R.string.pre_authorize)
+                receiver.text = context.getText(R.string.allowance_receiver)
+                transactionType.text = context.getText(R.string.allowance)
+                amount.text =
+                    if (transaction.allowance == Int.InvalidValue.toBigDecimal()) context.getString(R.string.Unlimited)
+                    else transaction.allowance?.toPlainString()
+            }
+            TransferType.TOKEN_SWAP -> {
+                value.invisible()
+                unit.text = transaction.tokenSymbol
+            }
+            else -> {
+                amount.text = transaction.value
+                account?.let { unit.text = it.network.token }
+            }
         }
     }
 

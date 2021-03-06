@@ -13,6 +13,7 @@ object TxCostPayloadToTxCostDataMapper : Mapper<TxCostPayload, TxCostData> {
             from,
             to,
             amount,
+            allowance,
             chainId,
             tokenDecimals,
             contractAddress,

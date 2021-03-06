@@ -283,4 +283,8 @@
     <string name="fast">Fast</string>
     <string name="standard">Standard</string>
     <string name="slow">Slow</string>
+    <string name="pre_authorize">Pre-Authorize</string>
+    <string name="Unlimited">Unlimited</string>
+    <string name="allowance_receiver">For</string>
+    <string name="allowance">Allowance</string>
 </resources>
