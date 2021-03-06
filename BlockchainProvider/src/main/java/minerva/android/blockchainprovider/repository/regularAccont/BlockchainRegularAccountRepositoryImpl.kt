@@ -98,31 +98,6 @@ class BlockchainRegularAccountRepositoryImpl(
                     }
             }.firstOrError()
 
-    override fun sendTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String> =
-        web3j.value(chainId)
-            .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .flatMap {
-                web3j.value(chainId)
-                    .ethSendRawTransaction(
-                        getSignedTransaction(
-                            it.transactionCount,
-                            transactionPayload,
-                            chainId.toLong(),
-                            Numeric.hexStringToByteArray(transactionPayload.data)
-                        )
-                    )
-                    .flowable()
-                    .flatMapSingle { response ->
-                        if (response.error == null) {
-                            Single.just(response.transactionHash)
-                        } else {
-                            Single.error(Throwable(response.error.message))
-                        }
-                    }
-            }.firstOrError()
-
-
     override fun getCurrentBlockNumber(chainId: Int): Flowable<BigInteger> =
         web3j.value(chainId)
             .ethBlockNumber()
@@ -183,6 +158,63 @@ class BlockchainRegularAccountRepositoryImpl(
             .flowable()
             .ignoreElements()
 
+    override fun sendTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String> =
+        web3j.value(chainId)
+            .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .flatMap {
+
+
+                web3j.value(chainId)
+                    .ethSendRawTransaction(
+                        getSignedTransaction(
+                            it.transactionCount,
+                            transactionPayload,
+                            chainId.toLong()
+                        )
+                    )
+                    .flowable()
+                    .flatMapSingle { response ->
+                        if (response.error == null) {
+                            Timber.tag("kobe").d("Hash: ${response.transactionHash}")
+
+                            Single.just(response.transactionHash)
+                        } else {
+                            Timber.tag("kobe").d("Tx error: ${response.error.message}, data: ${response.error.data}")
+
+                            Single.error(Throwable(response.error.message))
+                        }
+                    }
+            }.firstOrError()
+
+    private fun getSignedTransaction(
+        count: BigInteger,
+        transactionPayload: TransactionPayload,
+        chainId: Long
+    ): String? =
+        Numeric.toHexString(
+            TransactionEncoder.signMessage(
+                createTransaction(count, transactionPayload), chainId,
+                Credentials.create(transactionPayload.privateKey)
+            )
+        )
+
+    private fun createTransaction(count: BigInteger, payload: TransactionPayload): RawTransaction {
+
+        Timber.tag("kobe").d("TX: To: ${payload.receiverAddress}")
+        Timber.tag("kobe").d("TX: Data: ${payload.data}")
+        Timber.tag("kobe").d("TX: Value: ${toWei(payload.amount, Convert.Unit.ETHER).toBigInteger()}")
+
+        return RawTransaction.createTransaction(
+            count,
+            toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger(),
+            payload.gasLimit,
+            payload.receiverAddress,
+            toWei(payload.amount, Convert.Unit.ETHER).toBigInteger(),
+            payload.data
+        )
+    }
+
     override fun getTransactionCosts(txCostData: TxCostData, gasPrice: BigDecimal?): Single<TransactionCostPayload> =
         with(txCostData) {
             if (!isSafeAccountTransaction(txCostData)) {
@@ -190,6 +222,9 @@ class BlockchainRegularAccountRepositoryImpl(
                     .flowable()
                     .zipWith(resolveENS(to).toFlowable())
                     .flatMap { (count, address) ->
+
+                        Timber.tag("kobe").d("Transaction type: ${txCostData.transferType}")
+
                         val transaction: Transaction = prepareTransaction(count, address, this)
                         web3j.value(chainId).ethEstimateGas(transaction)
                             .flowable()
@@ -202,12 +237,12 @@ class BlockchainRegularAccountRepositoryImpl(
 
                                 if (call.error != null) {
                                     Timber.tag("kobe")
-                                        .d("EthCall Error: ${call.error}, message: ${call.error.message}, data${call.error.data}")
+                                        .d("EthCall Error: message: ${call.error.message}, data: ${call.error.data}")
                                 }
 
                                 if (gas.error != null) {
                                     Timber.tag("kobe")
-                                        .d("EstimateGas Error: ${gas.error}, message: ${gas.error.message}, data${gas.error.data}")
+                                        .d("EstimateGas Error: message: ${gas.error.message}, data: ${gas.error.data}")
                                 }
 
                                 handleGasLimit(chainId, gas, gasPrice, txCostData.transferType)
@@ -227,8 +262,27 @@ class BlockchainRegularAccountRepositoryImpl(
 
     private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
         when (costData.transferType) {
-            BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP ->
+            BlockchainTransactionType.COIN_TRANSFER ->
                 getTransaction(costData.from, count, address, costData.amount, costData.contractData)
+
+            BlockchainTransactionType.COIN_SWAP -> {
+
+                Timber.tag("kobe").d("COIN SWAP")
+                Timber.tag("kobe").d("Contract data: ${costData.contractData}")
+                Timber.tag("kobe").d("To: ${costData.to}")
+                Timber.tag("kobe").d("From: ${costData.from}")
+                Timber.tag("kobe").d("Amount: ${toWei(costData.amount, Convert.Unit.ETHER).toBigInteger()}")
+
+                Transaction(
+                    costData.from,
+                    count.transactionCount,
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    costData.to,
+                    toWei(costData.amount, Convert.Unit.ETHER).toBigInteger(),
+                    costData.contractData
+                )
+            }
             else -> {
                 Transaction.createFunctionCallTransaction(
                     costData.from,
@@ -397,29 +451,6 @@ class BlockchainRegularAccountRepositoryImpl(
                 createEtherTransaction(count, transactionPayload), chainId,
                 Credentials.create(transactionPayload.privateKey)
             )
-        )
-
-    private fun getSignedTransaction(
-        count: BigInteger,
-        transactionPayload: TransactionPayload,
-        chainId: Long,
-        data: ByteArray
-    ): String? =
-        Numeric.toHexString(
-            TransactionEncoder.signMessage(
-                createTransaction(count, transactionPayload, data), chainId,
-                Credentials.create(transactionPayload.privateKey)
-            )
-        )
-
-    private fun createTransaction(count: BigInteger, payload: TransactionPayload, data: ByteArray): RawTransaction =
-        RawTransaction.createTransaction(
-            count,
-            toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger(),
-            payload.gasLimit,
-            payload.receiverAddress,
-            toWei(payload.amount, Convert.Unit.ETHER).toBigInteger(),
-            Numeric.toHexString(data)
         )
 
     private fun createEtherTransaction(count: BigInteger, payload: TransactionPayload): RawTransaction? =

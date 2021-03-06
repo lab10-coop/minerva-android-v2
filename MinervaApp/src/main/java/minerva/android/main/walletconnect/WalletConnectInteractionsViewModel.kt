@@ -109,6 +109,7 @@ class WalletConnectInteractionsViewModel(
         return transactionRepository.getTransactionCosts(getTxCostPayload(currentDappSession.chainId, status, value))
             .flatMap { transactionCost ->
                 transactionRepository.getEurRate(session.chainId)
+                    .onErrorResumeNext { Single.just(0.0) }
                     .map {
                         currentRate = it.toBigDecimal()
                         val valueInFiat = status.transaction.value.toBigDecimal().multiply(currentRate)
@@ -129,7 +130,7 @@ class WalletConnectInteractionsViewModel(
             status.transaction.to,
             value,
             chainId, //todo handle token decimals ??
-            contractAddress = getContractData(status.transaction)
+            contractData = getContractData(status.transaction)
         )
 
     //TODO include other transaction types (token transfer, token swap)
@@ -172,6 +173,20 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
+    private val transaction
+        get() = with(currentTransaction) {
+            Transaction(
+                from,
+                currentAccount.privateKey,
+                to,
+                BigDecimal(value),
+                txCost.gasPrice,
+                txCost.gasLimit,
+                String.Empty,
+                data
+            )
+        }
+
     fun recalculateTxCost(gasPrice: BigDecimal, transaction: WalletConnectTransaction): WalletConnectTransaction {
         val txCost = transactionRepository.calculateTransactionCost(gasPrice, transaction.txCost.gasLimit)
         val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(currentRate))
@@ -188,20 +203,6 @@ class WalletConnectInteractionsViewModel(
     fun rejectRequest() {
         walletConnectRepository.rejectRequest(currentDappSession.peerId)
     }
-
-    private val transaction
-        get() = with(currentTransaction) {
-            Transaction(
-                from,
-                currentAccount.privateKey,
-                to,
-                BigDecimal(value),
-                txCost.gasPrice,
-                txCost.gasLimit,
-                String.Empty,
-                data
-            )
-        }
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =
         balance < cost || balance == BigDecimal.ZERO
