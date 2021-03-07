@@ -116,6 +116,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             when (it) {
                 is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(it)
+                is OnUndefinedTransaction ->
+                    Toast.makeText(this@MainActivity, getString(R.string.undefined_transaction), Toast.LENGTH_LONG).show()
                 is ProgressBarState -> handleLoadingDialog(it)
                 else -> dappDialog = null
             }

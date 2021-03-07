@@ -11,16 +11,19 @@ import minerva.android.accounts.walletconnect.*
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.crypto.HEX_PREFIX
 import minerva.android.kotlinUtils.crypto.hexToBigInteger
+import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.model.contract.ERC20Method
+import minerva.android.walletmanager.model.contract.ERC20TRANSACTIONS
 import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.TokenTransaction
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -28,6 +31,7 @@ import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
 import timber.log.Timber
 import java.math.BigDecimal
+import java.math.BigInteger
 
 class WalletConnectInteractionsViewModel(
     private val transactionRepository: TransactionRepository,
@@ -38,7 +42,7 @@ class WalletConnectInteractionsViewModel(
     private var currentRate: BigDecimal = BigDecimal.ZERO
     private lateinit var currentTransaction: WalletConnectTransaction
     internal lateinit var currentAccount: Account
-    private var tokenDecimal: Int = Int.InvalidValue
+    private var tokenDecimal: Int = 0
 
     private val _walletConnectStatus = MutableLiveData<WalletConnectState>()
     val walletConnectStatus: LiveData<WalletConnectState> get() = _walletConnectStatus
@@ -104,10 +108,7 @@ class WalletConnectInteractionsViewModel(
             else -> Single.just(DefaultRequest)
         }
 
-    private fun getTransactionCosts(
-        session: DappSession,
-        status: OnEthSendTransaction
-    ): Single<OnEthSendTransactionRequest> {
+    private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
         transactionRepository.getAccountByAddress(currentDappSession.address)?.let { currentAccount = it }
         val value = getTransactionValue(status)
@@ -122,12 +123,17 @@ class WalletConnectInteractionsViewModel(
                         currentRate = it.toBigDecimal()
                         val valueInFiat = status.transaction.value?.toBigDecimal()?.multiply(currentRate)!!
                         val costInFiat = transactionCost.cost.multiply(currentRate)
-                        currentTransaction = status.transaction.copy(
-                            fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
-                            txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat)),
-                            transactionType = transferType
-                        )
-                        OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
+                        when (transferType) {
+                            TransferType.UNDEFINED -> OnUndefinedTransaction
+                            else -> {
+                                currentTransaction = status.transaction.copy(
+                                    fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
+                                    txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat)),
+                                    transactionType = transferType
+                                )
+                                OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
+                            }
+                        }
                     }
             }
     }
@@ -135,9 +141,7 @@ class WalletConnectInteractionsViewModel(
     private fun getTransactionValue(status: OnEthSendTransaction) =
         status.transaction.value?.let {
             transactionRepository.toEther(hexToBigInteger(it, BigDecimal.ZERO))
-        }.orElse {
-            BigDecimal.ZERO
-        }
+        }.orElse { BigDecimal.ZERO }
 
     private fun getTransferType(status: OnEthSendTransaction, value: BigDecimal): TransferType =
         when {
@@ -147,26 +151,24 @@ class WalletConnectInteractionsViewModel(
             else -> TransferType.UNDEFINED
         }
 
-    private fun handleTokenTransactions(status: OnEthSendTransaction): TransferType {
-        return try {
+    private fun handleTokenTransactions(status: OnEthSendTransaction): TransferType =
+        try {
             val decoder = Decoder()
-            decoder.addAbi(TokenStandardJson.erc20Abi)
-
+            decoder.addAbi(TokenStandardJson.erc20TokenTransactionsAbi)
             val result: Decoder.DecodedMethod? = decoder.decodeMethod(status.transaction.data)
-
             Timber.tag("kobe").d("Parsed: ${result.toString()}")
             Timber.tag("kobe").d("Method type: ${result?.name}")
-
             Timber.tag("kobe").d("Method name: ${result?.params?.get(0)?.name}")
             Timber.tag("kobe").d("Method value: ${result?.params?.get(0)?.value}")
-
             Timber.tag("kobe").d("Method name: ${result?.params?.get(1)?.name}")
-            Timber.tag("kobe").d("Method name: ${result?.params?.get(1)?.value}")
+            Timber.tag("kobe").d("Method value: ${result?.params?.get(1)?.value}")
 
             result?.let { decoded ->
                 when (decoded.name) {
-                    ERC20Method.APPROVE.type -> handleApproveAllowance(status, decoded)
-                    else -> TransferType.TOKEN_SWAP
+                    ERC20TRANSACTIONS.APPROVE.type -> handleApproveAllowance(status, decoded)
+                    ERC20TRANSACTIONS.SWAP_EXACT_TOKENS_FOR_TOKENS.type,
+                    ERC20TRANSACTIONS.SWAP_EXACT_TOKENS_FOR_ETH.type -> handleTokenSwap(decoded, status)
+                    else -> TransferType.UNDEFINED
                 }
             }.orElse {
                 TransferType.UNDEFINED
@@ -176,35 +178,57 @@ class WalletConnectInteractionsViewModel(
             Timber.e(e)
             TransferType.UNDEFINED
         }
-    }
+
+    private fun handleTokenSwap(decoded: Decoder.DecodedMethod, status: OnEthSendTransaction) =
+        when {
+            decoded.params.size > TOKEN_SWAP_PARAMS -> {
+                val tokenTransaction = TokenTransaction()
+                val senderTokenContract =
+                    "$HEX_PREFIX${((decoded.params[2].value as Array<*>)[0] as ByteArray).toHexString()}"
+                findCurrentToken(senderTokenContract, tokenTransaction)
+
+                (decoded.params[0].value as? BigInteger)?.toBigDecimal()?.let {
+                    tokenTransaction.tokenValue = BalanceUtils.fromWei(it, tokenDecimal).toPlainString()
+                }
+
+                status.transaction.tokenTransaction = tokenTransaction
+                TransferType.TOKEN_SWAP
+            }
+            else -> TransferType.UNDEFINED
+        }
 
     private fun handleApproveAllowance(status: OnEthSendTransaction, decoded: Decoder.DecodedMethod): TransferType {
-        currentAccount.accountTokens
-            .find { it.token.address == status.transaction.to }
-            ?.let {
-                status.transaction.tokenSymbol = it.token.symbol
-                tokenDecimal = it.token.decimals.toInt()
-            }
-
-        return if (decoded.params.size > 1) {
-            getTransactionTypeBasedOnAllowance(decoded, status)
-        } else {
-            TransferType.UNDEFINED
+        findCurrentToken(status.transaction.to, status.transaction.tokenTransaction)
+        return when {
+            decoded.params.size > 1 -> getTransactionTypeBasedOnAllowance(decoded, status)
+            else -> TransferType.UNDEFINED
         }
     }
 
+    private fun findCurrentToken(tokenAddress: String, tokenTransaction: TokenTransaction) {
+        currentAccount.accountTokens
+            .find { it.token.address == tokenAddress }
+            ?.let {
+                tokenTransaction.tokenSymbol = it.token.symbol
+                tokenDecimal = it.token.decimals.toInt()
+            }
+    }
+
     private fun getTransactionTypeBasedOnAllowance(decoded: Decoder.DecodedMethod, status: OnEthSendTransaction) =
-        if ((decoded.params[1].value as? String) == UNLIMITED) {
-            status.transaction.allowance = Int.InvalidValue.toBigDecimal()
+        if (isAllowanceUnlimited(decoded)) {
+            status.transaction.tokenTransaction.allowance = Int.InvalidValue.toBigDecimal()
             TransferType.TOKEN_SWAP_APPROVAL
         } else {
-            (decoded.params[1].value as? String)?.toBigDecimal()?.let {
-                status.transaction.allowance = transactionRepository.toEther(it)
+            (decoded.params[1].value as? BigInteger)?.toBigDecimal()?.let {
+                status.transaction.tokenTransaction.allowance = transactionRepository.toEther(it)
                 TransferType.TOKEN_SWAP_APPROVAL
             }.orElse {
                 TransferType.UNDEFINED
             }
         }
+
+    private fun isAllowanceUnlimited(decoded: Decoder.DecodedMethod) =
+        (decoded.params[1].value as? BigInteger)?.toString() == UNLIMITED
 
     private fun getTxCostPayload(
         chainId: Int,
@@ -217,7 +241,7 @@ class WalletConnectInteractionsViewModel(
             status.transaction.from,
             status.transaction.to,
             value,
-            status.transaction.allowance,
+            status.transaction.tokenTransaction.allowance,
             chainId,
             tokenDecimal,
             contractData = getContractData(status.transaction)
@@ -290,5 +314,6 @@ class WalletConnectInteractionsViewModel(
 
     companion object {
         private const val UNLIMITED = "-1"
+        private const val TOKEN_SWAP_PARAMS = 2
     }
 }

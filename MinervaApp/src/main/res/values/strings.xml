@@ -287,4 +287,5 @@
     <string name="Unlimited">Unlimited</string>
     <string name="allowance_receiver">For</string>
     <string name="allowance">Allowance</string>
+    <string name="undefined_transaction">Undefined transaction</string>
 </resources>

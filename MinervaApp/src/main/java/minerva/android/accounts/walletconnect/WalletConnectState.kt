@@ -28,4 +28,6 @@ data class OnEthSendTransactionRequest(
     val account: Account?
 ) : WalletConnectState()
 
+object OnUndefinedTransaction : WalletConnectState()
+
 object DefaultRequest : WalletConnectState()

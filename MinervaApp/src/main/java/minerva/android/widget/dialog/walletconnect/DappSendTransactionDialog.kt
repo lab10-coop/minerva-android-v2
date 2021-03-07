@@ -45,9 +45,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         recalculateTxCost: (BigDecimal) -> WalletConnectTransaction,
         isBalanceTooLow: (balance: BigDecimal, cost: BigDecimal) -> Boolean
     ) = with(binding) {
-
         Timber.tag("kobe").d("Dapp Dialog Transfer type: ${transaction.transactionType.name}")
-
         setupHeader(session.name, session.networkName, session.iconUrl)
         prepareTransactions(transaction, account)
         senderAddress.text = transaction.from
@@ -82,17 +80,19 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         when (transaction.transactionType) {
             TransferType.TOKEN_SWAP_APPROVAL -> {
                 value.invisible()
-                unit.text = transaction.tokenSymbol
+                unit.text = transaction.tokenTransaction.tokenSymbol
                 requestLabel.text = context.getString(R.string.pre_authorize)
                 receiver.text = context.getText(R.string.allowance_receiver)
                 transactionType.text = context.getText(R.string.allowance)
                 amount.text =
-                    if (transaction.allowance == Int.InvalidValue.toBigDecimal()) context.getString(R.string.Unlimited)
-                    else transaction.allowance?.toPlainString()
+                    if (transaction.tokenTransaction.allowance == Int.InvalidValue.toBigDecimal()) context.getString(R.string.Unlimited)
+                    else transaction.tokenTransaction.allowance?.toPlainString()
+
             }
             TransferType.TOKEN_SWAP -> {
                 value.invisible()
-                unit.text = transaction.tokenSymbol
+                amount.text = transaction.tokenTransaction.tokenValue
+                unit.text = transaction.tokenTransaction.tokenSymbol
             }
             else -> {
                 amount.text = transaction.value
@@ -100,6 +100,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             }
         }
     }
+
 
     fun setCustomGasPrice(
         transaction: WalletConnectTransaction,
