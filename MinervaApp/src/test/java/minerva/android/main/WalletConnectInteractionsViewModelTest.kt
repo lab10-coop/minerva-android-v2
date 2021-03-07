@@ -149,7 +149,12 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `token approve transaction test`() {
-        val transition = WalletConnectTransaction("from", "to", value = null, data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+        val transition = WalletConnectTransaction(
+            "from",
+            "to",
+            value = null,
+            data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
@@ -194,7 +199,12 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `token swap transaction test`() {
-        val transition = WalletConnectTransaction("from", "to", value = null, data = "0x7ff36ab5000000000000000000000000000000000000000000000000036ad151ee54fe8d000000000000000000000000000000000000000000000000000000000000008000000000000000000000000072f4d6cb761fb9bab743f35f60eb463f3291b4a1000000000000000000000000000000000000000000000000000000006040fc7b0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000e91d153e0b41518a2ce8dd3d7944fa863463a97d0000000000000000000000007f7440c5098462f833e123b44b8a03e1d9785bab")
+        val transition = WalletConnectTransaction(
+            "from",
+            "to",
+            value = null,
+            data = "0x38ed1739000000000000000000000000000000000000000000000000000002ba7def30000000000000000000000000000000000000000000000000000010fc898105daf400000000000000000000000000000000000000000000000000000000000000a000000000000000000000000072f4d6cb761fb9bab743f35f60eb463f3291b4a10000000000000000000000000000000000000000000000000000000060449fa00000000000000000000000000000000000000000000000000000000000000004000000000000000000000000f1738912ae7439475712520797583ac784ea90330000000000000000000000006a023ccd1ff6f2045c3309768ead9e68f978f6e1000000000000000000000000e91d153e0b41518a2ce8dd3d7944fa863463a97d0000000000000000000000008a95ea379e1fa4c749dd0a7a21377162028c479e"
+        )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
@@ -238,7 +248,12 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `swap extra tokens for tokens transaction test`() {
-        val transition = WalletConnectTransaction("from", "to", value = null, data = "0x38ed1739000000000000000000000000000000000000000000000000000002ba7def30000000000000000000000000000000000000000000000000000010fc898105daf400000000000000000000000000000000000000000000000000000000000000a000000000000000000000000072f4d6cb761fb9bab743f35f60eb463f3291b4a10000000000000000000000000000000000000000000000000000000060449fa00000000000000000000000000000000000000000000000000000000000000004000000000000000000000000f1738912ae7439475712520797583ac784ea90330000000000000000000000006a023ccd1ff6f2045c3309768ead9e68f978f6e1000000000000000000000000e91d153e0b41518a2ce8dd3d7944fa863463a97d0000000000000000000000008a95ea379e1fa4c749dd0a7a21377162028c479e")
+        val transition = WalletConnectTransaction(
+            "from",
+            "to",
+            value = null,
+            data = "0x38ed1739000000000000000000000000000000000000000000000000000002ba7def30000000000000000000000000000000000000000000000000000010fc898105daf400000000000000000000000000000000000000000000000000000000000000a000000000000000000000000072f4d6cb761fb9bab743f35f60eb463f3291b4a10000000000000000000000000000000000000000000000000000000060449fa00000000000000000000000000000000000000000000000000000000000000004000000000000000000000000f1738912ae7439475712520797583ac784ea90330000000000000000000000006a023ccd1ff6f2045c3309768ead9e68f978f6e1000000000000000000000000e91d153e0b41518a2ce8dd3d7944fa863463a97d0000000000000000000000008a95ea379e1fa4c749dd0a7a21377162028c479e"
+        )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
@@ -282,7 +297,12 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `token swap transaction with hex data transfer method test`() {
-        val transition = WalletConnectTransaction("from", "to", value = null, data = "0xa9059cbb000000000000000000000000e602118e3658a433b60e6f7ced1186fde6df6f5d000000000000000000000000000000000000000000000000000009184e72a000")
+        val transition = WalletConnectTransaction(
+            "from",
+            "to",
+            value = null,
+            data = "0xa9059cbb000000000000000000000000e602118e3658a433b60e6f7ced1186fde6df6f5d000000000000000000000000000000000000000000000000000009184e72a000"
+        )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
@@ -314,19 +334,18 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         requestCaptor.run {
             verify(requestObserver).onChanged(capture())
             firstValue is OnEthSendTransactionRequest
-            (firstValue as OnEthSendTransactionRequest).apply {
-                this.transaction.transactionType shouldBeEqualTo TransferType.TOKEN_SWAP
-                this.transaction.txCost.cost shouldBeEqualTo BigDecimal.TEN
-                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10.000000"
-                this.transaction.value shouldBeEqualTo "0"
-                this.transaction.from shouldBeEqualTo "from"
-            }
+            firstValue as OnUndefinedTransaction
         }
     }
 
     @Test
     fun `parse undefined data contract transaction test`() {
-        val transition = WalletConnectTransaction("from", "to", value = null, data = "0xa93333602118e3658a433b60e6f7ced1186fde6df6f5d000000000000000000000000000000000000000000000000000009184e72a000")
+        val transition = WalletConnectTransaction(
+            "from",
+            "to",
+            value = null,
+            data = "0xa93333602118e3658a433b60e6f7ced1186fde6df6f5d000000000000000000000000000000000000000000000000000009184e72a000"
+        )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
@@ -400,7 +419,12 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `coin swap transaction test`() {
-        val transition = WalletConnectTransaction("from", "to", value = "22", data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+        val transition = WalletConnectTransaction(
+            "from",
+            "to",
+            value = "22",
+            data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        )
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
