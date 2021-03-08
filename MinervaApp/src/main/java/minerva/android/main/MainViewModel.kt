@@ -1,5 +1,6 @@
 package minerva.android.main
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.SingleSource
@@ -79,7 +80,7 @@ class MainViewModel(
         masterSeedRepository.dispose()
     }
 
-    fun subscribeToExecutedTransactions(accountIndex: Int) {
+    fun subscribeToExecutedTransactions(accountIndex: Int): Boolean =
         if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {
             webSocketSubscriptions.add(transactionRepository.subscribeToExecutedTransactions(accountIndex)
                 .subscribeOn(Schedulers.io())
@@ -93,8 +94,8 @@ class MainViewModel(
                     }
                 )
             )
-        }
-    }
+            true
+        } else false
 
     private fun handleExecutedAccounts(it: PendingAccount) {
         if (_updatePendingAccountLiveData.hasActiveObservers()) {

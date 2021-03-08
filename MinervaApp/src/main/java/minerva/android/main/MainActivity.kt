@@ -335,8 +335,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         data?.apply {
             val index = getIntExtra(ACCOUNT_INDEX, Int.InvalidValue)
             if (index != Int.InvalidValue) {
-                viewModel.subscribeToExecutedTransactions(index)
-                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
+                viewModel.subscribeToExecutedTransactions(index).let { isPending ->
+                    if (isPending) (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
+                }
             } else {
                 getStringExtra(TRANSACTION_MESSAGE)?.let {
                     showFlashbar(getString(R.string.transaction_success_title), it)
