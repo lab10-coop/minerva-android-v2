@@ -112,6 +112,12 @@ class TransactionViewModel(
             else -> account.accountTokens[tokenIndex].token.address
         }
 
+    private val currentToken: String
+        get() = when (tokenIndex) {
+            Int.InvalidIndex -> network.token
+            else -> account.accountTokens[tokenIndex].token.symbol
+        }
+
     private val tokenDecimals: Int
         get() = when (tokenIndex) {
             Int.InvalidIndex -> Int.InvalidValue
@@ -317,7 +323,8 @@ class TransactionViewModel(
     ) {
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, contractAddress)
-                .flatMapCompletable { transactionRepository.transferERC20Token(account.network.chainId, it) }
+                .flatMap { transactionRepository.transferERC20Token(account.network.chainId, it).toSingleDefault(it) }
+                .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -387,8 +394,9 @@ class TransactionViewModel(
         transactionRepository.resolveENS(receiverKey)
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
+
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network.token, status)))
+        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, currentToken, status)))
 
     private fun prepareTransaction(
         receiverKey: String,
