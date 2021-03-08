@@ -33,7 +33,6 @@ import org.web3j.utils.Convert
 import org.web3j.utils.Convert.fromWei
 import org.web3j.utils.Convert.toWei
 import org.web3j.utils.Numeric
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -174,10 +173,8 @@ class BlockchainRegularAccountRepositoryImpl(
                     .flowable()
                     .flatMapSingle { response ->
                         if (response.error == null) {
-                            Timber.tag("kobe").d("Hash: ${response.transactionHash}")
                             Single.just(response.transactionHash)
                         } else {
-                            Timber.tag("kobe").d("Tx error: ${response.error.message}, data: ${response.error.data}")
                             Single.error(Throwable(response.error.message))
                         }
                     }
@@ -191,16 +188,8 @@ class BlockchainRegularAccountRepositoryImpl(
             )
         )
 
-    private fun createTransaction(count: BigInteger, payload: TransactionPayload): RawTransaction {
-
-        Timber.tag("kobe").d("TX: To: ${payload.receiverAddress}")
-        Timber.tag("kobe").d("TX: Data: ${payload.data}")
-        Timber.tag("kobe").d("TX: Value: ${toWei(payload.amount, Convert.Unit.ETHER).toBigInteger()}")
-        Timber.tag("kobe").d("TX: Gas Limit: ${payload.gasLimit}")
-        Timber.tag("kobe").d("TX: Gas Price: ${toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger()}")
-        Timber.tag("kobe").d("TX: TokenDecimals: ${payload.tokenDecimals}")
-
-        return RawTransaction.createTransaction(
+    private fun createTransaction(count: BigInteger, payload: TransactionPayload): RawTransaction =
+        RawTransaction.createTransaction(
             count,
             toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger(),
             payload.gasLimit,
@@ -208,7 +197,6 @@ class BlockchainRegularAccountRepositoryImpl(
             toWei(payload.amount, Convert.Unit.ETHER).toBigInteger(),
             payload.data
         )
-    }
 
     override fun getTransactionCosts(txCostData: TxCostData, gasPrice: BigDecimal?): Single<TransactionCostPayload> =
         with(txCostData) {
@@ -217,9 +205,6 @@ class BlockchainRegularAccountRepositoryImpl(
                     .flowable()
                     .zipWith(resolveENS(to).toFlowable())
                     .flatMap { (count, address) ->
-
-                        Timber.tag("kobe").d("Transaction type: ${txCostData.transferType}")
-
                         val transaction: Transaction = prepareTransaction(count, address, this)
                         web3j.value(chainId).ethEstimateGas(transaction)
                             .flowable()
@@ -228,18 +213,7 @@ class BlockchainRegularAccountRepositoryImpl(
                                     .ethCall(transaction, DefaultBlockParameterName.LATEST)
                                     .flowable()
                             )
-                            .flatMapSingle { (gas, call) ->
-
-                                if (call.error != null) {
-                                    Timber.tag("kobe")
-                                        .d("EthCall Error: message: ${call.error.message}, data: ${call.error.data}")
-                                }
-
-                                if (gas.error != null) {
-                                    Timber.tag("kobe")
-                                        .d("EstimateGas Error: message: ${gas.error.message}, data: ${gas.error.data}")
-                                }
-
+                            .flatMapSingle { (gas, _) ->
                                 handleGasLimit(chainId, gas, gasPrice, txCostData.transferType)
                             }
                     }
@@ -258,12 +232,6 @@ class BlockchainRegularAccountRepositoryImpl(
     private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
         when (costData.transferType) {
             BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP -> {
-                Timber.tag("kobe").d("COIN SWAP OR COIN TRANSFER")
-                Timber.tag("kobe").d("Contract data: ${costData.contractData}")
-                Timber.tag("kobe").d("To: ${costData.to}")
-                Timber.tag("kobe").d("From: ${costData.from}")
-                Timber.tag("kobe").d("Amount: ${toWei(costData.amount, Convert.Unit.ETHER).toBigInteger()}")
-
                 Transaction(
                     costData.from,
                     count.transactionCount,
@@ -276,15 +244,6 @@ class BlockchainRegularAccountRepositoryImpl(
             }
 
             BlockchainTransactionType.TOKEN_SWAP_APPROVAL, BlockchainTransactionType.TOKEN_SWAP -> {
-
-                Timber.tag("kobe").d("TOKEN SWAP APPROVAL OR TOKEN SWAP")
-                Timber.tag("kobe").d("Contract data: ${costData.contractData}")
-                Timber.tag("kobe").d("To: ${costData.to}")
-                Timber.tag("kobe").d("From: ${costData.from}")
-                Timber.tag("kobe").d("Amount: ${toWei(costData.amount, Convert.Unit.ETHER).toBigInteger()}")
-                Timber.tag("kobe").d("TokenDecimals: ${costData.tokenDecimals}")
-
-
                 Transaction.createFunctionCallTransaction(
                     costData.from,
                     count.transactionCount,
@@ -337,9 +296,6 @@ class BlockchainRegularAccountRepositoryImpl(
                 else -> Operation.TRANSFER_ERC20.gasLimit
             }
         } ?: estimateGasLimit(it.amountUsed)
-
-        Timber.tag("kobe").d("Gas limit: $gasLimit")
-
         return calculateTransactionCosts(chainId, gasLimit, gasPrice)
     }
 

@@ -36,8 +36,6 @@ class WalletConnectRepositoryImpl(
     internal lateinit var currentEthMessage: WCEthereumSignMessage
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus> get() = status.toFlowable(BackpressureStrategy.BUFFER)
-    override val isClientMapEmpty: Boolean get() = clientMap.isEmpty()
-    override val walletConnectClients: ConcurrentHashMap<String, WCClient> get() = clientMap
     private var disposable: Disposable? = null
     private val dappDao = minervaDatabase.dappDao()
 
@@ -50,16 +48,19 @@ class WalletConnectRepositoryImpl(
                     OnSessionRequest(WCPeerToWalletConnectPeerMetaMapper.map(meta), chainId, Topic(peerId, remotePeerId))
                 )
             }
-            onFailure = { error, _ ->
+            onFailure = { error, peerId ->
                 Timber.e(error)
-                Timber.tag("kobe").d("Error: ${error}")
+                Timber.tag("kobe").d("MY Error: ${error}")
+                if (clientMap.containsKey(peerId)) {
+                    deleteSession(peerId)
+                }
 
                 status.onError(error)
             }
             onDisconnect = { _, peerId ->
                 Timber.tag("kobe").d("Error: disconnected")
                 peerId?.let {
-                    if (walletConnectClients.containsKey(peerId)) {
+                    if (clientMap.containsKey(peerId)) {
                         deleteSession(peerId)
                     }
                 }
@@ -74,14 +75,6 @@ class WalletConnectRepositoryImpl(
 
             onEthSendTransaction = { id, transaction, peerId ->
                 currentRequestId = id
-
-                Timber.tag("kobe").d("DATA: ${transaction.data}")
-                Timber.tag("kobe").d("From: ${transaction.from}")
-                Timber.tag("kobe").d("To: ${transaction.to}")
-                Timber.tag("kobe").d("Coin value: ${transaction.value}}")
-                Timber.tag("kobe").d("Gas price: ${transaction.gasPrice}")
-                Timber.tag("kobe").d("Gas limit: ${transaction.gasLimit}")
-
                 status.onNext(
                     OnEthSendTransaction(
                         WCEthTransactionToWalletConnectTransactionMapper.map(transaction),
@@ -122,6 +115,13 @@ class WalletConnectRepositoryImpl(
 
     private fun deleteSession(peerId: String) {
         disposable = deleteDappSession(peerId)
+            .andThen {
+                Timber.tag("kobe").d("killing session")
+                with(clientMap) {
+                    this[peerId]?.killSession()
+                    remove(peerId)
+                }
+            }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(onError = { Timber.e(it) })
@@ -183,6 +183,7 @@ class WalletConnectRepositoryImpl(
         deleteDappSession(peerId)
             .andThen {
                 with(clientMap) {
+                    Timber.tag("kobe").d("killing ITTTT")
                     this[peerId]?.killSession()
                     remove(peerId)
                 }

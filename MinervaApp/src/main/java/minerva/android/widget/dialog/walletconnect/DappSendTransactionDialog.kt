@@ -15,7 +15,6 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 import minerva.android.walletmanager.utils.BalanceUtils
-import timber.log.Timber
 import java.math.BigDecimal
 
 class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
@@ -45,7 +44,6 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         recalculateTxCost: (BigDecimal) -> WalletConnectTransaction,
         isBalanceTooLow: (balance: BigDecimal, cost: BigDecimal) -> Boolean
     ) = with(binding) {
-        Timber.tag("kobe").d("Dapp Dialog Transfer type: ${transaction.transactionType.name}")
         setupHeader(session.name, session.networkName, session.iconUrl)
         prepareTransactions(transaction, account)
         senderAddress.text = transaction.from

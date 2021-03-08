@@ -156,13 +156,6 @@ class WalletConnectInteractionsViewModel(
             val decoder = Decoder()
             decoder.addAbi(TokenStandardJson.erc20TokenTransactionsAbi)
             val result: Decoder.DecodedMethod? = decoder.decodeMethod(status.transaction.data)
-            Timber.tag("kobe").d("Parsed: ${result.toString()}")
-            Timber.tag("kobe").d("Method type: ${result?.name}")
-            Timber.tag("kobe").d("Method name: ${result?.params?.get(0)?.name}")
-            Timber.tag("kobe").d("Method value: ${result?.params?.get(0)?.value}")
-            Timber.tag("kobe").d("Method name: ${result?.params?.get(1)?.name}")
-            Timber.tag("kobe").d("Method value: ${result?.params?.get(1)?.value}")
-
             result?.let { decoded ->
                 when (decoded.name) {
                     ERC20TRANSACTIONS.APPROVE.type -> handleApproveAllowance(status, decoded)
@@ -275,6 +268,16 @@ class WalletConnectInteractionsViewModel(
                         _walletConnectStatus.value = OnError(it)
                     }
                 )
+        }
+    }
+
+    fun killSession() {
+        launchDisposable {
+            Timber.tag("kobe").d("VIEW MODEL, session killed")
+            walletConnectRepository.killSession(currentDappSession.peerId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onError = { Timber.e(it) })
         }
     }
 

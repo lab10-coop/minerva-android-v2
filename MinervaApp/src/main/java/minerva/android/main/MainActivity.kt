@@ -123,7 +123,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             }
         })
         walletConnectViewModel.errorLiveData.observe(this, EventObserver {
+            dappDialog?.dismiss()
             MinervaFlashbar.showError(this, it)
+            walletConnectViewModel.killSession()
         })
         viewModel.apply {
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
