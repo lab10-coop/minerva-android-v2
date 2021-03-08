@@ -180,6 +180,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             tokenIndex = 0
         }
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         viewModel.run {
             sendTransactionLiveData.observeForever(sendTransactionObserver)

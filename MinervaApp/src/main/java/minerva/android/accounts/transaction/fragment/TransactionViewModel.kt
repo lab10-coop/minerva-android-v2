@@ -112,12 +112,6 @@ class TransactionViewModel(
             else -> account.accountTokens[tokenIndex].token.address
         }
 
-    private val currentToken: String
-        get() = when (tokenIndex) {
-            Int.InvalidIndex -> network.token
-            else -> account.accountTokens[tokenIndex].token.symbol
-        }
-
     private val tokenDecimals: Int
         get() = when (tokenIndex) {
             Int.InvalidIndex -> Int.InvalidValue
@@ -396,7 +390,7 @@ class TransactionViewModel(
 
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, currentToken, status)))
+        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, prepareCurrency(), status)))
 
     private fun prepareTransaction(
         receiverKey: String,
