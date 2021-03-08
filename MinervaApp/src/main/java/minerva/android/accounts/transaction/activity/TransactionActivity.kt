@@ -103,7 +103,8 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     }
 
     private fun prepareAccountIndexForWebSocket() =
-        /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
+            /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
+        //TODO second and third if condition was added because we do not have pending UI for tokens - will be removed when pending feature will be implemented
         with(viewModel) {
             if (wssUri == String.Empty || isTokenTransaction || isSafeAccountTokenTransaction) Int.InvalidIndex
             else account.id

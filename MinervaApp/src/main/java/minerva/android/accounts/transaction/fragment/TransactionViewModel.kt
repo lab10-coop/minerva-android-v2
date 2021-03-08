@@ -20,7 +20,6 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.transactions.Recipient
