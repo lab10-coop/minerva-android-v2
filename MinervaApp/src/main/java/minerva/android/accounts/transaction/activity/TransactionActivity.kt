@@ -95,14 +95,14 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     override fun onTransactionAccepted(message: String?) {
         setResult(Activity.RESULT_OK, Intent().apply {
-            putExtra(ACCOUNT_INDEX, getAccountIndex())
+            putExtra(ACCOUNT_INDEX, prepareAccountIndexForWebSocket())
             putExtra(IS_TRANSACTION_SUCCESS, true)
             putExtra(TRANSACTION_MESSAGE, message)
         })
         finish()
     }
 
-    private fun getAccountIndex() =
+    private fun prepareAccountIndexForWebSocket() =
         /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
         with(viewModel) {
             if (wssUri == String.Empty || isTokenTransaction || isSafeAccountTokenTransaction) Int.InvalidIndex
