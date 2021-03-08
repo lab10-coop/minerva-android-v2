@@ -13,6 +13,7 @@ object TxCostPayloadToTxCostDataMapper : Mapper<TxCostPayload, TxCostData> {
             from,
             to,
             amount,
+            allowance,
             chainId,
             tokenDecimals,
             contractAddress,
@@ -25,6 +26,7 @@ object TxCostPayloadToTxCostDataMapper : Mapper<TxCostPayload, TxCostData> {
             TransferType.COIN_TRANSFER -> BlockchainTransactionType.COIN_TRANSFER
             TransferType.TOKEN_TRANSFER -> BlockchainTransactionType.TOKEN_TRANSFER
             TransferType.TOKEN_SWAP -> BlockchainTransactionType.TOKEN_SWAP
+            TransferType.TOKEN_SWAP_APPROVAL -> BlockchainTransactionType.TOKEN_SWAP_APPROVAL
             TransferType.COIN_SWAP -> BlockchainTransactionType.COIN_SWAP
             TransferType.SAFE_ACCOUNT_COIN_TRANSFER -> BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER
             TransferType.SAFE_ACCOUNT_TOKEN_TRANSFER -> BlockchainTransactionType.SAFE_ACCOUNT_TOKEN_TRANSFER

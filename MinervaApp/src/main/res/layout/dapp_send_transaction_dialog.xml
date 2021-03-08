@@ -20,7 +20,7 @@
         app:layout_constraintTop_toBottomOf="@+id/network" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/transfer"
+        android:id="@+id/transaction_type"
         style="@style/DappLabelStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

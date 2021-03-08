@@ -97,31 +97,6 @@ class BlockchainRegularAccountRepositoryImpl(
                     }
             }.firstOrError()
 
-    override fun sendTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String> =
-        web3j.value(chainId)
-            .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .flatMap {
-                web3j.value(chainId)
-                    .ethSendRawTransaction(
-                        getSignedTransaction(
-                            it.transactionCount,
-                            transactionPayload,
-                            chainId.toLong(),
-                            Numeric.hexStringToByteArray(transactionPayload.data)
-                        )
-                    )
-                    .flowable()
-                    .flatMapSingle { response ->
-                        if (response.error == null) {
-                            Single.just(response.transactionHash)
-                        } else {
-                            Single.error(Throwable(response.error.message))
-                        }
-                    }
-            }.firstOrError()
-
-
     override fun getCurrentBlockNumber(chainId: Int): Flowable<BigInteger> =
         web3j.value(chainId)
             .ethBlockNumber()
@@ -182,6 +157,47 @@ class BlockchainRegularAccountRepositoryImpl(
             .flowable()
             .ignoreElements()
 
+    override fun sendWalletConnectTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String> =
+        web3j.value(chainId)
+            .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .flatMap {
+                web3j.value(chainId)
+                    .ethSendRawTransaction(
+                        getSignedTransaction(
+                            it.transactionCount,
+                            transactionPayload,
+                            chainId.toLong()
+                        )
+                    )
+                    .flowable()
+                    .flatMapSingle { response ->
+                        if (response.error == null) {
+                            Single.just(response.transactionHash)
+                        } else {
+                            Single.error(Throwable(response.error.message))
+                        }
+                    }
+            }.firstOrError()
+
+    private fun getSignedTransaction(count: BigInteger, transactionPayload: TransactionPayload, chainId: Long): String? =
+        Numeric.toHexString(
+            TransactionEncoder.signMessage(
+                createTransaction(count, transactionPayload), chainId,
+                Credentials.create(transactionPayload.privateKey)
+            )
+        )
+
+    private fun createTransaction(count: BigInteger, payload: TransactionPayload): RawTransaction =
+        RawTransaction.createTransaction(
+            count,
+            toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger(),
+            payload.gasLimit,
+            payload.receiverAddress,
+            toWei(payload.amount, Convert.Unit.ETHER).toBigInteger(),
+            payload.data
+        )
+
     override fun getTransactionCosts(txCostData: TxCostData, gasPrice: BigDecimal?): Single<TransactionCostPayload> =
         with(txCostData) {
             if (!isSafeAccountTransaction(txCostData)) {
@@ -197,7 +213,9 @@ class BlockchainRegularAccountRepositoryImpl(
                                     .ethCall(transaction, DefaultBlockParameterName.LATEST)
                                     .flowable()
                             )
-                            .flatMapSingle { (gas, _) -> handleGasLimit(chainId, gas, gasPrice, txCostData.transferType) }
+                            .flatMapSingle { (gas, _) ->
+                                handleGasLimit(chainId, gas, gasPrice, txCostData.transferType)
+                            }
                     }
                     .firstOrError()
                     .timeout(
@@ -211,14 +229,32 @@ class BlockchainRegularAccountRepositoryImpl(
             }
         }
 
-    private fun isSafeAccountTransaction(txCostData: TxCostData) =
-        txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_TOKEN_TRANSFER ||
-                txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER
-
     private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
         when (costData.transferType) {
-            BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP ->
-                getTransaction(costData.from, count, address, costData.amount, costData.contractData)
+            BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP -> {
+                Transaction(
+                    costData.from,
+                    count.transactionCount,
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    costData.to,
+                    toWei(costData.amount, Convert.Unit.ETHER).toBigInteger(),
+                    costData.contractData
+                )
+            }
+
+            BlockchainTransactionType.TOKEN_SWAP_APPROVAL, BlockchainTransactionType.TOKEN_SWAP -> {
+                Transaction.createFunctionCallTransaction(
+                    costData.from,
+                    count.transactionCount,
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    costData.to,//token smart contract address
+                    BigInteger.ZERO, //value of native coin
+                    costData.contractData
+                )
+            }
+
             else -> {
                 Transaction.createFunctionCallTransaction(
                     costData.from,
@@ -244,21 +280,9 @@ class BlockchainRegularAccountRepositoryImpl(
             emptyList()
         )
 
-    private fun getTransaction(
-        from: String,
-        count: EthGetTransactionCount,
-        to: String,
-        amount: BigDecimal,
-        contractData: String
-    ) = Transaction(
-        from,
-        count.transactionCount,
-        BigInteger.ZERO,
-        BigInteger.ZERO,
-        to,
-        toWei(amount, Convert.Unit.ETHER).toBigInteger(),
-        contractData
-    )
+    private fun isSafeAccountTransaction(txCostData: TxCostData) =
+        txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_TOKEN_TRANSFER ||
+                txCostData.transferType == BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER
 
     private fun handleGasLimit(
         chainId: Int,
@@ -272,8 +296,7 @@ class BlockchainRegularAccountRepositoryImpl(
                 else -> Operation.TRANSFER_ERC20.gasLimit
             }
         } ?: estimateGasLimit(it.amountUsed)
-
-        return calculateTransactionCosts(chainId, increaseGasLimitByTenPercent(gasLimit), gasPrice)
+        return calculateTransactionCosts(chainId, gasLimit, gasPrice)
     }
 
     private fun estimateGasLimit(gasLimit: BigInteger): BigInteger =
@@ -317,7 +340,7 @@ class BlockchainRegularAccountRepositoryImpl(
             ContractGasProvider(gasPrices.value(chainId), Operation.TRANSFER_ERC20.gasLimit)
         )
 
-    //todo will be removed within the MNR-403
+    //todo probably can be removed and replaced with the sendTransaction method
     private fun loadTransactionERC20(
         privateKey: String,
         chainId: Int,
@@ -383,29 +406,6 @@ class BlockchainRegularAccountRepositoryImpl(
                 createEtherTransaction(count, transactionPayload), chainId,
                 Credentials.create(transactionPayload.privateKey)
             )
-        )
-
-    private fun getSignedTransaction(
-        count: BigInteger,
-        transactionPayload: TransactionPayload,
-        chainId: Long,
-        data: ByteArray
-    ): String? =
-        Numeric.toHexString(
-            TransactionEncoder.signMessage(
-                createTransaction(count, transactionPayload, data), chainId,
-                Credentials.create(transactionPayload.privateKey)
-            )
-        )
-
-    private fun createTransaction(count: BigInteger, payload: TransactionPayload, data: ByteArray): RawTransaction =
-        RawTransaction.createTransaction(
-            count,
-            toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger(),
-            payload.gasLimit,
-            payload.receiverAddress,
-            toWei(payload.amount, Convert.Unit.ETHER).toBigInteger(),
-            Numeric.toHexString(data)
         )
 
     private fun createEtherTransaction(count: BigInteger, payload: TransactionPayload): RawTransaction? =
