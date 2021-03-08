@@ -203,6 +203,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         }
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         viewModel.run {
             sendTransactionLiveData.observeForever(sendTransactionObserver)
             sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)

@@ -318,6 +318,7 @@ class TransactionViewModel(
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, contractAddress)
                 .flatMap { transactionRepository.transferERC20Token(account.network.chainId, it).toSingleDefault(it) }
+                .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
