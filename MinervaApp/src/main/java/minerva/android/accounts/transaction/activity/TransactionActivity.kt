@@ -104,10 +104,9 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     private fun getAccountIndex() =
         /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
-        if (viewModel.wssUri == String.Empty) {
-            Int.InvalidIndex
-        } else {
-            viewModel.account.id
+        with(viewModel) {
+            if (wssUri == String.Empty || isTokenTransaction || isSafeAccountTokenTransaction) Int.InvalidIndex
+            else account.id
         }
 
     override fun onError(message: String) {

@@ -88,9 +88,7 @@ class TransactionViewModel(
         get() = mutableListOf<Token>().apply {
             with(account.network) {
                 add(NativeToken(chainId, account.name, token, getMainTokenIconRes(chainId)))
-                account.accountTokens.forEach {
-                    add(ERC20Token(chainId, symbol = it.token.symbol, address = it.token.address))
-                }
+                account.accountTokens.forEach { add(it.token) }
             }
         }
 
@@ -100,10 +98,10 @@ class TransactionViewModel(
     private val isSafeAccountMainTransaction
         get() = tokenIndex == Int.InvalidIndex && account.isSafeAccount
 
-    private val isTokenTransaction
+    val isTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && !account.isSafeAccount
 
-    private val isSafeAccountTokenTransaction
+    val isSafeAccountTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && account.isSafeAccount
 
     private val contractAddress: String
