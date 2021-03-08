@@ -273,7 +273,6 @@ class WalletConnectInteractionsViewModel(
 
     fun killSession() {
         launchDisposable {
-            Timber.tag("kobe").d("VIEW MODEL, session killed")
             walletConnectRepository.killSession(currentDappSession.peerId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

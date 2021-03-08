@@ -50,7 +50,6 @@ class WalletConnectRepositoryImpl(
             }
             onFailure = { error, peerId ->
                 Timber.e(error)
-                Timber.tag("kobe").d("MY Error: ${error}")
                 if (clientMap.containsKey(peerId)) {
                     deleteSession(peerId)
                 }
@@ -58,7 +57,6 @@ class WalletConnectRepositoryImpl(
                 status.onError(error)
             }
             onDisconnect = { _, peerId ->
-                Timber.tag("kobe").d("Error: disconnected")
                 peerId?.let {
                     if (clientMap.containsKey(peerId)) {
                         deleteSession(peerId)
@@ -116,7 +114,6 @@ class WalletConnectRepositoryImpl(
     private fun deleteSession(peerId: String) {
         disposable = deleteDappSession(peerId)
             .andThen {
-                Timber.tag("kobe").d("killing session")
                 with(clientMap) {
                     this[peerId]?.killSession()
                     remove(peerId)
@@ -183,9 +180,8 @@ class WalletConnectRepositoryImpl(
         deleteDappSession(peerId)
             .andThen {
                 with(clientMap) {
-                    Timber.tag("kobe").d("killing ITTTT")
-                    this[peerId]?.killSession()
                     remove(peerId)
+                    this[peerId]?.killSession()
                 }
             }
 }
