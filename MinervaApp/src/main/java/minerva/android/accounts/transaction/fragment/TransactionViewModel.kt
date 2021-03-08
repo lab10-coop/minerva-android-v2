@@ -388,7 +388,6 @@ class TransactionViewModel(
         transactionRepository.resolveENS(receiverKey)
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
-
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
         walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, prepareCurrency(), status)))
 
