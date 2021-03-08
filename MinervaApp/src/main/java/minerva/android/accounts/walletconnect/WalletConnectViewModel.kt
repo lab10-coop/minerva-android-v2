@@ -16,8 +16,6 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
-import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
@@ -156,15 +154,10 @@ class WalletConnectViewModel(
             requestedNetwork = getNetworkName(id)
             OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
         }.orElse {
-            requestedNetwork = getNetworkWhenChainIdNotDefined()
+            requestedNetwork = account.network.name
             OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
         }
 
     private fun getNetworkName(chainId: Int) =
         NetworkManager.networks.find { it.chainId == chainId }?.name.orElse { String.Empty }
-
-
-    private fun getNetworkWhenChainIdNotDefined(): String =
-        if (account.network.testNet) NetworkManager.networks.find { it.chainId == ETH_GOR }?.name ?: String.Empty
-        else NetworkManager.networks.find { it.chainId == ETH_MAIN }?.name ?: String.Empty
 }
