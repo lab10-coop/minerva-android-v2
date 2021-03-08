@@ -106,6 +106,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     override fun onPause() {
         super.onPause()
+        rejectRequest()
+    }
+
+    private fun rejectRequest() {
         dappDialog?.let {
             it.dismiss()
             walletConnectViewModel.rejectRequest()

@@ -83,7 +83,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
                 receiver.text = context.getText(R.string.allowance_receiver)
                 transactionType.text = context.getText(R.string.allowance)
                 amount.text =
-                    if (transaction.tokenTransaction.allowance == Int.InvalidValue.toBigDecimal()) context.getString(R.string.Unlimited)
+                    if (transaction.tokenTransaction.allowance == Int.InvalidValue.toBigDecimal()) context.getString(R.string.unlimited)
                     else transaction.tokenTransaction.allowance?.toPlainString()
 
             }
