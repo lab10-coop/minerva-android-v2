@@ -38,7 +38,7 @@ class WalletConnectInteractionsViewModel(
     private val walletConnectRepository: WalletConnectRepository
 ) : BaseViewModel() {
 
-    internal lateinit var currentDappSession: DappSession
+    internal var currentDappSession: DappSession? = null
     private var currentRate: BigDecimal = BigDecimal.ZERO
     private lateinit var currentTransaction: WalletConnectTransaction
     internal lateinit var currentAccount: Account
@@ -110,11 +110,11 @@ class WalletConnectInteractionsViewModel(
 
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
-        transactionRepository.getAccountByAddress(currentDappSession.address)?.let { currentAccount = it }
+        transactionRepository.getAccountByAddress(session.address)?.let { currentAccount = it }
         val value = getTransactionValue(status)
         val transferType = getTransferType(status, value)
         status.transaction.value = value.toPlainString()
-        val txCostPayload = getTxCostPayload(currentDappSession.chainId, status, value, transferType)
+        val txCostPayload = getTxCostPayload(session.chainId, status, value, transferType)
         return transactionRepository.getTransactionCosts(txCostPayload)
             .flatMap { transactionCost ->
                 transactionRepository.getEurRate(session.chainId)
@@ -251,14 +251,18 @@ class WalletConnectInteractionsViewModel(
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map {
-                    walletConnectRepository.approveTransactionRequest(currentDappSession.peerId, it)
+                    currentDappSession?.let { session ->
+                        walletConnectRepository.approveTransactionRequest(session.peerId, it)
+                    }
                     it
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _walletConnectStatus.value = ProgressBarState(true) }
                 .doOnError {
-                    walletConnectRepository.rejectRequest(currentDappSession.peerId)
+                    currentDappSession?.let {
+                        walletConnectRepository.rejectRequest(it.peerId)
+                    }
                     _walletConnectStatus.value = ProgressBarState(false)
                 }
                 .subscribeBy(
@@ -272,11 +276,13 @@ class WalletConnectInteractionsViewModel(
     }
 
     fun killSession() {
-        launchDisposable {
-            walletConnectRepository.killSession(currentDappSession.peerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { Timber.e(it) })
+        currentDappSession?.let {
+            launchDisposable {
+                walletConnectRepository.killSession(it.peerId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(onError = { Timber.e(it) })
+            }
         }
     }
 
@@ -302,13 +308,17 @@ class WalletConnectInteractionsViewModel(
     }
 
     fun acceptRequest() {
-        transactionRepository.getAccountByAddress(currentDappSession.address)?.let {
-            walletConnectRepository.approveRequest(currentDappSession.peerId, it.privateKey)
+        currentDappSession?.let { session ->
+            transactionRepository.getAccountByAddress(session.address)?.let {
+                walletConnectRepository.approveRequest(session.peerId, it.privateKey)
+            }
         }
     }
 
     fun rejectRequest() {
-        walletConnectRepository.rejectRequest(currentDappSession.peerId)
+        currentDappSession?.let {
+            walletConnectRepository.rejectRequest(it.peerId)
+        }
     }
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =

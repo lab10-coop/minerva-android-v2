@@ -104,6 +104,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        dappDialog?.let {
+            it.dismiss()
+            walletConnectViewModel.rejectRequest()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         viewModel.dispose()
