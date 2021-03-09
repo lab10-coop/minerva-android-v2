@@ -21,15 +21,17 @@ class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiReposito
         api.getWalletConfigVersion(publicKey = publicKey)
             .map { it.version }
 
-    override fun saveWalletConfig(publicKey: String, walletConfigPayload: WalletConfigPayload): Completable =
-        api.saveWalletConfig(publicKey = publicKey, walletConfigPayload = walletConfigPayload)
+    override fun saveWalletConfig(publicKey: String, walletConfigPayload: WalletConfigPayload): Single<WalletConfigPayload> {
+        return api.saveWalletConfig(publicKey = publicKey, walletConfigPayload = walletConfigPayload)
+            .toSingleDefault(walletConfigPayload)
             .onErrorResumeNext {
                 if (it is HttpException && it.code() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                    Completable.error(HttpBadRequestException())
+                    Single.error(HttpBadRequestException())
                 } else {
-                    Completable.error(it)
+                    Single.error(it)
                 }
             }
+    }
 
     override fun getWalletActions(publicKey: String): Observable<WalletActionsResponse> =
         api.getWalletActions(publicKey = publicKey)

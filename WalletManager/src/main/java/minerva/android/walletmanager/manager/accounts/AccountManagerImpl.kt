@@ -53,8 +53,7 @@ class AccountManagerImpl(
                     address = blockchainRepository.toChecksumAddress(keys.address)
                 )
                 addAccount(newAccount, config)
-            }.flatMapCompletable { walletManager.updateWalletConfig(it) }
-                .toSingleDefault(accountName)
+            }.flatMapCompletable { walletManager.updateWalletConfig(it) }.toSingleDefault(accountName)
         }
         throw NotInitializedWalletConfigThrowable()
     }
