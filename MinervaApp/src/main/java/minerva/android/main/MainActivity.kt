@@ -104,6 +104,18 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        rejectRequest()
+    }
+
+    private fun rejectRequest() {
+        dappDialog?.let {
+            it.dismiss()
+            walletConnectViewModel.rejectRequest()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         viewModel.dispose()
@@ -116,12 +128,16 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             when (it) {
                 is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(it)
+                is OnUndefinedTransaction ->
+                    Toast.makeText(this@MainActivity, getString(R.string.undefined_transaction), Toast.LENGTH_LONG).show()
                 is ProgressBarState -> handleLoadingDialog(it)
                 else -> dappDialog = null
             }
         })
         walletConnectViewModel.errorLiveData.observe(this, EventObserver {
+            dappDialog?.dismiss()
             MinervaFlashbar.showError(this, it)
+            walletConnectViewModel.killSession()
         })
         viewModel.apply {
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {

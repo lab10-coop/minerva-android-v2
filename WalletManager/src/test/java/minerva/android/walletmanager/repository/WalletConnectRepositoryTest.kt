@@ -63,32 +63,6 @@ class WalletConnectRepositoryTest {
     }
 
     @Test
-    fun `is client map empty test`() {
-        clientMap = ConcurrentHashMap()
-        repository = WalletConnectRepositoryImpl(signatureRepository, database, client, clientMap)
-        val result = repository.isClientMapEmpty
-        assertEquals(true, result)
-    }
-
-    @Test
-    fun `is client map not empty test`() {
-        val result = repository.isClientMapEmpty
-        assertEquals(false, result)
-    }
-
-    @Test
-    fun `get wallet connect clients test`() {
-        val result = repository.walletConnectClients
-        assertEquals(1, result.size)
-    }
-
-    @Test
-    fun `get empty wallet connect clients test`() {
-        val result = repository.walletConnectClients
-        assertEquals(1, result.size)
-    }
-
-    @Test
     fun `reject session test`() {
         whenever(clientMap["peerId"]?.rejectSession(any())).thenReturn(true)
         repository.rejectSession("peerId")

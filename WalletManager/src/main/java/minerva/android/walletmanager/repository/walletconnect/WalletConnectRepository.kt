@@ -3,12 +3,9 @@ package minerva.android.walletmanager.repository.walletconnect
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import minerva.android.walletConnect.client.WCClient
-
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 interface WalletConnectRepository {
     fun connect(
@@ -21,8 +18,6 @@ interface WalletConnectRepository {
     fun rejectSession(peerId: String)
     fun killSession(peerId: String): Completable
     val connectionStatusFlowable: Flowable<WalletConnectStatus>
-    val isClientMapEmpty: Boolean
-    val walletConnectClients: ConcurrentHashMap<String, WCClient>
     fun getWCSessionFromQr(qrCode: String): WalletConnectSession
     fun getSessionsFlowable(): Flowable<List<DappSession>>
     fun saveDappSession(dappSession: DappSession): Completable

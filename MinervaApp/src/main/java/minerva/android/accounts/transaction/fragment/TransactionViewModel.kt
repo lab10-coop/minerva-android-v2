@@ -20,7 +20,6 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -88,9 +87,7 @@ class TransactionViewModel(
         get() = mutableListOf<Token>().apply {
             with(account.network) {
                 add(NativeToken(chainId, account.name, token, getMainTokenIconRes(chainId)))
-                account.accountTokens.forEach {
-                    add(ERC20Token(chainId, symbol = it.token.symbol, address = it.token.address))
-                }
+                account.accountTokens.forEach { add(it.token) }
             }
         }
 
@@ -100,10 +97,10 @@ class TransactionViewModel(
     private val isSafeAccountMainTransaction
         get() = tokenIndex == Int.InvalidIndex && account.isSafeAccount
 
-    private val isTokenTransaction
+    val isTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && !account.isSafeAccount
 
-    private val isSafeAccountTokenTransaction
+    val isSafeAccountTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && account.isSafeAccount
 
     private val contractAddress: String
@@ -162,9 +159,9 @@ class TransactionViewModel(
             account.address,
             to,
             amount,
-            account.network.chainId,
-            tokenDecimals,
-            contractAddress
+            chainId = account.network.chainId,
+            tokenDecimals = tokenDecimals,
+            contractAddress = contractAddress
         )
 
     private val transferType: TransferType
@@ -317,7 +314,9 @@ class TransactionViewModel(
     ) {
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, contractAddress)
-                .flatMapCompletable { transactionRepository.transferERC20Token(account.network.chainId, it) }
+                .flatMap { transactionRepository.transferERC20Token(account.network.chainId, it).toSingleDefault(it) }
+                .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
+                .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -388,7 +387,7 @@ class TransactionViewModel(
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network.token, status)))
+        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, prepareCurrency(), status)))
 
     private fun prepareTransaction(
         receiverKey: String,

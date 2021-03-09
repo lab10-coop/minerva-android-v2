@@ -36,8 +36,6 @@ class WalletConnectRepositoryImpl(
     internal lateinit var currentEthMessage: WCEthereumSignMessage
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus> get() = status.toFlowable(BackpressureStrategy.BUFFER)
-    override val isClientMapEmpty: Boolean get() = clientMap.isEmpty()
-    override val walletConnectClients: ConcurrentHashMap<String, WCClient> get() = clientMap
     private var disposable: Disposable? = null
     private val dappDao = minervaDatabase.dappDao()
 
@@ -50,13 +48,17 @@ class WalletConnectRepositoryImpl(
                     OnSessionRequest(WCPeerToWalletConnectPeerMetaMapper.map(meta), chainId, Topic(peerId, remotePeerId))
                 )
             }
-            onFailure = { error, _ ->
+            onFailure = { error, peerId ->
                 Timber.e(error)
+                if (clientMap.containsKey(peerId)) {
+                    deleteSession(peerId)
+                }
+
                 status.onError(error)
             }
             onDisconnect = { _, peerId ->
                 peerId?.let {
-                    if (walletConnectClients.containsKey(peerId)) {
+                    if (clientMap.containsKey(peerId)) {
                         deleteSession(peerId)
                     }
                 }
@@ -111,6 +113,12 @@ class WalletConnectRepositoryImpl(
 
     private fun deleteSession(peerId: String) {
         disposable = deleteDappSession(peerId)
+            .andThen {
+                with(clientMap) {
+                    this[peerId]?.killSession()
+                    remove(peerId)
+                }
+            }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(onError = { Timber.e(it) })
@@ -172,8 +180,8 @@ class WalletConnectRepositoryImpl(
         deleteDappSession(peerId)
             .andThen {
                 with(clientMap) {
-                    this[peerId]?.killSession()
                     remove(peerId)
+                    this[peerId]?.killSession()
                 }
             }
 }

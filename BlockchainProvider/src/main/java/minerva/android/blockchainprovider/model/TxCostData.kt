@@ -10,6 +10,7 @@ data class TxCostData(
     val from: String = String.Empty,
     val to: String = String.Empty,
     val amount: BigDecimal = BigDecimal.ZERO,
+    val allowance: BigDecimal? = null,
     val chainId: Int = Int.InvalidValue,
     val tokenDecimals: Int = Int.InvalidValue,
     val contractAddress: String = String.Empty,

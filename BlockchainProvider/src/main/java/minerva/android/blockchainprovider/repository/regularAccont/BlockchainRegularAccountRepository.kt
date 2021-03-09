@@ -38,7 +38,7 @@ interface BlockchainRegularAccountRepository {
     fun getERC20TokenDecimals(privateKey: String, chainId: Int, tokenAddress: String): Observable<BigInteger>
     fun fromWei(value: BigDecimal): BigDecimal
     fun toEther(value: BigDecimal): BigDecimal
-    fun sendTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String>
+    fun sendWalletConnectTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String>
     fun refreshTokenBalance(
         privateKey: String,
         chainId: Int,

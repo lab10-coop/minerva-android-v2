@@ -150,7 +150,7 @@ class TransactionRepositoryImpl(
     override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
 
     override fun sendTransaction(chainId: Int, transaction: Transaction): Single<String> =
-        blockchainRepository.sendTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
+        blockchainRepository.sendWalletConnectTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         if (shouldGetGasPriceFromApi(chainId)) {
@@ -165,7 +165,7 @@ class TransactionRepositoryImpl(
     private fun shouldGetGasPriceFromApi(chainId: Int) = NetworkManager.getNetwork(chainId).gasPriceOracle.isNotEmpty()
 
     private fun getTxCosts(payload: TxCostPayload, gasPrice: GasPrices?): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), gasPrice?.speed?.standard)
+        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), gasPrice?.speed?.rapid)
             .map { txCost ->
                 TransactionCostPayloadToTransactionCost.map(txCost, gasPrice, payload.chainId) {
                     blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)

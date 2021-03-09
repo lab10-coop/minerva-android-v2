@@ -672,7 +672,7 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `send transaction success`() {
-        whenever(blockchainRegularAccountRepository.sendTransaction(any(), any())).thenReturn(Single.just("txHash"))
+        whenever(blockchainRegularAccountRepository.sendWalletConnectTransaction(any(), any())).thenReturn(Single.just("txHash"))
         repository.sendTransaction(111, Transaction(address = "address"))
             .test()
             .assertComplete()
@@ -684,7 +684,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `send transaction error`() {
         val error = Throwable()
-        whenever(blockchainRegularAccountRepository.sendTransaction(any(), any())).thenReturn(Single.error(error))
+        whenever(blockchainRegularAccountRepository.sendWalletConnectTransaction(any(), any())).thenReturn(Single.error(error))
         repository.sendTransaction(111, Transaction(address = "address"))
             .test()
             .assertError(error)
