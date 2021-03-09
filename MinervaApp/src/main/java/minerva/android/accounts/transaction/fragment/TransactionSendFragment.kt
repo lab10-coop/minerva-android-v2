@@ -63,7 +63,6 @@ class TransactionSendFragment : Fragment() {
             binding = FragmentTransactionSendBinding.bind(this)
         }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         prepareTokenDropdown()
