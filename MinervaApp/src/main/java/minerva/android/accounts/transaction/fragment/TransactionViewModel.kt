@@ -314,7 +314,9 @@ class TransactionViewModel(
     ) {
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit, contractAddress)
-                .flatMapCompletable { transactionRepository.transferERC20Token(account.network.chainId, it) }
+                .flatMap { transactionRepository.transferERC20Token(account.network.chainId, it).toSingleDefault(it) }
+                .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
+                .flatMapCompletable { saveWalletAction(SENT, it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -385,7 +387,7 @@ class TransactionViewModel(
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, network.token, status)))
+        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, prepareCurrency(), status)))
 
     private fun prepareTransaction(
         receiverKey: String,
