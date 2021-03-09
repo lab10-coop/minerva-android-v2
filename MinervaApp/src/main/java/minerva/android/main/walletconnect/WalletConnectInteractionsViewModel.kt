@@ -83,7 +83,10 @@ class WalletConnectInteractionsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = { _walletConnectStatus.value = it },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = {
+                        Timber.e(it)
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }

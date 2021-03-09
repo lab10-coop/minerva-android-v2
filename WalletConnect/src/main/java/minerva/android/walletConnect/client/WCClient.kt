@@ -149,7 +149,6 @@ open class WCClient(
             .url(session.bridge)
             .build()
 
-
         socket = httpClient.newWebSocket(request, this)
     }
 
