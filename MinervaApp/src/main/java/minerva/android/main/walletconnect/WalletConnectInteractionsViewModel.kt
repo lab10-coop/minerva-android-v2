@@ -61,10 +61,7 @@ class WalletConnectInteractionsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = { reconnect(it) },
-                    onError = {
-                        Timber.tag("kobe").e("GetSessions: $it")
-//                        Timber.e(it)
-                    }
+                    onError = { Timber.e(it) }
                 )
         }
     }
@@ -72,7 +69,6 @@ class WalletConnectInteractionsViewModel(
     private fun reconnect(dapps: List<DappSession>) {
         dapps.forEach { session ->
             with(session) {
-                Timber.tag("kobe").e("Reconnect")
                 walletConnectRepository.connect(WalletConnectSession(topic, version, bridge, key), peerId, remotePeerId)
             }
         }
@@ -87,10 +83,7 @@ class WalletConnectInteractionsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = { _walletConnectStatus.value = it },
-                    onError = {
-                        Timber.tag("kobe").d("WCIneractionsVW: $it")
-                        _errorLiveData.value = Event(it)
-                    }
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
@@ -109,11 +102,6 @@ class WalletConnectInteractionsViewModel(
                     .flatMap { session ->
                         getTransactionCosts(session, status)
                     }
-            is OnFailure -> {
-                Timber.tag("kobe").d("Map Request Error: ${status.error}")
-
-                Single.just(OnError(status.error))
-            }
             else -> Single.just(DefaultRequest)
         }
 

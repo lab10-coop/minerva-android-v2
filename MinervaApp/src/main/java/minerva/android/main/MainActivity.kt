@@ -131,9 +131,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 is OnUndefinedTransaction ->
                     Toast.makeText(this@MainActivity, getString(R.string.undefined_transaction), Toast.LENGTH_LONG).show()
                 is ProgressBarState -> handleLoadingDialog(it)
-                is OnError -> {
-                    handleWalletConnectError(it.error)
-                }
                 else -> dappDialog = null
             }
         })

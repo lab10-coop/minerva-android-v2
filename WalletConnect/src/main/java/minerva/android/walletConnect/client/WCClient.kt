@@ -49,7 +49,7 @@ open class WCClient(
 
     private var remotePeerId: String? = null
 
-    var isConnected: Boolean = false
+    private var isConnected: Boolean = false
 
     fun sessionId(): String? =
         if (session != null) session!!.topic

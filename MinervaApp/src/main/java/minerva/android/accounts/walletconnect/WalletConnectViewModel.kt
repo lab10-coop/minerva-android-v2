@@ -57,19 +57,11 @@ class WalletConnectViewModel(
                                 handleSessionRequest(it)
                             }
                             is OnDisconnect -> OnDisconnected
-                            is OnFailure -> {
-                                Timber.tag("kobe").d("WCViewModel Error: ${it.error}")
-                                OnError(it.error)
-
-                            }
+                            is OnFailure -> OnError(it.error)
                             else -> DefaultRequest
                         }
                     },
-                    onError = {
-                        Timber.tag("kobe").d("WCViewModel ON ERROR: $it")
-
-                        _errorLiveData.value = Event(it)
-                    }
+                    onError = { _errorLiveData.value = Event(it) }
                 )
         }
     }
@@ -123,7 +115,6 @@ class WalletConnectViewModel(
         } else {
             _viewStateLiveData.value = CorrectQrCodeState
             currentSession = repository.getWCSessionFromQr(qrCode)
-            Timber.tag("kobe").d("QR GOOD, Connecting")
             repository.connect(currentSession)
         }
     }
