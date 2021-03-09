@@ -3,6 +3,7 @@ package minerva.android.configProvider.repository
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.migration.Migration
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
@@ -31,6 +32,7 @@ class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiReposito
                     Single.error(it)
                 }
             }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun getWalletActions(publicKey: String): Observable<WalletActionsResponse> =

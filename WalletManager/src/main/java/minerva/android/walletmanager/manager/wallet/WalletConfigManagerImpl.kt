@@ -210,12 +210,9 @@ class WalletConfigManagerImpl(
                 }
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .flatMap { minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), it) }
-                .map {
-                    localStorage.isSynced = true
-                }
+                .map { localStorage.isSynced = true }
                 .ignoreElement()
                 .handleAutomaticBackupFailedError(localStorage)
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
         } else Completable.error(AutomaticBackupFailedThrowable())
 
