@@ -11,3 +11,4 @@
 android-sdk.tgz
 android-sdk-linux
 *.zip
+/MinervaApp/logs/
