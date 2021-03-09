@@ -95,19 +95,19 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
 
     override fun onTransactionAccepted(message: String?) {
         setResult(Activity.RESULT_OK, Intent().apply {
-            putExtra(ACCOUNT_INDEX, getAccountIndex())
+            putExtra(ACCOUNT_INDEX, prepareAccountIndexForWebSocket())
             putExtra(IS_TRANSACTION_SUCCESS, true)
             putExtra(TRANSACTION_MESSAGE, message)
         })
         finish()
     }
 
-    private fun getAccountIndex() =
-        /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
-        if (viewModel.wssUri == String.Empty) {
-            Int.InvalidIndex
-        } else {
-            viewModel.account.id
+    private fun prepareAccountIndexForWebSocket() =
+            /*Subscription to web sockets doesn't work with http rpc, hence when there is no wss uri, index of account is not taken into consideration*/
+        //TODO second and third if condition was added because we do not have pending UI for tokens - will be removed when pending feature will be implemented
+        with(viewModel) {
+            if (wssUri == String.Empty || isTokenTransaction || isSafeAccountTokenTransaction) Int.InvalidIndex
+            else account.id
         }
 
     override fun onError(message: String) {

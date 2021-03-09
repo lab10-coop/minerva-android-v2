@@ -20,7 +20,6 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.model.token.Token
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -88,9 +87,7 @@ class TransactionViewModel(
         get() = mutableListOf<Token>().apply {
             with(account.network) {
                 add(NativeToken(chainId, account.name, token, getMainTokenIconRes(chainId)))
-                account.accountTokens.forEach {
-                    add(ERC20Token(chainId, symbol = it.token.symbol, address = it.token.address))
-                }
+                account.accountTokens.forEach { add(it.token) }
             }
         }
 
@@ -100,10 +97,10 @@ class TransactionViewModel(
     private val isSafeAccountMainTransaction
         get() = tokenIndex == Int.InvalidIndex && account.isSafeAccount
 
-    private val isTokenTransaction
+    val isTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && !account.isSafeAccount
 
-    private val isSafeAccountTokenTransaction
+    val isSafeAccountTokenTransaction
         get() = tokenIndex != Int.InvalidIndex && account.isSafeAccount
 
     private val contractAddress: String
