@@ -22,6 +22,7 @@ import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
+import minerva.android.walletmanager.repository.walletconnect.OnFailure
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import timber.log.Timber
@@ -56,10 +57,19 @@ class WalletConnectViewModel(
                                 handleSessionRequest(it)
                             }
                             is OnDisconnect -> OnDisconnected
+                            is OnFailure -> {
+                                Timber.tag("kobe").d("WCViewModel Error: ${it.error}")
+                                OnError(it.error)
+
+                            }
                             else -> DefaultRequest
                         }
                     },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = {
+                        Timber.tag("kobe").d("WCViewModel ON ERROR: $it")
+
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }
@@ -113,6 +123,7 @@ class WalletConnectViewModel(
         } else {
             _viewStateLiveData.value = CorrectQrCodeState
             currentSession = repository.getWCSessionFromQr(qrCode)
+            Timber.tag("kobe").d("QR GOOD, Connecting")
             repository.connect(currentSession)
         }
     }

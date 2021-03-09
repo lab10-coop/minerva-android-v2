@@ -49,18 +49,17 @@ open class WCClient(
 
     private var remotePeerId: String? = null
 
-    private var isConnected: Boolean = false
+    var isConnected: Boolean = false
 
     fun sessionId(): String? =
-        if (session != null) session!!.topic;
-        else null;
+        if (session != null) session!!.topic
+        else null
 
     private var handshakeId: Long = -1
 
     var accounts: List<String>? = null
         private set
     private var chainId: Int? = null
-        private set
 
     var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> }
     var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> }
@@ -83,21 +82,21 @@ open class WCClient(
         val session =
             this.session ?: throw IllegalStateException("session can't be null on connection open")
         val peerId =
-            this.peerId ?: throw IllegalStateException("peerId can't be null on connection open")
+            this.peerId
         // The Session.topic channel is used to listen session request messages only.
         subscribe(session.topic)
         // The peerId channel is used to listen to all messages sent to this httpClient.
         subscribe(peerId)
 
-        onWCOpen(peerId);
+        onWCOpen(peerId)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         var decrypted: String? = null
         try {
             if (text.equals("ping")) {
-                onPong(text);
-                return;
+                onPong(text)
+                return
             }
 
             val message = gson.fromJson<WCSocketMessage>(text)
@@ -150,14 +149,15 @@ open class WCClient(
             .url(session.bridge)
             .build()
 
+
         socket = httpClient.newWebSocket(request, this)
     }
 
     fun approveSession(accounts: List<String>, chainId: Int, peerId: String): Boolean {
         check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
 
-        this.accounts = accounts;
-        this.chainId = chainId;
+        this.accounts = accounts
+        this.chainId = chainId
 
         val result = WCApproveSessionResponse(
             chainId = chainId,

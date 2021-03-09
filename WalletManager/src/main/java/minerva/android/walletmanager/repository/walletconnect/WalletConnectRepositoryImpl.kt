@@ -40,23 +40,41 @@ class WalletConnectRepositoryImpl(
     private val dappDao = minervaDatabase.dappDao()
 
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?) {
+
+        Timber.tag("kobe").d("NEW WC CLIENT")
         wcClient = WCClient()
+
+        Timber.tag("kobe").d("Is Connected: ${wcClient.isConnected}")
+
         with(wcClient) {
-            onWCOpen = { peerId -> clientMap[peerId] = this }
+            onWCOpen = { peerId ->
+
+                Timber.tag("kobe").d("On WC Open")
+                clientMap[peerId] = this
+            }
             onSessionRequest = { remotePeerId, meta, chainId, peerId ->
+
+                Timber.tag("kobe").d("On Session request")
+
                 status.onNext(
                     OnSessionRequest(WCPeerToWalletConnectPeerMetaMapper.map(meta), chainId, Topic(peerId, remotePeerId))
                 )
             }
             onFailure = { error, peerId ->
-                Timber.e(error)
+//                Timber.e(error)
+
+                Timber.tag("kobe").d("WalletConnectRepo Error: $error")
+
                 if (clientMap.containsKey(peerId)) {
                     deleteSession(peerId)
                 }
 
-                status.onError(error)
+                status.onNext(OnFailure(error))
             }
             onDisconnect = { _, peerId ->
+
+                Timber.tag("kobe").d("Disconnected")
+
                 peerId?.let {
                     if (clientMap.containsKey(peerId)) {
                         deleteSession(peerId)
@@ -80,6 +98,9 @@ class WalletConnectRepositoryImpl(
                     )
                 )
             }
+
+            Timber.tag("kobe").d("CONNECT")
+            //todo check if connected?
 
             connect(
                 WalletConnectSessionMapper.map(session),

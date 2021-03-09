@@ -131,13 +131,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 is OnUndefinedTransaction ->
                     Toast.makeText(this@MainActivity, getString(R.string.undefined_transaction), Toast.LENGTH_LONG).show()
                 is ProgressBarState -> handleLoadingDialog(it)
+                is OnError -> {
+                    handleWalletConnectError(it.error)
+                }
                 else -> dappDialog = null
             }
         })
         walletConnectViewModel.errorLiveData.observe(this, EventObserver {
-            dappDialog?.dismiss()
-            MinervaFlashbar.showError(this, it)
-            walletConnectViewModel.killSession()
+            handleWalletConnectError(it)
         })
         viewModel.apply {
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
@@ -185,6 +186,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 stopPendingAccounts()
             })
         }
+    }
+
+    private fun handleWalletConnectError(error: Throwable) {
+        dappDialog?.dismiss()
+        MinervaFlashbar.showError(this, error)
+        walletConnectViewModel.killSession()
     }
 
     private fun handleLoadingDialog(it: ProgressBarState) {
