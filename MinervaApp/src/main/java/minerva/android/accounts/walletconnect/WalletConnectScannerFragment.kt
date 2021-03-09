@@ -59,12 +59,15 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                     }
                 }
                 is OnSessionDeleted -> showToast(getString(R.string.dapp_deleted))
+                is OnError -> handleError(it.error)
             }
         })
-        viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver {
-            shouldScan = true
-            showToast(getErrorMessage(it))
-        })
+        viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver { handleError(it) })
+    }
+
+    private fun handleError(error: Throwable) {
+        shouldScan = true
+        showToast(getErrorMessage(error))
     }
 
     private fun getErrorMessage(it: Throwable) =

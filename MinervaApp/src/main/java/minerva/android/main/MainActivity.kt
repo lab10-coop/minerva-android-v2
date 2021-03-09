@@ -135,9 +135,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             }
         })
         walletConnectViewModel.errorLiveData.observe(this, EventObserver {
-            dappDialog?.dismiss()
-            MinervaFlashbar.showError(this, it)
-            walletConnectViewModel.killSession()
+            handleWalletConnectError(it)
         })
         viewModel.apply {
             notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
@@ -185,6 +183,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 stopPendingAccounts()
             })
         }
+    }
+
+    private fun handleWalletConnectError(error: Throwable) {
+        dappDialog?.dismiss()
+        MinervaFlashbar.showError(this, error)
+        walletConnectViewModel.killSession()
     }
 
     private fun handleLoadingDialog(it: ProgressBarState) {
