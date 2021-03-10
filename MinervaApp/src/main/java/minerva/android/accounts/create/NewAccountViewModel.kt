@@ -35,7 +35,7 @@ class NewAccountViewModel(
         launchDisposable {
             accountManager.createRegularAccount(network)
                 .flatMapCompletable { walletActionsRepository.saveWalletActions(listOf(getWalletAction(it))) }
-                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
