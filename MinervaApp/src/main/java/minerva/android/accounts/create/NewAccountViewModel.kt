@@ -10,10 +10,10 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -34,8 +34,8 @@ class NewAccountViewModel(
     fun createNewAccount(network: Network) {
         launchDisposable {
             accountManager.createRegularAccount(network)
-                .observeOn(Schedulers.io())
                 .flatMapCompletable { walletActionsRepository.saveWalletActions(listOf(getWalletAction(it))) }
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }

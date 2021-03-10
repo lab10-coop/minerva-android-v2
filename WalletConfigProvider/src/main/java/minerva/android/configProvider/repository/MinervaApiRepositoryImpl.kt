@@ -3,6 +3,7 @@ package minerva.android.configProvider.repository
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
 import minerva.android.configProvider.migration.Migration
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
@@ -21,15 +22,18 @@ class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiReposito
         api.getWalletConfigVersion(publicKey = publicKey)
             .map { it.version }
 
-    override fun saveWalletConfig(publicKey: String, walletConfigPayload: WalletConfigPayload): Completable =
-        api.saveWalletConfig(publicKey = publicKey, walletConfigPayload = walletConfigPayload)
+    override fun saveWalletConfig(publicKey: String, walletConfigPayload: WalletConfigPayload): Single<WalletConfigPayload> {
+        return api.saveWalletConfig(publicKey = publicKey, walletConfigPayload = walletConfigPayload)
+            .toSingleDefault(walletConfigPayload)
             .onErrorResumeNext {
                 if (it is HttpException && it.code() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                    Completable.error(HttpBadRequestException())
+                    Single.error(HttpBadRequestException())
                 } else {
-                    Completable.error(it)
+                    Single.error(it)
                 }
             }
+            .subscribeOn(Schedulers.io())
+    }
 
     override fun getWalletActions(publicKey: String): Observable<WalletActionsResponse> =
         api.getWalletActions(publicKey = publicKey)

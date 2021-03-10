@@ -68,7 +68,7 @@ class WalletConfigManagerTest {
     }
 
     private fun mockWallet() {
-        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.just(WalletConfigPayload()))
         whenever(minervaApi.getWalletConfigVersion(any())).doReturn(Single.just(1))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(
             MasterSeed(
@@ -77,6 +77,7 @@ class WalletConfigManagerTest {
                 _publicKey = "public"
             )
         )
+        whenever(localWalletConfigProvider.saveWalletConfig(any())).thenReturn(Single.just(WalletConfigPayload()))
         whenever(localWalletConfigProvider.getWalletConfig()).thenReturn(Single.just(localWalletConfigPayload))
         whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.just(onlineWalletConfigResponse))
         whenever(minervaApi.saveWalletActions(any(), any())).doReturn(Completable.complete())
@@ -130,7 +131,7 @@ class WalletConfigManagerTest {
 
     @Test
     fun `Create default walletConfig should return success`() {
-        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.just(WalletConfigPayload()))
         NetworkManager.initialize(listOf(Network(chainId = 0, httpRpc = "some")))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertComplete()
@@ -139,7 +140,7 @@ class WalletConfigManagerTest {
     @Test
     fun `Create default walletConfig should return error`() {
         val throwable = Throwable()
-        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.error(throwable))
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(throwable))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertError(throwable)
     }
@@ -148,7 +149,7 @@ class WalletConfigManagerTest {
     fun `restore wallet config success test`() {
         whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.just(WalletConfigPayload(_version = 1)))
         doNothing().whenever(keyStoreRepository).encryptMasterSeed(any())
-        doNothing().whenever(localWalletConfigProvider).saveWalletConfig(any())
+        whenever(localWalletConfigProvider.saveWalletConfig(any())).thenReturn(Single.just(WalletConfigPayload()))
         walletManager.restoreWalletConfig(MasterSeed("123", "567"))
             .test()
             .assertComplete()
@@ -158,7 +159,7 @@ class WalletConfigManagerTest {
     fun `restore wallet config error test`() {
         val error = Throwable()
         doNothing().whenever(keyStoreRepository).encryptMasterSeed(any())
-        doNothing().whenever(localWalletConfigProvider).saveWalletConfig(any())
+        whenever(localWalletConfigProvider.saveWalletConfig(any())).thenReturn(Single.just(WalletConfigPayload()))
         whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
         whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.error(error))
         walletManager.restoreWalletConfig(MasterSeed("123", "567"))
@@ -170,6 +171,7 @@ class WalletConfigManagerTest {
     fun `save service test success`() {
         mockWallet()
         walletManager.initWalletConfig()
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.just(WalletConfigPayload()))
         walletManager.saveService(Service())
             .test()
             .assertComplete()
@@ -180,7 +182,7 @@ class WalletConfigManagerTest {
     fun `save service test error`() {
         mockWallet()
         val error = Throwable()
-        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.error(error))
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(error))
         walletManager.initWalletConfig()
         walletManager.saveService(Service()).test().assertComplete()
     }
@@ -234,7 +236,7 @@ class WalletConfigManagerTest {
     fun `update safe account owners error test`() {
         val error = Throwable()
         mockWallet()
-        whenever(minervaApi.saveWalletConfig(any(), any())) doReturn Completable.error(error)
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(error))
         walletManager.apply {
             initWalletConfig()
             updateSafeAccountOwners(0, listOf("owner"))
@@ -270,7 +272,7 @@ class WalletConfigManagerTest {
     @Test
     fun `update wallet config 400 error occurs`() {
         val httpBadRequestException = HttpBadRequestException()
-        whenever(minervaApi.saveWalletConfig(any(), any())) doReturn Completable.error(httpBadRequestException)
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(httpBadRequestException))
         whenever(localWalletConfigProvider.getWalletConfig()).thenReturn(Single.just(localWalletConfigPayload))
         walletManager.masterSeed = MasterSeed()
         walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
@@ -283,7 +285,7 @@ class WalletConfigManagerTest {
 
     @Test
     fun `create default walletConfig should return success`() {
-        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.complete())
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.just(WalletConfigPayload()))
         NetworkManager.initialize(listOf(Network(chainId = 0, httpRpc = "some")))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertNoErrors()
@@ -293,7 +295,7 @@ class WalletConfigManagerTest {
     fun `create default walletConfig should return error`() {
         val throwable = Throwable()
         NetworkManager.initialize(listOf(Network(chainId = 0, httpRpc = "some")))
-        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Completable.error(throwable))
+        whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(throwable))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
         test.assertError(throwable)
     }

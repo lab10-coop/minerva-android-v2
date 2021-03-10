@@ -10,7 +10,7 @@ import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 interface MinervaApiRepository {
     fun getWalletConfig(publicKey: String): Single<WalletConfigPayload>
     fun getWalletConfigVersion(publicKey: String): Single<Int>
-    fun saveWalletConfig(publicKey: String, walletConfigPayload: WalletConfigPayload): Completable
+    fun saveWalletConfig(publicKey: String, walletConfigPayload: WalletConfigPayload): Single<WalletConfigPayload>
     fun getWalletActions(publicKey: String): Observable<WalletActionsResponse>
     fun saveWalletActions(publicKey: String, walletActionsConfigPayload: WalletActionsConfigPayload): Completable
 }
