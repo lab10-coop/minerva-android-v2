@@ -32,15 +32,18 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/amount"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="55dp"
         android:layout_marginEnd="@dimen/margin_xxsmall"
         android:textColor="@color/dappNameBlack"
+        android:includeFontPadding="false"
         android:textSize="@dimen/text_large"
+        android:gravity="end"
         app:layout_constraintRight_toLeftOf="@+id/unit"
         app:layout_constraintTop_toBottomOf="@+id/requestLabel"
-        tools:text="0.24312" />
+        app:layout_constraintLeft_toRightOf="@id/transaction_type"
+        tools:text="0.2431423442432424233342424324" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/unit"
@@ -48,6 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
         android:textColor="@color/dappNameBlack"
+        android:layout_marginBottom="@dimen/margin_xxxsmall"
         android:textSize="@dimen/text_normal"
         app:layout_constraintBottom_toBottomOf="@+id/amount"
         app:layout_constraintRight_toRightOf="parent"
