@@ -14,8 +14,10 @@ class LocalWalletConfigProviderImpl(private val sharedPreferences: SharedPrefere
         Single.just(sharedPreferences.getString(WALLET_CONFIG, String.NO_DATA))
             .map { makeWalletConfig(it) }
 
-    override fun saveWalletConfig(payload: WalletConfigPayload) =
-        sharedPreferences.edit().putString(WALLET_CONFIG, Gson().toJson(payload)).apply()
+    override fun saveWalletConfig(payload: WalletConfigPayload): Single<WalletConfigPayload> =
+        sharedPreferences.edit().putString(WALLET_CONFIG, Gson().toJson(payload)).apply().let {
+            Single.just(payload)
+        }
 
     private fun makeWalletConfig(rawWalletConfig: String): WalletConfigPayload =
         if (rawWalletConfig == String.NO_DATA) WalletConfigPayload()

@@ -98,6 +98,7 @@ class WalletConfigManagerImpl(
 
     override fun createWalletConfig(masterSeed: MasterSeed): Completable =
         minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), DefaultWalletConfig.create)
+            .ignoreElement()
             .doOnComplete { localStorage.isSynced = true }
             .doOnError { localStorage.isSynced = false }
             .doOnTerminate {
@@ -187,6 +188,7 @@ class WalletConfigManagerImpl(
 
     private fun syncWalletConfig(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> =
         minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
+            .ignoreElement()
             .andThen(completeKeys(masterSeed, payload))
             .map {
                 localStorage.isSynced = true
@@ -201,26 +203,17 @@ class WalletConfigManagerImpl(
 
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable =
         if (localStorage.isBackupAllowed) {
-            val (config, payload) = Pair(
-                walletConfig,
-                WalletConfigToWalletPayloadMapper.map(walletConfig)
-            )
-
-            minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
-                .toSingleDefault(Pair(walletConfig, payload))
+            localWalletProvider.saveWalletConfig(WalletConfigToWalletPayloadMapper.map(walletConfig))
                 .map {
-                    localStorage.isSynced = true
+                    _walletConfigLiveData.value = walletConfig
                     it
                 }
-                .handleAutomaticBackupFailedError(Pair(config, payload), localStorage)
-                .subscribeOn(Schedulers.io())
-                .doOnSubscribe {
-                    _walletConfigLiveData.value = config
-                    localWalletProvider.saveWalletConfig(payload)
-                }
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap { minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), it) }
+                .map { localStorage.isSynced = true }
                 .ignoreElement()
+                .handleAutomaticBackupFailedError(localStorage)
+                .observeOn(AndroidSchedulers.mainThread())
         } else Completable.error(AutomaticBackupFailedThrowable())
 
     override fun dispose() {

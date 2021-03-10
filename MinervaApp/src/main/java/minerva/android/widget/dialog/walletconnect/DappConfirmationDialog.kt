@@ -1,7 +1,9 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
+import android.content.DialogInterface
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import minerva.android.R
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogBinding
@@ -20,6 +22,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         setContentView(binding.root)
         initButtons(binding.confirmationButtons)
         binding.confirmationView.hideRequestedData()
+        expand()
     }
 
     fun setView(meta: WalletConnectPeerMeta, networkName: String) = with(binding) {
@@ -34,7 +37,6 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             confirmationView.setIcon(meta.icons[FIRST_ICON])
             meta.icons[FIRST_ICON]
         }
-
 
     private fun setNetworkHeader(backgroundResId: Int) {
         with(networkHeader.network) {

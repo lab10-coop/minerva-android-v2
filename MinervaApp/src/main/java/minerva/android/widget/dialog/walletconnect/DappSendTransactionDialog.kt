@@ -34,6 +34,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
                 hideAddressIcon.visibleOrInvisible(!hideAddressIcon.isVisible)
             }
         }
+        expand()
     }
 
     fun setContent(
