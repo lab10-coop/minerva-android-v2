@@ -2,7 +2,10 @@ package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
 import android.view.KeyEvent
+import android.view.View
+import android.widget.FrameLayout
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import minerva.android.R
 import minerva.android.databinding.DappDialogButtonsBinding
@@ -15,6 +18,14 @@ abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val de
 
     init {
         this.setCancelable(false)
+    }
+
+    fun expand() {
+        (findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout).apply {
+            BottomSheetBehavior.from(this).apply {
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
     }
 
     fun initButtons(confirmationButtons: DappDialogButtonsBinding) {
