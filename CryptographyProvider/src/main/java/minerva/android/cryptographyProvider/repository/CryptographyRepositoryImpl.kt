@@ -50,8 +50,6 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         isTestNet: Boolean
     ): Single<DerivedKeys> {
         val derivationPath = "${derivationPathPrefix}$index"
-        val someDEPA = "${derivationPathPrefix}42"
-        val someKeys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(someDEPA).keyPair
         val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
         val derivedKeys = DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
         return Single.just(derivedKeys)
