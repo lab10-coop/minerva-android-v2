@@ -46,7 +46,8 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                     rowType = SettingsRowType.REMINDER_VIEW,
                     isVisible = !viewModel.isMnemonicRemembered
                 ),
-                SettingRow(getString(R.string.backup), R.drawable.ic_backup, rowType = SettingsRowType.BACKUP)
+                SettingRow(getString(R.string.backup), R.drawable.ic_backup, rowType = SettingsRowType.BACKUP),
+                SettingRow(getString(R.string.authentication), R.drawable.ic_authentication, rowType = SettingsRowType.AUTHENTICATION)
             ), SettingsSection.SECURITY
         ),
         Settings(

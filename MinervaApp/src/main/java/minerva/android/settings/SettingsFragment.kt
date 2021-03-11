@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_settings.*
 import minerva.android.BuildConfig
@@ -67,6 +68,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             COMMUNITY -> context?.openUri(BuildConfig.TELEGRAM_APP, BuildConfig.TELEGRAM_WEB)
             TERMS_OF_SERVICE -> context?.openUri(webUri = BuildConfig.TERMS_OF_SERVICE)
             PRIVACY_POLICY -> context?.openUri(webUri = BuildConfig.PRIVACY_POLICY)
+            AUTHENTICATION -> Toast.makeText(requireContext(), "Open Authentication Settings", Toast.LENGTH_SHORT).show()
             else -> Timber.d(type.toString())
         }
     }
