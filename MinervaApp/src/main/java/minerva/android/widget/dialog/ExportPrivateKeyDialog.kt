@@ -29,6 +29,7 @@ class ExportPrivateKeyDialog(context: Context, private val account: Account) : D
     private fun initView() {
         with(binding) {
             privateKeyLabel.apply {
+                //TODO add nice animation
                 showPrivateKeyButton.setOnClickListener {
                     showPrivateKeyButton.text = toggleButtonText(showPrivateKeyButton.text)
                     togglePasswordTransformation()

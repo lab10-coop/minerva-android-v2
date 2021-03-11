@@ -8,6 +8,7 @@ import minerva.android.accounts.adapter.NetworkAdapter
 import minerva.android.databinding.FragmentNewAccountBinding
 import minerva.android.extension.gone
 import minerva.android.extension.visible
+import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
@@ -44,13 +45,8 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
 
     private fun handleLoader(isShowing: Boolean) {
         binding.apply {
-            if (isShowing) {
-                addAccountProgressBar.visible()
-                createButton.gone()
-            } else {
-                addAccountProgressBar.gone()
-                createButton.visible()
-            }
+            addAccountProgressBar.visibleOrGone(isShowing)
+            createButton.visibleOrGone(!isShowing)
         }
     }
 

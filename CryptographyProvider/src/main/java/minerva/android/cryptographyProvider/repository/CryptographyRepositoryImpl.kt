@@ -41,8 +41,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         }
     }
 
-    override fun getMnemonicForMasterSeed(seed: String): String =
-        entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
+    override fun getMnemonicForMasterSeed(seed: String): String = entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
 
     override fun calculateDerivedKeys(
         seed: String,
@@ -51,6 +50,8 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         isTestNet: Boolean
     ): Single<DerivedKeys> {
         val derivationPath = "${derivationPathPrefix}$index"
+        val someDEPA = "${derivationPathPrefix}42"
+        val someKeys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(someDEPA).keyPair
         val keys = MnemonicWords(getMnemonicForMasterSeed(seed)).toKey(derivationPath).keyPair
         val derivedKeys = DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
         return Single.just(derivedKeys)
@@ -69,7 +70,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
 
     private fun ECKeyPair.getPublicKey(): String = getUncompressedPublicKeyWithPrefix().toBase64().padBase64()
 
-    private fun ECKeyPair.getPrivateKey(): String = privateKey.key.toString(RADIX)
+    private fun ECKeyPair.getPrivateKey(): String = String.format(PRIVATE_KEY_FORMAT, privateKey.key)
 
     private fun ECKeyPair.getAddress(): String = toAddress().hex
 
@@ -120,6 +121,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         private const val ENTROPY_SIZE = 128 / 8
         private const val RADIX = 16
         private const val DID_PREFIX = "did:ethr:"
+        private const val PRIVATE_KEY_FORMAT = "%064x"
 
         /*Those parameters for EthrDIDResolver should be taken based on NetworkID, hence all registry addresses are now stored on Artis Tau1,
          for now it is okay to keep them hardcoded. In the future those data should be generated dynamically based

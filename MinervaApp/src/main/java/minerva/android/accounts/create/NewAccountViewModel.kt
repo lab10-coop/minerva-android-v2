@@ -38,7 +38,7 @@ class NewAccountViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
-                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .doOnError { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = { _createAccountLiveData.value = Event(Unit) },
                     onError = {
