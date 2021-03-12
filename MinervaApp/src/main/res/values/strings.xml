@@ -288,4 +288,5 @@
     <string name="allowance_receiver">For</string>
     <string name="allowance">Allowance</string>
     <string name="undefined_transaction">Undefined transaction</string>
+    <string name="feature_enabled_soon">This feature will be enabled soon</string>
 </resources>

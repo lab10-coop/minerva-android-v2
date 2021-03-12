@@ -41,8 +41,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         }
     }
 
-    override fun getMnemonicForMasterSeed(seed: String): String =
-        entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
+    override fun getMnemonicForMasterSeed(seed: String): String = entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
 
     override fun calculateDerivedKeys(
         seed: String,
@@ -69,7 +68,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
 
     private fun ECKeyPair.getPublicKey(): String = getUncompressedPublicKeyWithPrefix().toBase64().padBase64()
 
-    private fun ECKeyPair.getPrivateKey(): String = privateKey.key.toString(RADIX)
+    private fun ECKeyPair.getPrivateKey(): String = String.format(PRIVATE_KEY_FORMAT, privateKey.key)
 
     private fun ECKeyPair.getAddress(): String = toAddress().hex
 
@@ -120,6 +119,7 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         private const val ENTROPY_SIZE = 128 / 8
         private const val RADIX = 16
         private const val DID_PREFIX = "did:ethr:"
+        private const val PRIVATE_KEY_FORMAT = "%064x"
 
         /*Those parameters for EthrDIDResolver should be taken based on NetworkID, hence all registry addresses are now stored on Artis Tau1,
          for now it is okay to keep them hardcoded. In the future those data should be generated dynamically based
