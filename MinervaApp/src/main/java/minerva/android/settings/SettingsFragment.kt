@@ -1,6 +1,7 @@
 package minerva.android.settings
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,6 +74,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     }
 
     private fun onUseMainNetworkCheckedChange(isChecked: Boolean) {
+        Log.e("klop", "Checked changed N O W with value $isChecked")
         viewModel.areMainNetworksEnabled(isChecked)
     }
 }

@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.settings_section_layout.view.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.settings.model.SettingRow
 import minerva.android.settings.model.Settings
 import minerva.android.settings.model.SettingsRowType
@@ -80,9 +79,11 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
         settings.rows.filter { it.rowType != SettingsRowType.REMINDER_VIEW }.forEach { settingRow ->
             settingRows.addView(SettingItem(context).apply {
                 setRow(settingRow)
-                setOnClickListener { onSettingPressed(settingRow.rowType) }
+                setOnClickListener {
+                    if (settingRow.isSwitchVisible) toggleSwitch { onCheckedChange(it) }
+                    else onSettingPressed(settingRow.rowType)
+                }
                 setAlert(settingRow, isMnemonicRemembered, false) //TODO klop add saving authentication enable option
-                toggleSwitch { onCheckedChange(it) }
                 if (settingRow.isSwitchVisible) {
                     setNetworkSwitch(areMainNetsEnabled)
                 }
