@@ -81,7 +81,7 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
             settingRows.addView(SettingItem(context).apply {
                 setRow(settingRow)
                 setOnClickListener { onSettingPressed(settingRow.rowType) }
-                setIcon(settingRow, isMnemonicRemembered)
+                setAlert(settingRow, isMnemonicRemembered, false) //TODO klop add saving authentication enable option
                 toggleSwitch { onCheckedChange(it) }
                 if (settingRow.isSwitchVisible) {
                     setNetworkSwitch(areMainNetsEnabled)
@@ -93,17 +93,9 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
     private fun shouldShowAlerts(settings: Settings) =
         settings.section == SettingsSection.SECURITY && settings.rows.any { it.rowType == SettingsRowType.REMINDER_VIEW && it.isVisible }
 
-    private fun SettingItem.setIcon(settingRow: SettingRow, isMnemonicRemembered: Boolean) {
-        if (settingRow.iconId != Int.InvalidValue) {
-            showIcons(settingRow, isMnemonicRemembered)
-        }
-    }
-
-    private fun SettingItem.showIcons(settingRow: SettingRow, isMnemonicRemembered: Boolean) {
-        if (settingRow.rowType == SettingsRowType.BACKUP && !isMnemonicRemembered) setIcons(
-            settingRow.iconId,
-            R.drawable.ic_alert
-        )
-        else setIcons(settingRow.iconId)
+    private fun SettingItem.setAlert(settingRow: SettingRow, isMnemonicRemembered: Boolean, isAuthenticationEnabled: Boolean) {
+        if ((settingRow.rowType == SettingsRowType.BACKUP && !isMnemonicRemembered)
+            || (settingRow.rowType == SettingsRowType.AUTHENTICATION && !isAuthenticationEnabled)
+        ) showAlert()
     }
 }

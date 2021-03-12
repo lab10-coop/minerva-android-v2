@@ -52,7 +52,6 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             if (isMnemonicRemembered && isSynced) {
                 interactor.removeSettingsBadgeIcon()
             }
-
             settingsAdapter.updateList(Pair(isMnemonicRemembered, areMainNetsEnabled), propagateSettings())
         }
     }
