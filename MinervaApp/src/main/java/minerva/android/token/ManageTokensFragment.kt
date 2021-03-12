@@ -41,7 +41,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
                 //TODO implement this element
                 Toast.makeText(
                     it.context,
-                    "This feature will be enabled once we have automated the token discovery.",
+                    getString(R.string.feature_enabled_soon),
                     Toast.LENGTH_SHORT
                 ).show()
             }

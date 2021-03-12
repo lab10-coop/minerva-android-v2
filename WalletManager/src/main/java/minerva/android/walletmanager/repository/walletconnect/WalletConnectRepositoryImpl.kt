@@ -176,8 +176,8 @@ class WalletConnectRepositoryImpl(
         deleteDappSession(peerId)
             .andThen {
                 with(clientMap) {
-                    remove(peerId)
                     this[peerId]?.killSession()
+                    remove(peerId)
                 }
             }
 }
