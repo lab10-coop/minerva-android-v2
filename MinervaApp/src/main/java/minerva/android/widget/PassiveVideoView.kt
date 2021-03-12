@@ -114,9 +114,7 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
         textureView?.apply {
             surfaceTextureListener = this@PassiveVideoView
-            if (isAvailable) {
-                onSurfaceTextureAvailable(surfaceTexture, 0, 0)
-            }
+            if (isAvailable) surfaceTexture?.let { onSurfaceTextureAvailable(it, 0, 0) }
         }
     }
 

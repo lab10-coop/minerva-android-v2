@@ -127,7 +127,7 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `save last free ATS timestamp` () {
+    fun `save last free ATS timestamp`() {
         val timestamp = 333L
         localStorage.saveFreeATSTimestamp(timestamp)
         every { localStorage.loadLastFreeATSTimestamp() } returns timestamp
@@ -138,7 +138,7 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `load last free ATS timestamp` () {
+    fun `load last free ATS timestamp`() {
         localStorage.loadLastFreeATSTimestamp()
         verify {
             sharedPref.getLong(any(), Long.InvalidValue)
@@ -146,10 +146,10 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `save token icons update timestamp` () {
+    fun `save token icons update timestamp`() {
         val timestamp = 333L
         localStorage.saveTokenIconsUpdateTimestamp(timestamp)
-        every { localStorage.loadTokenIconsUpdateTimestamp()} returns timestamp
+        every { localStorage.loadTokenIconsUpdateTimestamp() } returns timestamp
         verify {
             sharedPref.edit().putLong(any(), any()).apply()
         }
@@ -157,10 +157,19 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `load token icons update timestamp` () {
+    fun `load token icons update timestamp`() {
         localStorage.loadTokenIconsUpdateTimestamp()
         verify {
             sharedPref.getLong(any(), Long.InvalidValue)
         }
+    }
+
+    @Test
+    fun `check is authentication available`() {
+        localStorage.isAuthenticationEnabled = true
+        verify {
+            sharedPref.edit().putBoolean(any(), any()).apply()
+        }
+        confirmVerified(sharedPref)
     }
 }
