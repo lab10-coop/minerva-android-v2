@@ -83,6 +83,9 @@ class TransactionViewModel(
     val token
         get() = network.token
 
+    val spinnerPosition
+        get() = tokenIndex + ONE_ELEMENT
+
     val tokensList: List<Token>
         get() = mutableListOf<Token>().apply {
             with(account.network) {
@@ -406,4 +409,8 @@ class TransactionViewModel(
             contractAddress,
             tokenDecimals = tokenDecimals
         )
+
+    companion object {
+        const val ONE_ELEMENT = 1
+    }
 }

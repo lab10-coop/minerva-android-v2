@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.transition.TransitionManager
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
@@ -18,6 +16,7 @@ import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import minerva.android.R
 import minerva.android.accounts.listener.TransactionListener
+import minerva.android.accounts.transaction.fragment.TransactionViewModel.Companion.ONE_ELEMENT
 import minerva.android.accounts.transaction.fragment.adapter.RecipientAdapter
 import minerva.android.accounts.transaction.fragment.adapter.TokenAdapter
 import minerva.android.accounts.transaction.fragment.scanner.TransactionAddressScanner
@@ -26,16 +25,16 @@ import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.TransactionCost
-import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.properties.Delegates
 
-class TransactionSendFragment : Fragment() {
+class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
 
     private var areTransactionCostsOpen = false
     private var shouldOverrideTransactionCost = true
@@ -45,12 +44,10 @@ class TransactionSendFragment : Fragment() {
     private var allPressed: Boolean = false
     private lateinit var binding: FragmentTransactionSendBinding
 
-    private val spinnerPosition
-        get() = viewModel.tokenIndex + ONE_ELEMENT
-
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
         binding.apply {
-            transactionCostAmount.text = getString(R.string.transaction_cost_amount, newValue.toPlainString(), viewModel.token)
+            transactionCostAmount.text =
+                getString(R.string.transaction_cost_amount, newValue.toPlainString(), viewModel.token)
             if (allPressed && oldValue != newValue) {
                 if (viewModel.recalculateAmount <= BigDecimal.ZERO) amount.setText(BigDecimal.ZERO.toPlainString())
                 else amount.setText(viewModel.recalculateAmount.toPlainString())
@@ -58,13 +55,9 @@ class TransactionSendFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_transaction_send, container, false).apply {
-            binding = FragmentTransactionSendBinding.bind(this)
-        }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentTransactionSendBinding.bind(view)
         prepareTokenDropdown()
         setupTexts()
         setupListeners()
@@ -162,7 +155,7 @@ class TransactionSendFragment : Fragment() {
                         }
                     }
                     areFieldsValid
-                }.flatMap {
+                }.switchMap {
                     Observable.combineLatest(
                         gasLimitEditText.getValidationObservable(gasLimitInputLayout) { Validator.validateIsFilled(it) },
                         gasPriceEditText.getValidationObservable(gasPriceInputLayout) { Validator.validateIsFilled(it) },
@@ -201,7 +194,7 @@ class TransactionSendFragment : Fragment() {
                     isEnabled = isSpinnerEnabled(tokens.size)
                     adapter = TokenAdapter(context, R.layout.spinner_token, tokens)
                         .apply { setDropDownViewResource(R.layout.spinner_token) }
-                    setSelection(spinnerPosition, false)
+                    setSelection(viewModel.spinnerPosition, false)
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -209,7 +202,8 @@ class TransactionSendFragment : Fragment() {
                             setupTexts()
                         }
 
-                        override fun onNothingSelected(adapterView: AdapterView<*>?) = setSelection(spinnerPosition, true)
+                        override fun onNothingSelected(adapterView: AdapterView<*>?) =
+                            setSelection(viewModel.spinnerPosition, true)
                     }
                 }
             }
@@ -398,6 +392,5 @@ class TransactionSendFragment : Fragment() {
         private const val EMPTY_VALUE = "-.--"
         private const val DROP_DOWN_VERTICAL_OFFSET = 8
         private const val MIN_SIGN_TO_FILTER = 3
-        private const val ONE_ELEMENT = 1
     }
 }
