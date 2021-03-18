@@ -18,8 +18,8 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
-        buildConfigField "String", "ENS_TEST_URL", '"https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
-        buildConfigField "String", "ENS_MAIN_URL", '"https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469"'
+        buildConfigField "String", "ENS_TEST_URL", '"https://ropsten.infura.io/v3/"'
+        buildConfigField "String", "ENS_MAIN_URL", '"https://mainnet.infura.io/v3/"'
         buildConfigField "String", "ERC20_TOKEN_DATA_URL", '"https://raw.githubusercontent.com/lab10-coop/minerva-tokenlists/master/all.json"'
         buildConfigField "String", "ERC20_TOKEN_DATA_LAST_COMMIT", '"https://api.github.com/repos/lab10-coop/minerva-tokenlists/commits?path=all.json&page=1&per_page=1"'
         buildConfigField "String", "ETHEREUM_MAINNET_TOKEN_BALANCE_URL", '"https://api.etherscan.io/"'
@@ -34,6 +34,7 @@ android {
         buildConfigField "String", "X_DAI_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/xdai/"'
         buildConfigField "String", "LUKSO_TOKEN_BALANCE_URL", '"https://blockscout.com/lukso/l14/"'
         buildConfigField "String", "ETHERSCAN_KEY", System.env.ETHERSCAN_KEY ?: localProperty("etherscan.key")
+        buildConfigField "String", "INFURA_API_KEY", System.env.INFURA_API_KEY ?: localProperty("infura.key")
     }
 
     buildTypes {
