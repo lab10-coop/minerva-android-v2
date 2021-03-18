@@ -9,6 +9,7 @@ import minerva.android.apiProvider.model.CommitElement
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
@@ -134,17 +135,33 @@ class TokenManagerImpl(
             }
         } else Single.just(Pair(false, accountTokens))
 
-    override fun refreshTokenBalance(account: Account): Single<List<AccountToken>> =
-        when (account.chainId) {
-            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokenBalance(account)
-            else -> cryptoApi.getTokenBalance(url = getTokensApiURL(account)).map {
-                mutableListOf<AccountToken>().apply {
-                    it.tokens.forEach {
-                        add(TokenBalanceToAccountToken.map(account.chainId, it))
-                    }
-                }
-            }
+    override fun refreshTokenBalance(account: Account): Single<Pair<String, List<AccountToken>>> =
+        loadCurrentTokens(account.chainId).let { tokens ->
+            Observable.range(FIRST_INDEX, tokens.size)
+                .flatMap { position ->
+                    blockchainRepository.refreshTokenBalance(
+                        account.privateKey,
+                        account.chainId,
+                        tokens[position].address,
+                        account.address
+                    )
+                }.map { (address, balance) ->
+                    tokens.find { it.address == address }?.let { erc20Token ->
+                        AccountToken(erc20Token, balance)
+                    }.orElse { throw NullPointerException() }
+                }.toList()
+                .map { Pair(account.privateKey, it.toList()) }
         }
+//        when (account.chainId) {
+//            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokenBalance(account)
+//            else -> cryptoApi.getTokenBalance(url = getTokensApiURL(account)).map {
+//                mutableListOf<AccountToken>().apply {
+//                    it.tokens.forEach {
+//                        add(TokenBalanceToAccountToken.map(account.chainId, it))
+//                    }
+//                }
+//            }
+//        }
 
     private fun getEthereumTokenBalance(account: Account): Single<List<AccountToken>> =
         cryptoApi.getTokenTx(url = getTokenTxApiURL(account))

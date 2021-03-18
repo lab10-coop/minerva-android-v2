@@ -32,5 +32,5 @@ interface TokenManager {
         accountTokens: Map<String, List<AccountToken>>
     ): Single<Pair<Boolean, Map<String, List<AccountToken>>>>
 
-    fun refreshTokenBalance(account: Account): Single<List<AccountToken>>
+    fun refreshTokenBalance(account: Account): Single<Pair<String, List<AccountToken>>>
 }
