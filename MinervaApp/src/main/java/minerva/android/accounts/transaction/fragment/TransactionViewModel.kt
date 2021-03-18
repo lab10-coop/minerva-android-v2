@@ -173,7 +173,7 @@ class TransactionViewModel(
             isTokenTransaction -> TransferType.TOKEN_TRANSFER
             isSafeAccountMainTransaction -> TransferType.SAFE_ACCOUNT_COIN_TRANSFER
             isSafeAccountTokenTransaction -> TransferType.SAFE_ACCOUNT_TOKEN_TRANSFER
-            else -> TransferType.UNDEFINED
+            else -> TransferType.UNKNOWN
         }
 
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {

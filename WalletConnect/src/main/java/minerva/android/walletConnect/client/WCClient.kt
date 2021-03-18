@@ -59,7 +59,7 @@ open class WCClient(
 
     var accounts: List<String>? = null
         private set
-    private var chainId: Int? = null
+    var chainId: Int? = null
 
     var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> }
     var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> }

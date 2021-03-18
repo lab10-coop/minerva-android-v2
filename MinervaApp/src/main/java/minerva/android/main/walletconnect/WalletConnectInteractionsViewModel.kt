@@ -16,7 +16,7 @@ import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.model.contract.ERC20TRANSACTIONS
+import minerva.android.walletmanager.model.contract.ContractTransactions
 import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -57,27 +57,12 @@ class WalletConnectInteractionsViewModel(
     init {
         launchDisposable {
             walletConnectRepository.getSessions()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = { reconnect(it) },
-                    onError = { Timber.e(it) }
-                )
-        }
-    }
-
-    private fun reconnect(dapps: List<DappSession>) {
-        dapps.forEach { session ->
-            with(session) {
-                walletConnectRepository.connect(WalletConnectSession(topic, version, bridge, key), peerId, remotePeerId)
-            }
-        }
-        subscribeToWalletConnectEvents()
-    }
-
-    private fun subscribeToWalletConnectEvents() {
-        launchDisposable {
-            walletConnectRepository.connectionStatusFlowable
+                .map { reconnect(it) }
+                .toFlowable()
+                .switchMap { walletConnectRepository.getSessionsFlowable() }
+                .filter { it.isNotEmpty() }
+                .take(1)
+                .switchMap { walletConnectRepository.connectionStatusFlowable }
                 .flatMapSingle { mapRequests(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -88,6 +73,14 @@ class WalletConnectInteractionsViewModel(
                         _errorLiveData.value = Event(it)
                     }
                 )
+        }
+    }
+
+    private fun reconnect(dapps: List<DappSession>) {
+        dapps.forEach { session ->
+            with(session) {
+                walletConnectRepository.connect(WalletConnectSession(topic, version, bridge, key), peerId, remotePeerId)
+            }
         }
     }
 
@@ -123,17 +116,12 @@ class WalletConnectInteractionsViewModel(
                         currentRate = it.toBigDecimal()
                         val valueInFiat = status.transaction.value?.toBigDecimal()?.multiply(currentRate)!!
                         val costInFiat = transactionCost.cost.multiply(currentRate)
-                        when (transferType) {
-                            TransferType.UNDEFINED -> OnUndefinedTransaction
-                            else -> {
-                                currentTransaction = status.transaction.copy(
-                                    fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
-                                    txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat)),
-                                    transactionType = transferType
-                                )
-                                OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
-                            }
-                        }
+                        currentTransaction = status.transaction.copy(
+                            fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
+                            txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat)),
+                            transactionType = transferType
+                        )
+                        OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
                     }
             }
     }
@@ -148,28 +136,28 @@ class WalletConnectInteractionsViewModel(
             isContractDataEmpty(status.transaction) -> TransferType.COIN_TRANSFER
             !isContractDataEmpty(status.transaction) && value != BigDecimal.ZERO -> TransferType.COIN_SWAP
             !isContractDataEmpty(status.transaction) && value == BigDecimal.ZERO -> handleTokenTransactions(status)
-            else -> TransferType.UNDEFINED
+            else -> TransferType.DEFAULT_COIN_TX
         }
 
     private fun handleTokenTransactions(status: OnEthSendTransaction): TransferType =
         try {
             val decoder = Decoder()
-            decoder.addAbi(TokenStandardJson.erc20TokenTransactionsAbi)
+            decoder.addAbi(TokenStandardJson.contractTransactions)
             val result: Decoder.DecodedMethod? = decoder.decodeMethod(status.transaction.data)
             result?.let { decoded ->
                 when (decoded.name) {
-                    ERC20TRANSACTIONS.APPROVE.type -> handleApproveAllowance(status, decoded)
-                    ERC20TRANSACTIONS.SWAP_EXACT_TOKENS_FOR_TOKENS.type,
-                    ERC20TRANSACTIONS.SWAP_EXACT_TOKENS_FOR_ETH.type -> handleTokenSwap(decoded, status)
-                    else -> TransferType.UNDEFINED
+                    ContractTransactions.APPROVE.type -> handleApproveAllowance(status, decoded)
+                    ContractTransactions.SWAP_EXACT_TOKENS_FOR_TOKENS.type,
+                    ContractTransactions.SWAP_EXACT_TOKENS_FOR_ETH.type -> handleTokenSwap(decoded, status)
+                    else -> TransferType.DEFAULT_TOKEN_TX
                 }
             }.orElse {
-                TransferType.UNDEFINED
+                TransferType.DEFAULT_TOKEN_TX
             }
 
         } catch (e: RuntimeException) {
             Timber.e(e)
-            TransferType.UNDEFINED
+            TransferType.DEFAULT_TOKEN_TX
         }
 
     private fun handleTokenSwap(decoded: Decoder.DecodedMethod, status: OnEthSendTransaction) =
@@ -187,14 +175,14 @@ class WalletConnectInteractionsViewModel(
                 status.transaction.tokenTransaction = tokenTransaction
                 TransferType.TOKEN_SWAP
             }
-            else -> TransferType.UNDEFINED
+            else -> TransferType.DEFAULT_TOKEN_TX
         }
 
     private fun handleApproveAllowance(status: OnEthSendTransaction, decoded: Decoder.DecodedMethod): TransferType {
         findCurrentToken(status.transaction.to, status.transaction.tokenTransaction)
         return when {
             decoded.params.size > 1 -> getTransactionTypeBasedOnAllowance(decoded, status)
-            else -> TransferType.UNDEFINED
+            else -> TransferType.DEFAULT_TOKEN_TX
         }
     }
 
@@ -216,7 +204,7 @@ class WalletConnectInteractionsViewModel(
                 status.transaction.tokenTransaction.allowance = transactionRepository.toEther(it)
                 TransferType.TOKEN_SWAP_APPROVAL
             }.orElse {
-                TransferType.UNDEFINED
+                TransferType.DEFAULT_TOKEN_TX
             }
         }
 

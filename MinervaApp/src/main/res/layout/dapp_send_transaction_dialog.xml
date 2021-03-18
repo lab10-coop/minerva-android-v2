@@ -36,13 +36,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="55dp"
         android:layout_marginEnd="@dimen/margin_xxsmall"
-        android:textColor="@color/dappNameBlack"
-        android:includeFontPadding="false"
-        android:textSize="@dimen/text_large"
         android:gravity="end"
+        android:includeFontPadding="false"
+        android:textColor="@color/dappNameBlack"
+        android:textSize="@dimen/text_large"
+        app:layout_constraintLeft_toRightOf="@id/transaction_type"
         app:layout_constraintRight_toLeftOf="@+id/unit"
         app:layout_constraintTop_toBottomOf="@+id/requestLabel"
-        app:layout_constraintLeft_toRightOf="@id/transaction_type"
         tools:text="0.2431423442432424233342424324" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -50,8 +50,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
-        android:textColor="@color/dappNameBlack"
         android:layout_marginBottom="@dimen/margin_xxxsmall"
+        android:textColor="@color/dappNameBlack"
         android:textSize="@dimen/text_normal"
         app:layout_constraintBottom_toBottomOf="@+id/amount"
         app:layout_constraintRight_toRightOf="parent"
@@ -80,6 +80,12 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/value" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/transferGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="transfer_separator, value, unit, amount, transaction_type" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/receiver"
@@ -161,6 +167,12 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/receiver_address" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/receiverGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="expand_address_icon, receiver, receiver_address, receiver_separator" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/from"
@@ -281,12 +293,12 @@
         android:layout_marginEnd="@dimen/margin_small"
         android:fontFamily="@font/rubik_medium"
         android:gravity="end"
+        android:text="@string/custom"
         android:textColor="@color/dappLabelColorGray"
         android:textSize="@dimen/text_xsmall"
         android:visibility="invisible"
         app:layout_constraintRight_toLeftOf="@+id/close_custom_time"
-        app:layout_constraintTop_toBottomOf="@+id/sender_separator"
-        android:text="@string/custom" />
+        app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/transaction_time"
@@ -349,7 +361,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_normal"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/balance_to_low_error" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
