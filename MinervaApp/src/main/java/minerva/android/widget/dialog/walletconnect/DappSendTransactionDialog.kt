@@ -6,6 +6,7 @@ import androidx.core.view.isVisible
 import minerva.android.R
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.databinding.DappSendTransactionDialogBinding
+import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrInvisible
@@ -92,6 +93,11 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
                 value.invisible()
                 amount.text = transaction.tokenTransaction.tokenValue
                 unit.text = transaction.tokenTransaction.tokenSymbol
+            }
+            TransferType.DEFAULT_COIN_TX -> receiverGroup.gone()
+            TransferType.DEFAULT_TOKEN_TX -> {
+                receiverGroup.gone()
+                transferGroup.gone()
             }
             else -> {
                 amount.text = transaction.value

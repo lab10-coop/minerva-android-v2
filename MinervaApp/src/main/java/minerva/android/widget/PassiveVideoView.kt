@@ -115,7 +115,9 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
         textureView?.apply {
             surfaceTextureListener = this@PassiveVideoView
             if (isAvailable) {
-                onSurfaceTextureAvailable(surfaceTexture, 0, 0)
+                surfaceTexture?.let {
+                    onSurfaceTextureAvailable(it, 0, 0)
+                }
             }
         }
     }
@@ -196,7 +198,7 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
     override fun start() {
         if (isPrepared) {
             mediaPlayer?.start()
-            textureView?.animate()?.alpha(ALPHA)?.setStartDelay(STARTUP_DELAY)?.start();
+            textureView?.animate()?.alpha(ALPHA)?.setStartDelay(STARTUP_DELAY)?.start()
             requestLayout()
         }
     }

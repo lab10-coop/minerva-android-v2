@@ -13,7 +13,7 @@ data class WalletConnectTransaction(
     var value: String? = String.Empty,
     val fiatValue: String? = null,
     val data: String = String.Empty,
-    val transactionType: TransferType = TransferType.UNDEFINED,
+    val transactionType: TransferType = TransferType.UNKNOWN,
     var tokenTransaction: TokenTransaction = TokenTransaction(),
     val txCost: TransactionCost = TransactionCost()
 ) {

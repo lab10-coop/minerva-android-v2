@@ -1,7 +1,7 @@
 package minerva.android.accounts.walletconnect
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import minerva.android.R
 import minerva.android.databinding.ActivityWalletConnectBinding
@@ -12,11 +12,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class WalletConnectActivity : AppCompatActivity() {
 
-    private val binding: ActivityWalletConnectBinding by lazy {
-        ActivityWalletConnectBinding.inflate(
-            layoutInflater
-        )
-    }
+    private val binding: ActivityWalletConnectBinding by lazy { ActivityWalletConnectBinding.inflate(layoutInflater) }
     val viewModel: WalletConnectViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
