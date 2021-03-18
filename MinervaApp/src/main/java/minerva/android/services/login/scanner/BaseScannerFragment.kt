@@ -84,7 +84,7 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
         }
     }
 
-    fun handleCameraError(it: Exception) {
+    private fun handleCameraError(it: Exception) {
         requireActivity().runOnUiThread {
             Toast.makeText(context, "${getString(R.string.camera_error)} ${it.message}", Toast.LENGTH_LONG).show()
         }

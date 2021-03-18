@@ -96,7 +96,8 @@ class WalletConnectRepositoryImpl(
         dappDao.getAll().firstOrError().map { EntitiesToDappSessionsMapper.map(it) }
 
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
-        dappDao.getAll().map { EntitiesToDappSessionsMapper.map(it) }
+        dappDao.getAll().map {
+            EntitiesToDappSessionsMapper.map(it) }
 
     override fun getDappSessionById(peerId: String): Single<DappSession> =
         dappDao.getDapSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
