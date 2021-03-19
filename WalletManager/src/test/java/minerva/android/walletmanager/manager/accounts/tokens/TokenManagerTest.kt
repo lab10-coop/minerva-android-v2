@@ -22,14 +22,9 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
-import minerva.android.walletmanager.model.defs.CredentialType
-import minerva.android.walletmanager.model.minervaprimitives.Identity
-import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
@@ -285,51 +280,45 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `Test refreshing token balance`() {
-        val notEtherscanAccount = Account(1, chainId = ATS_TAU, address = "0xADDRESSxONE")
-        val etherscanAccount = Account(1, chainId = ETH_RIN, address = "0xADDRESSxTWO")
-        val tokenBalances = listOf(
-            TokenBalance("t01", "s01", "name01", "2", "0xC00KiE01", "1000"),
-            TokenBalance("t02", "s02", "name02", "3", "0xC00KiE02", "100000")
-        )
-        val tokenResponse = TokenBalanceResponse("OK", tokenBalances, "response N O W !")
+        val atsTauAccount = Account(1, chainId = ATS_TAU, address = "0xADDRESSxONE")
+        val tauTokenResponse01 = Observable.just(Pair("0xC00k1eN", 10000.toBigDecimal()))
+        val tauTokenResponse02 = Observable.just(Pair("0xS0m3T0k3N", 100000000.toBigDecimal()))
+        val tauTokenResponse03 = Observable.just(Pair("0xC00k1e", 100000000.toBigDecimal()))
+        val tauTokenResponse04 = Observable.just(Pair("0x0th3r", 100000000.toBigDecimal()))
 
-        val tokenTXs = listOf(
-            TokenTx(tokenName = "name03", address = "0xC00KiE03", tokenDecimal = "3"),
-            TokenTx(tokenName = "name04", address = "0xC00KiE04", tokenDecimal = "6")
-        )
-
-        val tokenTxResponse = TokenTxResponse("OK", tokenTXs, "response N O W !")
-        val refreshTokenResponse01 = Observable.just(Pair("0xC00KiE03", 10000.toBigDecimal()))
-        val refreshTokenResponse02 = Observable.just(Pair("0xC00KiE04", 100000000.toBigDecimal()))
+        val atsSigmaAccount = Account(2, chainId = ATS_SIGMA, address = "0xADDRESSxTWO")
+        val sigmaTokenResponse01 = Observable.just(Pair("0xC00k1e", 10000.toBigDecimal()))
+        val sigmaTokenResponse02 = Observable.just(Pair("0x0th3r22", 10000.toBigDecimal()))
+        val sigmaTokenResponse03 = Observable.just(Pair("0x0th3r", 10000.toBigDecimal()))
 
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenBalance(any())).thenReturn(Single.just(tokenResponse))
-        whenever(blockchainRepository.refreshTokenBalance(any(), any(), any(), any())).thenReturn(
-            refreshTokenResponse01,
-            refreshTokenResponse02
-        )
-        whenever(cryptoApi.getTokenTx(any())).thenReturn(Single.just(tokenTxResponse))
-        tokenManager.refreshTokenBalance(notEtherscanAccount)
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.size == 2
-                it[0].token.name == "name01"
-                it[0].balance.toPlainString() == "10"
-                it[1].token.name == "name02"
-                it[1].balance.toPlainString() == "100"
-            }
-        tokenManager.refreshTokenBalance(etherscanAccount)
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.size == 2
-                it[0].token.name == "name03"
-                it[0].balance.toPlainString() == "10"
-                it[1].token.name == "name04"
-                it[1].balance.toPlainString() == "100"
-            }
+        whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
 
+        whenever(blockchainRepository.refreshTokenBalance(any(), any(), any(), any())).thenReturn(
+            tauTokenResponse01, tauTokenResponse02, tauTokenResponse03, tauTokenResponse04,
+            sigmaTokenResponse01, sigmaTokenResponse02, sigmaTokenResponse03
+        )
+
+        tokenManager.refreshTokenBalance(atsTauAccount)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.second.size == 4
+                it.second[0].token.name == "CookieTokenDATS"
+                it.second[0].balance.toPlainString() == "0.000000001"
+                it.second[1].token.name == "SomeSomeTokenDATS"
+                it.second[1].balance.toPlainString() == "0.000000000000000000000001"
+            }
+        tokenManager.refreshTokenBalance(atsSigmaAccount)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.second.size == 3
+                it.second[0].token.name == "CookieTokenATS"
+                it.second[0].balance.toPlainString() == "0.000000001"
+                it.second[1].token.name == "SecondOtherATS"
+                it.second[1].balance.toPlainString() == "0.000000000000000001"
+            }
     }
 
     private val commitData: List<CommitElement>
@@ -348,7 +337,8 @@ class TokenManagerTest : RxTest() {
             "ATS_TAU",
             listOf(
                 AccountToken(firstToken, BigDecimal.ONE),
-                AccountToken(secondToken, BigDecimal.TEN))
+                AccountToken(secondToken, BigDecimal.TEN)
+            )
         )
     )
 
@@ -365,7 +355,11 @@ class TokenManagerTest : RxTest() {
     private val mapIII = mapOf(
         Pair(
             "ETH_RIN",
-            listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN), AccountToken(firstTokenIII, BigDecimal.ZERO))
+            listOf(
+                AccountToken(firstTokenII, BigDecimal.ONE),
+                AccountToken(secondTokenII, BigDecimal.TEN),
+                AccountToken(firstTokenIII, BigDecimal.ZERO)
+            )
         )
     )
 

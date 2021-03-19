@@ -146,7 +146,9 @@ class TokenManagerImpl(
                         account.address
                     )
                 }.map { (address, balance) ->
-                    tokens.find { it.address == address }?.let { erc20Token ->
+                    tokens.find {
+                        it.address == address
+                    }?.let { erc20Token ->
                         AccountToken(erc20Token, balance)
                     }.orElse { throw NullPointerException() }
                 }.toList()
