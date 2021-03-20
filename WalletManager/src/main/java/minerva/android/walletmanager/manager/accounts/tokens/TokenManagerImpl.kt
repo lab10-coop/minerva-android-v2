@@ -149,20 +149,21 @@ class TokenManagerImpl(
                 .map { Pair(account.privateKey, it.toList()) }
         }
 
-
-    //TODO klop refactor code duplications
     override fun downloadTokensList(account: Account): Single<List<ERC20Token>> =
         when (account.chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokens(account)
-            else -> cryptoApi.getTokenBalance(url = getTokensApiURL(account))
-                .map { response ->
-                    mutableListOf<ERC20Token>().apply {
-                        response.tokens.forEach {
-                            add(TokenBalanceToERC20Token.map(account.chainId, it))
-                        }
+            else -> getNotEthereumTokens(account)
+        }
+
+    private fun getNotEthereumTokens(account: Account): Single<List<ERC20Token>> =
+        cryptoApi.getTokenBalance(url = getTokensApiURL(account))
+            .map { response ->
+                mutableListOf<ERC20Token>().apply {
+                    response.tokens.forEach {
+                        add(TokenBalanceToERC20Token.map(account.chainId, it))
                     }
                 }
-        }
+            }
 
     private fun getEthereumTokens(account: Account): Single<List<ERC20Token>> =
         cryptoApi.getTokenTx(url = getTokenTxApiURL(account))

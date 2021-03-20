@@ -32,6 +32,7 @@ import minerva.android.walletmanager.model.transactions.*
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -93,10 +94,17 @@ class TransactionRepositoryImpl(
                             tokenManager.updateTokenIcons(
                                 shouldBeUpdated,
                                 accountTokens
-                            )
+                            ).onErrorReturn {
+                                Timber.e(it)
+                                Pair(false, accountTokens)
+                            }
                         }
                         .flatMap { (shouldBeSaved, automaticTokenUpdateMap) ->
                             tokenManager.saveTokens(shouldBeSaved, automaticTokenUpdateMap)
+                                .onErrorReturn {
+                                    Timber.e(it)
+                                    false
+                                }
                         }
                 }
             }

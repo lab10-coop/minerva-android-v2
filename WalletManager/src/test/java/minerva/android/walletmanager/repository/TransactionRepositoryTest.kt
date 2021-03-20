@@ -690,38 +690,41 @@ class TransactionRepositoryTest : RxTest() {
             .assertError(error)
     }
 
-    //TODO klop fix that
-//    @Test
-//    fun `Checking refreshing token balances`() {
-//        val tokenBalanceResponse = TokenBalanceResponse("OK", listOf(), "C00KiE!")
-//        val accountTokens = listOf(
-//            AccountToken(ERC20Token(3), BigDecimal.TEN)
-//        )
-//
-//        whenever(walletConfigManager.getWalletConfig()).thenReturn(null, DataProvider.walletConfig)
-//        whenever(cryptoApi.getTokenBalance(any())).thenReturn(Single.just(tokenBalanceResponse))
-//        whenever(tokenManager.sortTokensByChainId(any(), any())).thenReturn(accountTokens)
-//        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(Pair(false, mapOf()))
-//        whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(Pair("", listOf())))
-//        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
-//            Single.just(Pair(true, mapOf())),
-//            Single.just(Pair(true, mapOf())),
-//            Single.error(Throwable("error")),
-//            Single.just(Pair(true, mapOf())),
-//            Single.error(Throwable("error"))
-//        )
-//        whenever(tokenManager.saveTokens(any(), any())).thenReturn(
-//            Completable.complete(),
-//            Completable.complete(),
-//            Completable.complete(),
-//            Completable.error(Throwable("error")),
-//            Completable.error(Throwable("error"))
-//        )
-//
-//        repository.refreshTokenBalance().test().assertErrorMessage(NotInitializedWalletConfigThrowable().message)
-//        repository.refreshTokenBalance().test().assertComplete()
-//        repository.refreshTokenBalance().test().assertComplete()
-//        repository.refreshTokenBalance().test().assertComplete()
-//        repository.refreshTokenBalance().test().assertComplete()
-//    }
+    @Test
+    fun `Checking refreshing token balances`() {
+        val tokenBalanceResponse = TokenBalanceResponse("OK", listOf(), "C00KiE!")
+        val accountTokens = listOf(
+            AccountToken(ERC20Token(3), BigDecimal.TEN)
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
+        whenever(cryptoApi.getTokenBalance(any())).thenReturn(Single.just(tokenBalanceResponse))
+        whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
+
+        repository.refreshTokenBalance().test().assertComplete()
+    }
+
+
+    @Test
+    fun `Check refreshing tokens list`() {
+        val tokensList = listOf(
+            ERC20Token(3, "Token01", address = "0x0N3"),
+            ERC20Token(3, "Token02", address = "0xTW0"),
+            ERC20Token(3, "Token03", address = "0xTHR33")
+        )
+
+        val tokensMap = mapOf(Pair(3, tokensList))
+        val updatedTokensMap = Pair(true, tokensMap)
+
+        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.just(tokensList))
+        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
+        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
+        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
+            Single.just(updatedTokensMap),
+            Single.error(Throwable("Stop thread"))
+        )
+        whenever(tokenManager.saveTokens(any(), any())).thenReturn(Single.just(true), Single.error(Throwable("Stop thread")))
+
+        repository.refreshTokensList().test().assertComplete().assertValue { it }
+        repository.refreshTokensList().test().assertComplete().assertValue { !it }
+    }
 }

@@ -1,6 +1,5 @@
 package minerva.android.accounts.transaction.fragment
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -207,14 +206,8 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = {
-                        Log.e("klop", "Refresh tokens list result: $it")
-                        if(it) refreshTokenBalance()
-                    },
-                    onError = {
-                        Timber.e(it)
-                        Log.e("klop", "Error with refreshing tokens list: ${it.message}")
-                    }
+                    onSuccess = { if (it) refreshTokenBalance() },
+                    onError = { Timber.e(it) }
                 )
         }
 
