@@ -1,5 +1,6 @@
 package minerva.android.accounts.transaction.fragment
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -120,6 +121,7 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
+        refreshTokensList()
         accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
@@ -195,6 +197,23 @@ class AccountsViewModel(
                     onError = {
                         Timber.e(it)
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
+                    }
+                )
+        }
+
+    fun refreshTokensList() =
+        launchDisposable {
+            transactionRepository.refreshTokensList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = {
+                        Log.e("klop", "Refresh tokens list result: $it")
+                        if(it) refreshTokenBalance()
+                    },
+                    onError = {
+                        Timber.e(it)
+                        Log.e("klop", "Error with refreshing tokens list: ${it.message}")
                     }
                 )
         }

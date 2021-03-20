@@ -125,6 +125,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     with(viewModel) {
                         refreshBalances()
                         refreshTokenBalance()
+                        refreshTokensList()
                     }
                 }
             }

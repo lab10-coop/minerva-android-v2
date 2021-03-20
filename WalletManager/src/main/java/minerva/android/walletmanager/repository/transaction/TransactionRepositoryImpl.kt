@@ -27,11 +27,11 @@ import minerva.android.walletmanager.model.mappers.TxCostPayloadToTxCostDataMapp
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.*
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -67,9 +67,7 @@ class TransactionRepositoryImpl(
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
     override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
-        walletConfigManager.getWalletConfig()?.accounts?.filter { account ->
-            accountsFilter(account) && account.network.isAvailable()
-        }?.let { accounts ->
+        getActiveAccounts().let { accounts ->
             Observable.range(FIRST_INDEX, accounts.size)
                 .map { accounts[it] }
                 .flatMapSingle {
@@ -80,29 +78,57 @@ class TransactionRepositoryImpl(
                         it.forEach { put(it.first, it.second) }
                     }.toMap()
                 }
-        } ?: Single.error(NotInitializedWalletConfigThrowable())
+        }
 
-//    /**
-//     *
-//     *  return statement: List<Triple<ChainId, AccountPrivateKey, List<AccountToken>>>>
-//     *
-//     */
-//
-//    private fun refreshTokensBalanceWithBuffer(accounts: List<Account>):
-//            Single<List<Triple<Int, String, List<AccountToken>>>> =
-//        Observable.range(START, accounts.size)
-//            .map { accounts[it] }
-//            .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
-//            .flatMapSingle { refreshTokensBalance(it) }
-//            .toList()
-//            .map { balances ->
-//                mutableListOf<Triple<Int, String, List<AccountToken>>>().apply { balances.forEach { addAll(it) } }
-//            }
+    override fun refreshTokensList(): Single<Boolean> =
+        getActiveAccounts().let { accounts ->
+            accounts.filter { NetworkManager.isUsingEtherScan(it.chainId) }.let { etherscanAccounts ->
+                accounts.filter { !NetworkManager.isUsingEtherScan(it.chainId) }.let { notEtherscanAccounts ->
+                    downloadTokensListWithBuffer(etherscanAccounts)
+                        .zipWith(downloadTokensList(notEtherscanAccounts))
+                        .map { (etherscanTokens, notEtherscanTokens) -> etherscanTokens + notEtherscanTokens }
+                        .map { tokenManager.sortTokensByChainId(it) }
+                        .map { tokenManager.mergeWithLocalTokensList(it) }
+                        .flatMap { (shouldBeUpdated, accountTokens) ->
+                            tokenManager.updateTokenIcons(
+                                shouldBeUpdated,
+                                accountTokens
+                            )
+                        }
+                        .flatMap { (shouldBeSaved, automaticTokenUpdateMap) ->
+                            tokenManager.saveTokens(shouldBeSaved, automaticTokenUpdateMap)
+                        }
+                }
+            }
+        }
 
-//    private fun refreshTokensBalance(accounts: List<Account>): Single<List<Triple<Int, String, List<AccountToken>>>> =
-//        Observable.range(START, accounts.size)
-//            .flatMapSingle { position -> refreshTokensBalance(accounts[position]) }
-//            .toList()
+    private fun getActiveAccounts(): List<Account> =
+        walletConfigManager.getWalletConfig()?.accounts?.filter { account ->
+            accountsFilter(account) && account.network.isAvailable()
+        } ?: throw NotInitializedWalletConfigThrowable()
+
+    private fun downloadTokensListWithBuffer(accounts: List<Account>):
+            Single<List<ERC20Token>> =
+        Observable.range(FIRST_INDEX, accounts.size)
+            .map { accounts[it] }
+            .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
+            .flatMapSingle { downloadTokensList(it) }
+            .toList()
+            .map {
+                mutableListOf<ERC20Token>().apply {
+                    it.forEach { addAll(it) }
+                }
+            }
+
+    private fun downloadTokensList(accounts: List<Account>): Single<List<ERC20Token>> =
+        Observable.range(FIRST_INDEX, accounts.size)
+            .flatMapSingle { position -> tokenManager.downloadTokensList(accounts[position]) }
+            .toList()
+            .map {
+                mutableListOf<ERC20Token>().apply {
+                    it.forEach { addAll(it) }
+                }
+            }
 
     override fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(
@@ -235,16 +261,6 @@ class TransactionRepositoryImpl(
     private fun saveRecipient(ensName: String, address: String) = localStorage.saveRecipient(Recipient(ensName, address))
     override fun loadRecipients(): List<Recipient> = localStorage.getRecipients()
     override fun resolveENS(ensName: String): Single<String> = blockchainRepository.resolveENS(ensName)
-
-    /**
-     *
-     * return statement: Single<Triple<String, String, List<AccountToken>>>
-     *                   Single<Triple<ChainId, AccountPrivateKey, List<AccountToken>>>>
-     *
-     */
-
-//    private fun refreshTokensBalance(account: Account): Single<Triple<Int, String, List<AccountToken>>> =
-//        tokenManager.refreshTokenBalance(account).map { Triple(account.network.chainId, account.privateKey, it) }
 
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
