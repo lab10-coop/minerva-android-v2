@@ -96,7 +96,7 @@ class TokenManagerImpl(
             }
         }
 
-    override fun mergeWithLocalTokensList(map: Map<Int, List<ERC20Token>>) =
+    override fun mergeWithLocalTokensList(map: Map<Int, List<ERC20Token>>): Pair<Boolean, Map<Int, List<ERC20Token>>> =
         walletManager.getWalletConfig()?.erc20Tokens?.let { allLocalTokens ->
             var updateLogosURI = false
             val updatedMap = allLocalTokens.toMutableMap()

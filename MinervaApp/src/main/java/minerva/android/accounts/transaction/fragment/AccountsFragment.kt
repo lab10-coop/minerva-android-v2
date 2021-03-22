@@ -91,11 +91,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun isTokenVisible(networkAddress: String, accountToken: AccountToken): Boolean? =
         viewModel.isTokenVisible(networkAddress, accountToken)
 
-    override fun saveTokenVisibility(
-        networkAddress: String,
-        tokenAddress: String,
-        visibility: Boolean
-    ) {
+    override fun saveTokenVisibility(networkAddress: String, tokenAddress: String, visibility: Boolean) {
         viewModel.saveTokenVisible(networkAddress, tokenAddress, visibility)
     }
 
@@ -147,8 +143,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             binding.apply {
                 accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
                     noDataMessage.visibleOrGone(hasActiveAccount)
-                    accountAdapter.updateList(accounts, areMainNetsEnabled)
-                    setTatsButtonListener(accountAdapter.activeAccountsList)
+                    accountAdapter.updateList(accounts, activeAccounts)
+                    setTatsButtonListener(activeAccounts)
                 })
 
                 dappSessions.observe(viewLifecycleOwner, Observer {
@@ -161,7 +157,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 })
             }
             tokenBalanceLiveData.observe(viewLifecycleOwner, Observer {
-                accountAdapter.updateTokenBalances(it)
+                accountAdapter.updateTokenBalances()
             })
 
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
@@ -236,10 +232,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     private fun refreshFreeATSButton() {
-        viewModel.isAddingFreeATSAvailable(accountAdapter.activeAccountsList).let { isAvailable ->
-            binding.addTatsButton.apply {
-                val color = if (isAvailable) R.color.artis else R.color.inactiveButtonColor
-                setBackgroundColor(ContextCompat.getColor(context, color))
+        viewModel.apply {
+            isAddingFreeATSAvailable(activeAccounts).let { isAvailable ->
+                binding.addTatsButton.apply {
+                    val color = if (isAvailable) R.color.artis else R.color.inactiveButtonColor
+                    setBackgroundColor(ContextCompat.getColor(context, color))
+                }
             }
         }
     }
@@ -253,7 +251,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
 
     private fun getFreeAtsMessage(it: View, accounts: List<Account>) =
-        if (viewModel.isAddingFreeATSAvailable(accountAdapter.activeAccountsList)) {
+        if (viewModel.isAddingFreeATSAvailable(viewModel.activeAccounts)) {
             it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
             viewModel.addAtsToken(accounts, getString(R.string.free_ats_warning))
             R.string.refresh_balance_to_check_transaction_status

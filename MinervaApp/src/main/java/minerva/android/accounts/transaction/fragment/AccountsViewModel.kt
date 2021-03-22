@@ -12,6 +12,7 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
@@ -82,10 +83,12 @@ class AccountsViewModel(
     private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
     val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
     var hasActiveAccount: Boolean = false
+    var activeAccounts: List<Account> = listOf()
 
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
             hasActiveAccount = it.hasActiveAccount
+            activeAccounts = it.accounts.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
             it.accounts
         }
 
@@ -96,8 +99,7 @@ class AccountsViewModel(
     lateinit var tokenVisibilitySettings: TokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
 
-    fun arePendingAccountsEmpty() =
-        transactionRepository.getPendingAccounts().isEmpty()
+    fun arePendingAccountsEmpty() = transactionRepository.getPendingAccounts().isEmpty()
 
     init {
         launchDisposable {
@@ -186,13 +188,30 @@ class AccountsViewModel(
                 )
         }
 
+
+    private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>) =
+        activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
+            accountTokenBalances[account.privateKey]?.let { tokensList ->
+                account.accountTokens = tokensList.filter {
+                    isTokenVisible(account.address, it).orElse {
+                        saveTokenVisible(account.address, it.token.address, true)
+                        true
+                    }
+                }
+            }
+        }
+
     fun refreshTokenBalance() =
         launchDisposable {
             transactionRepository.refreshTokenBalance()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _tokenBalanceLiveData.value = it },
+                    //TODO refactor it!
+                    onSuccess = {
+                        filterNotVisibleTokens(it)
+                        _tokenBalanceLiveData.value = it
+                    },
                     onError = {
                         Timber.e(it)
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
@@ -206,7 +225,7 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { if (it) refreshTokenBalance() },
+                    onSuccess = { wasTokenListUpdated -> if (wasTokenListUpdated) refreshTokenBalance() },
                     onError = { Timber.e(it) }
                 )
         }
@@ -214,7 +233,8 @@ class AccountsViewModel(
     private fun handleRemoveAccountErrors(it: Throwable) {
         when (it) {
             is BalanceIsNotEmptyThrowable -> _balanceIsNotEmptyErrorLiveData.value = Event(it)
-            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
+            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value =
+                Event(it)
             is IsNotSafeAccountMasterOwnerThrowable -> _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
             is AutomaticBackupFailedThrowable -> _automaticBackupErrorLiveData.value = Event(it)
             else -> _errorLiveData.value = Event(Throwable(it.message))

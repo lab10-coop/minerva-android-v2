@@ -16,9 +16,14 @@ import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.ChainId
+import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.TransferType
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -691,21 +696,29 @@ class TransactionRepositoryTest : RxTest() {
     }
 
     @Test
-    fun `Checking refreshing token balances`() {
-        val tokenBalanceResponse = TokenBalanceResponse("OK", listOf(), "C00KiE!")
+    fun `Checking refreshing token balances success`() {
         val accountTokens = listOf(
-            AccountToken(ERC20Token(3), BigDecimal.TEN)
+            AccountToken(ERC20Token(3, "one", address = "0x01"), BigDecimal.TEN),
+            AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
         )
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
-        whenever(cryptoApi.getTokenBalance(any())).thenReturn(Single.just(tokenBalanceResponse))
         whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
 
-        repository.refreshTokenBalance().test().assertComplete()
+        repository.refreshTokenBalance().test().assertComplete().assertValue {
+            it.size == 1
+            it["privateKey"]?.size == 2
+        }
+    }
+
+    @Test
+    fun `Checking refreshing token balances error`() {
+        val error = Throwable("error")
+        whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.error(error))
+        repository.refreshTokenBalance().test().assertError(error)
     }
 
 
     @Test
-    fun `Check refreshing tokens list`() {
+    fun `Check refreshing tokens list success`() {
         val tokensList = listOf(
             ERC20Token(3, "Token01", address = "0x0N3"),
             ERC20Token(3, "Token02", address = "0xTW0"),
@@ -726,5 +739,18 @@ class TransactionRepositoryTest : RxTest() {
 
         repository.refreshTokensList().test().assertComplete().assertValue { it }
         repository.refreshTokensList().test().assertComplete().assertValue { !it }
+    }
+
+    @Test
+    fun `Check refreshing tokens list fail`() {
+        val error = Throwable("error")
+        val tokensMap = mapOf(Pair(3, listOf<ERC20Token>()))
+        val updatedTokensMap = Pair(true, tokensMap)
+        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.error(error))
+        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
+        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
+        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
+
+        repository.refreshTokensList().test().assertError(error)
     }
 }

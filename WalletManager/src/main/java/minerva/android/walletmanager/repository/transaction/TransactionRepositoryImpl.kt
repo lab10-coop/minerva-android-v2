@@ -76,7 +76,7 @@ class TransactionRepositoryImpl(
                 }.toList()
                 .map {
                     mutableMapOf<String, List<AccountToken>>().apply {
-                        it.forEach { put(it.first, it.second) }
+                        it.forEach { (privateKey, accountTokens) -> put(privateKey, accountTokens) }
                     }.toMap()
                 }
         }
@@ -115,28 +115,24 @@ class TransactionRepositoryImpl(
             accountsFilter(account) && account.network.isAvailable()
         } ?: throw NotInitializedWalletConfigThrowable()
 
-    private fun downloadTokensListWithBuffer(accounts: List<Account>):
-            Single<List<ERC20Token>> =
+    private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERC20Token>> =
         Observable.range(FIRST_INDEX, accounts.size)
             .map { accounts[it] }
             .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
             .flatMapSingle { downloadTokensList(it) }
             .toList()
-            .map {
-                mutableListOf<ERC20Token>().apply {
-                    it.forEach { addAll(it) }
-                }
-            }
+            .map { mergeLists(it) }
 
     private fun downloadTokensList(accounts: List<Account>): Single<List<ERC20Token>> =
         Observable.range(FIRST_INDEX, accounts.size)
             .flatMapSingle { position -> tokenManager.downloadTokensList(accounts[position]) }
             .toList()
-            .map {
-                mutableListOf<ERC20Token>().apply {
-                    it.forEach { addAll(it) }
-                }
-            }
+            .map { mergeLists(it) }
+
+    private fun mergeLists(lists: List<List<ERC20Token>>): List<ERC20Token> =
+        mutableListOf<ERC20Token>().apply {
+            lists.forEach { addAll(it) }
+        }
 
     override fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable =
         blockchainRepository.transferNativeCoin(

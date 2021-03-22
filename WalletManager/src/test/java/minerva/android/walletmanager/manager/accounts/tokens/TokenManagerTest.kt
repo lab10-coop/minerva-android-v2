@@ -29,9 +29,7 @@ import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
-import org.amshove.kluent.mock
-import org.amshove.kluent.should
-import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.*
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -258,21 +256,21 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
             .assertValue {
-                it.first
-                it.second.size == 3
-                it.second[1]?.get(0)?.logoURI == "logoOneOne"
-                it.second[2]?.get(0)?.logoURI == "logoTwo"
-                it.second[3]?.get(0)?.logoURI == null
+                it.first &&
+                        it.second.size == 3 &&
+                        it.second[1]?.get(0)?.logoURI == "logoOneOne" &&
+                        it.second[2]?.get(0)?.logoURI == "logoTwo" &&
+                        it.second[3]?.get(0)?.logoURI == null
             }
         updatedIcons2
             .test()
             .assertComplete()
             .assertValue {
-                !it.first
-                it.second.size == 3
-                it.second[1]?.get(0)?.logoURI == "logoOne"
-                it.second[2]?.get(0)?.logoURI == "logoTwo"
-                it.second[3]?.get(0)?.logoURI == null
+                !it.first &&
+                        it.second.size == 3 &&
+                        it.second[1]?.get(0)?.logoURI == "logoOneOne" &&
+                        it.second[2]?.get(0)?.logoURI == "logoTwo" &&
+                        it.second[3]?.get(0)?.logoURI == null
             }
     }
 
@@ -371,20 +369,20 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
             .assertValue {
-                it.second.size == 4
-                it.second[0].token.name == "CookieTokenDATS"
-                it.second[0].balance.toPlainString() == "0.000000001"
-                it.second[1].token.name == "SomeSomeTokenDATS"
+                it.second.size == 4 &&
+                it.second[0].token.name == "CookieTokenDATS" &&
+                it.second[0].balance.toPlainString() == "0.000000001" &&
+                it.second[1].token.name == "SomeSomeTokenDATS" &&
                 it.second[1].balance.toPlainString() == "0.000000000000000000000001"
             }
         tokenManager.refreshTokenBalance(atsSigmaAccount)
             .test()
             .assertComplete()
             .assertValue {
-                it.second.size == 3
-                it.second[0].token.name == "CookieTokenATS"
-                it.second[0].balance.toPlainString() == "0.000000001"
-                it.second[1].token.name == "SecondOtherATS"
+                it.second.size == 3 &&
+                it.second[0].token.name == "CookieTokenATS" &&
+                it.second[0].balance.toPlainString() == "0.000000001" &&
+                it.second[1].token.name == "SecondOtherATS" &&
                 it.second[1].balance.toPlainString() == "0.000000000000000001"
             }
     }
@@ -399,10 +397,6 @@ class TokenManagerTest : RxTest() {
 
     private val firstTokenII = ERC20Token(ETH_RIN, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
     private val secondTokenII = ERC20Token(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
-    private val mapII = mapOf(Pair(2, listOf(firstTokenII, secondTokenII)))
-
-    private val firstTokenIII = ERC20Token(ETH_RIN, "CookieTokenTINIII", "COOKiERINIII", "0x000000", "3")
-    private val mapIII = mapOf(Pair(3, listOf(firstTokenII, secondTokenII, firstTokenIII)))
 
     private val tokenRawData = listOf(
         TokenIconDetails(ATS_TAU, "0xC00k1e", "someIconAddress"),

@@ -163,6 +163,21 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
+    fun `get tokens list test`() {
+        whenever(transactionRepository.refreshTokensList()).thenReturn(
+            Single.just(true),
+            Single.just(false),
+            Single.error(Throwable("Refresh tokens list error"))
+        )
+        whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.just(mapOf()))
+
+        viewModel.refreshTokensList()
+        viewModel.refreshTokensList()
+        viewModel.refreshTokensList()
+        verify(transactionRepository, times(1)).refreshTokenBalance()
+    }
+
+    @Test
     fun `get tokens balance error test`() {
         val error = Throwable()
         whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.error(error))
