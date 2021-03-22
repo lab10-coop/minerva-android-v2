@@ -4,18 +4,18 @@ import java.util.*
 
 class TokenVisibilitySettings(private val map: MutableMap<String, MutableMap<String, Boolean>> = mutableMapOf()) {
 
-    fun updateTokenVisibility(networkAddress: String, assetAddress: String, visibility: Boolean): TokenVisibilitySettings {
-        networkAddress.toLowerCase(Locale.ROOT).let { networkAddress ->
-            assetAddress.toLowerCase(Locale.ROOT).let { assetAddress ->
-                (map[networkAddress] ?: mutableMapOf()).apply {
-                    this[assetAddress] = visibility
-                    map[networkAddress] = this
+    fun updateTokenVisibility(accountAddress: String, tokenAddress: String, visibility: Boolean): TokenVisibilitySettings {
+        accountAddress.toLowerCase(Locale.ROOT).let { accountAddress ->
+            tokenAddress.toLowerCase(Locale.ROOT).let { tokenAddress ->
+                (map[accountAddress] ?: mutableMapOf()).apply {
+                    this[tokenAddress] = visibility
+                    map[accountAddress] = this
                 }
             }
         }
         return this
     }
 
-    fun getTokenVisibility(networkAddress: String, tokenAddress: String): Boolean? =
-        map[networkAddress.toLowerCase(Locale.ROOT)]?.get(tokenAddress.toLowerCase(Locale.ROOT))
+    fun getTokenVisibility(accountAddress: String, tokenAddress: String): Boolean? =
+        map[accountAddress.toLowerCase(Locale.ROOT)]?.get(tokenAddress.toLowerCase(Locale.ROOT))
 }

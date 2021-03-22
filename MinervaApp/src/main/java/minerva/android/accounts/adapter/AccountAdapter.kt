@@ -72,14 +72,13 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     fun updateTokenBalances(accountTokenBalances: Map<String, List<AccountToken>>) {
         activeAccounts.filter { !it.isPending }
             .forEachIndexed { index, account ->
-                accountTokenBalances[account.privateKey]?.let { accountsList ->
-                    account.accountTokens = accountsList
-                        .filter {
-                            listener.isTokenVisible(account.address, it).orElse {
-                                listener.saveTokenVisibility(account.address, it.token.address, true)
-                                true
-                            }
+                accountTokenBalances[account.privateKey]?.let { tokensList ->
+                    account.accountTokens = tokensList.filter {
+                        listener.isTokenVisible(account.address, it).orElse {
+                            listener.saveTokenVisibility(account.address, it.token.address, true)
+                            true
                         }
+                    }
                     notifyItemChanged(index)
                 }
             }
