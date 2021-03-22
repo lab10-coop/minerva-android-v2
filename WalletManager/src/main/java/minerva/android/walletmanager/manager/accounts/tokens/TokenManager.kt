@@ -25,7 +25,7 @@ interface TokenManager {
     fun mergeWithLocalTokensList(map: Map<Int, List<ERC20Token>>): Pair<Boolean, Map<Int, List<ERC20Token>>>
 
     /**
-     * return statement: Map<AccountPrivateKey, List<AccountToken>>
+     * return statement: Map<ChainId, List<ERC20Token>>
      */
     fun updateTokenIcons(
         shouldBeUpdated: Boolean,
