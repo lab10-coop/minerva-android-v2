@@ -11,6 +11,7 @@ import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.Space
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -33,7 +34,7 @@ class AccountManagerImpl(
     private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
 ) : AccountManager {
 
-    override val walletConfigLiveData: LiveData<WalletConfig>
+    override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = walletManager.walletConfigLiveData
 
     override fun createRegularAccount(network: Network): Single<String> {

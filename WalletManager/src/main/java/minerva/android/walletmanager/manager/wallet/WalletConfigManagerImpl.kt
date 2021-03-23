@@ -56,13 +56,13 @@ class WalletConfigManagerImpl(
     private var disposable: Disposable? = null
 
     //TODO delete saving WalletConfig as reference - use Room for handling it - MinervaDatabase
-    private val _walletConfigLiveData = MutableLiveData<WalletConfig>()
-    override val walletConfigLiveData: LiveData<WalletConfig> get() = _walletConfigLiveData
+    private val _walletConfigLiveData = MutableLiveData<Event<WalletConfig>>()
+    override val walletConfigLiveData: LiveData<Event<WalletConfig>> get() = _walletConfigLiveData
 
     private val _walletConfigErrorLiveData = MutableLiveData<Event<Throwable>>()
     override val walletConfigErrorLiveData: LiveData<Event<Throwable>> get() = _walletConfigErrorLiveData
 
-    override fun getWalletConfig(): WalletConfig? = walletConfigLiveData.value
+    override fun getWalletConfig(): WalletConfig? = walletConfigLiveData.value?.peekContent()
     override fun isMasterSeedSaved(): Boolean = keystoreRepository.isMasterSeedSaved()
 
     private var localWalletConfigVersion = Int.InvalidIndex
@@ -110,7 +110,7 @@ class WalletConfigManagerImpl(
                     .subscribeBy(
                         onNext = {
                             localWalletConfigVersion = it.version
-                            _walletConfigLiveData.value = it
+                            _walletConfigLiveData.value = Event(it)
                         }, onError = { Timber.e(it) }
                     )
             }
@@ -136,7 +136,7 @@ class WalletConfigManagerImpl(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = { _walletConfigLiveData.value = it },
+                onNext = { _walletConfigLiveData.value = Event(it) },
                 onError = { Timber.e("Loading WalletConfig error: $it") }
             )
     }
@@ -204,20 +204,21 @@ class WalletConfigManagerImpl(
     override fun updateWalletConfig(walletConfig: WalletConfig): Completable =
         if (localStorage.isBackupAllowed) {
             localWalletProvider.saveWalletConfig(WalletConfigToWalletPayloadMapper.map(walletConfig))
+                .observeOn(AndroidSchedulers.mainThread())
                 .map {
-                    _walletConfigLiveData.value = walletConfig
+                    _walletConfigLiveData.value = Event(walletConfig)
                     it
                 }
-                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .flatMap { minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), it) }
                 .map { localStorage.isSynced = true }
                 .ignoreElement()
                 .handleAutomaticBackupFailedError(localStorage)
-                .observeOn(AndroidSchedulers.mainThread())
         } else Completable.error(AutomaticBackupFailedThrowable())
 
     override fun dispose() {
         disposable?.dispose()
+        disposable = null
     }
 
     override fun getSafeAccountNumber(ownerAddress: String): Int {
@@ -279,18 +280,26 @@ class WalletConfigManagerImpl(
 
     override fun saveService(service: Service): Completable {
         getWalletConfig()?.run {
-            if (services.isEmpty()) {
-                return updateWalletConfig(
-                    this.copy(
-                        version = updateVersion,
-                        services = listOf(service)
-                    )
-                )
+            val walletConfig = if (services.isEmpty()) {
+                copy(version = updateVersion, services = listOf(service))
+            } else {
+                getWalletConfigWithUpdatedService(service, this)
             }
-            return updateWalletConfig(getWalletConfigWithUpdatedService(service))
+            return updateWalletConfig(walletConfig)
         }
         throw NotInitializedWalletConfigThrowable()
     }
+
+    private fun getWalletConfigWithUpdatedService(newService: Service, config: WalletConfig): WalletConfig =
+        with(config) {
+            var walletConfig = this.copy(version = updateVersion)
+            walletConfig.services.find { service -> service.issuer == newService.issuer }?.let { service ->
+                service.lastUsed = DateUtils.timestamp
+            }.orElse {
+                walletConfig = walletConfig.copy(services = services + newService)
+            }
+            return walletConfig
+        }
 
     override fun getAccount(accountIndex: Int): Account? {
         getWalletConfig()?.accounts?.forEachIndexed { index, account ->
@@ -424,23 +433,6 @@ class WalletConfigManagerImpl(
                 BitmapMapper.fromBase64(localStorage.getProfileImage(it.profileImageName))
         }
         return identities
-    }
-
-    private fun WalletConfig.getWalletConfigWithUpdatedService(newService: Service): WalletConfig {
-        var walletConfig = WalletConfig(updateVersion, identities, accounts, services, credentials, erc20Tokens)
-        isServiceIsAlreadyConnected(newService)?.let {
-            updateService(it)
-        }.orElse {
-            walletConfig = walletConfig.copy(services = services + newService)
-        }
-        return walletConfig
-    }
-
-    private fun WalletConfig.isServiceIsAlreadyConnected(newService: Service) =
-        services.find { service -> service.issuer == newService.issuer }
-
-    private fun WalletConfig.updateService(service: Service) {
-        services.forEach { if (it == service) it.lastUsed = DateUtils.timestamp }
     }
 
     companion object {

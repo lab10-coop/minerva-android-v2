@@ -5,15 +5,16 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
-import minerva.android.walletmanager.utils.RxTest
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.WalletConfig
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
@@ -106,8 +107,8 @@ class OrderManagerTest : RxTest() {
         NetworkManager.initialize(networks)
         walletConfig.accounts[1].isDeleted = true
         walletConfig.accounts[2].isDeleted = true
-        val walletConfigLD = MutableLiveData<WalletConfig>()
-        walletConfigLD.value = walletConfig
+        val walletConfigLD = MutableLiveData<Event<WalletConfig>>()
+        walletConfigLD.value = Event(walletConfig)
         whenever(walletConfigManager.walletConfigLiveData).thenReturn(walletConfigLD)
         val isIdentityIconShown = orderManager.isOrderAvailable(WalletActionType.IDENTITY)
         isIdentityIconShown shouldBeEqualTo true

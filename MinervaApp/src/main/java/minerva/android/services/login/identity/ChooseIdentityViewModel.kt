@@ -16,8 +16,8 @@ import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.services.login.uitls.LoginUtils.isIdentityValid
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.ServiceQrCode
+import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -38,7 +38,7 @@ class ChooseIdentityViewModel(
     private val _requestedFieldsLiveData = MutableLiveData<Event<Any>>()
     val requestedFieldsLiveData: LiveData<Event<Any>> get() = _requestedFieldsLiveData
 
-    fun getIdentities() = serviceManager.walletConfigLiveData.value?.identities
+    fun getIdentities() = serviceManager.walletConfigLiveData.value?.peekContent()?.identities
 
     fun handleLogin(identity: Identity, serviceQrCode: ServiceQrCode) {
         _loadingLiveData.value = Event(true)

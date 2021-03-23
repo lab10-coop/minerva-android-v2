@@ -9,15 +9,15 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.identity.IdentityManager
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
-import minerva.android.walletmanager.model.minervaprimitives.Identity
-import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.IDENTITY_NAME
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.defs.WalletActionType.Companion.IDENTITY
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 
@@ -26,7 +26,7 @@ class MinervaPrimitivesViewModel(
     private val walletActionsRepository: WalletActionsRepository
 ) : BaseViewModel() {
 
-    val walletConfigLiveData: LiveData<WalletConfig> = identityManager.walletConfigLiveData
+    val walletConfigLiveData: LiveData<Event<WalletConfig>> = identityManager.walletConfigLiveData
 
     private val errorMutableLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = errorMutableLiveData
