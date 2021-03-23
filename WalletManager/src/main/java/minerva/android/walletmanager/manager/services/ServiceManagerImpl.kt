@@ -4,22 +4,24 @@ import androidx.lifecycle.LiveData
 import eu.afse.jsonlogic.JsonLogic
 import io.reactivex.Completable
 import io.reactivex.Single
+import minerva.android.apiProvider.api.ServicesApi
+import minerva.android.apiProvider.model.AccessTokenPayload
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import minerva.android.kotlinUtils.DateUtils
-import minerva.android.apiProvider.api.ServicesApi
-import minerva.android.apiProvider.model.AccessTokenPayload
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.QrCode
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
 import minerva.android.walletmanager.model.mappers.CredentialRequestMapper
 import minerva.android.walletmanager.model.mappers.mapHashMapToQrCodeResponse
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.IncognitoIdentity
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
 import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequirements
 import minerva.android.walletmanager.model.state.ConnectionRequest
@@ -31,7 +33,7 @@ class ServiceManagerImpl(
     private val cryptographyRepository: CryptographyRepository
 ) : ServiceManager {
 
-    override val walletConfigLiveData: LiveData<WalletConfig>
+    override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = walletConfigManager.walletConfigLiveData
 
     override fun decodeJwtToken(token: String): Single<QrCode> =

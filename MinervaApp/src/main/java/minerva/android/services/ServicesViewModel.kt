@@ -11,13 +11,13 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
-import minerva.android.walletmanager.model.minervaprimitives.Service
-import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -30,8 +30,9 @@ class ServicesViewModel(
 
     val servicesLiveData: LiveData<List<Service>> =
         Transformations.map(serviceManager.walletConfigLiveData) {
-            setDappSessionsFlowable(it.services)
-            it.services
+            it.peekContent().services.apply {
+                setDappSessionsFlowable(this)
+            }
         }
 
     private val _serviceRemovedLiveData = MutableLiveData<Event<Unit>>()

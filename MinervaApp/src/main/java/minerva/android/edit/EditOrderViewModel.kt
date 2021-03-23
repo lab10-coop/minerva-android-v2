@@ -15,7 +15,7 @@ class EditOrderViewModel(
     private val orderManager: OrderManager
 ) : BaseViewModel() {
 
-    val walletConfigLiveData: LiveData<WalletConfig> = orderManager.walletConfigLiveData
+    val walletConfigLiveData: LiveData<Event<WalletConfig>> = orderManager.walletConfigLiveData
 
     private val _saveNewOrderLiveData = MutableLiveData<Event<Unit>>()
     val saveNewOrderLiveData: LiveData<Event<Unit>> get() = _saveNewOrderLiveData

@@ -12,10 +12,10 @@ import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.utils.AlertDialogHandler
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.wrapped.startEditIdentityWrappedActivity
 import minerva.android.wrapped.startIdentityAddressWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -37,7 +37,11 @@ class MyIdentitiesFragment : Fragment(R.layout.recycler_view_layout), IdentityFr
         with(viewModel) {
             walletConfigLiveData.observe(
                 viewLifecycleOwner,
-                Observer { identityAdapter.updateList(it.identities.toMutableList(), it.credentials) })
+                Observer {
+                    it.peekContent().apply {
+                        identityAdapter.updateList(identities.toMutableList(), credentials)
+                    }
+                })
             identityRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
         }
     }
