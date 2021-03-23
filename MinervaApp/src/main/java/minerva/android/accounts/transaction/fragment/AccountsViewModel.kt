@@ -12,6 +12,7 @@ import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
@@ -67,8 +68,8 @@ class AccountsViewModel(
     private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
-    private val _tokenBalanceLiveData = MutableLiveData<Map<String, List<AccountToken>>>()
-    val tokenBalanceLiveData: LiveData<Map<String, List<AccountToken>>> get() = _tokenBalanceLiveData
+    private val _tokenBalanceLiveData = MutableLiveData<Unit>()
+    val tokenBalanceLiveData: LiveData<Unit> get() = _tokenBalanceLiveData
 
     private val _noFundsLiveData = MutableLiveData<Event<Unit>>()
     val noFundsLiveData: LiveData<Event<Unit>> get() = _noFundsLiveData
@@ -82,10 +83,12 @@ class AccountsViewModel(
     private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
     val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
     var hasActiveAccount: Boolean = false
+    var activeAccounts: List<Account> = listOf()
 
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
             hasActiveAccount = it.hasActiveAccount
+            activeAccounts = it.accounts.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
             it.accounts
         }
 
@@ -96,8 +99,7 @@ class AccountsViewModel(
     lateinit var tokenVisibilitySettings: TokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
 
-    fun arePendingAccountsEmpty() =
-        transactionRepository.getPendingAccounts().isEmpty()
+    fun arePendingAccountsEmpty() = transactionRepository.getPendingAccounts().isEmpty()
 
     init {
         launchDisposable {
@@ -120,6 +122,7 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
         refreshTokenBalance()
+        refreshTokensList()
         accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
@@ -185,13 +188,31 @@ class AccountsViewModel(
                 )
         }
 
+
+    private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>): Map<String, List<AccountToken>> {
+        activeAccounts.filter { !it.isPending }.forEach { account ->
+            accountTokenBalances[account.privateKey]?.let { tokensList ->
+                account.accountTokens = tokensList.filter {
+                    isTokenVisible(account.address, it).orElse {
+                        saveTokenVisible(account.address, it.token.address, true)
+                        true
+                    }
+                }
+            }
+        }
+        return accountTokenBalances
+    }
+
     fun refreshTokenBalance() =
         launchDisposable {
             transactionRepository.refreshTokenBalance()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _tokenBalanceLiveData.value = it },
+                    onSuccess = {
+                        filterNotVisibleTokens(it)
+                        _tokenBalanceLiveData.value = Unit
+                    },
                     onError = {
                         Timber.e(it)
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
@@ -199,10 +220,23 @@ class AccountsViewModel(
                 )
         }
 
+    fun refreshTokensList() =
+        launchDisposable {
+            transactionRepository.refreshTokensList()
+                .filter { it }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { refreshTokenBalance() },
+                    onError = { Timber.e(it) }
+                )
+        }
+
     private fun handleRemoveAccountErrors(it: Throwable) {
         when (it) {
             is BalanceIsNotEmptyThrowable -> _balanceIsNotEmptyErrorLiveData.value = Event(it)
-            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value = Event(it)
+            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value =
+                Event(it)
             is IsNotSafeAccountMasterOwnerThrowable -> _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
             is AutomaticBackupFailedThrowable -> _automaticBackupErrorLiveData.value = Event(it)
             else -> _errorLiveData.value = Event(Throwable(it.message))
@@ -294,7 +328,7 @@ class AccountsViewModel(
             it && accountToken.balance > BigDecimal.ZERO
         }
 
-    fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
+    private fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
             tokenVisibilitySettings.updateTokenVisibility(networkAddress, tokenAddress, visibility)
         )

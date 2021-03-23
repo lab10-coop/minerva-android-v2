@@ -8,12 +8,9 @@ import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.transactions.Balance
-import java.math.BigDecimal
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
@@ -22,9 +19,6 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     private var activeAccounts = listOf<Account>()
     private var rawAccounts = listOf<Account>()
     private var openAccounts = mutableListOf<Boolean>()
-
-    val activeAccountsList
-        get() = activeAccounts
 
     override fun getItemCount(): Int = activeAccounts.size
 
@@ -43,9 +37,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         }
     }
 
-    fun updateList(data: List<Account>, areMainNetsEnabled: Boolean) {
-        rawAccounts = data
-        activeAccounts = data.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
+    fun updateList(accounts: List<Account>, activeAccounts: List<Account>) {
+        rawAccounts = accounts
+        this.activeAccounts = activeAccounts
         openAccounts = activeAccounts.map { false }.toMutableList()
         notifyDataSetChanged()
     }
@@ -69,20 +63,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         }
     }
 
-    fun updateTokenBalances(accountTokenBalances: Map<String, List<AccountToken>>) {
-        activeAccounts.filter { !it.isPending }
-            .forEachIndexed { index, account ->
-                accountTokenBalances[account.privateKey]?.let { accountsList ->
-                    account.accountTokens = accountsList
-                        .filter {
-                            listener.isTokenVisible(account.address, it).orElse {
-                                listener.saveTokenVisibility(account.address, it.token.address, true)
-                                true
-                            }
-                        }
-                    notifyItemChanged(index)
-                }
-            }
+    fun updateTokenBalances() {
+        notifyDataSetChanged()
     }
 
     fun setPending(index: Int, isPending: Boolean, areMainNetsEnabled: Boolean) {

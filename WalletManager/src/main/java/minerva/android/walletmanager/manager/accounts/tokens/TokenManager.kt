@@ -14,23 +14,24 @@ interface TokenManager {
     /**
      * return statement: Map<AccountPrivateKey, List<AccountToken>>
      */
-    fun saveTokens(shouldBeSaved: Boolean, map: Map<String, List<AccountToken>>): Completable
+    fun saveTokens(shouldBeSaved: Boolean, map: Map<Int, List<ERC20Token>>): Single<Boolean>
     fun getTokenIconURL(chainId: Int, address: String): Single<String>
-    fun prepareCurrentTokenList(chainId: Int, tokenList: List<AccountToken>): List<AccountToken>
+    fun sortTokensByChainId(tokenList: List<ERC20Token>): Map<Int, List<ERC20Token>>
 
     /**
-     * arguments: Map<AccountPrivateKey, List<AccountToken>>
-     *     return statement: Pair<isUpdated, Map<AccountPrivateKey<List<AccountToken>>>
+     * arguments: Map<ChainId, List<ERC20Token>>
+     *     return statement: Pair<isUpdated, Map<ChainId<List<ERC20Token>>>
      */
-    fun updateTokensFromLocalStorage(map: Map<String, List<AccountToken>>): Pair<Boolean, Map<String, List<AccountToken>>>
+    fun mergeWithLocalTokensList(map: Map<Int, List<ERC20Token>>): Pair<Boolean, Map<Int, List<ERC20Token>>>
 
     /**
-     * return statement: Map<AccountPrivateKey, List<AccountToken>>
+     * return statement: Map<ChainId, List<ERC20Token>>
      */
     fun updateTokenIcons(
         shouldBeUpdated: Boolean,
-        accountTokens: Map<String, List<AccountToken>>
-    ): Single<Pair<Boolean, Map<String, List<AccountToken>>>>
+        accountTokens: Map<Int, List<ERC20Token>>
+    ): Single<Pair<Boolean, Map<Int, List<ERC20Token>>>>
 
-    fun refreshTokenBalance(account: Account): Single<List<AccountToken>>
+    fun refreshTokenBalance(account: Account): Single<Pair<String, List<AccountToken>>>
+    fun downloadTokensList(account: Account): Single<List<ERC20Token>>
 }
