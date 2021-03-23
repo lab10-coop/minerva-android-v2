@@ -2,18 +2,21 @@ package minerva.android.walletmanager.manager.order
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.exception.NotSupportedAccountThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.model.minervaprimitives.*
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.wallet.WalletConfig
 
 class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : OrderManager {
 
-    override val walletConfigLiveData: LiveData<WalletConfig>
+    override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = walletConfigManager.walletConfigLiveData
 
     override val areMainNetsEnabled
@@ -50,7 +53,7 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
         }
 
     override fun isOrderAvailable(type: Int): Boolean {
-        walletConfigLiveData.value?.let { config ->
+        walletConfigManager.getWalletConfig()?.let { config ->
             return when (type) {
                 WalletActionType.IDENTITY -> config.identities.filter { !it.isDeleted }.size > ONE_ELEMENT
                 WalletActionType.ACCOUNT -> config.accounts.filter { !it.isDeleted && it.network.testNet != areMainNetsEnabled }.size > ONE_ELEMENT

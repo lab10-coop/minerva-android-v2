@@ -82,14 +82,16 @@ class AccountsViewModel(
 
     private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
     val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
-    var hasActiveAccount: Boolean = false
+    var hasAvailableAccounts: Boolean = false
     var activeAccounts: List<Account> = listOf()
 
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
-            hasActiveAccount = it.hasActiveAccount
-            activeAccounts = it.accounts.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
-            it.accounts
+            with(it.peekContent()) {
+                hasAvailableAccounts = hasActiveAccount
+                activeAccounts = accounts.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
+                accounts
+            }
         }
 
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()

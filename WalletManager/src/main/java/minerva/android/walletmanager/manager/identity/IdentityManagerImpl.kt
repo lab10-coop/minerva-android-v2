@@ -7,6 +7,7 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.kotlinUtils.mapper.BitmapMapper
 import minerva.android.walletmanager.exception.CannotRemoveLastIdentityThrowable
@@ -14,11 +15,11 @@ import minerva.android.walletmanager.exception.NoIdentityToRemoveThrowable
 import minerva.android.walletmanager.exception.NoLoggedInIdentityThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.CredentialQrCode
-import minerva.android.walletmanager.model.minervaprimitives.Identity
-import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 
 class IdentityManagerImpl(
@@ -27,7 +28,7 @@ class IdentityManagerImpl(
     private val localStorage: LocalStorage
 ) : IdentityManager {
 
-    override val walletConfigLiveData: LiveData<WalletConfig>
+    override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = walletConfigManager.walletConfigLiveData
 
     override fun saveIdentity(identity: Identity): Completable {
