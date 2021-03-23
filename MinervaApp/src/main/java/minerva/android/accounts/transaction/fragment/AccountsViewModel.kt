@@ -68,8 +68,8 @@ class AccountsViewModel(
     private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
-    private val _tokenBalanceLiveData = MutableLiveData<Map<String, List<AccountToken>>>()
-    val tokenBalanceLiveData: LiveData<Map<String, List<AccountToken>>> get() = _tokenBalanceLiveData
+    private val _tokenBalanceLiveData = MutableLiveData<Unit>()
+    val tokenBalanceLiveData: LiveData<Unit> get() = _tokenBalanceLiveData
 
     private val _noFundsLiveData = MutableLiveData<Event<Unit>>()
     val noFundsLiveData: LiveData<Event<Unit>> get() = _noFundsLiveData
@@ -209,7 +209,10 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _tokenBalanceLiveData.value = filterNotVisibleTokens(it) },
+                    onSuccess = {
+                        filterNotVisibleTokens(it)
+                        _tokenBalanceLiveData.value = Unit
+                    },
                     onError = {
                         Timber.e(it)
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
@@ -220,12 +223,11 @@ class AccountsViewModel(
     fun refreshTokensList() =
         launchDisposable {
             transactionRepository.refreshTokensList()
+                .filter { it }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { wasTokenListUpdated -> if (wasTokenListUpdated) {
-                        refreshTokenBalance()
-                    } },
+                    onSuccess = { refreshTokenBalance() },
                     onError = { Timber.e(it) }
                 )
         }
