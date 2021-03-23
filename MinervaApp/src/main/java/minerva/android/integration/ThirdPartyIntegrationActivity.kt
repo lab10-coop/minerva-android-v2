@@ -18,9 +18,9 @@ import minerva.android.integration.listener.PaymentCommunicationListener
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
+import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.SIGNED_PAYLOAD
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
-import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.SIGNED_PAYLOAD
 import minerva.android.walletmanager.model.state.ConnectionRequest
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -39,18 +39,27 @@ class ThirdPartyIntegrationActivity : AppCompatActivity(), PaymentCommunicationL
     private fun checkIfWalletExists(jwt: String?) {
         with(viewModel) {
             if (isMasterSeedAvailable()) {
-                initWalletConfig()
-                prepareObservers()
                 setupActionBar()
-                decodeJwtToken(jwt)
+                prepareObservers(jwt)
+                initWalletConfig()
             } else {
                 sendResult(ON_WALLET_NOT_INITIALISED)
             }
         }
     }
 
-    private fun prepareObservers() {
+    private fun prepareObservers(jwt: String?) {
         viewModel.apply {
+            walletConfigLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver {
+                if (shouldDecodeJwt) {
+                    shouldDecodeJwt = false
+                    decodeJwtToken(jwt)
+                }
+            })
+            walletConfigErrorLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver {
+                sendResult(ON_WALLET_NOT_INITIALISED)
+            })
+
             showServiceConnectionRequestLiveData.observe(this@ThirdPartyIntegrationActivity, EventObserver {
                 when (it) {
                     is ConnectionRequest.ServiceNotConnected -> connectService(it)

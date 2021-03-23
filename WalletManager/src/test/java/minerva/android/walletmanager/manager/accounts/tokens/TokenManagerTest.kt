@@ -22,19 +22,14 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
-import minerva.android.walletmanager.model.defs.CredentialType
-import minerva.android.walletmanager.model.minervaprimitives.Identity
-import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
-import org.amshove.kluent.mock
-import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.*
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -102,42 +97,17 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Test updating token from local storage`() {
-        NetworkManager.initialize(DataProvider.networks)
-        whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
-        val result = tokenManager.updateTokensFromLocalStorage(map)
-        result.first shouldBeEqualTo true
-        result.second.size shouldBeEqualTo 1
-        result.second["ATS_TAU"]?.size shouldBeEqualTo 2
-        result.second["ATS_TAU"]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
-        result.second["ATS_TAU"]?.get(1)?.token?.logoURI shouldBeEqualTo null
-        val resultII = tokenManager.updateTokensFromLocalStorage(mapII)
-        resultII.first shouldBeEqualTo false
-        resultII.second.size shouldBeEqualTo 1
-        resultII.second["ETH_RIN"]?.size shouldBeEqualTo 2
-        resultII.second["ETH_RIN"]?.get(1)?.balance?.toPlainString() shouldBeEqualTo "0.1"
-        resultII.second["ETH_RIN"]?.get(1)?.token?.logoURI shouldBeEqualTo "someLogoURI_II"
-        val resultIII = tokenManager.updateTokensFromLocalStorage(mapIII)
-        resultIII.first shouldBeEqualTo true
-        resultIII.second.size shouldBeEqualTo 1
-        resultIII.second["ETH_RIN"]?.size shouldBeEqualTo 3
-        resultIII.second["ETH_RIN"]?.get(1)?.token?.logoURI shouldBeEqualTo "someLogoURI_II"
-        resultIII.second["ETH_RIN"]?.get(2)?.token?.logoURI shouldBeEqualTo null
-    }
-
-    @Test
     fun `Test tokens with online logos data without error`() {
         NetworkManager.initialize(DataProvider.networks)
         whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(tokenRawData))
         tokenManager.updateTokenIcons(false, map).test().assertComplete().assertNoErrors()
             .assertValue {
-                map == map
-                map["ATS_TAU"]?.get(0)?.token?.logoURI == null
+                map[1]?.get(0)?.logoURI == null
             }
         tokenManager.updateTokenIcons(true, map).test().assertComplete().assertNoErrors()
             .assertValue {
-                map["ATS_TAU"]?.get(0)?.token?.logoURI == "someIconAddress"
-                map["ATS_TAU"]?.get(1)?.token?.logoURI == "someIconAddressII"
+                map[1]?.get(0)?.logoURI == "someIconAddress"
+                map[1]?.get(1)?.logoURI == "someIconAddressII"
             }
     }
 
@@ -152,7 +122,7 @@ class TokenManagerTest : RxTest() {
     fun `Test saving tokens data`() {
         NetworkManager.initialize(DataProvider.networks)
         val map = mapOf(
-            Pair("Some", listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN)))
+            Pair(1, listOf(firstTokenII, secondTokenII))
         )
         tokenManager.saveTokens(true, map)
             .test()
@@ -185,42 +155,133 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check mapping from raw addresses to tokens`() {
-        NetworkManager.initialize(DataProvider.networks)
-        whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
-        val rawTokens = listOf(
-            AccountToken(
-                ERC20Token(chainId = 0, name = "CookieTokenATS", address = "0xC00k1e", decimals = "2"),
-                10000.toBigDecimal()
-            ),
-            AccountToken(
-                ERC20Token(chainId = 0, name = "CookieTokenOther2ATS", address = "0x0th3r2", decimals = "3"),
-                1000000000.toBigDecimal()
+    fun `Check sorting ERC20Token list into map`() {
+        val tokens = listOf(
+            ERC20Token(1, "chainOne", address = "0x0N3"),
+            ERC20Token(2, "chainTwo", address = "0x0N3"),
+            ERC20Token(2, "chainTwoTwo", address = "0x0N3"),
+            ERC20Token(3, "chainThree", address = "0x0N3"),
+            ERC20Token(3, "chainThreeThree", address = "0x0N3"),
+            ERC20Token(3, "chainOneThreeThreeThree", address = "0x0N3")
+        )
+
+        val resultMap = tokenManager.sortTokensByChainId(tokens)
+        resultMap.size shouldBeEqualTo 3
+        resultMap[1]?.size shouldBeEqualTo 1
+        resultMap[1]?.get(0)?.name shouldBeEqualTo "chainOne"
+        resultMap[2]?.size shouldBeEqualTo 2
+        resultMap[2]?.get(1)?.name shouldBeEqualTo "chainTwoTwo"
+        resultMap[3]?.size shouldBeEqualTo 3
+        resultMap[3]?.get(2)?.name shouldBeEqualTo "chainOneThreeThreeThree"
+
+        val resultEmptyMap = tokenManager.sortTokensByChainId(listOf())
+        resultEmptyMap.size shouldBeEqualTo 0
+    }
+
+    @Test
+    fun `Check merging ERC20Token maps`() {
+        val tokensSetOne = tokenManager.sortTokensByChainId(
+            listOf(
+                ERC20Token(1, "tokenOneOne", address = "0x0NE0N3"),
+                ERC20Token(2, "tokenTwoOne", address = "0xTW00N3"),
+                ERC20Token(2, "tokenTwoTwo", address = "0xTW0TW0"),
+                ERC20Token(3, "tokenThreeOne", address = "0xTHR330N3"),
+                ERC20Token(3, "tokenThreeTwo", address = "0xTHR33TW0"),
+                ERC20Token(3, "tokenThreeThree", address = "0xTHR33THR33")
             )
         )
 
-        val tokensATS = tokenManager.prepareCurrentTokenList(ATS_SIGMA, rawTokens)
-        tokensATS.size shouldBeEqualTo 4
-        tokensATS[0].token.name shouldBeEqualTo "CookieTokenOther2ATS"
-        tokensATS[0].balance.toPlainString() shouldBeEqualTo "1000000"
-        tokensATS[1].token.name shouldBeEqualTo "CookieTokenATS"
-        tokensATS[1].balance.toPlainString() shouldBeEqualTo "100"
-        tokensATS[2].token.name shouldBeEqualTo "SecondOtherATS"
-        tokensATS[2].balance.toPlainString() shouldBeEqualTo "0"
-        tokensATS[3].token.name shouldBeEqualTo "OtherTokenATS"
-        tokensATS[3].balance shouldBeEqualTo BigDecimal.ZERO
+        val tokenSetTwo = tokenManager.sortTokensByChainId(
+            listOf(
+                ERC20Token(1, "tokenOneOne", address = "0x0NE0N3")
+            )
+        )
 
-        val tokenETH = tokenManager.prepareCurrentTokenList(ETH_RIN, rawTokens)
-        tokenETH.size shouldBeEqualTo 4
-        tokenETH[0].token.name shouldBeEqualTo "CookieTokenOther2ATS"
-        tokenETH[0].balance.toPlainString() shouldBeEqualTo "1000000"
-        tokenETH[1].token.name shouldBeEqualTo "CookieTokenATS"
-        tokenETH[1].balance.toPlainString() shouldBeEqualTo "100"
-        tokenETH[2].token.name shouldBeEqualTo "OtherTokenDETH"
-        tokenETH[2].balance.toPlainString() shouldBeEqualTo "0"
-        tokenETH[3].token.name shouldBeEqualTo "OtherTokenETH"
-        tokenETH[3].balance.toPlainString() shouldBeEqualTo "0"
+        val tokenSetThree = tokenManager.sortTokensByChainId(
+            listOf(
+                ERC20Token(5, "tokenFive", address = "0xFIV3")
+            )
+        )
+
+        val localTokens = tokenManager.sortTokensByChainId(
+            listOf(
+                ERC20Token(1, "tokenOneOne", address = "0x0NE0N3", logoURI = "logoOneOne"),
+                ERC20Token(2, "tokenTwo", address = "0xS2Two01"),
+                ERC20Token(3, "tokenThreeThree", address = "0xTHR33THR33", logoURI = "bb")
+            )
+        )
+
+        whenever(walletManager.getWalletConfig()).thenReturn(WalletConfig(1, erc20Tokens = localTokens))
+        val mergedTokenMap01 = tokenManager.mergeWithLocalTokensList(tokensSetOne)
+        mergedTokenMap01.first shouldBeEqualTo true
+        mergedTokenMap01.second[1]?.size shouldBeEqualTo 1
+        mergedTokenMap01.second[1]?.get(0)?.logoURI shouldBeEqualTo "logoOneOne"
+        mergedTokenMap01.second[2]?.size shouldBeEqualTo 3
+        mergedTokenMap01.second[2]?.get(0)?.name shouldBeEqualTo "tokenTwo"
+        mergedTokenMap01.second[2]?.get(2)?.name shouldBeEqualTo "tokenTwoTwo"
+        mergedTokenMap01.second[2]?.get(2)?.logoURI shouldBeEqualTo null
+        mergedTokenMap01.second[3]?.size shouldBeEqualTo 3
+        mergedTokenMap01.second[3]?.get(0)?.name shouldBeEqualTo "tokenThreeThree"
+        mergedTokenMap01.second[3]?.get(0)?.logoURI shouldBeEqualTo "bb"
+        mergedTokenMap01.second[3]?.get(1)?.name shouldBeEqualTo "tokenThreeOne"
+        mergedTokenMap01.second[3]?.get(2)?.name shouldBeEqualTo "tokenThreeTwo"
+        mergedTokenMap01.second[3]?.get(2)?.logoURI shouldBeEqualTo null
+
+        val mergedTokenMap02 = tokenManager.mergeWithLocalTokensList(tokenSetTwo)
+        mergedTokenMap02.first shouldBeEqualTo false
+        mergedTokenMap02.second[1]?.size shouldBeEqualTo 1
+        mergedTokenMap02.second[1]?.get(0)?.logoURI shouldBeEqualTo "logoOneOne"
+
+        val mergedTokenMap03 = tokenManager.mergeWithLocalTokensList(tokenSetThree)
+        mergedTokenMap03.first shouldBeEqualTo true
+        mergedTokenMap03.second.size shouldBeEqualTo 4
+        mergedTokenMap03.second[5]?.get(0)?.name shouldBeEqualTo "tokenFive"
     }
+
+    @Test
+    fun `Check that tokens list has icon updates`() {
+        val tokens = tokenManager.sortTokensByChainId(
+            listOf(
+                ERC20Token(1, "tokenOneOne", address = "0x0NE0N3", logoURI = "logoOne"),
+                ERC20Token(2, "tokenTwo", address = "0xS2Two01", logoURI = "logoTwo"),
+                ERC20Token(3, "tokenThreeThree", address = "0xTHR33THR33", logoURI = null)
+            )
+        )
+
+        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(data))
+        val updatedIcons = tokenManager.updateTokenIcons(true, tokens)
+        val updatedIcons2 = tokenManager.updateTokenIcons(false, tokens)
+
+        updatedIcons
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.first &&
+                        it.second.size == 3 &&
+                        it.second[1]?.get(0)?.logoURI == "logoOneOne" &&
+                        it.second[2]?.get(0)?.logoURI == "logoTwo" &&
+                        it.second[3]?.get(0)?.logoURI == null
+            }
+        updatedIcons2
+            .test()
+            .assertComplete()
+            .assertValue {
+                !it.first &&
+                        it.second.size == 3 &&
+                        it.second[1]?.get(0)?.logoURI == "logoOneOne" &&
+                        it.second[2]?.get(0)?.logoURI == "logoTwo" &&
+                        it.second[3]?.get(0)?.logoURI == null
+            }
+    }
+
+    private val data = listOf(
+        TokenIconDetails(1, "0x4ddre55", "LogoUri"),
+        TokenIconDetails(1, "0x0NE0N3", "logoOneOne"),
+        TokenIconDetails(2, "0x4ddre55", "LogoUri2"),
+        TokenIconDetails(2, "0xS2Two01", "logoTwo"),
+        TokenIconDetails(23, "---", "---")
+
+    )
 
     @Test
     fun `Check getting Token Icon URL method`() {
@@ -285,89 +346,57 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `Test refreshing token balance`() {
-        val notEtherscanAccount = Account(1, chainId = ATS_TAU, address = "0xADDRESSxONE")
-        val etherscanAccount = Account(1, chainId = ETH_RIN, address = "0xADDRESSxTWO")
-        val tokenBalances = listOf(
-            TokenBalance("t01", "s01", "name01", "2", "0xC00KiE01", "1000"),
-            TokenBalance("t02", "s02", "name02", "3", "0xC00KiE02", "100000")
-        )
-        val tokenResponse = TokenBalanceResponse("OK", tokenBalances, "response N O W !")
+        val atsTauAccount = Account(1, chainId = ATS_TAU, address = "0xADDRESSxONE")
+        val tauTokenResponse01 = Observable.just(Pair("0xC00k1eN", 10000.toBigDecimal()))
+        val tauTokenResponse02 = Observable.just(Pair("0xS0m3T0k3N", 100000000.toBigDecimal()))
+        val tauTokenResponse03 = Observable.just(Pair("0xC00k1e", 100000000.toBigDecimal()))
+        val tauTokenResponse04 = Observable.just(Pair("0x0th3r", 100000000.toBigDecimal()))
 
-        val tokenTXs = listOf(
-            TokenTx(tokenName = "name03", address = "0xC00KiE03", tokenDecimal = "3"),
-            TokenTx(tokenName = "name04", address = "0xC00KiE04", tokenDecimal = "6")
-        )
-
-        val tokenTxResponse = TokenTxResponse("OK", tokenTXs, "response N O W !")
-        val refreshTokenResponse01 = Observable.just(Pair("0xC00KiE03", 10000.toBigDecimal()))
-        val refreshTokenResponse02 = Observable.just(Pair("0xC00KiE04", 100000000.toBigDecimal()))
+        val atsSigmaAccount = Account(2, chainId = ATS_SIGMA, address = "0xADDRESSxTWO")
+        val sigmaTokenResponse01 = Observable.just(Pair("0xC00k1e", 10000.toBigDecimal()))
+        val sigmaTokenResponse02 = Observable.just(Pair("0x0th3r22", 10000.toBigDecimal()))
+        val sigmaTokenResponse03 = Observable.just(Pair("0x0th3r", 10000.toBigDecimal()))
 
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenBalance(any())).thenReturn(Single.just(tokenResponse))
-        whenever(blockchainRepository.refreshTokenBalance(any(), any(), any(), any())).thenReturn(
-            refreshTokenResponse01,
-            refreshTokenResponse02
-        )
-        whenever(cryptoApi.getTokenTx(any())).thenReturn(Single.just(tokenTxResponse))
-        tokenManager.refreshTokenBalance(notEtherscanAccount)
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.size == 2
-                it[0].token.name == "name01"
-                it[0].balance.toPlainString() == "10"
-                it[1].token.name == "name02"
-                it[1].balance.toPlainString() == "100"
-            }
-        tokenManager.refreshTokenBalance(etherscanAccount)
-            .test()
-            .assertComplete()
-            .assertValue {
-                it.size == 2
-                it[0].token.name == "name03"
-                it[0].balance.toPlainString() == "10"
-                it[1].token.name == "name04"
-                it[1].balance.toPlainString() == "100"
-            }
+        whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
 
+        whenever(blockchainRepository.refreshTokenBalance(any(), any(), any(), any())).thenReturn(
+            tauTokenResponse01, tauTokenResponse02, tauTokenResponse03, tauTokenResponse04,
+            sigmaTokenResponse01, sigmaTokenResponse02, sigmaTokenResponse03
+        )
+
+        tokenManager.refreshTokenBalance(atsTauAccount)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.second.size == 4 &&
+                it.second[0].token.name == "CookieTokenDATS" &&
+                it.second[0].balance.toPlainString() == "0.000000001" &&
+                it.second[1].token.name == "SomeSomeTokenDATS" &&
+                it.second[1].balance.toPlainString() == "0.000000000000000000000001"
+            }
+        tokenManager.refreshTokenBalance(atsSigmaAccount)
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.second.size == 3 &&
+                it.second[0].token.name == "CookieTokenATS" &&
+                it.second[0].balance.toPlainString() == "0.000000001" &&
+                it.second[1].token.name == "SecondOtherATS" &&
+                it.second[1].balance.toPlainString() == "0.000000000000000001"
+            }
     }
 
     private val commitData: List<CommitElement>
         get() = listOf(CommitElement(Commit(Committer("2021-01-29T19:56:02Z")))) //1611950162000 in mills
 
 
-    private val data = listOf(
-        TokenIconDetails(1, "0x4ddre55", "LogoUri"),
-        TokenIconDetails(2, "0x4ddre55", "LogoUri2")
-    )
-
     private val firstToken = ERC20Token(ATS_TAU, "CookieToken", "COOKiE", "0xC00k1e", "1")
     private val secondToken = ERC20Token(ATS_TAU, "CookieTokenII", "COOKiE", "0xC00k1eII", "2")
-    private val map = mapOf(
-        Pair(
-            "ATS_TAU",
-            listOf(
-                AccountToken(firstToken, BigDecimal.ONE),
-                AccountToken(secondToken, BigDecimal.TEN))
-        )
-    )
+    private val map = mapOf(Pair(1, listOf(firstToken, secondToken)))
 
     private val firstTokenII = ERC20Token(ETH_RIN, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
     private val secondTokenII = ERC20Token(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
-    private val mapII = mapOf(
-        Pair(
-            "ETH_RIN",
-            listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN))
-        )
-    )
-
-    private val firstTokenIII = ERC20Token(ETH_RIN, "CookieTokenTINIII", "COOKiERINIII", "0x000000", "3")
-    private val mapIII = mapOf(
-        Pair(
-            "ETH_RIN",
-            listOf(AccountToken(firstTokenII, BigDecimal.ONE), AccountToken(secondTokenII, BigDecimal.TEN), AccountToken(firstTokenIII, BigDecimal.ZERO))
-        )
-    )
 
     private val tokenRawData = listOf(
         TokenIconDetails(ATS_TAU, "0xC00k1e", "someIconAddress"),

@@ -19,6 +19,7 @@ interface TransactionRepository {
      * return statement: Map<AccountPrivateKey, List<AccountToken>>
      */
     fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
+    fun refreshTokensList(): Single<Boolean>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable
     fun transferERC20Token(chainId: Int, transaction: Transaction): Completable
