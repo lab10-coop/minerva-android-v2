@@ -189,8 +189,8 @@ class AccountsViewModel(
         }
 
 
-    private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>) =
-        activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
+    private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>): Map<String, List<AccountToken>> {
+        activeAccounts.filter { !it.isPending }.forEach { account ->
             accountTokenBalances[account.privateKey]?.let { tokensList ->
                 account.accountTokens = tokensList.filter {
                     isTokenVisible(account.address, it).orElse {
@@ -200,6 +200,8 @@ class AccountsViewModel(
                 }
             }
         }
+        return accountTokenBalances
+    }
 
     fun refreshTokenBalance() =
         launchDisposable {
@@ -207,11 +209,7 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    //TODO refactor it!
-                    onSuccess = {
-                        filterNotVisibleTokens(it)
-                        _tokenBalanceLiveData.value = it
-                    },
+                    onSuccess = { _tokenBalanceLiveData.value = filterNotVisibleTokens(it) },
                     onError = {
                         Timber.e(it)
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
@@ -225,7 +223,9 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { wasTokenListUpdated -> if (wasTokenListUpdated) refreshTokenBalance() },
+                    onSuccess = { wasTokenListUpdated -> if (wasTokenListUpdated) {
+                        refreshTokenBalance()
+                    } },
                     onError = { Timber.e(it) }
                 )
         }
@@ -326,7 +326,7 @@ class AccountsViewModel(
             it && accountToken.balance > BigDecimal.ZERO
         }
 
-    fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
+    private fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
             tokenVisibilitySettings.updateTokenVisibility(networkAddress, tokenAddress, visibility)
         )

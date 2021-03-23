@@ -88,13 +88,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onExportPrivateKey(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
 
-    override fun isTokenVisible(networkAddress: String, accountToken: AccountToken): Boolean? =
-        viewModel.isTokenVisible(networkAddress, accountToken)
-
-    override fun saveTokenVisibility(networkAddress: String, tokenAddress: String, visibility: Boolean) {
-        viewModel.saveTokenVisible(networkAddress, tokenAddress, visibility)
-    }
-
     fun setPendingAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)
     }

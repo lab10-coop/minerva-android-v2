@@ -13,6 +13,4 @@ interface AccountsFragmentToAdapterListener {
     fun onWalletConnect(index: Int)
     fun onManageTokens(index: Int)
     fun onExportPrivateKey(account: Account)
-    fun isTokenVisible(networkAddress: String, accountToken: AccountToken): Boolean?
-    fun saveTokenVisibility(networkAddress: String, tokenAddress: String, visibility: Boolean)
 }
