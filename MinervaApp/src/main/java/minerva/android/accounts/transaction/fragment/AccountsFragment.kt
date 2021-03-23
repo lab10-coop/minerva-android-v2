@@ -18,7 +18,6 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
@@ -87,13 +86,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
 
     override fun onExportPrivateKey(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
-
-    override fun isTokenVisible(networkAddress: String, accountToken: AccountToken): Boolean? =
-        viewModel.isTokenVisible(networkAddress, accountToken)
-
-    override fun saveTokenVisibility(networkAddress: String, tokenAddress: String, visibility: Boolean) {
-        viewModel.saveTokenVisible(networkAddress, tokenAddress, visibility)
-    }
 
     fun setPendingAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)

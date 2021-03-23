@@ -8,10 +8,8 @@ import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.inBounds
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.transactions.Balance
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :

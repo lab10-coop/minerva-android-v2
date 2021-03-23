@@ -68,8 +68,8 @@ class AccountsViewModel(
     private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
-    private val _tokenBalanceLiveData = MutableLiveData<Map<String, List<AccountToken>>>()
-    val tokenBalanceLiveData: LiveData<Map<String, List<AccountToken>>> get() = _tokenBalanceLiveData
+    private val _tokenBalanceLiveData = MutableLiveData<Unit>()
+    val tokenBalanceLiveData: LiveData<Unit> get() = _tokenBalanceLiveData
 
     private val _noFundsLiveData = MutableLiveData<Event<Unit>>()
     val noFundsLiveData: LiveData<Event<Unit>> get() = _noFundsLiveData
@@ -189,8 +189,8 @@ class AccountsViewModel(
         }
 
 
-    private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>) =
-        activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
+    private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>): Map<String, List<AccountToken>> {
+        activeAccounts.filter { !it.isPending }.forEach { account ->
             accountTokenBalances[account.privateKey]?.let { tokensList ->
                 account.accountTokens = tokensList.filter {
                     isTokenVisible(account.address, it).orElse {
@@ -200,6 +200,8 @@ class AccountsViewModel(
                 }
             }
         }
+        return accountTokenBalances
+    }
 
     fun refreshTokenBalance() =
         launchDisposable {
@@ -207,10 +209,9 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    //TODO refactor it!
                     onSuccess = {
                         filterNotVisibleTokens(it)
-                        _tokenBalanceLiveData.value = it
+                        _tokenBalanceLiveData.value = Unit
                     },
                     onError = {
                         Timber.e(it)
@@ -222,10 +223,11 @@ class AccountsViewModel(
     fun refreshTokensList() =
         launchDisposable {
             transactionRepository.refreshTokensList()
+                .filter { it }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { wasTokenListUpdated -> if (wasTokenListUpdated) refreshTokenBalance() },
+                    onSuccess = { refreshTokenBalance() },
                     onError = { Timber.e(it) }
                 )
         }
@@ -326,7 +328,7 @@ class AccountsViewModel(
             it && accountToken.balance > BigDecimal.ZERO
         }
 
-    fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
+    private fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
             tokenVisibilitySettings.updateTokenVisibility(networkAddress, tokenAddress, visibility)
         )

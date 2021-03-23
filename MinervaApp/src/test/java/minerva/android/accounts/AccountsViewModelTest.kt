@@ -41,8 +41,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
     private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
 
-    private val tokensBalanceObserver: Observer<Map<String, List<AccountToken>>> = mock()
-    private val tokensBalanceCaptor: KArgumentCaptor<Map<String, List<AccountToken>>> = argumentCaptor()
+    private val tokensBalanceObserver: Observer<Unit> = mock()
+    private val tokensBalanceCaptor: KArgumentCaptor<Unit> = argumentCaptor()
 
     private val noFundsObserver: Observer<Event<Unit>> = mock()
     private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -158,7 +158,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel.refreshTokenBalance()
         tokensBalanceCaptor.run {
             verify(tokensBalanceObserver).onChanged(capture())
-            (firstValue["test"] ?: error(""))[0].token.name shouldBe "name"
         }
     }
 

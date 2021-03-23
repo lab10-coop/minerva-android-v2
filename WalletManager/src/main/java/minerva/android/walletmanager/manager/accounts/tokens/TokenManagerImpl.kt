@@ -90,9 +90,8 @@ class TokenManagerImpl(
     ): Map<Int, List<ERC20Token>> =
         mutableMapOf<Int, MutableList<ERC20Token>>().apply {
             tokenList.forEach { token ->
-                get(token.chainId)?.let {
-                    it.add(token)
-                }.orElse { put(token.chainId, mutableListOf(token)) }
+                get(token.chainId)?.add(token)
+                    .orElse { put(token.chainId, mutableListOf(token)) }
             }
         }
 
@@ -129,6 +128,7 @@ class TokenManagerImpl(
             }
         } else Single.just(Pair(false, accountTokens))
 
+    //TODO add refreshing optimalization for tokens for current account
     override fun refreshTokenBalance(account: Account): Single<Pair<String, List<AccountToken>>> =
         loadCurrentTokens(account.chainId).let { tokens ->
             Observable.range(FIRST_INDEX, tokens.size)
