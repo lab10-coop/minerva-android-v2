@@ -18,4 +18,17 @@ data class AccountToken(
     val balance: BigDecimal
         get() = if (rawBalance == BigDecimal.ZERO) BigDecimal.ZERO
         else BalanceUtils.fromWei(rawBalance, token.decimals.toInt())
+
+    val fiatBalance: BigDecimal
+        get() =
+            tokenPrice?.let {
+                when (it) {
+                    Double.InvalidValue -> WRONG_CURRENCY_VALUE
+                    else -> BigDecimal(tokenPrice!!).multiply(balance)
+                }
+            }.orElse { WRONG_CURRENCY_VALUE }
+
+    companion object {
+        private val WRONG_CURRENCY_VALUE = (-1).toBigDecimal()
+    }
 }
