@@ -50,27 +50,23 @@ class TokenManagerImpl(
 
     private val currentTimeProvider = CurrentTimeProviderImpl()
 
-    override fun loadCurrentTokens(chainId: Int): List<ERC20Token> =
-        walletManager.getWalletConfig().let {
-            NetworkManager.getTokens(chainId)
-                .mergeWithoutDuplicates(it.erc20Tokens[chainId] ?: listOf())
-        }
+    override fun loadCurrentTokens(chainId: Int): List<ERC20Token> = walletManager.getWalletConfig().run {
+        NetworkManager.getTokens(chainId).mergeWithoutDuplicates(erc20Tokens[chainId] ?: listOf())
+    }
 
     override fun saveToken(chainId: Int, token: ERC20Token): Completable =
-        walletManager.getWalletConfig().let { config ->
-            config.copy(
-                version = config.updateVersion,
-                erc20Tokens = updateTokens(chainId, token, config.erc20Tokens.toMutableMap())
-            ).let { walletManager.updateWalletConfig(it) }
+        walletManager.getWalletConfig().run {
+            copy(version = updateVersion, erc20Tokens = updateTokens(chainId, token, erc20Tokens.toMutableMap())).let {
+                walletManager.updateWalletConfig(it)
+            }
         }
 
     override fun saveTokens(shouldBeSaved: Boolean, map: Map<Int, List<ERC20Token>>): Single<Boolean> =
         if (shouldBeSaved) {
-            walletManager.getWalletConfig().let { config ->
-                config.copy(
-                    version = config.updateVersion,
-                    erc20Tokens = updateTokens(map, config.erc20Tokens.toMutableMap())
-                ).let { walletManager.updateWalletConfig(it) }
+            walletManager.getWalletConfig().run {
+                copy(version = updateVersion, erc20Tokens = updateTokens(map, erc20Tokens.toMutableMap())).let {
+                    walletManager.updateWalletConfig(it)
+                }
                     .toSingle { shouldBeSaved }
                     .onErrorReturn { shouldBeSaved }
             }
@@ -235,13 +231,13 @@ class TokenManagerImpl(
         }
 
     private fun updateAllTokenIcons(updatedIcons: Map<String, String>): Completable =
-        walletManager.getWalletConfig().let { config ->
-            config.erc20Tokens.forEach { (key, value) ->
+        walletManager.getWalletConfig().run {
+            erc20Tokens.forEach { (key, value) ->
                 value.forEach {
                     it.logoURI = updatedIcons[generateTokenHash(key, it.address)]
                 }
             }
-            walletManager.updateWalletConfig(config.copy(version = config.updateVersion))
+            walletManager.updateWalletConfig(copy(version = updateVersion))
         }
 
     @VisibleForTesting

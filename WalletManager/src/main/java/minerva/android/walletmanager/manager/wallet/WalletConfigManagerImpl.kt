@@ -243,20 +243,15 @@ class WalletConfigManagerImpl(
     override fun updateSafeAccountOwners(
         position: Int,
         owners: List<String>
-    ): Single<List<String>> = getWalletConfig().let { config ->
-        config.accounts.forEach { if (it.id == position) it.owners = owners }
-        updateWalletConfig(
-            config.copy(
-                version = config.updateVersion,
-                accounts = config.accounts
-            )
-        ).andThen(Single.just(owners))
+    ): Single<List<String>> = getWalletConfig().run {
+        accounts.forEach { if (it.id == position) it.owners = owners }
+        updateWalletConfig(copy(version = updateVersion, accounts = accounts))
+            .andThen(Single.just(owners))
     }
 
-    override fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>> {
-        TODO("Not yet implemented")
-        return Single.error(NotInitializedWalletConfigThrowable())
-    }
+    //TODO("Not yet implemented")
+    override fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>> =
+        Single.error(NotInitializedWalletConfigThrowable())
 
     override fun getValueIterator(): Int = getWalletConfig().accounts.let {
         var iterator = 1
@@ -265,7 +260,7 @@ class WalletConfigManagerImpl(
     }
 
     override fun getLoggedInIdentityByPublicKey(publicKey: String): Identity? =
-        getWalletConfig().identities.find { it.publicKey == publicKey }.let { it }.orElse { null }
+        getWalletConfig().identities.find { it.publicKey == publicKey }
 
     override fun saveService(service: Service): Completable =
         getWalletConfig().run {
@@ -295,8 +290,7 @@ class WalletConfigManagerImpl(
         return null
     }
 
-    override fun findIdentityByDid(did: String): Identity? =
-        getWalletConfig().let { config -> config.identities.find { it.did == did } }
+    override fun findIdentityByDid(did: String): Identity? = getWalletConfig().run { identities.find { it.did == did } }
 
     private fun completeKeys(
         masterSeed: MasterSeed,

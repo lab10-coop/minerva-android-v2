@@ -13,7 +13,6 @@ import minerva.android.kotlinUtils.mapper.BitmapMapper
 import minerva.android.walletmanager.exception.CannotRemoveLastIdentityThrowable
 import minerva.android.walletmanager.exception.NoIdentityToRemoveThrowable
 import minerva.android.walletmanager.exception.NoLoggedInIdentityThrowable
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.mappers.CredentialQrCodeToCredentialMapper
@@ -31,18 +30,13 @@ class IdentityManagerImpl(
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = walletConfigManager.walletConfigLiveData
 
-    override fun saveIdentity(identity: Identity): Completable = walletConfigManager.getWalletConfig().let { config ->
+    override fun saveIdentity(identity: Identity): Completable = walletConfigManager.getWalletConfig().run {
         cryptographyRepository.calculateDerivedKeys(
             walletConfigManager.masterSeed.seed,
             identity.index,
             DerivationPath.DID_PATH
         )
-            .map {
-                config.copy(
-                    version = config.updateVersion,
-                    identities = prepareIdentities(getIdentity(identity, it), config)
-                )
-            }
+            .map { copy(version = updateVersion, identities = prepareIdentities(getIdentity(identity, it), this)) }
             .flatMapCompletable { walletConfigManager.updateWalletConfig(it) }
     }
 
@@ -67,14 +61,14 @@ class IdentityManagerImpl(
     private fun prepareDefaultIdentityName(defaultName: String): String =
         String.format(NEW_IDENTITY_TITLE_PATTERN, defaultName, getNewIndex() + 1)
 
-    private fun getNewIndex(): Int = walletConfigManager.getWalletConfig().let { it.newIdentityIndex }
+    private fun getNewIndex(): Int = walletConfigManager.getWalletConfig().newIdentityIndex
 
-    override fun removeIdentity(identity: Identity): Completable = walletConfigManager.getWalletConfig().let {
-        val position = getPositionForIdentity(identity, it)
-        if (isOnlyOneElement(it.identities)) return Completable.error(CannotRemoveLastIdentityThrowable())
-        if (!it.identities.inBounds(position)) return Completable.error(NoIdentityToRemoveThrowable())
-        val newIdentities = prepareIdentities(Identity(identity, true), it)
-        return walletConfigManager.updateWalletConfig(it.copy(version = it.updateVersion, identities = newIdentities))
+    override fun removeIdentity(identity: Identity): Completable = walletConfigManager.getWalletConfig().run {
+        val position = getPositionForIdentity(identity, this)
+        if (isOnlyOneElement(identities)) return Completable.error(CannotRemoveLastIdentityThrowable())
+        if (!identities.inBounds(position)) return Completable.error(NoIdentityToRemoveThrowable())
+        val newIdentities = prepareIdentities(Identity(identity, true), this)
+        walletConfigManager.updateWalletConfig(copy(version = updateVersion, identities = newIdentities))
     }
 
     private fun isOnlyOneElement(identities: List<Identity>): Boolean {
@@ -86,13 +80,10 @@ class IdentityManagerImpl(
     }
 
     override fun bindCredentialToIdentity(qrCode: CredentialQrCode): Single<String> =
-        walletConfigManager.getWalletConfig().let {
+        walletConfigManager.getWalletConfig().run {
             if (doesIdentityExist(qrCode.loggedInDid)) {
                 walletConfigManager.updateWalletConfig(
-                    it.copy(
-                        version = it.updateVersion,
-                        credentials = it.credentials + CredentialQrCodeToCredentialMapper.map(qrCode)
-                    )
+                    copy(version = updateVersion, credentials = credentials + CredentialQrCodeToCredentialMapper.map(qrCode))
                 ).toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
             } else Single.error(NoLoggedInIdentityThrowable())
         }

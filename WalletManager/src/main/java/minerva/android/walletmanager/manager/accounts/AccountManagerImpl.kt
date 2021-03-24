@@ -38,10 +38,10 @@ class AccountManagerImpl(
         get() = walletManager.walletConfigLiveData
 
     override fun createRegularAccount(network: Network): Single<String> =
-        walletManager.getWalletConfig().let { config ->
-            val (index, derivationPath) = getIndexWithDerivationPath(network, config)
+        walletManager.getWalletConfig().run {
+            val (index, derivationPath) = getIndexWithDerivationPath(network, this)
             val accountName = CryptoUtils.prepareName(network.name, index)
-            return cryptographyRepository.calculateDerivedKeys(
+            cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
                 index, derivationPath, network.testNet
             ).map { keys ->
@@ -53,7 +53,7 @@ class AccountManagerImpl(
                     privateKey = keys.privateKey,
                     address = blockchainRepository.toChecksumAddress(keys.address)
                 )
-                addAccount(newAccount, config)
+                addAccount(newAccount, this)
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }.toSingleDefault(accountName)
         }
 
@@ -64,8 +64,8 @@ class AccountManagerImpl(
     }
 
     override fun createSafeAccount(account: Account, contract: String): Completable =
-        walletManager.getWalletConfig().let { config ->
-            val (index, derivationPath) = getIndexWithDerivationPath(account.network, config)
+        walletManager.getWalletConfig().run {
+            val (index, derivationPath) = getIndexWithDerivationPath(account.network, this)
             return cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
                 index, derivationPath, account.network.testNet
@@ -82,7 +82,7 @@ class AccountManagerImpl(
                     contractAddress = contract,
                     owners = mutableListOf(ownerAddress)
                 )
-                addSafeAccount(config, newAccount, ownerAddress)
+                addSafeAccount(this, newAccount, ownerAddress)
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }
         }
 
@@ -150,11 +150,11 @@ class AccountManagerImpl(
         get() = walletManager.enableMainNetsFlowable
 
     override fun removeAccount(account: Account): Completable =
-        walletManager.getWalletConfig().let { config ->
-            val newAccounts: MutableList<Account> = config.accounts.toMutableList()
-            config.accounts.forEachIndexed { index, item ->
+        walletManager.getWalletConfig().run {
+            val newAccounts: MutableList<Account> = accounts.toMutableList()
+            accounts.forEachIndexed { index, item ->
                 if (item.address == account.address) {
-                    return handleRemovingAccount(item, config, newAccounts, index)
+                    return handleRemovingAccount(item, this, newAccounts, index)
                 }
             }
             Completable.error(MissingAccountThrowable())
