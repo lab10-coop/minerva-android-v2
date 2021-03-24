@@ -35,6 +35,7 @@ import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
+import java.util.*
 
 class TokenManagerImpl(
     private val walletManager: WalletConfigManager,
@@ -206,15 +207,13 @@ class TokenManagerImpl(
     private fun updateAllTokenIcons(updatedIcons: Map<String, String>): Completable =
         walletManager.getWalletConfig()?.let { config ->
             config.erc20Tokens.forEach { (key, value) ->
-                value.forEach {
-                    it.logoURI = updatedIcons[generateTokenIconKey(key, it.address)]
-                }
+                value.forEach { it.logoURI = updatedIcons[generateTokenIconKey(key, it.address)] }
             }
             walletManager.updateWalletConfig(config.copy(version = config.updateVersion))
         } ?: Completable.error(NotInitializedWalletConfigThrowable())
 
     @VisibleForTesting
-    fun generateTokenIconKey(chainId: Int, address: String) = "$chainId$address"
+    fun generateTokenIconKey(chainId: Int, address: String) = "$chainId$address".toLowerCase(Locale.ROOT)
 
     /**
      * arguments: tokens MutableMap<ChainId, List<ERC20Token>>
