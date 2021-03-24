@@ -137,15 +137,11 @@ class TokenManagerImpl(
     //TODO add refreshing optimalization for tokens for current account
     override fun refreshTokenBalance(account: Account): Single<Pair<String, List<AccountToken>>> =
         loadCurrentTokens(account.chainId).let { tokens ->
-            Observable.range(FIRST_INDEX, tokens.size)
-                .flatMap { position ->
-                    blockchainRepository.refreshTokenBalance(
-                        account.privateKey,
-                        account.chainId,
-                        tokens[position].address,
-                        account.address
-                    )
-                }.map { (address, balance) ->
+            Observable.fromIterable(tokens)
+                .flatMap {
+                    blockchainRepository.refreshTokenBalance(account.privateKey, account.chainId, it.address, account.address)
+                }
+                .map { (address, balance) ->
                     tokens.find {
                         it.address == address
                     }?.let { erc20Token ->
@@ -168,8 +164,7 @@ class TokenManagerImpl(
         privateKey: String,
         tokens: List<AccountToken>
     ): Single<Pair<String, List<AccountToken>>> =
-        Observable.range(FIRST_INDEX, tokens.size)
-            .map { tokens[it] }
+        Observable.fromIterable(tokens)
             .flatMapSingle { accountToken ->
                 generateTokenHash(accountToken.token.chainId, accountToken.token.address).let { tokenHash ->
                     cachedTokensRate[tokenHash]?.let {
@@ -296,7 +291,6 @@ class TokenManagerImpl(
 
     companion object {
         private const val LAST_UPDATE_INDEX = 0
-        private const val FIRST_INDEX = 0
         private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
         private const val ETHEREUM_TOKENTX_REQUEST =
             "%sapi?module=account&action=tokentx&address=%s&startblock=0&endblock=999999999&sort=asc&apikey=%s"

@@ -62,7 +62,9 @@ class WalletConfigManagerImpl(
     private val _walletConfigErrorLiveData = MutableLiveData<Event<Throwable>>()
     override val walletConfigErrorLiveData: LiveData<Event<Throwable>> get() = _walletConfigErrorLiveData
 
-    override fun getWalletConfig(): WalletConfig = walletConfigLiveData.value?.peekContent() ?: throw NotInitializedWalletConfigThrowable()
+    override fun getWalletConfig(): WalletConfig =
+        walletConfigLiveData.value?.peekContent() ?: throw NotInitializedWalletConfigThrowable()
+
     override fun isMasterSeedSaved(): Boolean = keystoreRepository.isMasterSeedSaved()
 
     private var localWalletConfigVersion = Int.InvalidIndex
@@ -317,15 +319,9 @@ class WalletConfigManagerImpl(
     ): Observable<WalletConfig> {
         val identitiesResponse = payload.identityResponse
         val accountsResponse = payload.accountResponse
-        return Observable.range(START, identitiesResponse.size)
-            .filter { !identitiesResponse[it].isDeleted }
-            .flatMapSingle {
-                cryptographyRepository.calculateDerivedKeys(
-                    masterSeed.seed,
-                    identitiesResponse[it].index,
-                    DID_PATH
-                )
-            }
+        return Observable.fromIterable(identitiesResponse)
+            .filter { !it.isDeleted }
+            .flatMapSingle { cryptographyRepository.calculateDerivedKeys(masterSeed.seed, it.index, DID_PATH) }
             .toList()
             .map { keys -> completeIdentitiesKeys(payload, keys) }
             .map { completeIdentitiesProfileImages(it) }

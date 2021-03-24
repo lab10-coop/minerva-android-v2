@@ -68,8 +68,7 @@ class TransactionRepositoryImpl(
     //TODO klop need to be tested!
     override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
         getActiveAccounts().let { accounts ->
-            Observable.range(FIRST_INDEX, accounts.size)
-                .map { accounts[it] }
+            Observable.fromIterable(accounts)
                 .flatMapSingle { tokenManager.refreshTokenBalance(it) }
                 .flatMapSingle { (privateKey, tokens) -> tokenManager.updateTokensRate(privateKey, tokens) }
                 .toList()
@@ -115,16 +114,15 @@ class TransactionRepositoryImpl(
         }
 
     private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERC20Token>> =
-        Observable.range(FIRST_INDEX, accounts.size)
-            .map { accounts[it] }
+        Observable.fromIterable(accounts)
             .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
             .flatMapSingle { downloadTokensList(it) }
             .toList()
             .map { mergeLists(it) }
 
     private fun downloadTokensList(accounts: List<Account>): Single<List<ERC20Token>> =
-        Observable.range(FIRST_INDEX, accounts.size)
-            .flatMapSingle { position -> tokenManager.downloadTokensList(accounts[position]) }
+        Observable.fromIterable(accounts)
+            .flatMapSingle { tokenManager.downloadTokensList(it) }
             .toList()
             .map { mergeLists(it) }
 
@@ -279,7 +277,6 @@ class TransactionRepositoryImpl(
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1
         private const val PENDING_NETWORK_LIMIT = 2
-        private const val FIRST_INDEX = 0
         private const val EUR_CURRENCY = "eur"
         private const val ETHERSCAN_REQUEST_TIMESPAN = 1L
         private const val ETHERSCAN_REQUEST_PACKAGE = 5
