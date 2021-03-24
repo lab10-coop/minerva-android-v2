@@ -20,7 +20,7 @@ interface WalletConfigManager : Manager {
     fun dispose()
 
     fun initWalletConfig()
-    fun getWalletConfig(): WalletConfig?
+    fun getWalletConfig(): WalletConfig
     fun createWalletConfig(masterSeed: MasterSeed): Completable
     fun restoreWalletConfig(masterSeed: MasterSeed): Completable
     fun updateWalletConfig(walletConfig: WalletConfig): Completable

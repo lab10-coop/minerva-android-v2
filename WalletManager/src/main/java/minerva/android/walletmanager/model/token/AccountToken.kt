@@ -7,7 +7,8 @@ import java.math.BigDecimal
 
 data class AccountToken(
     val token: ERC20Token,
-    var rawBalance: BigDecimal = Int.InvalidValue.toBigDecimal()
+    var rawBalance: BigDecimal = Int.InvalidValue.toBigDecimal(),
+    var tokenPrice: Double? = Double.InvalidValue
 ) {
     override fun equals(other: Any?): Boolean =
         (other as? AccountToken)?.let {

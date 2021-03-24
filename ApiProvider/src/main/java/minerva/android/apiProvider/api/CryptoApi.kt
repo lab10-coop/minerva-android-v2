@@ -16,7 +16,7 @@ interface CryptoApi {
     fun getMarkets(@Query(IDS) coinIds: String, @Query(VS_CURRENCIES) currency: String): Single<Markets>
 
     @GET("coins/{$ID}/contract/{$CONTRACT_ADDRESS}")
-    fun getTokenFiatBalance(@Path(ID) id: String, @Path(CONTRACT_ADDRESS) contractAddress: String): Single<TokenMarketResponse>
+    fun getTokenMarkets(@Path(ID) id: String, @Path(CONTRACT_ADDRESS) contractAddress: String): Single<TokenMarketResponse>
 
     @GET
     fun getGasPrice(
@@ -31,7 +31,7 @@ interface CryptoApi {
     fun getTokenLastCommitRawData(@Url url: String): Single<List<CommitElement>>
 
     @GET
-    fun getTokenBalance(@Url url: String): Single<TokenBalanceResponse>
+    fun getConnectedTokens(@Url url: String): Single<TokenBalanceResponse>
 
     @GET
     fun getTokenTx(@Url url: String): Single<TokenTxResponse>

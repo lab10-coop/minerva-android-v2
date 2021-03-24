@@ -56,13 +56,21 @@ object MarketUtils {
             else -> null
         }
 
+    fun getMarketId(chainId: Int): String =
+        when(chainId) {
+            ETH_MAIN -> MarketIds.ETHEREUM
+            POA_CORE -> MarketIds.POA_NETWORK
+            XDAI -> MarketIds.XDAI
+            else -> String.Empty
+        }
+
     fun getMarketsIds(accounts: List<Account>?): String {
         var ids = String.Empty
         accounts?.distinctBy { it.network }?.forEach {
             when (it.network.chainId) {
                 ETH_MAIN -> ids = "$ids${MarketIds.ETHEREUM},"
                 POA_CORE -> ids = "$ids${MarketIds.POA_NETWORK},"
-                XDAI -> ids = "$ids${MarketIds.DAI},"
+                XDAI -> ids = "$ids${MarketIds.XDAI},"
             }
         }
         return ids

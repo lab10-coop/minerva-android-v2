@@ -62,7 +62,7 @@ class WalletConfigManagerImpl(
     private val _walletConfigErrorLiveData = MutableLiveData<Event<Throwable>>()
     override val walletConfigErrorLiveData: LiveData<Event<Throwable>> get() = _walletConfigErrorLiveData
 
-    override fun getWalletConfig(): WalletConfig? = walletConfigLiveData.value
+    override fun getWalletConfig(): WalletConfig = walletConfigLiveData.value ?: throw NotInitializedWalletConfigThrowable()
     override fun isMasterSeedSaved(): Boolean = keystoreRepository.isMasterSeedSaved()
 
     private var localWalletConfigVersion = Int.InvalidIndex

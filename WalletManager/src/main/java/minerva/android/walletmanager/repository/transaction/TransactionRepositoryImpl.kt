@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.repository.transaction
 
+import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -15,7 +16,6 @@ import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -50,14 +50,12 @@ class TransactionRepositoryImpl(
     override val masterSeed: MasterSeed
         get() = walletConfigManager.masterSeed
 
-    override fun refreshBalances(): Single<HashMap<String, Balance>> {
+    override fun refreshBalances(): Single<HashMap<String, Balance>> =
         walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
-            return blockchainRepository.refreshBalances(getAddresses(accounts))
+            blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
                 .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
     private fun accountsFilter(it: Account) =
         refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
@@ -67,13 +65,14 @@ class TransactionRepositoryImpl(
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
+    //TODO klop need to be tested!
     override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
         getActiveAccounts().let { accounts ->
             Observable.range(FIRST_INDEX, accounts.size)
                 .map { accounts[it] }
-                .flatMapSingle {
-                    tokenManager.refreshTokenBalance(it)
-                }.toList()
+                .flatMapSingle { tokenManager.refreshTokenBalance(it) }
+                .flatMapSingle { (privateKey, tokens) -> tokenManager.updateTokensRate(privateKey, tokens) }
+                .toList()
                 .map {
                     mutableMapOf<String, List<AccountToken>>().apply {
                         it.forEach { (privateKey, accountTokens) -> put(privateKey, accountTokens) }
@@ -113,7 +112,7 @@ class TransactionRepositoryImpl(
     private fun getActiveAccounts(): List<Account> =
         walletConfigManager.getWalletConfig()?.accounts?.filter { account ->
             accountsFilter(account) && account.network.isAvailable()
-        } ?: throw NotInitializedWalletConfigThrowable()
+        }
 
     private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERC20Token>> =
         Observable.range(FIRST_INDEX, accounts.size)
@@ -152,11 +151,12 @@ class TransactionRepositoryImpl(
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
 
+    //TODO klopelse should be changed to Invalid value?
     override fun getEurRate(chainId: Int): Single<Double> =
         when (chainId) {
             ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.value }
             ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaPrice?.value }
-            ChainId.XDAI -> getRate(MarketIds.DAI).map { it.daiPrice?.value }
+            ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiPrice?.value }
             else -> Single.just(0.0)
         }
 

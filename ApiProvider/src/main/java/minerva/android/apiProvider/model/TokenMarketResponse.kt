@@ -8,6 +8,6 @@ data class TokenMarketResponse(
     val id: String = String.Empty,
     @SerializedName("name")
     val name: String = String.Empty,
-    @SerializedName("current_price")
-    val currentPrice: CurrentMarketPrice = CurrentMarketPrice()
+    @SerializedName("market_data")
+    val marketData: MarketData = MarketData()
 )

@@ -23,7 +23,6 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
@@ -32,7 +31,6 @@ import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.*
 import org.junit.Before
 import org.junit.Test
-import java.math.BigDecimal
 import kotlin.test.assertFailsWith
 
 class TokenManagerTest : RxTest() {
@@ -307,7 +305,7 @@ class TokenManagerTest : RxTest() {
     fun `Check that generating key for map is correct`() {
         val chaiId = 3
         val address = "0x4ddr355"
-        val key = tokenManager.generateTokenIconKey(chaiId, address)
+        val key = tokenManager.generateTokenHash(chaiId, address)
         key shouldBeEqualTo "30x4ddr355"
     }
 
