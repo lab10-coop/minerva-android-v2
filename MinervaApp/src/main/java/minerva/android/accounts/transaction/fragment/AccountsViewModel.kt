@@ -82,14 +82,16 @@ class AccountsViewModel(
 
     private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
     val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
-    var hasActiveAccount: Boolean = false
+    var hasAvailableAccounts: Boolean = false
     var activeAccounts: List<Account> = listOf()
 
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) {
-            hasActiveAccount = it.hasActiveAccount
-            activeAccounts = it.accounts.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
-            it.accounts
+            with(it.peekContent()) {
+                hasAvailableAccounts = hasActiveAccount
+                activeAccounts = accounts.filter { !it.isDeleted && it.network.testNet == !areMainNetsEnabled }
+                accounts
+            }
         }
 
     private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
@@ -195,7 +197,7 @@ class AccountsViewModel(
                 account.accountTokens = tokensList.filter {
                     isTokenVisible(account.address, it).orElse {
                         saveTokenVisible(account.address, it.token.address, true)
-                        true
+                        hasFunds(it.balance)
                     }
                 }
             }
@@ -325,8 +327,10 @@ class AccountsViewModel(
 
     fun isTokenVisible(networkAddress: String, accountToken: AccountToken) =
         tokenVisibilitySettings.getTokenVisibility(networkAddress, accountToken.token.address)?.let {
-            it && accountToken.balance > BigDecimal.ZERO
+            it && hasFunds(accountToken.balance)
         }
+
+    private fun hasFunds(balance: BigDecimal) = balance > BigDecimal.ZERO
 
     private fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(

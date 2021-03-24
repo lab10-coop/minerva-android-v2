@@ -13,7 +13,7 @@
     "chainId": 246785
   },
   {
-    "name": "Ethereum (Rinkeby)",
+    "name": "Rinkeby",
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -78,7 +78,7 @@
     "chainId": 22
   },
   {
-    "name": "Ethereum (Kovan)",
+    "name": "Kovan",
     "token": "kETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://kovan.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -91,7 +91,7 @@
     "chainId": 42
   },
   {
-    "name": "Ethereum (Görli)",
+    "name": "Görli",
     "token": "gETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://goerli.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -104,7 +104,7 @@
     "chainId": 5
   },
   {
-    "name": "Ethereum (Ropsten)",
+    "name": "Ropsten",
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",

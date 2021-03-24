@@ -17,8 +17,10 @@ class CredentialsFragment : MinervaPrimitiveListFragment() {
     override fun prepareObservers() {
         viewModel.apply {
             walletConfigLiveData.observe(viewLifecycleOwner, Observer { config ->
-                binding.noDataMessage.visibleOrGone(config.credentials.isEmpty())
-                primitivesAdapter.updateList(config.credentials)
+                with(config.peekContent().credentials){
+                    binding.noDataMessage.visibleOrGone(isEmpty())
+                    primitivesAdapter.updateList(this)
+                }
             })
             removeCredentialLiveData.observe(viewLifecycleOwner, Observer {
                 activity?.invalidateOptionsMenu()

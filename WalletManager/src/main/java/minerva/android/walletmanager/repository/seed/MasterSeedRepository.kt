@@ -6,7 +6,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.wallet.WalletConfig
 
 interface MasterSeedRepository {
-    val walletConfigLiveData: LiveData<WalletConfig>
+    val walletConfigLiveData: LiveData<Event<WalletConfig>>
     val walletConfigErrorLiveData: LiveData<Event<Throwable>>
     fun validateMnemonic(mnemonic: String): List<String>
     fun getMnemonic(): String
