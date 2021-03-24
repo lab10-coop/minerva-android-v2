@@ -43,14 +43,13 @@ class TokenManagerTest : RxTest() {
 
     @Before
     fun initializeMocks() {
-        whenever(walletManager.getWalletConfig()).thenReturn(null, DataProvider.walletConfig, DataProvider.walletConfig)
+        whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig, DataProvider.walletConfig)
         whenever(walletManager.updateWalletConfig(any())).thenReturn(Completable.complete())
     }
 
     @Test
     fun `Test loading tokens list`() {
         NetworkManager.initialize(DataProvider.networks)
-        tokenManager.loadCurrentTokens(246785).size shouldBeEqualTo 0
         tokenManager.loadCurrentTokens(ATS_TAU).let {
             it.size shouldBeEqualTo 4
             it[0].name shouldBeEqualTo "CookieTokenDATS"
@@ -67,24 +66,16 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Test saving tokens for giving network`() {
+    fun `Test saving tokens for given network`() {
         NetworkManager.initialize(DataProvider.networks)
         val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "C00")
-        tokenManager.saveToken(ATS_TAU, firstToken)
-            .test()
-            .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
-        tokenManager.saveToken(ATS_TAU, firstToken)
-            .test()
-            .assertComplete()
+        tokenManager.saveToken(ATS_TAU, firstToken).test().assertComplete()
         verify(walletManager, times(1)).updateWalletConfig(any())
     }
 
     @Test
     fun `Test saving tokens list for giving network`() {
         NetworkManager.initialize(DataProvider.networks)
-        tokenManager.saveTokens(true, map)
-            .test()
-            .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
         tokenManager.saveTokens(true, map)
             .test()
             .assertComplete()
@@ -122,9 +113,6 @@ class TokenManagerTest : RxTest() {
         val map = mapOf(
             Pair(1, listOf(firstTokenII, secondTokenII))
         )
-        tokenManager.saveTokens(true, map)
-            .test()
-            .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
         tokenManager.saveTokens(true, map)
             .test()
             .assertComplete()
@@ -368,20 +356,20 @@ class TokenManagerTest : RxTest() {
             .assertComplete()
             .assertValue {
                 it.second.size == 4 &&
-                it.second[0].token.name == "CookieTokenDATS" &&
-                it.second[0].balance.toPlainString() == "0.000000001" &&
-                it.second[1].token.name == "SomeSomeTokenDATS" &&
-                it.second[1].balance.toPlainString() == "0.000000000000000000000001"
+                        it.second[0].token.name == "CookieTokenDATS" &&
+                        it.second[0].balance.toPlainString() == "0.000000001" &&
+                        it.second[1].token.name == "SomeSomeTokenDATS" &&
+                        it.second[1].balance.toPlainString() == "0.000000000000000000000001"
             }
         tokenManager.refreshTokenBalance(atsSigmaAccount)
             .test()
             .assertComplete()
             .assertValue {
                 it.second.size == 3 &&
-                it.second[0].token.name == "CookieTokenATS" &&
-                it.second[0].balance.toPlainString() == "0.000000001" &&
-                it.second[1].token.name == "SecondOtherATS" &&
-                it.second[1].balance.toPlainString() == "0.000000000000000001"
+                        it.second[0].token.name == "CookieTokenATS" &&
+                        it.second[0].balance.toPlainString() == "0.000000001" &&
+                        it.second[1].token.name == "SecondOtherATS" &&
+                        it.second[1].balance.toPlainString() == "0.000000000000000001"
             }
     }
 

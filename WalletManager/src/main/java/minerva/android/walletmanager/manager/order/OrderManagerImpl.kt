@@ -23,7 +23,7 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
         get() = walletConfigManager.areMainNetworksEnabled
 
     override fun updateList(type: Int, newOrderList: List<MinervaPrimitive>): Completable {
-        getWalletConfig()?.let {
+        getWalletConfig().let {
             return when (type) {
                 WalletActionType.IDENTITY -> walletConfigManager.updateWalletConfig(
                     it.copy(version = it.updateVersion, identities = (newOrderList as List<Identity>))
@@ -40,7 +40,6 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
                 else -> Completable.error(NotSupportedAccountThrowable())
             }
         }
-        throw NotInitializedWalletConfigThrowable()
     }
 
     override fun prepareList(type: Int): List<MinervaPrimitive> =
@@ -52,8 +51,8 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
             else -> listOf()
         }
 
-    override fun isOrderAvailable(type: Int): Boolean {
-        walletConfigManager.getWalletConfig()?.let { config ->
+    override fun isOrderAvailable(type: Int): Boolean =
+        walletConfigManager.getWalletConfig().let { config ->
             return when (type) {
                 WalletActionType.IDENTITY -> config.identities.filter { !it.isDeleted }.size > ONE_ELEMENT
                 WalletActionType.ACCOUNT -> config.accounts.filter { !it.isDeleted && it.network.testNet != areMainNetsEnabled }.size > ONE_ELEMENT
@@ -62,38 +61,18 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
                 else -> false
             }
         }
-        return false
-    }
 
     private fun getWalletConfig() = walletConfigManager.getWalletConfig()
 
-    private fun prepareIdentitiesList(): List<MinervaPrimitive> {
-        getWalletConfig()?.let {
-            return it.identities
-        }
-        return listOf()
-    }
+    private fun prepareIdentitiesList(): List<MinervaPrimitive> = getWalletConfig().let { it.identities }
 
-    private fun prepareValuesList(): List<MinervaPrimitive> {
-        getWalletConfig()?.let {
-            return it.accounts
-        }
-        return listOf()
-    }
+    private fun prepareValuesList(): List<MinervaPrimitive> = getWalletConfig().let { it.accounts }
 
-    private fun prepareServicesList(): List<MinervaPrimitive> {
-        getWalletConfig()?.let {
+    private fun prepareServicesList(): List<MinervaPrimitive> = getWalletConfig().let {
             return it.services
         }
-        return listOf()
-    }
 
-    private fun prepareCredentialList(): List<MinervaPrimitive> {
-        getWalletConfig()?.let { config ->
-            return config.credentials
-        }
-        return listOf()
-    }
+    private fun prepareCredentialList(): List<MinervaPrimitive> = getWalletConfig().let { it.credentials }
 
     companion object {
         private const val ONE_ELEMENT = 1

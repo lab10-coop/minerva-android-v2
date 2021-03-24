@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -58,7 +57,7 @@ class TokenManagerImpl(
         }
 
     override fun saveToken(chainId: Int, token: ERC20Token): Completable =
-        walletManager.getWalletConfig()?.let { config ->
+        walletManager.getWalletConfig().let { config ->
             config.copy(
                 version = config.updateVersion,
                 erc20Tokens = updateTokens(chainId, token, config.erc20Tokens.toMutableMap())
@@ -102,7 +101,7 @@ class TokenManagerImpl(
         }
 
     override fun mergeWithLocalTokensList(map: Map<Int, List<ERC20Token>>): Pair<Boolean, Map<Int, List<ERC20Token>>> =
-        walletManager.getWalletConfig()?.erc20Tokens?.let { allLocalTokens ->
+        walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
             var updateLogosURI = false
             val updatedMap = allLocalTokens.toMutableMap()
             for ((chainId, tokens) in map) {
@@ -113,7 +112,7 @@ class TokenManagerImpl(
                 }
             }
             Pair(updateLogosURI, updatedMap)
-        }.orElse { throw NotInitializedWalletConfigThrowable() }
+        }
 
     override fun updateTokenIcons(
         shouldBeUpdated: Boolean,
@@ -159,35 +158,33 @@ class TokenManagerImpl(
 
     private var cachedTokensRate: MutableMap<String, Double> = mutableMapOf()
 
+    //TODO klop should be tested too!
+    private fun updateAccountTokenRate(accountToken: AccountToken): Observable<AccountToken> =
+        generateTokenHash(accountToken.token.chainId, accountToken.token.address).let { tokenHash ->
+            cachedTokensRate[tokenHash]?.let {
+                accountToken.tokenPrice = it
+                Observable.just(accountToken)
+            }.orElse {
+                cryptoApi.getTokenMarkets(MarketUtils.getMarketId(accountToken.token.chainId), accountToken.token.address)
+                    .onErrorReturn { TokenMarketResponse(marketData = MarketData(Price())) }
+                    .map {
+                        val tokenMarketValue = it.marketData.currentPrice.value ?: Double.InvalidValue
+                        cachedTokensRate[tokenHash] = tokenMarketValue
+                        accountToken.tokenPrice = tokenMarketValue
+                        accountToken
+                    }.toObservable()
+            }
+        }
+
     //TODO klop should be tested
     override fun updateTokensRate(
         privateKey: String,
         tokens: List<AccountToken>
     ): Single<Pair<String, List<AccountToken>>> =
-        Observable.fromIterable(tokens)
-            .flatMapSingle { accountToken ->
-                generateTokenHash(accountToken.token.chainId, accountToken.token.address).let { tokenHash ->
-                    cachedTokensRate[tokenHash]?.let {
-                        Log.e("klop", "Token ${accountToken.token.name} F O U N D with value : $it")
-                        accountToken.tokenPrice = it
-                        Single.just(accountToken)
-                    }.orElse {
-                        cryptoApi.getTokenMarkets(MarketUtils.getMarketId(accountToken.token.chainId), accountToken.token.address)
-                            .onErrorReturn {
-                                Log.e("klop", "E R R O R ! ! !")
-                                TokenMarketResponse(marketData = MarketData(Price()))
-                            }
-                            .map {
-                                Log.e("klop", "D O W N LO A D E D  ${it.name} token market rate: ${it.marketData.currentPrice}")
-                                val tokenMarketValue = it.marketData.currentPrice.value ?: Double.InvalidValue
-                                cachedTokensRate[tokenHash] = tokenMarketValue
-                                accountToken.tokenPrice = tokenMarketValue
-                                accountToken
-                            }
-                    }
-                }
-            }.toList()
-            .map { Pair(privateKey, it) }
+        mutableListOf<Observable<AccountToken>>().let { observables ->
+            tokens.forEach { observables.add(updateAccountTokenRate(it)) }
+            Observable.merge(observables).toList().map { Pair(privateKey, it) }
+        }
 
     private fun getNotEthereumTokens(account: Account): Single<List<ERC20Token>> =
         cryptoApi.getConnectedTokens(url = getTokensApiURL(account))
@@ -238,7 +235,7 @@ class TokenManagerImpl(
         }
 
     private fun updateAllTokenIcons(updatedIcons: Map<String, String>): Completable =
-        walletManager.getWalletConfig()?.let { config ->
+        walletManager.getWalletConfig().let { config ->
             config.erc20Tokens.forEach { (key, value) ->
                 value.forEach {
                     it.logoURI = updatedIcons[generateTokenHash(key, it.address)]

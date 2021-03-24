@@ -702,6 +702,7 @@ class TransactionRepositoryTest : RxTest() {
             AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
         )
         whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
+        whenever(tokenManager.updateTokensRate(any(), any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
 
         repository.refreshTokenBalance().test().assertComplete().assertValue {
             it.size == 1

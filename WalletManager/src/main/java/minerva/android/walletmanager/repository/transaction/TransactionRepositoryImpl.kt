@@ -51,7 +51,7 @@ class TransactionRepositoryImpl(
         get() = walletConfigManager.masterSeed
 
     override fun refreshBalances(): Single<HashMap<String, Balance>> =
-        walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
+        walletConfigManager.getWalletConfig().accounts.filter { accountsFilter(it) }.let { accounts ->
             blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
                 .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
@@ -65,7 +65,6 @@ class TransactionRepositoryImpl(
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
-    //TODO klop need to be tested!
     override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
         getActiveAccounts().let { accounts ->
             Observable.fromIterable(accounts)
@@ -108,10 +107,9 @@ class TransactionRepositoryImpl(
             }
         }
 
-    private fun getActiveAccounts(): List<Account> =
-        walletConfigManager.getWalletConfig()?.accounts?.filter { account ->
-            accountsFilter(account) && account.network.isAvailable()
-        }
+    private fun getActiveAccounts(): List<Account> = walletConfigManager.getWalletConfig().accounts.filter { account ->
+        accountsFilter(account) && account.network.isAvailable()
+    }
 
     private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERC20Token>> =
         Observable.fromIterable(accounts)
@@ -149,7 +147,7 @@ class TransactionRepositoryImpl(
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
 
-    //TODO klopelse should be changed to Invalid value?
+    //TODO collapse should be changed to Invalid value?
     override fun getEurRate(chainId: Int): Single<Double> =
         when (chainId) {
             ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.value }
@@ -267,7 +265,7 @@ class TransactionRepositoryImpl(
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
     override fun getAccountByAddress(address: String): Account? =
-        walletConfigManager.getWalletConfig()?.accounts?.find {
+        walletConfigManager.getWalletConfig().accounts.find {
             blockchainRepository.toChecksumAddress(it.address) == address
         }
 
