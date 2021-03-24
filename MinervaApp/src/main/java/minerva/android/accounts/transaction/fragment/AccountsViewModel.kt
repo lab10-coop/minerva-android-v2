@@ -197,7 +197,7 @@ class AccountsViewModel(
                 account.accountTokens = tokensList.filter {
                     isTokenVisible(account.address, it).orElse {
                         saveTokenVisible(account.address, it.token.address, true)
-                        true
+                        hasFunds(it.balance)
                     }
                 }
             }
@@ -327,8 +327,10 @@ class AccountsViewModel(
 
     fun isTokenVisible(networkAddress: String, accountToken: AccountToken) =
         tokenVisibilitySettings.getTokenVisibility(networkAddress, accountToken.token.address)?.let {
-            it && accountToken.balance > BigDecimal.ZERO
+            it && hasFunds(accountToken.balance)
         }
+
+    private fun hasFunds(balance: BigDecimal) = balance > BigDecimal.ZERO
 
     private fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
