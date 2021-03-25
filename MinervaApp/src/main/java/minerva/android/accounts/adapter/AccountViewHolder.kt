@@ -3,6 +3,7 @@ package minerva.android.accounts.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +21,6 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.token.TokenView
-import minerva.android.widget.TokensAndCollectiblesView
 import minerva.android.widget.repository.getNetworkIcon
 
 class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
@@ -32,25 +32,21 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private var rawPosition: Int = Int.InvalidIndex
 
     private val isOpen
-        get() = binding.container.isVisible
+        get() = binding.tokensAndCollectibles.isVisible
 
     override fun onSendTokenTokenClicked(account: Account, tokenIndex: Int) =
         listener.onSendTokenClicked(account, tokenIndex)
 
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
-    fun setListener(listener: AccountsAdapterListener) {
-        this.listener = listener
-    }
-
-    fun setData(index: Int, account: Account, isOpen: Boolean) {
+    fun setData(index: Int, account: Account, listener: AccountsAdapterListener) {
         rawPosition = index
+        this.listener = listener
         view.apply {
             prepareView(account)
             prepareToken(account)
             bindData(account)
             setOnMenuClickListener(rawPosition, account)
-            if (isOpen) binding.container.visible()
         }
 
         binding.qrCode.setOnClickListener {
@@ -75,11 +71,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     }
 
     private fun prepareView(account: Account) {
-        if (!account.isSafeAccount) {
-            prepareAccountView()
-        } else {
-            prepareSafeAccountView()
-        }
+        if (!account.isSafeAccount) prepareAccountView()
+        else prepareSafeAccountView()
     }
 
     private fun prepareAccountView() {
@@ -133,20 +126,9 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.prepareToken(account: Account) {
         binding.apply {
+            tokensAndCollectibles.prepareView(account, viewGroup, this@AccountViewHolder, listener.getAccountUIState(rawPosition))
+            //TODO change this statement when collectibles or main coin will be implemented
             account.accountTokens.isNotEmpty().let { visible ->
-                with(container) {
-                    removeAllViews()
-                    //TODO showing/hiding main token in TokensAndCollectiblesView is made using last argument - needs to be updated in the future
-                    addView(
-                        TokensAndCollectiblesView(
-                            viewGroup,
-                            account,
-                            this@AccountViewHolder,
-                            false
-                        ).apply {
-                            visibleOrGone(visible)
-                        })
-                }
                 setOnItemClickListener(visible)
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
@@ -156,23 +138,23 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun open() {
-        listener.onOpenOrClose(rawPosition, true)
-        TransitionManager.beginDelayedTransition(viewGroup)
+    private fun setOpen(isOpen: Boolean) {
+        listener.updateAccountUIState(rawPosition, isOpen)
         binding.apply {
-            arrow.rotate180()
-            container.visible()
+            if (isOpen) arrow.rotate180() else arrow.rotate180back()
+            tokensAndCollectibles.visibleOrGone(isOpen)
         }
     }
 
+    private fun open() {
+        TransitionManager.beginDelayedTransition(viewGroup)
+        setOpen(true)
+    }
+
     private fun close() {
-        listener.onOpenOrClose(rawPosition, false)
         TransitionManager.endTransitions(viewGroup)
         TransitionManager.beginDelayedTransition(viewGroup)
-        binding.apply {
-            arrow.rotate180back()
-            container.gone()
-        }
+        setOpen(false)
     }
 
     private fun PopupMenu.setOnItemMenuClickListener(index: Int, account: Account) {

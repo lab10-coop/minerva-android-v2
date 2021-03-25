@@ -69,7 +69,7 @@ class TransactionRepositoryImpl(
         getActiveAccounts().let { accounts ->
             Observable.fromIterable(accounts)
                 .flatMapSingle { tokenManager.refreshTokenBalance(it) }
-                .flatMapSingle { (privateKey, tokens) -> tokenManager.updateTokensRate(privateKey, tokens) }
+                //.flatMapSingle { (privateKey, tokens) -> tokenManager.updateTokensRate(privateKey, tokens) }
                 .toList()
                 .map {
                     mutableMapOf<String, List<AccountToken>>().apply {

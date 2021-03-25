@@ -35,6 +35,7 @@ import minerva.android.walletmanager.repository.smartContract.SmartContractRepos
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.widget.state.AppUIState
 import timber.log.Timber
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
@@ -44,7 +45,8 @@ class AccountsViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository,
-    private val walletConnectRepository: WalletConnectRepository
+    private val walletConnectRepository: WalletConnectRepository,
+    private val appUIState: AppUIState
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -128,6 +130,12 @@ class AccountsViewModel(
         accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
+    //TODO klop add tests?
+    fun updateAccountUIState(index: Int, isOpen: Boolean) = appUIState.updateAccountState(index, isOpen)
+
+    //TODO klop add tests?
+    fun getAccountUIState(index: Int) = appUIState.getAccountState(index)
+
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
             walletConnectRepository.getSessionsFlowable()
@@ -151,9 +159,7 @@ class AccountsViewModel(
                     }
                 }
             }
-        } else {
-            hashMapOf()
-        }
+        } else hashMapOf()
 
     private fun isCurrentSession(sessions: List<DappSession>, account: Account) =
         sessions.find { it.address == accountManager.toChecksumAddress(account.address) } != null

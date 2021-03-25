@@ -12,5 +12,6 @@ interface AccountsAdapterListener {
     fun onWalletConnect(index: Int)
     fun onManageTokens(index: Int)
     fun onExportPrivateKey(account: Account)
-    fun onOpenOrClose(index: Int, isOpen: Boolean)
+    fun updateAccountUIState(index: Int, isOpen: Boolean)
+    fun getAccountUIState(index: Int): Boolean
 }

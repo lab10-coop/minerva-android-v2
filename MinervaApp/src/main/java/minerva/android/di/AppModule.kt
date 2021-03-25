@@ -29,6 +29,8 @@ import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage
 import minerva.android.widget.clubCard.CacheStorageImpl
 import minerva.android.widget.clubCard.ClubCardViewModel
+import minerva.android.widget.state.AppUIState
+import minerva.android.widget.state.AppUIStateImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
@@ -49,6 +51,7 @@ fun createAppModule() = mutableListOf<Module>().apply {
 private val appModules = module {
     factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
     factory<CacheStorage> { CacheStorageImpl(get()) }
+    single<AppUIState> { AppUIStateImpl() }
     viewModel { ClubCardViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get()) }
     viewModel { WalletConnectInteractionsViewModel(get(), get()) }
@@ -56,7 +59,7 @@ private val appModules = module {
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }
-    viewModel { AccountsViewModel(get(), get(), get(), get(), get()) }
+    viewModel { AccountsViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }

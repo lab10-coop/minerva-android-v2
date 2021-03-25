@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Observable

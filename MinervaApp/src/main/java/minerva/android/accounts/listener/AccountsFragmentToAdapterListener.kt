@@ -1,7 +1,7 @@
 package minerva.android.accounts.listener
 
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.widget.state.AppUIStateImpl
 
 interface AccountsFragmentToAdapterListener {
     fun onSendTransaction(index: Int)
@@ -13,4 +13,6 @@ interface AccountsFragmentToAdapterListener {
     fun onWalletConnect(index: Int)
     fun onManageTokens(index: Int)
     fun onExportPrivateKey(account: Account)
+    fun updateAccountUIState(index: Int, isOpen: Boolean)
+    fun getAccountUIState(index: Int): Boolean
 }
