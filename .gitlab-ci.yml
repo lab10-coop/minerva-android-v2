@@ -11,7 +11,7 @@ before_script:
   - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
 
 stages:
-#  - preparation
+  #  - preparation
   - validation
   - distribution
   - deploy
@@ -49,14 +49,14 @@ distributeStagingBuild:
   only:
     refs:
       - develop
-#      - master
+  #      - master
 
   script:
-    - echo "$KEY_STORE_FILE" > keyStoreMinerva.jks.b64
-    - base64 -d -i keyStoreMinerva.jks.b64 > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
+    - echo "$KEY_STORE_FILE" > keyStoreMinerva.jks.b64
+    - base64 -d -i keyStoreMinerva.jks.b64 > MinervaApp/keyStoreMinerva.jks
     - fastlane firebaseStaging
     - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
 
