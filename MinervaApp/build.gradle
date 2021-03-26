@@ -42,7 +42,7 @@ android {
             keyAlias String.valueOf(System.env.KEY_ALIAS)
             keyPassword String.valueOf(System.env.KEY_PASSWORD)
             storePassword String.valueOf(System.env.KEY_STORE_PASSWORD)
-            storeFile file("../keyStoreMinerva.jks")
+            storeFile file("../keystore/keyStoreMinerva.jks")
         }
     }
 

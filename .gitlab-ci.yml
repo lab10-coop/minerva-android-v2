@@ -23,23 +23,23 @@ restoreKeystoreFile:
       - develop #master and production
   script:
     - echo "$KEY_STORE_FILE" > keyStoreMinerva.jks.b64
-    - base64 -d -i keyStoreMinerva.jks.b64 > keyStoreMinerva.jks
+    - base64 -d -i keyStoreMinerva.jks.b64 > keystore/keyStoreMinerva.jks
 
-validateBranch:
-  stage: validation
-  except:
-    refs:
-      - master
-  script:
-    - ./gradlew test
-
-validateLint:
-  stage: validation
-  except:
-    refs:
-      - master
-  script:
-    - ./gradlew lint
+#validateBranch:
+#  stage: validation
+#  except:
+#    refs:
+#      - master
+#  script:
+#    - ./gradlew test
+#
+#validateLint:
+#  stage: validation
+#  except:
+#    refs:
+#      - master
+#  script:
+#    - ./gradlew lint
 
 distributeStagingBuild:
   stage: distribution
@@ -59,23 +59,23 @@ distributeStagingBuild:
     paths:
       - ./MinervaApp/build/outputs/apk/staging
 
-distributeProductionBuild:
-  stage: distribution
-  only:
-    refs:
-      - develop
-#      - master
-
-  script:
-    - ./gradlew build
-    - . /etc/profile.d/rvm.sh
-    - ./BuildScripts/build_fastlane.sh
-    - fastlane firebaseProduction
-    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
-
-  artifacts:
-    paths:
-      - ./MinervaApp/build/outputs/apk/production
+#distributeProductionBuild:
+#  stage: distribution
+#  only:
+#    refs:
+#      - develop
+##      - master
+#
+#  script:
+#    - ./gradlew build
+#    - . /etc/profile.d/rvm.sh
+#    - ./BuildScripts/build_fastlane.sh
+#    - fastlane firebaseProduction
+#    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
+#
+#  artifacts:
+#    paths:
+#      - ./MinervaApp/build/outputs/apk/production
 
 deployProductionBuild:
   stage: distribution
