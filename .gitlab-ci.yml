@@ -13,6 +13,7 @@ before_script:
 stages:
   - validation
   - distribution
+  - deploy
 
 validateBranch:
   stage: validation
@@ -34,7 +35,7 @@ distributeStagingBuild:
   stage: distribution
   only:
     refs:
-      - master
+        - master
 
   script:
     - ./gradlew build
@@ -57,9 +58,45 @@ distributeProductionBuild:
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
-    - fastlane firebaseBetaProduction
+    - fastlane firebaseProduction
     - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
 
   artifacts:
     paths:
       - ./MinervaApp/build/outputs/apk/production
+
+#Delete when releasing to production
+deployProductionBuild:
+  stage: distribution
+  only:
+    refs:
+      - production
+
+  script:
+    - ./gradlew build
+    - . /etc/profile.d/rvm.sh
+    - ./BuildScripts/build_fastlane.sh
+    - fastlane firebaseProduction
+    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
+
+  artifacts:
+    paths:
+      - ./MinervaApp/build/outputs/apk/production
+
+#Uncomment when production app is ready, to upload every new version automatically. Check if the Google Play credential file is needed at this stage ?
+#productionBetaReleaseBuild:
+#  stage: diploy
+#  only:
+#    refs:
+#      - production
+#
+#  script:
+#    - ./gradlew build
+#    - . /etc/profile.d/rvm.sh
+#    - ./BuildScripts/build_fastlane.sh
+#    - fastlane productionRelease
+#    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
+#
+#  artifacts:
+#    paths:
+#      - ./MinervaApp/build/outputs/apk/production
