@@ -11,21 +11,22 @@ before_script:
   - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
 
 stages:
-  - preparation
+#  - preparation
   - validation
   - distribution
   - deploy
 
-restoreKeystoreFile:
-  stage: preparation
-  only:
-    refs:
-      - develop #master and production
-  script:
-    - echo "$KEY_STORE_FILE" > keyStoreMinerva.jks.b64
-    - base64 -d -i keyStoreMinerva.jks.b64 > MinervaApp/keyStoreMinerva.jks
+#restoreKeystoreFile:
+#  stage: preparation
+#  only:
+#    refs:
+#      - develop #master and production
+#  script:
+#    - echo "$KEY_STORE_FILE" > keyStoreMinerva.jks.b64
+#    - base64 -d -i keyStoreMinerva.jks.b64 > MinervaApp/keyStoreMinerva.jks
+
 #  env:
-#    KEY_STORE_FILE: ${{se}}
+#    KEY_STORE_FILE: ${{ secrets.KEY_STORE_FILE }}
 
 #validateBranch:
 #  stage: validation
@@ -51,6 +52,8 @@ distributeStagingBuild:
 #      - master
 
   script:
+    - echo "$KEY_STORE_FILE" > keyStoreMinerva.jks.b64
+    - base64 -d -i keyStoreMinerva.jks.b64 > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
