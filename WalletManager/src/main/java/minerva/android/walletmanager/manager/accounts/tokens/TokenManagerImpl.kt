@@ -20,7 +20,6 @@ import minerva.android.kotlinUtils.list.removeAll
 import minerva.android.walletmanager.BuildConfig.*
 import minerva.android.walletmanager.exception.AllTokenIconsUpdated
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
@@ -40,13 +39,15 @@ import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.storage.TempStorage
 import minerva.android.walletmanager.utils.MarketUtils
 
 class TokenManagerImpl(
     private val walletManager: WalletConfigManager,
     private val cryptoApi: CryptoApi,
     private val localStorage: LocalStorage,
-    private val blockchainRepository: BlockchainRegularAccountRepository
+    private val blockchainRepository: BlockchainRegularAccountRepository,
+    private val tempStorage: TempStorage
 ) : TokenManager {
 
     private val currentTimeProvider = CurrentTimeProviderImpl()
@@ -138,12 +139,15 @@ class TokenManagerImpl(
                     blockchainRepository.refreshTokenBalance(account.privateKey, account.chainId, it.address, account.address)
                 }
                 .map { (address, balance) ->
-                    tokens.find {
-                        it.address == address
-                    }?.let { erc20Token ->
-                        AccountToken(erc20Token, balance)
+                    tokens.find { it.address == address }?.let { erc20Token ->
+                        AccountToken(
+                            erc20Token,
+                            balance,
+                            tempStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address))
+                        )
                     }.orElse { throw NullPointerException() }
-                }.toList()
+                }
+                .toList()
                 .map { Pair(account.privateKey, it.toList()) }
         }
 
@@ -153,35 +157,42 @@ class TokenManagerImpl(
             else -> getNotEthereumTokens(account)
         }
 
-    private var cachedTokensRate: MutableMap<String, Double> = mutableMapOf()
-
     //TODO klop should be tested too!
-    private fun updateAccountTokenRate(accountToken: AccountToken): Observable<AccountToken> =
-        generateTokenHash(accountToken.token.chainId, accountToken.token.address).let { tokenHash ->
-            cachedTokensRate[tokenHash]?.let {
-                accountToken.tokenPrice = it
-                Observable.just(accountToken)
+    private fun updateAccountTokenRate(token: ERC20Token, ratesMap: Map<String, Double>): Observable<Pair<String, Double>> =
+        generateTokenHash(token.chainId, token.address).let { tokenHash ->
+            ratesMap[tokenHash]?.let {
+                Observable.just(Pair(tokenHash, it))
             }.orElse {
-                cryptoApi.getTokenMarkets(MarketUtils.getMarketId(accountToken.token.chainId), accountToken.token.address)
+                cryptoApi.getTokenMarkets(MarketUtils.getMarketId(token.chainId), token.address)
                     .onErrorReturn { TokenMarketResponse(marketData = MarketData(Price())) }
                     .map {
-                        val tokenMarketValue = it.marketData.currentPrice.value ?: Double.InvalidValue
-                        cachedTokensRate[tokenHash] = tokenMarketValue
-                        accountToken.tokenPrice = tokenMarketValue
-                        accountToken
+                        val tokenMarketRate = it.marketData.currentPrice.value ?: Double.InvalidValue
+                        Pair(tokenHash, tokenMarketRate)
                     }.toObservable()
             }
         }
 
     //TODO klop should be tested
-    override fun updateTokensRate(
-        privateKey: String,
-        tokens: List<AccountToken>
-    ): Single<Pair<String, List<AccountToken>>> =
-        mutableListOf<Observable<AccountToken>>().let { observables ->
-            tokens.forEach { observables.add(updateAccountTokenRate(it)) }
-            Observable.merge(observables).toList().map { Pair(privateKey, it) }
+    //TODO klop is possible to merge for Networks?
+    override fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable =
+        mutableListOf<Observable<Pair<String, Double>>>().let { observables ->
+            tokens.values.forEach {
+                it.forEach {
+                    observables.add(updateAccountTokenRate(it, tempStorage.getRates()))
+                }
+            }
+            Observable.merge(observables)
+                .doOnNext { (tokenHash, rate) ->
+                    tempStorage.saveRate(tokenHash, rate)
+                }.toList().ignoreElement()
         }
+
+    override fun updateTokensRate(account: Account): Account {
+        account.accountTokens.forEach {
+            it.tokenPrice = tempStorage.getRate(generateTokenHash(it.token.chainId, it.token.address))
+        }
+        return account
+    }
 
     private fun getNotEthereumTokens(account: Account): Single<List<ERC20Token>> =
         cryptoApi.getConnectedTokens(url = getTokensApiURL(account))

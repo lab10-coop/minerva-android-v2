@@ -18,7 +18,6 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.widget.state.AppUIStateImpl
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
@@ -51,8 +50,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             if (arePendingAccountsEmpty()) accountAdapter.stopPendingTransactions()
         }
     }
-
-    fun refreshBalances() = viewModel.refreshBalances()
 
     fun stopPendingTransactions() = accountAdapter.stopPendingTransactions()
 
@@ -96,6 +93,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)
     }
 
+    fun updateTokensRate() = viewModel.updateTokensRate()
+
+    fun refreshBalances() = viewModel.refreshBalances()
+
     private fun initFragment() {
         binding.apply {
             viewModel.apply {
@@ -130,6 +131,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
     }
 
+    private fun checkSwipe() = binding.swipeRefresh.run {
+        if (isRefreshing) isRefreshing = !viewModel.isRefreshDone()
+    }
+
     private fun setupLiveData() {
         viewModel.apply {
             shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
@@ -150,12 +155,13 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
                 balanceLiveData.observe(viewLifecycleOwner, Observer {
                     accountAdapter.updateBalances(it)
-                    swipeRefresh.isRefreshing = false
+                    checkSwipe()
+                })
+                tokenBalanceLiveData.observe(viewLifecycleOwner, Observer {
+                    accountAdapter.updateTokenBalances()
+                    checkSwipe()
                 })
             }
-            tokenBalanceLiveData.observe(viewLifecycleOwner, Observer {
-                accountAdapter.updateTokenBalances()
-            })
 
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 refreshFreeATSButton()

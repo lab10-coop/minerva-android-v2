@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.repository.transaction
 
-import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -69,13 +68,24 @@ class TransactionRepositoryImpl(
         getActiveAccounts().let { accounts ->
             Observable.fromIterable(accounts)
                 .flatMapSingle { tokenManager.refreshTokenBalance(it) }
-                //.flatMapSingle { (privateKey, tokens) -> tokenManager.updateTokensRate(privateKey, tokens) }
                 .toList()
                 .map {
                     mutableMapOf<String, List<AccountToken>>().apply {
                         it.forEach { (privateKey, accountTokens) -> put(privateKey, accountTokens) }
                     }.toMap()
                 }
+        }
+
+    //TODO klop tests
+    override fun getTokensRate(): Completable =
+        walletConfigManager.getWalletConfig().let { config -> tokenManager.getTokensRate(config.erc20Tokens) }
+
+    //TODO klop tests
+    override fun updateTokensRate(): Completable =
+        getActiveAccounts().let { accounts ->
+            Observable.fromIterable(accounts)
+                .map { tokenManager.updateTokensRate(it) }
+                .ignoreElements()
         }
 
     override fun refreshTokensList(): Single<Boolean> =
@@ -183,8 +193,7 @@ class TransactionRepositoryImpl(
                 }
             }
 
-    override fun isAddressValid(address: String): Boolean =
-        blockchainRepository.isAddressValid(address)
+    override fun isAddressValid(address: String): Boolean = blockchainRepository.isAddressValid(address)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
@@ -270,6 +279,7 @@ class TransactionRepositoryImpl(
         }
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
+
     override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
 
     companion object {

@@ -1,26 +1,22 @@
 package minerva.android.widget
 
 import android.animation.ObjectAnimator
-import android.annotation.SuppressLint
 import android.content.Context
 import android.transition.TransitionManager
 import android.util.AttributeSet
-import android.util.Log
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
 import minerva.android.R
-import minerva.android.databinding.HorizontalLabeledTextLayoutBinding
 import minerva.android.databinding.TokensAndCollectiblesLayoutBinding
-import minerva.android.extension.*
-import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.extension.toggleVisibleOrGone
+import minerva.android.extension.visible
+import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_PADDING
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.Collectible
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.token.TokenView
-import kotlin.math.pow
 
 class TokensAndCollectiblesView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -32,7 +28,6 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     private var showMainToken = false
 
     init {
-        Log.e("klop", "initialize view")
         initView()
         prepareListeners()
     }
@@ -46,7 +41,12 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     }
 
     private fun initView() {
-        setPadding(Int.NO_PADDING, Int.NO_PADDING, resources.getDimension(R.dimen.margin_normal).toInt(), Int.NO_PADDING)
+        setPadding(
+            Int.NO_PADDING,
+            resources.getDimension(R.dimen.margin_xxsmall).toInt(),
+            resources.getDimension(R.dimen.margin_normal).toInt(),
+            resources.getDimension(R.dimen.margin_xxsmall).toInt()
+        )
         orientation = VERTICAL
         isClickable = true
         isFocusable = true

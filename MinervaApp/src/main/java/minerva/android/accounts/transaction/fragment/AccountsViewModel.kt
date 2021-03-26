@@ -103,6 +103,9 @@ class AccountsViewModel(
     lateinit var tokenVisibilitySettings: TokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
 
+    private var balancesRefreshed = false
+    private var tokenBalancesRefreshed = false
+
     fun arePendingAccountsEmpty() = transactionRepository.getPendingAccounts().isEmpty()
 
     init {
@@ -184,11 +187,15 @@ class AccountsViewModel(
 
     fun refreshBalances() =
         launchDisposable {
+            balancesRefreshed = false
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _balanceLiveData.value = it },
+                    onSuccess = {
+                        balancesRefreshed = true
+                        _balanceLiveData.value = it
+                    },
                     onError = {
                         Timber.d("Refresh balance error: ${it.message}")
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.BALANCE_ERROR)
@@ -213,18 +220,33 @@ class AccountsViewModel(
 
     fun refreshTokenBalance() =
         launchDisposable {
+            tokenBalancesRefreshed = false
             transactionRepository.refreshTokenBalance()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = {
                         filterNotVisibleTokens(it)
+                        tokenBalancesRefreshed = true
                         _tokenBalanceLiveData.value = Unit
                     },
                     onError = {
                         Timber.e(it)
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
                     }
+                )
+        }
+
+    fun updateTokensRate() =
+        launchDisposable {
+            transactionRepository.updateTokensRate()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = {
+                        _tokenBalanceLiveData.value = Unit
+                    },
+                    onError = { Timber.e(it) }
                 )
         }
 
@@ -239,6 +261,8 @@ class AccountsViewModel(
                     onError = { Timber.e(it) }
                 )
         }
+
+    fun isRefreshDone() = balancesRefreshed && tokenBalancesRefreshed
 
     private fun handleRemoveAccountErrors(it: Throwable) {
         when (it) {
