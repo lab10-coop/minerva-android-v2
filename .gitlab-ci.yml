@@ -24,6 +24,8 @@ restoreKeystoreFile:
   script:
     - echo "$KEY_STORE_FILE" > keyStoreMinerva.jks.b64
     - base64 -d -i keyStoreMinerva.jks.b64 > MinervaApp/keyStoreMinerva.jks
+#  env:
+#    KEY_STORE_FILE: ${{se}}
 
 #validateBranch:
 #  stage: validation
