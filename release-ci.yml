@@ -1,6 +1,7 @@
 on:
   push:
-    branches: [master, production]
+    branches: develop
+#    [master, production]
 
 jobs:
   assembleRelease:
