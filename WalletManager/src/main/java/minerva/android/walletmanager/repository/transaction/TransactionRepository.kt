@@ -29,7 +29,7 @@ interface TransactionRepository {
     fun getAccountByAddress(address: String): Account?
     fun getFreeATS(address: String): Completable
     fun getTokensRate(): Completable
-    fun updateTokensRate(): Completable
+    fun updateTokensRate()
 
     fun subscribeToExecutedTransactions(accountIndex: Int): Flowable<PendingAccount>
     fun removePendingAccount(pendingAccount: PendingAccount)

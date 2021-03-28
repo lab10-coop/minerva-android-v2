@@ -21,6 +21,8 @@ import minerva.android.walletmanager.repository.smartContract.SmartContractRepos
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.widget.state.AppUIState
+import minerva.android.widget.state.AppUIStateImpl
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -36,6 +38,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
+    private val appUIState: AppUIState = mock()
     private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
@@ -71,7 +74,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletActionsRepository,
             smartContractRepository,
             transactionRepository,
-            walletConnectRepository
+            walletConnectRepository,
+            appUIState
         )
     }
 
@@ -349,6 +353,18 @@ class AccountsViewModelTest : BaseViewModelTest() {
             viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo null
             verify(settings, times(5)).getTokenVisibility(any(), any())
         }
+    }
+
+    @Test
+    fun `Check getting and updating Account UI State calls`() {
+        doNothing().whenever(appUIState).updateAccountState(any(), any())
+        whenever(appUIState.getAccountUIState(any())).thenReturn(false)
+
+        viewModel.updateAccountUIState(3, false)
+        viewModel.getAccountUIState(3)
+
+        verify(appUIState, times(1)).updateAccountState(any(), any())
+        verify(appUIState, times(1)).getAccountUIState(any())
     }
 
     private val accounts = listOf(

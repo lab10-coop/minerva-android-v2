@@ -1,15 +1,15 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
+import com.google.gson.annotations.SerializedName
+import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -23,14 +23,17 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.storage.TempStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.*
 import org.junit.Before
 import org.junit.Test
+import java.math.BigDecimal
 import kotlin.test.assertFailsWith
 
 class TokenManagerTest : RxTest() {
@@ -39,7 +42,8 @@ class TokenManagerTest : RxTest() {
     private val cryptoApi: CryptoApi = mock()
     private val localStorage: LocalStorage = mock()
     private val blockchainRepository: BlockchainRegularAccountRepository = mock()
-    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository)
+    private val tempStorage: TempStorage = mock()
+    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, tempStorage)
 
     @Before
     fun initializeMocks() {
@@ -371,6 +375,50 @@ class TokenManagerTest : RxTest() {
                         it.second[1].token.name == "SecondOtherATS" &&
                         it.second[1].balance.toPlainString() == "0.000000000000000001"
             }
+    }
+
+    @Test
+    fun `check getting tokens rate request`() {
+        val error = Throwable("ERROR-333")
+        val rates = mapOf(Pair("40x0th3r", 1.0), Pair("40xC00k1e", 0.2), Pair("hash03", 3.3))
+        val marketResponse = TokenMarketResponse("id", "tokenName", MarketData(Price(3.3)))
+        val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
+
+        doNothing().whenever(tempStorage).saveRate(any(), any())
+        whenever(tempStorage.getRates()).thenReturn(rates)
+        whenever(cryptoApi.getTokenMarkets(any(), any())).thenReturn(
+            Single.just(marketResponse),
+            Single.just(marketResponse),
+            Single.just(marketResponse),
+            Single.just(marketResponse),
+            Single.error(error)
+        )
+
+        tokenManager.getTokensRate(tokens)
+            .test()
+            .assertComplete()
+        tokenManager.getTokensRate(tokens)
+            .test()
+            .assertComplete()
+
+        verify(tempStorage, times(8)).getRates()
+        verify(tempStorage, times(8)).saveRate(any(), any())
+        verify(cryptoApi, times(4)).getTokenMarkets(any(), any())
+    }
+
+    @Test
+    fun `Check updating Tokens Rates` () {
+        val accountTokens = listOf(
+            AccountToken(ERC20Token(3, "one", address = "0x01"), BigDecimal.TEN),
+            AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
+        )
+        val account = Account(1, name = "account01", accountTokens = accountTokens)
+        whenever(tempStorage.getRate(any())).thenReturn(0.1, 0.3)
+
+        tokenManager.updateTokensRate(account)
+
+        account.accountTokens[0].tokenPrice shouldBeEqualTo 0.1
+        account.accountTokens[1].tokenPrice shouldBeEqualTo 0.3
     }
 
     private val commitData: List<CommitElement>

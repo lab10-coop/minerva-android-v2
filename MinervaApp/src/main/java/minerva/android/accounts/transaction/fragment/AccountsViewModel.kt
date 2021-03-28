@@ -133,11 +133,9 @@ class AccountsViewModel(
         accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
-    //TODO klop add tests?
     fun updateAccountUIState(index: Int, isOpen: Boolean) = appUIState.updateAccountState(index, isOpen)
 
-    //TODO klop add tests?
-    fun getAccountUIState(index: Int) = appUIState.getAccountState(index)
+    fun getAccountUIState(index: Int) = appUIState.getAccountUIState(index)
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
@@ -237,18 +235,10 @@ class AccountsViewModel(
                 )
         }
 
-    fun updateTokensRate() =
-        launchDisposable {
-            transactionRepository.updateTokensRate()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = {
-                        _tokenBalanceLiveData.value = Unit
-                    },
-                    onError = { Timber.e(it) }
-                )
-        }
+    fun updateTokensRate() {
+        transactionRepository.updateTokensRate()
+        _tokenBalanceLiveData.value = Unit
+    }
 
     fun refreshTokensList() =
         launchDisposable {

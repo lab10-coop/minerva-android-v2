@@ -76,17 +76,12 @@ class TransactionRepositoryImpl(
                 }
         }
 
-    //TODO klop tests
     override fun getTokensRate(): Completable =
         walletConfigManager.getWalletConfig().let { config -> tokenManager.getTokensRate(config.erc20Tokens) }
 
-    //TODO klop tests
-    override fun updateTokensRate(): Completable =
-        getActiveAccounts().let { accounts ->
-            Observable.fromIterable(accounts)
-                .map { tokenManager.updateTokensRate(it) }
-                .ignoreElements()
-        }
+    override fun updateTokensRate() {
+        getActiveAccounts().forEach { tokenManager.updateTokensRate(it) }
+    }
 
     override fun refreshTokensList(): Single<Boolean> =
         getActiveAccounts().let { accounts ->

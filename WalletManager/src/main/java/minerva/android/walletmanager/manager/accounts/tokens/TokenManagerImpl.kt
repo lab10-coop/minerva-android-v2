@@ -157,7 +157,6 @@ class TokenManagerImpl(
             else -> getNotEthereumTokens(account)
         }
 
-    //TODO klop should be tested too!
     private fun updateAccountTokenRate(token: ERC20Token, ratesMap: Map<String, Double>): Observable<Pair<String, Double>> =
         generateTokenHash(token.chainId, token.address).let { tokenHash ->
             ratesMap[tokenHash]?.let {
@@ -172,8 +171,6 @@ class TokenManagerImpl(
             }
         }
 
-    //TODO klop should be tested
-    //TODO klop is possible to merge for Networks?
     override fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable =
         mutableListOf<Observable<Pair<String, Double>>>().let { observables ->
             tokens.values.forEach {
@@ -187,11 +184,12 @@ class TokenManagerImpl(
                 }.toList().ignoreElement()
         }
 
-    override fun updateTokensRate(account: Account): Account {
-        account.accountTokens.forEach {
-            it.tokenPrice = tempStorage.getRate(generateTokenHash(it.token.chainId, it.token.address))
+    override fun updateTokensRate(account: Account) {
+        account.apply {
+            accountTokens.forEach {
+                it.tokenPrice = tempStorage.getRate(generateTokenHash(it.token.chainId, it.token.address))
+            }
         }
-        return account
     }
 
     private fun getNotEthereumTokens(account: Account): Single<List<ERC20Token>> =
