@@ -40,6 +40,7 @@ import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.TempStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import java.util.*
 
 class TokenManagerImpl(
     private val walletManager: WalletConfigManager,
@@ -250,7 +251,7 @@ class TokenManagerImpl(
         }
 
     @VisibleForTesting
-    fun generateTokenHash(chainId: Int, address: String) = "$chainId$address"
+    fun generateTokenHash(chainId: Int, address: String) = "$chainId$address".toLowerCase(Locale.ROOT)
 
     /**
      * arguments: tokens MutableMap<ChainId, List<ERC20Token>>
