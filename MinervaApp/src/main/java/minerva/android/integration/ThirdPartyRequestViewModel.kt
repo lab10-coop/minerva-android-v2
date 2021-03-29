@@ -21,12 +21,13 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REJ
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType.Companion.SERVICE
 import minerva.android.walletmanager.model.mappers.GATEWAY
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.minervaprimitives.credential.CredentialRequest
 import minerva.android.walletmanager.model.state.ConnectionRequest
 import minerva.android.walletmanager.model.transactions.Payment
 import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
@@ -40,7 +41,13 @@ class ThirdPartyRequestViewModel(
     lateinit var payment: Payment
     lateinit var credentialRequest: Pair<Credential, CredentialRequest>
 
-    private val _showConnectionRequestLiveData = MutableLiveData<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>>()
+    var shouldDecodeJwt: Boolean = true
+
+    val walletConfigErrorLiveData: LiveData<Event<Throwable>> = masterSeedRepository.walletConfigErrorLiveData
+    val walletConfigLiveData: LiveData<Event<WalletConfig>> = masterSeedRepository.walletConfigLiveData
+
+    private val _showConnectionRequestLiveData =
+        MutableLiveData<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>>()
     val showServiceConnectionRequestLiveData: LiveData<Event<ConnectionRequest<Pair<Credential, CredentialRequest>>>> get() = _showConnectionRequestLiveData
 
     private val _showPaymentConfirmationLiveData = MutableLiveData<Event<Unit>>()
@@ -76,6 +83,11 @@ class ThirdPartyRequestViewModel(
     private val serviceIconUrl: String
         get() = GATEWAY + credentialRequest.second.service.iconUrl.url
 
+    override fun onCleared() {
+        super.onCleared()
+        masterSeedRepository.dispose()
+    }
+
     fun decodeJwtToken(token: String?) {
         token?.let {
             launchDisposable {
@@ -92,7 +104,7 @@ class ThirdPartyRequestViewModel(
                     .subscribeBy(
                         onSuccess = { _showConnectionRequestLiveData.value = Event(it) },
                         onError = {
-                            Timber.e(it)
+                            Timber.e("Decoding JWT error: $it")
                             _errorLiveData.value = Event(it)
                         }
                     )
@@ -147,13 +159,19 @@ class ThirdPartyRequestViewModel(
         )
 
     private val sentCredentialMap
-        get() = hashMapOf(SERVICE_NAME to credentialRequest.second.service.name, CREDENTIAL_NAME to credentialRequest.first.name)
+        get() = hashMapOf(
+            SERVICE_NAME to credentialRequest.second.service.name,
+            CREDENTIAL_NAME to credentialRequest.first.name
+        )
 
     private fun saveWalletActions(it: ConnectionRequest.ServiceConnected<Pair<Credential, CredentialRequest>>) =
         walletActionsRepository.saveWalletActions(
             listOf(
                 getWalletAction(SENT, sentCredentialMap(it)),
-                getWalletAction(WalletActionStatus.BACKGROUND_ADDED, hashMapOf(SERVICE_NAME to it.data.second.service.name))
+                getWalletAction(
+                    WalletActionStatus.BACKGROUND_ADDED,
+                    hashMapOf(SERVICE_NAME to it.data.second.service.name)
+                )
             )
         ).toSingleDefault(it)
 
@@ -162,21 +180,6 @@ class ThirdPartyRequestViewModel(
 
     private fun getWalletAction(status: Int, payload: HashMap<String, String>): WalletAction =
         WalletAction(SERVICE, status, DateUtils.timestamp, payload)
-
-    //todo should be handle when services request is ready on m27 app
-//    private fun handleDecodeResult(payment: Payment, services: List<Service>?) {
-//        this.payment = payment
-//        checkIfServiceIsAlreadyConnected(services, payment)
-//        //todo check what kind of interaction is requested and display a proper fragment for that
-//    }
-//
-//    private fun checkIfServiceIsAlreadyConnected(services: List<Service>?, payment: Payment) {
-//        if (isM27Connected(services)) _showPaymentConfirmationLiveData.value = Event(Unit)
-//        else _showConnectionRequestLiveData.value = Event(payment.serviceName)
-//    }
-//
-//    private fun isM27Connected(services: List<Service>?) =
-//        services?.find { service -> service.name == M27_NAME } != null
 
     fun confirmTransaction() {
         launchDisposable {

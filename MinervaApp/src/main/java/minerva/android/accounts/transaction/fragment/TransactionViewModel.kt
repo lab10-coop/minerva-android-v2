@@ -83,6 +83,9 @@ class TransactionViewModel(
     val token
         get() = network.token
 
+    val spinnerPosition
+        get() = tokenIndex + ONE_ELEMENT
+
     val tokensList: List<Token>
         get() = mutableListOf<Token>().apply {
             with(account.network) {
@@ -170,7 +173,7 @@ class TransactionViewModel(
             isTokenTransaction -> TransferType.TOKEN_TRANSFER
             isSafeAccountMainTransaction -> TransferType.SAFE_ACCOUNT_COIN_TRANSFER
             isSafeAccountTokenTransaction -> TransferType.SAFE_ACCOUNT_TOKEN_TRANSFER
-            else -> TransferType.UNDEFINED
+            else -> TransferType.UNKNOWN
         }
 
     fun sendTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
@@ -406,4 +409,8 @@ class TransactionViewModel(
             contractAddress,
             tokenDecimals = tokenDecimals
         )
+
+    companion object {
+        const val ONE_ELEMENT = 1
+    }
 }

@@ -213,9 +213,7 @@ class BlockchainRegularAccountRepositoryImpl(
                                     .ethCall(transaction, DefaultBlockParameterName.LATEST)
                                     .flowable()
                             )
-                            .flatMapSingle { (gas, _) ->
-                                handleGasLimit(chainId, gas, gasPrice, txCostData.transferType)
-                            }
+                            .flatMapSingle { (gas, _) -> handleGasLimit(chainId, gas, gasPrice, txCostData.transferType) }
                     }
                     .firstOrError()
                     .timeout(
@@ -224,38 +222,14 @@ class BlockchainRegularAccountRepositoryImpl(
                         calculateTransactionCosts(chainId, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
                     )
             } else {
-                //TODO implement getting gasLimit for Safe Account transaction fro Blockchain
+                //TODO implement getting gasLimit for Safe Account transaction from Blockchain
                 calculateTransactionCosts(chainId, Operation.SAFE_ACCOUNT_TXS.gasLimit, gasPrice)
             }
         }
 
     private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
         when (costData.transferType) {
-            BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP -> {
-                Transaction(
-                    costData.from,
-                    count.transactionCount,
-                    BigInteger.ZERO,
-                    BigInteger.ZERO,
-                    costData.to,
-                    toWei(costData.amount, Convert.Unit.ETHER).toBigInteger(),
-                    costData.contractData
-                )
-            }
-
-            BlockchainTransactionType.TOKEN_SWAP_APPROVAL, BlockchainTransactionType.TOKEN_SWAP -> {
-                Transaction.createFunctionCallTransaction(
-                    costData.from,
-                    count.transactionCount,
-                    BigInteger.ZERO,
-                    BigInteger.ZERO,
-                    costData.to,//token smart contract address
-                    BigInteger.ZERO, //value of native coin
-                    costData.contractData
-                )
-            }
-
-            else -> {
+            BlockchainTransactionType.TOKEN_TRANSFER -> {
                 Transaction.createFunctionCallTransaction(
                     costData.from,
                     count.transactionCount,
@@ -269,6 +243,17 @@ class BlockchainRegularAccountRepositoryImpl(
                             CryptoUtils.convertTokenAmount(costData.amount, costData.tokenDecimals)
                         )
                     )
+                )
+            }
+            else -> {
+                Transaction(
+                    costData.from,
+                    count.transactionCount,
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    costData.to,
+                    toWei(costData.amount, Convert.Unit.ETHER).toBigInteger(),
+                    costData.contractData
                 )
             }
         }

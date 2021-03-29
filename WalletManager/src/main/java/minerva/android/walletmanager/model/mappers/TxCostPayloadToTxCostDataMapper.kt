@@ -30,6 +30,8 @@ object TxCostPayloadToTxCostDataMapper : Mapper<TxCostPayload, TxCostData> {
             TransferType.COIN_SWAP -> BlockchainTransactionType.COIN_SWAP
             TransferType.SAFE_ACCOUNT_COIN_TRANSFER -> BlockchainTransactionType.SAFE_ACCOUNT_COIN_TRANSFER
             TransferType.SAFE_ACCOUNT_TOKEN_TRANSFER -> BlockchainTransactionType.SAFE_ACCOUNT_TOKEN_TRANSFER
-            TransferType.UNDEFINED -> BlockchainTransactionType.UNDEFINED
+            TransferType.DEFAULT_TOKEN_TX -> BlockchainTransactionType.DEFAULT_TOKEN_TX
+            TransferType.DEFAULT_COIN_TX -> BlockchainTransactionType.DEFAULT_COIN_TX
+            TransferType.UNKNOWN -> BlockchainTransactionType.UNKNOWN
         }
 }

@@ -194,7 +194,7 @@ class PassiveVideoView : FrameLayout, MediaController.MediaPlayerControl, Surfac
     override fun start() {
         if (isPrepared) {
             mediaPlayer?.start()
-            textureView?.animate()?.alpha(ALPHA)?.setStartDelay(STARTUP_DELAY)?.start();
+            textureView?.animate()?.alpha(ALPHA)?.setStartDelay(STARTUP_DELAY)?.start()
             requestLayout()
         }
     }

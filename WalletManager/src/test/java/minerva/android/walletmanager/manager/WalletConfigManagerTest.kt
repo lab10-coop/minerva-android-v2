@@ -16,6 +16,7 @@ import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -48,8 +49,8 @@ class WalletConfigManagerTest {
     private val walletManager =
         WalletConfigManagerImpl(keyStoreRepository, cryptographyRepository, localWalletConfigProvider, localStorage, minervaApi)
 
-    private val walletConfigObserver: Observer<WalletConfig> = mock()
-    private val walletConfigCaptor: KArgumentCaptor<WalletConfig> = argumentCaptor()
+    private val walletConfigObserver: Observer<Event<WalletConfig>> = mock()
+    private val walletConfigCaptor: KArgumentCaptor<Event<WalletConfig>> = argumentCaptor()
 
     @get:Rule
     val rule
@@ -100,7 +101,7 @@ class WalletConfigManagerTest {
         walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
         walletConfigCaptor.run {
             verify(walletConfigObserver).onChanged(capture())
-            firstValue.identities[0].name shouldBeEqualTo "IdentityName1"
+            firstValue.peekContent().identities[0].name shouldBeEqualTo "IdentityName1"
         }
     }
 
@@ -114,7 +115,7 @@ class WalletConfigManagerTest {
         walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
         walletConfigCaptor.run {
             verify(walletConfigObserver).onChanged(capture())
-            firstValue.identities[0].name shouldBeEqualTo "IdentityName1"
+            firstValue.peekContent().identities[0].name shouldBeEqualTo "IdentityName1"
         }
     }
 
@@ -125,7 +126,7 @@ class WalletConfigManagerTest {
         walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
         walletConfigCaptor.run {
             verify(walletConfigObserver).onChanged(capture())
-            firstValue.identities[0].name shouldBeEqualTo "IdentityName1"
+            firstValue.peekContent().identities[0].name shouldBeEqualTo "IdentityName1"
         }
     }
 

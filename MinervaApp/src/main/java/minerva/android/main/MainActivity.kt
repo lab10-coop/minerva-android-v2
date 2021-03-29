@@ -128,8 +128,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             when (it) {
                 is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(it)
-                is OnUndefinedTransaction ->
-                    Toast.makeText(this@MainActivity, getString(R.string.undefined_transaction), Toast.LENGTH_LONG).show()
                 is ProgressBarState -> handleLoadingDialog(it)
                 else -> dappDialog = null
             }
@@ -336,9 +334,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             R.id.editCredentialsOrder -> startEditCredentialOrderWrappedActivity(this)
             R.id.addAccount -> startNewAccountActivity()
             R.id.editServiceOrder -> startEditServiceOrderWrappedActivity(this)
-            R.id.qrCodeScanner -> launchActivityForResult<LoginScannerActivity>(
-                LOGIN_SCANNER_RESULT_REQUEST_CODE
-            )
+            R.id.qrCodeScanner -> launchActivityForResult<LoginScannerActivity>(LOGIN_SCANNER_RESULT_REQUEST_CODE)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -452,6 +448,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         const val LOGIN_SCANNER_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
+        const val SESSION_APPROVED_REQUEST_CODE = 6
         const val JWT = "jwt"
         const val ACCOUNT_INDEX = "account_index"
     }

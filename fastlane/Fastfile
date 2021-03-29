@@ -38,7 +38,7 @@ platform :android do
   end
 
   desc "Submit a new Production Beta Build to Firebase app distribution"
-    lane :firebaseBetaProduction do
+    lane :firebaseProduction do
       gradle(task: "clean assembleProductionRelease")
       firebase_app_distribution(
                  app: "1:927787980045:android:007fefb4b704a3b0d00c44",
@@ -48,6 +48,18 @@ platform :android do
                  groups:  "minerva_testers")
              slack(
                message: "Fresh and funky production build is in da house!",
+               channel: "#minerva_wallet_status",
+               slack_url: "https://hooks.slack.com/services/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",
+                  )
+    end
+end
+
+  desc "Deploy a Production Build to Google Play Store"
+    lane :productionRelease do
+      gradle(task: "clean assembleProductionRelease")
+      upload_to_play_store
+             slack(
+               message: "Fresh and funky production build is deployed!",
                channel: "#minerva_wallet_status",
                slack_url: "https://hooks.slack.com/services/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",
                   )

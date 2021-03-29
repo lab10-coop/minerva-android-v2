@@ -57,8 +57,8 @@ android {
     productFlavors {
         flavorDimensions 'enviroment'
         staging {
-            versionCode 26
-            versionName "1.0.26"
+            versionCode 29
+            versionName "1.0.29"
             dimension 'enviroment'
             applicationIdSuffix ".staging"
             versionNameSuffix '-staging'

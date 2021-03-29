@@ -70,6 +70,8 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
 
     private fun ECKeyPair.getPrivateKey(): String = String.format(PRIVATE_KEY_FORMAT, privateKey.key)
 
+//    privateKey.key.toString(RADIX
+
     private fun ECKeyPair.getAddress(): String = toAddress().hex
 
     override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> =
@@ -117,7 +119,6 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
     companion object {
 
         private const val ENTROPY_SIZE = 128 / 8
-        private const val RADIX = 16
         private const val DID_PREFIX = "did:ethr:"
         private const val PRIVATE_KEY_FORMAT = "%064x"
 

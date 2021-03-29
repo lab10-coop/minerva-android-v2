@@ -28,7 +28,7 @@ class RestoreWalletViewModelTest : BaseViewModelTest() {
 
     @Before
     fun setup() {
-        val liveData: LiveData<WalletConfig> = MutableLiveData<WalletConfig>()
+        val liveData: LiveData<Event<WalletConfig>> = MutableLiveData<Event<WalletConfig>>()
         whenever(masterSeedRepository.walletConfigLiveData) doReturn liveData
     }
 

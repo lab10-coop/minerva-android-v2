@@ -15,7 +15,7 @@ import java.util.*
 
 class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedRepository) : BaseViewModel() {
 
-    val restoreWalletLiveData: LiveData<WalletConfig> get() = masterSeedRepository.walletConfigLiveData
+    val restoreWalletLiveData: LiveData<Event<WalletConfig>> get() = masterSeedRepository.walletConfigLiveData
 
     private val _invalidMnemonicLiveData = MutableLiveData<Event<List<String>>>()
     val invalidMnemonicLiveData: LiveData<Event<List<String>>> get() = _invalidMnemonicLiveData

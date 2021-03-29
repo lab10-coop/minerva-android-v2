@@ -3,7 +3,6 @@ package minerva.android.walletmanager.repository.seed
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
-import minerva.android.cryptographyProvider.repository.model.DerivationPath
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.wallet.MasterSeed
@@ -14,7 +13,7 @@ class MasterSeedRepositoryImpl(
     private val cryptographyRepository: CryptographyRepository
 ) : MasterSeedRepository {
 
-    override val walletConfigLiveData: LiveData<WalletConfig>
+    override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = walletConfigManager.walletConfigLiveData
 
     override val walletConfigErrorLiveData: LiveData<Event<Throwable>>

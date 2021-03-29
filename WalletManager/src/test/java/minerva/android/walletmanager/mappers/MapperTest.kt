@@ -400,14 +400,12 @@ class MapperTest {
             "0xC00KiE02",
             "200000000000000000"
         )
-        val result01 = TokenBalanceToAccountToken.map(ATS_TAU, tokenBalance01)
-        result01.token.name shouldBeEqualTo "Cookie Token"
-        result01.token.address shouldBeEqualTo "0xC00KiE01"
-        result01.balance shouldBeEqualTo 1000.toBigDecimal()
-        val result02 = TokenBalanceToAccountToken.map(ATS_TAU, tokenBalance02)
-        result02.token.name shouldBeEqualTo "Cookie Token 2"
-        result02.token.address shouldBeEqualTo "0xC00KiE02"
-        result02.balance shouldBeEqualTo 0.2.toBigDecimal()
+        val result01 = TokenBalanceToERC20Token.map(ATS_TAU, tokenBalance01)
+        result01.name shouldBeEqualTo "Cookie Token"
+        result01.address shouldBeEqualTo "0xC00KiE01"
+        val result02 = TokenBalanceToERC20Token.map(ATS_TAU, tokenBalance02)
+        result02.name shouldBeEqualTo "Cookie Token 2"
+        result02.address shouldBeEqualTo "0xC00KiE02"
     }
 
     @Test
