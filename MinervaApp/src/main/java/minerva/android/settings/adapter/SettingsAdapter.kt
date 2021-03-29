@@ -7,6 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.settings_section_layout.view.*
 import minerva.android.R
 import minerva.android.extension.visibleOrGone
+import minerva.android.settings.SettingsFragment
+import minerva.android.settings.SettingsFragment.Companion.AUTHENTICATION_ENABLED
+import minerva.android.settings.SettingsFragment.Companion.MAIN_NETWORKS_ENABLED
+import minerva.android.settings.SettingsFragment.Companion.MNEMONIC_REMEMBERED
 import minerva.android.settings.model.SettingRow
 import minerva.android.settings.model.Settings
 import minerva.android.settings.model.SettingsRowType
@@ -20,8 +24,11 @@ class SettingsAdapter(
 ) : RecyclerView.Adapter<SettingsViewHolder>() {
 
     var settings: List<Settings> = listOf()
-    private var isMnemonicRemembered: Boolean = false
-    private var areMainNetworksEnabled: Boolean = false
+//    private var isMnemonicRemembered = false
+//    private var areMainNetworksEnabled = false
+//    private var isAuthenticationEnabled = false
+
+    private var flags = mapOf<Int, Boolean>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SettingsViewHolder =
         SettingsViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.settings_section_layout, parent, false))
@@ -29,17 +36,15 @@ class SettingsAdapter(
     override fun onBindViewHolder(holder: SettingsViewHolder, position: Int) {
         holder.bindData(
             settings[position],
-            Pair(isMnemonicRemembered, areMainNetworksEnabled),
+            flags,
             { onSettingPressed(it) }) { onCheckedChange(it) }
     }
 
     override fun getItemCount(): Int = settings.size
 
-    fun updateList(flags: Pair<Boolean, Boolean>, settings: List<Settings>) {
-        val (isMnemonicRemembered, areMainNetsEnabled) = flags
+    fun updateList(flags: Map<Int, Boolean>, settings: List<Settings>) {
         this.settings = settings
-        this.isMnemonicRemembered = isMnemonicRemembered
-        this.areMainNetworksEnabled = areMainNetsEnabled
+        this.flags = flags
         notifyDataSetChanged()
     }
 }
@@ -48,7 +53,7 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
 
     fun bindData(
         settings: Settings,
-        flags: Pair<Boolean, Boolean>,
+        flags: Map<Int, Boolean>,
         onSettingPressed: (type: SettingsRowType) -> Unit,
         onCheckedChange: (isChecked: Boolean) -> Unit
     ) {
@@ -61,11 +66,10 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
 
     private fun View.addSettingRows(
         settings: Settings,
-        flags: Pair<Boolean, Boolean>,
+        flags: Map<Int, Boolean>,
         onSettingPressed: (type: SettingsRowType) -> Unit,
         onCheckedChange: (isChecked: Boolean) -> Unit
     ) {
-        val (isMnemonicRemembered, areMainNetsEnabled) = flags
         settingRows.removeAllViews()
 
         if (shouldShowAlerts(settings)) {
@@ -83,9 +87,9 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
                     if (settingRow.isSwitchVisible) toggleSwitch { onCheckedChange(it) }
                     else onSettingPressed(settingRow.rowType)
                 }
-                setAlert(settingRow, isMnemonicRemembered, false) //TODO klop add saving authentication enable option
+                setAlert(settingRow, flags)
                 if (settingRow.isSwitchVisible) {
-                    setNetworkSwitch(areMainNetsEnabled)
+                    setNetworkSwitch(flags[MAIN_NETWORKS_ENABLED] ?: false)
                 }
             })
         }
@@ -94,9 +98,10 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
     private fun shouldShowAlerts(settings: Settings) =
         settings.section == SettingsSection.SECURITY && settings.rows.any { it.rowType == SettingsRowType.REMINDER_VIEW && it.isVisible }
 
-    private fun SettingItem.setAlert(settingRow: SettingRow, isMnemonicRemembered: Boolean, isAuthenticationEnabled: Boolean) {
-        if ((settingRow.rowType == SettingsRowType.BACKUP && !isMnemonicRemembered)
-            || (settingRow.rowType == SettingsRowType.AUTHENTICATION && !isAuthenticationEnabled)
-        ) showAlert()
+    private fun SettingItem.setAlert(settingRow: SettingRow, flags: Map<Int, Boolean>) {
+        when (settingRow.rowType) {
+            SettingsRowType.BACKUP -> showAlert(!(flags[MNEMONIC_REMEMBERED] ?: false))
+            SettingsRowType.AUTHENTICATION -> showAlert(!(flags[AUTHENTICATION_ENABLED] ?: false))
+        }
     }
 }

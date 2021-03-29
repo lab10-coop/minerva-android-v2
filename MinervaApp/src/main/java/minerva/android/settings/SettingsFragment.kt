@@ -52,7 +52,13 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             if (isMnemonicRemembered && isSynced) {
                 interactor.removeSettingsBadgeIcon()
             }
-            settingsAdapter.updateList(Pair(isMnemonicRemembered, areMainNetsEnabled), propagateSettings())
+            mapOf(
+                MNEMONIC_REMEMBERED to isMnemonicRemembered,
+                MAIN_NETWORKS_ENABLED to areMainNetsEnabled,
+                AUTHENTICATION_ENABLED to isAuthenticationEnabled
+            ).let {
+                settingsAdapter.updateList(it, propagateSettings())
+            }
         }
     }
 
@@ -74,5 +80,11 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     private fun onUseMainNetworkCheckedChange(isChecked: Boolean) {
         viewModel.areMainNetworksEnabled(isChecked)
+    }
+
+    companion object {
+        const val MNEMONIC_REMEMBERED = 0
+        const val MAIN_NETWORKS_ENABLED = 1
+        const val AUTHENTICATION_ENABLED = 2
     }
 }

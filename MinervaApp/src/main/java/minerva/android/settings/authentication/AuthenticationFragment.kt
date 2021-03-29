@@ -20,7 +20,13 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
     }
 
     private fun initializeFragment() {
-        
+        binding.apply {
+            authenticationSwitch.isChecked = viewModel.isAuthenticationEnabled()
+            tapContainer.setOnClickListener {
+                authenticationSwitch.toggle()
+                viewModel.toggleAuthentication()
+            }
+        }
     }
 
     companion object {

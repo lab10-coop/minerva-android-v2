@@ -55,7 +55,7 @@ private val appModules = module {
     viewModel { WalletConnectInteractionsViewModel(get(), get()) }
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
-    viewModel { SettingsViewModel(get()) }
+    viewModel { SettingsViewModel(get(), get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }
     viewModel { AccountsViewModel(get(), get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }

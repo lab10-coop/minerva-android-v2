@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import minerva.android.R
 import minerva.android.databinding.SettingItemLayoutBinding
 import minerva.android.extension.addRippleEffect
+import minerva.android.extension.empty
 import minerva.android.extension.visibleOrGone
 import minerva.android.settings.model.SettingRow
 
@@ -30,11 +31,14 @@ class SettingItem(context: Context) : ConstraintLayout(context) {
         }
     }
 
-    fun showAlert() {
+    fun showAlert(isAlerted: Boolean) {
         binding.apply {
-            detailMessage.setTextColor(ContextCompat.getColor(context, R.color.alertRed))
-            settingsArrow.setColorFilter(ContextCompat.getColor(context, R.color.alertRed))
+            if (isAlerted) {
+                detailMessage.setTextColor(ContextCompat.getColor(context, R.color.alertRed))
+                settingsArrow.setColorFilter(ContextCompat.getColor(context, R.color.alertRed))
+            } else detailMessage.text = String.empty
         }
+
     }
 
     fun toggleSwitch(onCheckedChange: (isChecked: Boolean) -> Unit) {
