@@ -23,7 +23,6 @@ android {
     }
 
     defaultConfig {
-        applicationId "minerva.android"
         minSdkVersion 23
         targetSdkVersion 29
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -42,7 +41,7 @@ android {
             keyAlias String.valueOf(System.env.KEY_ALIAS)
             keyPassword String.valueOf(System.env.KEY_PASSWORD)
             storePassword String.valueOf(System.env.KEY_STORE_PASSWORD)
-            storeFile file("../keyStoreMinerva.jks")
+            storeFile file('keyStoreMinerva.jks')
         }
     }
 
@@ -57,10 +56,10 @@ android {
     productFlavors {
         flavorDimensions 'enviroment'
         staging {
-            versionCode 28
-            versionName "1.0.28"
+            applicationId "minerva.android.staging"
+            versionCode 29
+            versionName "1.0.29"
             dimension 'enviroment'
-            applicationIdSuffix ".staging"
             versionNameSuffix '-staging'
 
             buildConfigField "String", "REST_API_URL", '"http://minerva-api.dev.lab10.io/"'
@@ -68,8 +67,9 @@ android {
         }
 
         production {
+            applicationId "digital.minerva"
             versionCode 1
-            versionName "1.0"
+            versionName "1.0.0"
             dimension 'enviroment'
             versionNameSuffix '-release'
 
