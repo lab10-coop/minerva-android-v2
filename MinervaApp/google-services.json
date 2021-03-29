@@ -8,20 +8,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:927787980045:android:007fefb4b704a3b0d00c44",
+        "mobilesdk_app_id": "1:927787980045:android:8c24b855de1a4c03d00c44",
         "android_client_info": {
-          "package_name": "minerva.android"
+          "package_name": "digital.minerva"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "927787980045-vpff7j96bj2oe3m7v8kobfbt9dokg8cq.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "minerva.android",
-            "certificate_hash": "aa39b4383b20e188ca39bfb7cb359a390d26c77d"
-          }
-        },
         {
           "client_id": "927787980045-b7eo2u9iejc1472n0lprav6ckdncog6q.apps.googleusercontent.com",
           "client_type": 3
