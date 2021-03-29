@@ -52,16 +52,15 @@ platform :android do
                slack_url: "https://hooks.slack.com/services/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",
                   )
     end
-end
 
   desc "Deploy a Production Build to Google Play Store"
-    lane :productionRelease do
-      gradle(task: "clean assembleProductionRelease")
-      upload_to_play_store
-             slack(
-               message: "Fresh and funky production build is deployed!",
-               channel: "#minerva_wallet_status",
-               slack_url: "https://hooks.slack.com/services/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",
-                  )
-    end
+        lane :productionRelease do
+          gradle(task: "clean assembleProductionRelease")
+          upload_to_play_store
+                 slack(
+                   message: "Fresh and funky production build is deployed!",
+                   channel: "#minerva_wallet_status",
+                   slack_url: "https://hooks.slack.com/services/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",
+                      )
+        end
 end
