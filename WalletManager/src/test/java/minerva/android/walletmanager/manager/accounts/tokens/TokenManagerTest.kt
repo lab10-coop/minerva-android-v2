@@ -380,7 +380,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `check getting tokens rate request`() {
         val error = Throwable("ERROR-333")
-        val rates = mapOf(Pair("40x0th3r", 1.0), Pair("40xC00k1e", 0.2), Pair("hash03", 3.3))
+        val rates = mapOf(Pair("40x0th3r", 1.0), Pair("40xc00k1e", 0.2), Pair("hash03", 3.3))
         val marketResponse = TokenMarketResponse("id", "tokenName", MarketData(Price(3.3)))
         val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
 
