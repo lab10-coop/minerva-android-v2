@@ -7,14 +7,20 @@ import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Window
+import androidx.fragment.app.Fragment
 import minerva.android.R
 import minerva.android.databinding.ExportPrivateKeyDialogBinding
 import minerva.android.extension.toggleVisibleOrGone
+import minerva.android.main.listener.BiometricDialogCallback
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton
 
-class ExportPrivateKeyDialog(context: Context, private val account: Account) : Dialog(context, R.style.DialogStyle) {
+class ExportPrivateKeyDialog(
+    context: Context,
+    private val account: Account,
+    private val biometricCallback: BiometricDialogCallback
+) : Dialog(context, R.style.DialogStyle) {
 
     private val binding = ExportPrivateKeyDialogBinding.inflate(LayoutInflater.from(context))
 
@@ -27,21 +33,27 @@ class ExportPrivateKeyDialog(context: Context, private val account: Account) : D
     }
 
     private fun initView() {
-        with(binding) {
+        binding.apply {
+            showPrivateKeyButton.setOnClickListener {
+                biometricCallback.showBiometricDialog("F A I L", "E R R O R") { showPrivateKey() }
+            }
             privateKeyLabel.apply {
-                //TODO add nice animation
-                showPrivateKeyButton.setOnClickListener {
-                    showPrivateKeyButton.text = toggleButtonText(showPrivateKeyButton.text)
-                    togglePasswordTransformation()
-                    copyButton.toggleVisibleOrGone()
-                    shareButton.toggleVisibleOrGone()
-                }
+                //TODO klop add nice animation
                 setBodyGravity(Gravity.LEFT)
                 togglePasswordTransformation()
                 setTitleAndBody("${account.name} ${context.getString(R.string.private_key)}", account.privateKey)
                 setupCopyButton(binding.copyButton, account.privateKey, context.getString(R.string.private_key_saved_to_clipboard))
                 setupShareButton(binding.shareButton, account.privateKey)
             }
+        }
+    }
+
+    private fun showPrivateKey() {
+        binding.apply {
+            showPrivateKeyButton.text = toggleButtonText(showPrivateKeyButton.text)
+            privateKeyLabel.togglePasswordTransformation()
+            copyButton.toggleVisibleOrGone()
+            shareButton.toggleVisibleOrGone()
         }
     }
 

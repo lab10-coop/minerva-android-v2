@@ -23,12 +23,8 @@ class SettingsAdapter(
     private val onCheckedChange: (isChecked: Boolean) -> Unit
 ) : RecyclerView.Adapter<SettingsViewHolder>() {
 
-    var settings: List<Settings> = listOf()
-//    private var isMnemonicRemembered = false
-//    private var areMainNetworksEnabled = false
-//    private var isAuthenticationEnabled = false
-
     private var flags = mapOf<Int, Boolean>()
+    var settings: List<Settings> = listOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SettingsViewHolder =
         SettingsViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.settings_section_layout, parent, false))

@@ -16,9 +16,11 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
+import minerva.android.main.listener.BiometricDialogCallback
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.BiometricDialog
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.wrapped.startManageTokensWrappedActivity
@@ -26,7 +28,7 @@ import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
-    AccountsFragmentToAdapterListener {
+    AccountsFragmentToAdapterListener, BiometricDialogCallback {
 
     private val viewModel: AccountsViewModel by viewModel()
     private val accountAdapter by lazy { AccountAdapter(this) }
@@ -85,7 +87,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
 
-    override fun onExportPrivateKey(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
+    override fun onExportPrivateKey(account: Account) = ExportPrivateKeyDialog(requireContext(), account, this).show()
+
+    override fun showBiometricDialog(onFailMessage: String, onErrorMessage: String, onSuccessAction: () -> Unit) =
+        BiometricDialog.show(this, onFailMessage, onErrorMessage) { onSuccessAction() }
 
     fun setPendingAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)

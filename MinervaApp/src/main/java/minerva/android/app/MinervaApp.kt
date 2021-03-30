@@ -1,6 +1,7 @@
 package minerva.android.app
 
 import android.app.Application
+import androidx.lifecycle.LifecycleObserver
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
 import io.fabric.sdk.android.Fabric
@@ -11,7 +12,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
 
-class MinervaApp : Application() {
+class MinervaApp : Application(), LifecycleObserver {
 
     override fun onCreate() {
         super.onCreate()
