@@ -4,6 +4,7 @@ import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.utils.BalanceUtils
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 data class AccountToken(
     val token: ERC20Token,
@@ -24,7 +25,7 @@ data class AccountToken(
             tokenPrice?.let {
                 when (it) {
                     Double.InvalidValue -> WRONG_CURRENCY_VALUE
-                    else -> BigDecimal(tokenPrice!!).multiply(balance)
+                    else -> BigDecimal(it).multiply(balance).setScale(13, RoundingMode.HALF_UP)
                 }
             }.orElse { WRONG_CURRENCY_VALUE }
 

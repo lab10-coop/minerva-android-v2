@@ -133,9 +133,9 @@ class AccountsViewModel(
         accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
-    fun updateAccountUIState(index: Int, isOpen: Boolean) = appUIState.updateAccountState(index, isOpen)
+    fun updateAccountWidgetState(index: Int, isOpen: Boolean) = appUIState.updateAccountWidgetState(index, isOpen)
 
-    fun getAccountUIState(index: Int) = appUIState.getAccountUIState(index)
+    fun getAccountWidgetState(index: Int) = appUIState.getAccountWidgetState(index)
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {

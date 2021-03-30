@@ -85,9 +85,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onExportPrivateKey(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
 
-    override fun updateAccountUIState(index: Int, isOpen: Boolean) = viewModel.updateAccountUIState(index, isOpen)
+    override fun updateAccountWidgetState(index: Int, isOpen: Boolean) = viewModel.updateAccountWidgetState(index, isOpen)
 
-    override fun getAccountUIState(index: Int): Boolean = viewModel.getAccountUIState(index)
+    override fun getAccountWidgetState(index: Int): Boolean = viewModel.getAccountWidgetState(index)
 
     fun setPendingAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)

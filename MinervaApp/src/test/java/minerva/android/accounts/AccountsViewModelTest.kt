@@ -22,8 +22,6 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.state.AppUIState
-import minerva.android.widget.state.AppUIStateImpl
-import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
@@ -357,14 +355,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `Check getting and updating Account UI State calls`() {
-        doNothing().whenever(appUIState).updateAccountState(any(), any())
-        whenever(appUIState.getAccountUIState(any())).thenReturn(false)
+        doNothing().whenever(appUIState).updateAccountWidgetState(any(), any())
+        whenever(appUIState.getAccountWidgetState(any())).thenReturn(false)
 
-        viewModel.updateAccountUIState(3, false)
-        viewModel.getAccountUIState(3)
+        viewModel.updateAccountWidgetState(3, false)
+        viewModel.getAccountWidgetState(3)
 
-        verify(appUIState, times(1)).updateAccountState(any(), any())
-        verify(appUIState, times(1)).getAccountUIState(any())
+        verify(appUIState, times(1)).updateAccountWidgetState(any(), any())
+        verify(appUIState, times(1)).getAccountWidgetState(any())
     }
 
     private val accounts = listOf(

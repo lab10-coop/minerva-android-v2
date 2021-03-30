@@ -98,8 +98,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun onExportPrivateKey(account: Account) = listener.onExportPrivateKey(account)
 
-    override fun updateAccountUIState(index: Int, isOpen: Boolean) = listener.updateAccountUIState(index, isOpen)
+    override fun updateAccountWidgetState(index: Int, isOpen: Boolean) = listener.updateAccountWidgetState(index, isOpen)
 
-    override fun getAccountUIState(index: Int): Boolean = listener.getAccountUIState(index)
+    override fun getAccountWidgetState(index: Int): Boolean = listener.getAccountWidgetState(index)
 }
 

@@ -3,7 +3,6 @@ package minerva.android.accounts.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.transition.TransitionManager
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -20,8 +19,8 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.widget.token.TokenView
 import minerva.android.widget.repository.getNetworkIcon
+import minerva.android.widget.token.TokenView
 
 class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
     RecyclerView.ViewHolder(view) {
@@ -126,7 +125,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.prepareToken(account: Account) {
         binding.apply {
-            tokensAndCollectibles.prepareView(account, viewGroup, this@AccountViewHolder, listener.getAccountUIState(rawPosition))
+            tokensAndCollectibles.prepareView(account, viewGroup, this@AccountViewHolder, listener.getAccountWidgetState(rawPosition))
             //TODO change this statement when collectibles or main coin will be implemented
             account.accountTokens.isNotEmpty().let { visible ->
                 setOnItemClickListener(visible)
@@ -139,7 +138,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     }
 
     private fun setOpen(isOpen: Boolean) {
-        listener.updateAccountUIState(rawPosition, isOpen)
+        listener.updateAccountWidgetState(rawPosition, isOpen)
         binding.apply {
             if (isOpen) arrow.rotate180() else arrow.rotate180back()
             tokensAndCollectibles.visibleOrGone(isOpen)
