@@ -28,7 +28,7 @@ import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
-    AccountsFragmentToAdapterListener, BiometricDialogCallback {
+    AccountsFragmentToAdapterListener {
 
     private val viewModel: AccountsViewModel by viewModel()
     private val accountAdapter by lazy { AccountAdapter(this) }
@@ -92,8 +92,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         else showExportDialog(account)
 
     private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
-
-    override fun showBiometricDialog(onSuccessAction: () -> Unit) = BiometricDialog.show(this) { onSuccessAction() }
 
     fun setPendingAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)

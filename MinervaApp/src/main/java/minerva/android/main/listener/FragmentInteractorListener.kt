@@ -1,6 +1,5 @@
 package minerva.android.main.listener
 
-import androidx.appcompat.app.AppCompatActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.SEND_TRANSACTION_INDEX
 import minerva.android.kotlinUtils.InvalidIndex
 
