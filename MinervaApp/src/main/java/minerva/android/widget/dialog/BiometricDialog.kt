@@ -1,34 +1,30 @@
 package minerva.android.widget.dialog
 
-import android.util.Log
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import minerva.android.R
+import minerva.android.widget.MinervaFlashbar
+import timber.log.Timber
 
 object BiometricDialog {
-    fun show(fragment: Fragment, onFailMessage: String, onErrorMessage: String, onSuccessAction: () -> Unit) {
+    fun show(fragment: Fragment, onSuccessAction: () -> Unit) {
         val executor = ContextCompat.getMainExecutor(fragment.context)
         val biometricPrompt = BiometricPrompt(fragment, executor,
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    Log.e("klop", "Biometric dialog E R R O R !")
+                    Timber.e("Authentication error: $errString")
                 }
 
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    Log.e("klop", "Biometric dialog S U C C E S S !")
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    Log.e("klop", "Biometric F A I L !")
+                    onSuccessAction()
                 }
             })
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Biometric login for my app")
-            .setSubtitle("Log in using your biometric credential")
+            .setTitle(fragment.context?.getString(R.string.authentication_title).toString())
             .setDeviceCredentialAllowed(true)
             .build()
         biometricPrompt.authenticate(promptInfo)

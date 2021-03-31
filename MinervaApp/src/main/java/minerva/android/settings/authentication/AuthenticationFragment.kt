@@ -1,11 +1,14 @@
 package minerva.android.settings.authentication
 
+import android.app.KeyguardManager
+import android.content.Context.KEYGUARD_SERVICE
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import minerva.android.R
 import minerva.android.databinding.FragmentAuthenticationBinding
 import minerva.android.main.base.BaseFragment
+import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.BiometricDialog
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
@@ -22,11 +25,24 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
     private fun initializeFragment() {
         binding.apply {
             authenticationSwitch.isChecked = viewModel.isAuthenticationEnabled()
-            tapContainer.setOnClickListener {
-                authenticationSwitch.toggle()
-                viewModel.toggleAuthentication()
+            tapContainer.setOnClickListener { toggleAuthentication() }
+        }
+    }
+
+    private fun toggleAuthentication() {
+        activity?.let {
+            (it.getSystemService(KEYGUARD_SERVICE) as KeyguardManager).let { keyguard ->
+                if (keyguard.isDeviceSecure) BiometricDialog.show(
+                    this@AuthenticationFragment
+                ) { toggleAuthenticationSwitch() }
+                else MinervaFlashbar.show(it, getString(R.string.device_not_secured), getString(R.string.device_not_secured_message))
             }
         }
+    }
+
+    private fun toggleAuthenticationSwitch() {
+        binding.authenticationSwitch.toggle()
+        viewModel.toggleAuthentication()
     }
 
     companion object {

@@ -87,10 +87,13 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
 
-    override fun onExportPrivateKey(account: Account) = ExportPrivateKeyDialog(requireContext(), account, this).show()
+    override fun onExportPrivateKey(account: Account) =
+        if (viewModel.isAuthenticationEnabled()) BiometricDialog.show(this) { showExportDialog(account) }
+        else showExportDialog(account)
 
-    override fun showBiometricDialog(onFailMessage: String, onErrorMessage: String, onSuccessAction: () -> Unit) =
-        BiometricDialog.show(this, onFailMessage, onErrorMessage) { onSuccessAction() }
+    private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
+
+    override fun showBiometricDialog(onSuccessAction: () -> Unit) = BiometricDialog.show(this) { onSuccessAction() }
 
     fun setPendingAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)

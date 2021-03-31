@@ -34,6 +34,7 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -44,7 +45,8 @@ class AccountsViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository,
-    private val walletConnectRepository: WalletConnectRepository
+    private val walletConnectRepository: WalletConnectRepository,
+    private val localStorage: LocalStorage
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -140,6 +142,8 @@ class AccountsViewModel(
                 )
         }
     }
+
+    fun isAuthenticationEnabled() = localStorage.isAuthenticationEnabled
 
     private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>): HashMap<String, Int> =
         if (sessions.isNotEmpty()) {

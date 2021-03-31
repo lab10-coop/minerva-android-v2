@@ -4,23 +4,21 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.transition.TransitionManager
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Window
-import androidx.fragment.app.Fragment
 import minerva.android.R
 import minerva.android.databinding.ExportPrivateKeyDialogBinding
-import minerva.android.extension.toggleVisibleOrGone
+import minerva.android.extension.gone
+import minerva.android.extension.visible
 import minerva.android.main.listener.BiometricDialogCallback
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.setupCopyButton
 import minerva.android.widget.setupShareButton
 
-class ExportPrivateKeyDialog(
-    context: Context,
-    private val account: Account,
-    private val biometricCallback: BiometricDialogCallback
-) : Dialog(context, R.style.DialogStyle) {
+class ExportPrivateKeyDialog(context: Context, private val account: Account) : Dialog(context, R.style.DialogStyle) {
 
     private val binding = ExportPrivateKeyDialogBinding.inflate(LayoutInflater.from(context))
 
@@ -35,33 +33,30 @@ class ExportPrivateKeyDialog(
     private fun initView() {
         binding.apply {
             showPrivateKeyButton.setOnClickListener {
-                biometricCallback.showBiometricDialog("F A I L", "E R R O R") { showPrivateKey() }
+                //it.isEnabled = false
+                showPrivateKey()
+                //biometricCallback.showBiometricDialog(it.context.getString(R.string.authentication_fail_message)) { showPrivateKey() }
             }
             privateKeyLabel.apply {
-                //TODO klop add nice animation
                 setBodyGravity(Gravity.LEFT)
                 togglePasswordTransformation()
                 setTitleAndBody("${account.name} ${context.getString(R.string.private_key)}", account.privateKey)
-                setupCopyButton(binding.copyButton, account.privateKey, context.getString(R.string.private_key_saved_to_clipboard))
-                setupShareButton(binding.shareButton, account.privateKey)
+                setupCopyButton(copyButton, account.privateKey, context.getString(R.string.private_key_saved_to_clipboard))
+                setupShareButton(shareButton, account.privateKey)
             }
         }
     }
 
     private fun showPrivateKey() {
+        Log.e("klop", "Changing export dialog N O W !")
         binding.apply {
-            showPrivateKeyButton.text = toggleButtonText(showPrivateKeyButton.text)
+            Log.e("klop", "inside apply")
+            TransitionManager.beginDelayedTransition(binding.root)
+            showPrivateKeyButton.gone()
             privateKeyLabel.togglePasswordTransformation()
-            copyButton.toggleVisibleOrGone()
-            shareButton.toggleVisibleOrGone()
+            copyButton.visible()
+            shareButton.visible()
+            Log.e("klop", "end")
         }
     }
-
-    private fun toggleButtonText(currentText: CharSequence): String =
-        with(context) {
-            getString(R.string.show_private_key).let { showPrivateKeyText ->
-                if (showPrivateKeyText == currentText) getString(R.string.hide_private_key)
-                else getString(R.string.show_private_key)
-            }
-        }
 }
