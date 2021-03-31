@@ -20,6 +20,7 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -36,6 +37,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
+    private val localStorage: LocalStorage = mock()
     private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
@@ -71,7 +73,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletActionsRepository,
             smartContractRepository,
             transactionRepository,
-            walletConnectRepository
+            walletConnectRepository,
+            localStorage
         )
     }
 
