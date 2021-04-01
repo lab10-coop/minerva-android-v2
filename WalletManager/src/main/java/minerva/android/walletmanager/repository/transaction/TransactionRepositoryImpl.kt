@@ -152,7 +152,6 @@ class TransactionRepositoryImpl(
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
 
-    //TODO collapse should be changed to Invalid value?
     override fun getEurRate(chainId: Int): Single<Double> =
         when (chainId) {
             ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.value }

@@ -222,11 +222,11 @@ class AccountsViewModel(
         launchDisposable {
             tokenBalancesRefreshed = false
             transactionRepository.refreshTokenBalance()
+                .map { filterNotVisibleTokens(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = {
-                        filterNotVisibleTokens(it)
                         tokenBalancesRefreshed = true
                         _tokenBalanceLiveData.value = Unit
                     },
