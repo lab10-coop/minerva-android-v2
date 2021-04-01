@@ -21,6 +21,7 @@ import minerva.android.walletmanager.repository.smartContract.SmartContractRepos
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.state.AppUIState
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -356,9 +357,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `Check getting and updating Account UI State calls`() {
         doNothing().whenever(appUIState).updateAccountWidgetState(any(), any())
-        whenever(appUIState.getAccountWidgetState(any())).thenReturn(false)
+        whenever(appUIState.getAccountWidgetState(any())).thenReturn(AccountWidgetState())
 
-        viewModel.updateAccountWidgetState(3, false)
+        viewModel.updateAccountWidgetState(3, AccountWidgetState())
         viewModel.getAccountWidgetState(3)
 
         verify(appUIState, times(1)).updateAccountWidgetState(any(), any())

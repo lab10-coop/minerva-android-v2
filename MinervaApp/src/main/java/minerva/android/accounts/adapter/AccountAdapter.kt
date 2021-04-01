@@ -10,6 +10,7 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Balance
+import minerva.android.widget.state.AccountWidgetState
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
@@ -98,8 +99,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun onExportPrivateKey(account: Account) = listener.onExportPrivateKey(account)
 
-    override fun updateAccountWidgetState(index: Int, isOpen: Boolean) = listener.updateAccountWidgetState(index, isOpen)
+    override fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
+        listener.updateAccountWidgetState(index, accountWidgetState)
 
-    override fun getAccountWidgetState(index: Int): Boolean = listener.getAccountWidgetState(index)
+    override fun getAccountWidgetState(index: Int): AccountWidgetState = listener.getAccountWidgetState(index)
 }
 

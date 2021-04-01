@@ -35,6 +35,7 @@ import minerva.android.walletmanager.repository.smartContract.SmartContractRepos
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.state.AppUIState
 import timber.log.Timber
 import java.math.BigDecimal
@@ -133,7 +134,8 @@ class AccountsViewModel(
         accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
-    fun updateAccountWidgetState(index: Int, isOpen: Boolean) = appUIState.updateAccountWidgetState(index, isOpen)
+    fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
+        appUIState.updateAccountWidgetState(index, accountWidgetState)
 
     fun getAccountWidgetState(index: Int) = appUIState.getAccountWidgetState(index)
 

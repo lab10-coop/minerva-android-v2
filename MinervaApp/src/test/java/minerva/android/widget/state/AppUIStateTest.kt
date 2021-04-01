@@ -6,15 +6,17 @@ import org.junit.Test
 class AppUIStateTest {
 
     @Test
-    fun `Check getting and updating Account UI State` () {
+    fun `Check getting and updating Account UI State`() {
         val appUIState = AppUIStateImpl()
-        appUIState.updateAccountWidgetState(1, true)
-        appUIState.updateAccountWidgetState(3, false)
+        val openWidgetState = AccountWidgetState().apply { isWidgetOpen = true }
+        val closedWidgetState = AccountWidgetState().apply { isWidgetOpen = false }
+        appUIState.updateAccountWidgetState(1, openWidgetState)
+        appUIState.updateAccountWidgetState(3, closedWidgetState)
         val result01 = appUIState.getAccountWidgetState(1)
         val result02 = appUIState.getAccountWidgetState(3)
         val result03 = appUIState.getAccountWidgetState(13)
-        result01 shouldBeEqualTo true
-        result02 shouldBeEqualTo false
-        result03 shouldBeEqualTo false
+        result01.isWidgetOpen shouldBeEqualTo true
+        result02.isWidgetOpen shouldBeEqualTo false
+        result03.isWidgetOpen shouldBeEqualTo false
     }
 }

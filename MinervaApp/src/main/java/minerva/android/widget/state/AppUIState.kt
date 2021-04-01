@@ -1,6 +1,6 @@
 package minerva.android.widget.state
 
 interface AppUIState {
-    fun getAccountWidgetState(index: Int): Boolean
-    fun updateAccountWidgetState(index: Int, state: Boolean)
+    fun getAccountWidgetState(index: Int): AccountWidgetState
+    fun updateAccountWidgetState(index: Int, state: AccountWidgetState)
 }

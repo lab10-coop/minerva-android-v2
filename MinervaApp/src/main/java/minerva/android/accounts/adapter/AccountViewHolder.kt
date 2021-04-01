@@ -20,6 +20,7 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.repository.getNetworkIcon
+import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.token.TokenView
 
 class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
@@ -30,11 +31,13 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private lateinit var listener: AccountsAdapterListener
     private var rawPosition: Int = Int.InvalidIndex
 
-    private val isOpen
+    private val isWidgetOpen
         get() = binding.tokensAndCollectibles.isVisible
 
-    override fun onSendTokenTokenClicked(account: Account, tokenIndex: Int) =
-        listener.onSendTokenClicked(account, tokenIndex)
+    private val accountWidgetState: AccountWidgetState
+        get() = listener.getAccountWidgetState(rawPosition)
+
+    override fun onSendTokenTokenClicked(account: Account, tokenIndex: Int) = listener.onSendTokenClicked(account, tokenIndex)
 
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
@@ -121,11 +124,11 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     }
 
     private fun View.setOnItemClickListener(isTokenAreaAvailable: Boolean) =
-        setOnClickListener { if (isTokenAreaAvailable) if (isOpen) close() else open() }
+        setOnClickListener { if (isTokenAreaAvailable) if (isWidgetOpen) close() else open() }
 
     private fun View.prepareToken(account: Account) {
         binding.apply {
-            tokensAndCollectibles.prepareView(account, viewGroup, this@AccountViewHolder, listener.getAccountWidgetState(rawPosition))
+            tokensAndCollectibles.prepareView(account, viewGroup, this@AccountViewHolder, accountWidgetState.isWidgetOpen)
             //TODO change this statement when collectibles or main coin will be implemented
             account.accountTokens.isNotEmpty().let { visible ->
                 setOnItemClickListener(visible)
@@ -138,7 +141,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     }
 
     private fun setOpen(isOpen: Boolean) {
-        listener.updateAccountWidgetState(rawPosition, isOpen)
+        accountWidgetState.isWidgetOpen = isOpen
+        listener.updateAccountWidgetState(rawPosition, accountWidgetState)
         binding.apply {
             if (isOpen) arrow.rotate180() else arrow.rotate180back()
             tokensAndCollectibles.visibleOrGone(isOpen)
