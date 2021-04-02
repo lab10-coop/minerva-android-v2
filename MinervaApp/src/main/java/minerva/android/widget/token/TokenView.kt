@@ -6,18 +6,16 @@ import android.widget.RelativeLayout
 import minerva.android.R
 import minerva.android.databinding.TokenViewBinding
 import minerva.android.kotlinUtils.InvalidIndex
-import minerva.android.walletmanager.utils.BalanceUtils.getCryptoBalance
-import minerva.android.walletmanager.utils.BalanceUtils.getFiatBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.NativeToken
+import minerva.android.walletmanager.utils.BalanceUtils.getCryptoBalance
+import minerva.android.walletmanager.utils.BalanceUtils.getFiatBalance
 import minerva.android.widget.repository.getMainTokenIconRes
 import java.math.BigDecimal
 
 class TokenView(context: Context, attributeSet: AttributeSet? = null) : RelativeLayout(context, attributeSet) {
 
-    private var binding: TokenViewBinding = TokenViewBinding.bind(
-        inflate(context, R.layout.token_view, this)
-    )
+    private var binding: TokenViewBinding = TokenViewBinding.bind(inflate(context, R.layout.token_view, this))
 
     fun initView(
         account: Account,

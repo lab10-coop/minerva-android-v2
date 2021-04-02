@@ -114,10 +114,11 @@ class WalletConnectInteractionsViewModel(
                     .onErrorResumeNext { Single.just(0.0) }
                     .map {
                         currentRate = it.toBigDecimal()
-                        val valueInFiat = status.transaction.value?.toBigDecimal()?.multiply(currentRate)!!
+                        val valueInFiat = status.transaction.value?.toBigDecimal()?.multiply(currentRate)
                         val costInFiat = transactionCost.cost.multiply(currentRate)
                         currentTransaction = status.transaction.copy(
-                            fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
+                            value = BalanceUtils.getCryptoBalance(value),
+                            fiatValue = valueInFiat?.let { fiat -> BalanceUtils.getFiatBalance(fiat) },
                             txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat)),
                             transactionType = transferType
                         )
@@ -167,11 +168,11 @@ class WalletConnectInteractionsViewModel(
                 val senderTokenContract =
                     "$HEX_PREFIX${((decoded.params[2].value as Array<*>)[0] as ByteArray).toHexString()}"
                 findCurrentToken(senderTokenContract, tokenTransaction)
-
-                (decoded.params[0].value as? BigInteger)?.toBigDecimal()?.let {
-                    tokenTransaction.tokenValue = BalanceUtils.fromWei(it, tokenDecimal).toPlainString()
+                (decoded.params[0].value as? BigInteger)?.toBigDecimal()?.let { value ->
+                    BalanceUtils.convertFromWei(value, tokenDecimal).also {
+                        tokenTransaction.tokenValue = BalanceUtils.getCryptoBalance(it)
+                    }
                 }
-
                 status.transaction.tokenTransaction = tokenTransaction
                 TransferType.TOKEN_SWAP
             }
