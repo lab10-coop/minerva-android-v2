@@ -48,8 +48,10 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = {
-                        masterSeedRepository.initWalletConfig()
-                        masterSeedRepository.saveIsMnemonicRemembered()
+                        masterSeedRepository.apply {
+                            initWalletConfig()
+                            saveIsMnemonicRemembered()
+                        }
                     },
                     onError = {
                         Timber.e(it)
