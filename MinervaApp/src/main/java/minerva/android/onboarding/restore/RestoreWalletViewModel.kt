@@ -47,7 +47,10 @@ class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedReposit
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { masterSeedRepository.initWalletConfig() },
+                    onComplete = {
+                        masterSeedRepository.initWalletConfig()
+                        masterSeedRepository.saveIsMnemonicRemembered()
+                    },
                     onError = {
                         Timber.e(it)
                         _walletConfigNotFoundLiveData.value = Event(Unit)
