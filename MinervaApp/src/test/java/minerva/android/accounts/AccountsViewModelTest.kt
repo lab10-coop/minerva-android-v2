@@ -73,8 +73,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletActionsRepository,
             smartContractRepository,
             transactionRepository,
-            walletConnectRepository,
-            localStorage
+            walletConnectRepository
         )
     }
 
