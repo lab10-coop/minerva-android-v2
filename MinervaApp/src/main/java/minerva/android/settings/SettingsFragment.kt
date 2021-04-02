@@ -14,7 +14,7 @@ import minerva.android.settings.backup.BackupActivity
 import minerva.android.settings.model.SettingsRowType
 import minerva.android.settings.model.SettingsRowType.*
 import minerva.android.settings.model.propagateSettings
-import minerva.android.widget.dialog.BiometricDialog
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.wrapped.startAuthenticationWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -64,7 +64,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     }
 
     private fun showBackupActivity() =
-        if (viewModel.isAuthenticationEnabled) BiometricDialog.show(this) { startBackupActivity() }
+        if (viewModel.isAuthenticationEnabled) showBiometricPrompt { startBackupActivity() }
         else startBackupActivity()
 
     private fun startBackupActivity() = context?.launchActivity<BackupActivity>()

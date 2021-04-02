@@ -8,7 +8,7 @@ import minerva.android.R
 import minerva.android.databinding.FragmentAuthenticationBinding
 import minerva.android.main.base.BaseFragment
 import minerva.android.widget.MinervaFlashbar
-import minerva.android.widget.dialog.BiometricDialog
+import minerva.android.extensions.showBiometricPrompt
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
@@ -32,9 +32,7 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
     private fun toggleAuthentication() {
         activity?.let {
             (it.getSystemService(KEYGUARD_SERVICE) as KeyguardManager).let { keyguard ->
-                if (keyguard.isDeviceSecure) BiometricDialog.show(
-                    this@AuthenticationFragment
-                ) { toggleAuthenticationSwitch() }
+                if (keyguard.isDeviceSecure) showBiometricPrompt { toggleAuthenticationSwitch() }
                 else MinervaFlashbar.show(it, getString(R.string.device_not_secured), getString(R.string.device_not_secured_message))
             }
         }

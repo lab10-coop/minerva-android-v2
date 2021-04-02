@@ -45,6 +45,5 @@
             app:layout_constraintRight_toLeftOf="@id/authentication_switch"
             app:layout_constraintTop_toBottomOf="@id/authentication_title" />
 
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

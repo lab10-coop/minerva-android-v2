@@ -4,10 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.settings_section_layout.view.*
 import minerva.android.R
+import minerva.android.databinding.SettingsSectionLayoutBinding
 import minerva.android.extension.visibleOrGone
-import minerva.android.settings.SettingsFragment
 import minerva.android.settings.SettingsFragment.Companion.AUTHENTICATION_ENABLED
 import minerva.android.settings.SettingsFragment.Companion.MAIN_NETWORKS_ENABLED
 import minerva.android.settings.SettingsFragment.Companion.MNEMONIC_REMEMBERED
@@ -47,6 +46,8 @@ class SettingsAdapter(
 
 class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
+    private var binding = SettingsSectionLayoutBinding.bind(view)
+
     fun bindData(
         settings: Settings,
         flags: Map<Int, Boolean>,
@@ -54,9 +55,11 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
         onCheckedChange: (isChecked: Boolean) -> Unit
     ) {
         view.run {
-            sectionTitle.text = settings.sectionTitle
-            addSettingRows(settings, flags, onSettingPressed, onCheckedChange)
-            settingsSeparator.visibleOrGone(settings.section != SettingsSection.LEGAL)
+            binding.apply {
+                sectionTitle.text = settings.sectionTitle
+                addSettingRows(settings, flags, onSettingPressed, onCheckedChange)
+                settingsSeparator.visibleOrGone(settings.section != SettingsSection.LEGAL)
+            }
         }
     }
 
@@ -66,28 +69,30 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
         onSettingPressed: (type: SettingsRowType) -> Unit,
         onCheckedChange: (isChecked: Boolean) -> Unit
     ) {
-        settingRows.removeAllViews()
+        binding.apply {
+            settingRows.removeAllViews()
 
-        if (shouldShowAlerts(settings)) {
-            settingRows.addView(
-                ReminderView(
-                    context,
-                    rows = settings.rows.filter { it.rowType == SettingsRowType.REMINDER_VIEW && it.isVisible })
-            )
-        }
+            if (shouldShowAlerts(settings)) {
+                settingRows.addView(
+                    ReminderView(
+                        context,
+                        rows = settings.rows.filter { it.rowType == SettingsRowType.REMINDER_VIEW && it.isVisible })
+                )
+            }
 
-        settings.rows.filter { it.rowType != SettingsRowType.REMINDER_VIEW }.forEach { settingRow ->
-            settingRows.addView(SettingItem(context).apply {
-                setRow(settingRow)
-                setOnClickListener {
-                    if (settingRow.isSwitchVisible) toggleSwitch { onCheckedChange(it) }
-                    else onSettingPressed(settingRow.rowType)
-                }
-                setAlert(settingRow, flags)
-                if (settingRow.isSwitchVisible) {
-                    setNetworkSwitch(flags[MAIN_NETWORKS_ENABLED] ?: false)
-                }
-            })
+            settings.rows.filter { it.rowType != SettingsRowType.REMINDER_VIEW }.forEach { settingRow ->
+                settingRows.addView(SettingItem(context).apply {
+                    setRow(settingRow)
+                    setOnClickListener {
+                        if (settingRow.isSwitchVisible) toggleSwitch { onCheckedChange(it) }
+                        else onSettingPressed(settingRow.rowType)
+                    }
+                    setAlert(settingRow, flags)
+                    if (settingRow.isSwitchVisible) {
+                        setNetworkSwitch(flags[MAIN_NETWORKS_ENABLED] ?: false)
+                    }
+                })
+            }
         }
     }
 

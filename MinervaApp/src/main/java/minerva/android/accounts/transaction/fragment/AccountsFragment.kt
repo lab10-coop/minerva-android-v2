@@ -16,13 +16,12 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
-import minerva.android.main.listener.BiometricDialogCallback
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.MinervaFlashbar
-import minerva.android.widget.dialog.BiometricDialog
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.wrapped.startManageTokensWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -88,7 +87,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
 
     override fun onExportPrivateKey(account: Account) =
-        if (viewModel.isAuthenticationEnabled()) BiometricDialog.show(this) { showExportDialog(account) }
+        if (viewModel.isAuthenticationEnabled()) showBiometricPrompt { showExportDialog(account) }
         else showExportDialog(account)
 
     private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()

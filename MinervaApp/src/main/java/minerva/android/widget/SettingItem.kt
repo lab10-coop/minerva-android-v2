@@ -1,7 +1,6 @@
 package minerva.android.widget
 
 import android.content.Context
-import android.util.TypedValue
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import minerva.android.R
