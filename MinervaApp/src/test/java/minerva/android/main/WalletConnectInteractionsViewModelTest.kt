@@ -161,7 +161,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             (firstValue as OnEthSendTransactionRequest).apply {
                 transaction.transactionType shouldBeEqualTo TransferType.COIN_TRANSFER
                 transaction.txCost.cost shouldBeEqualTo BigDecimal.TEN
-                transaction.txCost.formattedCryptoCost shouldBeEqualTo "10.000000"
+                transaction.txCost.formattedCryptoCost shouldBeEqualTo "10"
                 transaction.data shouldBeEqualTo "0x0"
                 transaction.value shouldBeEqualTo "10"
                 transaction.from shouldBeEqualTo "from"
@@ -213,7 +213,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             (firstValue as OnEthSendTransactionRequest).apply {
                 this.transaction.transactionType shouldBeEqualTo TransferType.TOKEN_SWAP_APPROVAL
                 this.transaction.txCost.cost shouldBeEqualTo BigDecimal.TEN
-                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10.000000"
+                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10"
                 this.transaction.data shouldBeEqualTo "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                 this.transaction.value shouldBeEqualTo "0"
                 this.transaction.from shouldBeEqualTo "from"
@@ -264,7 +264,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             (firstValue as OnEthSendTransactionRequest).apply {
                 this.transaction.transactionType shouldBeEqualTo TransferType.TOKEN_SWAP
                 this.transaction.txCost.cost shouldBeEqualTo BigDecimal.TEN
-                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10.000000"
+                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10"
                 this.transaction.value shouldBeEqualTo "0"
                 this.transaction.from shouldBeEqualTo "from"
             }
@@ -314,7 +314,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             (firstValue as OnEthSendTransactionRequest).apply {
                 this.transaction.transactionType shouldBeEqualTo TransferType.TOKEN_SWAP
                 this.transaction.txCost.cost shouldBeEqualTo BigDecimal.TEN
-                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10.000000"
+                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10"
                 this.transaction.value shouldBeEqualTo "0"
                 this.transaction.from shouldBeEqualTo "from"
             }
@@ -497,7 +497,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             (firstValue as OnEthSendTransactionRequest).apply {
                 this.transaction.transactionType shouldBeEqualTo TransferType.COIN_SWAP
                 this.transaction.txCost.cost shouldBeEqualTo BigDecimal.TEN
-                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10.000000"
+                this.transaction.txCost.formattedCryptoCost shouldBeEqualTo "10"
                 this.transaction.data shouldBeEqualTo "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                 this.transaction.value shouldBeEqualTo "10"
                 this.transaction.from shouldBeEqualTo "from"
