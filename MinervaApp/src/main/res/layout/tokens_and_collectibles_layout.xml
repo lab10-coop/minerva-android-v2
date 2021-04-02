@@ -18,11 +18,13 @@
         android:background="@color/separatorColor"
         android:visibility="gone" />
 
+    <!-- TODO add it when implementing collectibles task: -->
+    <!-- android:drawableLeft="@drawable/arrow_rotate_anim" -->
+
     <TextView
         android:id="@+id/tokens_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/arrow_rotate_anim"
         android:fontFamily="@font/rubik_medium"
         android:gravity="center_vertical"
         android:paddingTop="@dimen/margin_xsmall"
