@@ -291,4 +291,7 @@
     <string name="undefined_transaction">Undefined transaction</string>
     <string name="feature_enabled_soon">This feature will be enabled soon</string>
     <string name="choose_your_crypto">Choose your crypto</string>
+    <string name="continue_to_ramp">Continue to Ramp</string>
+    <string name="create_new_account">Create a new Account</string>
+    <string name="no_account_on_network">You don\'t have an Account on this Network. Please create a new Account.</string>
 </resources>

@@ -9,20 +9,79 @@
 
     <TextView
         android:id="@+id/networks_header"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/margin_xlarge"
-        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:fontFamily="@font/rubik_medium"
         android:gravity="center_vertical"
         android:paddingTop="@dimen/margin_small"
         android:paddingBottom="@dimen/margin_xsmall"
-        android:text="@string/test_networks"
+        android:text="@string/choose_your_crypto"
         android:textAllCaps="true"
         android:textColor="@color/networksTypeHeader"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/recycler_view_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.53" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/crypto_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintWidth_default="wrap"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintBottom_toTopOf="@id/recycler_view_guideline"
+        app:layout_constraintTop_toBottomOf="@id/networks_header" />
+
+    <TextView
+        android:id="@+id/accounts_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_medium"
+        android:gravity="center_vertical"
+        android:paddingTop="@dimen/margin_small"
+        android:paddingBottom="@dimen/margin_normal"
+        android:text="@string/choose_your_crypto"
+        android:textAllCaps="true"
+        android:textColor="@color/networksTypeHeader"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/crypto_recycler" />
+
+    <ViewSwitcher
+        android:id="@+id/account_switcher"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/margin_normal"
+        app:layout_constraintBottom_toTopOf="@id/rememberButton"
+        app:layout_constraintTop_toBottomOf="@id/accounts_header">
+
+        <include layout="@layout/no_account_ramp_layout" />
+
+        <Spinner
+            android:id="@+id/token_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_spinner_background"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:spinnerMode="dropdown"
+            app:layout_constraintTop_toBottomOf="@id/accounts_header" />
+
+    </ViewSwitcher>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/rememberButton"
+        style="@style/PurpleButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="0dp"
+        android:text="@string/continue_to_ramp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
