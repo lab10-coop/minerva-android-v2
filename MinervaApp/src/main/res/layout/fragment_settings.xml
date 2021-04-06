@@ -8,7 +8,7 @@
     tools:context=".settings.SettingsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/settingsList"
+        android:id="@+id/settings_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"

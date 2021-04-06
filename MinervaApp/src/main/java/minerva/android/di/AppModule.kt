@@ -22,6 +22,7 @@ import minerva.android.services.ServicesViewModel
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
+import minerva.android.settings.authentication.AuthenticationViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
 import minerva.android.walletActions.WalletActionsViewModel
@@ -54,7 +55,7 @@ private val appModules = module {
     viewModel { WalletConnectInteractionsViewModel(get(), get()) }
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
-    viewModel { SettingsViewModel(get()) }
+    viewModel { SettingsViewModel(get(), get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }
     viewModel { AccountsViewModel(get(), get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
@@ -73,6 +74,7 @@ private val appModules = module {
     viewModel { WalletConnectViewModel(get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
+    viewModel { AuthenticationViewModel(get()) }
 }
 
 private const val MinervaCache = "MinervaCache"

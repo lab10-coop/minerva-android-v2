@@ -1,6 +1,7 @@
 package minerva.android.app
 
 import android.app.Application
+import androidx.lifecycle.LifecycleObserver
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
 import io.fabric.sdk.android.Fabric
