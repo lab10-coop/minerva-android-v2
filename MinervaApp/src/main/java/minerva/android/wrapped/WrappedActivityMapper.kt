@@ -107,3 +107,9 @@ fun startManageTokensWrappedActivity(context: Context, index: Int) {
         putExtra(WrappedActivity.INDEX, index)
     }
 }
+
+fun startRampWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.RAMP)
+    }
+}

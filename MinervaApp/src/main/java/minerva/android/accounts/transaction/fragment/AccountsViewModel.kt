@@ -80,6 +80,9 @@ class AccountsViewModel(
     private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
     val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
 
+    private val _addFreeAtsLiveData = MutableLiveData<Event<Boolean>>()
+    val addFreeAtsLiveData: LiveData<Event<Boolean>> get() = _addFreeAtsLiveData
+
     private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
     val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
     var hasAvailableAccounts: Boolean = false
@@ -289,30 +292,31 @@ class AccountsViewModel(
         }
     }
 
-    fun addAtsToken(accounts: List<Account>, errorMessage: String) {
-        getAccountForFreeATS(accounts).let { account ->
-            if (account.id != Int.InvalidId) {
+    //TODO klop here!
+    fun addAtsToken() {
+        getAccountForFreeATS(activeAccounts).let { account ->
+            if (account.id != Int.InvalidId && isAddingFreeATSAvailable(activeAccounts)) {
                 transactionRepository.getFreeATS(account.address)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onComplete = { accountManager.saveFreeATSTimestamp() },
+                        onComplete = {
+                            accountManager.saveFreeATSTimestamp()
+                            _addFreeAtsLiveData.value = Event(true)
+                        },
                         onError = {
                             Timber.e("Adding 5 tATS failed: ${it.message}")
                             _errorLiveData.value = Event(Throwable(it.message))
                         }
                     )
-            } else {
-                Timber.e("Adding 5 tATS failed: $errorMessage")
-                _errorLiveData.value = Event(Throwable(errorMessage))
-            }
+            } else _addFreeAtsLiveData.value = Event(false)
         }
     }
 
     fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
         shouldGetFreeAts() &&
                 accounts.any { it.network.chainId == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].chainId }
-
+    
     private fun shouldGetFreeAts() =
         ((accountManager.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(24L)) < accountManager.currentTimeMills())
 

@@ -248,6 +248,7 @@
     <string name="invalid_account_address">Error: Invalid account address</string>
     <string name="invalid_token_address">Error: Invalid asset address</string>
     <string name="add_tats">Add 5 tATS</string>
+    <string name="buy_crypto">Buy Crypto</string>
     <string name="wc_message">WalletConnect lets you connect to desktop websites by scaning a QR code.</string>
     <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
     <string name="connected">Connected</string>
@@ -289,4 +290,5 @@
     <string name="allowance">Allowance</string>
     <string name="undefined_transaction">Undefined transaction</string>
     <string name="feature_enabled_soon">This feature will be enabled soon</string>
+    <string name="choose_your_crypto">Choose your crypto</string>
 </resources>
