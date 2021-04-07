@@ -4,13 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/margin_normal"
+    android:paddingTop="@dimen/margin_normal"
+    android:paddingBottom="@dimen/margin_normal"
     tools:context=".token.ramp.RampFragment">
 
     <TextView
         android:id="@+id/networks_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
         android:gravity="center_vertical"
         android:paddingTop="@dimen/margin_small"
@@ -22,26 +25,23 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/recycler_view_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.53" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/crypto_recycler"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_default="wrap"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintBottom_toTopOf="@id/recycler_view_guideline"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_xsmall"
+        android:layout_marginRight="@dimen/margin_xsmall"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        app:layout_constraintHeight_max="256dp"
         app:layout_constraintTop_toBottomOf="@id/networks_header" />
 
     <TextView
         android:id="@+id/accounts_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
         android:gravity="center_vertical"
         android:paddingTop="@dimen/margin_small"
@@ -80,7 +80,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="0dp"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginBottom="0dp"
         android:text="@string/continue_to_ramp"
         app:layout_constraintBottom_toBottomOf="parent" />
 

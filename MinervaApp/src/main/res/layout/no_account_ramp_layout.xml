@@ -6,6 +6,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginLeft="@dimen/margin_normal"
         android:orientation="vertical">
 
         <com.google.android.material.button.MaterialButton
@@ -18,20 +20,14 @@
             android:layout_marginRight="0dp"
             android:text="@string/create_new_account" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/margin_small"
-            android:src="@drawable/ic_alert" />
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:drawableTop="@drawable/ic_info"
+            android:drawablePadding="@dimen/margin_small"
             android:gravity="center"
             android:text="@string/no_account_on_network"
             android:textSize="@dimen/text_normal" />
-
     </LinearLayout>
 </ScrollView>
