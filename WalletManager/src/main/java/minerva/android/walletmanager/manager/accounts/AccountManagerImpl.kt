@@ -139,7 +139,8 @@ class AccountManagerImpl(
     override fun getAllAccounts(): List<Account>? = walletManager.getWalletConfig()?.accounts
 
     //TODO klop test it
-    override fun getAllAccounts(chainId: Int): List<Account> = getAllAccounts()?.filter { it.chainId == chainId } ?: listOf()
+    override fun getAllActiveAccounts(chainId: Int): List<Account> = getAllAccounts()?.filter { !it.isDeleted && it.chainId == chainId }
+            ?: listOf()
 
     override fun toChecksumAddress(address: String): String =
             blockchainRepository.toChecksumAddress(address)

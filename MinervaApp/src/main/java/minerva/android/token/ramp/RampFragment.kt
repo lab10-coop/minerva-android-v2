@@ -8,9 +8,11 @@ import android.widget.AdapterView
 import androidx.recyclerview.widget.GridLayoutManager
 import minerva.android.R
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
-import minerva.android.accounts.transaction.fragment.adapter.TokenAdapter
 import minerva.android.databinding.FragmentRampBinding
+import minerva.android.extension.visibleOrGone
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.main.base.BaseFragment
+import minerva.android.token.ramp.adapter.AccountSpinnerAdapter
 import minerva.android.token.ramp.adapter.RampCryptoAdapter
 import minerva.android.token.ramp.listener.OnRampCryptoChangedListener
 import minerva.android.token.ramp.model.RampCrypto
@@ -54,41 +56,46 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
                 layoutManager = GridLayoutManager(view.context, RAMP_CRYPTO_COLUMNS)
                 adapter = cryptoAdapter
             }
+            continueButton.setOnClickListener {
+                Log.e("klop", "Going to RAMP screen with account: ${viewModel.getCurrentAccount().name}")
+            }
         }
-        showCurrentAccounts(viewModel.getValidAccounts(crypto[0].chainId))
+
+        if (crypto.isNotEmpty()) showCurrentAccounts(viewModel.getValidAccounts(crypto[0].chainId))
     }
 
     private fun showCurrentAccounts(accounts: List<Account>) {
-        binding.accountSwitcher.apply {
-            TransitionManager.beginDelayedTransition(this)
-            if (accounts.isEmpty()) showPrevious()
-            else {
-                showNext()
-                updateSpinner(accounts)
+        binding.apply {
+            TransitionManager.beginDelayedTransition(container)
+            noAccountLayout.visibleOrGone(accounts.isEmpty())
+            accounts.isNotEmpty().let {
+                continueButton.isEnabled = it
+                cryptoSpinner.isEnabled = it
+                cryptoSpinner.visibleOrGone(it)
+                if (it) updateSpinner(accounts)
             }
         }
     }
 
-    private fun updateSpinner(accounts: List<Account>) {
-        binding.apply {
-            cryptoSpinner.apply {
-                setBackgroundResource(getSpinnerBackground(accounts.size))
-                isEnabled = isSpinnerEnabled(accounts.size)
-                adapter = TokenAdapter(context, R.layout.spinner_token, tokens)
-                        .apply { setDropDownViewResource(R.layout.spinner_token) }
-                setSelection(viewModel.spinnerPosition, false)
-                setPopupBackgroundResource(R.drawable.rounded_white_background)
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                        Log.e("klop", "Item selected: ")
-                    }
+    private fun updateSpinner(accounts: List<Account>) =
+            binding.apply {
+                cryptoSpinner.apply {
+                    setBackgroundResource(getSpinnerBackground(accounts.size))
+                    isEnabled = isSpinnerEnabled(accounts.size)
+                    adapter = AccountSpinnerAdapter(context, R.layout.spinner_network, accounts)
+                            .apply { setDropDownViewResource(R.layout.spinner_token) }
+                    setSelection(viewModel.spinnerPosition, false)
+                    setPopupBackgroundResource(R.drawable.rounded_white_background)
+                    onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                            Log.e("klop", "Item selected: $position")
+                            viewModel.spinnerPosition = position
+                        }
 
-                    override fun onNothingSelected(adapterView: AdapterView<*>?) =
-                            setSelection(viewModel.spinnerPosition, true)
+                        override fun onNothingSelected(adapterView: AdapterView<*>?) = setSelection(viewModel.spinnerPosition, true)
+                    }
                 }
             }
-        }
-    }
 
     //TODO klop code duplication with TransactionSendFragment
     private fun getSpinnerBackground(size: Int) =

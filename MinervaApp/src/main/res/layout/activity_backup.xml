@@ -91,7 +91,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/rememberButton"
+        android:id="@+id/continue_button"
         style="@style/PurpleButtonStyle"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"

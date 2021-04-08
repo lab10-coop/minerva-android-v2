@@ -34,7 +34,7 @@ class BackupActivity : AppCompatActivity() {
     }
 
     private fun setupRememberButton() {
-        rememberButton.setOnClickListener {
+        continue_button.setOnClickListener {
             viewModel.saveIsMnemonicRemembered()
             onBackPressed()
         }
