@@ -64,9 +64,11 @@
         <include layout="@layout/no_account_ramp_layout" />
 
         <Spinner
-            android:id="@+id/token_spinner"
+            android:id="@+id/crypto_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginLeft="@dimen/margin_normal"
             android:background="@drawable/rounded_spinner_background"
             android:elevation="@dimen/cardview_default_elevation"
             android:spinnerMode="dropdown"

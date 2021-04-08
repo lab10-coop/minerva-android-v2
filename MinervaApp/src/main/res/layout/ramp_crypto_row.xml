@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/crypto"
+    android:id="@+id/crypto_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="@dimen/margin_xsmall"
@@ -13,5 +13,5 @@
     android:gravity="center"
     android:padding="@dimen/margin_normal"
     android:textColor="@color/gray"
-    android:drawableTop="@drawable/ic_ethereum"
-    android:text="ETH" />
+    tools:drawableTop="@drawable/ic_ethereum"
+    tools:text="ETH" />

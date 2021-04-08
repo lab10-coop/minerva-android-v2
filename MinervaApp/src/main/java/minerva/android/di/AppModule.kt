@@ -74,7 +74,7 @@ private val appModules = module {
     viewModel { WalletConnectViewModel(get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
-    viewModel { RampViewModel() }
+    viewModel { RampViewModel(get()) }
 }
 
 private const val MinervaCache = "MinervaCache"

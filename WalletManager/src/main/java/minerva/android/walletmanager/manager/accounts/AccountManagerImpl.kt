@@ -27,11 +27,11 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 class AccountManagerImpl(
-    private val walletManager: WalletConfigManager,
-    private val cryptographyRepository: CryptographyRepository,
-    private val blockchainRepository: BlockchainRegularAccountRepository,
-    private val localStorage: LocalStorage,
-    private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
+        private val walletManager: WalletConfigManager,
+        private val cryptographyRepository: CryptographyRepository,
+        private val blockchainRepository: BlockchainRegularAccountRepository,
+        private val localStorage: LocalStorage,
+        private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
 ) : AccountManager {
 
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
@@ -42,16 +42,16 @@ class AccountManagerImpl(
             val (index, derivationPath) = getIndexWithDerivationPath(network, config)
             val accountName = CryptoUtils.prepareName(network.name, index)
             return cryptographyRepository.calculateDerivedKeys(
-                walletManager.masterSeed.seed,
-                index, derivationPath, network.testNet
+                    walletManager.masterSeed.seed,
+                    index, derivationPath, network.testNet
             ).map { keys ->
                 val newAccount = Account(
-                    index,
-                    name = accountName,
-                    chainId = network.chainId,
-                    publicKey = keys.publicKey,
-                    privateKey = keys.privateKey,
-                    address = blockchainRepository.toChecksumAddress(keys.address)
+                        index,
+                        name = accountName,
+                        chainId = network.chainId,
+                        publicKey = keys.publicKey,
+                        privateKey = keys.privateKey,
+                        address = blockchainRepository.toChecksumAddress(keys.address)
                 )
                 addAccount(newAccount, config)
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }.toSingleDefault(accountName)
@@ -69,20 +69,20 @@ class AccountManagerImpl(
         walletManager.getWalletConfig()?.let { config ->
             val (index, derivationPath) = getIndexWithDerivationPath(account.network, config)
             return cryptographyRepository.calculateDerivedKeys(
-                walletManager.masterSeed.seed,
-                index, derivationPath, account.network.testNet
+                    walletManager.masterSeed.seed,
+                    index, derivationPath, account.network.testNet
             ).map { keys ->
                 val ownerAddress = account.address
                 val newAccount = Account(
-                    index,
-                    name = getSafeAccountName(account),
-                    chainId = account.network.chainId,
-                    bindedOwner = ownerAddress,
-                    publicKey = keys.publicKey,
-                    privateKey = keys.privateKey,
-                    address = blockchainRepository.toChecksumAddress(contract),
-                    contractAddress = contract,
-                    owners = mutableListOf(ownerAddress)
+                        index,
+                        name = getSafeAccountName(account),
+                        chainId = account.network.chainId,
+                        bindedOwner = ownerAddress,
+                        publicKey = keys.publicKey,
+                        privateKey = keys.privateKey,
+                        address = blockchainRepository.toChecksumAddress(contract),
+                        contractAddress = contract,
+                        owners = mutableListOf(ownerAddress)
                 )
                 addSafeAccount(config, newAccount, ownerAddress)
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }
@@ -91,19 +91,19 @@ class AccountManagerImpl(
     }
 
     private fun getIndexWithDerivationPath(
-        network: Network,
-        config: WalletConfig
+            network: Network,
+            config: WalletConfig
     ): Pair<Int, String> =
-        if (network.testNet) {
-            Pair(config.newTestNetworkIndex, DerivationPath.TEST_NET_PATH)
-        } else {
-            Pair(config.newMainNetworkIndex, DerivationPath.MAIN_NET_PATH)
-        }
+            if (network.testNet) {
+                Pair(config.newTestNetworkIndex, DerivationPath.TEST_NET_PATH)
+            } else {
+                Pair(config.newMainNetworkIndex, DerivationPath.MAIN_NET_PATH)
+            }
 
     private fun addSafeAccount(
-        config: WalletConfig,
-        newAccount: Account,
-        ownerAddress: String
+            config: WalletConfig,
+            newAccount: Account,
+            ownerAddress: String
     ): WalletConfig {
         val newAccounts = config.accounts.toMutableList()
         var newAccountPosition = config.accounts.size
@@ -116,31 +116,33 @@ class AccountManagerImpl(
     }
 
     override fun getSafeAccountName(account: Account): String =
-        account.name.replaceFirst(String.Space, " | ${getSafeAccountCount(account.address)} ")
+            account.name.replaceFirst(String.Space, " | ${getSafeAccountCount(account.address)} ")
 
     override fun isAddressValid(address: String): Boolean =
-        blockchainRepository.isAddressValid(address)
+            blockchainRepository.isAddressValid(address)
 
     override fun getTokenVisibilitySettings(): TokenVisibilitySettings =
-        localStorage.getTokenVisibilitySettings()
+            localStorage.getTokenVisibilitySettings()
 
     override fun saveFreeATSTimestamp() {
         localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills())
     }
 
     override fun getLastFreeATSTimestamp(): Long =
-        localStorage.loadLastFreeATSTimestamp()
+            localStorage.loadLastFreeATSTimestamp()
 
     override fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings =
-        localStorage.saveTokenVisibilitySettings(settings)
+            localStorage.saveTokenVisibilitySettings(settings)
 
     override fun currentTimeMills(): Long = timeProvider.currentTimeMills()
 
-    override fun getAllAccounts(): List<Account>? =
-        walletManager.getWalletConfig()?.accounts
+    override fun getAllAccounts(): List<Account>? = walletManager.getWalletConfig()?.accounts
+
+    //TODO klop test it
+    override fun getAllAccounts(chainId: Int): List<Account> = getAllAccounts()?.filter { it.chainId == chainId } ?: listOf()
 
     override fun toChecksumAddress(address: String): String =
-        blockchainRepository.toChecksumAddress(address)
+            blockchainRepository.toChecksumAddress(address)
 
     override val areMainNetworksEnabled: Boolean
         get() = walletManager.areMainNetworksEnabled
@@ -168,24 +170,24 @@ class AccountManagerImpl(
     }
 
     private fun handleRemovingAccount(
-        item: Account, config: WalletConfig,
-        newAccounts: MutableList<Account>, index: Int
+            item: Account, config: WalletConfig,
+            newAccounts: MutableList<Account>, index: Int
     ): Completable =
-        when {
-            areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
-            isNotSAMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
-            else -> {
-                newAccounts[index] = Account(item, true)
-                walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+            when {
+                areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
+                isNotSAMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+                else -> {
+                    newAccounts[index] = Account(item, true)
+                    walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+                }
             }
-        }
 
     private fun handleNoFundsError(account: Account): Completable =
-        if (account.isSafeAccount) {
-            Completable.error(BalanceIsNotEmptyAndHasMoreOwnersThrowable())
-        } else {
-            Completable.error(BalanceIsNotEmptyThrowable())
-        }
+            if (account.isSafeAccount) {
+                Completable.error(BalanceIsNotEmptyAndHasMoreOwnersThrowable())
+            } else {
+                Completable.error(BalanceIsNotEmptyThrowable())
+            }
 
     private fun isNotSAMasterOwner(accounts: List<Account>, account: Account): Boolean {
         account.owners?.let {
@@ -203,8 +205,8 @@ class AccountManagerImpl(
     }
 
     override fun getSafeAccountCount(ownerAddress: String): Int =
-        if (ownerAddress == String.Empty) NO_SAFE_ACCOUNTS
-        else walletManager.getSafeAccountNumber(ownerAddress)
+            if (ownerAddress == String.Empty) NO_SAFE_ACCOUNTS
+            else walletManager.getSafeAccountNumber(ownerAddress)
 
     override val masterSeed: MasterSeed
         get() = walletManager.masterSeed
