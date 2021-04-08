@@ -35,6 +35,7 @@ class WalletConnectViewModel(
     internal lateinit var account: Account
     var requestedNetwork: String = String.Empty
     internal lateinit var topic: Topic
+    private var handshakeId: Long = 0L
     internal lateinit var currentSession: WalletConnectSession
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectState>()
@@ -54,6 +55,7 @@ class WalletConnectViewModel(
                         _viewStateLiveData.value = when (it) {
                             is OnSessionRequest -> {
                                 topic = it.topic
+                                handshakeId = it.handshakeId
                                 handleSessionRequest(it)
                             }
                             is OnDisconnect -> OnDisconnected
@@ -141,7 +143,8 @@ class WalletConnectViewModel(
         topic.remotePeerId,
         requestedNetwork,
         account.name,
-        chainId
+        chainId,
+        handshakeId
     )
 
     private fun getIcon(icons: List<String>) =

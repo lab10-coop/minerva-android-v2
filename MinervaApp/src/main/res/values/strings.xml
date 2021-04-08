@@ -275,7 +275,7 @@
     <string name="to">To</string>
     <string name="from">From</string>
     <string name="transaction_cost">Transaction cost</string>
-    <string name="account_balance_is_to_low">Account balance is to low</string>
+    <string name="account_balance_is_to_low">Account balance is too low</string>
     <string name="custom">Custom</string>
     <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
     <string name="sending">Sending</string>
@@ -289,6 +289,7 @@
     <string name="allowance">Allowance</string>
     <string name="undefined_transaction">Undefined transaction</string>
     <string name="feature_enabled_soon">This feature will be enabled soon</string>
+    <string name="wc_connection_error_message">Your WalletConnect connection was closed, you will have to reconnect again to the website</string>
     <string name="enable">Enable</string>
     <string name="create">Create</string>
     <string name="protect_minerva">Protect Minerva</string>
