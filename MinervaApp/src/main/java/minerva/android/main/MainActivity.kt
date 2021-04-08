@@ -452,7 +452,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         const val LOGIN_SCANNER_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
-        const val SESSION_APPROVED_REQUEST_CODE = 6
         const val JWT = "jwt"
         const val ACCOUNT_INDEX = "account_index"
     }

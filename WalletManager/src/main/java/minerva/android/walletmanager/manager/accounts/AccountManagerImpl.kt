@@ -149,6 +149,9 @@ class AccountManagerImpl(
     override val enableMainNetsFlowable: Flowable<Boolean>
         get() = walletManager.enableMainNetsFlowable
 
+    override val isAuthenticationEnabled: Boolean
+        get() = localStorage.isAuthenticationEnabled
+
     override fun removeAccount(account: Account): Completable =
         walletManager.getWalletConfig().run {
             val newAccounts: MutableList<Account> = accounts.toMutableList()

@@ -4,13 +4,15 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import minerva.android.BaseViewModelTest
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class SettingsViewModelTest : BaseViewModelTest() {
 
     private val masterSeedRepository: MasterSeedRepository = mock()
-    private val viewModel = SettingsViewModel(masterSeedRepository)
+    private val localStorage: LocalStorage = mock()
+    private val viewModel = SettingsViewModel(masterSeedRepository, localStorage)
 
     @Test
     fun `are main nets enabled returns true test`() {

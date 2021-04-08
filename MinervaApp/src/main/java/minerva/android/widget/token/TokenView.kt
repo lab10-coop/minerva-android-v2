@@ -15,9 +15,7 @@ import java.math.BigDecimal
 
 class TokenView(context: Context, attributeSet: AttributeSet? = null) : RelativeLayout(context, attributeSet) {
 
-    private var binding: TokenViewBinding = TokenViewBinding.bind(
-        inflate(context, R.layout.token_view, this)
-    )
+    private var binding: TokenViewBinding = TokenViewBinding.bind(inflate(context, R.layout.token_view, this))
 
     fun initView(
         account: Account,

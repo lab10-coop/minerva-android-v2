@@ -69,8 +69,9 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     private fun prepareListeners() {
         binding.apply {
-            setOnHeaderClickListener(tokensHeader, tokensContainer)
-            setOnHeaderClickListener(collectiblesHeader, collectiblesContainer)
+            //TODO listeners turned off until Collectibles support implementation
+            //setOnHeaderClickListener(tokensHeader, tokensContainer)
+            //setOnHeaderClickListener(collectiblesHeader, collectiblesContainer)
         }
     }
 

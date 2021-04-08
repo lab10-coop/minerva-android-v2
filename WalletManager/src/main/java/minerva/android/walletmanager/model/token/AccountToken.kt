@@ -18,7 +18,7 @@ data class AccountToken(
 
     val balance: BigDecimal
         get() = if (rawBalance == BigDecimal.ZERO) BigDecimal.ZERO
-        else BalanceUtils.fromWei(rawBalance, token.decimals.toInt())
+        else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
 
     val fiatBalance: BigDecimal
         get() =

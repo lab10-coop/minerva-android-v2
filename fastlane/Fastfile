@@ -41,7 +41,7 @@ platform :android do
     lane :firebaseProduction do
       gradle(task: "clean assembleProductionRelease")
       firebase_app_distribution(
-                 app: "1:927787980045:android:007fefb4b704a3b0d00c44",
+                 app: "1:927787980045:android:8c24b855de1a4c03d00c44",
                  apk_path: "./MinervaApp/build/outputs/apk/production/release/MinervaApp-production-release.apk",
                  release_notes: "New production build in da house, yo!",
                  firebase_cli_token: "#{ENV['FIREBASE_TOKEN']}",
@@ -52,16 +52,29 @@ platform :android do
                slack_url: "https://hooks.slack.com/services/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",
                   )
     end
-end
 
-  desc "Deploy a Production Build to Google Play Store"
-    lane :productionRelease do
+  desc "Deploy a Production Build to Beta Channel"
+    lane :productionBetaRelease do
       gradle(task: "clean assembleProductionRelease")
-      upload_to_play_store
+      upload_to_play_store(
+      track: 'beta',
+      json_key: options[:json_path]
+      )
              slack(
-               message: "Fresh and funky production build is deployed!",
+               message: "Fresh and funky production build is deployed to BETA channel!",
                channel: "#minerva_wallet_status",
                slack_url: "https://hooks.slack.com/services/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",
                   )
     end
+
+  desc "Deploy a Production Build to Google Play Store"
+        lane :productionRelease do
+          gradle(task: "clean assembleProductionRelease")
+          upload_to_play_store
+                 slack(
+                   message: "Fresh and funky production build is deployed!",
+                   channel: "#minerva_wallet_status",
+                   slack_url: "https://hooks.slack.com/services/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",
+                      )
+        end
 end

@@ -20,6 +20,7 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.state.AppUIState
@@ -37,6 +38,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
+    private val localStorage: LocalStorage = mock()
     private val appUIState: AppUIState = mock()
     private lateinit var viewModel: AccountsViewModel
 

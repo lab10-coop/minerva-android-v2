@@ -152,6 +152,8 @@ class AccountsViewModel(
         }
     }
 
+    fun isAuthenticationEnabled() = accountManager.isAuthenticationEnabled
+
     private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>): HashMap<String, Int> =
         if (sessions.isNotEmpty()) {
             hashMapOf<String, Int>().apply {
