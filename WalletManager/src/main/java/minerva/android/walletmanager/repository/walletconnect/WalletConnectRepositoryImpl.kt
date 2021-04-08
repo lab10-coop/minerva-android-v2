@@ -1,10 +1,6 @@
 package minerva.android.walletmanager.repository.walletconnect
 
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.*
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -19,12 +15,18 @@ import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSign
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
+import minerva.android.walletmanager.exception.WalletConnectConnectionThrowable
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import timber.log.Timber
+import java.io.EOFException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLException
 
 class WalletConnectRepositoryImpl(
     private val signatureRepository: SignatureRepository,
@@ -37,27 +39,40 @@ class WalletConnectRepositoryImpl(
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
     override val connectionStatusFlowable: Flowable<WalletConnectStatus> get() = status.toFlowable(BackpressureStrategy.BUFFER)
     private var disposable: Disposable? = null
+    private var pingDisposable: Disposable? = null
     private val dappDao = minervaDatabase.dappDao()
 
-    override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?) {
+    override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?, dapps: List<DappSession>) {
         wcClient = WCClient()
         with(wcClient) {
-            onWCOpen = { peerId -> clientMap[peerId] = this }
-            onSessionRequest = { remotePeerId, meta, chainId, peerId ->
+            onWCOpen = { peerId ->
+                clientMap[peerId] = this
+                if (pingDisposable == null) {
+                    startPing(dapps)
+                }
+            }
+
+            onSessionRequest = { remotePeerId, meta, chainId, peerId, handshakeId ->
                 status.onNext(
-                    OnSessionRequest(WCPeerToWalletConnectPeerMetaMapper.map(meta), chainId, Topic(peerId, remotePeerId))
+                    OnSessionRequest(
+                        WCPeerToWalletConnectPeerMetaMapper.map(meta),
+                        chainId,
+                        Topic(peerId, remotePeerId),
+                        handshakeId
+                    )
                 )
             }
-            onFailure = { error, _ ->
-                Timber.e(error)
-                status.onNext(OnFailure(error))
+            onFailure = { error, peerId ->
+                Timber.e("WalletConnect onFailure: $error")
+                var state = OnFailure(error)
+                if (isConnectionException(error)) {
+                    deleteSession(peerId)
+                    state = OnFailure(WalletConnectConnectionThrowable())
+                }
+                status.onNext(state)
             }
             onDisconnect = { _, peerId ->
-                peerId?.let {
-                    if (clientMap.containsKey(peerId)) {
-                        deleteSession(peerId)
-                    }
-                }
+                peerId?.let { deleteSession(it) }
                 status.onNext(OnDisconnect)
             }
 
@@ -86,6 +101,9 @@ class WalletConnectRepositoryImpl(
         }
     }
 
+    private fun isConnectionException(error: Throwable) =
+        error is SocketTimeoutException || error is EOFException || error is UnknownHostException || error is SSLException
+
     override fun saveDappSession(dappSession: DappSession): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
 
@@ -97,7 +115,8 @@ class WalletConnectRepositoryImpl(
 
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
         dappDao.getAll().map {
-            EntitiesToDappSessionsMapper.map(it) }
+            EntitiesToDappSessionsMapper.map(it)
+        }
 
     override fun getDappSessionById(peerId: String): Single<DappSession> =
         dappDao.getDapSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
@@ -110,14 +129,14 @@ class WalletConnectRepositoryImpl(
 
     private fun deleteSession(peerId: String) {
         disposable = deleteDappSession(peerId)
-            .andThen {
-                with(clientMap) {
-                    this[peerId]?.killSession()
-                    remove(peerId)
+            .toSingleDefault(peerId)
+            .map {
+                if (clientMap.contains(it)) {
+                    clientMap.remove(it)
                 }
             }
+            .ignoreElement()
             .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(onError = { Timber.e(it) })
     }
 
@@ -130,6 +149,37 @@ class WalletConnectRepositoryImpl(
         } else {
             Completable.error(Throwable("Session not approved"))
         }
+
+    private fun startPing(dapps: List<DappSession>) {
+        pingDisposable = Observable.interval(0, PING_TIMEOUT, TimeUnit.SECONDS)
+            .doOnNext { ping(dapps) }
+            .subscribeOn(Schedulers.io())
+            .subscribeBy(onError = { Timber.e("Error while ping: $it") })
+    }
+
+    private fun ping(dapps: List<DappSession>) {
+        if (clientMap.isNotEmpty()) {
+            clientMap.forEach {
+                val currentDapp = dapps.find { dapp -> dapp.peerId == it.key }
+                if (shouldPing(it)) {
+                    it.value.approveSession(it.value.accounts!!, it.value.chainId!!, it.key)
+                } else if (dapps.isNotEmpty() && currentDapp != null && it.value.session != null) {
+                    it.value.approveSession(
+                        listOf(currentDapp.address),
+                        currentDapp.chainId,
+                        currentDapp.peerId,
+                        currentDapp.handshakeId
+                    )
+                }
+            }
+        } else {
+            pingDisposable?.dispose()
+            pingDisposable = null
+        }
+    }
+
+    private fun shouldPing(it: Map.Entry<String, WCClient>) =
+        it.value.isConnected && it.value.accounts != null && it.value.chainId != null
 
     override fun rejectSession(peerId: String) {
         with(clientMap) {
@@ -171,6 +221,8 @@ class WalletConnectRepositoryImpl(
 
     override fun dispose() {
         disposable?.dispose()
+        pingDisposable?.dispose()
+        pingDisposable = null
     }
 
     override fun killSession(peerId: String): Completable =
@@ -181,4 +233,8 @@ class WalletConnectRepositoryImpl(
                     remove(peerId)
                 }
             }
+
+    companion object {
+        const val PING_TIMEOUT: Long = 30
+    }
 }

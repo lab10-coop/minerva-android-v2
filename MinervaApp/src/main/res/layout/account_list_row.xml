@@ -92,18 +92,15 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/divider_top" />
 
-        <FrameLayout
-            android:id="@+id/container"
+        <minerva.android.widget.TokensAndCollectiblesView
+            android:id="@+id/tokens_and_collectibles"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/margin_normal"
-            android:paddingTop="@dimen/margin_xxsmall"
-            android:paddingRight="@dimen/margin_normal"
-            android:paddingBottom="@dimen/margin_xxsmall"
-            android:visibility="gone"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginRight="@dimen/margin_normal"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
+            android:visibility="gone"
             app:layout_constraintTop_toTopOf="@id/divider_top" />
 
         <View
@@ -130,7 +127,7 @@
             android:background="@color/separatorColor"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/container" />
+            app:layout_constraintTop_toBottomOf="@id/tokens_and_collectibles" />
 
         <ImageView
             android:id="@+id/arrow"
@@ -140,7 +137,7 @@
             android:src="@drawable/ic_arrow_down"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/container"
+            app:layout_constraintTop_toBottomOf="@id/tokens_and_collectibles"
             tools:ignore="ContentDescription" />
 
         <FrameLayout

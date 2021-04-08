@@ -13,6 +13,8 @@ import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.integration.ThirdPartyRequestViewModel
 import minerva.android.main.MainViewModel
+import minerva.android.walletmanager.storage.TempStorage
+import minerva.android.walletmanager.storage.TempStorageImpl
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.token.AddTokenViewModel
 import minerva.android.token.ManageTokensViewModel
@@ -22,6 +24,7 @@ import minerva.android.services.ServicesViewModel
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
+import minerva.android.settings.authentication.AuthenticationViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
 import minerva.android.walletActions.WalletActionsViewModel
@@ -29,6 +32,8 @@ import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage
 import minerva.android.widget.clubCard.CacheStorageImpl
 import minerva.android.widget.clubCard.ClubCardViewModel
+import minerva.android.widget.state.AppUIState
+import minerva.android.widget.state.AppUIStateImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
@@ -47,6 +52,7 @@ fun createAppModule() = mutableListOf<Module>().apply {
 }
 
 private val appModules = module {
+    single<AppUIState> { AppUIStateImpl() }
     factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
     factory<CacheStorage> { CacheStorageImpl(get()) }
     viewModel { ClubCardViewModel(get()) }
@@ -54,9 +60,9 @@ private val appModules = module {
     viewModel { WalletConnectInteractionsViewModel(get(), get()) }
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
-    viewModel { SettingsViewModel(get()) }
+    viewModel { SettingsViewModel(get(), get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }
-    viewModel { AccountsViewModel(get(), get(), get(), get(), get()) }
+    viewModel { AccountsViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
@@ -73,6 +79,7 @@ private val appModules = module {
     viewModel { WalletConnectViewModel(get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
+    viewModel { AuthenticationViewModel(get()) }
 }
 
 private const val MinervaCache = "MinervaCache"

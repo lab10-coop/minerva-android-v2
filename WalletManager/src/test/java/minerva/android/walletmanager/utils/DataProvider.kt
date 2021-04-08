@@ -2,9 +2,9 @@ package minerva.android.walletmanager.utils
 
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.WalletConfigTestValues.accountsResponse
-import minerva.android.walletmanager.model.WalletConfigTestValues.identityResponse
-import minerva.android.walletmanager.model.WalletConfigTestValues.onlineIdentityResponse
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityResponse
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.onlineIdentityResponse
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN

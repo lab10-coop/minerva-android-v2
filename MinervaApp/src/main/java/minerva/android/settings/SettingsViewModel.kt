@@ -2,8 +2,10 @@ package minerva.android.settings
 
 import androidx.lifecycle.ViewModel
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
+import minerva.android.walletmanager.storage.LocalStorage
 
-class SettingsViewModel(private val masterSeedRepository: MasterSeedRepository) : ViewModel() {
+class SettingsViewModel(private val masterSeedRepository: MasterSeedRepository, private val localStorage: LocalStorage) :
+    ViewModel() {
 
     fun areMainNetworksEnabled(isChecked: Boolean) {
         masterSeedRepository.toggleMainNetsEnabled = isChecked
@@ -17,4 +19,7 @@ class SettingsViewModel(private val masterSeedRepository: MasterSeedRepository) 
 
     val isSynced
         get() = masterSeedRepository.isSynced
+
+    val isAuthenticationEnabled
+        get() = localStorage.isAuthenticationEnabled
 }

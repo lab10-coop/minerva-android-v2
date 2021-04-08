@@ -22,7 +22,8 @@ object EntitiesToDappSessionsMapper : Mapper<List<DappSessionEntity>, List<DappS
                             remotePeerId,
                             networkName,
                             accountName,
-                            chainId
+                            chainId,
+                            handshakeId
                         )
                     )
                 }
@@ -32,7 +33,7 @@ object EntitiesToDappSessionsMapper : Mapper<List<DappSessionEntity>, List<DappS
 
 object SessionEntityToDappSessionMapper : Mapper<DappSessionEntity, DappSession> {
     override fun map(input: DappSessionEntity): DappSession = with(input) {
-        DappSession(address, topic, version, bridge, key, name, icon, peerId, remotePeerId, networkName, accountName, chainId)
+        DappSession(address, topic, version, bridge, key, name, icon, peerId, remotePeerId, networkName, accountName, chainId, handshakeId)
     }
 
 }

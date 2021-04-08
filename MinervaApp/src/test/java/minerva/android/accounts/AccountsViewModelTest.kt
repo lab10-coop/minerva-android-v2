@@ -20,8 +20,10 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
-import org.amshove.kluent.shouldBe
+import minerva.android.widget.state.AccountWidgetState
+import minerva.android.widget.state.AppUIState
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
@@ -36,6 +38,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
+    private val localStorage: LocalStorage = mock()
+    private val appUIState: AppUIState = mock()
     private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
@@ -71,7 +75,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletActionsRepository,
             smartContractRepository,
             transactionRepository,
-            walletConnectRepository
+            walletConnectRepository,
+            appUIState
         )
     }
 
@@ -349,6 +354,18 @@ class AccountsViewModelTest : BaseViewModelTest() {
             viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo null
             verify(settings, times(5)).getTokenVisibility(any(), any())
         }
+    }
+
+    @Test
+    fun `Check getting and updating Account UI State calls`() {
+        doNothing().whenever(appUIState).updateAccountWidgetState(any(), any())
+        whenever(appUIState.getAccountWidgetState(any())).thenReturn(AccountWidgetState())
+
+        viewModel.updateAccountWidgetState(3, AccountWidgetState())
+        viewModel.getAccountWidgetState(3)
+
+        verify(appUIState, times(1)).updateAccountWidgetState(any(), any())
+        verify(appUIState, times(1)).getAccountWidgetState(any())
     }
 
     private val accounts = listOf(

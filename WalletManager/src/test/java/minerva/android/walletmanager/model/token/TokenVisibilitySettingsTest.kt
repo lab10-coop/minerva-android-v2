@@ -1,6 +1,5 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.token
 
-import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import org.junit.Test
 import kotlin.test.assertEquals
 

@@ -67,7 +67,7 @@ class MarketUtilsTest {
                 Account(3, chainId = 100)
             )
         val result = MarketUtils.getMarketsIds(accounts)
-        assertEquals("ethereum,poa-network,dai,", result)
+        assertEquals("ethereum,poa-network,xdai,", result)
     }
 
     @Test

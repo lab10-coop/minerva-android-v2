@@ -1,7 +1,7 @@
 package minerva.android.walletmanager.mappers
 
 import minerva.android.apiProvider.model.GasPrices
-import minerva.android.apiProvider.model.TokenBalance
+import minerva.android.apiProvider.model.TokenData
 import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -12,12 +12,12 @@ import minerva.android.configProvider.model.walletConfig.ServicePayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.ServiceQrCode
-import minerva.android.walletmanager.model.WalletConfigTestValues.accounts
-import minerva.android.walletmanager.model.WalletConfigTestValues.accountsResponse
-import minerva.android.walletmanager.model.WalletConfigTestValues.identities
-import minerva.android.walletmanager.model.WalletConfigTestValues.identityData
-import minerva.android.walletmanager.model.WalletConfigTestValues.networks
-import minerva.android.walletmanager.model.WalletConfigTestValues.tokens
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.accounts
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.identities
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityData
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.networks
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.mappers.*
@@ -384,7 +384,7 @@ class MapperTest {
     @Test
     fun `map TokenBalance to AccountToken`() {
         NetworkManager.initialize(DataProvider.networks)
-        val tokenBalance01 = TokenBalance(
+        val tokenBalance01 = TokenData(
             "type",
             "symbol",
             "Cookie Token",
@@ -392,7 +392,7 @@ class MapperTest {
             "0xC00KiE01",
             "10000000000000"
         )
-        val tokenBalance02 = TokenBalance(
+        val tokenBalance02 = TokenData(
             "type",
             "symbol",
             "Cookie Token 2",
@@ -400,10 +400,10 @@ class MapperTest {
             "0xC00KiE02",
             "200000000000000000"
         )
-        val result01 = TokenBalanceToERC20Token.map(ATS_TAU, tokenBalance01)
+        val result01 = TokenDataToERC20Token.map(ATS_TAU, tokenBalance01)
         result01.name shouldBeEqualTo "Cookie Token"
         result01.address shouldBeEqualTo "0xC00KiE01"
-        val result02 = TokenBalanceToERC20Token.map(ATS_TAU, tokenBalance02)
+        val result02 = TokenDataToERC20Token.map(ATS_TAU, tokenBalance02)
         result02.name shouldBeEqualTo "Cookie Token 2"
         result02.address shouldBeEqualTo "0xC00KiE02"
     }

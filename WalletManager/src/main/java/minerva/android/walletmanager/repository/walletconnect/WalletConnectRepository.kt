@@ -11,7 +11,8 @@ interface WalletConnectRepository {
     fun connect(
         session: WalletConnectSession,
         peerId: String = UUID.randomUUID().toString(),
-        remotePeerId: String? = null
+        remotePeerId: String? = null,
+        dapps: List<DappSession> = emptyList()
     )
 
     fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSession): Completable

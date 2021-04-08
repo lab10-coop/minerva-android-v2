@@ -70,8 +70,6 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
 
     private fun ECKeyPair.getPrivateKey(): String = String.format(PRIVATE_KEY_FORMAT, privateKey.key)
 
-//    privateKey.key.toString(RADIX
-
     private fun ECKeyPair.getAddress(): String = toAddress().hex
 
     override fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>> =

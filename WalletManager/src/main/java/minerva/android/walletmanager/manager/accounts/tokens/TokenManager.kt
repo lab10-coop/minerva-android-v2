@@ -34,4 +34,6 @@ interface TokenManager {
 
     fun refreshTokenBalance(account: Account): Single<Pair<String, List<AccountToken>>>
     fun downloadTokensList(account: Account): Single<List<ERC20Token>>
+    fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable
+    fun updateTokensRate(account: Account)
 }

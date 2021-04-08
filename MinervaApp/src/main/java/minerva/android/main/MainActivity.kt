@@ -31,6 +31,7 @@ import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
+import minerva.android.walletmanager.exception.WalletConnectConnectionThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
@@ -70,6 +71,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             )
         }
         viewModel.updateTokenIcons()
+        viewModel.getTokensRate()
     }
 
     override fun onResume() {
@@ -129,6 +131,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(it)
                 is ProgressBarState -> handleLoadingDialog(it)
+                is OnError -> handleWalletConnectError(it.error)
                 else -> dappDialog = null
             }
         })
@@ -180,13 +183,20 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 it.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
                 stopPendingAccounts()
             })
+            updateTokensRateLiveData.observe(this@MainActivity, EventObserver {
+                (getCurrentFragment() as? AccountsFragment)?.updateTokensRate()
+            })
         }
     }
 
     private fun handleWalletConnectError(error: Throwable) {
         dappDialog?.dismiss()
-        MinervaFlashbar.showError(this, error)
-        walletConnectViewModel.killSession()
+        val errorMessage = if (error is WalletConnectConnectionThrowable) {
+            getString(R.string.wc_connection_error_message)
+        } else {
+            error.message ?: getString(R.string.unexpected_error)
+        }
+        showFlashbar(getString(R.string.wallet_connect_title), errorMessage)
     }
 
     private fun handleLoadingDialog(it: ProgressBarState) {
@@ -448,7 +458,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         const val LOGIN_SCANNER_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
-        const val SESSION_APPROVED_REQUEST_CODE = 6
         const val JWT = "jwt"
         const val ACCOUNT_INDEX = "account_index"
     }

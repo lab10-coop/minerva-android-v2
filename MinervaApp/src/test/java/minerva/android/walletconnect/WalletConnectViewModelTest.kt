@@ -82,7 +82,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on session request event test with defined chainId on test net`() {
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"))))
+            .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"), 1)))
         NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1))
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
@@ -108,7 +108,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(networks)
         whenever(repository.connectionStatusFlowable).thenReturn(
             Flowable.just(
-                    OnSessionRequest(meta, null, Topic("peerID", "remotePeerID"))
+                    OnSessionRequest(meta, null, Topic("peerID", "remotePeerID"), 1)
                 )
             )
         viewModel.stateLiveData.observeForever(stateObserver)
@@ -130,7 +130,8 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
                     OnSessionRequest(
                         meta,
                         null,
-                        Topic("peerID", "remotePeerID")
+                        Topic("peerID", "remotePeerID"),
+                        1
                     )
                 )
             )

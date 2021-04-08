@@ -70,8 +70,13 @@ class MainViewModel(
     private val _handleTimeoutOnPendingTransactionsLiveData = MutableLiveData<Event<List<PendingAccount>>>()
     val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
 
-    val executedAccounts = mutableListOf<PendingAccount>()
+    private val _updateTokensRateLiveData = MutableLiveData<Event<Unit>>()
+    val updateTokensRateLiveData: LiveData<Event<Unit>> get() = _updateTokensRateLiveData
+
     private var webSocketSubscriptions = CompositeDisposable()
+    val executedAccounts = mutableListOf<PendingAccount>()
+    val isBackupAllowed: Boolean
+        get() = masterSeedRepository.isBackupAllowed
 
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
     fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
@@ -243,6 +248,15 @@ class MainViewModel(
         clearWebSocketSubscription()
     }
 
-    val isBackupAllowed: Boolean
-        get() = masterSeedRepository.isBackupAllowed
+    fun getTokensRate() {
+        launchDisposable {
+            transactionRepository.getTokensRate()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = { _updateTokensRateLiveData.value = Event(Unit) },
+                    onError = { Timber.e(it) }
+                )
+        }
+    }
 }
