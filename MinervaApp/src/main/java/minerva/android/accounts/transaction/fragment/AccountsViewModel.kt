@@ -35,6 +35,8 @@ import minerva.android.walletmanager.repository.smartContract.SmartContractRepos
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.widget.state.AccountWidgetState
+import minerva.android.widget.state.AppUIState
 import timber.log.Timber
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
@@ -44,7 +46,8 @@ class AccountsViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository,
-    private val walletConnectRepository: WalletConnectRepository
+    private val walletConnectRepository: WalletConnectRepository,
+    private val appUIState: AppUIState
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -101,6 +104,9 @@ class AccountsViewModel(
     lateinit var tokenVisibilitySettings: TokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
 
+    private var balancesRefreshed = false
+    private var tokenBalancesRefreshed = false
+
     fun arePendingAccountsEmpty() = transactionRepository.getPendingAccounts().isEmpty()
 
     init {
@@ -128,6 +134,11 @@ class AccountsViewModel(
         accountManager.getAllAccounts()?.let { getSessions(it) }
     }
 
+    fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
+        appUIState.updateAccountWidgetState(index, accountWidgetState)
+
+    fun getAccountWidgetState(index: Int) = appUIState.getAccountWidgetState(index)
+
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
             walletConnectRepository.getSessionsFlowable()
@@ -153,9 +164,7 @@ class AccountsViewModel(
                     }
                 }
             }
-        } else {
-            hashMapOf()
-        }
+        } else hashMapOf()
 
     private fun isCurrentSession(sessions: List<DappSession>, account: Account) =
         sessions.find { it.address == accountManager.toChecksumAddress(account.address) } != null
@@ -180,11 +189,15 @@ class AccountsViewModel(
 
     fun refreshBalances() =
         launchDisposable {
+            balancesRefreshed = false
             transactionRepository.refreshBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { _balanceLiveData.value = it },
+                    onSuccess = {
+                        balancesRefreshed = true
+                        _balanceLiveData.value = it
+                    },
                     onError = {
                         Timber.d("Refresh balance error: ${it.message}")
                         _refreshBalancesErrorLiveData.value = Event(ErrorCode.BALANCE_ERROR)
@@ -209,12 +222,14 @@ class AccountsViewModel(
 
     fun refreshTokenBalance() =
         launchDisposable {
+            tokenBalancesRefreshed = false
             transactionRepository.refreshTokenBalance()
+                .map { filterNotVisibleTokens(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = {
-                        filterNotVisibleTokens(it)
+                        tokenBalancesRefreshed = true
                         _tokenBalanceLiveData.value = Unit
                     },
                     onError = {
@@ -223,6 +238,11 @@ class AccountsViewModel(
                     }
                 )
         }
+
+    fun updateTokensRate() {
+        transactionRepository.updateTokensRate()
+        _tokenBalanceLiveData.value = Unit
+    }
 
     fun refreshTokensList() =
         launchDisposable {
@@ -235,6 +255,8 @@ class AccountsViewModel(
                     onError = { Timber.e(it) }
                 )
         }
+
+    fun isRefreshDone() = balancesRefreshed && tokenBalancesRefreshed
 
     private fun handleRemoveAccountErrors(it: Throwable) {
         when (it) {

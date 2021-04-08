@@ -1,15 +1,15 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
+import com.google.gson.annotations.SerializedName
+import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -27,6 +27,7 @@ import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.storage.TempStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.*
@@ -41,18 +42,18 @@ class TokenManagerTest : RxTest() {
     private val cryptoApi: CryptoApi = mock()
     private val localStorage: LocalStorage = mock()
     private val blockchainRepository: BlockchainRegularAccountRepository = mock()
-    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository)
+    private val tempStorage: TempStorage = mock()
+    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, tempStorage)
 
     @Before
     fun initializeMocks() {
-        whenever(walletManager.getWalletConfig()).thenReturn(null, DataProvider.walletConfig, DataProvider.walletConfig)
+        whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig, DataProvider.walletConfig)
         whenever(walletManager.updateWalletConfig(any())).thenReturn(Completable.complete())
     }
 
     @Test
     fun `Test loading tokens list`() {
         NetworkManager.initialize(DataProvider.networks)
-        tokenManager.loadCurrentTokens(246785).size shouldBeEqualTo 0
         tokenManager.loadCurrentTokens(ATS_TAU).let {
             it.size shouldBeEqualTo 4
             it[0].name shouldBeEqualTo "CookieTokenDATS"
@@ -69,24 +70,16 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Test saving tokens for giving network`() {
+    fun `Test saving tokens for given network`() {
         NetworkManager.initialize(DataProvider.networks)
         val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "C00")
-        tokenManager.saveToken(ATS_TAU, firstToken)
-            .test()
-            .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
-        tokenManager.saveToken(ATS_TAU, firstToken)
-            .test()
-            .assertComplete()
+        tokenManager.saveToken(ATS_TAU, firstToken).test().assertComplete()
         verify(walletManager, times(1)).updateWalletConfig(any())
     }
 
     @Test
     fun `Test saving tokens list for giving network`() {
         NetworkManager.initialize(DataProvider.networks)
-        tokenManager.saveTokens(true, map)
-            .test()
-            .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
         tokenManager.saveTokens(true, map)
             .test()
             .assertComplete()
@@ -124,9 +117,6 @@ class TokenManagerTest : RxTest() {
         val map = mapOf(
             Pair(1, listOf(firstTokenII, secondTokenII))
         )
-        tokenManager.saveTokens(true, map)
-            .test()
-            .assertErrorMessage(NotInitializedWalletConfigThrowable().message)
         tokenManager.saveTokens(true, map)
             .test()
             .assertComplete()
@@ -307,7 +297,7 @@ class TokenManagerTest : RxTest() {
     fun `Check that generating key for map is correct`() {
         val chaiId = 3
         val address = "0x4ddr355"
-        val key = tokenManager.generateTokenIconKey(chaiId, address)
+        val key = tokenManager.generateTokenHash(chaiId, address)
         key shouldBeEqualTo "30x4ddr355"
     }
 
@@ -370,21 +360,65 @@ class TokenManagerTest : RxTest() {
             .assertComplete()
             .assertValue {
                 it.second.size == 4 &&
-                it.second[0].token.name == "CookieTokenDATS" &&
-                it.second[0].balance.toPlainString() == "0.000000001" &&
-                it.second[1].token.name == "SomeSomeTokenDATS" &&
-                it.second[1].balance.toPlainString() == "0.000000000000000000000001"
+                        it.second[0].token.name == "CookieTokenDATS" &&
+                        it.second[0].balance.toPlainString() == "0.000000001" &&
+                        it.second[1].token.name == "SomeSomeTokenDATS" &&
+                        it.second[1].balance.toPlainString() == "0.000000000000000000000001"
             }
         tokenManager.refreshTokenBalance(atsSigmaAccount)
             .test()
             .assertComplete()
             .assertValue {
                 it.second.size == 3 &&
-                it.second[0].token.name == "CookieTokenATS" &&
-                it.second[0].balance.toPlainString() == "0.000000001" &&
-                it.second[1].token.name == "SecondOtherATS" &&
-                it.second[1].balance.toPlainString() == "0.000000000000000001"
+                        it.second[0].token.name == "CookieTokenATS" &&
+                        it.second[0].balance.toPlainString() == "0.000000001" &&
+                        it.second[1].token.name == "SecondOtherATS" &&
+                        it.second[1].balance.toPlainString() == "0.000000000000000001"
             }
+    }
+
+    @Test
+    fun `check getting tokens rate request`() {
+        val error = Throwable("ERROR-333")
+        val rates = mapOf(Pair("40x0th3r", 1.0), Pair("40xc00k1e", 0.2), Pair("hash03", 3.3))
+        val marketResponse = TokenMarketResponse("id", "tokenName", MarketData(Price(3.3)))
+        val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
+
+        doNothing().whenever(tempStorage).saveRate(any(), any())
+        whenever(tempStorage.getRates()).thenReturn(rates)
+        whenever(cryptoApi.getTokenMarkets(any(), any())).thenReturn(
+            Single.just(marketResponse),
+            Single.just(marketResponse),
+            Single.just(marketResponse),
+            Single.just(marketResponse),
+            Single.error(error)
+        )
+
+        tokenManager.getTokensRate(tokens)
+            .test()
+            .assertComplete()
+        tokenManager.getTokensRate(tokens)
+            .test()
+            .assertComplete()
+
+        verify(tempStorage, times(8)).getRates()
+        verify(tempStorage, times(8)).saveRate(any(), any())
+        verify(cryptoApi, times(4)).getTokenMarkets(any(), any())
+    }
+
+    @Test
+    fun `Check updating Tokens Rates` () {
+        val accountTokens = listOf(
+            AccountToken(ERC20Token(3, "one", address = "0x01"), BigDecimal.TEN),
+            AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
+        )
+        val account = Account(1, name = "account01", accountTokens = accountTokens)
+        whenever(tempStorage.getRate(any())).thenReturn(0.1, 0.3)
+
+        tokenManager.updateTokensRate(account)
+
+        account.accountTokens[0].tokenPrice shouldBeEqualTo 0.1
+        account.accountTokens[1].tokenPrice shouldBeEqualTo 0.3
     }
 
     private val commitData: List<CommitElement>

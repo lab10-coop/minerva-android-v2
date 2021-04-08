@@ -15,7 +15,6 @@ import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -50,14 +49,12 @@ class TransactionRepositoryImpl(
     override val masterSeed: MasterSeed
         get() = walletConfigManager.masterSeed
 
-    override fun refreshBalances(): Single<HashMap<String, Balance>> {
-        walletConfigManager.getWalletConfig()?.accounts?.filter { accountsFilter(it) }?.let { accounts ->
-            return blockchainRepository.refreshBalances(getAddresses(accounts))
+    override fun refreshBalances(): Single<HashMap<String, Balance>> =
+        walletConfigManager.getWalletConfig().accounts.filter { accountsFilter(it) }.let { accounts ->
+            blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
                 .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
     private fun accountsFilter(it: Account) =
         refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
@@ -69,17 +66,22 @@ class TransactionRepositoryImpl(
 
     override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
         getActiveAccounts().let { accounts ->
-            Observable.range(FIRST_INDEX, accounts.size)
-                .map { accounts[it] }
-                .flatMapSingle {
-                    tokenManager.refreshTokenBalance(it)
-                }.toList()
+            Observable.fromIterable(accounts)
+                .flatMapSingle { tokenManager.refreshTokenBalance(it) }
+                .toList()
                 .map {
                     mutableMapOf<String, List<AccountToken>>().apply {
                         it.forEach { (privateKey, accountTokens) -> put(privateKey, accountTokens) }
                     }.toMap()
                 }
         }
+
+    override fun getTokensRate(): Completable =
+        walletConfigManager.getWalletConfig().let { config -> tokenManager.getTokensRate(config.erc20Tokens) }
+
+    override fun updateTokensRate() {
+        getActiveAccounts().forEach { tokenManager.updateTokensRate(it) }
+    }
 
     override fun refreshTokensList(): Single<Boolean> =
         getActiveAccounts().let { accounts ->
@@ -110,22 +112,20 @@ class TransactionRepositoryImpl(
             }
         }
 
-    private fun getActiveAccounts(): List<Account> =
-        walletConfigManager.getWalletConfig()?.accounts?.filter { account ->
-            accountsFilter(account) && account.network.isAvailable()
-        } ?: throw NotInitializedWalletConfigThrowable()
+    private fun getActiveAccounts(): List<Account> = walletConfigManager.getWalletConfig().accounts.filter { account ->
+        accountsFilter(account) && account.network.isAvailable()
+    }
 
     private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERC20Token>> =
-        Observable.range(FIRST_INDEX, accounts.size)
-            .map { accounts[it] }
+        Observable.fromIterable(accounts)
             .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
             .flatMapSingle { downloadTokensList(it) }
             .toList()
             .map { mergeLists(it) }
 
     private fun downloadTokensList(accounts: List<Account>): Single<List<ERC20Token>> =
-        Observable.range(FIRST_INDEX, accounts.size)
-            .flatMapSingle { position -> tokenManager.downloadTokensList(accounts[position]) }
+        Observable.fromIterable(accounts)
+            .flatMapSingle { tokenManager.downloadTokensList(it) }
             .toList()
             .map { mergeLists(it) }
 
@@ -156,7 +156,7 @@ class TransactionRepositoryImpl(
         when (chainId) {
             ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.value }
             ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaPrice?.value }
-            ChainId.XDAI -> getRate(MarketIds.DAI).map { it.daiPrice?.value }
+            ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiPrice?.value }
             else -> Single.just(0.0)
         }
 
@@ -187,8 +187,7 @@ class TransactionRepositoryImpl(
                 }
             }
 
-    override fun isAddressValid(address: String): Boolean =
-        blockchainRepository.isAddressValid(address)
+    override fun isAddressValid(address: String): Boolean = blockchainRepository.isAddressValid(address)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
@@ -269,17 +268,17 @@ class TransactionRepositoryImpl(
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
     override fun getAccountByAddress(address: String): Account? =
-        walletConfigManager.getWalletConfig()?.accounts?.find {
+        walletConfigManager.getWalletConfig().accounts.find {
             blockchainRepository.toChecksumAddress(it.address) == address
         }
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
+
     override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1
         private const val PENDING_NETWORK_LIMIT = 2
-        private const val FIRST_INDEX = 0
         private const val EUR_CURRENCY = "eur"
         private const val ETHERSCAN_REQUEST_TIMESPAN = 1L
         private const val ETHERSCAN_REQUEST_PACKAGE = 5

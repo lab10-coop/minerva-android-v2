@@ -70,6 +70,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             )
         }
         viewModel.updateTokenIcons()
+        viewModel.getTokensRate()
     }
 
     override fun onResume() {
@@ -179,6 +180,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             handleTimeoutOnPendingTransactionsLiveData.observe(this@MainActivity, EventObserver {
                 it.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
                 stopPendingAccounts()
+            })
+            updateTokensRateLiveData.observe(this@MainActivity, EventObserver {
+                (getCurrentFragment() as? AccountsFragment)?.updateTokensRate()
             })
         }
     }

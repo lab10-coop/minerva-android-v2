@@ -37,11 +37,11 @@ class AccountManagerImpl(
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = walletManager.walletConfigLiveData
 
-    override fun createRegularAccount(network: Network): Single<String> {
-        walletManager.getWalletConfig()?.let { config ->
-            val (index, derivationPath) = getIndexWithDerivationPath(network, config)
+    override fun createRegularAccount(network: Network): Single<String> =
+        walletManager.getWalletConfig().run {
+            val (index, derivationPath) = getIndexWithDerivationPath(network, this)
             val accountName = CryptoUtils.prepareName(network.name, index)
-            return cryptographyRepository.calculateDerivedKeys(
+            cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
                 index, derivationPath, network.testNet
             ).map { keys ->
@@ -53,11 +53,9 @@ class AccountManagerImpl(
                     privateKey = keys.privateKey,
                     address = blockchainRepository.toChecksumAddress(keys.address)
                 )
-                addAccount(newAccount, config)
+                addAccount(newAccount, this)
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }.toSingleDefault(accountName)
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
     private fun addAccount(newAccount: Account, config: WalletConfig): WalletConfig {
         val newAccounts = config.accounts.toMutableList()
@@ -65,9 +63,9 @@ class AccountManagerImpl(
         return config.copy(version = config.updateVersion, accounts = newAccounts)
     }
 
-    override fun createSafeAccount(account: Account, contract: String): Completable {
-        walletManager.getWalletConfig()?.let { config ->
-            val (index, derivationPath) = getIndexWithDerivationPath(account.network, config)
+    override fun createSafeAccount(account: Account, contract: String): Completable =
+        walletManager.getWalletConfig().run {
+            val (index, derivationPath) = getIndexWithDerivationPath(account.network, this)
             return cryptographyRepository.calculateDerivedKeys(
                 walletManager.masterSeed.seed,
                 index, derivationPath, account.network.testNet
@@ -84,11 +82,9 @@ class AccountManagerImpl(
                     contractAddress = contract,
                     owners = mutableListOf(ownerAddress)
                 )
-                addSafeAccount(config, newAccount, ownerAddress)
+                addSafeAccount(this, newAccount, ownerAddress)
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
     private fun getIndexWithDerivationPath(
         network: Network,
@@ -136,8 +132,7 @@ class AccountManagerImpl(
 
     override fun currentTimeMills(): Long = timeProvider.currentTimeMills()
 
-    override fun getAllAccounts(): List<Account>? =
-        walletManager.getWalletConfig()?.accounts
+    override fun getAllAccounts(): List<Account> = walletManager.getWalletConfig().accounts
 
     override fun toChecksumAddress(address: String): String =
         blockchainRepository.toChecksumAddress(address)
@@ -157,18 +152,16 @@ class AccountManagerImpl(
     override val isAuthenticationEnabled: Boolean
         get() = localStorage.isAuthenticationEnabled
 
-    override fun removeAccount(account: Account): Completable {
-        walletManager.getWalletConfig()?.let { config ->
-            val newAccounts: MutableList<Account> = config.accounts.toMutableList()
-            config.accounts.forEachIndexed { index, item ->
+    override fun removeAccount(account: Account): Completable =
+        walletManager.getWalletConfig().run {
+            val newAccounts: MutableList<Account> = accounts.toMutableList()
+            accounts.forEachIndexed { index, item ->
                 if (item.address == account.address) {
-                    return handleRemovingAccount(item, config, newAccounts, index)
+                    return handleRemovingAccount(item, this, newAccounts, index)
                 }
             }
-            return Completable.error(MissingAccountThrowable())
+            Completable.error(MissingAccountThrowable())
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
     private fun handleRemovingAccount(
         item: Account, config: WalletConfig,
@@ -212,14 +205,11 @@ class AccountManagerImpl(
     override val masterSeed: MasterSeed
         get() = walletManager.masterSeed
 
-    override fun loadAccount(index: Int): Account {
-        walletManager.getWalletConfig()?.accounts?.apply {
-            return if (inBounds(index)) {
-                val account = this[index]
-                account.copy(address = blockchainRepository.toChecksumAddress(account.address))
-            } else Account(Int.InvalidIndex)
-        }
-        return Account(Int.InvalidIndex)
+    override fun loadAccount(index: Int): Account = walletManager.getWalletConfig().accounts.run {
+        if (inBounds(index)) {
+            val account = this[index]
+            account.copy(address = blockchainRepository.toChecksumAddress(account.address))
+        } else Account(Int.InvalidIndex)
     }
 
     companion object {
