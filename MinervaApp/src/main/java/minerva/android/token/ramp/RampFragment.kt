@@ -67,7 +67,7 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
         Log.e("klop", "Going to RAMP screen with account: ${viewModel.getCurrentAccount().name}")
     }
 
-    private fun createNewAccount() = viewModel.createNewAccount(crypto[viewModel.spinnerPosition].chainId)
+    private fun createNewAccount() = viewModel.createNewAccount(viewModel.currentChainId)
 
     private fun showCurrentAccounts(accounts: List<Account>) {
         if (crypto.isNotEmpty()) {
