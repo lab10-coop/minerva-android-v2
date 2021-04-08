@@ -7,18 +7,20 @@ import android.view.View
 import android.widget.AdapterView
 import androidx.recyclerview.widget.GridLayoutManager
 import minerva.android.R
-import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.databinding.FragmentRampBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import minerva.android.token.ramp.adapter.AccountSpinnerAdapter
 import minerva.android.token.ramp.adapter.RampCryptoAdapter
+import minerva.android.token.ramp.adapter.RampCryptoViewHolder.Companion.DEFAULT_RAMP_CRYPTO_POSITION
 import minerva.android.token.ramp.listener.OnRampCryptoChangedListener
 import minerva.android.token.ramp.model.RampCrypto
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedListener {
@@ -39,16 +41,10 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentRampBinding.bind(view)
         initializeFragment(view)
+        showCurrentAccounts(viewModel.getValidAccounts(crypto[DEFAULT_RAMP_CRYPTO_POSITION].chainId))
     }
 
-    override fun onRampCryptoChanged(chainId: Int) {
-        val validAccounts = viewModel.getValidAccounts(chainId)
-        Log.e("klop", "Current accounts: ${validAccounts.size}")
-        validAccounts.forEach {
-            Log.e("klop", "${it.name}")
-        }
-        showCurrentAccounts(validAccounts)
-    }
+    override fun onRampCryptoChanged(chainId: Int) = showCurrentAccounts(viewModel.getValidAccounts(chainId))
 
     private fun initializeFragment(view: View) {
         binding.apply {
@@ -56,23 +52,34 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
                 layoutManager = GridLayoutManager(view.context, RAMP_CRYPTO_COLUMNS)
                 adapter = cryptoAdapter
             }
-            continueButton.setOnClickListener {
-                Log.e("klop", "Going to RAMP screen with account: ${viewModel.getCurrentAccount().name}")
+            continueButton.setOnClickListener { openRampScreen() }
+            createNewAccount.setOnClickListener { createNewAccount() }
+
+            viewModel.apply {
+                createAccountLiveData.observe(viewLifecycleOwner, EventObserver { showCurrentAccounts(viewModel.currentAccounts) })
+                loadingLiveData.observe(viewLifecycleOwner, EventObserver { showProgressBar(it) })
+                errorLiveData.observe(viewLifecycleOwner, EventObserver { MinervaFlashbar.showError(requireActivity(), it) })
             }
         }
-
-        if (crypto.isNotEmpty()) showCurrentAccounts(viewModel.getValidAccounts(crypto[0].chainId))
     }
 
+    private fun openRampScreen() {
+        Log.e("klop", "Going to RAMP screen with account: ${viewModel.getCurrentAccount().name}")
+    }
+
+    private fun createNewAccount() = viewModel.createNewAccount(crypto[viewModel.spinnerPosition].chainId)
+
     private fun showCurrentAccounts(accounts: List<Account>) {
-        binding.apply {
-            TransitionManager.beginDelayedTransition(container)
-            noAccountLayout.visibleOrGone(accounts.isEmpty())
-            accounts.isNotEmpty().let {
-                continueButton.isEnabled = it
-                cryptoSpinner.isEnabled = it
-                cryptoSpinner.visibleOrGone(it)
-                if (it) updateSpinner(accounts)
+        if (crypto.isNotEmpty()) {
+            binding.apply {
+                TransitionManager.beginDelayedTransition(container)
+                noAccountLayout.visibleOrGone(accounts.isEmpty())
+                accounts.isNotEmpty().let {
+                    continueButton.isEnabled = it
+                    cryptoSpinner.isEnabled = it
+                    cryptoSpinner.visibleOrGone(it)
+                    if (it) updateSpinner(accounts)
+                }
             }
         }
     }
@@ -80,15 +87,14 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
     private fun updateSpinner(accounts: List<Account>) =
             binding.apply {
                 cryptoSpinner.apply {
-                    setBackgroundResource(getSpinnerBackground(accounts.size))
-                    isEnabled = isSpinnerEnabled(accounts.size)
-                    adapter = AccountSpinnerAdapter(context, R.layout.spinner_network, accounts)
+                    setBackgroundResource(R.drawable.rounded_spinner_background)
+                    adapter = AccountSpinnerAdapter(context, R.layout.spinner_network, accounts + Account(Int.InvalidId))
                             .apply { setDropDownViewResource(R.layout.spinner_token) }
                     setSelection(viewModel.spinnerPosition, false)
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                            Log.e("klop", "Item selected: $position")
+                            if (position == accounts.size) createNewAccount()
                             viewModel.spinnerPosition = position
                         }
 
@@ -97,18 +103,19 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
                 }
             }
 
-    //TODO klop code duplication with TransactionSendFragment
-    private fun getSpinnerBackground(size: Int) =
-            if (size > TransactionViewModel.ONE_ELEMENT) R.drawable.rounded_spinner_background
-            else R.drawable.rounded_white_background
-
-    //TODO klop code duplication with TransictionSendFragment
-    private fun isSpinnerEnabled(size: Int) = size > ONE_ELEMENT
+    private fun showProgressBar(value: Boolean) {
+        binding.apply {
+            progressBar.visibleOrGone(value)
+            viewModel.currentAccounts.let { accounts ->
+                noAccountLayout.visibleOrGone(!value && accounts.isEmpty())
+                cryptoSpinner.visibleOrGone(!value && accounts.isNotEmpty())
+            }
+        }
+    }
 
     companion object {
         @JvmStatic
         fun newInstance() = RampFragment()
-        private const val ONE_ELEMENT = 1
         private const val RAMP_CRYPTO_COLUMNS = 2
     }
 }

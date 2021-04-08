@@ -37,12 +37,12 @@ import org.koin.dsl.module
 
 fun createAppModule() = mutableListOf<Module>().apply {
     addAll(
-        createWalletManagerModules(
-            BuildConfig.DEBUG,
-            BuildConfig.REST_API_URL,
-            BuildConfig.MARKETS_API_URL,
-            BuildConfig.API_TOKEN
-        )
+            createWalletManagerModules(
+                    BuildConfig.DEBUG,
+                    BuildConfig.REST_API_URL,
+                    BuildConfig.MARKETS_API_URL,
+                    BuildConfig.API_TOKEN
+            )
     )
     add(appModules)
 }
@@ -74,7 +74,7 @@ private val appModules = module {
     viewModel { WalletConnectViewModel(get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
-    viewModel { RampViewModel(get()) }
+    viewModel { RampViewModel(get(), get()) }
 }
 
 private const val MinervaCache = "MinervaCache"

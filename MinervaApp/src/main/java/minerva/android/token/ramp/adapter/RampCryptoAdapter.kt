@@ -54,6 +54,7 @@ class RampCryptoViewHolder(view: View, private val listener: OnRampCryptoClickLi
     }
 
     companion object {
+        const val DEFAULT_RAMP_CRYPTO_POSITION = 0
         private const val NO_IMAGE = 0
     }
 }
