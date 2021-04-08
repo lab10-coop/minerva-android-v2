@@ -79,7 +79,12 @@ class WalletConnectInteractionsViewModel(
     private fun reconnect(dapps: List<DappSession>) {
         dapps.forEach { session ->
             with(session) {
-                walletConnectRepository.connect(WalletConnectSession(topic, version, bridge, key), peerId, remotePeerId)
+                walletConnectRepository.connect(
+                    WalletConnectSession(topic, version, bridge, key),
+                    peerId,
+                    remotePeerId,
+                    dapps
+                )
             }
         }
     }
@@ -98,6 +103,7 @@ class WalletConnectInteractionsViewModel(
                     .flatMap { session ->
                         getTransactionCosts(session, status)
                     }
+            is OnFailure -> Single.just(OnError(status.error))
             else -> Single.just(DefaultRequest)
         }
 
@@ -261,17 +267,6 @@ class WalletConnectInteractionsViewModel(
                         _walletConnectStatus.value = OnError(it)
                     }
                 )
-        }
-    }
-
-    fun killSession() {
-        currentDappSession?.let {
-            launchDisposable {
-                walletConnectRepository.killSession(it.peerId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(onError = { Timber.e(it) })
-            }
         }
     }
 

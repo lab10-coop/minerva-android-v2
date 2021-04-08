@@ -19,5 +19,6 @@ data class DappSessionEntity(
     @ColumnInfo(name = "remote_peer_id") val remotePeerId: String? = String.Empty,
     @ColumnInfo(name = "network_name") val networkName: String = String.Empty,
     @ColumnInfo(name = "account_name") val accountName: String = String.Empty,
-    @ColumnInfo(name = "chain_id") val chainId: Int = Int.InvalidValue
+    @ColumnInfo(name = "chain_id") val chainId: Int = Int.InvalidValue,
+    @ColumnInfo(name = "handshake_id") val handshakeId: Long = 0L
 )

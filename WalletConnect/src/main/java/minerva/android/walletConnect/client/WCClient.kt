@@ -17,6 +17,7 @@ import minerva.android.walletConnect.model.jsonRpc.JsonRpcErrorResponse
 import minerva.android.walletConnect.model.jsonRpc.JsonRpcRequest
 import minerva.android.walletConnect.model.jsonRpc.JsonRpcResponse
 import minerva.android.walletConnect.model.session.*
+import minerva.android.walletConnect.providers.OkHttpProvider
 import minerva.android.walletConnect.utils.WCCipher
 import okhttp3.*
 import okio.ByteString
@@ -25,7 +26,7 @@ import java.util.*
 const val JSONRPC_VERSION = "2.0"
 
 open class WCClient(
-    private val httpClient: OkHttpClient = OkHttpClient(),
+    private val httpClient: OkHttpClient = OkHttpProvider.okHttpClient,
     builder: GsonBuilder = GsonBuilder()
 ) : WebSocketListener() {
 
@@ -49,7 +50,7 @@ open class WCClient(
 
     private var remotePeerId: String? = null
 
-    private var isConnected: Boolean = false
+    var isConnected: Boolean = false
 
     fun sessionId(): String? =
         if (session != null) session!!.topic
@@ -63,8 +64,8 @@ open class WCClient(
 
     var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> }
     var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> }
-    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String) -> Unit =
-        { _, _, _, _ -> }
+    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String, handshakeId: Long) -> Unit =
+        { _, _, _, _, _ -> }
     var onEthSign: (id: Long, message: WCEthereumSignMessage, peerId: String) -> Unit = { _, _, _ -> }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
     var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction, peerId: String) -> Unit = { _, _, _ -> }
@@ -94,11 +95,6 @@ open class WCClient(
     override fun onMessage(webSocket: WebSocket, text: String) {
         var decrypted: String? = null
         try {
-            if (text.equals("ping")) {
-                onPong(text)
-                return
-            }
-
             val message = gson.fromJson<WCSocketMessage>(text)
             decrypted = decryptMessage(message)
             handleMessage(decrypted)
@@ -112,6 +108,7 @@ open class WCClient(
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         resetState()
         onFailure(t, peerId)
+        peerId = String.Empty
 
         listeners.forEach { it.onFailure(webSocket, t, response) }
     }
@@ -127,6 +124,7 @@ open class WCClient(
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         onDisconnect(code, peerId)
         resetState()
+        peerId = String.Empty
         listeners.forEach { it.onClosing(webSocket, code, reason) }
     }
 
@@ -152,7 +150,11 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int, peerId: String): Boolean {
+    fun approveSession(accounts: List<String>, chainId: Int, peerId: String, handshake: Long = 0L): Boolean {
+        if (handshake != 0L) {
+            handshakeId = handshake
+        }
+
         check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
 
         this.accounts = accounts
@@ -170,10 +172,6 @@ open class WCClient(
         )
 
         return encryptAndSend(gson.toJson(response))
-    }
-
-    fun sendPing(): Boolean {
-        return socket?.send("ping") ?: false
     }
 
     fun updateSession(
@@ -270,7 +268,7 @@ open class WCClient(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                onSessionRequest(remotePeerId, param.peerMeta, param.chainId?.toInt(), peerId)
+                onSessionRequest(remotePeerId, param.peerMeta, param.chainId?.toInt(), peerId, handshakeId)
             }
             WCMethod.SESSION_UPDATE -> {
                 val param = gson.fromJson<List<WCSessionUpdate>>(request.params)
@@ -382,7 +380,6 @@ open class WCClient(
         handshakeId = -1
         isConnected = false
         session = null
-        peerId = String.Empty
         remotePeerId = null
         peerMeta = null
     }

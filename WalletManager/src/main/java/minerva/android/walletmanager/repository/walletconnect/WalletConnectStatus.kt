@@ -5,7 +5,7 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
 
 sealed class WalletConnectStatus
-data class OnSessionRequest(val meta: WalletConnectPeerMeta, val chainId: Int?, val topic: Topic) :
+data class OnSessionRequest(val meta: WalletConnectPeerMeta, val chainId: Int?, val topic: Topic, val handshakeId: Long) :
     WalletConnectStatus()
 
 object OnDisconnect : WalletConnectStatus()
