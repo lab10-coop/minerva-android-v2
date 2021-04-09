@@ -12,6 +12,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -26,6 +27,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
+import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 
@@ -67,11 +69,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun initViewModel() {
         whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
         viewModel = AccountsViewModel(
-            accountManager,
-            walletActionsRepository,
-            smartContractRepository,
-            transactionRepository,
-            walletConnectRepository
+                accountManager,
+                walletActionsRepository,
+                smartContractRepository,
+                transactionRepository,
+                walletConnectRepository
         )
     }
 
@@ -112,11 +114,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `refresh balances success`() {
         whenever(walletConnectRepository.getSessionsFlowable())
-            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+                .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshBalances()).thenReturn(
-            Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
+                Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
         )
         viewModel.balanceLiveData.observeForever(balanceObserver)
         viewModel.refreshBalances()
@@ -130,7 +132,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `refresh balances error`() {
         val error = Throwable()
         whenever(walletConnectRepository.getSessionsFlowable())
-            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+                .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshBalances()).thenReturn(Single.error(error))
@@ -145,14 +147,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `get tokens balance success test`() {
         whenever(transactionRepository.refreshTokenBalance()).thenReturn(
-            Single.just(
-                mapOf(
-                    Pair(
-                        "test",
-                        listOf(AccountToken(ERC20Token(1, "name")))
-                    )
+                Single.just(
+                        mapOf(
+                                Pair(
+                                        "test",
+                                        listOf(AccountToken(ERC20Token(1, "name")))
+                                )
+                        )
                 )
-            )
         )
         viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
         viewModel.refreshTokenBalance()
@@ -164,9 +166,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `get tokens list test`() {
         whenever(transactionRepository.refreshTokensList()).thenReturn(
-            Single.just(true),
-            Single.just(false),
-            Single.error(Throwable("Refresh tokens list error"))
+                Single.just(true),
+                Single.just(false),
+                Single.error(Throwable("Refresh tokens list error"))
         )
         whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.just(mapOf()))
 
@@ -193,7 +195,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("error")
         whenever(accountManager.removeAccount(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
-            Completable.error(error)
+                Completable.error(error)
         )
         whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
@@ -251,26 +253,28 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `adding free ATS correct`() {
         NetworkManager.initialize(networks)
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.complete())
-        viewModel.addAtsToken(accounts, "nope")
+        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
+        whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
+        viewModel.apply {
+            activeAccounts = listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
+            addAtsToken()
+        }
         verify(accountManager, times(1)).saveFreeATSTimestamp()
     }
+
 
     @Test
     fun `adding free ATS error`() {
         NetworkManager.initialize(networks)
-        viewModel.errorLiveData.observeForever(errorObserver)
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.error(Throwable("Some error")))
-        viewModel.addAtsToken(accounts, "nope")
-        errorCaptor.run {
-            verify(errorObserver).onChanged(capture())
+        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
+        whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
+        viewModel.apply {
+            activeAccounts = listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
+            errorLiveData.observeForever(errorObserver)
+            addAtsToken()
         }
-    }
 
-    @Test
-    fun `missing account for adding free ATS test error`() {
-        viewModel.errorLiveData.observeForever(errorObserver)
-        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0)
-        viewModel.addAtsToken(listOf(), "nope")
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -282,12 +286,12 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.currentTimeMills()).thenReturn(1610120569428)
         accountManager.currentTimeMills().let { time ->
             whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(
-                time - 96400000,
-                time - 86400001,
-                time - 86299933,
-                time - 500,
-                time - 96400000,
-                time - 303
+                    time - 96400000,
+                    time - 86400001,
+                    time - 86299933,
+                    time - 500,
+                    time - 96400000,
+                    time - 303
             )
         }
         assertEquals(true, viewModel.isAddingFreeATSAvailable(accounts))
@@ -301,9 +305,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `get sessions and update accounts success`() {
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(
-            Flowable.just(
-                listOf(DappSession(address = "address"))
-            )
+                Flowable.just(
+                        listOf(DappSession(address = "address"))
+                )
         )
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.dappSessions.observeForever(dappSessionObserver)
@@ -352,20 +356,20 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     private val accounts = listOf(
-        Account(1, chainId = 2),
-        Account(2, chainId = 1),
-        Account(3, chainId = 1),
-        Account(4, chainId = 3)
+            Account(1, chainId = 2),
+            Account(2, chainId = 1),
+            Account(3, chainId = 1),
+            Account(4, chainId = 3)
     )
 
     private val accountsWithoutPrimaryAccount = listOf(
-        Account(1, chainId = 2),
-        Account(4, chainId = 3)
+            Account(1, chainId = 2),
+            Account(4, chainId = 3)
     )
 
     private val networks = listOf(
-        Network(httpRpc = "some_rpc", chainId = 1),
-        Network(httpRpc = "some_rpc", chainId = 2),
-        Network(httpRpc = "some_rpc", chainId = 3)
+            Network(httpRpc = "some_rpc", chainId = 1),
+            Network(httpRpc = "some_rpc", chainId = 2),
+            Network(httpRpc = "some_rpc", chainId = 3)
     )
 }
