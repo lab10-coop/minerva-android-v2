@@ -37,16 +37,12 @@ class RampViewModel(private val walletActionsRepository: WalletActionsRepository
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> = _errorLiveData
 
-
-    //TODO klop test
     fun getValidAccounts(chainId: Int) = accountManager.getAllActiveAccounts(chainId).apply {
         currentChainId = chainId
     }
 
-    //TODO klop test
     fun getCurrentAccount() = getValidAccounts(currentChainId)[spinnerPosition]
 
-    //TODO klop test
     fun createNewAccount(chainId: Int) {
         launchDisposable {
             accountManager.createRegularAccount(NetworkManager.getNetwork(chainId))

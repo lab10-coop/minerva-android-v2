@@ -292,7 +292,6 @@ class AccountsViewModel(
         }
     }
 
-    //TODO klop here!
     fun addAtsToken() {
         getAccountForFreeATS(activeAccounts).let { account ->
             if (account.id != Int.InvalidId && isAddingFreeATSAvailable(activeAccounts)) {
