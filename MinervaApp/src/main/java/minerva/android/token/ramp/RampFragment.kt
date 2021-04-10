@@ -76,7 +76,6 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
                 noAccountLayout.visibleOrGone(accounts.isEmpty())
                 accounts.isNotEmpty().let {
                     continueButton.isEnabled = it
-                    cryptoSpinner.isEnabled = it
                     cryptoSpinner.visibleOrGone(it)
                     if (it) updateSpinner(accounts)
                 }

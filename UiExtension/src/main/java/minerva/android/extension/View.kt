@@ -8,15 +8,17 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 
 fun View.visible() {
-    this.visibility = View.VISIBLE
+    visibility = View.VISIBLE
+    isEnabled = true
 }
 
 fun View.invisible() {
-    this.visibility = View.INVISIBLE
+    visibility = View.INVISIBLE
 }
 
 fun View.gone() {
-    this.visibility = View.GONE
+    isEnabled = false
+    visibility = View.GONE
 }
 
 fun View.visibleOrGone(isVisible: Boolean) {

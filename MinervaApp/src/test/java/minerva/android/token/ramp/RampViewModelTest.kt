@@ -53,6 +53,7 @@ class RampViewModelTest : BaseViewModelTest() {
         }
     }
 
+    //TODO klop test imrovement?
     @Test
     fun `check Creating new Account flow`() {
         val error = Throwable("error")
