@@ -32,6 +32,8 @@ class RampCryptoAdapter(private val crypto: List<RampCrypto>, private val listen
         listener.onRampCryptoChanged(crypto[position].chainId)
         notifyDataSetChanged()
     }
+
+    fun getCryptoPosition() = currentCryptoPosition
 }
 
 class RampCryptoViewHolder(view: View, private val listener: OnRampCryptoClickListener) : RecyclerView.ViewHolder(view) {

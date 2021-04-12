@@ -6,14 +6,12 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.InvalidId
-import minerva.android.walletmanager.manager.accounts.AccountManager
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
-import okhttp3.internal.notify
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
@@ -35,14 +33,15 @@ class RampViewModelTest : BaseViewModelTest() {
     @Test
     fun `Check getting active account by chainId and getting currently chosen Account`() {
         val currentAccounts = listOf(
-                Account(1, chainId = 3, name = "account1"),
-                Account(2, chainId = 3, name = "account2"),
-                Account(3, chainId = 3, name = "account3"),
-                Account(4, chainId = 3, name = "account4")
+            Account(1, chainId = 3, name = "account1"),
+            Account(2, chainId = 3, name = "account2"),
+            Account(3, chainId = 3, name = "account3"),
+            Account(4, chainId = 3, name = "account4")
         )
         whenever(accountManager.getAllActiveAccounts(any())).thenReturn(currentAccounts)
         viewModel.apply {
             currentChainId shouldBeEqualTo Int.InvalidId
+            currentChainId = 3
             getValidAccounts(3)
             currentChainId shouldBeEqualTo 3
             spinnerPosition = 3
@@ -53,7 +52,6 @@ class RampViewModelTest : BaseViewModelTest() {
         }
     }
 
-    //TODO klop test imrovement?
     @Test
     fun `check Creating new Account flow`() {
         val error = Throwable("error")
@@ -64,18 +62,13 @@ class RampViewModelTest : BaseViewModelTest() {
             loadingLiveData.observeForever(loadingObserver)
             createAccountLiveData.observeForever(createObserver)
             errorLiveData.observeForever(errorObserver)
-            createNewAccount(3)
-            createNewAccount(3)
-        }
-        createCaptor.run {
-            verify(createObserver).onChanged(capture())
+            currentChainId = 3
+            createNewAccount()
+            createNewAccount()
         }
 
-        loadingCaptor.run {
-            verify(loadingObserver, times(4)).onChanged(capture())
-        }
-        errorCaptor.run {
-            verify(errorObserver).onChanged(capture())
-        }
+        verify(createObserver).onChanged(createCaptor.capture())
+        verify(loadingObserver, times(4)).onChanged(loadingCaptor.capture())
+        verify(errorObserver).onChanged(errorCaptor.capture())
     }
 }

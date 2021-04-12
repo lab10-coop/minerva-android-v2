@@ -139,7 +139,6 @@ class AccountManagerImpl(
 
     override fun getAllAccounts(): List<Account>? = walletManager.getWalletConfig()?.accounts
 
-    //TODO klop test it
     override fun getAllActiveAccounts(chainId: Int): List<Account> = getAllAccounts()?.filter { !it.isDeleted && it.chainId == chainId }
             ?: listOf()
 
