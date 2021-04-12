@@ -33,7 +33,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     }
 
     private fun getTokensValues(account: Account, tokenIndex: Int): Pair<BigDecimal, BigDecimal> =
-        if (tokenIndex != Int.InvalidIndex) Pair(account.accountTokens[tokenIndex].balance, WRONG_CURRENCY_VALUE)
+        if (tokenIndex != Int.InvalidIndex) Pair(account.accountTokens[tokenIndex].balance, account.accountTokens[tokenIndex].fiatBalance)
         else Pair(account.cryptoBalance, prepareFiatBalance(account))
 
     private fun prepareFiatBalance(account: Account) =
@@ -59,10 +59,6 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     private fun prepareListeners(callback: TokenViewCallback, account: Account, tokenIndex: Int) {
         if (tokenIndex != Int.InvalidIndex) setOnClickListener { callback.onSendTokenTokenClicked(account, tokenIndex) }
         else setOnClickListener { callback.onSendTokenClicked(account) }
-    }
-
-    companion object {
-        private val WRONG_CURRENCY_VALUE = (-1).toBigDecimal()
     }
 
     interface TokenViewCallback {

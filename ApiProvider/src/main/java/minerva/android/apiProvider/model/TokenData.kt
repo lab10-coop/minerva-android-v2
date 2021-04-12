@@ -3,7 +3,7 @@ package minerva.android.apiProvider.model
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
 
-data class TokenBalance(
+data class TokenData(
     @SerializedName("type")
     val type: String = String.Empty,
     @SerializedName("symbol")

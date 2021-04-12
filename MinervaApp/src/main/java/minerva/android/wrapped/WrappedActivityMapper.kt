@@ -108,6 +108,12 @@ fun startManageTokensWrappedActivity(context: Context, index: Int) {
     }
 }
 
+fun startAuthenticationWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.AUTHENTICATION)
+    }
+}
+
 fun startRampWrappedActivity(context: Context) {
     context.launchActivity<WrappedActivity> {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.RAMP)

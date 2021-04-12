@@ -276,7 +276,7 @@
     <string name="to">To</string>
     <string name="from">From</string>
     <string name="transaction_cost">Transaction cost</string>
-    <string name="account_balance_is_to_low">Account balance is to low</string>
+    <string name="account_balance_is_to_low">Account balance is too low</string>
     <string name="custom">Custom</string>
     <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
     <string name="sending">Sending</string>
@@ -290,6 +290,16 @@
     <string name="allowance">Allowance</string>
     <string name="undefined_transaction">Undefined transaction</string>
     <string name="feature_enabled_soon">This feature will be enabled soon</string>
+    <string name="wc_connection_error_message">Your WalletConnect connection was closed, you will have to reconnect again to the website</string>
+    <string name="enable">Enable</string>
+    <string name="create">Create</string>
+    <string name="protect_minerva">Protect Minerva</string>
+    <string name="protect_minerva_description">Enable your standard phone authentication method to access and secure the Minerva wallet</string>
+    <string name="authentication_title">Use yor phone authentication</string>
+    <string name="device_not_secured">Your device is not secured!</string>
+    <string name="device_not_secured_message">Please change your device security settings and try again.</string>
+    <string name="authentication_fail">Authentication failed!</string>
+    <string name="authentication_fail_message">There was unexpected authentication error. Please try again.</string>
     <string name="choose_your_crypto">Choose your crypto</string>
     <string name="continue_to_ramp">Continue to Ramp</string>
     <string name="create_new_account">Create a new Account</string>

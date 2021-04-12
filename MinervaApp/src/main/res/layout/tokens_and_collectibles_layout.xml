@@ -1,72 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
 
-    <minerva.android.widget.token.TokenView
-        android:id="@+id/main_token"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_xsmall"
-        android:layout_marginBottom="@dimen/margin_xsmall"
-        android:visibility="gone" />
+        <minerva.android.widget.token.TokenView
+            android:id="@+id/main_token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginBottom="@dimen/margin_xsmall"
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
 
-    <View
-        android:id="@+id/tokens_separator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/separatorColor"
-        android:visibility="gone" />
+        <View
+            android:id="@+id/tokens_separator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/separatorColor"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
     <!-- TODO add it when implementing collectibles task: -->
     <!-- android:drawableLeft="@drawable/arrow_rotate_anim" -->
 
-    <TextView
-        android:id="@+id/tokens_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/rubik_medium"
-        android:gravity="center_vertical"
-        android:paddingTop="@dimen/margin_xsmall"
-        android:text="@string/tokens"
-        android:textAllCaps="true"
-        android:textColor="@color/bodyColor"
-        android:textSize="@dimen/text_xsmall" />
+        <TextView
+            android:id="@+id/tokens_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_medium"
+            android:gravity="center_vertical"
+            android:paddingTop="@dimen/margin_xsmall"
+            android:text="@string/tokens"
+            android:textAllCaps="true"
+            android:textColor="@color/bodyColor"
+            android:textSize="@dimen/text_xsmall"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
-    <LinearLayout
-        android:id="@+id/tokens_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/margin_xsmall" />
+        <LinearLayout
+            android:id="@+id/tokens_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/margin_xsmall"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
-    <View
-        android:id="@+id/collectibles_separator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="@dimen/margin_xsmall"
-        android:background="@color/separatorColor"
-        android:visibility="gone" />
+        <View
+            android:id="@+id/collectibles_separator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:background="@color/separatorColor"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
-    <TextView
-        android:id="@+id/collectibles_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/arrow_rotate_anim"
-        android:fontFamily="@font/rubik_medium"
-        android:gravity="center_vertical"
-        android:paddingTop="@dimen/margin_xsmall"
-        android:text="@string/collectibles"
-        android:textAllCaps="true"
-        android:textColor="@color/bodyColor"
-        android:textSize="@dimen/text_xsmall"
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/collectibles_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/arrow_rotate_anim"
+            android:fontFamily="@font/rubik_medium"
+            android:gravity="center_vertical"
+            android:paddingTop="@dimen/margin_xsmall"
+            android:text="@string/collectibles"
+            android:textAllCaps="true"
+            android:textColor="@color/bodyColor"
+            android:textSize="@dimen/text_xsmall"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
-    <LinearLayout
-        android:id="@+id/collectibles_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/margin_xsmall"
-        android:visibility="gone" />
-</merge>
+        <LinearLayout
+            android:id="@+id/collectibles_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/margin_xsmall"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+</LinearLayout>

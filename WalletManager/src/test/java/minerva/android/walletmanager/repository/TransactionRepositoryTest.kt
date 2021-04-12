@@ -11,19 +11,13 @@ import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.defs.ChainId
-import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.TransferType
-import minerva.android.walletmanager.model.minervaprimitives.Identity
-import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -36,6 +30,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -702,6 +697,7 @@ class TransactionRepositoryTest : RxTest() {
             AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
         )
         whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
+        whenever(tokenManager.getTokensRate(any())).thenReturn(Completable.complete())
 
         repository.refreshTokenBalance().test().assertComplete().assertValue {
             it.size == 1
@@ -752,5 +748,15 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
 
         repository.refreshTokensList().test().assertError(error)
+    }
+
+    @Test
+    fun `Check getting current tokens rate` () {
+        val error = Throwable("Error-303")
+        whenever(tokenManager.getTokensRate(any())).thenReturn(Completable.complete(), Completable.error(error))
+
+        repository.getTokensRate().test().assertComplete()
+        repository.getTokensRate().test().assertError(error)
+        verify(tokenManager, times(2)).getTokensRate(any())
     }
 }

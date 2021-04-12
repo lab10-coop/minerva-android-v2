@@ -48,10 +48,8 @@ class BlockchainRegularAccountRepositoryImpl(
 ) : BlockchainRegularAccountRepository {
 
     override fun getTransactions(pendingHashes: List<Pair<Int, String>>): Single<List<Pair<String, String?>>> =
-        Observable.range(START, pendingHashes.size)
-            .flatMapSingle { position ->
-                getTransaction(pendingHashes[position].first, pendingHashes[position].second)
-            }
+        Observable.fromIterable(pendingHashes)
+            .flatMapSingle { (chainId, txHash) -> getTransaction(chainId, txHash) }
             .toList()
 
     private fun getTransaction(chainId: Int, txHash: String): Single<Pair<String, String?>> =
@@ -107,13 +105,8 @@ class BlockchainRegularAccountRepositoryImpl(
      * List arguments: first - network short name, second - wallet address (public)
      */
     override fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Pair<String, BigDecimal>>> =
-        Observable.range(START, networkAddress.size)
-            .flatMapSingle { position ->
-                getBalance(
-                    networkAddress[position].first,
-                    networkAddress[position].second
-                )
-            }
+        Observable.fromIterable(networkAddress)
+            .flatMapSingle { (chainId, address) -> getBalance(chainId, address) }
             .toList()
 
     override fun toChecksumAddress(address: String): String = Keys.toChecksumAddress(address)
@@ -403,7 +396,6 @@ class BlockchainRegularAccountRepositoryImpl(
         )
 
     companion object {
-        private const val START = 0
         private const val SCALE = 8
         private const val DOT = "."
         private const val BLOCK_NUMBER_OFFSET = 5L

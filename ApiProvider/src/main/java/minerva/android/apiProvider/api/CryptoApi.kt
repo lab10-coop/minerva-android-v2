@@ -8,15 +8,15 @@ import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.TokenIconDetails
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
-import retrofit2.http.Url
+import retrofit2.http.*
 
 interface CryptoApi {
 
     @GET("simple/price")
     fun getMarkets(@Query(IDS) coinIds: String, @Query(VS_CURRENCIES) currency: String): Single<Markets>
+
+    @GET("coins/{$ID}/contract/{$CONTRACT_ADDRESS}")
+    fun getTokenMarkets(@Path(ID) id: String, @Path(CONTRACT_ADDRESS) contractAddress: String): Single<TokenMarketResponse>
 
     @GET
     fun getGasPrice(
@@ -25,19 +25,21 @@ interface CryptoApi {
     ): Single<GasPrices>
 
     @GET
-    fun getTokenRawData(@Url url: String) : Single<List<TokenIconDetails>>
+    fun getTokenRawData(@Url url: String): Single<List<TokenIconDetails>>
 
     @GET
-    fun getTokenLastCommitRawData(@Url url: String) : Single<List<CommitElement>>
+    fun getTokenLastCommitRawData(@Url url: String): Single<List<CommitElement>>
 
     @GET
-    fun getTokenBalance(@Url url: String) : Single<TokenBalanceResponse>
+    fun getConnectedTokens(@Url url: String): Single<TokenBalanceResponse>
 
     @GET
-    fun getTokenTx(@Url url: String) : Single<TokenTxResponse>
+    fun getTokenTx(@Url url: String): Single<TokenTxResponse>
 
     companion object {
+        private const val ID = "id"
         private const val IDS = "ids"
         private const val VS_CURRENCIES = "vs_currencies"
+        private const val CONTRACT_ADDRESS = "contract_address"
     }
 }

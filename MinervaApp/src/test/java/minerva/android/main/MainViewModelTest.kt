@@ -49,6 +49,9 @@ class MainViewModelTest : BaseViewModelTest() {
     private val timeoutPendingAccountObserver: Observer<Event<List<PendingAccount>>> = mock()
     private val timeoutPendingAccountCaptor: KArgumentCaptor<Event<List<PendingAccount>>> = argumentCaptor()
 
+    private val updateTokensRateObserver: Observer<Event<Unit>> = mock()
+    private val updateTokensRateCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+
     @Before
     fun setup() {
         viewModel = MainViewModel(
@@ -259,5 +262,18 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.updateTokenIcons()).thenReturn(Completable.complete())
         viewModel.updateTokenIcons()
         verify(transactionRepository, times(1)).updateTokenIcons()
+    }
+
+    @Test
+    fun `Check getting token rate success` () {
+        whenever(transactionRepository.getTokensRate()).thenReturn(Completable.complete())
+        viewModel.run {
+            updateTokensRateLiveData.observeForever(updateTokensRateObserver)
+            getTokensRate()
+        }
+
+        updateTokensRateCaptor.run {
+            verify(updateTokensRateObserver).onChanged(capture())
+        }
     }
 }

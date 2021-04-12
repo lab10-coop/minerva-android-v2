@@ -29,6 +29,10 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()
     }
 
+    override var isAuthenticationEnabled: Boolean
+        set(value) = sharedPreferences.edit().putBoolean(AUTHENTICATION_ENABLED, value).apply()
+        get() = sharedPreferences.getBoolean(AUTHENTICATION_ENABLED, false)
+
     override fun isMnemonicRemembered(): Boolean = sharedPreferences.getBoolean(IS_MNEMONIC_REMEMBERED, false)
 
     override fun getRecipients(): List<Recipient> {
@@ -116,5 +120,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val ASSET_VISIBILITY_SETTINGS = "asset_visibility_settings"
         private const val FREE_ATS_TIMESTAMP = "free_ats_timestamp"
         private const val ICON_UPDATE_TIMESTAMP = "last_update_timestamp"
+        private const val AUTHENTICATION_ENABLED = "authentication_enabled"
     }
 }

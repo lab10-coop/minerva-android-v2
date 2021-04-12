@@ -15,8 +15,8 @@ interface DappSessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(dapp: DappSessionEntity): Completable
 
-    @Query("DELETE FROM dapp_sessions WHERE peer_id = :peerId")
-    fun delete(peerId: String): Completable
+    @Query("DELETE FROM dapp_sessions WHERE peer_id = :itemId")
+    fun delete(itemId: String): Completable
 
     @Query("DELETE FROM dapp_sessions WHERE address = :key")
     fun deleteAllDappsForAccount(key: String): Completable
