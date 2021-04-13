@@ -139,6 +139,6 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
         private const val HOST_API_KEY = "hostApiKey"
         private const val HOST_APP_NAME = "hostAppName"
         private const val HOST_LOGO_URL = "hostLogoUrl"
-        private const val MINERVA_LOGO_URL = "http://dev.lab10.io/minerva/MIVA_Logo.svg"
+        private const val MINERVA_LOGO_URL = "https://minerva.digital/i/minerva-owl.svg"
     }
 }
