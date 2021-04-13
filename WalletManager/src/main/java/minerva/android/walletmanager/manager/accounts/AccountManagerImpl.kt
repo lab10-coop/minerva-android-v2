@@ -140,14 +140,14 @@ class AccountManagerImpl(
     override val areMainNetworksEnabled: Boolean
         get() = walletManager.areMainNetworksEnabled
 
-    override var toggleMainNetsEnabled: Boolean?
-        get() = walletManager.toggleMainNetsEnabled
+    override var showMainNetworksWarning: Boolean
+        get() = walletManager.showMainNetworksWarning
         set(value) {
-            walletManager.toggleMainNetsEnabled = value
+            walletManager.showMainNetworksWarning = value
         }
 
-    override val enableMainNetsFlowable: Flowable<Boolean>
-        get() = walletManager.enableMainNetsFlowable
+//    override val enableMainNetsFlowable: Flowable<Boolean>
+//        get() = walletManager.enableMainNetsFlowable
 
     override val isAuthenticationEnabled: Boolean
         get() = localStorage.isAuthenticationEnabled

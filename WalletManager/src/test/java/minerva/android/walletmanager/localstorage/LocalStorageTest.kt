@@ -1,10 +1,12 @@
 package minerva.android.walletmanager.localstorage
 
 import android.content.SharedPreferences
+import com.nhaarman.mockitokotlin2.times
 import io.mockk.*
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.storage.LocalStorageImpl
 import org.junit.Test
 
@@ -50,7 +52,7 @@ class LocalStorageTest {
 
     @Test
     fun `areMainNetsEnabled test`() {
-        localStorage.areMainNetsEnabled = true
+        localStorage.areMainNetworksEnabled = true
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
@@ -171,5 +173,11 @@ class LocalStorageTest {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
         confirmVerified(sharedPref)
+    }
+
+    @Test
+    fun `check showing main networks correctly` () {
+        localStorage.areMainNetworksEnabled = true
+
     }
 }

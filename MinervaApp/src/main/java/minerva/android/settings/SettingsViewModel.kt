@@ -8,7 +8,7 @@ class SettingsViewModel(private val masterSeedRepository: MasterSeedRepository, 
     ViewModel() {
 
     fun areMainNetworksEnabled(isChecked: Boolean) {
-        masterSeedRepository.toggleMainNetsEnabled = isChecked
+        masterSeedRepository.areMainNetworksEnabled = isChecked
     }
 
     val areMainNetsEnabled: Boolean

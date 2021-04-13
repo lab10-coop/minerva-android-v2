@@ -10,7 +10,6 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
-
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 29
@@ -41,6 +40,16 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    flavorDimensions 'enviroment'
+    productFlavors {
+        staging {
+            buildConfigField "boolean", "ARE_MAIN_NETS_ENABLED", "false"
+        }
+        production {
+            buildConfigField "boolean", "ARE_MAIN_NETS_ENABLED", "true"
         }
     }
 }

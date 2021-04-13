@@ -382,31 +382,6 @@ class WalletConfigManagerTest {
     }
 
     @Test
-    fun `when setting main nets enabled it, should be set on behavior subject`() {
-        walletManager.toggleMainNetsEnabled = true
-        walletManager.enableMainNetsFlowable
-            .test()
-            .assertValue { it }
-    }
-
-    @Test
-    fun `when setting main nets disabled it, should be set on behavior subject`() {
-        walletManager.toggleMainNetsEnabled = false
-        walletManager.enableMainNetsFlowable
-            .test()
-            .assertValue { !it }
-    }
-
-    @Test
-    fun `when setting enable main nets to null, behavior subject should not emit any items`() {
-        walletManager.toggleMainNetsEnabled = null
-        walletManager.enableMainNetsFlowable
-            .test()
-            .assertNoValues()
-    }
-
-
-    @Test
     fun `is synced returns true`() {
         whenever(localStorage.isSynced).thenReturn(true)
         val result = walletManager.isSynced
@@ -436,14 +411,14 @@ class WalletConfigManagerTest {
 
     @Test
     fun `are main nets enabled returns true`() {
-        whenever(localStorage.areMainNetsEnabled).thenReturn(true)
+        whenever(localStorage.areMainNetworksEnabled).thenReturn(true)
         val result = walletManager.areMainNetworksEnabled
         assertEquals(true, result)
     }
 
     @Test
     fun `are main nets enabled returns false`() {
-        whenever(localStorage.areMainNetsEnabled).thenReturn(false)
+        whenever(localStorage.areMainNetworksEnabled).thenReturn(false)
         val result = walletManager.areMainNetworksEnabled
         assertEquals(false, result)
     }

@@ -60,12 +60,15 @@ class MasterSeedRepositoryImpl(
     override val isSynced: Boolean
         get() = walletConfigManager.isSynced
 
-    override val areMainNetworksEnabled: Boolean
+    override var areMainNetworksEnabled: Boolean
         get() = walletConfigManager.areMainNetworksEnabled
-
-    override var toggleMainNetsEnabled: Boolean?
-        get() = walletConfigManager.toggleMainNetsEnabled
         set(value) {
-            walletConfigManager.toggleMainNetsEnabled = value
+            walletConfigManager.areMainNetworksEnabled = value
         }
+
+//    override var toggleMainNetsEnabled: Boolean
+//        get() = walletConfigManager.toggleMainNetsEnabled
+//        set(value) {
+//            walletConfigManager.toggleMainNetsEnabled = value
+//        }
 }

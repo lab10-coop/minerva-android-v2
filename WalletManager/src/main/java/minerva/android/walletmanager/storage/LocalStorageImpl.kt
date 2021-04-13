@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_DATA
+import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -21,9 +22,18 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         set(value) = sharedPreferences.edit().putBoolean(IS_SYNCED, value).apply()
         get() = sharedPreferences.getBoolean(IS_SYNCED, true)
 
-    override var areMainNetsEnabled: Boolean
-        set(value) = sharedPreferences.edit().putBoolean(ARE_MAIN_NETS_ENABLED, value).apply()
-        get() = sharedPreferences.getBoolean(ARE_MAIN_NETS_ENABLED, false)
+    override var areMainNetworksEnabled: Boolean
+        set(value) {
+            sharedPreferences.edit().putBoolean(ARE_MAIN_NETS_ENABLED, value).apply()
+            showMainNetworksWarning = true
+        }
+        get() = sharedPreferences.getBoolean(ARE_MAIN_NETS_ENABLED, BuildConfig.ARE_MAIN_NETS_ENABLED)
+
+    override var showMainNetworksWarning: Boolean
+        set(value) = sharedPreferences.edit().putBoolean(SHOW_MAIN_NETWORKS_WARNING, value).apply()
+        get() = sharedPreferences.run {
+            getBoolean(SHOW_MAIN_NETWORKS_WARNING, true) && areMainNetworksEnabled
+        }
 
     override fun saveIsMnemonicRemembered(isRemembered: Boolean) {
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()
@@ -50,13 +60,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
             }
             sharedPreferences.edit().putString(RECIPIENTS, Gson().toJson(it)).apply()
         }
-    }
-
-    private fun findRecipient(list: List<Recipient>, recipient: Recipient): Int {
-        list.forEachIndexed { index, it ->
-            if (it.address.equals(recipient.address, true)) return index
-        }
-        return Int.InvalidIndex
     }
 
     override fun savePendingAccount(pendingAccount: PendingAccount) {
@@ -110,6 +113,13 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         return settings
     }
 
+    private fun findRecipient(list: List<Recipient>, recipient: Recipient): Int {
+        list.forEachIndexed { index, it ->
+            if (it.address.equals(recipient.address, true)) return index
+        }
+        return Int.InvalidIndex
+    }
+
     companion object {
         private const val IS_MNEMONIC_REMEMBERED = "is_mnemonic_remembered"
         private const val IS_BACKUP_ALLOWED = "is_mnemonic_remembered"
@@ -121,5 +131,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val FREE_ATS_TIMESTAMP = "free_ats_timestamp"
         private const val ICON_UPDATE_TIMESTAMP = "last_update_timestamp"
         private const val AUTHENTICATION_ENABLED = "authentication_enabled"
+        private const val SHOW_MAIN_NETWORKS_WARNING = "show_main_networks_warning"
     }
 }

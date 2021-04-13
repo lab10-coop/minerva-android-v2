@@ -109,6 +109,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             viewModel.apply {
                 networksHeader.text = getHeader(areMainNetsEnabled)
                 addTatsButton.visibleOrGone(!areMainNetsEnabled)
+                if (showMainNetworksWarning) {
+                    FundsAtRiskDialog(requireContext()).show()
+                    showMainNetworksWarning = false
+                }
             }
         }
     }
@@ -144,11 +148,11 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     private fun setupLiveData() {
         viewModel.apply {
-            shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
-                if (it) {
-                    FundsAtRiskDialog(requireContext()).show()
-                }
-            })
+//            shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
+//                if (it) {
+//                    FundsAtRiskDialog(requireContext()).show()
+//                }
+//            })
             binding.apply {
                 accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)

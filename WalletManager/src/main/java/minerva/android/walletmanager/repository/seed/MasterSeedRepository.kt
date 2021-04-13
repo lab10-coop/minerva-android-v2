@@ -20,6 +20,6 @@ interface MasterSeedRepository {
     fun getValueIterator(): Int
     val isBackupAllowed: Boolean
     val isSynced: Boolean
-    val areMainNetworksEnabled: Boolean
-    var toggleMainNetsEnabled: Boolean?
+    var areMainNetworksEnabled: Boolean
+    //var toggleMainNetsEnabled: Boolean
 }
