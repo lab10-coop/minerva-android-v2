@@ -191,12 +191,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     private fun handleWalletConnectError(error: Throwable) {
         dappDialog?.dismiss()
-        val errorMessage = if (error is WalletConnectConnectionThrowable) {
-            getString(R.string.wc_connection_error_message)
-        } else {
-            error.message ?: getString(R.string.unexpected_error)
+        if (error is WalletConnectConnectionThrowable) {
+            showFlashbar(getString(R.string.wallet_connect_title), getString(R.string.wc_connection_error_message))
         }
-        showFlashbar(getString(R.string.wallet_connect_title), errorMessage)
     }
 
     private fun handleLoadingDialog(it: ProgressBarState) {
