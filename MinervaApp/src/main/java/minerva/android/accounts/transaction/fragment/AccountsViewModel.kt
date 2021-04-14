@@ -97,10 +97,6 @@ class AccountsViewModel(
             }
         }
 
-    //TODO remove?
-    private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
-    val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
-
     var showMainNetworksWarning: Boolean
         get() = accountManager.showMainNetworksWarning
         set(value) {

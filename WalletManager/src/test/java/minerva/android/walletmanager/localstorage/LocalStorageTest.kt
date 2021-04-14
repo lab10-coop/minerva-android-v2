@@ -1,13 +1,12 @@
 package minerva.android.walletmanager.localstorage
 
 import android.content.SharedPreferences
-import com.nhaarman.mockitokotlin2.times
 import io.mockk.*
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.storage.LocalStorageImpl
+import org.junit.After
 import org.junit.Test
 
 class LocalStorageTest {
@@ -29,7 +28,6 @@ class LocalStorageTest {
         verify {
             sharedPref.getBoolean(any(), false)
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -38,7 +36,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -47,7 +44,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -56,7 +52,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
 
@@ -66,7 +61,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -75,7 +69,6 @@ class LocalStorageTest {
         verify {
             sharedPref.getString(any(), any())
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -87,7 +80,6 @@ class LocalStorageTest {
             sharedPref.edit().putString(any(), any()).apply()
             sharedPref.getString(any(), any())
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -98,7 +90,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putString(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -117,7 +108,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putString(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -136,7 +126,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putLong(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -155,7 +144,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putLong(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -172,12 +160,26 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
     fun `check showing main networks correctly` () {
         localStorage.areMainNetworksEnabled = true
+        verify (exactly = 2) {
+            sharedPref.edit().putBoolean(any(), any()).apply()
+        }
+    }
 
+    @Test
+    fun `check the main networks warning should show` () {
+        localStorage.showMainNetworksWarning = true
+        verify {
+            sharedPref.edit().putBoolean(any(), any()).apply()
+        }
+    }
+
+    @After
+    fun `double check verification` () {
+        confirmVerified(sharedPref)
     }
 }
