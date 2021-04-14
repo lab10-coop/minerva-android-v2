@@ -98,11 +98,12 @@ class WalletConnectInteractionsViewModel(
                         OnEthSignRequest(status.message, session)
                     }
             is OnDisconnect -> Single.just(OnDisconnected)
-            is OnEthSendTransaction ->
+            is OnEthSendTransaction ->{
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session ->
                         getTransactionCosts(session, status)
                     }
+            }
             is OnFailure -> Single.just(OnError(status.error))
             else -> Single.just(DefaultRequest)
         }
