@@ -17,16 +17,15 @@ import minerva.android.main.base.BaseFragment
 import minerva.android.token.ramp.adapter.AccountSpinnerAdapter
 import minerva.android.token.ramp.adapter.RampCryptoAdapter
 import minerva.android.token.ramp.adapter.RampCryptoViewHolder.Companion.DEFAULT_RAMP_CRYPTO_POSITION
-import minerva.android.token.ramp.listener.OnRampCryptoChangedListener
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedListener {
+class RampFragment : BaseFragment(R.layout.fragment_ramp) {
 
     private lateinit var binding: FragmentRampBinding
     private val viewModel: RampViewModel by viewModel()
-    private val cryptoAdapter by lazy { RampCryptoAdapter(viewModel.rampCrypto, this) }
+    private val cryptoAdapter by lazy { RampCryptoAdapter(viewModel.rampCrypto) { showCurrentAccounts(viewModel.getValidAccounts(it)) } }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -34,9 +33,6 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp), OnRampCryptoChangedLi
         initializeFragment(view)
         showCurrentAccounts(viewModel.getValidAccounts(viewModel.rampCrypto[DEFAULT_RAMP_CRYPTO_POSITION].chainId))
     }
-
-    override fun onRampCryptoChanged(chainId: Int) =
-        showCurrentAccounts(viewModel.getValidAccounts(chainId))
 
     private fun initializeFragment(view: View) {
         binding.apply {

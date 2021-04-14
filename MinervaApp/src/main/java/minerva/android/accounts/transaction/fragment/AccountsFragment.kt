@@ -229,8 +229,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
             automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
             refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleRefreshBalancesError(it) })
-            addFreeAtsLiveData.observe(viewLifecycleOwner, EventObserver {
-                (if (it) R.string.refresh_balance_to_check_transaction_status
+            addFreeAtsLiveData.observe(viewLifecycleOwner, EventObserver { success ->
+                (if (success) R.string.refresh_balance_to_check_transaction_status
                 else R.string.free_ats_warning).apply {
                     Toast.makeText(context, this, Toast.LENGTH_SHORT).show()
                 }

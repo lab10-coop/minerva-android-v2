@@ -319,19 +319,21 @@ class AccountsViewModel(
     fun addAtsToken() {
         getAccountForFreeATS(activeAccounts).let { account ->
             if (account.id != Int.InvalidId && isAddingFreeATSAvailable(activeAccounts)) {
-                transactionRepository.getFreeATS(account.address)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onComplete = {
-                            accountManager.saveFreeATSTimestamp()
-                            _addFreeAtsLiveData.value = Event(true)
-                        },
-                        onError = {
-                            Timber.e("Adding 5 tATS failed: ${it.message}")
-                            _errorLiveData.value = Event(Throwable(it.message))
-                        }
-                    )
+                launchDisposable {
+                    transactionRepository.getFreeATS(account.address)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeBy(
+                            onComplete = {
+                                accountManager.saveFreeATSTimestamp()
+                                _addFreeAtsLiveData.value = Event(true)
+                            },
+                            onError = {
+                                Timber.e("Adding 5 tATS failed: ${it.message}")
+                                _errorLiveData.value = Event(Throwable(it.message))
+                            }
+                        )
+                }
             } else _addFreeAtsLiveData.value = Event(false)
         }
     }
@@ -339,7 +341,7 @@ class AccountsViewModel(
     fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
         shouldGetFreeAts() &&
                 accounts.any { it.network.chainId == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].chainId }
-    
+
     private fun shouldGetFreeAts() =
         ((accountManager.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(24L)) < accountManager.currentTimeMills())
 

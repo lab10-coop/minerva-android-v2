@@ -6,52 +6,50 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.databinding.RampCryptoRowBinding
-import minerva.android.token.ramp.listener.OnRampCryptoChangedListener
-import minerva.android.token.ramp.listener.OnRampCryptoClickListener
 import minerva.android.token.ramp.model.RampCrypto
 
-class RampCryptoAdapter(private val crypto: List<RampCrypto>, private val listener: OnRampCryptoChangedListener) : RecyclerView.Adapter<RampCryptoViewHolder>(), OnRampCryptoClickListener {
+class RampCryptoAdapter(private val crypto: List<RampCrypto>, private val onRampChanged: (chainId: Int) -> Unit) :
+    RecyclerView.Adapter<RampCryptoViewHolder>() {
 
     private var currentCryptoPosition = 0
 
     override fun getItemCount() = crypto.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RampCryptoViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.ramp_crypto_row, parent, false), this
-    )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        RampCryptoViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.ramp_crypto_row, parent, false))
 
     override fun onBindViewHolder(holder: RampCryptoViewHolder, position: Int) {
         holder.apply {
-            setData(position, crypto[position])
+            setData(position, crypto[position]) { onRampClicked(it) }
             showSelected(position == currentCryptoPosition)
         }
     }
 
-    override fun onRampCryptoClicked(position: Int) {
+    private fun onRampClicked(position: Int) {
         currentCryptoPosition = position
-        listener.onRampCryptoChanged(crypto[position].chainId)
+        onRampChanged(crypto[position].chainId)
         notifyDataSetChanged()
     }
 
     fun getCryptoPosition() = currentCryptoPosition
 }
 
-class RampCryptoViewHolder(view: View, private val listener: OnRampCryptoClickListener) : RecyclerView.ViewHolder(view) {
+class RampCryptoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     private val binding = RampCryptoRowBinding.bind(view)
 
-    fun setData(position: Int, rampCrypto: RampCrypto) {
+    fun setData(position: Int, rampCrypto: RampCrypto, onRampClicked: (chainId: Int) -> Unit) {
         binding.cryptoView.apply {
             text = rampCrypto.symbol
             setCompoundDrawablesWithIntrinsicBounds(NO_IMAGE, rampCrypto.iconRes, NO_IMAGE, NO_IMAGE)
-            setOnClickListener { listener.onRampCryptoClicked(position) }
+            setOnClickListener { onRampClicked(position) }
         }
     }
 
     fun showSelected(value: Boolean) {
         binding.cryptoView.setBackgroundResource(
-                if (value) R.drawable.rounded_white_frame_purple
-                else R.drawable.rounded_white_button
+            if (value) R.drawable.rounded_white_frame_purple
+            else R.drawable.rounded_white_button
         )
     }
 
