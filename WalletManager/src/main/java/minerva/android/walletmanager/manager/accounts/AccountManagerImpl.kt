@@ -146,9 +146,6 @@ class AccountManagerImpl(
             walletManager.showMainNetworksWarning = value
         }
 
-//    override val enableMainNetsFlowable: Flowable<Boolean>
-//        get() = walletManager.enableMainNetsFlowable
-
     override val isAuthenticationEnabled: Boolean
         get() = localStorage.isAuthenticationEnabled
 
