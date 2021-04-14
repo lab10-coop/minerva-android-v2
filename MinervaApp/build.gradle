@@ -34,6 +34,8 @@ android {
         buildConfigField "String", "TELEGRAM_WEB", '"https://web.telegram.org/#/im?p=@MinervaWallet"'
         buildConfigField "String", "PRIVACY_POLICY", '"https://docs.minerva.digital/legal/privacy"'
         buildConfigField "String", "TERMS_OF_SERVICE", '"https://docs.minerva.digital/legal/terms"'
+        buildConfigField "String", "API_TOKEN", String.valueOf(System.env.REST_API_TOKEN) ?: '"dummyToken"'
+        buildConfigField "String", "RAMP_API_KEY", System.env.RAMP_API_KEY ?: localProperty("ramp.api.key")
     }
 
     signingConfigs {
@@ -63,8 +65,6 @@ android {
             versionNameSuffix '-staging'
 
             buildConfigField "String", "REST_API_URL", '"http://minerva-api.dev.lab10.io/"'
-            buildConfigField "String", "API_TOKEN", '"dummyToken"'
-            buildConfigField "String", "RAMP_API_KEY", localProperty("ramp.api.key")
             buildConfigField "String", "RAMP_API_URL", '"ri-widget-staging.firebaseapp.com"'
         }
 
@@ -76,8 +76,6 @@ android {
             versionNameSuffix '-release'
 
             buildConfigField "String", "REST_API_URL", '"https://api.minerva.digital"'
-            buildConfigField "String", "API_TOKEN", String.valueOf(System.env.REST_API_TOKEN)
-            buildConfigField "String", "RAMP_API_KEY", String.valueOf(System.env.RAMP_API_KEY)
             buildConfigField "String", "RAMP_API_URL", '"buy.ramp.network"'
         }
     }
