@@ -34,7 +34,7 @@ android {
         buildConfigField "String", "TELEGRAM_WEB", '"https://web.telegram.org/#/im?p=@MinervaWallet"'
         buildConfigField "String", "PRIVACY_POLICY", '"https://docs.minerva.digital/legal/privacy"'
         buildConfigField "String", "TERMS_OF_SERVICE", '"https://docs.minerva.digital/legal/terms"'
-        buildConfigField "String", "API_TOKEN", String.valueOf(System.env.REST_API_TOKEN) ?: '"dummyToken"'
+        buildConfigField "String", "API_TOKEN", System.env.REST_API_TOKEN ?: '"dummyToken"'
         buildConfigField "String", "RAMP_API_KEY", System.env.RAMP_API_KEY ?: localProperty("ramp.api.key")
     }
 
