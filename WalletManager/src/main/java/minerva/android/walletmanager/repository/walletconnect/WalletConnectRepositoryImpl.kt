@@ -21,7 +21,6 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import timber.log.Timber
-import java.io.EOFException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.ConcurrentHashMap
@@ -102,7 +101,7 @@ class WalletConnectRepositoryImpl(
     }
 
     private fun isConnectionException(error: Throwable) =
-        error is SocketTimeoutException || error is EOFException || error is UnknownHostException || error is SSLException
+        error is SocketTimeoutException || error is UnknownHostException || error is SSLException
 
     override fun saveDappSession(dappSession: DappSession): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
@@ -131,8 +130,13 @@ class WalletConnectRepositoryImpl(
         disposable = deleteDappSession(peerId)
             .toSingleDefault(peerId)
             .map {
-                if (clientMap.contains(it)) {
-                    clientMap.remove(it)
+                with(clientMap) {
+                    if (contains(it)) {
+                        if (this[peerId]?.session != null) {
+                            this[peerId]?.killSession()
+                        }
+                        remove(it)
+                    }
                 }
             }
             .ignoreElement()
@@ -229,12 +233,14 @@ class WalletConnectRepositoryImpl(
         deleteDappSession(peerId)
             .andThen {
                 with(clientMap) {
-                    this[peerId]?.killSession()
+                    if (this[peerId]?.session != null) {
+                        this[peerId]?.killSession()
+                    }
                     remove(peerId)
                 }
             }
 
     companion object {
-        const val PING_TIMEOUT: Long = 30
+        const val PING_TIMEOUT: Long = 60
     }
 }

@@ -5,6 +5,7 @@ import minerva.android.kotlinUtils.InvalidValue
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.*
 import kotlin.math.pow
 
@@ -14,7 +15,7 @@ object BalanceUtils {
         if (cryptoBalance == Int.InvalidValue.toBigDecimal()) String.EmptyBalance
         else {
             val scaled = cryptoBalance.setScale(CRYPTO_SCALE, RoundingMode.CEILING)
-            DecimalFormat(CRYPTO_FORMAT).format(scaled)
+            DecimalFormat(CRYPTO_FORMAT, DecimalFormatSymbols(Locale.ROOT)).format(scaled)
         }
 
     fun getFiatBalance(fiatBalance: BigDecimal): String =
