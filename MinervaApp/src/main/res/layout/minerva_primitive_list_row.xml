@@ -25,15 +25,17 @@
 
     <TextView
         android:id="@+id/minerva_primitive_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_small"
+        android:layout_marginEnd="@dimen/margin_xxsmall"
         android:layout_marginBottom="@dimen/margin_xxxsmall"
         android:fontFamily="@font/rubik_medium"
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toRightOf="@+id/minerva_primitive_logo"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/popup_menu"
         tools:text="Minerva Service" />
 
     <TextView

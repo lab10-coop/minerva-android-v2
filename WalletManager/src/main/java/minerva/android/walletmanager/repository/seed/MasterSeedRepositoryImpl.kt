@@ -52,7 +52,7 @@ class MasterSeedRepositoryImpl(
         walletConfigManager.dispose()
     }
 
-    override fun getValueIterator(): Int = walletConfigManager.getValueIterator()
+    override fun getAccountIterator(): Int = walletConfigManager.getValueIterator()
 
     override val isBackupAllowed: Boolean
         get() = walletConfigManager.isBackupAllowed

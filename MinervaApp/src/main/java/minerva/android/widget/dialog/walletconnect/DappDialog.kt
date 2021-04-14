@@ -54,6 +54,7 @@ abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val de
         network.text = networkName
         Glide.with(context)
             .load(icon)
+            .error(R.drawable.ic_services)
             .into(networkHeader.icon)
     }
 }

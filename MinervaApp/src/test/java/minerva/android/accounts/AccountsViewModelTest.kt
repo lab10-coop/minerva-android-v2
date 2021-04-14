@@ -12,6 +12,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -28,6 +29,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
+import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 
@@ -256,26 +258,27 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `adding free ATS correct`() {
         NetworkManager.initialize(networks)
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.complete())
-        viewModel.addAtsToken(accounts, "nope")
+        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
+        whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
+        viewModel.apply {
+            activeAccounts = listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
+            addAtsToken()
+        }
         verify(accountManager, times(1)).saveFreeATSTimestamp()
     }
 
     @Test
     fun `adding free ATS error`() {
         NetworkManager.initialize(networks)
-        viewModel.errorLiveData.observeForever(errorObserver)
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.error(Throwable("Some error")))
-        viewModel.addAtsToken(accounts, "nope")
-        errorCaptor.run {
-            verify(errorObserver).onChanged(capture())
+        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
+        whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
+        viewModel.apply {
+            activeAccounts = listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
+            errorLiveData.observeForever(errorObserver)
+            addAtsToken()
         }
-    }
 
-    @Test
-    fun `missing account for adding free ATS test error`() {
-        viewModel.errorLiveData.observeForever(errorObserver)
-        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0)
-        viewModel.addAtsToken(listOf(), "nope")
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }

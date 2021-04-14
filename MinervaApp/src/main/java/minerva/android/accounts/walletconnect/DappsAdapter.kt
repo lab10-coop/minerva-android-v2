@@ -51,6 +51,7 @@ class DappViewHolder(
         with(binding) {
             Glide.with(binding.root.context)
                 .load(getIcon(dappSession))
+                .error(R.drawable.ic_services)
                 .into(icon)
             name.text = dappSession.name
             menu.setOnClickListener { showMenu(dappSession.peerId) }

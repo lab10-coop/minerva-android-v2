@@ -25,6 +25,7 @@ interface AccountManager : Manager {
     fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings
     fun currentTimeMills(): Long
     fun getAllAccounts(): List<Account>
+    fun getAllActiveAccounts(chainId: Int): List<Account>
     fun toChecksumAddress(address: String): String
     val areMainNetworksEnabled: Boolean
     val isAuthenticationEnabled: Boolean

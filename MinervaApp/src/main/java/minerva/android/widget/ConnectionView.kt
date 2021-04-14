@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setPadding
 import com.bumptech.glide.Glide
+import minerva.android.R
 import minerva.android.databinding.ConnectionViewLayoutBinding
 
 class ConnectionView @JvmOverloads constructor(
@@ -24,9 +25,10 @@ class ConnectionView @JvmOverloads constructor(
             .into(binding.connectionIcon)
     }
 
-    fun setIconUrl(icon:Uri){
+    fun setIconUrl(icon: String) {
         Glide.with(context)
-            .load(icon)
+            .load(Uri.parse(icon))
+            .error(R.drawable.ic_services)
             .into(binding.connectionIcon)
     }
 

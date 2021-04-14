@@ -6,6 +6,7 @@ import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.toByteArray
 import minerva.android.walletConnect.model.enums.MessageType
 import minerva.android.walletConnect.model.enums.WCMethod
@@ -25,7 +26,7 @@ import java.util.*
 
 const val JSONRPC_VERSION = "2.0"
 
-open class WCClient(
+class WCClient(
     private val httpClient: OkHttpClient = OkHttpProvider.okHttpClient,
     builder: GsonBuilder = GsonBuilder()
 ) : WebSocketListener() {
@@ -150,8 +151,8 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int, peerId: String, handshake: Long = 0L): Boolean {
-        if (handshake != 0L) {
+    fun approveSession(accounts: List<String>, chainId: Int, peerId: String, handshake: Long = Long.InvalidValue): Boolean {
+        if (handshake != Long.InvalidValue) {
             handshakeId = handshake
         }
 
@@ -174,7 +175,7 @@ open class WCClient(
         return encryptAndSend(gson.toJson(response))
     }
 
-    fun updateSession(
+    private fun updateSession(
         accounts: List<String>? = null,
         chainId: Int? = null,
         approved: Boolean = true

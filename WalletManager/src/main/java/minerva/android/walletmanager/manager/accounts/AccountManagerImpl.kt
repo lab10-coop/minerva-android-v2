@@ -22,6 +22,7 @@ import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
+import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -134,6 +135,8 @@ class AccountManagerImpl(
 
     override fun getAllAccounts(): List<Account> = walletManager.getWalletConfig().accounts
 
+    override fun getAllActiveAccounts(chainId: Int): List<Account> = getAllAccounts()?.filter { !it.isDeleted && it.chainId == chainId }
+
     override fun toChecksumAddress(address: String): String =
         blockchainRepository.toChecksumAddress(address)
 
@@ -215,5 +218,6 @@ class AccountManagerImpl(
     companion object {
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
         private const val NO_SAFE_ACCOUNTS = 0
+        const val NEW_ACCOUNT_TITLE_PATTERN = "%s #%d"
     }
 }
