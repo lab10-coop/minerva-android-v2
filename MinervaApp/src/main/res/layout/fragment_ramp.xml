@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="@dimen/margin_normal"
+    android:paddingBottom="@dimen/margin_normal"
+    tools:context=".token.ramp.RampFragment">
+
+    <TextView
+        android:id="@+id/networks_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_medium"
+        android:gravity="center_vertical"
+        android:paddingTop="@dimen/margin_small"
+        android:paddingBottom="@dimen/margin_xsmall"
+        android:text="@string/choose_your_crypto"
+        android:textAllCaps="true"
+        android:textColor="@color/networksTypeHeader"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/crypto_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_xsmall"
+        android:layout_marginRight="@dimen/margin_xsmall"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        app:layout_constraintHeight_max="256dp"
+        app:layout_constraintTop_toBottomOf="@id/networks_header" />
+
+    <TextView
+        android:id="@+id/accounts_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_medium"
+        android:gravity="center_vertical"
+        android:paddingTop="@dimen/margin_small"
+        android:paddingBottom="@dimen/margin_normal"
+        android:text="@string/choose_your_crypto"
+        android:textAllCaps="true"
+        android:textColor="@color/networksTypeHeader"
+        android:textSize="@dimen/text_xsmall"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/crypto_recycler" />
+
+    <LinearLayout
+        android:id="@+id/no_account_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/continue_button"
+        app:layout_constraintTop_toBottomOf="@id/accounts_header">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/create_new_account"
+            style="@style/OutlinedButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:text="@string/create_new_account" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:drawableTop="@drawable/ic_info"
+            android:drawablePadding="@dimen/margin_small"
+            android:gravity="center"
+            android:text="@string/no_account_on_network"
+            android:textSize="@dimen/text_normal" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/accounts_header" />
+
+    <Spinner
+        android:id="@+id/crypto_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:background="@drawable/rounded_spinner_background"
+        android:elevation="@dimen/cardview_default_elevation"
+        android:spinnerMode="dropdown"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/accounts_header" />
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/continue_button"
+        style="@style/PurpleButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginBottom="0dp"
+        android:text="@string/continue_to_ramp"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

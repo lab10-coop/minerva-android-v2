@@ -23,6 +23,7 @@ import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.settings.authentication.AuthenticationFragment
 import minerva.android.token.AddTokenFragment
 import minerva.android.token.ManageTokensFragment
+import minerva.android.token.ramp.RampFragment
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.repository.getNetworkIcon
 import java.util.*
@@ -120,6 +121,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.CREDENTIAL_ORDER -> EditOrderFragment.newInstance(WalletActionType.CREDENTIAL)
             WrappedFragmentType.MANAGE_TOKENS -> ManageTokensFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
             WrappedFragmentType.AUTHENTICATION -> AuthenticationFragment.newInstance()
+            WrappedFragmentType.RAMP -> RampFragment.newInstance()
         }
         addFragment(R.id.container, fragment)
     }
@@ -135,6 +137,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
             WrappedFragmentType.CREDENTIAL_ORDER -> getString(R.string.edit_credentials_order)
             WrappedFragmentType.MANAGE_TOKENS -> getString(R.string.manage_token)
+            WrappedFragmentType.RAMP -> getString(R.string.buy_crypto)
             WrappedFragmentType.AUTHENTICATION -> getString(R.string.authentication)
         }
 
@@ -189,5 +192,6 @@ enum class WrappedFragmentType {
     SAFE_ACCOUNT_SETTINGS,
     SERVICE_ORDER,
     MANAGE_TOKENS,
-    AUTHENTICATION
+    AUTHENTICATION,
+    RAMP
 }

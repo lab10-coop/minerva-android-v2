@@ -79,7 +79,7 @@ class MainViewModel(
         get() = masterSeedRepository.isBackupAllowed
 
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
-    fun getValueIterator(): Int = masterSeedRepository.getValueIterator()
+    fun getAccountIterator(): Int = masterSeedRepository.getAccountIterator()
 
     fun dispose() {
         masterSeedRepository.dispose()

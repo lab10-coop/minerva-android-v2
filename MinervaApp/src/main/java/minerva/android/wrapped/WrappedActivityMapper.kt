@@ -113,3 +113,9 @@ fun startAuthenticationWrappedActivity(context: Context) {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.AUTHENTICATION)
     }
 }
+
+fun startRampWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.RAMP)
+    }
+}

@@ -27,6 +27,7 @@ import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.authentication.AuthenticationViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.splash.SplashScreenViewModel
+import minerva.android.token.ramp.RampViewModel
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage
@@ -80,6 +81,7 @@ private val appModules = module {
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
+    viewModel { RampViewModel(get(), get()) }
 }
 
 private const val MinervaCache = "MinervaCache"
