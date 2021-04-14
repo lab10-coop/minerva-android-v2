@@ -71,7 +71,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Before
     fun initViewModel() {
-        //whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
         viewModel = AccountsViewModel(
             accountManager,
             walletActionsRepository,

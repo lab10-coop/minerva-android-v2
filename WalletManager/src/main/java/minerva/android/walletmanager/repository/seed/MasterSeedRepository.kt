@@ -21,5 +21,4 @@ interface MasterSeedRepository {
     val isBackupAllowed: Boolean
     val isSynced: Boolean
     var areMainNetworksEnabled: Boolean
-    //var toggleMainNetsEnabled: Boolean
 }

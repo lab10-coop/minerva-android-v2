@@ -30,5 +30,4 @@ interface AccountManager : Manager {
     val areMainNetworksEnabled: Boolean
     val isAuthenticationEnabled: Boolean
     var showMainNetworksWarning: Boolean
-    //var toggleMainNetsEnabled: Boolean
 }

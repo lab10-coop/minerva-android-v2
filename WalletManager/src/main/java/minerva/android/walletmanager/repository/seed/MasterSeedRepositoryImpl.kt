@@ -65,10 +65,4 @@ class MasterSeedRepositoryImpl(
         set(value) {
             walletConfigManager.areMainNetworksEnabled = value
         }
-
-//    override var toggleMainNetsEnabled: Boolean
-//        get() = walletConfigManager.toggleMainNetsEnabled
-//        set(value) {
-//            walletConfigManager.toggleMainNetsEnabled = value
-//        }
 }
