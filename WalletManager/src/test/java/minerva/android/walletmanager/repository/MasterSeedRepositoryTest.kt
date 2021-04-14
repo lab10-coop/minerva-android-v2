@@ -116,7 +116,7 @@ class MasterSeedRepositoryTest : RxTest() {
     fun `get correct new Value number`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.getValueIterator() shouldBeEqualTo 0
+        repository.getAccountIterator() shouldBeEqualTo 0
     }
 
     @Test

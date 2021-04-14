@@ -83,6 +83,9 @@ class AccountsViewModel(
     private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
     val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
 
+    private val _addFreeAtsLiveData = MutableLiveData<Event<Boolean>>()
+    val addFreeAtsLiveData: LiveData<Event<Boolean>> get() = _addFreeAtsLiveData
+
     private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
     val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
     var hasAvailableAccounts: Boolean = false
@@ -300,23 +303,25 @@ class AccountsViewModel(
         }
     }
 
-    fun addAtsToken(accounts: List<Account>, errorMessage: String) {
-        getAccountForFreeATS(accounts).let { account ->
-            if (account.id != Int.InvalidId) {
-                transactionRepository.getFreeATS(account.address)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onComplete = { accountManager.saveFreeATSTimestamp() },
-                        onError = {
-                            Timber.e("Adding 5 tATS failed: ${it.message}")
-                            _errorLiveData.value = Event(Throwable(it.message))
-                        }
-                    )
-            } else {
-                Timber.e("Adding 5 tATS failed: $errorMessage")
-                _errorLiveData.value = Event(Throwable(errorMessage))
-            }
+    fun addAtsToken() {
+        getAccountForFreeATS(activeAccounts).let { account ->
+            if (account.id != Int.InvalidId && isAddingFreeATSAvailable(activeAccounts)) {
+                launchDisposable {
+                    transactionRepository.getFreeATS(account.address)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeBy(
+                            onComplete = {
+                                accountManager.saveFreeATSTimestamp()
+                                _addFreeAtsLiveData.value = Event(true)
+                            },
+                            onError = {
+                                Timber.e("Adding 5 tATS failed: ${it.message}")
+                                _errorLiveData.value = Event(Throwable(it.message))
+                            }
+                        )
+                }
+            } else _addFreeAtsLiveData.value = Event(false)
         }
     }
 

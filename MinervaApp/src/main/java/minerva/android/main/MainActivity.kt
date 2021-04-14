@@ -31,6 +31,7 @@ import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
+import minerva.android.walletmanager.manager.accounts.AccountManagerImpl.Companion.NEW_ACCOUNT_TITLE_PATTERN
 import minerva.android.walletmanager.exception.WalletConnectConnectionThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -423,9 +424,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         startNewAccountWrappedActivity(
             this,
             String.format(
-                NEW_VALUE_TITLE_PATTERN,
+                NEW_ACCOUNT_TITLE_PATTERN,
                 getString(R.string.new_account),
-                viewModel.getValueIterator()
+                viewModel.getAccountIterator()
             )
         )
     }
@@ -451,7 +452,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     companion object {
-        private const val NEW_VALUE_TITLE_PATTERN = "%s #%d"
         const val LOGIN_SCANNER_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5

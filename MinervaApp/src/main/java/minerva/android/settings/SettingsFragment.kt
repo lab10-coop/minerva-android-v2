@@ -19,7 +19,6 @@ import minerva.android.wrapped.startAuthenticationWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-
 class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     private lateinit var binding: FragmentSettingsBinding

@@ -313,6 +313,25 @@ class AccountManagerTest : RxTest() {
     }
 
     @Test
+    fun `getting all active accounts with given chainID`() {
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(1, chainId = 1, name = "account01", isDeleted = false),
+                Account(2, chainId = 1, name = "account02", isDeleted = false),
+                Account(3, chainId = 3, name = "account03", isDeleted = true),
+                Account(4, chainId = 3, name = "account04", isDeleted = false),
+                Account(5, chainId = 3, name = "account05", isDeleted = false)
+            )
+        )
+
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        val accounts = manager.getAllActiveAccounts(3)
+        accounts.size shouldBeEqualTo 2
+        accounts[0].name shouldBeEqualTo "account04"
+        accounts[1].name shouldBeEqualTo "account05"
+    }
+
+    @Test
     fun `to checksum address test`() {
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("checksum")
         val result = manager.toChecksumAddress("address")

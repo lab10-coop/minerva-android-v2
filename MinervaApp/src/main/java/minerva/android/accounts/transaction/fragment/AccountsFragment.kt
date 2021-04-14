@@ -24,6 +24,7 @@ import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.wrapped.startManageTokensWrappedActivity
+import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -48,7 +49,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         interactor.changeActionBarColor(R.color.lightGray)
         viewModel.apply {
             onResume()
-            refreshFreeATSButton()
+            refreshAddCryptoButton()
             if (arePendingAccountsEmpty()) accountAdapter.stopPendingTransactions()
         }
     }
@@ -108,6 +109,15 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         binding.apply {
             viewModel.apply {
                 networksHeader.text = getHeader(areMainNetsEnabled)
+                addCryptoButton.apply {
+                    if (areMainNetsEnabled) {
+                        text = getString(R.string.buy_crypto)
+                        setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary))
+                    } else {
+                        text = getString(R.string.add_tats)
+                        setBackgroundColor(ContextCompat.getColor(context, R.color.artis))
+                    }
+                }
                 addTatsButton.visibleOrGone(!areMainNetsEnabled)
                 if (showMainNetworksWarning) {
                     FundsAtRiskDialog(requireContext()).show()
@@ -148,16 +158,11 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     private fun setupLiveData() {
         viewModel.apply {
-//            shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
-//                if (it) {
-//                    FundsAtRiskDialog(requireContext()).show()
-//                }
-//            })
             binding.apply {
                 accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)
                     accountAdapter.updateList(accounts, activeAccounts)
-                    setTatsButtonListener(activeAccounts)
+                    setTatsButtonListener()
                 })
 
                 dappSessions.observe(viewLifecycleOwner, Observer {
@@ -175,7 +180,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             }
 
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
-                refreshFreeATSButton()
+                refreshAddCryptoButton()
                 showErrorFlashbar(
                     getString(R.string.error_header),
                     getString(R.string.unexpected_error)
@@ -219,15 +224,17 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
             accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver {
                 activity?.invalidateOptionsMenu()
-                refreshFreeATSButton()
+                refreshAddCryptoButton()
             })
 
-            automaticBackupErrorLiveData.observe(
-                viewLifecycleOwner,
-                EventObserver { handleAutomaticBackupError(it) })
-            refreshBalancesErrorLiveData.observe(
-                viewLifecycleOwner,
-                EventObserver { handleRefreshBalancesError(it) })
+            automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
+            refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleRefreshBalancesError(it) })
+            addFreeAtsLiveData.observe(viewLifecycleOwner, EventObserver { success ->
+                (if (success) R.string.refresh_balance_to_check_transaction_status
+                else R.string.free_ats_warning).apply {
+                    Toast.makeText(context, this, Toast.LENGTH_SHORT).show()
+                }
+            })
         }
     }
 
@@ -245,31 +252,29 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
     }
 
-    private fun refreshFreeATSButton() {
+    private fun refreshAddCryptoButton() {
         viewModel.apply {
             isAddingFreeATSAvailable(activeAccounts).let { isAvailable ->
-                binding.addTatsButton.apply {
-                    val color = if (isAvailable) R.color.artis else R.color.inactiveButtonColor
-                    setBackgroundColor(ContextCompat.getColor(context, color))
+                binding.addCryptoButton.apply {
+                    if (!viewModel.areMainNetsEnabled) {
+                        val color = if (isAvailable) R.color.artis else R.color.inactiveButtonColor
+                        setBackgroundColor(ContextCompat.getColor(context, color))
+                    }
                 }
             }
         }
     }
 
-    private fun setTatsButtonListener(accounts: List<Account>) =
-        binding.addTatsButton.setOnClickListener {
+    private fun setTatsButtonListener() =
+        binding.addCryptoButton.setOnClickListener {
             viewModel.apply {
-                Toast.makeText(it.context, getFreeAtsMessage(it, accounts), Toast.LENGTH_SHORT)
-                    .show()
+                if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
+                else {
+                    it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
+                    addAtsToken()
+                }
             }
         }
-
-    private fun getFreeAtsMessage(it: View, accounts: List<Account>) =
-        if (viewModel.isAddingFreeATSAvailable(viewModel.activeAccounts)) {
-            it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
-            viewModel.addAtsToken(accounts, getString(R.string.free_ats_warning))
-            R.string.refresh_balance_to_check_transaction_status
-        } else R.string.free_ats_warning
 
     private fun showErrorFlashbar(title: String, message: String? = String.Empty) =
         message?.let {
