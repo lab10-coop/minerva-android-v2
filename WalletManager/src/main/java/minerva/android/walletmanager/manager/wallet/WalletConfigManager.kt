@@ -40,13 +40,10 @@ interface WalletConfigManager : Manager {
 
     fun saveIsMnemonicRemembered()
     fun isMnemonicRemembered(): Boolean
+    fun getMnemonic(): String
 
     val isBackupAllowed: Boolean
     val isSynced: Boolean
-
-    val areMainNetworksEnabled: Boolean
-    var toggleMainNetsEnabled: Boolean?
-    val enableMainNetsFlowable: Flowable<Boolean>
-
-    fun getMnemonic(): String
+    var areMainNetworksEnabled: Boolean
+    var showMainNetworksWarning: Boolean
 }

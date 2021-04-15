@@ -110,13 +110,17 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             viewModel.apply {
                 networksHeader.text = getHeader(areMainNetsEnabled)
                 addCryptoButton.apply {
-                    if (areMainNetsEnabled) {
-                        text = getString(R.string.buy_crypto)
+                    text = if (areMainNetsEnabled) {
                         setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary))
+                        getString(R.string.buy_crypto)
                     } else {
-                        text = getString(R.string.add_tats)
                         setBackgroundColor(ContextCompat.getColor(context, R.color.artis))
+                        getString(R.string.add_tats)
                     }
+                }
+                if (showMainNetworksWarning) {
+                    FundsAtRiskDialog(requireContext()).show()
+                    showMainNetworksWarning = false
                 }
             }
         }
@@ -153,11 +157,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     private fun setupLiveData() {
         viewModel.apply {
-            shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
-                if (it) {
-                    FundsAtRiskDialog(requireContext()).show()
-                }
-            })
             binding.apply {
                 accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)

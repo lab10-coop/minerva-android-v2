@@ -57,7 +57,7 @@ class TransactionRepositoryImpl(
         }
 
     private fun accountsFilter(it: Account) =
-        refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
+        refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetworksEnabled
 
     private fun getAddresses(accounts: List<Account>): List<Pair<Int, String>> =
         accounts.map { it.network.chainId to it.address }

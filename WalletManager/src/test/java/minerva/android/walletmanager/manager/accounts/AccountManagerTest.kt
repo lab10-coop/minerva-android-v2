@@ -269,25 +269,6 @@ class AccountManagerTest : RxTest() {
     }
 
     @Test
-    fun `toggle main nets enabled returns true`() {
-        whenever(walletConfigManager.toggleMainNetsEnabled).thenReturn(true)
-        val result = manager.toggleMainNetsEnabled
-        assertEquals(true, result)
-    }
-
-    @Test
-    fun `enable main nets emits true`() {
-        whenever(walletConfigManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
-        manager.enableMainNetsFlowable.test().assertValue { it }
-    }
-
-    @Test
-    fun `enable main nets emits false`() {
-        whenever(walletConfigManager.enableMainNetsFlowable).thenReturn(Flowable.just(false))
-        manager.enableMainNetsFlowable.test().assertValue { !it }
-    }
-
-    @Test
     fun `get token visibility test`() {
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
         manager.getTokenVisibilitySettings()

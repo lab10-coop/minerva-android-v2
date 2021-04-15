@@ -29,6 +29,5 @@ interface AccountManager : Manager {
     fun toChecksumAddress(address: String): String
     val areMainNetworksEnabled: Boolean
     val isAuthenticationEnabled: Boolean
-    var toggleMainNetsEnabled: Boolean?
-    val enableMainNetsFlowable: Flowable<Boolean>
+    var showMainNetworksWarning: Boolean
 }

@@ -100,8 +100,11 @@ class AccountsViewModel(
             }
         }
 
-    private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
-    val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
+    var showMainNetworksWarning: Boolean
+        get() = accountManager.showMainNetworksWarning
+        set(value) {
+            accountManager.showMainNetworksWarning = value
+        }
 
     @VisibleForTesting
     lateinit var tokenVisibilitySettings: TokenVisibilitySettings
@@ -111,22 +114,6 @@ class AccountsViewModel(
     private var tokenBalancesRefreshed = false
 
     fun arePendingAccountsEmpty() = transactionRepository.getPendingAccounts().isEmpty()
-
-    init {
-        launchDisposable {
-            accountManager.enableMainNetsFlowable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = { _shouldMainNetsShowWarringLiveData.value = Event(it) },
-                    onError = { _shouldMainNetsShowWarringLiveData.value = Event(false) })
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        accountManager.toggleMainNetsEnabled = null
-    }
 
     override fun onResume() {
         super.onResume()

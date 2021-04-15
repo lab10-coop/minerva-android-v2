@@ -75,20 +75,17 @@ class WalletConfigManagerImpl(
     override val isSynced: Boolean
         get() = localStorage.isSynced
 
-    override val areMainNetworksEnabled: Boolean
-        get() = localStorage.areMainNetsEnabled
-
-    private var enableMainNetsBehaviorSubject = BehaviorSubject.create<Boolean>()
-
-    override var toggleMainNetsEnabled: Boolean? by Delegates.observable(localStorage.areMainNetsEnabled) { _, _: Boolean?, newValue: Boolean? ->
-        newValue?.let {
-            localStorage.areMainNetsEnabled = it
-            enableMainNetsBehaviorSubject.onNext(it)
+    override var areMainNetworksEnabled: Boolean
+        get() = localStorage.areMainNetworksEnabled
+        set(value) {
+            localStorage.areMainNetworksEnabled = value
         }
-    }
-    override val enableMainNetsFlowable: Flowable<Boolean>
-        get() = enableMainNetsBehaviorSubject.toFlowable(BackpressureStrategy.LATEST)
-            .filter { toggleMainNetsEnabled != null }
+
+    override var showMainNetworksWarning: Boolean
+        get() = localStorage.showMainNetworksWarning
+        set(value) {
+            localStorage.showMainNetworksWarning = value
+        }
 
     override fun getMnemonic(): String = cryptographyRepository.getMnemonicForMasterSeed(masterSeed.seed)
 

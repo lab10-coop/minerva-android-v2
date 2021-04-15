@@ -71,7 +71,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Before
     fun initViewModel() {
-        whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
         viewModel = AccountsViewModel(
             accountManager,
             walletActionsRepository,
@@ -80,26 +79,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletConnectRepository,
             appUIState
         )
-    }
-
-    @Test
-    fun `should show warning success test`() {
-        viewModel.shouldShowWarringLiveData.observeForever(shouldShowWarningObserver)
-        shouldShowWarningCaptor.run {
-            verify(shouldShowWarningObserver).onChanged(capture())
-            firstValue.peekContent()
-        }
-    }
-
-    @Test
-    fun `should show warning error test`() {
-        val error = Throwable()
-        whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.error(error))
-        viewModel.shouldShowWarringLiveData.observeForever(shouldShowWarningObserver)
-        shouldShowWarningCaptor.run {
-            verify(shouldShowWarningObserver).onChanged(capture())
-            !firstValue.peekContent()
-        }
     }
 
     @Test
