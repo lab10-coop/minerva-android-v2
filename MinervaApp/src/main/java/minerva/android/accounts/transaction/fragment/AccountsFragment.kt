@@ -58,8 +58,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onSendTransaction(index: Int) = interactor.showTransactionScreen(index)
 
-    override fun onSendTokenTransaction(accountIndex: Int, tokenIndex: Int) =
-        interactor.showTransactionScreen(accountIndex, tokenIndex)
+    override fun onSendTokenTransaction(accountIndex: Int, tokenAddress: String) =
+        interactor.showTransactionScreen(accountIndex, tokenAddress)
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 

@@ -198,7 +198,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                            viewModel.tokenIndex = position - ONE_ELEMENT
+                            viewModel.updateTokenAddress(position - ONE_ELEMENT)
                             setupTexts()
                         }
 

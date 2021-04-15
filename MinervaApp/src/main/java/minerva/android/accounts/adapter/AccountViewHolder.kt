@@ -37,7 +37,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private val accountWidgetState: AccountWidgetState
         get() = listener.getAccountWidgetState(rawPosition)
 
-    override fun onSendTokenTokenClicked(account: Account, tokenIndex: Int) = listener.onSendTokenClicked(account, tokenIndex)
+    override fun onSendTokenTokenClicked(account: Account, tokenAddress: String) = listener.onSendTokenClicked(account, tokenAddress)
 
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 

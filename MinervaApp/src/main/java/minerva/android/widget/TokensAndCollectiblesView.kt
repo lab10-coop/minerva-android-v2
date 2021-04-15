@@ -4,10 +4,12 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.transition.TransitionManager
 import android.util.AttributeSet
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import minerva.android.R
 import minerva.android.databinding.TokensAndCollectiblesLayoutBinding
 import minerva.android.extension.toggleVisibleOrGone
@@ -58,9 +60,12 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
             account.accountTokens.isNotEmpty().let { areTokensVisible ->
                 tokensHeader.visibleOrGone(areTokensVisible)
                 tokensContainer.visibleOrGone(areTokensVisible)
-                account.accountTokens.forEachIndexed { index, _ ->
+                account.accountTokens.sortedByDescending { it.fiatBalance }.forEach {
                     tokensContainer.addView(TokenView(context).apply {
-                        initView(account, callback, index)
+                        initView(account, callback, it.token.address)
+                        resources.getDimensionPixelOffset(R.dimen.margin_xxsmall).let {
+                            updatePadding(Int.NO_PADDING, it, Int.NO_PADDING, it)
+                        }
                     })
                 }
             }

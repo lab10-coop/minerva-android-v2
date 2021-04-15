@@ -6,7 +6,7 @@ import minerva.android.widget.state.AppUIStateImpl
 
 interface AccountsFragmentToAdapterListener {
     fun onSendTransaction(index: Int)
-    fun onSendTokenTransaction(accountIndex: Int, tokenIndex: Int)
+    fun onSendTokenTransaction(accountIndex: Int, tokenAddress: String)
     fun onCreateSafeAccount(account: Account)
     fun onAccountRemove(account: Account)
     fun onShowAddress(accountIndex: Int)
