@@ -2,7 +2,6 @@ package minerva.android.accounts.listener
 
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.state.AccountWidgetState
-import minerva.android.widget.state.AppUIStateImpl
 
 interface AccountsFragmentToAdapterListener {
     fun onSendTransaction(index: Int)

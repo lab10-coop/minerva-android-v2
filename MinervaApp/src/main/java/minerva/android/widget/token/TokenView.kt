@@ -6,7 +6,6 @@ import android.widget.RelativeLayout
 import minerva.android.R
 import minerva.android.databinding.TokenViewBinding
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
