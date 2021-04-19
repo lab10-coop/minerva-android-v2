@@ -123,7 +123,8 @@ class TransactionViewModel(
     }
 
     fun updateTokenAddress(index: Int) {
-        tokenAddress = account.accountTokens[index].token.address
+        tokenAddress = if (index == Int.InvalidIndex) String.Empty
+        else account.accountTokens[index].token.address
     }
 
     fun loadRecipients() {
