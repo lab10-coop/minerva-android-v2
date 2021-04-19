@@ -7,6 +7,7 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_DATA
 import minerva.android.walletmanager.BuildConfig
+import minerva.android.walletmanager.model.Currency
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -113,6 +114,14 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         return settings
     }
 
+    //todo klop test?
+    override fun loadCurrentCurrency(): String = sharedPreferences.getString(CURRENT_CURRENCY, Currency.EUR.name) ?: Currency.EUR.name
+
+    //todo klop test?
+    override fun saveCurrentCurrency(currency: String) {
+        sharedPreferences.edit().putString(CURRENT_CURRENCY, currency).apply()
+    }
+
     private fun findRecipient(list: List<Recipient>, recipient: Recipient): Int {
         list.forEachIndexed { index, it ->
             if (it.address.equals(recipient.address, true)) return index
@@ -132,5 +141,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val ICON_UPDATE_TIMESTAMP = "last_update_timestamp"
         private const val AUTHENTICATION_ENABLED = "authentication_enabled"
         private const val SHOW_MAIN_NETWORKS_WARNING = "show_main_networks_warning"
+        private const val CURRENT_CURRENCY = "current_currency"
     }
 }

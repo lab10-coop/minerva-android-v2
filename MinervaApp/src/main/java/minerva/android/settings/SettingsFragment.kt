@@ -1,6 +1,7 @@
 package minerva.android.settings
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import minerva.android.BuildConfig
@@ -16,6 +17,7 @@ import minerva.android.settings.model.SettingsRowType.*
 import minerva.android.settings.model.propagateSettings
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.wrapped.startAuthenticationWrappedActivity
+import minerva.android.wrapped.startCurrencyWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -76,6 +78,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             TERMS_OF_SERVICE -> context?.openUri(webUri = BuildConfig.TERMS_OF_SERVICE)
             PRIVACY_POLICY -> context?.openUri(webUri = BuildConfig.PRIVACY_POLICY)
             AUTHENTICATION -> startAuthenticationWrappedActivity(requireContext())
+            CURRENCY -> startCurrencyWrappedActivity(requireContext())
             else -> Timber.d(type.toString())
         }
     }

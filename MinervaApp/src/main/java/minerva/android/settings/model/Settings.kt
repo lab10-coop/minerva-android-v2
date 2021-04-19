@@ -1,10 +1,13 @@
 package minerva.android.settings.model
 
+import android.content.Context
 import minerva.android.BuildConfig
 import minerva.android.R
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.mapper.StringArrayMapper
 import minerva.android.settings.SettingsFragment
+import minerva.android.walletmanager.model.Currency
 
 data class Settings(
     val sectionTitle: String = String.Empty,
@@ -55,13 +58,19 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                 SettingRow(
                     getString(R.string.authentication),
                     R.drawable.ic_authentication,
-                    detailText = getString(R.string.enable),
+                    detailText = getString( R.string.enable),
                     rowType = SettingsRowType.AUTHENTICATION
                 )
             ), SettingsSection.SECURITY
         ),
         Settings(
             getString(R.string.your_preferences), listOf(
+                SettingRow(
+                    getString(R.string.currency),
+                    R.drawable.ic_currency,
+                    detailText = getCurrencyArray(requireContext())[Currency.EUR.name] ?: String.Empty, //TODO get/save curren currecny in sharedpreferences
+                    rowType = SettingsRowType.CURRENCY
+                ),
                 SettingRow(
                     getString(R.string.use_main_networks),
                     R.drawable.ic_main_networks,
@@ -98,3 +107,7 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
             ), SettingsSection.LEGAL
         )
     )
+
+private fun getCurrencyArray(context: Context) =
+    StringArrayMapper.mapStringArray(context.resources.getStringArray(R.array.currencies))
+

@@ -119,3 +119,9 @@ fun startRampWrappedActivity(context: Context) {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.RAMP)
     }
 }
+
+fun startCurrencyWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.CURRENCY)
+    }
+}
