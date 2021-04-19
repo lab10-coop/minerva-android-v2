@@ -69,6 +69,7 @@ dependencies {
     implementation rxDependencies.values()
     implementation startupDependencies.values()
     implementation jsonLogicDependencies.values()
+    implementation kotlinReflect.values()
     testImplementation testDependencies.values()
     implementation room.values()
     implementation okhttp.values()

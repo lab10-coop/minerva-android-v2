@@ -115,7 +115,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
     }
 
     //todo klop test?
-    override fun loadCurrentCurrency(): String = sharedPreferences.getString(CURRENT_CURRENCY, Currency.EUR.name) ?: Currency.EUR.name
+    override fun loadCurrentCurrency(): String = sharedPreferences.getString(CURRENT_CURRENCY, DEFAULT_CURRENCY) ?: DEFAULT_CURRENCY
 
     //todo klop test?
     override fun saveCurrentCurrency(currency: String) {
@@ -142,5 +142,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val AUTHENTICATION_ENABLED = "authentication_enabled"
         private const val SHOW_MAIN_NETWORKS_WARNING = "show_main_networks_warning"
         private const val CURRENT_CURRENCY = "current_currency"
+        private const val DEFAULT_CURRENCY = "EUR"
     }
 }

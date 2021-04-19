@@ -154,9 +154,9 @@ class TransactionRepositoryImpl(
 
     override fun getEurRate(chainId: Int): Single<Double> =
         when (chainId) {
-            ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.value }
-            ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaPrice?.value }
-            ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiPrice?.value }
+            ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.eur }
+            ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaPrice?.eur }
+            ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiPrice?.eur }
             else -> Single.just(0.0)
         }
 

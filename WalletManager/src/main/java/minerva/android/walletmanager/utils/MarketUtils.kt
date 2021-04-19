@@ -50,9 +50,9 @@ object MarketUtils {
     private fun getRate(chainId: Int, markets: Markets): Double? =
         when (chainId) {
             ATS_SIGMA -> ATS_EURO
-            POA_CORE -> markets.poaPrice?.value
-            ETH_MAIN -> markets.ethPrice?.value
-            XDAI -> markets.daiPrice?.value
+            POA_CORE -> markets.poaPrice?.eur
+            ETH_MAIN -> markets.ethPrice?.eur
+            XDAI -> markets.daiPrice?.eur
             else -> null
         }
 

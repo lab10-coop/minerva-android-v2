@@ -32,7 +32,7 @@ class MarketUtilsTest {
             Account(1, address = "address1", chainId = poaNetwork.chainId),
             Account(2, address = "address2", chainId = xdaiNetwork.chainId)
         )
-    private val markets = Markets(poaPrice = Price(value = 0.5), daiPrice = Price(2.0))
+    private val markets = Markets(poaPrice = Price(eur = 0.5), daiPrice = Price(2.0))
 
     @Test
     fun `calculate fiat balance in euro for xdai and poa when main nets enabled`() {

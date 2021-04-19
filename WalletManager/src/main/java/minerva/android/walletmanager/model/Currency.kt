@@ -1,9 +1,14 @@
 package minerva.android.walletmanager.model
 
-//TODO klop add rest currencies
-//make it together with currencies for main coins
-enum class Currency(val symbol: String) {
-    EUR("eur"),
-    GBP("gbp"),
-    USD("usd")
+import minerva.android.apiProvider.model.Price
+import kotlin.reflect.full.memberProperties
+
+object Currency {
+    val currencies: List<String> by lazy {
+        mutableListOf<String>().apply {
+            Price::class.memberProperties.forEach {
+                add(it.name.toUpperCase())
+            }
+        }
+    }
 }

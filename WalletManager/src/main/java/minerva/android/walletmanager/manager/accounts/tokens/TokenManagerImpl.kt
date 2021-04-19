@@ -165,7 +165,7 @@ class TokenManagerImpl(
                 cryptoApi.getTokenMarkets(MarketUtils.getMarketId(token.chainId), token.address)
                     .onErrorReturn { TokenMarketResponse(marketData = MarketData(Price())) }
                     .map {
-                        val tokenMarketRate = it.marketData.currentPrice.value ?: Double.InvalidValue
+                        val tokenMarketRate = it.marketData.currentPrice.eur ?: Double.InvalidValue
                         Pair(tokenHash, tokenMarketRate)
                     }.toObservable()
             }

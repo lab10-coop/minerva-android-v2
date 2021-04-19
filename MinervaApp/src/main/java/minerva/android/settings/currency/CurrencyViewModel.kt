@@ -14,11 +14,10 @@ class CurrencyViewModel(private val localStorage: LocalStorage) : BaseViewModel(
         Log.e("klop", "Current currency: $currency")
     }
 
-    fun getCurrencyList(currencyMap: Map<String, String>) {
-        Currency.values().toList().apply {
-            currencyMap.keys.forEach {
-                
-            }
+    fun getCurrencyList() {
+        Log.e("klop", "currencies:")
+        Currency.currencies.forEach {
+            Log.e("klop", "$it")
         }
     }
 }

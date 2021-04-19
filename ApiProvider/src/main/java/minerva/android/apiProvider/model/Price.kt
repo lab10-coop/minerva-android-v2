@@ -5,7 +5,11 @@ import minerva.android.kotlinUtils.InvalidValue
 
 data class Price(
     @SerializedName("eur")
-    val value: Double? = Double.InvalidValue
+    val eur: Double? = Double.InvalidValue,
+    @SerializedName("usd")
+    val usd: Double? = Double.InvalidValue,
+    @SerializedName("gbp")
+    val gbp: Double? = Double.InvalidValue
 
 //TODO klop add currences
 //"aed": 2038.4,

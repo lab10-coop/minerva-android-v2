@@ -1,6 +1,7 @@
 package minerva.android.settings.currency
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import minerva.android.R
 import minerva.android.databinding.FragmentCurrencyBinding
@@ -20,6 +21,7 @@ class CurrencyFragment : BaseFragment(R.layout.fragment_currency) {
 
     private fun initializeFragment() {
         viewModel.getCurrentCurrency()
+        viewModel.getCurrencyList()
     }
 
     companion object {

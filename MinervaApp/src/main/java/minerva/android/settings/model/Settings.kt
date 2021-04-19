@@ -58,7 +58,7 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                 SettingRow(
                     getString(R.string.authentication),
                     R.drawable.ic_authentication,
-                    detailText = getString( R.string.enable),
+                    detailText = getString(R.string.enable),
                     rowType = SettingsRowType.AUTHENTICATION
                 )
             ), SettingsSection.SECURITY
@@ -68,7 +68,6 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                 SettingRow(
                     getString(R.string.currency),
                     R.drawable.ic_currency,
-                    detailText = getCurrencyArray(requireContext())[Currency.EUR.name] ?: String.Empty, //TODO get/save curren currecny in sharedpreferences
                     rowType = SettingsRowType.CURRENCY
                 ),
                 SettingRow(
@@ -108,6 +107,4 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
         )
     )
 
-private fun getCurrencyArray(context: Context) =
-    StringArrayMapper.mapStringArray(context.resources.getStringArray(R.array.currencies))
 
