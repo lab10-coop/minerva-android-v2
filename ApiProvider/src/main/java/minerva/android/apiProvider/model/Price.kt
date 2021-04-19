@@ -10,9 +10,29 @@ data class Price(
     val usd: Double? = Double.InvalidValue,
     @SerializedName("gbp")
     val gbp: Double? = Double.InvalidValue
+//    @SerializedName("aed")
+//    val aed: Double? = Double.InvalidValue,
+//    @SerializedName("ars")
+//    val ars: Double? = Double.InvalidValue,
+//    @SerializedName("aud")
+//    val aud: Double? = Double.InvalidValue,
+//    @SerializedName("bch")
+//    val bch: Double? = Double.InvalidValue,
+//    @SerializedName("bdt")
+//    val bdt: Double? = Double.InvalidValue,
+//    @SerializedName("bhd")
+//    val bhd: Double? = Double.InvalidValue,
+//    @SerializedName("bmd")
+//    val bmd: Double? = Double.InvalidValue,
+//    @SerializedName("bnb")
+//    val bnb: Double? = Double.InvalidValue,
+//    @SerializedName("brl")
+//    val brl: Double? = Double.InvalidValue,
+//    @SerializedName("btc")
+//    val btc: Double? = Double.InvalidValue,
 
 //TODO klop add currences
-//"aed": 2038.4,
+//"aed":
 //"ars": 51457,
 //"aud": 717.2,
 //"bch": 0.59941022,
@@ -31,8 +51,6 @@ data class Price(
 //"dot": 13.035592,
 //"eos": 70.126,
 //"eth": 0.22636391,
-//"eur": 463.79,
-//"gbp": 403.23,
 //"hkd": 4311.31,
 //"huf": 166780,
 //"idr": 8083660,
@@ -60,7 +78,6 @@ data class Price(
 //"try": 4458.32,
 //"twd": 15718.02,
 //"uah": 15512.91,
-//"usd": 554.97,
 //"vef": 55.57,
 //"vnd": 12801730,
 //"xag": 21.45,

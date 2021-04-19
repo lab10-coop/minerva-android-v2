@@ -1,13 +1,10 @@
 package minerva.android.settings.model
 
-import android.content.Context
 import minerva.android.BuildConfig
 import minerva.android.R
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.kotlinUtils.mapper.StringArrayMapper
 import minerva.android.settings.SettingsFragment
-import minerva.android.walletmanager.model.Currency
 
 data class Settings(
     val sectionTitle: String = String.Empty,
@@ -33,7 +30,7 @@ enum class SettingsRowType {
     BACKUP, REMINDER_VIEW, AUTHENTICATION, EDIT_NETWORKS, MAIN_NETWORKS, CURRENCY, LANGUAGE, TWITTER, COMMUNITY, APP_VERSION, LICENCE, TERMS_OF_SERVICE, PRIVACY_POLICY
 }
 
-fun SettingsFragment.propagateSettings(): List<Settings> =
+fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
     listOf(
         Settings(
             getString(R.string.security), listOf(
@@ -56,7 +53,7 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                     rowType = SettingsRowType.BACKUP
                 ),
                 SettingRow(
-                    getString(R.string.authentication),
+                    getString(R.string.protect_keys),
                     R.drawable.ic_authentication,
                     detailText = getString(R.string.enable),
                     rowType = SettingsRowType.AUTHENTICATION
@@ -68,6 +65,7 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                 SettingRow(
                     getString(R.string.currency),
                     R.drawable.ic_currency,
+                    detailText = currentFiat,
                     rowType = SettingsRowType.CURRENCY
                 ),
                 SettingRow(

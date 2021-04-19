@@ -28,8 +28,8 @@ interface LocalStorage {
     fun saveTokenIconsUpdateTimestamp(timestamp: Long)
     fun loadTokenIconsUpdateTimestamp(): Long
 
-    fun loadCurrentCurrency(): String
-    fun saveCurrentCurrency(currency: String)
+    fun loadCurrentFiat(): String
+    fun saveCurrentFiat(currency: String)
 
     var isBackupAllowed: Boolean
     var isSynced: Boolean

@@ -152,6 +152,7 @@ class TransactionRepositoryImpl(
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
 
+    //TODO klop check getting fiats!
     override fun getEurRate(chainId: Int): Single<Double> =
         when (chainId) {
             ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.eur }
@@ -160,6 +161,7 @@ class TransactionRepositoryImpl(
             else -> Single.just(0.0)
         }
 
+    //TODO klop check getting fiats here!
     private fun getRate(id: String): Single<Markets> = cryptoApi.getMarkets(id, EUR_CURRENCY)
 
     override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)

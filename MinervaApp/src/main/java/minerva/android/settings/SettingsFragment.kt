@@ -59,7 +59,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
                 MAIN_NETWORKS_ENABLED to areMainNetsEnabled,
                 AUTHENTICATION_ENABLED to isAuthenticationEnabled
             ).let {
-                settingsAdapter.updateList(it, propagateSettings())
+                settingsAdapter.updateList(it, propagateSettings(viewModel.getCurrentFiat(requireContext())))
             }
         }
     }
