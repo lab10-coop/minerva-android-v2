@@ -28,7 +28,7 @@ class ConnectionView @JvmOverloads constructor(
     fun setIconUrl(icon: String) {
         Glide.with(context)
             .load(Uri.parse(icon))
-            .error(R.drawable.ic_services)
+            .error(R.drawable.ic_default_connection)
             .into(binding.connectionIcon)
     }
 
