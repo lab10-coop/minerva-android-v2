@@ -3,6 +3,7 @@ package minerva.android.main
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -72,13 +73,13 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             )
         }
         viewModel.updateTokenIcons()
-        viewModel.getTokensRate()
     }
 
     override fun onResume() {
         super.onResume()
         shouldShowLoadingScreen(false)
         handleExecutedAccounts()
+        viewModel.getTokensRate()
     }
 
     override fun onAttachFragment(fragment: Fragment) {

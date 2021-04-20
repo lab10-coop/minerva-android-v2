@@ -66,7 +66,7 @@ class TransactionRepositoryTest : RxTest() {
     fun `refresh balances test success`() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
             .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(eur = 1.0))))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.0))))
 
         repository.refreshBalances().test()
             .assertComplete()
@@ -642,7 +642,7 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `get eur rate test`() {
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(eur = 1.2))))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
         repository.getEurRate(2)
             .test()
             .assertComplete()
@@ -653,7 +653,7 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `get eur rate for eth test`() {
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(eur = 1.2))))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
         repository.getEurRate(1)
             .test()
             .assertComplete()

@@ -2,14 +2,28 @@ package minerva.android.apiProvider.model
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.InvalidValue
+import kotlin.reflect.full.memberProperties
 
-data class Price(
+data class FiatPrice(
     @SerializedName("eur")
     val eur: Double? = Double.InvalidValue,
     @SerializedName("usd")
     val usd: Double? = Double.InvalidValue,
     @SerializedName("gbp")
     val gbp: Double? = Double.InvalidValue
+) {
+
+    fun getRate(fiat: String): Double = getFiatPrices()[fiat] ?: Double.InvalidValue
+
+    private fun getFiatPrices(): Map<String, Double> =
+        mutableMapOf<String, Double>().apply {
+            this@FiatPrice::class.memberProperties.forEach {
+                put(it.name.toUpperCase(), it.getter.call(this@FiatPrice) as Double)
+            }
+        }
+}
+
+
 //    @SerializedName("aed")
 //    val aed: Double? = Double.InvalidValue,
 //    @SerializedName("ars")
@@ -90,4 +104,3 @@ data class Price(
 //"bits": 8943.37,
 //"link": 13.410627,
 //"sats": 894337
-)

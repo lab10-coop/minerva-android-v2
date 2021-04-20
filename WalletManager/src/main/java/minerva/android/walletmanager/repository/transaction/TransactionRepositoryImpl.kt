@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.repository.transaction
 
+import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -155,9 +156,18 @@ class TransactionRepositoryImpl(
     //TODO klop check getting fiats!
     override fun getEurRate(chainId: Int): Single<Double> =
         when (chainId) {
-            ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.eur }
-            ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaPrice?.eur }
-            ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiPrice?.eur }
+            ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map {
+                Log.e("klop", "GET ETH RATE")
+                it.ethFiatPrice?.getRate("EUR")
+            }
+            ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map {
+                Log.e("klop", "GET POA RATE")
+                it.poaFiatPrice?.getRate("EUR")
+            }
+            ChainId.XDAI -> getRate(MarketIds.XDAI).map {
+                Log.e("klop", "GET XDAI RATE")
+                it.daiFiatPrice?.getRate("EUR")
+            }
             else -> Single.just(0.0)
         }
 

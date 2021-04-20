@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -7,12 +8,11 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.MarketData
-import minerva.android.apiProvider.model.Price
+import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.apiProvider.model.TokenMarketResponse
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
@@ -51,6 +51,7 @@ class TokenManagerImpl(
 ) : TokenManager {
 
     private val currentTimeProvider = CurrentTimeProviderImpl()
+    private var currentFiat = String.Empty
 
     override fun loadCurrentTokens(chainId: Int): List<ERC20Token> = walletManager.getWalletConfig().run {
         NetworkManager.getTokens(chainId).mergeWithoutDuplicates(erc20Tokens[chainId] ?: listOf())
@@ -160,12 +161,14 @@ class TokenManagerImpl(
     private fun updateAccountTokenRate(token: ERC20Token, ratesMap: Map<String, Double>): Observable<Pair<String, Double>> =
         generateTokenHash(token.chainId, token.address).let { tokenHash ->
             ratesMap[tokenHash]?.let {
+                Log.e("klop", "Using storaget local data")
                 Observable.just(Pair(tokenHash, it))
             }.orElse {
                 cryptoApi.getTokenMarkets(MarketUtils.getMarketId(token.chainId), token.address)
-                    .onErrorReturn { TokenMarketResponse(marketData = MarketData(Price())) }
+                    .onErrorReturn { TokenMarketResponse(marketData = MarketData(FiatPrice())) }
                     .map {
-                        val tokenMarketRate = it.marketData.currentPrice.eur ?: Double.InvalidValue
+                        val tokenMarketRate = it.marketData.currentFiatPrice.getRate(localStorage.loadCurrentFiat())
+                        Log.e("klop", "Current Fiat: ${localStorage.loadCurrentFiat()} with rate: $tokenMarketRate")
                         Pair(tokenHash, tokenMarketRate)
                     }.toObservable()
             }
@@ -173,6 +176,7 @@ class TokenManagerImpl(
 
     override fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable =
         mutableListOf<Observable<Pair<String, Double>>>().let { observables ->
+            if (currentFiat != localStorage.loadCurrentFiat()) tempStorage.clearRates()
             tokens.values.forEach {
                 it.forEach {
                     observables.add(updateAccountTokenRate(it, tempStorage.getRates()))
@@ -181,7 +185,11 @@ class TokenManagerImpl(
             Observable.merge(observables)
                 .doOnNext { (tokenHash, rate) ->
                     tempStorage.saveRate(tokenHash, rate)
-                }.toList().ignoreElement()
+                }.toList()
+                .doOnSuccess {
+                    currentFiat = localStorage.loadCurrentFiat()
+                }
+                .ignoreElement()
         }
 
     override fun updateTokensRate(account: Account) {

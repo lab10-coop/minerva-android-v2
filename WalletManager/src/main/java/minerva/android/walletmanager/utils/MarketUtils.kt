@@ -46,13 +46,13 @@ object MarketUtils {
         rate?.let { value.multiply(BigDecimal(it)).setScale(SCALE, RoundingMode.HALF_DOWN) }
             .orElse { Int.InvalidValue.toBigDecimal() }
 
-
+    //TODO klop change it
     private fun getRate(chainId: Int, markets: Markets): Double? =
         when (chainId) {
             ATS_SIGMA -> ATS_EURO
-            POA_CORE -> markets.poaPrice?.eur
-            ETH_MAIN -> markets.ethPrice?.eur
-            XDAI -> markets.daiPrice?.eur
+            POA_CORE -> markets.poaFiatPrice?.getRate("EUR")
+            ETH_MAIN -> markets.ethFiatPrice?.getRate("EUR")
+            XDAI -> markets.daiFiatPrice?.getRate("EUR")
             else -> null
         }
 

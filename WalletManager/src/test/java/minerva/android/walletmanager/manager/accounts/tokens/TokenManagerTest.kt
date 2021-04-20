@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
-import com.google.gson.annotations.SerializedName
 import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.any
 import io.reactivex.Completable
@@ -9,9 +8,7 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
-import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
@@ -381,7 +378,7 @@ class TokenManagerTest : RxTest() {
     fun `check getting tokens rate request`() {
         val error = Throwable("ERROR-333")
         val rates = mapOf(Pair("40x0th3r", 1.0), Pair("40xc00k1e", 0.2), Pair("hash03", 3.3))
-        val marketResponse = TokenMarketResponse("id", "tokenName", MarketData(Price(3.3)))
+        val marketResponse = TokenMarketResponse("id", "tokenName", MarketData(FiatPrice(3.3)))
         val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
 
         doNothing().whenever(tempStorage).saveRate(any(), any())
