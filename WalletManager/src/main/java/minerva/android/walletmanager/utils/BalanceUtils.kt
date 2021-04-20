@@ -18,15 +18,15 @@ object BalanceUtils {
             DecimalFormat(CRYPTO_FORMAT, DecimalFormatSymbols(Locale.ROOT)).format(scaled)
         }
 
-    fun getFiatBalance(fiatBalance: BigDecimal): String =
-        if (fiatBalance != Int.InvalidValue.toBigDecimal()) String.format(Locale.ROOT, CURRENCY_FORMAT, fiatBalance)
-        else NO_FIAT_VALUE
+    fun getFiatBalance(fiatBalance: BigDecimal, fiatSymbol: String): String =
+        if (fiatBalance != Int.InvalidValue.toBigDecimal()) String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
+        else String.format(Locale.ROOT, NO_FIAT_VALUE, fiatSymbol)
 
     fun convertFromWei(balance: BigDecimal, decimals: Int): BigDecimal =
         balance.divide(TEN.pow(decimals).toBigDecimal()).stripTrailingZeros()
 
-    private const val CURRENCY_FORMAT = "€ %.2f"
-    private const val NO_FIAT_VALUE = "€ -.--"
+    private const val CURRENCY_FORMAT = "%s %.2f"
+    private const val NO_FIAT_VALUE = "%s -.--"
     private const val TEN = 10.0
     private const val CRYPTO_SCALE = 6
     private const val CRYPTO_FORMAT = "#.######"

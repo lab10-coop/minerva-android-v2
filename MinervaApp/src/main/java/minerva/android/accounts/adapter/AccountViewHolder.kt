@@ -41,13 +41,13 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
-    fun setData(index: Int, account: Account, listener: AccountsAdapterListener) {
+    fun setData(index: Int, account: Account, fiatSymbol: String, listener: AccountsAdapterListener) {
         rawPosition = index
         this.listener = listener
         view.apply {
             prepareView(account)
-            prepareToken(account)
-            bindData(account)
+            prepareToken(account, fiatSymbol)
+            bindData(account, fiatSymbol)
             setOnMenuClickListener(rawPosition, account)
         }
 
@@ -56,7 +56,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun View.bindData(account: Account) {
+    private fun View.bindData(account: Account, fiatSymbol: String) {
         with(account) {
             binding.apply {
                 card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
@@ -67,7 +67,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 pendingMask.visibleOrGone(isPending)
                 mainIcon.setImageDrawable(getNetworkIcon(context, network.chainId, isSafeAccount))
                 accountName.text = name
-                mainTokenView.initView(account, this@AccountViewHolder)
+                mainTokenView.initView(account, this@AccountViewHolder, fiatSymbol)
             }
         }
     }
@@ -126,9 +126,15 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun View.setOnItemClickListener(isTokenAreaAvailable: Boolean) =
         setOnClickListener { if (isTokenAreaAvailable) if (isWidgetOpen) close() else open() }
 
-    private fun View.prepareToken(account: Account) {
+    private fun View.prepareToken(account: Account, fiatSymbol: String) {
         binding.apply {
-            tokensAndCollectibles.prepareView(account, viewGroup, this@AccountViewHolder, accountWidgetState.isWidgetOpen)
+            tokensAndCollectibles.prepareView(
+                account,
+                viewGroup,
+                this@AccountViewHolder,
+                accountWidgetState.isWidgetOpen,
+                fiatSymbol
+            )
             //TODO change this statement when collectibles or main coin will be implemented
             account.accountTokens.isNotEmpty().let { visible ->
                 setOnItemClickListener(visible)

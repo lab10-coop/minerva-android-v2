@@ -20,6 +20,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     fun initView(
         account: Account,
         callback: TokenViewCallback,
+        fiatSymbol: String,
         tokenIndex: Int = Int.InvalidIndex
     ) {
         prepareView(account, tokenIndex)
@@ -27,13 +28,16 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         getTokensValues(account, tokenIndex).let { (crypto, fiat) ->
             with(binding.amountView) {
                 setCrypto(getCryptoBalance(crypto))
-                setFiat(getFiatBalance(fiat))
+                setFiat(getFiatBalance(fiat, fiatSymbol))
             }
         }
     }
 
     private fun getTokensValues(account: Account, tokenIndex: Int): Pair<BigDecimal, BigDecimal> =
-        if (tokenIndex != Int.InvalidIndex) Pair(account.accountTokens[tokenIndex].balance, account.accountTokens[tokenIndex].fiatBalance)
+        if (tokenIndex != Int.InvalidIndex) Pair(
+            account.accountTokens[tokenIndex].balance,
+            account.accountTokens[tokenIndex].fiatBalance
+        )
         else Pair(account.cryptoBalance, prepareFiatBalance(account))
 
     private fun prepareFiatBalance(account: Account) =

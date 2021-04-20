@@ -22,42 +22,39 @@ object MarketUtils {
     internal fun calculateFiatBalances(
         cryptoBalances: List<Pair<String, BigDecimal>>,
         accounts: List<Account>?,
-        markets: Markets
-    ): HashMap<String, Balance> {
-        val balancesMap = hashMapOf<String, Balance>()
+        markets: Markets,
+        currentFiat: String
+    ): HashMap<String, Balance> = hashMapOf<String, Balance>().apply {
         accounts?.let {
             if (it.isNotEmpty()) {
                 cryptoBalances.forEachIndexed { index, cryptoBalance ->
                     if (cryptoBalance.first == it[index]?.address) {
-                        getBalance(balancesMap, cryptoBalance, getRate(accounts[index].network.chainId, markets))
+                        getBalance(this, cryptoBalance, getRate(accounts[index].network.chainId, markets, currentFiat))
                     }
                 }
             }
         }
-        return balancesMap
     }
 
     private fun getBalance(balances: HashMap<String, Balance>, cryptoBalance: Pair<String, BigDecimal>, rate: Double?) {
-        balances[cryptoBalance.first] =
-            Balance(cryptoBalance.second, fiatBalance = calculateFiatBalance(cryptoBalance.second, rate))
+        balances[cryptoBalance.first] = Balance(cryptoBalance.second, fiatBalance = calculateFiatBalance(cryptoBalance.second, rate))
     }
 
     private fun calculateFiatBalance(value: BigDecimal, rate: Double?): BigDecimal =
         rate?.let { value.multiply(BigDecimal(it)).setScale(SCALE, RoundingMode.HALF_DOWN) }
             .orElse { Int.InvalidValue.toBigDecimal() }
 
-    //TODO klop change it
-    private fun getRate(chainId: Int, markets: Markets): Double? =
+    private fun getRate(chainId: Int, markets: Markets, currentFiat: String): Double? =
         when (chainId) {
             ATS_SIGMA -> ATS_EURO
-            POA_CORE -> markets.poaFiatPrice?.getRate("EUR")
-            ETH_MAIN -> markets.ethFiatPrice?.getRate("EUR")
-            XDAI -> markets.daiFiatPrice?.getRate("EUR")
+            POA_CORE -> markets.poaFiatPrice?.getRate(currentFiat)
+            ETH_MAIN -> markets.ethFiatPrice?.getRate(currentFiat)
+            XDAI -> markets.daiFiatPrice?.getRate(currentFiat)
             else -> null
         }
 
     fun getMarketId(chainId: Int): String =
-        when(chainId) {
+        when (chainId) {
             ETH_MAIN -> MarketIds.ETHEREUM
             POA_CORE -> MarketIds.POA_NETWORK
             XDAI -> MarketIds.XDAI

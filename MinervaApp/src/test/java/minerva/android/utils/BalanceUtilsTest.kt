@@ -53,13 +53,13 @@ class BalanceUtilsTest {
 
     @Test
     fun `get fiat balance success test`() {
-        val result = BalanceUtils.getFiatBalance(BigDecimal.TEN)
+        val result = BalanceUtils.getFiatBalance(BigDecimal.TEN, "€")
         assertEquals(result, "€ 10.00")
     }
 
     @Test
     fun `get fiat balance error test`() {
-        val result = BalanceUtils.getFiatBalance(Int.InvalidValue.toBigDecimal())
+        val result = BalanceUtils.getFiatBalance(Int.InvalidValue.toBigDecimal(), "€")
         assertEquals(result, "€ -.--")
     }
 

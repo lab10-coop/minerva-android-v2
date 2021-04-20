@@ -6,14 +6,32 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.databinding.FiatListRowBinding
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.mapper.StringArrayMapper
+import minerva.android.walletmanager.model.Fiat
+import minerva.android.walletmanager.model.Fiat.EUR
+import minerva.android.walletmanager.model.Fiat.GBP
+import minerva.android.walletmanager.model.Fiat.USD
 
 class FiatAdapter(
-    private val fiats: List<String>,
+    private val rawFiats: List<String>,
     private var currentCheckedPosition: Int,
     private val tapAction: (position: Int) -> Unit
 ) :
     RecyclerView.Adapter<FiatViewHolder>() {
+
+    private val fiats: List<String> by lazy {
+        mutableListOf<String>().apply {
+            rawFiats.find { it == EUR }?.let { add(it) }
+            rawFiats.find { it == GBP }?.let { add(it) }
+            rawFiats.find { it == USD }?.let { add(it) }
+            rawFiats.forEach {
+                if (it != EUR && it != GBP && it != USD) {
+                    add(it)
+                }
+            }
+        }
+    }
 
     override fun getItemCount(): Int = fiats.size
 
@@ -28,7 +46,7 @@ class FiatAdapter(
     private fun uncheckOldFiat(position: Int) {
         notifyItemChanged(currentCheckedPosition)
         currentCheckedPosition = position
-        tapAction(position)
+        tapAction(rawFiats.indexOf(fiats[position]))
     }
 }
 
@@ -40,7 +58,7 @@ class FiatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     fun setData(fiat: String, currentPosition: Int, action: () -> Unit) {
         binding.apply {
-            fiatName.text = fiatMap[fiat] ?: fiat
+            fiatName.text = prepareFiatHeader(fiat)
             fiatRadioButton.isChecked = adapterPosition == currentPosition
             fiatRow.setOnClickListener {
                 if (adapterPosition != currentPosition) {
@@ -49,5 +67,14 @@ class FiatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 }
             }
         }
+    }
+
+    private fun prepareFiatHeader(fiat: String): String =
+        fiatMap[fiat]?.let {
+            String.format(FIAT_HEADER_FORMAT, it, fiat)
+        }.orElse { fiat }
+
+    companion object {
+        private const val FIAT_HEADER_FORMAT = "%s (%s)"
     }
 }

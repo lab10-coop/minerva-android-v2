@@ -98,7 +98,7 @@ class WalletConnectInteractionsViewModel(
                         OnEthSignRequest(status.message, session)
                     }
             is OnDisconnect -> Single.just(OnDisconnected)
-            is OnEthSendTransaction ->{
+            is OnEthSendTransaction -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session ->
                         getTransactionCosts(session, status)
@@ -125,8 +125,18 @@ class WalletConnectInteractionsViewModel(
                         val costInFiat = transactionCost.cost.multiply(currentRate)
                         currentTransaction = status.transaction.copy(
                             value = BalanceUtils.getCryptoBalance(value),
-                            fiatValue = valueInFiat?.let { fiat -> BalanceUtils.getFiatBalance(fiat) },
-                            txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat)),
+                            fiatValue = valueInFiat?.let { fiat ->
+                                BalanceUtils.getFiatBalance(
+                                    fiat,
+                                    transactionRepository.getFiatSymbol()
+                                )
+                            },
+                            txCost = transactionCost.copy(
+                                fiatCost = BalanceUtils.getFiatBalance(
+                                    costInFiat,
+                                    transactionRepository.getFiatSymbol()
+                                )
+                            ),
                             transactionType = transferType
                         )
                         OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
@@ -287,7 +297,7 @@ class WalletConnectInteractionsViewModel(
 
     fun recalculateTxCost(gasPrice: BigDecimal, transaction: WalletConnectTransaction): WalletConnectTransaction {
         val txCost = transactionRepository.calculateTransactionCost(gasPrice, transaction.txCost.gasLimit)
-        val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(currentRate))
+        val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(currentRate), transactionRepository.getFiatSymbol())
         currentTransaction = transaction.copy(txCost = transaction.txCost.copy(cost = txCost, fiatCost = fiatTxCost))
         return currentTransaction
     }

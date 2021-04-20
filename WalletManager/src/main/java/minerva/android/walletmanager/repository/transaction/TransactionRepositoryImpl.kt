@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.repository.transaction
 
-import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -19,6 +18,7 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Fiat
 import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.mappers.PendingTransactionToPendingAccountMapper
 import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTransactionCost
@@ -54,7 +54,9 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig().accounts.filter { accountsFilter(it) }.let { accounts ->
             blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
-                .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
+                .map { (cryptoBalances, markets) ->
+                    MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, localStorage.loadCurrentFiat())
+                }
         }
 
     private fun accountsFilter(it: Account) =
@@ -153,31 +155,24 @@ class TransactionRepositoryImpl(
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
 
-    //TODO klop check getting fiats!
     override fun getEurRate(chainId: Int): Single<Double> =
-        when (chainId) {
-            ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map {
-                Log.e("klop", "GET ETH RATE")
-                it.ethFiatPrice?.getRate("EUR")
+        localStorage.loadCurrentFiat().toLowerCase().let { currentFiat ->
+            when (chainId) {
+                ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethFiatPrice?.getRate(currentFiat) }
+                ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaFiatPrice?.getRate(currentFiat) }
+                ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiFiatPrice?.getRate(currentFiat) }
+                else -> Single.just(ZERO_FIAT_VALUE)
             }
-            ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map {
-                Log.e("klop", "GET POA RATE")
-                it.poaFiatPrice?.getRate("EUR")
-            }
-            ChainId.XDAI -> getRate(MarketIds.XDAI).map {
-                Log.e("klop", "GET XDAI RATE")
-                it.daiFiatPrice?.getRate("EUR")
-            }
-            else -> Single.just(0.0)
         }
 
-    //TODO klop check getting fiats here!
-    private fun getRate(id: String): Single<Markets> = cryptoApi.getMarkets(id, EUR_CURRENCY)
+    private fun getRate(id: String): Single<Markets> = cryptoApi.getMarkets(id, localStorage.loadCurrentFiat().toLowerCase())
 
     override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
 
     override fun sendTransaction(chainId: Int, transaction: Transaction): Single<String> =
         blockchainRepository.sendWalletConnectTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
+
+    override fun getFiatSymbol(): String = Fiat.getFiatSymbol(localStorage.loadCurrentFiat())
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         if (shouldGetGasPriceFromApi(chainId)) {
@@ -291,8 +286,8 @@ class TransactionRepositoryImpl(
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1
         private const val PENDING_NETWORK_LIMIT = 2
-        private const val EUR_CURRENCY = "eur"
         private const val ETHERSCAN_REQUEST_TIMESPAN = 1L
         private const val ETHERSCAN_REQUEST_PACKAGE = 5
+        private const val ZERO_FIAT_VALUE = 0.0
     }
 }

@@ -7,6 +7,7 @@ import minerva.android.R
 import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Balance
@@ -18,6 +19,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     private var activeAccounts = listOf<Account>()
     private var rawAccounts = listOf<Account>()
+    private var fiatSymbol: String = String.Empty
 
     override fun getItemCount(): Int = activeAccounts.size
 
@@ -29,13 +31,14 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
         activeAccounts[position].let {
             val index = rawAccounts.indexOf(it)
-            holder.setData(index, it, this@AccountAdapter)
+            holder.setData(index, it, fiatSymbol, this@AccountAdapter)
         }
     }
 
-    fun updateList(accounts: List<Account>, activeAccounts: List<Account>) {
+    fun updateList(accounts: List<Account>, activeAccounts: List<Account>, fiatSymbol: String) {
         rawAccounts = accounts
         this.activeAccounts = activeAccounts
+        this.fiatSymbol = fiatSymbol
         notifyDataSetChanged()
     }
 

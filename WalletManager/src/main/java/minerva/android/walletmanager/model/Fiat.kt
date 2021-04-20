@@ -11,4 +11,19 @@ object Fiat {
             }
         }
     }
+
+    fun getFiatSymbol(fiat: String): String =
+        when (fiat) {
+            EUR -> EUR_SYMBOL
+            GBP -> GBP_SYMBOL
+            USD -> USD_SYMBOL
+            else -> fiat
+        }
+
+    const val EUR = "EUR"
+    const val GBP = "GBP"
+    const val USD = "USD"
+    private const val EUR_SYMBOL = "€"
+    private const val GBP_SYMBOL = "£"
+    private const val USD_SYMBOL = "$"
 }
