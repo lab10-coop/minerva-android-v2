@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
-import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TOKEN_ADDRESS
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
 import minerva.android.accounts.transaction.fragment.AccountsFragment
@@ -370,10 +370,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     }
 
-    override fun showTransactionScreen(index: Int, assetIndex: Int, screenIndex: Int) {
+    override fun showTransactionScreen(index: Int, tokenAddress: String, screenIndex: Int) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
             putExtra(ACCOUNT_INDEX, index)
-            putExtra(ASSET_INDEX, assetIndex)
+            putExtra(TOKEN_ADDRESS, tokenAddress)
             putExtra(TRANSACTION_SCREEN, screenIndex)
         }
     }

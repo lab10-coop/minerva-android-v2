@@ -81,8 +81,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun onSendAccountClicked(account: Account) =
         listener.onSendTransaction(rawAccounts.indexOf(account))
 
-    override fun onSendTokenClicked(account: Account, tokenIndex: Int) {
-        listener.onSendTokenTransaction(rawAccounts.indexOf(account), tokenIndex)
+    override fun onSendTokenClicked(account: Account, tokenAddress: String) {
+        listener.onSendTokenTransaction(rawAccounts.indexOf(account), tokenAddress)
     }
 
     override fun onAccountRemoved(index: Int) = listener.onAccountRemove(rawAccounts[index])
