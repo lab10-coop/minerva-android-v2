@@ -1,7 +1,6 @@
 package minerva.android.settings.fiat
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import minerva.android.R

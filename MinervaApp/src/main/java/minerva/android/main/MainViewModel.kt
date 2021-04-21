@@ -1,6 +1,5 @@
 package minerva.android.main
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.SingleSource
@@ -10,7 +9,6 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.R
 import minerva.android.base.BaseViewModel
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.error.*
 import minerva.android.services.login.uitls.LoginPayload
@@ -242,14 +240,14 @@ class MainViewModel(
     }
 
     fun getTokensRate() {
-            launchDisposable {
-                transactionRepository.getTokensRate()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onComplete = { _updateTokensRateLiveData.value = Event(Unit) },
-                        onError = { Timber.e(it) }
-                    )
-            }
+        launchDisposable {
+            transactionRepository.getTokensRate()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = { _updateTokensRateLiveData.value = Event(Unit) },
+                    onError = { Timber.e(it) }
+                )
+        }
     }
 }

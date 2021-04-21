@@ -1,7 +1,6 @@
 package minerva.android.settings
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import minerva.android.BuildConfig
@@ -9,13 +8,13 @@ import minerva.android.R
 import minerva.android.databinding.FragmentSettingsBinding
 import minerva.android.extension.launchActivity
 import minerva.android.extension.openUri
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.main.base.BaseFragment
 import minerva.android.settings.adapter.SettingsAdapter
 import minerva.android.settings.backup.BackupActivity
 import minerva.android.settings.model.SettingsRowType
 import minerva.android.settings.model.SettingsRowType.*
 import minerva.android.settings.model.propagateSettings
-import minerva.android.extensions.showBiometricPrompt
 import minerva.android.wrapped.startAuthenticationWrappedActivity
 import minerva.android.wrapped.startCurrencyWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel

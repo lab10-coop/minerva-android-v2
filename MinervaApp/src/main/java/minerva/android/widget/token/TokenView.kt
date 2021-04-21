@@ -2,7 +2,6 @@ package minerva.android.widget.token
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.widget.RelativeLayout
 import minerva.android.R
 import minerva.android.databinding.TokenViewBinding

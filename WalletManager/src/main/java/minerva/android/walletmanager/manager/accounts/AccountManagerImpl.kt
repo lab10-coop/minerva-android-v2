@@ -2,7 +2,6 @@ package minerva.android.walletmanager.manager.accounts
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.utils.CryptoUtils
@@ -14,7 +13,10 @@ import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.list.inBounds
-import minerva.android.walletmanager.exception.*
+import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
+import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
+import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
+import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -23,7 +25,6 @@ import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
-import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import java.math.BigDecimal
 import java.math.BigInteger
