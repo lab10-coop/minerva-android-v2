@@ -1,19 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card"
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fiats"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/margin_normal"
+    android:paddingTop="@dimen/margin_normal"
     android:clipToPadding="false"
-    android:orientation="vertical"
-    app:cardCornerRadius="@dimen/card_corner_radius">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fiats"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/margin_normal"
-        android:paddingBottom="@dimen/margin_normal" />
-
-</androidx.cardview.widget.CardView>
+    android:paddingBottom="@dimen/margin_normal" />

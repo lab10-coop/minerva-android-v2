@@ -1,28 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fiat_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="@dimen/margin_normal"
+    android:layout_marginLeft="@dimen/margin_normal"
+    android:layout_marginRight="@dimen/margin_normal"
+    android:clipToPadding="false"
+    android:elevation="@dimen/elevation_xsmall"
     android:foreground="?attr/selectableItemBackgroundBorderless">
+
+    <View
+        android:id="@+id/separator"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/margin_small"
+        android:background="@color/lightGray"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/fiat_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginRight="@dimen/margin_xxlarge"
-        android:textColor="@color/gray"
-        android:textSize="@dimen/text_normal"
-        tools:text="Euro (EUR)" />
-
-    <RadioButton
-        android:id="@+id/fiat_radio_button"
-        android:clickable="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right|center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginRight="@dimen/margin_xxlarge"
+        android:textColor="@color/titleColor"
+        android:textSize="@dimen/text_normal"
+        android:textAllCaps="true"
+        app:layout_constraintBottom_toBottomOf="@id/checkButton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@id/checkButton"
+        tools:text="EUR" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/fiat_full_name"
+        android:layout_width="0dp"
+        android:ellipsize="end"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="@id/fiat_row_guideline"
+        app:layout_constraintTop_toTopOf="@id/fiat_name"
+        app:layout_constraintBottom_toBottomOf="@id/fiat_name"
+        app:layout_constraintRight_toLeftOf="@id/checkButton"
+        android:textSize="@dimen/text_normal"
+        android:textColor="@color/gray"
+        android:layout_gravity="center_vertical"
+        tools:text="Euro"
+        />
+
+    <ImageView
+        android:id="@+id/checkButton"
+        android:layout_width="@dimen/radio_button_size"
+        android:layout_height="@dimen/radio_button_size"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_small"
+        android:background="@drawable/check_button_selector"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/separator"
+        tools:ignore="ContentDescription" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/fiat_row_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.18" />
+</androidx.constraintlayout.widget.ConstraintLayout>

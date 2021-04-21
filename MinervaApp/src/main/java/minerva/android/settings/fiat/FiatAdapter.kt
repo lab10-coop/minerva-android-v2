@@ -1,11 +1,19 @@
 package minerva.android.settings.fiat
 
+import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.fiat_list_row.view.*
 import minerva.android.R
 import minerva.android.databinding.FiatListRowBinding
+import minerva.android.extension.margin
+import minerva.android.extension.visible
+import minerva.android.extension.visibleOrGone
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.mapper.StringArrayMapper
 
@@ -23,7 +31,7 @@ class FiatAdapter(
     )
 
     override fun onBindViewHolder(holder: FiatViewHolder, position: Int) {
-        holder.setData(fiats[position], currentCheckedPosition) { uncheckOldFiat(position) }
+        holder.setData(fiats, currentCheckedPosition, position) { uncheckOldFiat(position) }
     }
 
     private fun uncheckOldFiat(position: Int) {
@@ -39,25 +47,48 @@ class FiatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     private val fiatMap = StringArrayMapper.mapStringArray(view.resources.getStringArray(R.array.currencies))
 
-    fun setData(fiat: String, currentPosition: Int, action: () -> Unit) {
+    fun setData(fiat: List<String>, currentlyChosen: Int, position: Int, action: () -> Unit) {
         binding.apply {
-            fiatName.text = prepareFiatHeader(fiat)
-            fiatRadioButton.isChecked = adapterPosition == currentPosition
+            prepareRow(fiatRow, position, fiat.size)
+            fiatName.text = fiat[position]
+            fiatFullName.text = prepareFiatFullName(fiat[position])
+            checkButton.isEnabled = adapterPosition == currentlyChosen
             fiatRow.setOnClickListener {
-                if (adapterPosition != currentPosition) {
-                    fiatRadioButton.isChecked = true
+                if (adapterPosition != currentlyChosen) {
+                    checkButton.isEnabled = true
                     action()
                 }
             }
         }
     }
 
-    private fun prepareFiatHeader(fiat: String): String =
-        fiatMap[fiat]?.let {
-            String.format(FIAT_HEADER_FORMAT, it, fiat)
-        }.orElse { fiat }
+    private fun prepareRow(fiatRow: ConstraintLayout, position: Int, fiatSize: Int) {
+        fiatRow.apply {
+            resources.getDimension(R.dimen.margin_big).toInt().let { bigPadding ->
+                when (position) {
+                    FIRST_ELEMENT -> {
+                        setPadding(NO_PADDING, bigPadding, NO_PADDING, NO_PADDING)
+                        setBackgroundResource(R.drawable.top_rounded_white_background)
+                    }
+                    fiatSize - 1 -> {
+                        setPadding(NO_PADDING, NO_PADDING, NO_PADDING, bigPadding)
+                        setBackgroundResource(R.drawable.bottom_rounded_white_background)
+                    }
+                    else -> {
+                        setPadding(NO_PADDING, NO_PADDING, NO_PADDING, NO_PADDING)
+                        setBackgroundResource(R.color.white)
+                    }
+                }
+                separator.visibleOrGone(position == FIRST_NOT_PROMOTED_FIAT_INDEX)
+            }
+        }
+    }
+
+    private fun prepareFiatFullName(fiat: String): String = fiatMap[fiat] ?: String.Empty
 
     companion object {
-        private const val FIAT_HEADER_FORMAT = "%s (%s)"
+        private const val NO_PADDING = 0
+        private const val FIRST_ELEMENT = 0
+        private const val FIRST_NOT_PROMOTED_FIAT_INDEX = 3
     }
 }
