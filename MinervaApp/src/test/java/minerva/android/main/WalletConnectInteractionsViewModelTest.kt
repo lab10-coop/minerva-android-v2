@@ -62,7 +62,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -149,7 +149,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
         viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
@@ -201,7 +201,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -253,7 +253,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -304,7 +304,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -355,7 +355,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -402,7 +402,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -444,7 +444,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -491,7 +491,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getEurRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
 

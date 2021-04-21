@@ -647,7 +647,7 @@ class TransactionRepositoryTest : RxTest() {
     fun `get eur rate test`() {
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
-        repository.getEurRate(2)
+        repository.getFiatRate(2)
             .test()
             .assertComplete()
             .assertValue {
@@ -659,7 +659,7 @@ class TransactionRepositoryTest : RxTest() {
     fun `get eur rate for eth test`() {
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
-        repository.getEurRate(1)
+        repository.getFiatRate(1)
             .test()
             .assertComplete()
             .assertValue {

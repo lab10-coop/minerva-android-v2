@@ -117,7 +117,7 @@ class WalletConnectInteractionsViewModel(
         val txCostPayload = getTxCostPayload(session.chainId, status, value, transferType)
         return transactionRepository.getTransactionCosts(txCostPayload)
             .flatMap { transactionCost ->
-                transactionRepository.getEurRate(session.chainId)
+                transactionRepository.getFiatRate(session.chainId)
                     .onErrorResumeNext { Single.just(0.0) }
                     .map {
                         currentRate = it.toBigDecimal()

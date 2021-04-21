@@ -155,7 +155,7 @@ class TransactionRepositoryImpl(
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
 
-    override fun getEurRate(chainId: Int): Single<Double> =
+    override fun getFiatRate(chainId: Int): Single<Double> =
         localStorage.loadCurrentFiat().let { currentFiat ->
             when (chainId) {
                 ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethFiatPrice?.getRate(currentFiat) }
