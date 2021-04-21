@@ -1,20 +1,15 @@
 package minerva.android.settings.fiat
 
-import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fiat_list_row.view.*
 import minerva.android.R
 import minerva.android.databinding.FiatListRowBinding
-import minerva.android.extension.margin
-import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.mapper.StringArrayMapper
 
 class FiatAdapter(
