@@ -156,7 +156,7 @@ class TransactionRepositoryImpl(
             .map { getPendingAccountsWithBlockHashes(it) }
 
     override fun getEurRate(chainId: Int): Single<Double> =
-        localStorage.loadCurrentFiat().toLowerCase().let { currentFiat ->
+        localStorage.loadCurrentFiat().let { currentFiat ->
             when (chainId) {
                 ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethFiatPrice?.getRate(currentFiat) }
                 ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaFiatPrice?.getRate(currentFiat) }

@@ -37,7 +37,7 @@ class MarketUtilsTest {
     @Test
     fun `calculate fiat balance in euro for xdai and poa when main nets enabled`() {
         NetworkManager.initialize(listOf(poaNetwork, xdaiNetwork))
-        val result = MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, "F")
+        val result = MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, "EUR")
         val expectedFiatBalance = BigDecimal.valueOf(6.00).setScale(2, RoundingMode.HALF_DOWN)
         assertEquals(expectedFiatBalance, result["address1"]?.fiatBalance)
         assertEquals(BigDecimal(10), result["address2"]?.cryptoBalance)
@@ -45,7 +45,7 @@ class MarketUtilsTest {
 
     @Test
     fun `calculate fiat balance in euro for xdai and poa when main nets disabled`() {
-        val result = MarketUtils.calculateFiatBalances(cryptoBalances, testNetworksAccount, markets, "F")
+        val result = MarketUtils.calculateFiatBalances(cryptoBalances, testNetworksAccount, markets, "EUR")
         val expectedFiatBalance = BigDecimal.valueOf(6.00).setScale(2, RoundingMode.HALF_DOWN)
         assertEquals(expectedFiatBalance, result["address1"]?.fiatBalance)
         assertEquals(BigDecimal(10), result["address2"]?.cryptoBalance)

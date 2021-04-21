@@ -67,7 +67,7 @@ class TransactionRepositoryTest : RxTest() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
             .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.0))))
-        whenever(localStorage.loadCurrentFiat()).thenReturn("eur")
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
 
         repository.refreshBalances().test()
             .assertComplete()
@@ -79,7 +79,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `refresh balances test error`() {
         val error = Throwable()
-        whenever(localStorage.loadCurrentFiat()).thenReturn("eur")
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(
             Single.error(
                 error
@@ -96,7 +96,7 @@ class TransactionRepositoryTest : RxTest() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
             .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
-        whenever(localStorage.loadCurrentFiat()).thenReturn("eur")
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         repository.refreshBalances().test()
             .assertComplete()
             .assertValue {
@@ -646,7 +646,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `get eur rate test`() {
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
-        whenever(localStorage.loadCurrentFiat()).thenReturn("eur")
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         repository.getEurRate(2)
             .test()
             .assertComplete()

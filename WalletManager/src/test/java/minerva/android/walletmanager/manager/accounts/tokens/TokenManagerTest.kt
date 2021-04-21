@@ -390,6 +390,7 @@ class TokenManagerTest : RxTest() {
             Single.just(marketResponse),
             Single.error(error)
         )
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
 
         tokenManager.getTokensRate(tokens)
             .test()
