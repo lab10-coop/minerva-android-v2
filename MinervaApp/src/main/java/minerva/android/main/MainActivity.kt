@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
-import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.ASSET_INDEX
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TOKEN_ADDRESS
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
 import minerva.android.accounts.transaction.fragment.AccountsFragment
@@ -26,14 +26,15 @@ import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.main.base.BaseFragment
+import minerva.android.main.error.*
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
-import minerva.android.walletmanager.manager.accounts.AccountManagerImpl.Companion.NEW_ACCOUNT_TITLE_PATTERN
 import minerva.android.walletmanager.exception.WalletConnectConnectionThrowable
+import minerva.android.walletmanager.manager.accounts.AccountManagerImpl.Companion.NEW_ACCOUNT_TITLE_PATTERN
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
@@ -141,20 +142,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             handleWalletConnectError(it)
         })
         viewModel.apply {
-            notExistedIdentityLiveData.observe(this@MainActivity, EventObserver {
-                Toast.makeText(this@MainActivity, getString(R.string.not_existed_identity_message), Toast.LENGTH_LONG)
-                    .show()
-            })
-            requestedFieldsLiveData.observe(this@MainActivity, EventObserver {
-                Toast.makeText(this@MainActivity, getString(R.string.fill_requested_data_message, it), Toast.LENGTH_LONG)
-                    .show()
-            })
-            errorLiveData.observe(this@MainActivity, EventObserver {
-                Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.unexpected_error),
-                    Toast.LENGTH_LONG
-                ).show()
+            errorLiveData.observe(this@MainActivity, EventObserver { errorStatus ->
+                when (errorStatus) {
+                    is UpdateCredentialError -> handleUpdateCredentialError(errorStatus.throwable)
+                    is RequestedFields -> showToast(getString(R.string.fill_requested_data_message, errorStatus.identityName))
+                    UpdatePendingTransactionError -> handleUpdatePendingTransactionError()
+                    BaseError -> showToast(getString(R.string.unexpected_error))
+                    NotExistedIdentity -> showToast(getString(R.string.not_existed_identity_message))
+                }
             })
             loadingLiveData.observe(this@MainActivity, EventObserver {
                 (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(it.first, it.second)
@@ -162,25 +157,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(true, it)
             })
-            updateCredentialErrorLiveData.observe(this@MainActivity, EventObserver {
-                var message: String? = null
-                if (it is AutomaticBackupFailedThrowable) {
-                    message = getString(R.string.automatic_backup_failed_error)
-                }
-                showBindCredentialFlashbar(false, message)
-            })
             updatePendingAccountLiveData.observe(
                 this@MainActivity,
                 EventObserver { updatePendingAccount(it) })
-            updatePendingTransactionErrorLiveData.observe(this@MainActivity, EventObserver {
-                showFlashbar(
-                    getString(R.string.error_header),
-                    getString(R.string.pending_account_error_message)
-                )
-                stopPendingAccounts()
-                viewModel.clearPendingAccounts()
-            })
-
             handleTimeoutOnPendingTransactionsLiveData.observe(this@MainActivity, EventObserver {
                 it.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
                 stopPendingAccounts()
@@ -191,9 +170,30 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }
     }
 
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun handleUpdateCredentialError(throwable: Throwable) {
+        var message: String? = null
+        if (throwable is AutomaticBackupFailedThrowable) {
+            message = getString(R.string.automatic_backup_failed_error)
+        }
+        showBindCredentialFlashbar(false, message)
+    }
+
+    private fun handleUpdatePendingTransactionError() {
+        showFlashbar(
+            getString(R.string.error_header),
+            getString(R.string.pending_account_error_message)
+        )
+        stopPendingAccounts()
+        viewModel.clearPendingAccounts()
+    }
+
     private fun handleWalletConnectError(error: Throwable) {
-        dappDialog?.dismiss()
         if (error is WalletConnectConnectionThrowable) {
+            dappDialog?.dismiss()
             showFlashbar(getString(R.string.wallet_connect_title), getString(R.string.wc_connection_error_message))
         }
     }
@@ -371,10 +371,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
 
     }
 
-    override fun showTransactionScreen(index: Int, assetIndex: Int, screenIndex: Int) {
+    override fun showTransactionScreen(index: Int, tokenAddress: String, screenIndex: Int) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
             putExtra(ACCOUNT_INDEX, index)
-            putExtra(ASSET_INDEX, assetIndex)
+            putExtra(TOKEN_ADDRESS, tokenAddress)
             putExtra(TRANSACTION_SCREEN, screenIndex)
         }
     }

@@ -12,6 +12,7 @@ import minerva.android.accounts.enum.ErrorCode
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.databinding.RefreshableRecyclerViewLayoutBinding
 import minerva.android.extension.visibleOrGone
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
@@ -22,7 +23,6 @@ import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.widget.state.AccountWidgetState
-import minerva.android.extensions.showBiometricPrompt
 import minerva.android.wrapped.startManageTokensWrappedActivity
 import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
@@ -58,8 +58,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onSendTransaction(index: Int) = interactor.showTransactionScreen(index)
 
-    override fun onSendTokenTransaction(accountIndex: Int, tokenIndex: Int) =
-        interactor.showTransactionScreen(accountIndex, tokenIndex)
+    override fun onSendTokenTransaction(accountIndex: Int, tokenAddress: String) =
+        interactor.showTransactionScreen(accountIndex, tokenAddress)
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
