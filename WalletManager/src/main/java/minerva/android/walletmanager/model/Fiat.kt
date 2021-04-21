@@ -1,16 +1,22 @@
 package minerva.android.walletmanager.model
 
 import minerva.android.apiProvider.model.FiatPrice
+import java.util.*
 import kotlin.reflect.full.memberProperties
 
 object Fiat {
     val all: List<String> by lazy {
         mutableListOf<String>().apply {
-            FiatPrice::class.memberProperties.forEach {
-                add(it.name.toUpperCase())
-            }
+            FiatPrice::class.memberProperties.forEach { add(it.name.toUpperCase()) }
+            remove(USD)
+            add(FIRST_INDEX, USD)
+            remove(GBP)
+            add(FIRST_INDEX, GBP)
+            remove(EUR)
+            add(FIRST_INDEX, EUR)
         }
     }
+
 
     fun getFiatSymbol(fiat: String): String =
         when (fiat) {
@@ -26,4 +32,5 @@ object Fiat {
     private const val EUR_SYMBOL = "€"
     private const val GBP_SYMBOL = "£"
     private const val USD_SYMBOL = "$"
+    private const val FIRST_INDEX = 0
 }

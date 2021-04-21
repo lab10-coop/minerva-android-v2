@@ -8,30 +8,13 @@ import minerva.android.R
 import minerva.android.databinding.FiatListRowBinding
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.mapper.StringArrayMapper
-import minerva.android.walletmanager.model.Fiat
-import minerva.android.walletmanager.model.Fiat.EUR
-import minerva.android.walletmanager.model.Fiat.GBP
-import minerva.android.walletmanager.model.Fiat.USD
 
 class FiatAdapter(
-    private val rawFiats: List<String>,
+    private val fiats: List<String>,
     private var currentCheckedPosition: Int,
     private val tapAction: (position: Int) -> Unit
 ) :
     RecyclerView.Adapter<FiatViewHolder>() {
-
-    private val fiats: List<String> by lazy {
-        mutableListOf<String>().apply {
-            rawFiats.find { it == EUR }?.let { add(it) }
-            rawFiats.find { it == GBP }?.let { add(it) }
-            rawFiats.find { it == USD }?.let { add(it) }
-            rawFiats.forEach {
-                if (it != EUR && it != GBP && it != USD) {
-                    add(it)
-                }
-            }
-        }
-    }
 
     override fun getItemCount(): Int = fiats.size
 
@@ -46,7 +29,7 @@ class FiatAdapter(
     private fun uncheckOldFiat(position: Int) {
         notifyItemChanged(currentCheckedPosition)
         currentCheckedPosition = position
-        tapAction(rawFiats.indexOf(fiats[position]))
+        tapAction(fiats.indexOf(fiats[position]))
     }
 }
 

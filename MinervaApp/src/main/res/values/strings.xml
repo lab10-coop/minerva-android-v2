@@ -307,9 +307,9 @@
     <string name="currency">Currency</string>
 
     <string-array name="currencies">
-        <item>EUR|Euro (EUR)</item>
-        <item>GBP|Pound Sterling (GBP)</item>
-        <item>USD|US Dollar (USD)</item>
+        <item>EUR|Euro</item>
+        <item>GBP|Pound Sterling</item>
+        <item>USD|US Dollar</item>
         <item>AED|United Arab Emirates Dirham</item>
         <item>ARS|Argentine Peso</item>
         <item>AUD|Australian Dollar</item>
