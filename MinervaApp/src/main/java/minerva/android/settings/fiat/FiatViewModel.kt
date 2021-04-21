@@ -13,7 +13,6 @@ class FiatViewModel(private val localStorage: LocalStorage, private val accountM
         else it
     }
 
-    //TODO klop add test
     fun saveCurrentFiat(fiat: String) {
         localStorage.saveCurrentFiat(fiat)
         accountManager.clearFiat()

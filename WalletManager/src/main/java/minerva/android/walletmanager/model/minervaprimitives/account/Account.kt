@@ -18,7 +18,7 @@ data class Account(
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = BigDecimal.ZERO,
     var accountTokens: List<AccountToken> = listOf(),
-    var fiatBalance: BigDecimal = Int.InvalidValue.toBigDecimal(),
+    var fiatBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var owners: List<String>? = null,
     var contractAddress: String = String.Empty,
     var isPending: Boolean = false,

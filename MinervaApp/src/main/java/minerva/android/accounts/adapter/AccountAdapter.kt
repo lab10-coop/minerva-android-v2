@@ -9,6 +9,7 @@ import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.widget.state.AccountWidgetState
@@ -54,8 +55,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     fun updateBalances(balances: HashMap<String, Balance>) {
         activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
             account.apply {
-                cryptoBalance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
-                fiatBalance = balances[address]?.fiatBalance ?: Int.InvalidId.toBigDecimal()
+                cryptoBalance = balances[address]?.cryptoBalance ?: Double.InvalidValue.toBigDecimal()
+                fiatBalance = balances[address]?.fiatBalance ?: Double.InvalidValue.toBigDecimal()
                 notifyItemChanged(index)
             }
         }

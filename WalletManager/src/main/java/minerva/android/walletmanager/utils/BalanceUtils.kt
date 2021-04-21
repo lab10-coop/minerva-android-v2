@@ -12,14 +12,14 @@ import kotlin.math.pow
 object BalanceUtils {
 
     fun getCryptoBalance(cryptoBalance: BigDecimal): String =
-        if (cryptoBalance == Int.InvalidValue.toBigDecimal()) String.EmptyBalance
+        if (cryptoBalance == Double.InvalidValue.toBigDecimal()) String.EmptyBalance
         else {
             val scaled = cryptoBalance.setScale(CRYPTO_SCALE, RoundingMode.CEILING)
             DecimalFormat(CRYPTO_FORMAT, DecimalFormatSymbols(Locale.ROOT)).format(scaled)
         }
 
     fun getFiatBalance(fiatBalance: BigDecimal, fiatSymbol: String): String =
-        if (fiatBalance != Int.InvalidValue.toBigDecimal()) String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
+        if (fiatBalance != Double.InvalidValue.toBigDecimal()) String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
         else String.format(Locale.ROOT, NO_FIAT_VALUE, fiatSymbol)
 
     fun convertFromWei(balance: BigDecimal, decimals: Int): BigDecimal =

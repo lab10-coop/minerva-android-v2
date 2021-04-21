@@ -42,7 +42,7 @@ object MarketUtils {
 
     private fun calculateFiatBalance(value: BigDecimal, rate: Double?): BigDecimal =
         rate?.let { value.multiply(BigDecimal(it)).setScale(SCALE, RoundingMode.HALF_DOWN) }
-            .orElse { Int.InvalidValue.toBigDecimal() }
+            .orElse { Double.InvalidValue.toBigDecimal() }
 
     private fun getRate(chainId: Int, markets: Markets, currentFiat: String): Double? =
         when (chainId) {

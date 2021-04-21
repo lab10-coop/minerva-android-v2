@@ -215,7 +215,7 @@ class WalletConnectInteractionsViewModel(
 
     private fun getTransactionTypeBasedOnAllowance(decoded: Decoder.DecodedMethod, status: OnEthSendTransaction) =
         if (isAllowanceUnlimited(decoded)) {
-            status.transaction.tokenTransaction.allowance = Int.InvalidValue.toBigDecimal()
+            status.transaction.tokenTransaction.allowance = Double.InvalidValue.toBigDecimal()
             TransferType.TOKEN_SWAP_APPROVAL
         } else {
             (decoded.params[1].value as? BigInteger)?.toBigDecimal()?.let {
