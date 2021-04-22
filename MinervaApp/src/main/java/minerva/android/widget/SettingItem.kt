@@ -48,7 +48,6 @@ class SettingItem(context: Context) : ConstraintLayout(context) {
                 settingsArrow.setColorFilter(ContextCompat.getColor(context, R.color.alertRed))
             } else detailMessage.text = String.empty
         }
-
     }
 
     fun toggleSwitch(onCheckedChange: (isChecked: Boolean) -> Unit) {

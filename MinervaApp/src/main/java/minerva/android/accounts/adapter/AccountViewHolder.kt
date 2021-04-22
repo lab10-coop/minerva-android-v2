@@ -128,6 +128,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.prepareToken(account: Account) {
         binding.apply {
+
             tokensAndCollectibles.prepareView(account, viewGroup, this@AccountViewHolder, accountWidgetState.isWidgetOpen)
             //TODO change this statement when collectibles or main coin will be implemented
             account.accountTokens.isNotEmpty().let { visible ->
@@ -135,6 +136,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
                 arrow.visibleOrGone(visible)
+                if(accountWidgetState.isWidgetOpen) arrow.rotation = 180f else arrow.rotation = 0f
                 containerBackground.visibleOrGone(visible)
             }
         }
