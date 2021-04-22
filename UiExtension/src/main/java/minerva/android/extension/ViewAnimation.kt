@@ -26,6 +26,6 @@ fun View.fadeIn() {
     startAnimation(AnimationUtils.loadAnimation(context, R.anim.fade_in))
 }
 
-private const val ROTATE_180_ANGLE = 180f
-private const val ROTATE_0_ANGLE = 0f
+const val ROTATE_180_ANGLE = 180f
+const val ROTATE_0_ANGLE = 0f
 private const val ROTATE_ANIMATION = "rotation"

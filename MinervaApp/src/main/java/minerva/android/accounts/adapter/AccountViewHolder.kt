@@ -3,6 +3,7 @@ package minerva.android.accounts.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -34,8 +35,9 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private val isWidgetOpen
         get() = binding.tokensAndCollectibles.isVisible
 
-    private val accountWidgetState: AccountWidgetState
-        get() = listener.getAccountWidgetState(rawPosition)
+    private val accountWidgetState: AccountWidgetState by lazy {
+        listener.getAccountWidgetState(rawPosition)
+    }
 
     override fun onSendTokenTokenClicked(account: Account, tokenAddress: String) = listener.onSendTokenClicked(account, tokenAddress)
 
@@ -135,8 +137,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 setOnItemClickListener(visible)
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
-                arrow.visibleOrGone(visible)
-                if(accountWidgetState.isWidgetOpen) arrow.rotation = 180f else arrow.rotation = 0f
+                prepareArrow(visible)
                 containerBackground.visibleOrGone(visible)
             }
         }
@@ -151,14 +152,23 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
+    private fun prepareArrow(isVisible: Boolean) {
+        binding.arrow.apply {
+            visibleOrGone(isVisible)
+            rotation = if (accountWidgetState.isWidgetOpen) ROTATE_180_ANGLE else ROTATE_0_ANGLE
+        }
+    }
+
     private fun open() {
         TransitionManager.beginDelayedTransition(viewGroup)
+        Log.e("klop", "Opening N O W !")
         setOpen(true)
     }
 
     private fun close() {
         TransitionManager.endTransitions(viewGroup)
         TransitionManager.beginDelayedTransition(viewGroup)
+        Log.e("klop", "Closing N O W !")
         setOpen(false)
     }
 
