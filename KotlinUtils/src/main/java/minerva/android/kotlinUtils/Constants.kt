@@ -24,6 +24,9 @@ val Int.Companion.InvalidIndex: Int
 val Int.Companion.InvalidValue: Int
     get() = -1
 
+val Int.Companion.EmptyResource: Int
+    get() = 0
+
 val Long.Companion.InvalidValue: Long
     get() = -1L
 
