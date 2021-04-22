@@ -3,7 +3,6 @@ package minerva.android.accounts.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.transition.TransitionManager
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -161,14 +160,12 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun open() {
         TransitionManager.beginDelayedTransition(viewGroup)
-        Log.e("klop", "Opening N O W !")
         setOpen(true)
     }
 
     private fun close() {
         TransitionManager.endTransitions(viewGroup)
         TransitionManager.beginDelayedTransition(viewGroup)
-        Log.e("klop", "Closing N O W !")
         setOpen(false)
     }
 
