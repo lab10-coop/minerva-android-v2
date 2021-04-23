@@ -130,7 +130,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success test`() {
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(
             Single.just(
                 mapOf(
                     Pair(
@@ -141,7 +141,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             )
         )
         viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
-        viewModel.refreshTokenBalance()
+        viewModel.refreshTokensBalances()
         tokensBalanceCaptor.run {
             verify(tokensBalanceObserver).onChanged(capture())
         }
@@ -154,20 +154,20 @@ class AccountsViewModelTest : BaseViewModelTest() {
             Single.just(false),
             Single.error(Throwable("Refresh tokens list error"))
         )
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.just(mapOf()))
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.just(mapOf()))
 
-        viewModel.refreshTokensList()
-        viewModel.refreshTokensList()
-        viewModel.refreshTokensList()
-        verify(transactionRepository, times(1)).refreshTokenBalance()
+        viewModel.discoverNewTokens()
+        viewModel.discoverNewTokens()
+        viewModel.discoverNewTokens()
+        verify(transactionRepository, times(1)).refreshTokensBalances()
     }
 
     @Test
     fun `get tokens balance error test`() {
         val error = Throwable()
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.error(error))
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.error(error))
         viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
-        viewModel.refreshTokenBalance()
+        viewModel.refreshTokensBalances()
         refreshBalancesErrorCaptor.run {
             verify(refreshBalancesErrorObserver).onChanged(capture())
             firstValue.peekContent() == ErrorCode.TOKEN_BALANCE_ERROR

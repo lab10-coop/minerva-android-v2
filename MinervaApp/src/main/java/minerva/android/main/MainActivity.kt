@@ -64,7 +64,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         replaceFragment(AccountsFragment.newInstance())
         prepareSettingsIcon()
         prepareObservers()
-        viewModel.restorePendingTransactions()
         if (!viewModel.isBackupAllowed) {
             AlertDialogHandler.showDialog(
                 this,
@@ -72,8 +71,13 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 getString(R.string.outdated_wallet_error_message)
             )
         }
-        viewModel.updateTokenIcons()
-        viewModel.getTokensRate()
+
+        //todo move to viewModel init ??
+        with(viewModel) {
+            restorePendingTransactions()
+            checkMissingTokensDetails()
+            getTokensRate()
+        }
     }
 
     override fun onResume() {
@@ -144,7 +148,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             errorLiveData.observe(this@MainActivity, EventObserver { errorStatus ->
                 when (errorStatus) {
                     is UpdateCredentialError -> handleUpdateCredentialError(errorStatus.throwable)
-                    is RequestedFields -> showToast(getString(R.string.fill_requested_data_message, errorStatus.identityName))
+                    is RequestedFields -> showToast(
+                        getString(
+                            R.string.fill_requested_data_message,
+                            errorStatus.identityName
+                        )
+                    )
                     UpdatePendingTransactionError -> handleUpdatePendingTransactionError()
                     BaseError -> showToast(getString(R.string.unexpected_error))
                     NotExistedIdentity -> showToast(getString(R.string.not_existed_identity_message))
