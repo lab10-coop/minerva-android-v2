@@ -53,8 +53,10 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         receiverAddressFull.text = transaction.to
         account?.let {
             accountName.text = it.name
-            "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
 
+            transaction.tokenTransaction
+
+            balance.text = BalanceUtils.getCryptoBalance(it.cryptoBalance)
             if (isBalanceTooLow(it.cryptoBalance, transaction.txCost.cost)) {
                 balanceToLowError.visible()
                 balance.setTextColor(context.getColor(R.color.errorRed))

@@ -2,6 +2,7 @@ package minerva.android.apiProvider.model
 
 import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.InvalidValue
+import java.util.*
 import kotlin.reflect.full.memberProperties
 
 data class FiatPrice(
@@ -105,7 +106,7 @@ data class FiatPrice(
     private fun getFiatPrices(): Map<String, Double> =
         mutableMapOf<String, Double>().apply {
             this@FiatPrice::class.memberProperties.forEach {
-                put(it.name.toUpperCase(), it.getter.call(this@FiatPrice) as Double)
+                put(it.name.toUpperCase(Locale.ROOT), it.getter.call(this@FiatPrice) as Double)
             }
         }
 }

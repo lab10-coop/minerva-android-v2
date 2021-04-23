@@ -58,7 +58,10 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
                 MAIN_NETWORKS_ENABLED to areMainNetsEnabled,
                 AUTHENTICATION_ENABLED to isAuthenticationEnabled
             ).let {
-                settingsAdapter.updateList(it, propagateSettings(viewModel.getCurrentFiat(requireContext())))
+                settingsAdapter.updateList(
+                    it,
+                    propagateSettings(viewModel.getCurrentFiat(requireContext().resources.getStringArray(R.array.currencies)))
+                )
             }
         }
     }

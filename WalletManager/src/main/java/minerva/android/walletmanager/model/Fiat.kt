@@ -7,7 +7,7 @@ import kotlin.reflect.full.memberProperties
 object Fiat {
     val all: List<String> by lazy {
         mutableListOf<String>().apply {
-            FiatPrice::class.memberProperties.forEach { add(it.name.toUpperCase()) }
+            FiatPrice::class.memberProperties.forEach { add(it.name.toUpperCase(Locale.ROOT)) }
             remove(USD)
             add(FIRST_INDEX, USD)
             remove(GBP)

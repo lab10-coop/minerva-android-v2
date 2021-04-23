@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.fiat_list_row.view.*
 import minerva.android.R
 import minerva.android.databinding.FiatListRowBinding
 import minerva.android.extension.visibleOrGone
@@ -74,7 +73,7 @@ class FiatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                         setBackgroundResource(R.color.white)
                     }
                 }
-                separator.visibleOrGone(position == FIRST_NOT_PROMOTED_FIAT_INDEX)
+                binding.separator.visibleOrGone(position == FIRST_NOT_PROMOTED_FIAT_INDEX)
             }
         }
     }

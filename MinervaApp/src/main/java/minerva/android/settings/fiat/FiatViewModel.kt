@@ -8,9 +8,9 @@ import minerva.android.walletmanager.storage.LocalStorage
 
 class FiatViewModel(private val localStorage: LocalStorage, private val accountManager: AccountManager) : BaseViewModel() {
 
-    fun getCurrentFiatPosition(): Int = Fiat.all.indexOf(localStorage.loadCurrentFiat()).let {
-        if (it == Int.InvalidIndex) FIRST_INDEX
-        else it
+    fun getCurrentFiatPosition(): Int = Fiat.all.indexOf(localStorage.loadCurrentFiat()).let { currentPosition ->
+        if (currentPosition == Int.InvalidIndex) FIRST_INDEX
+        else currentPosition
     }
 
     fun saveCurrentFiat(fiat: String) {

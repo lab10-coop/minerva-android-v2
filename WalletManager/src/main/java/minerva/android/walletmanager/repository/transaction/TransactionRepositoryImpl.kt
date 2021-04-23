@@ -36,7 +36,9 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashMap
 
 class TransactionRepositoryImpl(
     private val blockchainRepository: BlockchainRegularAccountRepository,
@@ -165,7 +167,8 @@ class TransactionRepositoryImpl(
             }
         }
 
-    private fun getRate(id: String): Single<Markets> = cryptoApi.getMarkets(id, localStorage.loadCurrentFiat().toLowerCase())
+    private fun getRate(id: String): Single<Markets> =
+        cryptoApi.getMarkets(id, localStorage.loadCurrentFiat().toLowerCase(Locale.ROOT))
 
     override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
 
