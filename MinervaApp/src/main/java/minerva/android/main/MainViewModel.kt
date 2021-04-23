@@ -194,9 +194,9 @@ class MainViewModel(
         if (serviceManager.isMoreCredentialToBind(qrCode)) R.string.replace_all
         else R.string.replace
 
-    fun updateTokenIcons() {
+    fun checkMissingTokensDetails() {
         launchDisposable {
-            transactionRepository.updateTokenIcons()
+            transactionRepository.checkMissingTokensDetails()
                 .onErrorComplete()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
