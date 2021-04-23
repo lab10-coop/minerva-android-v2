@@ -28,7 +28,6 @@ class SettingsViewModel(private val masterSeedRepository: MasterSeedRepository, 
     val isAuthenticationEnabled
         get() = localStorage.isAuthenticationEnabled
 
-    //TODO klop add test
     fun getCurrentFiat(currencies: Array<String>): String = localStorage.loadCurrentFiat().let { fiat ->
         StringArrayMapper.mapStringArray(currencies)[fiat]?.let {
             String.format(FIAT_HEADER_FORMAT, it, fiat)

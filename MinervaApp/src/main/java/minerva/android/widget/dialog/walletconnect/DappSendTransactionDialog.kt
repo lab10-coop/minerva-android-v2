@@ -53,10 +53,8 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         receiverAddressFull.text = transaction.to
         account?.let {
             accountName.text = it.name
+            "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
 
-            transaction.tokenTransaction
-
-            balance.text = BalanceUtils.getCryptoBalance(it.cryptoBalance)
             if (isBalanceTooLow(it.cryptoBalance, transaction.txCost.cost)) {
                 balanceToLowError.visible()
                 balance.setTextColor(context.getColor(R.color.errorRed))
@@ -65,7 +63,13 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         editTxTime.setOnClickListener { showGasPriceDialog() }
         gasPriceSelector.setAdapter(transaction.txCost.txSpeeds) { setTxCost(recalculateTxCost(it.value), account) }
         setTxCost(transaction, account)
-        value.text = transaction.fiatWithUnit
+        transaction.fiatValue?.toBigDecimal()?.let {
+            value.text = BalanceUtils.getFiatBalance(it, "WTF")   //
+        }
+
+
+
+        transaction.fiatWithUnit
         closeCustomTime.setOnClickListener {
             TransitionManager.beginDelayedTransition(sendTransactionDialog)
             closeCustomTime.visibleOrInvisible(false)
