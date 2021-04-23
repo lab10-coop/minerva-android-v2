@@ -34,8 +34,9 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private val isWidgetOpen
         get() = binding.tokensAndCollectibles.isVisible
 
-    private val accountWidgetState: AccountWidgetState
-        get() = listener.getAccountWidgetState(rawPosition)
+    private val accountWidgetState: AccountWidgetState by lazy {
+        listener.getAccountWidgetState(rawPosition)
+    }
 
     override fun onSendTokenTokenClicked(account: Account, tokenAddress: String) = listener.onSendTokenClicked(account, tokenAddress)
 
@@ -128,13 +129,14 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.prepareToken(account: Account) {
         binding.apply {
+
             tokensAndCollectibles.prepareView(account, viewGroup, this@AccountViewHolder, accountWidgetState.isWidgetOpen)
             //TODO change this statement when collectibles or main coin will be implemented
             account.accountTokens.isNotEmpty().let { visible ->
                 setOnItemClickListener(visible)
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
-                arrow.visibleOrGone(visible)
+                prepareArrow(visible)
                 containerBackground.visibleOrGone(visible)
             }
         }
@@ -146,6 +148,13 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         binding.apply {
             if (isOpen) arrow.rotate180() else arrow.rotate180back()
             tokensAndCollectibles.visibleOrGone(isOpen)
+        }
+    }
+
+    private fun prepareArrow(isVisible: Boolean) {
+        binding.arrow.apply {
+            visibleOrGone(isVisible)
+            rotation = if (accountWidgetState.isWidgetOpen) ROTATE_180_ANGLE else ROTATE_0_ANGLE
         }
     }
 
