@@ -63,12 +63,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         editTxTime.setOnClickListener { showGasPriceDialog() }
         gasPriceSelector.setAdapter(transaction.txCost.txSpeeds) { setTxCost(recalculateTxCost(it.value), account) }
         setTxCost(transaction, account)
-        transaction.fiatValue?.toBigDecimal()?.let {
-            value.text = BalanceUtils.getFiatBalance(it, "WTF")   //
-        }
-
-
-
+        transaction.fiatValue?.let { value.text = it }
         transaction.fiatWithUnit
         closeCustomTime.setOnClickListener {
             TransitionManager.beginDelayedTransition(sendTransactionDialog)
