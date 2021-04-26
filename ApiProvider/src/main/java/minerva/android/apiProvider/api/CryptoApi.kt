@@ -4,10 +4,6 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.ServicesApi.Companion.APPLICATION_JSON
 import minerva.android.apiProvider.api.ServicesApi.Companion.CONTENT_TYPE
 import minerva.android.apiProvider.model.*
-import minerva.android.apiProvider.model.CommitElement
-import minerva.android.apiProvider.model.GasPrices
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.TokenIconDetails
 import retrofit2.http.*
 
 interface CryptoApi {
@@ -25,10 +21,10 @@ interface CryptoApi {
     ): Single<GasPrices>
 
     @GET
-    fun getTokenRawData(@Url url: String): Single<List<TokenIconDetails>>
+    fun getTokenDetails(@Url url: String): Single<List<TokenDetails>>
 
     @GET
-    fun getTokenLastCommitRawData(@Url url: String): Single<List<CommitElement>>
+    fun getLastCommitFromTokenList(@Url url: String): Single<List<CommitElement>>
 
     @GET
     fun getConnectedTokens(@Url url: String): Single<TokenBalanceResponse>

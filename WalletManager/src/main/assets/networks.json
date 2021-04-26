@@ -7,7 +7,7 @@
     "wsRpc": "wss://ws.tau1.artis.network",
     "gasPriceOracle": "",
     "gasPrice": "100000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#FFF97599",
     "testNet": true,
     "chainId": 246785
@@ -20,7 +20,7 @@
     "wsRpc": "wss://rinkeby.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#FF6535c9",
     "testNet": true,
     "chainId": 4
@@ -33,7 +33,7 @@
     "wsRpc": "wss://ws.sigma1.artis.network",
     "gasPriceOracle": "",
     "gasPrice": "100000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#129c6b",
     "testNet": false,
     "chainId": 246529
@@ -46,7 +46,7 @@
     "wsRpc": "wss://rpc.xdaichain.com/wss",
     "gasPriceOracle": "",
     "gasPrice": "1000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#48a9a6",
     "testNet": false,
     "chainId": 100
@@ -59,7 +59,7 @@
     "wsRpc": "ws://sokol.poa.network:8546",
     "gasPriceOracle": "",
     "gasPrice": "1000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#FF5CBEAB",
     "testNet": true,
     "chainId": 77
@@ -72,7 +72,7 @@
     "wsRpc": "",
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#FFFBCDC5",
     "testNet": true,
     "chainId": 22
@@ -85,7 +85,7 @@
     "wsRpc": "wss://kovan.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#FF6535c9",
     "testNet": true,
     "chainId": 42
@@ -98,7 +98,7 @@
     "wsRpc": "wss://goerli.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#FFBDAE9B",
     "testNet": true,
     "chainId": 5
@@ -111,7 +111,7 @@
     "wsRpc": "wss://ropsten.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#FF6535c9",
     "testNet": true,
     "chainId": 3
@@ -124,7 +124,7 @@
     "wsRpc": "wss://mainnet.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
     "gasPriceOracle": "https://www.gasnow.org/api/v3/gas/price?utm_source=minerva",
     "gasPrice": "20000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#393939",
     "testNet": false,
     "chainId": 1
@@ -137,7 +137,7 @@
     "wsRpc": "",
     "gasPriceOracle": "",
     "gasPrice": "10000000000",
-    "assets": [],
+    "tokens": [],
     "color": "#5c34a2",
     "testNet": false,
     "chainId": 99

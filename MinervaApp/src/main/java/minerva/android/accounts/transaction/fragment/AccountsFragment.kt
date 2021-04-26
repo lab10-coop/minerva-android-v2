@@ -138,8 +138,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 setOnRefreshListener {
                     with(viewModel) {
                         refreshBalances()
-                        refreshTokenBalance()
-                        refreshTokensList()
+                        refreshTokensBalances()
+                        discoverNewTokens()
                     }
                 }
             }

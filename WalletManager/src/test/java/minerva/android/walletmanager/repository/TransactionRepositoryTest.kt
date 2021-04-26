@@ -5,7 +5,10 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.GasPrices
+import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.Price
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -625,9 +628,9 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `Checking token icon updates`() {
-        whenever(tokenManager.updateTokenIcons()).thenReturn(Completable.complete())
-        repository.updateTokenIcons()
-        verify(tokenManager, times(1)).updateTokenIcons()
+        whenever(tokenManager.checkMissingTokensDetails()).thenReturn(Completable.complete())
+        repository.checkMissingTokensDetails()
+        verify(tokenManager, times(1)).checkMissingTokensDetails()
     }
 
     @Test
@@ -700,10 +703,10 @@ class TransactionRepositoryTest : RxTest() {
             AccountToken(ERC20Token(3, "one", address = "0x01"), BigDecimal.TEN),
             AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
         )
-        whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
         whenever(tokenManager.getTokensRate(any())).thenReturn(Completable.complete())
 
-        repository.refreshTokenBalance().test().assertComplete().assertValue {
+        repository.refreshTokensBalances().test().assertComplete().assertValue {
             it.size == 1
             it["privateKey"]?.size == 2
         }
@@ -712,8 +715,8 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `Checking refreshing token balances error`() {
         val error = Throwable("error")
-        whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.error(error))
-        repository.refreshTokenBalance().test().assertError(error)
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.error(error))
+        repository.refreshTokensBalances().test().assertError(error)
     }
 
 

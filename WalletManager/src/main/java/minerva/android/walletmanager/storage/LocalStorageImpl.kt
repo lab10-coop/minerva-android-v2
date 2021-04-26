@@ -7,8 +7,8 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_DATA
 import minerva.android.walletmanager.BuildConfig
-import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Recipient
 
 //TODO move saving object to Room - MinervaDatabase, handle primitives only here
@@ -93,12 +93,15 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         sharedPreferences.edit().putLong(FREE_ATS_TIMESTAMP, timestamp).apply()
     }
 
-    override fun saveTokenIconsUpdateTimestamp(timestamp: Long) =
+    override fun saveTokenIconsUpdateTimestamp(timestamp: Long) {
         sharedPreferences.edit().putLong(ICON_UPDATE_TIMESTAMP, timestamp).apply()
+    }
 
-    override fun loadTokenIconsUpdateTimestamp(): Long = sharedPreferences.getLong(ICON_UPDATE_TIMESTAMP, Long.InvalidValue)
+    override fun loadTokenIconsUpdateTimestamp(): Long =
+        sharedPreferences.getLong(ICON_UPDATE_TIMESTAMP, Long.InvalidValue)
 
-    override fun getProfileImage(name: String): String = sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
+    override fun getProfileImage(name: String): String =
+        sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
 
     override fun saveProfileImage(name: String, image: String) = sharedPreferences.edit().putString(name, image).apply()
 

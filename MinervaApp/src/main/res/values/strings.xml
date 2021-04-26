@@ -293,8 +293,8 @@
     <string name="wc_connection_error_message">Your WalletConnect connection was closed, you will have to reconnect again to the website</string>
     <string name="enable">Enable</string>
     <string name="create">Create</string>
-    <string name="protect_minerva">Protect Minerva</string>
-    <string name="protect_minerva_description">Enable your standard phone authentication method to access and secure the Minerva wallet</string>
+    <string name="protect_keys">Protect Keys</string>
+    <string name="protect_minerva_description">Enable your standard phone authentication method to protect your Seed Phrase and the export of private keys.</string>
     <string name="authentication_title">Use yor phone authentication</string>
     <string name="device_not_secured">Your device is not secured!</string>
     <string name="device_not_secured_message">Please change your device security settings and try again.</string>

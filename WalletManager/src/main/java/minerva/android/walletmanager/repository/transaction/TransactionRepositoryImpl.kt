@@ -69,10 +69,10 @@ class TransactionRepositoryImpl(
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
-    override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
+    override fun refreshTokensBalances(): Single<Map<String, List<AccountToken>>> =
         getActiveAccounts().let { accounts ->
             Observable.fromIterable(accounts)
-                .flatMapSingle { tokenManager.refreshTokenBalance(it) }
+                .flatMapSingle { account -> tokenManager.refreshTokensBalances(account) }
                 .toList()
                 .map {
                     mutableMapOf<String, List<AccountToken>>().apply {
@@ -98,13 +98,11 @@ class TransactionRepositoryImpl(
                         .map { tokenManager.sortTokensByChainId(it) }
                         .map { tokenManager.mergeWithLocalTokensList(it) }
                         .flatMap { (shouldBeUpdated, accountTokens) ->
-                            tokenManager.updateTokenIcons(
-                                shouldBeUpdated,
-                                accountTokens
-                            ).onErrorReturn {
-                                Timber.e(it)
-                                Pair(false, accountTokens)
-                            }
+                            tokenManager.updateTokenIcons(shouldBeUpdated, accountTokens)
+                                .onErrorReturn {
+                                    Timber.e(it)
+                                    Pair(false, accountTokens)
+                                }
                         }
                         .flatMap { (shouldBeSaved, automaticTokenUpdateMap) ->
                             tokenManager.saveTokens(shouldBeSaved, automaticTokenUpdateMap)
@@ -117,9 +115,11 @@ class TransactionRepositoryImpl(
             }
         }
 
-    private fun getActiveAccounts(): List<Account> = walletConfigManager.getWalletConfig().accounts.filter { account ->
-        accountsFilter(account) && account.network.isAvailable()
-    }
+    private fun getActiveAccounts(): List<Account> =
+        walletConfigManager.getWalletConfig().accounts
+            .filter { account ->
+                accountsFilter(account) && account.network.isAvailable()
+            }
 
     private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERC20Token>> =
         Observable.fromIterable(accounts)
@@ -284,7 +284,7 @@ class TransactionRepositoryImpl(
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
 
-    override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
+    override fun checkMissingTokensDetails(): Completable = tokenManager.checkMissingTokensDetails()
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1

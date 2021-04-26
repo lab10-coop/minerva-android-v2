@@ -11,7 +11,8 @@ import minerva.android.main.error.*
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
@@ -260,10 +261,10 @@ class MainViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `Checking token icons updating works fine`() {
-        whenever(transactionRepository.updateTokenIcons()).thenReturn(Completable.complete())
-        viewModel.updateTokenIcons()
-        verify(transactionRepository, times(1)).updateTokenIcons()
+    fun `Checking token icons updating works fine` () {
+        whenever(transactionRepository.checkMissingTokensDetails()).thenReturn(Completable.complete())
+        viewModel.checkMissingTokensDetails()
+        verify(transactionRepository, times(1)).checkMissingTokensDetails()
     }
 
     @Test

@@ -18,7 +18,7 @@ interface TransactionRepository {
     /**
      * return statement: Map<AccountPrivateKey, List<AccountToken>>
      */
-    fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>>
+    fun refreshTokensBalances(): Single<Map<String, List<AccountToken>>>
     fun refreshTokensList(): Single<Boolean>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable
@@ -41,7 +41,7 @@ interface TransactionRepository {
 
     fun isAddressValid(address: String): Boolean
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
-    fun updateTokenIcons(): Completable
+    fun checkMissingTokensDetails(): Completable
     fun getFiatRate(chainId: Int): Single<Double>
     fun toEther(value: BigDecimal): BigDecimal
     fun sendTransaction(chainId: Int, transaction: Transaction): Single<String>

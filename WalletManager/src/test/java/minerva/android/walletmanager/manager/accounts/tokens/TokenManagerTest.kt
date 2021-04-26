@@ -1,13 +1,14 @@
 package minerva.android.walletmanager.manager.accounts.tokens
 
 import com.nhaarman.mockitokotlin2.*
-import com.nhaarman.mockitokotlin2.any
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.walletmanager.database.MinervaDatabase
+import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -22,12 +23,14 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.TokenTag
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.TempStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
-import org.amshove.kluent.*
+import org.amshove.kluent.mock
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -40,7 +43,14 @@ class TokenManagerTest : RxTest() {
     private val localStorage: LocalStorage = mock()
     private val blockchainRepository: BlockchainRegularAccountRepository = mock()
     private val tempStorage: TempStorage = mock()
-    private val tokenManager = TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, tempStorage)
+    private val tokenDao: TokenDao = mock()
+
+    private val database: MinervaDatabase = mock {
+        whenever(mock.tokenDao()).thenReturn(tokenDao)
+    }
+
+    private val tokenManager =
+        TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, tempStorage, database)
 
     @Before
     fun initializeMocks() {
@@ -89,7 +99,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test tokens with online logos data without error`() {
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(tokenRawData))
+        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(tokenRawData))
         tokenManager.updateTokenIcons(false, map).test().assertComplete().assertNoErrors()
             .assertValue {
                 map[1]?.get(0)?.logoURI == null
@@ -104,7 +114,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test tokens with online logos data with error`() {
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.error(Throwable("No data here!")))
+        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.error(Throwable("No data here!")))
         tokenManager.updateTokenIcons(true, map).test().assertErrorMessage("No data here!")
     }
 
@@ -235,7 +245,7 @@ class TokenManagerTest : RxTest() {
             )
         )
 
-        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(data))
+        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data))
         val updatedIcons = tokenManager.updateTokenIcons(true, tokens)
         val updatedIcons2 = tokenManager.updateTokenIcons(false, tokens)
 
@@ -262,18 +272,19 @@ class TokenManagerTest : RxTest() {
     }
 
     private val data = listOf(
-        TokenIconDetails(1, "0x4ddre55", "LogoUri"),
-        TokenIconDetails(1, "0x0NE0N3", "logoOneOne"),
-        TokenIconDetails(2, "0x4ddre55", "LogoUri2"),
-        TokenIconDetails(2, "0xS2Two01", "logoTwo"),
-        TokenIconDetails(23, "---", "---")
+        TokenDetails(1, "0x4ddre55", "LogoUri"),
+        TokenDetails(1, "0x0NE0N3", "logoOneOne"),
+        TokenDetails(2, "0x4ddre55", "LogoUri2"),
+        TokenDetails(2, "0xS2Two01", "logoTwo"),
+        TokenDetails(2, "0xS2Two01", "logoTwo", _tags = listOf(TokenTag.SUPER_TOKEN.tag)),
+        TokenDetails(23, "---", "---")
 
     )
 
     @Test
     fun `Check getting Token Icon URL method`() {
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(data), Single.just(listOf()))
+        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data), Single.just(listOf()))
         tokenManager.getTokenIconURL(1, "0x4ddre55")
             .test()
             .assertComplete()
@@ -287,7 +298,7 @@ class TokenManagerTest : RxTest() {
                 it.first() shouldBeEqualTo ""
             }
 
-        verify(cryptoApi, times(2)).getTokenRawData(any())
+        verify(cryptoApi, times(2)).getTokenDetails(any())
     }
 
     @Test
@@ -301,13 +312,28 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Check mapping last commit data to last commit timestamp`() {
         NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptoApi.getTokenLastCommitRawData(any())).thenReturn(Single.just(commitData))
-        whenever(cryptoApi.getTokenRawData(any())).thenReturn(Single.just(data))
+        whenever(cryptoApi.getLastCommitFromTokenList(any())).thenReturn(Single.just(commitData))
+        whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data))
         whenever(localStorage.loadTokenIconsUpdateTimestamp()).thenReturn(333L, 1611950162000, 1611950162333)
         whenever(walletManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
-        tokenManager.updateTokenIcons().test().assertComplete()
-        tokenManager.updateTokenIcons().test().assertNotComplete()
-        tokenManager.updateTokenIcons().test().assertNotComplete()
+        whenever(tokenDao.getTaggedTokens()).thenReturn(
+            Single.just(
+                listOf(
+                    ERC20Token(
+                        ATS_TAU,
+                        "CookieTokenATS",
+                        "Cookie",
+                        "0xS0m3T0k3N",
+                        "13"
+                    )
+                )
+            )
+        )
+        doNothing().whenever(tokenDao).updateTokens(any())
+        doNothing().whenever(localStorage).saveFreeATSTimestamp(any())
+        tokenManager.checkMissingTokensDetails().test().assertComplete()
+        tokenManager.checkMissingTokensDetails().test().assertNotComplete()
+        tokenManager.checkMissingTokensDetails().test().assertNotComplete()
     }
 
     @Test
@@ -352,17 +378,22 @@ class TokenManagerTest : RxTest() {
             sigmaTokenResponse01, sigmaTokenResponse02, sigmaTokenResponse03
         )
 
-        tokenManager.refreshTokenBalance(atsTauAccount)
+        whenever(tokenDao.getTaggedTokens())
+            .thenReturn(Single.just(listOf(ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xS0m3T0k3N", "13"))))
+
+        whenever(tempStorage.getRate(any())).thenReturn(2.0)
+
+        tokenManager.refreshTokensBalances(atsTauAccount)
             .test()
             .assertComplete()
             .assertValue {
                 it.second.size == 4 &&
                         it.second[0].token.name == "CookieTokenDATS" &&
                         it.second[0].balance.toPlainString() == "0.000000001" &&
-                        it.second[1].token.name == "SomeSomeTokenDATS" &&
-                        it.second[1].balance.toPlainString() == "0.000000000000000000000001"
+                        it.second[1].token.name == "CookieTokenATS" &&
+                        it.second[1].balance.toPlainString() == "0.00001"
             }
-        tokenManager.refreshTokenBalance(atsSigmaAccount)
+        tokenManager.refreshTokensBalances(atsSigmaAccount)
             .test()
             .assertComplete()
             .assertValue {
@@ -405,7 +436,7 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check updating Tokens Rates` () {
+    fun `Check updating Tokens Rates`() {
         val accountTokens = listOf(
             AccountToken(ERC20Token(3, "one", address = "0x01"), BigDecimal.TEN),
             AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
@@ -431,7 +462,7 @@ class TokenManagerTest : RxTest() {
     private val secondTokenII = ERC20Token(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
 
     private val tokenRawData = listOf(
-        TokenIconDetails(ATS_TAU, "0xC00k1e", "someIconAddress"),
-        TokenIconDetails(ATS_TAU, "0xC00k1eII", "someIconAddressII")
+        TokenDetails(ATS_TAU, "0xC00k1e", "someIconAddress"),
+        TokenDetails(ATS_TAU, "0xC00k1eII", "someIconAddressII")
     )
 }
