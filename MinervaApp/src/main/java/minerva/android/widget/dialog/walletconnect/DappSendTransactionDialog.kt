@@ -64,7 +64,6 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         gasPriceSelector.setAdapter(transaction.txCost.txSpeeds) { setTxCost(recalculateTxCost(it.value), account) }
         setTxCost(transaction, account)
         transaction.fiatValue?.let { value.text = it }
-        transaction.fiatWithUnit
         closeCustomTime.setOnClickListener {
             TransitionManager.beginDelayedTransition(sendTransactionDialog)
             closeCustomTime.visibleOrInvisible(false)
