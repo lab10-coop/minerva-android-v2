@@ -302,11 +302,9 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check that generating key for map is correct`() {
-        val chaiId = 3
-        val address = "0x4ddr355"
-        val key = tokenManager.generateTokenHash(chaiId, address)
-        key shouldBeEqualTo "30x4ddr355"
+    fun `getting token rate test`() {
+        whenever(tempStorage.getRate(any())).thenReturn(3.3)
+        tokenManager.getSingleTokenRate("somesome") shouldBeEqualTo 3.3
     }
 
     @Test

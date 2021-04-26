@@ -44,6 +44,7 @@ import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.TempStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import java.math.BigDecimal
 import java.util.*
 
@@ -119,10 +120,6 @@ class TokenManagerImpl(
             }
             walletManager.updateWalletConfig(copy(version = updateVersion))
         }
-
-    @VisibleForTesting
-    fun generateTokenHash(chainId: Int, address: String) = "$chainId$address".toLowerCase(Locale.ROOT)
-
 
     override fun getTokenIconURL(chainId: Int, address: String): Single<String> =
         cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->
@@ -227,6 +224,8 @@ class TokenManagerImpl(
                 Pair(true, accountTokens)
             }
         } else Single.just(Pair(false, accountTokens))
+
+    override fun getSingleTokenRate(tokenHash: String): Double = tempStorage.getRate(tokenHash)
 
     private fun getTokenIconsURL(): Single<Map<String, String>> =
         cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->

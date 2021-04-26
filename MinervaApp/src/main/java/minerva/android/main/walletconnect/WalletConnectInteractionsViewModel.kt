@@ -29,6 +29,7 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectTransactio
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
+import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -39,7 +40,7 @@ class WalletConnectInteractionsViewModel(
 ) : BaseViewModel() {
 
     internal var currentDappSession: DappSession? = null
-    private var currentRate: BigDecimal = BigDecimal.ZERO
+    private var currentRate: BigDecimal = Double.InvalidValue.toBigDecimal()
     private lateinit var currentTransaction: WalletConnectTransaction
     internal lateinit var currentAccount: Account
     private var tokenDecimal: Int = 0
@@ -108,6 +109,29 @@ class WalletConnectInteractionsViewModel(
             else -> Single.just(DefaultRequest)
         }
 
+    private fun getValueInFiat(transferType: TransferType, status: OnEthSendTransaction): BigDecimal =
+        status.transaction.run {
+            (if (isTokenTransaction(transferType)) tokenTransaction.tokenValue.toBigDecimal()
+            else value?.toBigDecimal() ?: Double.InvalidValue.toBigDecimal()).multiply(currentRate)
+        }
+
+    private fun getConstInFiat(cost: BigDecimal) =
+        if (currentRate == Double.InvalidValue.toBigDecimal()) Double.InvalidValue.toBigDecimal()
+        else cost.multiply(currentRate)
+
+    private fun getFiatRate(chainId: Int, transferType: TransferType, status: OnEthSendTransaction): Single<Double> =
+        if (isTokenTransaction(transferType)) transactionRepository.getTokenFiatRate(getTokenHash(chainId, status))
+        else transactionRepository.getCoinFiatRate(chainId)
+
+    private fun getTokenHash(chainId: Int, status: OnEthSendTransaction): String =
+        currentAccount.accountTokens
+            .find { it.token.symbol == status.transaction.tokenTransaction.tokenSymbol }?.token?.address.let { tokenAddress ->
+                generateTokenHash(chainId, tokenAddress ?: String.Empty)
+            }
+
+    private fun isTokenTransaction(transferType: TransferType) =
+        (transferType == TransferType.TOKEN_SWAP || transferType == TransferType.TOKEN_TRANSFER)
+
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
         transactionRepository.getAccountByAddress(session.address)?.let { currentAccount = it }
@@ -117,15 +141,15 @@ class WalletConnectInteractionsViewModel(
         val txCostPayload = getTxCostPayload(session.chainId, status, value, transferType)
         return transactionRepository.getTransactionCosts(txCostPayload)
             .flatMap { transactionCost ->
-                transactionRepository.getFiatRate(session.chainId)
-                    .onErrorResumeNext { Single.just(0.0) }
+                getFiatRate(session.chainId, transferType, status)
+                    .onErrorResumeNext { Single.just(Double.InvalidValue) }
                     .map {
                         currentRate = it.toBigDecimal()
-                        val valueInFiat = status.transaction.value?.toBigDecimal()?.multiply(currentRate)
-                        val costInFiat = transactionCost.cost.multiply(currentRate)
+                        val valueInFiat = getValueInFiat(transferType, status)
+                        val costInFiat = getConstInFiat(transactionCost.cost)
                         currentTransaction = status.transaction.copy(
                             value = BalanceUtils.getCryptoBalance(value),
-                            fiatValue = valueInFiat?.let { fiat ->
+                            fiatValue = valueInFiat.let { fiat ->
                                 BalanceUtils.getFiatBalance(
                                     fiat,
                                     transactionRepository.getFiatSymbol()

@@ -13,12 +13,11 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxSpeed
-import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.walletconnect.Topic
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
-import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
+import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import org.amshove.kluent.any
@@ -62,7 +61,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -149,7 +148,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
         viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
@@ -176,10 +175,13 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             "from",
             "to",
             value = null,
-            data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            tokenTransaction = TokenTransaction(tokenSymbol = "WTF")
         )
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, accountTokens = listOf(AccountToken(
+                ERC20Token(1, symbol = "WTF")
+            )))
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransaction(transition, "peerId"))
@@ -201,9 +203,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
+        whenever(transactionRepository.getTokenFiatRate(any())).thenReturn(Single.just(3.0))
 
         viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
         viewModel.currentAccount = account
@@ -253,7 +256,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getTokenFiatRate(any())).thenReturn(Single.just(3.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -304,9 +308,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
+        whenever(transactionRepository.getTokenFiatRate(any())).thenReturn(Single.just(3.0))
 
         viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
         viewModel.currentAccount = account
@@ -355,7 +360,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -367,7 +372,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             verify(requestObserver).onChanged(capture())
             firstValue is OnEthSendTransactionRequest
             (firstValue as OnEthSendTransactionRequest).apply {
-                transaction.transactionType shouldBeEqualTo  TransferType.DEFAULT_TOKEN_TX
+                transaction.transactionType shouldBeEqualTo TransferType.DEFAULT_TOKEN_TX
             }
         }
     }
@@ -402,7 +407,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -414,7 +419,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             verify(requestObserver).onChanged(capture())
             firstValue is OnEthSendTransactionRequest
             (firstValue as OnEthSendTransactionRequest).apply {
-                transaction.transactionType shouldBeEqualTo  TransferType.DEFAULT_TOKEN_TX
+                transaction.transactionType shouldBeEqualTo TransferType.DEFAULT_TOKEN_TX
             }
         }
     }
@@ -444,7 +449,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
@@ -456,7 +461,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             verify(requestObserver).onChanged(capture())
             firstValue is OnEthSendTransactionRequest
             (firstValue as OnEthSendTransactionRequest).apply {
-                transaction.transactionType shouldBeEqualTo  TransferType.COIN_TRANSFER
+                transaction.transactionType shouldBeEqualTo TransferType.COIN_TRANSFER
             }
         }
     }
@@ -491,7 +496,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                     )
                 )
             )
-        whenever(transactionRepository.getFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
 
