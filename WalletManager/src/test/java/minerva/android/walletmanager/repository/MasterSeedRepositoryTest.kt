@@ -160,11 +160,4 @@ class MasterSeedRepositoryTest : RxTest() {
         val result = repository.areMainNetworksEnabled
         assertEquals(true, result)
     }
-
-    @Test
-    fun `toggle main nets enabled returns true`() {
-        whenever(walletConfigManager.toggleMainNetsEnabled).thenReturn(true)
-        val result = repository.toggleMainNetsEnabled
-        assertEquals(true, result)
-    }
 }

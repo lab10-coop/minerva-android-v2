@@ -100,8 +100,11 @@ class AccountsViewModel(
             }
         }
 
-    private val _shouldMainNetsShowWarringLiveData = MutableLiveData<Event<Boolean>>()
-    val shouldShowWarringLiveData: LiveData<Event<Boolean>> get() = _shouldMainNetsShowWarringLiveData
+    var showMainNetworksWarning: Boolean
+        get() = accountManager.showMainNetworksWarning
+        set(value) {
+            accountManager.showMainNetworksWarning = value
+        }
 
     @VisibleForTesting
     lateinit var tokenVisibilitySettings: TokenVisibilitySettings
@@ -112,30 +115,16 @@ class AccountsViewModel(
 
     fun arePendingAccountsEmpty() = transactionRepository.getPendingAccounts().isEmpty()
 
-    init {
-        launchDisposable {
-            accountManager.enableMainNetsFlowable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = { _shouldMainNetsShowWarringLiveData.value = Event(it) },
-                    onError = { _shouldMainNetsShowWarringLiveData.value = Event(false) })
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        accountManager.toggleMainNetsEnabled = null
-    }
-
     override fun onResume() {
         super.onResume()
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings()
         refreshBalances()
-        refreshTokenBalance()
-        refreshTokensList()
-        accountManager.getAllAccounts()?.let { getSessions(it) }
+        refreshTokensBalances()
+        discoverNewTokens()
+        getSessions(accountManager.getAllAccounts())
     }
+
+    fun getFiatSymbol() = transactionRepository.getFiatSymbol()
 
     fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
         appUIState.updateAccountWidgetState(index, accountWidgetState)
@@ -212,10 +201,10 @@ class AccountsViewModel(
     private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>): Map<String, List<AccountToken>> {
         activeAccounts.filter { !it.isPending }.forEach { account ->
             accountTokenBalances[account.privateKey]?.let { tokensList ->
-                account.accountTokens = tokensList.filter {
-                    isTokenVisible(account.address, it).orElse {
-                        saveTokenVisible(account.address, it.token.address, true)
-                        hasFunds(it.balance)
+                account.accountTokens = tokensList.filter { accountToken ->
+                    isTokenVisible(account.address, accountToken).orElse {
+                        saveTokenVisible(account.address, accountToken.token.address, true)
+                        hasFunds(accountToken.balance)
                     }
                 }
             }
@@ -223,10 +212,10 @@ class AccountsViewModel(
         return accountTokenBalances
     }
 
-    fun refreshTokenBalance() =
+    fun refreshTokensBalances() =
         launchDisposable {
             tokenBalancesRefreshed = false
-            transactionRepository.refreshTokenBalance()
+            transactionRepository.refreshTokensBalances()
                 .map { filterNotVisibleTokens(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -247,14 +236,14 @@ class AccountsViewModel(
         _tokenBalanceLiveData.value = Unit
     }
 
-    fun refreshTokensList() =
+    fun discoverNewTokens() =
         launchDisposable {
             transactionRepository.refreshTokensList()
                 .filter { it }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { refreshTokenBalance() },
+                    onSuccess = { refreshTokensBalances() },
                     onError = { Timber.e(it) }
                 )
         }
@@ -354,9 +343,9 @@ class AccountsViewModel(
         return Account(Int.InvalidId)
     }
 
-    fun isTokenVisible(networkAddress: String, accountToken: AccountToken) =
-        tokenVisibilitySettings.getTokenVisibility(networkAddress, accountToken.token.address)?.let {
-            it && hasFunds(accountToken.balance)
+    fun isTokenVisible(accountAddress: String, accountToken: AccountToken): Boolean? =
+        tokenVisibilitySettings.getTokenVisibility(accountAddress, accountToken.token.address)?.let { isTokenVisible ->
+            isTokenVisible && hasFunds(accountToken.balance)
         }
 
     private fun hasFunds(balance: BigDecimal) = balance > BigDecimal.ZERO

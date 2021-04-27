@@ -46,23 +46,4 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/requestedDataLabel"
         tools:text="hahaha" />
-
-    <!--maybe needed for m27 integration    -->
-    <!--    <TextView-->
-    <!--        android:id="@+id/connectionLabel"-->
-    <!--        android:layout_width="0dp"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginLeft="@dimen/margin_normal"-->
-    <!--        android:layout_marginTop="@dimen/margin_large"-->
-    <!--        android:layout_marginRight="@dimen/margin_normal"-->
-    <!--        android:layout_marginBottom="@dimen/margin_normal"-->
-    <!--        android:fontFamily="@font/rubik_regular"-->
-    <!--        android:gravity="center"-->
-    <!--        android:textColor="@color/gray"-->
-    <!--        android:textSize="@dimen/text_normal"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintLeft_toLeftOf="parent"-->
-    <!--        app:layout_constraintRight_toRightOf="parent"-->
-    <!--        app:layout_constraintTop_toBottomOf="@+id/logo"-->
-    <!--        tools:text="wants connect to Minedasdasdsadsarva" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

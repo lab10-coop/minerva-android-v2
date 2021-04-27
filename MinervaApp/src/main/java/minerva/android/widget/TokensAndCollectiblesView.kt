@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import minerva.android.R
 import minerva.android.databinding.TokensAndCollectiblesLayoutBinding
 import minerva.android.extension.toggleVisibleOrGone
@@ -32,12 +33,18 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         prepareListeners()
     }
 
-    fun prepareView(account: Account, viewGroup: ViewGroup, callback: TokenView.TokenViewCallback, isOpen: Boolean) {
+    fun prepareView(
+        account: Account,
+        viewGroup: ViewGroup,
+        callback: TokenView.TokenViewCallback,
+        isOpen: Boolean,
+        fiatSymbol: String
+    ) {
         parent = viewGroup
         this.callback = callback
         visibleOrGone(isOpen)
-        initMainToken(account, callback)
-        initTokensList(account)
+        initMainToken(account, fiatSymbol, callback)
+        initTokensList(account, fiatSymbol)
     }
 
     private fun initView() {
@@ -52,15 +59,18 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         isFocusable = true
     }
 
-    private fun initTokensList(account: Account) {
+    private fun initTokensList(account: Account, fiatSymbol: String) {
         binding.apply {
             tokensContainer.removeAllViews()
             account.accountTokens.isNotEmpty().let { areTokensVisible ->
                 tokensHeader.visibleOrGone(areTokensVisible)
                 tokensContainer.visibleOrGone(areTokensVisible)
-                account.accountTokens.forEachIndexed { index, _ ->
+                account.accountTokens.sortedByDescending { it.fiatBalance }.forEach {
                     tokensContainer.addView(TokenView(context).apply {
-                        initView(account, callback, index)
+                        initView(account, callback, fiatSymbol, it.token.address)
+                        resources.getDimensionPixelOffset(R.dimen.margin_xxsmall).let {
+                            updatePadding(Int.NO_PADDING, it, Int.NO_PADDING, it)
+                        }
                     })
                 }
             }
@@ -119,13 +129,13 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     }
 
     //TODO this method is not used, because Asset Manage screen is not implemented yet - ready to use UI
-    private fun initMainToken(account: Account, callback: TokenView.TokenViewCallback) {
+    private fun initMainToken(account: Account, fiatSymbol: String, callback: TokenView.TokenViewCallback) {
         binding.apply {
             if (showMainToken) {
                 tokensSeparator.visible()
                 with(mainToken) {
                     visible()
-                    initView(account, callback)
+                    initView(account, callback, fiatSymbol)
                 }
             }
         }

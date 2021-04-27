@@ -59,10 +59,11 @@ android {
         flavorDimensions 'enviroment'
         staging {
             applicationId "minerva.android.staging"
-            versionCode 31
-            versionName "1.0.31"
+            versionCode 32
+            versionName "1.1.0"
             dimension 'enviroment'
             versionNameSuffix '-staging'
+            matchingFallbacks = ["staging"]
 
             buildConfigField "String", "REST_API_URL", '"http://minerva-api.dev.lab10.io/"'
             buildConfigField "String", "RAMP_API_URL", '"ri-widget-staging.firebaseapp.com"'
@@ -74,6 +75,7 @@ android {
             versionName "1.0.0"
             dimension 'enviroment'
             versionNameSuffix '-release'
+            matchingFallbacks = ["production"]
 
             buildConfigField "String", "REST_API_URL", '"https://api.minerva.digital"'
             buildConfigField "String", "RAMP_API_URL", '"buy.ramp.network"'

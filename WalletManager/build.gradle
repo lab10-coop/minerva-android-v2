@@ -10,7 +10,6 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
-
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 29
@@ -43,6 +42,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    flavorDimensions 'enviroment'
+    productFlavors {
+        staging {
+            buildConfigField "boolean", "ARE_MAIN_NETS_ENABLED", "false"
+        }
+        production {
+            buildConfigField "boolean", "ARE_MAIN_NETS_ENABLED", "true"
+        }
+    }
 }
 
 dependencies {
@@ -60,6 +69,7 @@ dependencies {
     implementation rxDependencies.values()
     implementation startupDependencies.values()
     implementation jsonLogicDependencies.values()
+    implementation kotlinReflect.values()
     testImplementation testDependencies.values()
     implementation room.values()
     implementation okhttp.values()

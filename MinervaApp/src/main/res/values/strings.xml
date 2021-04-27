@@ -66,7 +66,6 @@
     <string name="camera_error">Camera initialization error:</string>
     <string name="login">Login</string>
     <string name="next">Next</string>
-    <string name="authentication">Authentication</string>
     <string name="requested_data">Requested data: </string>
     <string name="required_field">This field is required</string>
     <string name="choose_an_identity">Choose an identity</string>
@@ -293,8 +292,8 @@
     <string name="wc_connection_error_message">Your WalletConnect connection was closed, you will have to reconnect again to the website</string>
     <string name="enable">Enable</string>
     <string name="create">Create</string>
-    <string name="protect_minerva">Protect Minerva</string>
-    <string name="protect_minerva_description">Enable your standard phone authentication method to access and secure the Minerva wallet</string>
+    <string name="protect_keys">Protect Keys</string>
+    <string name="protect_minerva_description">Enable your standard phone authentication method to protect your Seed Phrase and the export of private keys.</string>
     <string name="authentication_title">Use yor phone authentication</string>
     <string name="device_not_secured">Your device is not secured!</string>
     <string name="device_not_secured_message">Please change your device security settings and try again.</string>
@@ -304,4 +303,54 @@
     <string name="continue_to_ramp">Continue to Ramp</string>
     <string name="create_new_account">Create a new Account</string>
     <string name="no_account_on_network">You don\'t have an Account on this Network. Please create a new Account.</string>
+    <string name="currency">Currency</string>
+
+    <string-array name="currencies">
+        <item>EUR|Euro</item>
+        <item>GBP|Pound Sterling</item>
+        <item>USD|US Dollar</item>
+        <item>AED|United Arab Emirates Dirham</item>
+        <item>ARS|Argentine Peso</item>
+        <item>AUD|Australian Dollar</item>
+        <item>BDT|Bangladeshi Taka</item>
+        <item>BHD|Bahraini Dinar</item>
+        <item>BMD|Bermudian Dollar</item>
+        <item>BRL|Brazil Real</item>
+        <item>CAD|Canadian Dollar</item>
+        <item>CHF|Swiss Franc</item>
+        <item>CLP|Chilean Peso</item>
+        <item>CNY|Chinese Yuan</item>
+        <item>CZK|Czech Koruna</item>
+        <item>DKK|Danish Krone</item>
+        <item>HKD|Hong Kong Dollar</item>
+        <item>HUF|Hungarian Forint</item>
+        <item>IDR|Indonesian Rupiah</item>
+        <item>ILS|Israeli New Shekel</item>
+        <item>INR|Indian Rupee</item>
+        <item>JPY|Japanese Yen</item>
+        <item>KRW|South Korean Won</item>
+        <item>KWD|Kuwaiti Dinar</item>
+        <item>LKR|Sri Lankan Rupee</item>
+        <item>MMK|Burmese Kyat</item>
+        <item>MXN|Mexican Peso</item>
+        <item>MYR|Malaysian Ringgit</item>
+        <item>NGN|Nigerian Naira</item>
+        <item>NOK|Norwegian Krone</item>
+        <item>NZD|New Zealand Dollar</item>
+        <item>PHP|Philippine Peso</item>
+        <item>PKR|Pakistani Rupee</item>
+        <item>PLN|Polish Zloty</item>
+        <item>RUB|Russian Ruble</item>
+        <item>SAR|Saudi Riyal</item>
+        <item>SEK|Swedish Krona</item>
+        <item>SGD|Singapore Dollar</item>
+        <item>THB|Thai Baht</item>
+        <item>TRY|Turkish Lira</item>
+        <item>TWD|New Taiwan Dollar</item>
+        <item>UAH|Ukrainian hryvnia</item>
+        <item>VEF|Venezuelan Bolívar Fuerte</item>
+        <item>VND|Vietnamese Đồng</item>
+        <item>XDR|IMF Special Drawing Rights</item>
+        <item>ZAR|South African Rand</item>
+    </string-array>
 </resources>

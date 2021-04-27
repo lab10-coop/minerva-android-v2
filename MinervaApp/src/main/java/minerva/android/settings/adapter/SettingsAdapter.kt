@@ -71,7 +71,6 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
     ) {
         binding.apply {
             settingRows.removeAllViews()
-
             if (shouldShowAlerts(settings)) {
                 settingRows.addView(
                     ReminderView(

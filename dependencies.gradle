@@ -172,7 +172,8 @@ ext {
     jsonLogicDependencies = [jsonLogic: "eu.afse:eu.afse.jsonlogic:$jsonLogicVersion"]
 
     room = [
-            room  : "androidx.room:room-runtime:$roomVersion",
-            rommRx: "androidx.room:room-rxjava2:$roomVersion",
+            room   : "androidx.room:room-runtime:$roomVersion",
+            rommRx : "androidx.room:room-rxjava2:$roomVersion",
+            roomKtx: "androidx.room:room-ktx:$roomVersion"
     ]
 }

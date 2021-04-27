@@ -63,7 +63,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         editTxTime.setOnClickListener { showGasPriceDialog() }
         gasPriceSelector.setAdapter(transaction.txCost.txSpeeds) { setTxCost(recalculateTxCost(it.value), account) }
         setTxCost(transaction, account)
-        value.text = transaction.fiatWithUnit
+        transaction.fiatValue?.let { value.text = it }
         closeCustomTime.setOnClickListener {
             TransitionManager.beginDelayedTransition(sendTransactionDialog)
             closeCustomTime.visibleOrInvisible(false)
@@ -85,7 +85,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
                 receiver.text = context.getText(R.string.allowance_receiver)
                 transactionType.text = context.getText(R.string.allowance)
                 amount.text =
-                    if (transaction.tokenTransaction.allowance == Int.InvalidValue.toBigDecimal()) context.getString(R.string.unlimited)
+                    if (transaction.tokenTransaction.allowance == Double.InvalidValue.toBigDecimal()) context.getString(R.string.unlimited)
                     else transaction.tokenTransaction.allowance?.toPlainString()
 
             }

@@ -6,6 +6,10 @@ class TempStorageImpl : TempStorage {
 
     private val rateMap = mutableMapOf<String, Double>()
 
+    override fun clearRates() {
+        rateMap.clear()
+    }
+
     override fun getRates(): Map<String, Double> = rateMap
 
     override fun getRate(tokenHash: String) = rateMap[tokenHash] ?: Double.InvalidValue

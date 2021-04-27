@@ -18,6 +18,7 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.Fiat
 import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.mappers.PendingTransactionToPendingAccountMapper
 import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTransactionCost
@@ -35,7 +36,9 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashMap
 
 class TransactionRepositoryImpl(
     private val blockchainRepository: BlockchainRegularAccountRepository,
@@ -53,21 +56,23 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig().accounts.filter { accountsFilter(it) }.let { accounts ->
             blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
-                .map { (cryptoBalances, markets) -> MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets) }
+                .map { (cryptoBalances, markets) ->
+                    MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, localStorage.loadCurrentFiat())
+                }
         }
 
     private fun accountsFilter(it: Account) =
-        refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetsEnabled
+        refreshBalanceFilter(it) && it.network.testNet == !localStorage.areMainNetworksEnabled
 
     private fun getAddresses(accounts: List<Account>): List<Pair<Int, String>> =
         accounts.map { it.network.chainId to it.address }
 
     private fun refreshBalanceFilter(it: Account) = !it.isDeleted && !it.isPending
 
-    override fun refreshTokenBalance(): Single<Map<String, List<AccountToken>>> =
+    override fun refreshTokensBalances(): Single<Map<String, List<AccountToken>>> =
         getActiveAccounts().let { accounts ->
             Observable.fromIterable(accounts)
-                .flatMapSingle { tokenManager.refreshTokenBalance(it) }
+                .flatMapSingle { account -> tokenManager.refreshTokensBalances(account) }
                 .toList()
                 .map {
                     mutableMapOf<String, List<AccountToken>>().apply {
@@ -93,13 +98,11 @@ class TransactionRepositoryImpl(
                         .map { tokenManager.sortTokensByChainId(it) }
                         .map { tokenManager.mergeWithLocalTokensList(it) }
                         .flatMap { (shouldBeUpdated, accountTokens) ->
-                            tokenManager.updateTokenIcons(
-                                shouldBeUpdated,
-                                accountTokens
-                            ).onErrorReturn {
-                                Timber.e(it)
-                                Pair(false, accountTokens)
-                            }
+                            tokenManager.updateTokenIcons(shouldBeUpdated, accountTokens)
+                                .onErrorReturn {
+                                    Timber.e(it)
+                                    Pair(false, accountTokens)
+                                }
                         }
                         .flatMap { (shouldBeSaved, automaticTokenUpdateMap) ->
                             tokenManager.saveTokens(shouldBeSaved, automaticTokenUpdateMap)
@@ -112,9 +115,11 @@ class TransactionRepositoryImpl(
             }
         }
 
-    private fun getActiveAccounts(): List<Account> = walletConfigManager.getWalletConfig().accounts.filter { account ->
-        accountsFilter(account) && account.network.isAvailable()
-    }
+    private fun getActiveAccounts(): List<Account> =
+        walletConfigManager.getWalletConfig().accounts
+            .filter { account ->
+                accountsFilter(account) && account.network.isAvailable()
+            }
 
     private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERC20Token>> =
         Observable.fromIterable(accounts)
@@ -152,20 +157,27 @@ class TransactionRepositoryImpl(
         blockchainRepository.getTransactions(getTxHashes())
             .map { getPendingAccountsWithBlockHashes(it) }
 
-    override fun getEurRate(chainId: Int): Single<Double> =
-        when (chainId) {
-            ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethPrice?.value }
-            ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaPrice?.value }
-            ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiPrice?.value }
-            else -> Single.just(0.0)
+    override fun getCoinFiatRate(chainId: Int): Single<Double> =
+        localStorage.loadCurrentFiat().let { currentFiat ->
+            when (chainId) {
+                ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethFiatPrice?.getRate(currentFiat) }
+                ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaFiatPrice?.getRate(currentFiat) }
+                ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiFiatPrice?.getRate(currentFiat) }
+                else -> Single.just(ZERO_FIAT_VALUE)
+            }
         }
 
-    private fun getRate(id: String): Single<Markets> = cryptoApi.getMarkets(id, EUR_CURRENCY)
+    override fun getTokenFiatRate(tokenHash: String): Single<Double> = Single.just(tokenManager.getSingleTokenRate(tokenHash))
+
+    private fun getRate(id: String): Single<Markets> =
+        cryptoApi.getMarkets(id, localStorage.loadCurrentFiat().toLowerCase(Locale.ROOT))
 
     override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
 
     override fun sendTransaction(chainId: Int, transaction: Transaction): Single<String> =
         blockchainRepository.sendWalletConnectTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
+
+    override fun getFiatSymbol(): String = Fiat.getFiatSymbol(localStorage.loadCurrentFiat())
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         if (shouldGetGasPriceFromApi(chainId)) {
@@ -274,13 +286,13 @@ class TransactionRepositoryImpl(
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
 
-    override fun updateTokenIcons(): Completable = tokenManager.updateTokenIcons()
+    override fun checkMissingTokensDetails(): Completable = tokenManager.checkMissingTokensDetails()
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1
         private const val PENDING_NETWORK_LIMIT = 2
-        private const val EUR_CURRENCY = "eur"
         private const val ETHERSCAN_REQUEST_TIMESPAN = 1L
         private const val ETHERSCAN_REQUEST_PACKAGE = 5
+        private const val ZERO_FIAT_VALUE = 0.0
     }
 }

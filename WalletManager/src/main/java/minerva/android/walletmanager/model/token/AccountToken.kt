@@ -8,7 +8,7 @@ import java.math.RoundingMode
 
 data class AccountToken(
     val token: ERC20Token,
-    var rawBalance: BigDecimal = Int.InvalidValue.toBigDecimal(),
+    var rawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var tokenPrice: Double? = Double.InvalidValue
 ) {
     override fun equals(other: Any?): Boolean =
@@ -24,12 +24,8 @@ data class AccountToken(
         get() =
             tokenPrice?.let {
                 when (it) {
-                    Double.InvalidValue -> WRONG_CURRENCY_VALUE
+                    Double.InvalidValue -> Double.InvalidValue.toBigDecimal()
                     else -> BigDecimal(it).multiply(balance).setScale(13, RoundingMode.HALF_UP)
                 }
-            }.orElse { WRONG_CURRENCY_VALUE }
-
-    companion object {
-        private val WRONG_CURRENCY_VALUE = (-1).toBigDecimal()
-    }
+            }.orElse { Double.InvalidValue.toBigDecimal() }
 }

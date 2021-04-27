@@ -71,7 +71,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Before
     fun initViewModel() {
-        whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
         viewModel = AccountsViewModel(
             accountManager,
             walletActionsRepository,
@@ -80,26 +79,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
             walletConnectRepository,
             appUIState
         )
-    }
-
-    @Test
-    fun `should show warning success test`() {
-        viewModel.shouldShowWarringLiveData.observeForever(shouldShowWarningObserver)
-        shouldShowWarningCaptor.run {
-            verify(shouldShowWarningObserver).onChanged(capture())
-            firstValue.peekContent()
-        }
-    }
-
-    @Test
-    fun `should show warning error test`() {
-        val error = Throwable()
-        whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.error(error))
-        viewModel.shouldShowWarringLiveData.observeForever(shouldShowWarningObserver)
-        shouldShowWarningCaptor.run {
-            verify(shouldShowWarningObserver).onChanged(capture())
-            !firstValue.peekContent()
-        }
     }
 
     @Test
@@ -151,7 +130,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success test`() {
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(
             Single.just(
                 mapOf(
                     Pair(
@@ -162,7 +141,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             )
         )
         viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
-        viewModel.refreshTokenBalance()
+        viewModel.refreshTokensBalances()
         tokensBalanceCaptor.run {
             verify(tokensBalanceObserver).onChanged(capture())
         }
@@ -175,20 +154,20 @@ class AccountsViewModelTest : BaseViewModelTest() {
             Single.just(false),
             Single.error(Throwable("Refresh tokens list error"))
         )
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.just(mapOf()))
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.just(mapOf()))
 
-        viewModel.refreshTokensList()
-        viewModel.refreshTokensList()
-        viewModel.refreshTokensList()
-        verify(transactionRepository, times(1)).refreshTokenBalance()
+        viewModel.discoverNewTokens()
+        viewModel.discoverNewTokens()
+        viewModel.discoverNewTokens()
+        verify(transactionRepository, times(1)).refreshTokensBalances()
     }
 
     @Test
     fun `get tokens balance error test`() {
         val error = Throwable()
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.error(error))
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.error(error))
         viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
-        viewModel.refreshTokenBalance()
+        viewModel.refreshTokensBalances()
         refreshBalancesErrorCaptor.run {
             verify(refreshBalancesErrorObserver).onChanged(capture())
             firstValue.peekContent() == ErrorCode.TOKEN_BALANCE_ERROR

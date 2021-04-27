@@ -12,6 +12,7 @@ import minerva.android.accounts.enum.ErrorCode
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.databinding.RefreshableRecyclerViewLayoutBinding
 import minerva.android.extension.visibleOrGone
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
@@ -22,7 +23,6 @@ import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.widget.state.AccountWidgetState
-import minerva.android.extensions.showBiometricPrompt
 import minerva.android.wrapped.startManageTokensWrappedActivity
 import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
@@ -58,8 +58,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onSendTransaction(index: Int) = interactor.showTransactionScreen(index)
 
-    override fun onSendTokenTransaction(accountIndex: Int, tokenIndex: Int) =
-        interactor.showTransactionScreen(accountIndex, tokenIndex)
+    override fun onSendTokenTransaction(accountIndex: Int, tokenAddress: String) =
+        interactor.showTransactionScreen(accountIndex, tokenAddress)
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
@@ -110,13 +110,17 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             viewModel.apply {
                 networksHeader.text = getHeader(areMainNetsEnabled)
                 addCryptoButton.apply {
-                    if (areMainNetsEnabled) {
-                        text = getString(R.string.buy_crypto)
+                    text = if (areMainNetsEnabled) {
                         setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary))
+                        getString(R.string.buy_crypto)
                     } else {
-                        text = getString(R.string.add_tats)
                         setBackgroundColor(ContextCompat.getColor(context, R.color.artis))
+                        getString(R.string.add_tats)
                     }
+                }
+                if (showMainNetworksWarning) {
+                    FundsAtRiskDialog(requireContext()).show()
+                    showMainNetworksWarning = false
                 }
             }
         }
@@ -134,8 +138,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 setOnRefreshListener {
                     with(viewModel) {
                         refreshBalances()
-                        refreshTokenBalance()
-                        refreshTokensList()
+                        refreshTokensBalances()
+                        discoverNewTokens()
                     }
                 }
             }
@@ -153,15 +157,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     private fun setupLiveData() {
         viewModel.apply {
-            shouldShowWarringLiveData.observe(viewLifecycleOwner, EventObserver {
-                if (it) {
-                    FundsAtRiskDialog(requireContext()).show()
-                }
-            })
             binding.apply {
                 accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)
-                    accountAdapter.updateList(accounts, activeAccounts)
+                    accountAdapter.updateList(accounts, activeAccounts, viewModel.getFiatSymbol())
                     setTatsButtonListener()
                 })
 
