@@ -355,29 +355,10 @@
         <item>ZAR|South African Rand</item>
     </string-array>
 
-    <!--  TODO add real release notes  -->
-    <!--  use \u2022 indicator to show note with bullet -->
+    <!--  TODO Add real release notes  -->
+    <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
-        <item>1.0.3</item>
-        <item>\u2022 The first is a non technical method which requires the use of adware removal software.Download free adware and spyware removal.</item>
-        <item>\u2022 Download free adware and spyware removal software and use advanced tools to help prevent getting infected.</item>
-        <item>\u2022 Use an adware removal program to scan the system and remove adware.</item>
-        <item>\u2022 Download and run an adware or spyware removal program.</item>
-        <item>1.0.2</item>
-        <item>\u2022 Download free adware and spyware removal software and use advanced tools to help prevent getting infected.</item>
-        <item>\u2022 The first is a non technical method which requires the use of adware removal software.Download free adware and spyware removal.</item>
-        <item>\u2022 Download and run an adware or spyware removal program.</item>
-        <item>\u2022 Use an adware removal program to scan the system and remove adware.</item>
-        <item>1.0.1</item>
-        <item>\u2022 Use an adware removal program to scan the system and remove adware.</item>
-        <item>\u2022 Download free adware and spyware removal software and use advanced tools to help prevent getting infected.</item>
-        <item>\u2022 Download and run an adware or spyware removal program.</item>
-        <item>\u2022 The first is a non technical method which requires the use of adware removal software.Download free adware and spyware removal.</item>
-        <item>1.0.0</item>
-        <item>\u2022 First release E V E R !</item>
-        <item>\u2022 Download free adware and spyware removal software and use advanced tools to help prevent getting infected.</item>
-        <item>\u2022 Use an adware removal program to scan the system and remove adware.</item>
-        <item>\u2022 Download and run an adware or spyware removal program.</item>
-        <item>\u2022 The first is a non technical method which requires the use of adware removal software.Download free adware and spyware removal.</item>
+        <item>3.0.3</item>
+        <item>* Release Notes.</item>
     </string-array>
 </resources>

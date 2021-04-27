@@ -37,7 +37,7 @@ class ReleaseNoteAdapter(private val notes: List<String>) : RecyclerView.Adapter
     companion object {
         private const val VERSION_ROW_TYPE = 3
         private const val NOTE_ROW_TYPE = 13
-        private const val NOTE_INDICATOR = "\u2022"
+        private const val NOTE_INDICATOR = "*"
     }
 
     inner class VersionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
