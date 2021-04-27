@@ -1,6 +1,5 @@
 package minerva.android.main.walletconnect
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.prettymuchbryce.abidecoder.Decoder
