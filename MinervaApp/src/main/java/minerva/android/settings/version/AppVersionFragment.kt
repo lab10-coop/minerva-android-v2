@@ -1,13 +1,15 @@
 package minerva.android.settings.version
 
 import android.os.Bundle
+import android.transition.TransitionManager
 import android.view.View
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.databinding.FragmentAppVersionBinding
+import minerva.android.extension.visibleOrGone
 import minerva.android.main.base.BaseFragment
-import minerva.android.settings.model.ReleaseNote
 
 class AppVersionFragment : BaseFragment(R.layout.fragment_app_version) {
 
@@ -23,18 +25,20 @@ class AppVersionFragment : BaseFragment(R.layout.fragment_app_version) {
         binding.releaseNotes.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = ConcatAdapter(
-                HeaderNotesAdapter(), ReleaseNoteAdapter(
-                    listOf(
-                        ReleaseNote("1.0.3", "Some Some notes notes"),
-                        ReleaseNote("1.0.4", "WTF klop WTF")
-                    )
-                )
+                HeaderNotesAdapter(), ReleaseNoteAdapter(context.resources.getStringArray(R.array.release_notes).toList())
             )
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    binding.footer.visibleOrGone(canScrollVertically(SCROLLING_DOWN))
+                }
+            })
         }
     }
 
     companion object {
         @JvmStatic
         fun newInstance() = AppVersionFragment()
+        private const val SCROLLING_DOWN = 1
     }
 }

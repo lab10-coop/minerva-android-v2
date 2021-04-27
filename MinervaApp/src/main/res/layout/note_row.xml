@@ -3,21 +3,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/margin_small"
+    android:paddingBottom="@dimen/margin_small">
 
-    <TextView
-        android:id="@+id/version"
-        android:layout_width="match_parent"
+    <ImageView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/margin_xsmall"
-        android:textColor="@color/gray"
-        tools:text="1.0.1" />
+        android:contentDescription=""
+        android:src="@drawable/purple_round_indicator" />
 
     <TextView
-        android:id="@+id/body"
+        android:id="@+id/note"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/margin_xsmall"
-        android:textColor="@color/gray"
+        android:padding="@dimen/margin_xxxsmall"
+        android:textSize="@dimen/text_small"
         tools:text="The first is a non technical method which requires the use of adware removal software. Download free adware and spyware removal." />
 </LinearLayout>

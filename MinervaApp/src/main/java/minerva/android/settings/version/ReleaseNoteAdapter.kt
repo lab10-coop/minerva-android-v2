@@ -5,30 +5,56 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
-import minerva.android.databinding.NotesRowBinding
-import minerva.android.settings.model.ReleaseNote
+import minerva.android.databinding.NoteRowBinding
+import minerva.android.databinding.VersionRowBinding
+import minerva.android.kotlinUtils.Empty
 
-class ReleaseNoteAdapter(private val notes: List<ReleaseNote>) : RecyclerView.Adapter<ReleaseNoteAdapter.NotesViewHolder>() {
+class ReleaseNoteAdapter(private val notes: List<String>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount(): Int = notes.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NotesViewHolder(
-        LayoutInflater.from(parent.context).inflate(R.layout.notes_row, parent, false)
-    )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+        when (viewType) {
+            VERSION_ROW_TYPE -> VersionViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.version_row, parent, false))
+            else -> NotesViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.note_row, parent, false))
+        }
 
-    override fun onBindViewHolder(holder: NotesViewHolder, position: Int) {
-        holder.setData(notes[position])
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        notes[position].run {
+            if (isNoteRowType(this)) (holder as NotesViewHolder).bind(prepareNote(this))
+            else (holder as VersionViewHolder).bind(this)
+        }
     }
 
-    class NotesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    override fun getItemViewType(position: Int): Int =
+        if (isNoteRowType(notes[position])) NOTE_ROW_TYPE
+        else VERSION_ROW_TYPE
 
-        private val binding = NotesRowBinding.bind(view)
+    private fun isNoteRowType(note: String) = note.startsWith(NOTE_INDICATOR)
 
-        fun setData(note: ReleaseNote) {
-            binding.apply {
-                version.text = note.version
-                body.text = note.note
-            }
+    private fun prepareNote(note: String) = note.replace(NOTE_INDICATOR, String.Empty).trim()
+
+    companion object {
+        private const val VERSION_ROW_TYPE = 3
+        private const val NOTE_ROW_TYPE = 13
+        private const val NOTE_INDICATOR = "\u2022"
+    }
+
+    inner class VersionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        private val binding = VersionRowBinding.bind(view)
+
+        fun bind(version: String) {
+            binding.version.text = version
+        }
+    }
+
+    inner class NotesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        private val binding = NoteRowBinding.bind(view)
+
+        fun bind(note: String) {
+            binding.note.text = note
         }
     }
 }
