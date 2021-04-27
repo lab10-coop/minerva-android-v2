@@ -1,5 +1,6 @@
 package minerva.android.main.walletconnect
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.prettymuchbryce.abidecoder.Decoder
@@ -111,8 +112,9 @@ class WalletConnectInteractionsViewModel(
 
     private fun getValueInFiat(transferType: TransferType, status: OnEthSendTransaction): BigDecimal =
         status.transaction.run {
-            (if (isTokenTransaction(transferType)) tokenTransaction.tokenValue.toBigDecimal()
-            else value?.toBigDecimal() ?: Double.InvalidValue.toBigDecimal()).multiply(currentRate)
+            if (currentRate == Double.InvalidValue.toBigDecimal()) return currentRate
+            if (isTokenTransaction(transferType)) tokenTransaction.tokenValue.toBigDecimal().multiply(currentRate)
+            else value?.toBigDecimal()?.multiply(currentRate) ?: Double.InvalidValue.toBigDecimal()
         }
 
     private fun getConstInFiat(cost: BigDecimal) =
