@@ -304,6 +304,7 @@
     <string name="create_new_account">Create a new Account</string>
     <string name="no_account_on_network">You don\'t have an Account on this Network. Please create a new Account.</string>
     <string name="currency">Currency</string>
+    <string name="version_history">Version history</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

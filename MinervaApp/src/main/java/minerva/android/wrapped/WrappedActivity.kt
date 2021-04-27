@@ -22,6 +22,7 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.settings.authentication.AuthenticationFragment
 import minerva.android.settings.fiat.FiatFragment
+import minerva.android.settings.version.AppVersionFragment
 import minerva.android.token.AddTokenFragment
 import minerva.android.token.ManageTokensFragment
 import minerva.android.token.ramp.RampFragment
@@ -124,6 +125,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.AUTHENTICATION -> AuthenticationFragment.newInstance()
             WrappedFragmentType.RAMP -> RampFragment.newInstance()
             WrappedFragmentType.CURRENCY -> FiatFragment.newInstance()
+            WrappedFragmentType.APP_VERSION -> AppVersionFragment.newInstance()
         }
         addFragment(R.id.container, fragment)
     }
@@ -142,6 +144,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.RAMP -> getString(R.string.buy_crypto)
             WrappedFragmentType.AUTHENTICATION -> getString(R.string.protect_keys)
             WrappedFragmentType.CURRENCY -> getString(R.string.currency)
+            WrappedFragmentType.APP_VERSION -> getString(R.string.version)
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
@@ -197,5 +200,6 @@ enum class WrappedFragmentType {
     MANAGE_TOKENS,
     AUTHENTICATION,
     RAMP,
-    CURRENCY
+    CURRENCY,
+    APP_VERSION
 }
