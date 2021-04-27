@@ -5,10 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPrices
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.Price
-import minerva.android.apiProvider.model.TransactionSpeed
+import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -69,7 +66,8 @@ class TransactionRepositoryTest : RxTest() {
     fun `refresh balances test success`() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
             .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.0))))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.0))))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
 
         repository.refreshBalances().test()
             .assertComplete()
@@ -81,6 +79,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `refresh balances test error`() {
         val error = Throwable()
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(
             Single.error(
                 error
@@ -97,6 +96,7 @@ class TransactionRepositoryTest : RxTest() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
             .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         repository.refreshBalances().test()
             .assertComplete()
             .assertValue {
@@ -645,8 +645,9 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `get eur rate test`() {
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.2))))
-        repository.getEurRate(2)
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
+        repository.getCoinFiatRate(2)
             .test()
             .assertComplete()
             .assertValue {
@@ -656,8 +657,9 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `get eur rate for eth test`() {
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.2))))
-        repository.getEurRate(1)
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
+        repository.getCoinFiatRate(1)
             .test()
             .assertComplete()
             .assertValue {

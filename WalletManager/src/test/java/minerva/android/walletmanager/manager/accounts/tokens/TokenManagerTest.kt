@@ -302,11 +302,9 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `Check that generating key for map is correct`() {
-        val chaiId = 3
-        val address = "0x4ddr355"
-        val key = tokenManager.generateTokenHash(chaiId, address)
-        key shouldBeEqualTo "30x4ddr355"
+    fun `getting token rate test`() {
+        whenever(tempStorage.getRate(any())).thenReturn(3.3)
+        tokenManager.getSingleTokenRate("somesome") shouldBeEqualTo 3.3
     }
 
     @Test
@@ -409,7 +407,7 @@ class TokenManagerTest : RxTest() {
     fun `check getting tokens rate request`() {
         val error = Throwable("ERROR-333")
         val rates = mapOf(Pair("40x0th3r", 1.0), Pair("40xc00k1e", 0.2), Pair("hash03", 3.3))
-        val marketResponse = TokenMarketResponse("id", "tokenName", MarketData(Price(3.3)))
+        val marketResponse = TokenMarketResponse("id", "tokenName", MarketData(FiatPrice(3.3)))
         val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
 
         doNothing().whenever(tempStorage).saveRate(any(), any())
@@ -421,6 +419,7 @@ class TokenManagerTest : RxTest() {
             Single.just(marketResponse),
             Single.error(error)
         )
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
 
         tokenManager.getTokensRate(tokens)
             .test()

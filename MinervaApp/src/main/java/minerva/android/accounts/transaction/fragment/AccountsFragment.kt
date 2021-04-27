@@ -160,7 +160,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             binding.apply {
                 accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)
-                    accountAdapter.updateList(accounts, activeAccounts)
+                    accountAdapter.updateList(accounts, activeAccounts, viewModel.getFiatSymbol())
                     setTatsButtonListener()
                 })
 

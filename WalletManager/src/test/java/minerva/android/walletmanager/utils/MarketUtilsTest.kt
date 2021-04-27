@@ -1,7 +1,7 @@
 package minerva.android.walletmanager.utils
 
 import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.Price
+import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.Network
@@ -32,12 +32,12 @@ class MarketUtilsTest {
             Account(1, address = "address1", chainId = poaNetwork.chainId),
             Account(2, address = "address2", chainId = xdaiNetwork.chainId)
         )
-    private val markets = Markets(poaPrice = Price(value = 0.5), daiPrice = Price(2.0))
+    private val markets = Markets(poaFiatPrice = FiatPrice(eur = 0.5), daiFiatPrice = FiatPrice(2.0))
 
     @Test
     fun `calculate fiat balance in euro for xdai and poa when main nets enabled`() {
         NetworkManager.initialize(listOf(poaNetwork, xdaiNetwork))
-        val result = MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets)
+        val result = MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, "EUR")
         val expectedFiatBalance = BigDecimal.valueOf(6.00).setScale(2, RoundingMode.HALF_DOWN)
         assertEquals(expectedFiatBalance, result["address1"]?.fiatBalance)
         assertEquals(BigDecimal(10), result["address2"]?.cryptoBalance)
@@ -45,7 +45,7 @@ class MarketUtilsTest {
 
     @Test
     fun `calculate fiat balance in euro for xdai and poa when main nets disabled`() {
-        val result = MarketUtils.calculateFiatBalances(cryptoBalances, testNetworksAccount, markets)
+        val result = MarketUtils.calculateFiatBalances(cryptoBalances, testNetworksAccount, markets, "EUR")
         val expectedFiatBalance = BigDecimal.valueOf(6.00).setScale(2, RoundingMode.HALF_DOWN)
         assertEquals(expectedFiatBalance, result["address1"]?.fiatBalance)
         assertEquals(BigDecimal(10), result["address2"]?.cryptoBalance)

@@ -163,23 +163,37 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `check showing main networks correctly` () {
+    fun `check showing main networks correctly`() {
         localStorage.areMainNetworksEnabled = true
-        verify (exactly = 2) {
+        verify(exactly = 2) {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
     }
 
     @Test
-    fun `check the main networks warning should show` () {
+    fun `check the main networks warning should show`() {
         localStorage.showMainNetworksWarning = true
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
     }
 
+    @Test
+    fun `check saving and loading current fiat`() {
+        localStorage.apply {
+            loadCurrentFiat()
+            saveCurrentFiat("EUR")
+        }
+        verify {
+            sharedPref.apply {
+                edit().putString(any(), any()).apply()
+                getString(any(), any())
+            }
+        }
+    }
+
     @After
-    fun `double check verification` () {
+    fun `double check verification`() {
         confirmVerified(sharedPref)
     }
 }

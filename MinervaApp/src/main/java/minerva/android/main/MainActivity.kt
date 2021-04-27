@@ -76,7 +76,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         with(viewModel) {
             restorePendingTransactions()
             checkMissingTokensDetails()
-            getTokensRate()
         }
     }
 
@@ -84,6 +83,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         super.onResume()
         shouldShowLoadingScreen(false)
         handleExecutedAccounts()
+        viewModel.getTokensRate()
     }
 
     override fun onAttachFragment(fragment: Fragment) {

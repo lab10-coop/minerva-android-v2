@@ -23,6 +23,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     fun initView(
         account: Account,
         callback: TokenViewCallback,
+        fiatSymbol: String,
         tokenAddress: String = String.Empty
     ) {
         prepareView(account, tokenAddress)
@@ -30,7 +31,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         getTokensValues(account, tokenAddress).let { (crypto, fiat) ->
             with(binding.amountView) {
                 setCrypto(getCryptoBalance(crypto))
-                setFiat(getFiatBalance(fiat))
+                setFiat(getFiatBalance(fiat, fiatSymbol))
             }
         }
     }

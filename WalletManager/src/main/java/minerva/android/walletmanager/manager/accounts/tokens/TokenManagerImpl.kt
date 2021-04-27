@@ -6,11 +6,14 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.apiProvider.api.CryptoApi
+import minerva.android.apiProvider.model.CommitElement
+import minerva.android.apiProvider.model.FiatPrice
+import minerva.android.apiProvider.model.MarketData
+import minerva.android.apiProvider.model.TokenMarketResponse
 import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
@@ -41,6 +44,7 @@ import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.TempStorage
 import minerva.android.walletmanager.utils.MarketUtils
+import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import java.math.BigDecimal
 import java.util.*
 
@@ -55,6 +59,7 @@ class TokenManagerImpl(
 
     private val currentTimeProvider = CurrentTimeProviderImpl()
     private val tokenDao: TokenDao = database.tokenDao()
+    private var currentFiat = String.Empty
 
     override fun loadCurrentTokens(chainId: Int): List<ERC20Token> =
         walletManager.getWalletConfig().run {
@@ -115,10 +120,6 @@ class TokenManagerImpl(
             }
             walletManager.updateWalletConfig(copy(version = updateVersion))
         }
-
-    @VisibleForTesting
-    fun generateTokenHash(chainId: Int, address: String) = "$chainId$address".toLowerCase(Locale.ROOT)
-
 
     override fun getTokenIconURL(chainId: Int, address: String): Single<String> =
         cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->
@@ -224,6 +225,8 @@ class TokenManagerImpl(
             }
         } else Single.just(Pair(false, accountTokens))
 
+    override fun getSingleTokenRate(tokenHash: String): Double = tempStorage.getRate(tokenHash)
+
     private fun getTokenIconsURL(): Single<Map<String, String>> =
         cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->
             data.associate { generateTokenHash(it.chainId, it.address) to it.logoURI }
@@ -244,9 +247,9 @@ class TokenManagerImpl(
                 Observable.just(Pair(tokenHash, it))
             }.orElse {
                 cryptoApi.getTokenMarkets(MarketUtils.getMarketId(token.chainId), token.address)
-                    .onErrorReturn { TokenMarketResponse(marketData = MarketData(Price())) }
+                    .onErrorReturn { TokenMarketResponse(marketData = MarketData(FiatPrice())) }
                     .map {
-                        val tokenMarketRate = it.marketData.currentPrice.value ?: Double.InvalidValue
+                        val tokenMarketRate = it.marketData.currentFiatPrice.getRate(localStorage.loadCurrentFiat())
                         Pair(tokenHash, tokenMarketRate)
                     }.toObservable()
             }
@@ -254,6 +257,7 @@ class TokenManagerImpl(
 
     override fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable =
         mutableListOf<Observable<Pair<String, Double>>>().let { observables ->
+            if (currentFiat != localStorage.loadCurrentFiat()) tempStorage.clearRates()
             tokens.values.forEach {
                 it.forEach {
                     observables.add(updateAccountTokenRate(it, tempStorage.getRates()))
@@ -262,7 +266,11 @@ class TokenManagerImpl(
             Observable.merge(observables)
                 .doOnNext { (tokenHash, rate) ->
                     tempStorage.saveRate(tokenHash, rate)
-                }.toList().ignoreElement()
+                }.toList()
+                .doOnSuccess {
+                    currentFiat = localStorage.loadCurrentFiat()
+                }
+                .ignoreElement()
         }
 
     override fun updateTokensRate(account: Account) {

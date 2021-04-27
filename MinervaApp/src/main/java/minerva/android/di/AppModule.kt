@@ -13,11 +13,7 @@ import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
 import minerva.android.integration.ThirdPartyRequestViewModel
 import minerva.android.main.MainViewModel
-import minerva.android.walletmanager.storage.TempStorage
-import minerva.android.walletmanager.storage.TempStorageImpl
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
-import minerva.android.token.AddTokenViewModel
-import minerva.android.token.ManageTokensViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.services.ServicesViewModel
@@ -26,7 +22,10 @@ import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.authentication.AuthenticationViewModel
 import minerva.android.settings.backup.BackupViewModel
+import minerva.android.settings.fiat.FiatViewModel
 import minerva.android.splash.SplashScreenViewModel
+import minerva.android.token.AddTokenViewModel
+import minerva.android.token.ManageTokensViewModel
 import minerva.android.token.ramp.RampViewModel
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletmanager.createWalletManagerModules
@@ -82,6 +81,7 @@ private val appModules = module {
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
     viewModel { RampViewModel(get(), get()) }
+    viewModel { FiatViewModel(get(), get()) }
 }
 
 private const val MinervaCache = "MinervaCache"

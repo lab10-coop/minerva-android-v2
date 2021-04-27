@@ -8,14 +8,15 @@ import minerva.android.R
 import minerva.android.databinding.FragmentSettingsBinding
 import minerva.android.extension.launchActivity
 import minerva.android.extension.openUri
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.main.base.BaseFragment
 import minerva.android.settings.adapter.SettingsAdapter
 import minerva.android.settings.backup.BackupActivity
 import minerva.android.settings.model.SettingsRowType
 import minerva.android.settings.model.SettingsRowType.*
 import minerva.android.settings.model.propagateSettings
-import minerva.android.extensions.showBiometricPrompt
 import minerva.android.wrapped.startAuthenticationWrappedActivity
+import minerva.android.wrapped.startCurrencyWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -57,7 +58,10 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
                 MAIN_NETWORKS_ENABLED to areMainNetsEnabled,
                 AUTHENTICATION_ENABLED to isAuthenticationEnabled
             ).let {
-                settingsAdapter.updateList(it, propagateSettings())
+                settingsAdapter.updateList(
+                    it,
+                    propagateSettings(viewModel.getCurrentFiat(requireContext().resources.getStringArray(R.array.currencies)))
+                )
             }
         }
     }
@@ -76,6 +80,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             TERMS_OF_SERVICE -> context?.openUri(webUri = BuildConfig.TERMS_OF_SERVICE)
             PRIVACY_POLICY -> context?.openUri(webUri = BuildConfig.PRIVACY_POLICY)
             AUTHENTICATION -> startAuthenticationWrappedActivity(requireContext())
+            CURRENCY -> startCurrencyWrappedActivity(requireContext())
             else -> Timber.d(type.toString())
         }
     }

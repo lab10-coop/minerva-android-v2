@@ -124,6 +124,8 @@ class AccountsViewModel(
         getSessions(accountManager.getAllAccounts())
     }
 
+    fun getFiatSymbol() = transactionRepository.getFiatSymbol()
+
     fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
         appUIState.updateAccountWidgetState(index, accountWidgetState)
 

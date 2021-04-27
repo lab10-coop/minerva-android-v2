@@ -44,7 +44,7 @@ enum class SettingsRowType(val iconRes: Int) {
     PRIVACY_POLICY(Int.EmptyResource)
 }
 
-fun SettingsFragment.propagateSettings(): List<Settings> =
+fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
     listOf(
         Settings(
             getString(R.string.security), listOf(
@@ -67,7 +67,7 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                     rowType = SettingsRowType.BACKUP
                 ),
                 SettingRow(
-                    getString(R.string.authentication),
+                    getString(R.string.protect_keys),
                     R.drawable.ic_authentication,
                     detailText = getString(R.string.enable),
                     rowType = SettingsRowType.AUTHENTICATION
@@ -76,6 +76,12 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
         ),
         Settings(
             getString(R.string.your_preferences), listOf(
+                SettingRow(
+                    getString(R.string.currency),
+                    R.drawable.ic_currency,
+                    detailText = currentFiat,
+                    rowType = SettingsRowType.CURRENCY
+                ),
                 SettingRow(
                     getString(R.string.use_main_networks),
                     R.drawable.ic_main_networks,
@@ -112,3 +118,5 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
             ), SettingsSection.LEGAL
         )
     )
+
+

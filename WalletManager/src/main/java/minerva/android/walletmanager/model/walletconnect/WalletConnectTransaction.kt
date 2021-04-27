@@ -16,6 +16,4 @@ data class WalletConnectTransaction(
     val transactionType: TransferType = TransferType.UNKNOWN,
     var tokenTransaction: TokenTransaction = TokenTransaction(),
     val txCost: TransactionCost = TransactionCost()
-) {
-    val fiatWithUnit = "$fiatValue EUR"
-}
+)

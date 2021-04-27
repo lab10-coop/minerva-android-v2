@@ -33,6 +33,7 @@ dependencies {
     implementation project(':KotlinUtils')
     implementation coreDependencies.values()
     implementation koinDependencies.values()
+    implementation kotlinReflect.values()
     api rxDependencies.values()
     implementation retrofitDependencies.values()
     testImplementation testDependencies.values()

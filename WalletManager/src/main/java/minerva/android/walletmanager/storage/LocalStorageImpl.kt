@@ -116,6 +116,12 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         return settings
     }
 
+    override fun loadCurrentFiat(): String = sharedPreferences.getString(CURRENT_FIAT, DEFAULT_CURRENCY) ?: DEFAULT_CURRENCY
+
+    override fun saveCurrentFiat(fiat: String) {
+        sharedPreferences.edit().putString(CURRENT_FIAT, fiat).apply()
+    }
+
     private fun findRecipient(list: List<Recipient>, recipient: Recipient): Int {
         list.forEachIndexed { index, it ->
             if (it.address.equals(recipient.address, true)) return index
@@ -135,5 +141,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val ICON_UPDATE_TIMESTAMP = "last_update_timestamp"
         private const val AUTHENTICATION_ENABLED = "authentication_enabled"
         private const val SHOW_MAIN_NETWORKS_WARNING = "show_main_networks_warning"
+        private const val CURRENT_FIAT = "current_fiat"
+        private const val DEFAULT_CURRENCY = "EUR"
     }
 }

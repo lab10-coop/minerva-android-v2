@@ -8,11 +8,14 @@ import minerva.android.blockchainprovider.repository.regularAccont.BlockchainReg
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.*
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
@@ -336,5 +339,37 @@ class AccountManagerTest : RxTest() {
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("checksum")
         val result = manager.toChecksumAddress("address")
         assertEquals(result, "checksum")
+    }
+
+    @Test
+    fun `Checking clearing current fiats values for main coin and tokens`() {
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(
+                    1, chainId = 1, name = "account01", isDeleted = false, fiatBalance = 13f.toBigDecimal(),
+                    accountTokens = listOf(
+                        AccountToken(ERC20Token(1, "CookieToken", address = "0x0"), tokenPrice = 13.3),
+                        AccountToken(ERC20Token(2, "AnotherToken", address = "0x1"), tokenPrice = 23.3)
+                    )
+                ),
+                Account(
+                    2, chainId = 1, name = "account02", isDeleted = false, fiatBalance = 3f.toBigDecimal(),
+                    accountTokens = listOf(
+                        AccountToken(ERC20Token(3, "CookieToken", address = "0x0"), tokenPrice = 33.3),
+                        AccountToken(ERC20Token(4, "CookieToken", address = "0x0"), tokenPrice = 43.3)
+                    )
+                )
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        walletConfigManager.getWalletConfig().accounts[0].apply {
+            fiatBalance shouldBeEqualTo 13f.toBigDecimal()
+            
+        }
+
+        walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo 13f.toBigDecimal()
+        walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo 13f.toBigDecimal()
+        manager.clearFiat()
+        walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo Double.InvalidValue.toBigDecimal()
     }
 }

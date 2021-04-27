@@ -90,7 +90,6 @@ class WalletConnectRepositoryImpl(
                     )
                 )
             }
-
             connect(
                 WalletConnectSessionMapper.map(session),
                 peerMeta = WCPeerMeta(),

@@ -47,19 +47,19 @@ class BalanceUtilsTest {
 
     @Test
     fun `get crypto balance error test`() {
-        val result = BalanceUtils.getCryptoBalance(Int.InvalidValue.toBigDecimal())
+        val result = BalanceUtils.getCryptoBalance(Double.InvalidValue.toBigDecimal())
         assertEquals(result, "0")
     }
 
     @Test
     fun `get fiat balance success test`() {
-        val result = BalanceUtils.getFiatBalance(BigDecimal.TEN)
+        val result = BalanceUtils.getFiatBalance(BigDecimal.TEN, "€")
         assertEquals(result, "€ 10.00")
     }
 
     @Test
     fun `get fiat balance error test`() {
-        val result = BalanceUtils.getFiatBalance(Int.InvalidValue.toBigDecimal())
+        val result = BalanceUtils.getFiatBalance(Double.InvalidValue.toBigDecimal(), "€")
         assertEquals(result, "€ -.--")
     }
 

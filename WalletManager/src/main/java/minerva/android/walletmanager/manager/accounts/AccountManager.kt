@@ -27,6 +27,7 @@ interface AccountManager : Manager {
     fun getAllAccounts(): List<Account>
     fun getAllActiveAccounts(chainId: Int): List<Account>
     fun toChecksumAddress(address: String): String
+    fun clearFiat()
     val areMainNetworksEnabled: Boolean
     val isAuthenticationEnabled: Boolean
     var showMainNetworksWarning: Boolean
