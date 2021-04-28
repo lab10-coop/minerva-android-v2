@@ -27,12 +27,15 @@ class AppVersionFragment : BaseFragment(R.layout.fragment_app_version) {
             adapter = ConcatAdapter(
                 HeaderNotesAdapter(), ReleaseNoteAdapter(context.resources.getStringArray(R.array.release_notes).toList())
             )
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    binding.footer.visibleOrGone(canScrollVertically(SCROLLING_DOWN))
-                }
-            })
+            with(binding.footer) {
+                visibleOrGone(canScrollVertically(SCROLLING_DOWN))
+                addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        super.onScrollStateChanged(recyclerView, newState)
+                        visibleOrGone(canScrollVertically(SCROLLING_DOWN))
+                    }
+                })
+            }
         }
     }
 
