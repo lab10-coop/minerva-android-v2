@@ -127,7 +127,9 @@ class WalletConnectViewModel(
             repository.approveSession(listOf(account.address), chainId, topic.peerId, getDapp(meta, chainId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { OnError(it) })
+                .subscribeBy(
+                    onComplete = { closeScanner() },
+                    onError = { OnError(it) })
         }
     }
 
