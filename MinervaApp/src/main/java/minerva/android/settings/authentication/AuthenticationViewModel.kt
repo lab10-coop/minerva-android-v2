@@ -5,9 +5,19 @@ import minerva.android.walletmanager.storage.LocalStorage
 
 class AuthenticationViewModel(private val localStorage: LocalStorage) : BaseViewModel() {
 
-    fun isAuthenticationEnabled() = localStorage.isAuthenticationEnabled
+    var wasCredentialsChecked = false
 
-    fun toggleAuthentication() {
-        localStorage.isAuthenticationEnabled = !isAuthenticationEnabled()
+    val isProtectKeysEnabled
+        get() = localStorage.isProtectKeysEnabled
+
+    val isProtectTransactionsEnabled
+        get() = localStorage.isProtectTransactionsEnabled
+
+    fun toggleProtectKeys() {
+        localStorage.isProtectKeysEnabled = !isProtectKeysEnabled
+    }
+
+    fun toggleProtectTransactions() {
+        localStorage.isProtectTransactionsEnabled = !isProtectTransactionsEnabled
     }
 }

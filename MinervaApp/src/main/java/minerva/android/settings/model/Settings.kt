@@ -66,6 +66,7 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     detailText = getString(R.string.create),
                     rowType = SettingsRowType.BACKUP
                 ),
+                //TODO klop change name?
                 SettingRow(
                     getString(R.string.protect_keys),
                     R.drawable.ic_authentication,

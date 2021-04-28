@@ -156,7 +156,7 @@ class LocalStorageTest {
 
     @Test
     fun `check is authentication available`() {
-        localStorage.isAuthenticationEnabled = true
+        localStorage.isProtectKeysEnabled = true
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }

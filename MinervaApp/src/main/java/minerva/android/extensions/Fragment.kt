@@ -1,5 +1,8 @@
 package minerva.android.extensions
 
+import android.os.Build
+import android.util.Log
+import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -7,7 +10,7 @@ import minerva.android.R
 import timber.log.Timber
 
 fun Fragment.showBiometricPrompt(onSuccessAction: () -> Unit) {
-    val executor = ContextCompat.getMainExecutor(context)
+    val executor = ContextCompat.getMainExecutor(requireContext())
     val biometricPrompt = BiometricPrompt(this, executor,
         object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -21,9 +24,9 @@ fun Fragment.showBiometricPrompt(onSuccessAction: () -> Unit) {
             }
         })
 
-    val promptInfo = BiometricPrompt.PromptInfo.Builder()
-        .setTitle(context?.getString(R.string.authentication_title).toString())
-        .setDeviceCredentialAllowed(true)
-        .build()
-    biometricPrompt.authenticate(promptInfo)
+    BiometricPrompt.PromptInfo.Builder().setTitle(context?.getString(R.string.authentication_title).toString()).apply {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+        else setDeviceCredentialAllowed(true)
+        biometricPrompt.authenticate(build())
+    }
 }

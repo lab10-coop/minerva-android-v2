@@ -39,9 +39,15 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()
     }
 
-    override var isAuthenticationEnabled: Boolean
-        set(value) = sharedPreferences.edit().putBoolean(AUTHENTICATION_ENABLED, value).apply()
-        get() = sharedPreferences.getBoolean(AUTHENTICATION_ENABLED, false)
+    override var isProtectKeysEnabled: Boolean
+        set(value) = sharedPreferences.edit().putBoolean(PROTECT_KEYS_ENABLED, value).apply()
+        get() = sharedPreferences.getBoolean(PROTECT_KEYS_ENABLED, false)
+
+    override var isProtectTransactionsEnabled: Boolean
+        set(value) = sharedPreferences.edit().putBoolean(PROTECT_TRANSACTIONS_ENABLED, value).apply()
+        get() = sharedPreferences.getBoolean(PROTECT_TRANSACTIONS_ENABLED, false)
+                && sharedPreferences.getBoolean(PROTECT_KEYS_ENABLED, false)
+
 
     override fun isMnemonicRemembered(): Boolean = sharedPreferences.getBoolean(IS_MNEMONIC_REMEMBERED, false)
 
@@ -139,7 +145,8 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val ASSET_VISIBILITY_SETTINGS = "asset_visibility_settings"
         private const val FREE_ATS_TIMESTAMP = "free_ats_timestamp"
         private const val ICON_UPDATE_TIMESTAMP = "last_update_timestamp"
-        private const val AUTHENTICATION_ENABLED = "authentication_enabled"
+        private const val PROTECT_KEYS_ENABLED = "protect_keys_enabled"
+        private const val PROTECT_TRANSACTIONS_ENABLED = "protect_transactions_enabled"
         private const val SHOW_MAIN_NETWORKS_WARNING = "show_main_networks_warning"
         private const val CURRENT_FIAT = "current_fiat"
         private const val DEFAULT_CURRENCY = "EUR"

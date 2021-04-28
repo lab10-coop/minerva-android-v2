@@ -15,9 +15,9 @@ class AuthenticationViewModelTest {
 
     @Test
     fun `Check getting authentication setting` () {
-        whenever(localStorage.isAuthenticationEnabled).thenReturn(false)
-        viewModel.isAuthenticationEnabled()
-        viewModel.toggleAuthentication()
-        verify(localStorage, times(2)).isAuthenticationEnabled
+        whenever(localStorage.isProtectKeysEnabled).thenReturn(false)
+        viewModel.isProtectKeysEnabled()
+        viewModel.toggleProtectKeys()
+        verify(localStorage, times(2)).isProtectKeysEnabled
     }
 }
