@@ -15,8 +15,8 @@ class ReleaseNoteAdapter(private val notes: List<String>) : RecyclerView.Adapter
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
         when (viewType) {
-            VERSION_ROW_TYPE -> VersionViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.version_row, parent, false))
-            else -> NotesViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.note_row, parent, false))
+            VERSION_ROW_TYPE -> VersionViewHolder(inflateLayout(parent, R.layout.version_row))
+            else -> NotesViewHolder(inflateLayout(parent, R.layout.note_row))
         }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -30,9 +30,12 @@ class ReleaseNoteAdapter(private val notes: List<String>) : RecyclerView.Adapter
         if (isNoteRowType(notes[position])) NOTE_ROW_TYPE
         else VERSION_ROW_TYPE
 
-    private fun isNoteRowType(note: String) = note.startsWith(NOTE_INDICATOR)
+    private fun isNoteRowType(note: String): Boolean = note.startsWith(NOTE_INDICATOR)
 
-    private fun prepareNote(note: String) = note.replace(NOTE_INDICATOR, String.Empty).trim()
+    private fun prepareNote(note: String): String = note.replaceFirst(NOTE_INDICATOR, String.Empty).trim()
+
+    private fun inflateLayout(parent: ViewGroup, layoutRes: Int): View =
+        LayoutInflater.from(parent.context).inflate(layoutRes, parent, false)
 
     companion object {
         private const val VERSION_ROW_TYPE = 3

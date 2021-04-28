@@ -16,7 +16,7 @@ class HeaderNotesAdapter : RecyclerView.Adapter<HeaderNotesAdapter.HeaderViewHol
 
     override fun getItemCount(): Int = HEADER_COUNT
 
-    class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {}
+    class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
     companion object {
         private const val HEADER_COUNT = 1

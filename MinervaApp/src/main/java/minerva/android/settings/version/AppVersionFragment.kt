@@ -1,7 +1,6 @@
 package minerva.android.settings.version
 
 import android.os.Bundle
-import android.transition.TransitionManager
 import android.view.View
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
