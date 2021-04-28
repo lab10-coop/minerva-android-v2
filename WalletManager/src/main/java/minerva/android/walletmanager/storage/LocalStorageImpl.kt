@@ -45,9 +45,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
 
     override var isProtectTransactionsEnabled: Boolean
         set(value) = sharedPreferences.edit().putBoolean(PROTECT_TRANSACTIONS_ENABLED, value).apply()
-        get() = sharedPreferences.getBoolean(PROTECT_TRANSACTIONS_ENABLED, false)
-                && sharedPreferences.getBoolean(PROTECT_KEYS_ENABLED, false)
-
+        get() = sharedPreferences.getBoolean(PROTECT_TRANSACTIONS_ENABLED, false) && isProtectKeysEnabled
 
     override fun isMnemonicRemembered(): Boolean = sharedPreferences.getBoolean(IS_MNEMONIC_REMEMBERED, false)
 
