@@ -98,14 +98,14 @@ class WalletConnectInteractionsViewModel(
                         currentDappSession = session
                         OnEthSignRequest(status.message, session)
                     }
-            is OnDisconnect -> Single.just(OnDisconnected)
+            is OnDisconnect -> Single.just(OnDisconnected())
             is OnEthSendTransaction -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session ->
                         getTransactionCosts(session, status)
                     }
             }
-            is OnFailure -> Single.just(OnError(status.error))
+            is OnFailure -> Single.just(OnGeneralError(status.error))
             else -> Single.just(DefaultRequest)
         }
 
@@ -300,7 +300,7 @@ class WalletConnectInteractionsViewModel(
                     onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
                     onError = {
                         Timber.e(it)
-                        _walletConnectStatus.value = OnError(it)
+                        _walletConnectStatus.value = OnGeneralError(it)
                     }
                 )
         }

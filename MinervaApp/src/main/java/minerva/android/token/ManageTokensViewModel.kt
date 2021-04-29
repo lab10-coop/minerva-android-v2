@@ -9,7 +9,6 @@ import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.widget.repository.getMainTokenIconRes
-import timber.log.Timber
 
 class ManageTokensViewModel(
     private val accountManager: AccountManager,
@@ -27,12 +26,7 @@ class ManageTokensViewModel(
     }
 
     fun loadTokens() = account.network.let {
-
-        val assets = listOf(NativeToken(it.chainId, it.name, it.token, logoRes = getMainTokenIconRes(it.chainId))) + tokenManager.loadCurrentTokens(it.chainId)
-
-        Timber.tag("kobe").d("Assets to display: $assets")
-
-        assets
+        listOf(NativeToken(it.chainId, it.name, it.token, logoRes = getMainTokenIconRes(it.chainId))) + tokenManager.loadCurrentTokens(it.chainId)
     }
 
     fun getTokenVisibilitySettings(assetAddress: String): Boolean =

@@ -7,8 +7,11 @@ import minerva.android.R
 import timber.log.Timber
 
 fun Fragment.showBiometricPrompt(onSuccessAction: () -> Unit) {
+
     val executor = ContextCompat.getMainExecutor(context)
+
     val biometricPrompt = BiometricPrompt(this, executor,
+
         object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                 super.onAuthenticationError(errorCode, errString)
