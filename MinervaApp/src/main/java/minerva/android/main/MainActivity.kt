@@ -216,27 +216,29 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     private fun getSendTransactionDialog(it: OnEthSendTransactionRequest) =
-        DappSendTransactionDialog(
-            this,
-            {
-                if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt(
-                    { walletConnectViewModel.sendTransaction() },
-                    { walletConnectViewModel.rejectRequest() })
-                else walletConnectViewModel.sendTransaction()
-                dappDialog = null
-            },
-            {
-                walletConnectViewModel.rejectRequest()
-                dappDialog = null
-            }).apply {
-            setContent(
-                it.transaction, it.session, it.account,
-                { showGasPriceDialog(it) },
-                { gasPrice -> walletConnectViewModel.recalculateTxCost(gasPrice, it.transaction) },
-                { balance, cost -> walletConnectViewModel.isBalanceTooLow(balance, cost) }
+        with(walletConnectViewModel) {
+            DappSendTransactionDialog(
+                this@MainActivity,
+                {
+                    if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt(
+                        { sendTransaction() },
+                        { rejectRequest() })
+                    else sendTransaction()
+                    dappDialog = null
+                },
+                {
+                    rejectRequest()
+                    dappDialog = null
+                }).apply {
+                setContent(
+                    it.transaction, it.session, it.account,
+                    { showGasPriceDialog(it) },
+                    { gasPrice -> recalculateTxCost(gasPrice, it.transaction) },
+                    { balance, cost -> isBalanceTooLow(balance, cost) }
 
-            )
-            show()
+                )
+                show()
+            }
         }
 
     private fun DappSendTransactionDialog.showGasPriceDialog(it: OnEthSendTransactionRequest) {
