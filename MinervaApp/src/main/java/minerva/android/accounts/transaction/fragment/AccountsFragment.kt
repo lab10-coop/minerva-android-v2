@@ -87,7 +87,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
 
     override fun onExportPrivateKey(account: Account) =
-        if (viewModel.isAuthenticationEnabled()) showBiometricPrompt { showExportDialog(account) }
+        if (viewModel.isProtectKeysEnabled()) showBiometricPrompt { showExportDialog(account) }
         else showExportDialog(account)
 
     private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()

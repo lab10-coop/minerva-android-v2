@@ -18,6 +18,7 @@ import minerva.android.accounts.transaction.fragment.AccountsFragment
 import minerva.android.accounts.walletconnect.*
 import minerva.android.databinding.ActivityMainBinding
 import minerva.android.extension.*
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.identities.credentials.CredentialsFragment
 import minerva.android.identities.myIdentities.MyIdentitiesFragment
@@ -218,7 +219,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         DappSendTransactionDialog(
             this,
             {
-                walletConnectViewModel.sendTransaction()
+                if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt { walletConnectViewModel.sendTransaction() }
+                else walletConnectViewModel.sendTransaction()
                 dappDialog = null
             },
             {

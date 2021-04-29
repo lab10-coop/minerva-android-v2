@@ -23,6 +23,7 @@ import minerva.android.accounts.transaction.fragment.scanner.TransactionAddressS
 import minerva.android.databinding.FragmentTransactionSendBinding
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.defs.WalletActionStatus
@@ -360,7 +361,17 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     private fun setSendButtonOnClickListener() {
         binding.apply {
             sendButton.setOnClickListener {
-                viewModel.sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
+                viewModel.run {
+                    if (isAuthenticationEnabled()) showBiometricPrompt {
+                        sendTransaction(
+                            receiver.text.toString(),
+                            getAmount(),
+                            getGasPrice(),
+                            getGasLimit()
+                        )
+                    }
+                    else sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
+                }
             }
             receiverInputLayout.setEndIconOnClickListener {
                 receiver.setText(String.Empty)
