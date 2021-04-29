@@ -105,7 +105,7 @@ class WalletConnectInteractionsViewModel(
                         getTransactionCosts(session, status)
                     }
             }
-            is OnFailure -> Single.just(OnGeneralError(status.error))
+            is OnFailure -> Single.just(if (status.sessionName.isNotEmpty()) OnGeneralError(status.error) else DefaultRequest)
             else -> Single.just(DefaultRequest)
         }
 
