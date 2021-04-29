@@ -105,7 +105,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     @Test
     fun `reconnect to saved sessions and disconnect request occurs test`() {
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
-            Flowable.just(OnDisconnect)
+            Flowable.just(OnDisconnect())
         )
         whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
         whenever(walletConnectRepository.getSessions()).thenReturn(
@@ -558,7 +558,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         viewModel.walletConnectStatus.observeForever(requestObserver)
         requestCaptor.run {
             verify(requestObserver).onChanged(capture())
-            firstValue is OnError
+            firstValue is OnGeneralError
         }
     }
 

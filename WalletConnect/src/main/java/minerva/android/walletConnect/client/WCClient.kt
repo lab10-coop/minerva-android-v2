@@ -57,7 +57,7 @@ class WCClient(
         if (session != null) session!!.topic
         else null
 
-    private var handshakeId: Long = -1
+    var handshakeId: Long = Long.InvalidValue
 
     var accounts: List<String>? = null
         private set
@@ -73,7 +73,6 @@ class WCClient(
     var onCustomRequest: (id: Long, payload: String) -> Unit = { _, _ -> }
     var onGetAccounts: (id: Long) -> Unit = { _ -> }
     var onWCOpen: (peerId: String) -> Unit = { _ -> }
-    var onPong: (peerId: String) -> Unit = { _ -> }
     var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = { _, _ -> }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -107,6 +106,10 @@ class WCClient(
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        if (session != null) {
+            killSession()
+        }
+
         resetState()
         onFailure(t, peerId)
         peerId = String.Empty
@@ -151,7 +154,12 @@ class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int, peerId: String, handshake: Long = Long.InvalidValue): Boolean {
+    fun approveSession(
+        accounts: List<String>,
+        chainId: Int,
+        peerId: String,
+        handshake: Long = Long.InvalidValue
+    ): Boolean {
         if (handshake != Long.InvalidValue) {
             handshakeId = handshake
         }
@@ -373,8 +381,8 @@ class WCClient(
         listeners.add(listener)
     }
 
-    fun removeSocketListener(listener: WebSocketListener) {
-        listeners.remove(listener)
+    fun removeSocketListener() {
+        listeners.remove(this)
     }
 
     private fun resetState() {

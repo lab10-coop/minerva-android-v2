@@ -30,4 +30,5 @@ interface WalletConnectRepository {
     fun approveRequest(peerId: String, privateKey: String)
     fun rejectRequest(peerId: String)
     fun approveTransactionRequest(peerId: String, message: String)
+    fun removeDeadSessions()
 }

@@ -58,8 +58,8 @@ class WalletConnectViewModel(
                                 handshakeId = it.handshakeId
                                 handleSessionRequest(it)
                             }
-                            is OnDisconnect -> OnDisconnected
-                            is OnFailure -> OnError(it.error)
+                            is OnDisconnect -> OnDisconnected(it.sessionName)
+                            is OnFailure -> OnWalletConnectConnectionError(it.error, it.sessionName)
                             else -> DefaultRequest
                         }
                     },
@@ -84,12 +84,19 @@ class WalletConnectViewModel(
                             }
 
                         },
-                        onError = { _viewStateLiveData.value = OnError(it) }
+                        onError = {
+                            _viewStateLiveData.value = OnGeneralError(it)
+                        }
                     )
             }
         } else {
-            _viewStateLiveData.value = OnError(InvalidAccountThrowable())
+            _viewStateLiveData.value = OnGeneralError(InvalidAccountThrowable())
         }
+    }
+
+    fun removeDeadSession() {
+        repository.removeDeadSessions()
+        _viewStateLiveData.value = ProgressBarState(false)
     }
 
     fun closeScanner() {
@@ -127,7 +134,9 @@ class WalletConnectViewModel(
             repository.approveSession(listOf(account.address), chainId, topic.peerId, getDapp(meta, chainId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { OnError(it) })
+                .subscribeBy(
+                    onComplete = { closeScanner() },
+                    onError = { OnGeneralError(it) })
         }
     }
 

@@ -68,7 +68,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on disconnect event test`() {
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnDisconnect))
+            .thenReturn(Flowable.just(OnDisconnect()))
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
@@ -198,9 +198,14 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.topic = Topic()
         viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
         viewModel.account = Account(1, chainId = 2)
+        viewModel.stateLiveData.observeForever(stateObserver)
         whenever(repository.approveSession(any(), any(), any(), any())).thenReturn(Completable.complete())
         viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"))
         verify(repository).approveSession(any(), any(), any(), any())
+        stateCaptor.run {
+            verify(stateObserver).onChanged(capture())
+            firstValue is CloseScannerState
+        }
     }
 
     @Test
