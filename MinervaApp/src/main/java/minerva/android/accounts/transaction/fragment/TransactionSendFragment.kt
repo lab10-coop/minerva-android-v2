@@ -362,14 +362,14 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
         binding.apply {
             sendButton.setOnClickListener {
                 viewModel.run {
-                    if (isAuthenticationEnabled()) showBiometricPrompt {
+                    if (isAuthenticationEnabled()) showBiometricPrompt ({
                         sendTransaction(
                             receiver.text.toString(),
                             getAmount(),
                             getGasPrice(),
                             getGasLimit()
                         )
-                    }
+                    })
                     else sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
                 }
             }

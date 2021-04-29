@@ -1,12 +1,13 @@
 package minerva.android.settings.authentication
 
 import android.app.KeyguardManager
-import android.content.Context.KEYGUARD_SERVICE
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import minerva.android.R
 import minerva.android.databinding.FragmentAuthenticationBinding
 import minerva.android.extensions.showBiometricPrompt
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -19,7 +20,13 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentAuthenticationBinding.bind(view)
+        viewModel.init()
         initializeFragment()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkSystemAuthentication()
     }
 
     override fun onPause() {
@@ -29,24 +36,37 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
 
     private fun initializeFragment() {
         binding.apply {
-            protectKeysSwitch.isChecked = viewModel.isProtectKeysEnabled
-            protectTransactionsSwitch.isChecked = viewModel.isProtectTransactionsEnabled
-            activateProtectTransactions(viewModel.isProtectKeysEnabled)
             protectKeysContainer.setOnClickListener { showBiometric { toggleProtectKeys() } }
             protectTransactionsContainer.setOnClickListener {
                 if (protectKeysSwitch.isChecked) showBiometric { toggleProtectTransaction() }
-                else showWarningFlashbar()
+                else showProtectTransactionsWarning()
+            }
+            with(viewModel) {
+                protectKeysLiveData.observe(viewLifecycleOwner, EventObserver {
+                    protectKeysSwitch.isChecked = it
+                    activateProtectTransactions(it)
+                    if (it) protectTransactionsContainer.isEnabled = true
+                })
+                protectTransactionsLiveData.observe(viewLifecycleOwner, EventObserver {
+                    protectTransactionsSwitch.isChecked = it
+                })
             }
         }
     }
 
-    private fun showBiometric(onSuccessAction: () -> Unit) {
-        if (viewModel.wasCredentialsChecked) onSuccessAction()
-        else activity?.let {
-            (it.getSystemService(KEYGUARD_SERVICE) as KeyguardManager).let { keyguard ->
-                if (keyguard.isDeviceSecure) showBiometricPrompt { onSuccessAction() }
-                else MinervaFlashbar.show(it, getString(R.string.device_not_secured), getString(R.string.device_not_secured_message))
+    private fun checkSystemAuthentication() {
+        if (viewModel.isProtectKeysEnabled)
+            (requireActivity().getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).let { keyguard ->
+                if (!keyguard.isDeviceSecure) viewModel.toggleProtectKeys()
             }
+    }
+
+    private fun showBiometric(onSuccessAction: () -> Unit) {
+        activity?.let {
+            if (viewModel.wasCredentialsChecked) onSuccessAction()
+            else showBiometricPrompt(
+                { onSuccessAction() },
+                { MinervaFlashbar.show(it, getString(R.string.device_not_secured), getString(R.string.device_not_secured_message)) })
         }
     }
 
@@ -54,30 +74,19 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
         binding.protectTransactionsContainer.alpha = if (isActivated) FULL_VISIBLE else HALF_TRANSPARENT
     }
 
-    private fun toggleProtectKeys() {
-        with(viewModel) {
-            toggleProtectKeys()
-            wasCredentialsChecked = true
-            binding.apply {
-                protectKeysSwitch.toggle()
-                protectKeysSwitch.isChecked.let { isProtectKeysActive ->
-                    activateProtectTransactions(isProtectKeysActive)
-                    if (isProtectKeysActive) protectTransactionsContainer.isEnabled = true
-                }
-                protectTransactionsSwitch.isChecked = isProtectTransactionsEnabled
-            }
-        }
+    private fun toggleProtectKeys() = viewModel.run {
+        wasCredentialsChecked = true
+        toggleProtectKeys()
     }
 
     private fun toggleProtectTransaction() {
-        binding.protectTransactionsSwitch.toggle()
         viewModel.apply {
             toggleProtectTransactions()
             wasCredentialsChecked = true
         }
     }
 
-    private fun showWarningFlashbar() {
+    private fun showProtectTransactionsWarning() {
         MinervaFlashbar.show(
             requireActivity(),
             getString(R.string.protect_transaction_error_title),
