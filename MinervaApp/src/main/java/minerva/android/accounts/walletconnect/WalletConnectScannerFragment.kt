@@ -3,10 +3,12 @@ package minerva.android.accounts.walletconnect
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.invisible
@@ -14,6 +16,7 @@ import minerva.android.extension.margin
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.scanner.BaseScannerFragment
+import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialog
@@ -26,6 +29,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     private val dappsAdapter: DappsAdapter by lazy {
         DappsAdapter { peerId -> viewModel.killSession(peerId) }
     }
+    private var confirmationDialogDialog: DappConfirmationDialog? = null
+    private var errorDialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,7 +46,13 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             when (it) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
-                is OnDisconnected -> showToast(getString(R.string.dapp_disconnected))
+                is OnDisconnected -> {
+                    if (it.sessionName.isNotEmpty()) {
+                        showToast(getString(R.string.dapp_disconnected, it.sessionName))
+                    } else {
+                        showAlertDialog(getString(R.string.session_connection_error))
+                    }
+                }
                 is ProgressBarState -> {
                     if (!it.show) {
                         binding.scannerProgressBar.invisible()
@@ -59,13 +70,41 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                     }
                 }
                 is OnSessionDeleted -> showToast(getString(R.string.dapp_deleted))
-                is OnError -> handleError(it.error)
+                is OnGeneralError -> handleError(it.error)
+                is OnWalletConnectConnectionError -> handleWalletConnectError(it)
             }
         })
         viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver { handleError(it) })
     }
 
+    private fun handleWalletConnectError(it: OnWalletConnectConnectionError) {
+        confirmationDialogDialog?.dismiss()
+        val errorMessage = if (it.sessionName.isEmpty()) {
+            getString(R.string.session_connection_error)
+        } else {
+            getString(
+                R.string.active_session_connection_error,
+                formatString(it.sessionName)
+            ).spannify()
+        }
+        showAlertDialog(errorMessage)
+    }
+
+    private fun formatString(text: String) = "{`$text` < text-style:bold />}"
+
+    private fun showAlertDialog(errorMessage: CharSequence) {
+        AlertDialogHandler.showDialog(
+            requireContext(),
+            getString(R.string.try_again),
+            errorMessage
+        ) {
+            errorDialog?.dismiss()
+            shouldScan = true
+        }
+    }
+
     private fun handleError(error: Throwable) {
+        confirmationDialogDialog?.dismiss()
         shouldScan = true
         showToast(getErrorMessage(error))
     }
@@ -78,7 +117,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
 
     private fun showToast(message: String?) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 
     private fun handleWrongQrCode() {
@@ -110,7 +149,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: String, isNetworkDefined: Boolean) {
-        DappConfirmationDialog(requireContext(),
+        confirmationDialogDialog = DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession(meta)
                 binding.dappsBottomSheet.dapps.visible()
@@ -137,11 +176,16 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     override fun onCloseButtonAction() {
-        viewModel.closeScanner()
+        closeScanner()
     }
 
     override fun onPermissionNotGranted() {
+        closeScanner()
+    }
+
+    private fun closeScanner() {
         viewModel.closeScanner()
+        confirmationDialogDialog = null
     }
 
     companion object {

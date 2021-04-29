@@ -260,7 +260,7 @@
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
     <string name="dapp_connection_warning">This WalletConnect Session provides no information on the needed network. Please make sure you selected the correct account/network.</string>
     <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
-    <string name="dapp_disconnected">Dapp disconnected</string>
+    <string name="dapp_disconnected">%s session disconnected</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
     <string name="confirm">Confirm</string>
@@ -304,6 +304,9 @@
     <string name="create_new_account">Create a new Account</string>
     <string name="no_account_on_network">You don\'t have an Account on this Network. Please create a new Account.</string>
     <string name="currency">Currency</string>
+    <string name="try_again">Try again</string>
+    <string name="active_session_connection_error">Your connection with %s was closed. Check your internet connection and try to reconnect with a refreshed website.</string>
+    <string name="session_connection_error">Check your internet connection and try to reconnect with a refreshed website.</string>
     <string name="version_history">Version history</string>
 
     <string-array name="currencies">

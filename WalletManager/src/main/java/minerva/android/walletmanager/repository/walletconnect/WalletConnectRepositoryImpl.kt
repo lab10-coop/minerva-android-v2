@@ -1,11 +1,14 @@
 package minerva.android.walletmanager.repository.walletconnect
 
 import io.reactivex.*
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
@@ -15,17 +18,13 @@ import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSign
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
-import minerva.android.walletmanager.exception.WalletConnectConnectionThrowable
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import timber.log.Timber
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLException
 
 class WalletConnectRepositoryImpl(
     private val signatureRepository: SignatureRepository,
@@ -36,14 +35,15 @@ class WalletConnectRepositoryImpl(
     private var currentRequestId: Long = Long.InvalidValue
     internal lateinit var currentEthMessage: WCEthereumSignMessage
     private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
-    override val connectionStatusFlowable: Flowable<WalletConnectStatus> get() = status.toFlowable(BackpressureStrategy.BUFFER)
-    private var disposable: Disposable? = null
+    override val connectionStatusFlowable: Flowable<WalletConnectStatus> get() = status.toFlowable(BackpressureStrategy.DROP)
+    private var disposable: CompositeDisposable = CompositeDisposable()
     private var pingDisposable: Disposable? = null
     private val dappDao = minervaDatabase.dappDao()
 
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?, dapps: List<DappSession>) {
         wcClient = WCClient()
         with(wcClient) {
+
             onWCOpen = { peerId ->
                 clientMap[peerId] = this
                 if (pingDisposable == null) {
@@ -61,18 +61,29 @@ class WalletConnectRepositoryImpl(
                     )
                 )
             }
+
             onFailure = { error, peerId ->
-                Timber.e("WalletConnect onFailure: $error")
-                var state = OnFailure(error)
-                if (isConnectionException(error)) {
-                    deleteSession(peerId)
-                    state = OnFailure(WalletConnectConnectionThrowable())
-                }
-                status.onNext(state)
+                Timber.e("WalletConnect onFailure: $error, peerId: $peerId")
+                removeDappSession(peerId, onSuccess = { session ->
+                    removeWcClient(session.peerId)
+                    status.onNext(OnFailure(error, session.name))
+                }, onError = {
+                    removeWcClient(peerId)
+                    status.onNext(OnFailure(error, String.Empty))
+                })
             }
             onDisconnect = { _, peerId ->
-                peerId?.let { deleteSession(it) }
-                status.onNext(OnDisconnect)
+                peerId?.let {
+                    removeDappSession(it, onSuccess = { session ->
+                        removeWcClient(session.peerId)
+                        status.onNext(OnDisconnect(session.name))
+                    }, onError = {
+                        if (clientMap.containsKey(peerId)) {
+                            clientMap.remove(peerId)
+                            status.onNext(OnDisconnect())
+                        }
+                    })
+                }
             }
 
             onEthSign = { id, message, peerId ->
@@ -99,8 +110,46 @@ class WalletConnectRepositoryImpl(
         }
     }
 
-    private fun isConnectionException(error: Throwable) =
-        error is SocketTimeoutException || error is UnknownHostException || error is SSLException
+    private fun removeDappSession(peerId: String, onSuccess: (session: DappSession) -> Unit, onError: () -> Unit) {
+        getDappSessionById(peerId)
+            .flatMap { session ->
+                deleteDappSession(session.peerId)
+                    .toSingleDefault(session)
+            }
+            .map { session -> onSuccess(session) }
+            .doOnError { onError() }
+            .subscribeOn(Schedulers.io())
+            .subscribeBy(onError = { Timber.e(it) })
+            .addTo(disposable)
+    }
+
+    override fun rejectSession(peerId: String) {
+        with(clientMap) {
+            this[peerId]?.rejectSession()
+            this[peerId]?.disconnect()
+            remove(peerId)
+        }
+    }
+
+    override fun removeDeadSessions() = with(clientMap) {
+        forEach {
+            if (it.value.handshakeId == Long.InvalidValue) {
+                it.value.disconnect()
+                remove(it.key)
+            }
+        }
+    }
+
+    private fun removeWcClient(peerId: String) {
+        with(clientMap) {
+            if (containsKey(peerId)) {
+                if (this[peerId]?.session != null) {
+                    this[peerId]?.killSession()
+                }
+                remove(peerId)
+            }
+        }
+    }
 
     override fun saveDappSession(dappSession: DappSession): Completable =
         dappDao.insert(DappSessionToEntityMapper.map(dappSession))
@@ -124,24 +173,6 @@ class WalletConnectRepositoryImpl(
             PERSONAL_MESSAGE -> message.data.hexToUtf8
             MESSAGE, TYPED_MESSAGE -> message.data.getFormattedMessage
         }
-
-    private fun deleteSession(peerId: String) {
-        disposable = deleteDappSession(peerId)
-            .toSingleDefault(peerId)
-            .map {
-                with(clientMap) {
-                    if (contains(it)) {
-                        if (this[peerId]?.session != null) {
-                            this[peerId]?.killSession()
-                        }
-                        remove(it)
-                    }
-                }
-            }
-            .ignoreElement()
-            .subscribeOn(Schedulers.io())
-            .subscribeBy(onError = { Timber.e(it) })
-    }
 
     override fun getWCSessionFromQr(qrCode: String): WalletConnectSession =
         WCSessionToWalletConnectSessionMapper.map(WCSession.from(qrCode))
@@ -184,13 +215,6 @@ class WalletConnectRepositoryImpl(
     private fun shouldPing(it: Map.Entry<String, WCClient>) =
         it.value.isConnected && it.value.accounts != null && it.value.chainId != null
 
-    override fun rejectSession(peerId: String) {
-        with(clientMap) {
-            this[peerId]?.rejectSession()
-            remove(peerId)
-        }
-    }
-
     override fun approveRequest(peerId: String, privateKey: String) {
         clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
     }
@@ -223,7 +247,7 @@ class WalletConnectRepositoryImpl(
             }
 
     override fun dispose() {
-        disposable?.dispose()
+        disposable.dispose()
         pingDisposable?.dispose()
         pingDisposable = null
     }
