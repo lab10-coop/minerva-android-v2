@@ -4,6 +4,7 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import io.reactivex.Single
 import minerva.android.R
 import minerva.android.databinding.FragmentAuthenticationBinding
 import minerva.android.extensions.showBiometricPrompt
@@ -66,6 +67,7 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
             if (viewModel.wasCredentialsChecked) onSuccessAction()
             else showBiometricPrompt(
                 { onSuccessAction() },
+                { },
                 { MinervaFlashbar.show(it, getString(R.string.device_not_secured), getString(R.string.device_not_secured_message)) })
         }
     }

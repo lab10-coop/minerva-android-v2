@@ -219,7 +219,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         DappSendTransactionDialog(
             this,
             {
-                if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt ({ walletConnectViewModel.sendTransaction() })
+                if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt(
+                    { walletConnectViewModel.sendTransaction() },
+                    { walletConnectViewModel.rejectRequest() })
                 else walletConnectViewModel.sendTransaction()
                 dappDialog = null
             },
