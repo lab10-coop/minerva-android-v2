@@ -33,7 +33,6 @@ import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
-import minerva.android.walletmanager.exception.WalletConnectConnectionThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManagerImpl.Companion.NEW_ACCOUNT_TITLE_PATTERN
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -138,13 +137,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(it)
                 is ProgressBarState -> handleLoadingDialog(it)
-                is OnError -> handleWalletConnectError(it.error)
+                is OnGeneralError -> handleWalletConnectError()
                 else -> dappDialog = null
             }
         })
-        walletConnectViewModel.errorLiveData.observe(this, EventObserver {
-            handleWalletConnectError(it)
-        })
+        walletConnectViewModel.errorLiveData.observe(this, EventObserver { handleWalletConnectError() })
         viewModel.apply {
             errorLiveData.observe(this@MainActivity, EventObserver { errorStatus ->
                 when (errorStatus) {
@@ -200,11 +197,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         viewModel.clearPendingAccounts()
     }
 
-    private fun handleWalletConnectError(error: Throwable) {
-        if (error is WalletConnectConnectionThrowable) {
-            dappDialog?.dismiss()
-            showFlashbar(getString(R.string.wallet_connect_title), getString(R.string.wc_connection_error_message))
-        }
+    private fun handleWalletConnectError() {
+        dappDialog?.dismiss()
+        showFlashbar(getString(R.string.wallet_connect_title), getString(R.string.wc_connection_error_message))
     }
 
     private fun handleLoadingDialog(it: ProgressBarState) {

@@ -46,4 +46,3 @@ private fun showBiometricPrompt(fragment: Fragment, onSuccessAction: () -> Unit,
         }
     }
 }
-

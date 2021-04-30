@@ -125,3 +125,9 @@ fun startCurrencyWrappedActivity(context: Context) {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.CURRENCY)
     }
 }
+
+fun startAppVersionWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.APP_VERSION)
+    }
+}

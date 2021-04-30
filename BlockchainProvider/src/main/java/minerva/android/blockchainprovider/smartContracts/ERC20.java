@@ -5,7 +5,6 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -60,13 +59,13 @@ public class ERC20 extends Contract {
     public static final String FUNC_ALLOWANCE = "allowance";
 
     public static final Event APPROVAL_EVENT = new Event("Approval",
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {
+            Arrays.asList(new TypeReference<Address>(true) {
             }, new TypeReference<Address>(true) {
             }, new TypeReference<Uint256>() {
             }));
 
     public static final Event TRANSFER_EVENT = new Event("Transfer",
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {
+            Arrays.asList(new TypeReference<Address>(true) {
             }, new TypeReference<Address>(true) {
             }, new TypeReference<Uint256>() {
             }));
@@ -91,8 +90,8 @@ public class ERC20 extends Contract {
 
     public RemoteFunctionCall<String> name() {
         final Function function = new Function(FUNC_NAME,
-                Collections.<Type>emptyList(),
-                Collections.<TypeReference<?>>singletonList(new TypeReference<Utf8String>() {
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Utf8String>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
@@ -100,16 +99,16 @@ public class ERC20 extends Contract {
     public RemoteFunctionCall<TransactionReceipt> approve(String _spender, BigInteger _value) {
         final Function function = new Function(
                 FUNC_APPROVE,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_spender),
+                Arrays.asList(new org.web3j.abi.datatypes.Address(_spender),
                         new org.web3j.abi.datatypes.generated.Uint256(_value)),
-                Collections.<TypeReference<?>>emptyList());
+                Collections.emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<BigInteger> totalSupply() {
         final Function function = new Function(FUNC_TOTALSUPPLY,
-                Collections.<Type>emptyList(),
-                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Uint256>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
@@ -117,33 +116,33 @@ public class ERC20 extends Contract {
     public RemoteFunctionCall<TransactionReceipt> transferFrom(String _from, String _to, BigInteger _value) {
         final Function function = new Function(
                 FUNC_TRANSFERFROM,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_from),
+                Arrays.asList(new org.web3j.abi.datatypes.Address(_from),
                         new org.web3j.abi.datatypes.Address(_to),
                         new org.web3j.abi.datatypes.generated.Uint256(_value)),
-                Collections.<TypeReference<?>>emptyList());
+                Collections.emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<BigInteger> decimals() {
         final Function function = new Function(FUNC_DECIMALS,
-                Collections.<Type>emptyList(),
-                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint8>() {
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Uint8>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteFunctionCall<BigInteger> balanceOf(String _owner) {
         final Function function = new Function(FUNC_BALANCEOF,
-                Collections.<Type>singletonList(new Address(_owner)),
-                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
+                Collections.singletonList(new Address(_owner)),
+                Collections.singletonList(new TypeReference<Uint256>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteFunctionCall<String> symbol() {
         final Function function = new Function(FUNC_SYMBOL,
-                Collections.<Type>emptyList(),
-                Collections.<TypeReference<?>>singletonList(new TypeReference<Utf8String>() {
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Utf8String>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
@@ -151,17 +150,17 @@ public class ERC20 extends Contract {
     public RemoteFunctionCall<TransactionReceipt> transfer(String _to, BigInteger _value) {
         final Function function = new Function(
                 FUNC_TRANSFER,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_to),
+                Arrays.asList(new org.web3j.abi.datatypes.Address(_to),
                         new org.web3j.abi.datatypes.generated.Uint256(_value)),
-                Collections.<TypeReference<?>>emptyList());
+                Collections.emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<BigInteger> allowance(String _owner, String _spender) {
         final Function function = new Function(FUNC_ALLOWANCE,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(_owner),
+                Arrays.asList(new org.web3j.abi.datatypes.Address(_owner),
                         new org.web3j.abi.datatypes.Address(_spender)),
-                Collections.<TypeReference<?>>singletonList(new TypeReference<Uint256>() {
+                Collections.singletonList(new TypeReference<Uint256>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
@@ -180,16 +179,13 @@ public class ERC20 extends Contract {
     }
 
     public Flowable<ApprovalEventResponse> approvalEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(new io.reactivex.functions.Function<Log, ApprovalEventResponse>() {
-            @Override
-            public ApprovalEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(APPROVAL_EVENT, log);
-                ApprovalEventResponse typedResponse = new ApprovalEventResponse();
-                typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
-                typedResponse.spender = (String) eventValues.getIndexedValues().get(1).getValue();
-                typedResponse.value = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
-                return typedResponse;
-            }
+        return web3j.ethLogFlowable(filter).map(log -> {
+            EventValuesWithLog eventValues = extractEventParametersWithLog(APPROVAL_EVENT, log);
+            ApprovalEventResponse typedResponse = new ApprovalEventResponse();
+            typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
+            typedResponse.spender = (String) eventValues.getIndexedValues().get(1).getValue();
+            typedResponse.value = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
+            return typedResponse;
         });
     }
 

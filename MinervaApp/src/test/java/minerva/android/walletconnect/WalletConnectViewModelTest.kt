@@ -68,7 +68,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on disconnect event test`() {
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnDisconnect))
+            .thenReturn(Flowable.just(OnDisconnect()))
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {

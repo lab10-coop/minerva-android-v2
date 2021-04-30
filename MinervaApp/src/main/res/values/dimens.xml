@@ -61,4 +61,5 @@
     <dimen name="progressbar_size_small">18dp</dimen>
     <dimen name="drawable_icon_small">16dp</dimen>
     <dimen name="drag_view_margin">120dp</dimen>
+    <dimen name="app_version_bottom_bar_size">60dp</dimen>
 </resources>

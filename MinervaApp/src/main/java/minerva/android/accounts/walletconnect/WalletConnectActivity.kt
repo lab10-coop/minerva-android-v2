@@ -31,4 +31,9 @@ class WalletConnectActivity : AppCompatActivity() {
             }
         })
     }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.removeDeadSession()
+    }
 }

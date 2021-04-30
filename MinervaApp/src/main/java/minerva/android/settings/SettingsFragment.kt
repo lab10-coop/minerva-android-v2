@@ -15,6 +15,7 @@ import minerva.android.settings.backup.BackupActivity
 import minerva.android.settings.model.SettingsRowType
 import minerva.android.settings.model.SettingsRowType.*
 import minerva.android.settings.model.propagateSettings
+import minerva.android.wrapped.startAppVersionWrappedActivity
 import minerva.android.wrapped.startAuthenticationWrappedActivity
 import minerva.android.wrapped.startCurrencyWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -81,6 +82,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             PRIVACY_POLICY -> context?.openUri(webUri = BuildConfig.PRIVACY_POLICY)
             AUTHENTICATION -> startAuthenticationWrappedActivity(requireContext())
             CURRENCY -> startCurrencyWrappedActivity(requireContext())
+            APP_VERSION -> startAppVersionWrappedActivity(requireContext())
             else -> Timber.d(type.toString())
         }
     }
