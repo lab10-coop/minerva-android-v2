@@ -14,7 +14,7 @@ class AuthenticationViewModelTest : BaseViewModelTest() {
 
     private val localStorage: LocalStorage = mock()
 
-    private val viewModel = AuthenticationViewModel(localStorage)
+    private lateinit var viewModel: AuthenticationViewModel
 
     private val protectKeysObserver: Observer<Event<Boolean>> = mock()
     private val protectKeysCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
@@ -24,36 +24,36 @@ class AuthenticationViewModelTest : BaseViewModelTest() {
 
     @Before
     fun setupLiveDataObservers() {
-        viewModel.protectKeysLiveData.observeForever(protectKeysObserver)
-        viewModel.protectTransactionsLiveData.observeForever(protectTransactionsObserver)
+        localStorage.run {
+            whenever(isProtectKeysEnabled).thenReturn(true)
+            whenever(isProtectTransactionsEnabled).thenReturn(false)
+            viewModel = AuthenticationViewModel(this).apply {
+                protectKeysLiveData.observeForever(protectKeysObserver)
+                protectTransactionsLiveData.observeForever(protectTransactionsObserver)
+            }
+        }
     }
 
     @Test
     fun `Check that initializing view model works fine`() {
-        whenever(localStorage.isProtectKeysEnabled).thenReturn(true)
-        whenever(localStorage.isProtectTransactionsEnabled).thenReturn(false)
-        viewModel.init()
         protectKeysCaptor.run { verify(protectKeysObserver).onChanged(capture()) }
         protectTransactionsCaptor.run { verify(protectTransactionsObserver).onChanged(capture()) }
     }
 
     @Test
     fun `Check that toggling protect keys works fine`() {
-        whenever(localStorage.isProtectKeysEnabled).thenReturn(true)
-        whenever(localStorage.isProtectTransactionsEnabled).thenReturn(true)
         viewModel.toggleProtectKeys()
         protectKeysCaptor.run {
-            verify(protectKeysObserver).onChanged(capture())
-            firstValue.peekContent() shouldBeEqualTo false
+            verify(protectKeysObserver, times(2)).onChanged(capture())
+            firstValue.peekContent() shouldBeEqualTo true
+            secondValue.peekContent() shouldBeEqualTo false
         }
-        protectTransactionsCaptor.run { verify(protectTransactionsObserver).onChanged(capture()) }
+        protectTransactionsCaptor.run { verify(protectTransactionsObserver, times(2)).onChanged(capture()) }
     }
 
     @Test
     fun `Check that toggling protect transactions works fine`() {
-        whenever(localStorage.isProtectTransactionsEnabled).thenReturn(false)
-        viewModel.protectTransactionsLiveData.observeForever(protectTransactionsObserver)
         viewModel.toggleProtectTransactions()
-        protectTransactionsCaptor.run { verify(protectTransactionsObserver).onChanged(capture()) }
+        protectTransactionsCaptor.run { verify(protectTransactionsObserver, times(2)).onChanged(capture()) }
     }
 }
