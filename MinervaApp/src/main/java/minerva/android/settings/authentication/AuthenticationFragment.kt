@@ -21,7 +21,6 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentAuthenticationBinding.bind(view)
-        viewModel.init()
         initializeFragment()
     }
 

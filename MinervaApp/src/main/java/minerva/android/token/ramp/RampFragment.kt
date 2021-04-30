@@ -42,7 +42,6 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
             }
             continueButton.setOnClickListener { openRampScreen() }
             createNewAccount.setOnClickListener { createNewAccount() }
-
             viewModel.apply {
                 createAccountLiveData.observe(
                     viewLifecycleOwner,
