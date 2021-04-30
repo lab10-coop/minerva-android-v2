@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import androidx.recyclerview.widget.GridLayoutManager
@@ -57,6 +58,9 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
 
     private fun openRampScreen() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
+
+            Log.e("klop", "Current address: ${viewModel.getCurrentAccount().address}")
+
             data = Uri.Builder()
                 .scheme(SCHEME)
                 .authority(BuildConfig.RAMP_API_URL)

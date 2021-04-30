@@ -30,8 +30,8 @@ class AuthenticationViewModel(private val localStorage: LocalStorage) : BaseView
     fun toggleProtectKeys() {
         localStorage.apply {
             _protectKeysLiveData.value = Event(!isProtectKeysEnabled)
-            _protectTransactionsLiveData.value = Event(isProtectTransactionsEnabled)
             isProtectKeysEnabled = !isProtectKeysEnabled
+            _protectTransactionsLiveData.value = Event(isProtectTransactionsEnabled)
         }
 
     }
