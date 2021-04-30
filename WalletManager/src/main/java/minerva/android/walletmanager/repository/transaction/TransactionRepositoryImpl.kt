@@ -38,7 +38,6 @@ import java.math.BigInteger
 import java.math.RoundingMode
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.HashMap
 
 class TransactionRepositoryImpl(
     private val blockchainRepository: BlockchainRegularAccountRepository,
@@ -280,9 +279,7 @@ class TransactionRepositoryImpl(
 
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
     override fun getAccountByAddress(address: String): Account? =
-        walletConfigManager.getWalletConfig().accounts.find {
-            blockchainRepository.toChecksumAddress(it.address) == address
-        }
+        walletConfigManager.getWalletConfig().accounts.find { it.address.equals(address, true) }
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
 
