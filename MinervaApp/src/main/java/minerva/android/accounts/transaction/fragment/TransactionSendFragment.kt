@@ -361,17 +361,8 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     private fun setSendButtonOnClickListener() {
         binding.apply {
             sendButton.setOnClickListener {
-                viewModel.run {
-                    if (isAuthenticationEnabled()) showBiometricPrompt ({
-                        sendTransaction(
-                            receiver.text.toString(),
-                            getAmount(),
-                            getGasPrice(),
-                            getGasLimit()
-                        )
-                    })
-                    else sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
-                }
+                if (viewModel.isAuthenticationEnabled()) showBiometricPrompt({ sendTransaction(receiver.text.toString()) })
+                else sendTransaction(receiver.text.toString())
             }
             receiverInputLayout.setEndIconOnClickListener {
                 receiver.setText(String.Empty)
@@ -379,6 +370,8 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
             }
         }
     }
+
+    private fun sendTransaction(receiver: String) = viewModel.sendTransaction(receiver, getAmount(), getGasPrice(), getGasLimit())
 
     private fun getAmount() = BigDecimal(binding.amount.text.toString())
 

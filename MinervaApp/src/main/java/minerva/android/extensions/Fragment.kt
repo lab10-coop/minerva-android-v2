@@ -17,32 +17,30 @@ fun Fragment.showBiometricPrompt(
 ) {
     activity?.let {
         (it.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).let { keyguard ->
-            if (keyguard.isDeviceSecure) showBiometricPrompt(this, { onSuccessAction() }, { onCancelledAction() })
+            if (keyguard.isDeviceSecure) showBiometricPrompt({ onSuccessAction() }, { onCancelledAction() })
             else notSystemAuthorizationAction()
         }
     }
 }
 
-private fun showBiometricPrompt(fragment: Fragment, onSuccessAction: () -> Unit, onCancelledAction: () -> Unit = {}) {
-    fragment.run {
-        val biometricPrompt = BiometricPrompt(this, ContextCompat.getMainExecutor(requireContext()),
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    Timber.e("Authentication error: $errString")
-                    onCancelledAction()
-                }
+private fun Fragment.showBiometricPrompt(onSuccessAction: () -> Unit, onCancelledAction: () -> Unit = {}) {
+    val biometricPrompt = BiometricPrompt(this, ContextCompat.getMainExecutor(requireContext()),
+        object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                Timber.e("Authentication error: $errString")
+                onCancelledAction()
+            }
 
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    onSuccessAction()
-                }
-            })
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                onSuccessAction()
+            }
+        })
 
-        BiometricPrompt.PromptInfo.Builder().setTitle(context?.getString(R.string.authentication_title).toString()).apply {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-            else setDeviceCredentialAllowed(true)
-            biometricPrompt.authenticate(build())
-        }
+    BiometricPrompt.PromptInfo.Builder().setTitle(context?.getString(R.string.authentication_title).toString()).apply {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+        else setDeviceCredentialAllowed(true)
+        biometricPrompt.authenticate(build())
     }
 }

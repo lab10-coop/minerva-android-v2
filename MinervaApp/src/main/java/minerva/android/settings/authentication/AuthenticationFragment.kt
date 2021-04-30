@@ -63,13 +63,17 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
     }
 
     private fun showBiometric(onSuccessAction: () -> Unit) {
-        activity?.let {
-            if (viewModel.wasCredentialsChecked) onSuccessAction()
-            else showBiometricPrompt(
-                { onSuccessAction() },
-                { },
-                { MinervaFlashbar.show(it, getString(R.string.device_not_secured), getString(R.string.device_not_secured_message)) })
-        }
+        if (viewModel.wasCredentialsChecked) onSuccessAction()
+        else showBiometricPrompt(
+            { onSuccessAction() },
+            { },
+            {
+                MinervaFlashbar.show(
+                    requireActivity(),
+                    getString(R.string.device_not_secured),
+                    getString(R.string.device_not_secured_message)
+                )
+            })
     }
 
     private fun activateProtectTransactions(isActivated: Boolean) {

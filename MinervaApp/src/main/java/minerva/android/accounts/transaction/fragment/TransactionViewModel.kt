@@ -155,7 +155,7 @@ class TransactionViewModel(
         }
     }
 
-    fun isAuthenticationEnabled() = transactionRepository.isProtectTransactionEnabled()
+    fun isAuthenticationEnabled(): Boolean = transactionRepository.isProtectTransactionEnabled()
 
     private fun getTxCostPayload(to: String, amount: BigDecimal): TxCostPayload =
         TxCostPayload(
