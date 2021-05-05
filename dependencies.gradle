@@ -60,7 +60,7 @@ ext {
     jsoupVersion = '1.13.1'
     jsonLogicVersion = '0.9.6'
     flexboxVersion = '2.0.1'
-    cookieFlashbarVersion = '1.0.2'
+    flashbarVersion = '1.0.4'
     mockitoInline = '3.4.0'
     roomVersion = '2.2.6'
 
@@ -140,7 +140,7 @@ ext {
 
     uiDependencies = [
             glide          : "com.github.bumptech.glide:glide:$glideVersion",
-            flashbar       : "com.andrognito.flashbar:CookieFlashbar:$cookieFlashbarVersion",
+            flashbar       : "com.github.CookieStudio:Flashbar:$flashbarVersion",
             spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion",
             biometric      : "androidx.biometric:biometric:$biometricVersion",
             waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion",
