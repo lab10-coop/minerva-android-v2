@@ -19,7 +19,11 @@ import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxSpeed
 import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.repository.walletconnect.*
+import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
+import minerva.android.walletmanager.repository.walletconnect.OnEthSendTransaction
+import minerva.android.walletmanager.repository.walletconnect.OnEthSign
+import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test

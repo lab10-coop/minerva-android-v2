@@ -12,12 +12,8 @@ object WrongQrCodeState : WalletConnectState()
 object CorrectQrCodeState : WalletConnectState()
 data class OnGeneralError(val error: Throwable, val sessionName: String = String.Empty) : WalletConnectState()
 data class OnWalletConnectConnectionError(val error: Throwable, val sessionName: String = String.Empty) : WalletConnectState()
-data class OnSessionRequestWithDefinedNetwork(val meta: WalletConnectPeerMeta, val network: String) :
+data class OnSessionRequest(val meta: WalletConnectPeerMeta, val network: String, val dialogType: WalletConnectAlertType) :
     WalletConnectState()
-
-data class OnSessionRequestWithUndefinedNetwork(val meta: WalletConnectPeerMeta, val network: String) :
-    WalletConnectState()
-
 data class OnDisconnected(val sessionName: String = String.Empty) : WalletConnectState()
 data class ProgressBarState(val show: Boolean) : WalletConnectState()
 data class UpdateDappsState(val dapps: List<DappSession>) : WalletConnectState()

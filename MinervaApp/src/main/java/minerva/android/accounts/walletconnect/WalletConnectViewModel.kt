@@ -160,18 +160,29 @@ class WalletConnectViewModel(
         if (icons.isEmpty()) String.Empty
         else icons[FIRST_ICON]
 
-    val shouldChangeNetwork: Boolean
-        get() = account.network.name != requestedNetwork
-
     private fun handleSessionRequest(it: OnSessionRequest): WalletConnectState =
         it.chainId?.let { id ->
             requestedNetwork = getNetworkName(id)
-            OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
+            OnSessionRequest(it.meta, requestedNetwork, getAlertType(it.meta.url))
         }.orElse {
             requestedNetwork = account.network.name
-            OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
+            OnSessionRequest(it.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
         }
+
+    private fun getAlertType(url: String) = when {
+        account.network.name == requestedNetwork -> WalletConnectAlertType.NO_ALERT
+        requestedNetwork == ETHEREUM_NETWORK && isUrlContainAccountNetwork(url) -> WalletConnectAlertType.NO_ALERT
+        requestedNetwork == ETHEREUM_NETWORK && !isUrlContainAccountNetwork(url) -> WalletConnectAlertType.WARNING
+        account.network.name != requestedNetwork -> WalletConnectAlertType.ERROR
+        else -> WalletConnectAlertType.NO_ALERT
+    }
+
+    private fun isUrlContainAccountNetwork(url: String): Boolean = url.contains(account.network.token, true)
 
     private fun getNetworkName(chainId: Int) =
         NetworkManager.networks.find { it.chainId == chainId }?.name.orElse { String.Empty }
+
+    companion object {
+        private val ETHEREUM_NETWORK = "Ethereum"
+    }
 }

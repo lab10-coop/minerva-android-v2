@@ -64,4 +64,6 @@
     <color name="dappSeparatorColor">#eaeaee</color>
     <color name="transparentErrorRed">#10e42c00</color>
     <color name="errorRed">#e42c00</color>
+    <color name="warningMessageOrange">#dc7500</color>
+    <color name="warningOrange">#fda518</color>
 </resources>
