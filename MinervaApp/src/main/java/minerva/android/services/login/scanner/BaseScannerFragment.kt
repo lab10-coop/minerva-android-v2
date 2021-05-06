@@ -50,13 +50,17 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
             decodeCallback = DecodeCallback { result ->
                 requireActivity().runOnUiThread {
                     if (shouldScan) {
-                        binding.scannerProgressBar.visible()
+                        showProgress()
                         onCallbackAction(result.text)
                     }
                 }
             }
             errorCallback = ErrorCallback { handleCameraError(it) }
         }
+    }
+
+    protected open fun showProgress() {
+        binding.scannerProgressBar.visible()
     }
 
     private fun setOnCloseButtonAction() {
