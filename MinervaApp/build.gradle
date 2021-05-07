@@ -113,7 +113,7 @@ dependencies {
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
 
-    implementation('com.github.prettymuchbryce:abidecoder:master-SNAPSHOT') {
+    implementation('com.github.CookieStudio:abidecoder:1.0.4') {
         exclude group: 'org.iq80.leveldb', module: 'leveldb-api'
     }
 
