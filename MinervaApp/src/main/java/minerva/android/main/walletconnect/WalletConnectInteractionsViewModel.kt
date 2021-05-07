@@ -345,7 +345,7 @@ class WalletConnectInteractionsViewModel(
         balance < cost || balance == BigDecimal.ZERO
 
     companion object {
-        private const val UNLIMITED = "-1"
+        private const val UNLIMITED = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
         private const val TOKEN_SWAP_PARAMS = 2
     }
 }

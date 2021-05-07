@@ -38,7 +38,7 @@ class DecodeDataUtils {
         val value = result?.params?.get(1)?.value
         val name = result?.name
 
-        assertEquals(value, BigInteger.valueOf(-1))
+        assertEquals(value.toString(), "115792089237316195423570985008687907853269984665640564039457584007913129639935")
         assertEquals(name, "approve")
         assertEquals(result?.params?.get(0)?.type, "address")
     }
