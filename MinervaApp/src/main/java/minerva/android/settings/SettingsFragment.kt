@@ -68,7 +68,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     }
 
     private fun showBackupActivity() =
-        if (viewModel.isAuthenticationEnabled) showBiometricPrompt { startBackupActivity() }
+        if (viewModel.isAuthenticationEnabled) showBiometricPrompt({ startBackupActivity() })
         else startBackupActivity()
 
     private fun startBackupActivity() = context?.launchActivity<BackupActivity>()

@@ -1,11 +1,14 @@
 package minerva.android.walletmanager.localstorage
 
 import android.content.SharedPreferences
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import io.mockk.*
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.storage.LocalStorageImpl
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.After
 import org.junit.Test
 
@@ -156,17 +159,28 @@ class LocalStorageTest {
 
     @Test
     fun `check is authentication available`() {
-        localStorage.isAuthenticationEnabled = true
-        verify {
-            sharedPref.edit().putBoolean(any(), any()).apply()
+        localStorage.run {
+            isProtectKeysEnabled = false
+            isProtectTransactionsEnabled = true
+            isProtectKeysEnabled
+            isProtectTransactionsEnabled
+        }
+
+        sharedPref.run {
+            verify(exactly = 2) { edit().putBoolean(any(), any()).apply() }
+            verify(exactly = 3) { getBoolean(any(), any()) }
         }
     }
 
     @Test
     fun `check showing main networks correctly`() {
-        localStorage.areMainNetworksEnabled = true
-        verify(exactly = 2) {
-            sharedPref.edit().putBoolean(any(), any()).apply()
+        localStorage.run {
+            areMainNetworksEnabled = true
+            areMainNetworksEnabled
+        }
+        sharedPref.run {
+            verify(exactly = 2) { edit().putBoolean(any(), any()).apply() }
+            verify { getBoolean(any(), any()) }
         }
     }
 

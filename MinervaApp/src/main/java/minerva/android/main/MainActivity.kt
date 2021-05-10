@@ -18,6 +18,7 @@ import minerva.android.accounts.transaction.fragment.AccountsFragment
 import minerva.android.accounts.walletconnect.*
 import minerva.android.databinding.ActivityMainBinding
 import minerva.android.extension.*
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.identities.credentials.CredentialsFragment
 import minerva.android.identities.myIdentities.MyIdentitiesFragment
@@ -210,24 +211,29 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     private fun getSendTransactionDialog(it: OnEthSendTransactionRequest) =
-        DappSendTransactionDialog(
-            this,
-            {
-                walletConnectViewModel.sendTransaction()
-                dappDialog = null
-            },
-            {
-                walletConnectViewModel.rejectRequest()
-                dappDialog = null
-            }).apply {
-            setContent(
-                it.transaction, it.session, it.account,
-                { showGasPriceDialog(it) },
-                { gasPrice -> walletConnectViewModel.recalculateTxCost(gasPrice, it.transaction) },
-                { balance, cost -> walletConnectViewModel.isBalanceTooLow(balance, cost) }
+        with(walletConnectViewModel) {
+            DappSendTransactionDialog(
+                this@MainActivity,
+                {
+                    if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt(
+                        ::sendTransaction,
+                        ::rejectRequest)
+                    else sendTransaction()
+                    dappDialog = null
+                },
+                {
+                    rejectRequest()
+                    dappDialog = null
+                }).apply {
+                setContent(
+                    it.transaction, it.session, it.account,
+                    { showGasPriceDialog(it) },
+                    { gasPrice -> recalculateTxCost(gasPrice, it.transaction) },
+                    { balance, cost -> isBalanceTooLow(balance, cost) }
 
-            )
-            show()
+                )
+                show()
+            }
         }
 
     private fun DappSendTransactionDialog.showGasPriceDialog(it: OnEthSendTransactionRequest) {

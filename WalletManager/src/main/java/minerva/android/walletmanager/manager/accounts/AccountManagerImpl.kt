@@ -158,8 +158,11 @@ class AccountManagerImpl(
             walletManager.showMainNetworksWarning = value
         }
 
-    override val isAuthenticationEnabled: Boolean
-        get() = localStorage.isAuthenticationEnabled
+    override val isProtectKeysEnabled: Boolean
+        get() = localStorage.isProtectKeysEnabled
+
+    override val isProtectTransactionsEnabled: Boolean
+        get() = localStorage.isProtectTransactionsEnabled
 
     override fun removeAccount(account: Account): Completable =
         walletManager.getWalletConfig().run {

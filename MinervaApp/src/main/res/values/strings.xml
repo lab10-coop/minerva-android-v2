@@ -293,7 +293,11 @@
     <string name="enable">Enable</string>
     <string name="create">Create</string>
     <string name="protect_keys">Protect Keys</string>
-    <string name="protect_minerva_description">Enable your standard phone authentication method to protect your Seed Phrase and the export of private keys.</string>
+    <string name="protect_transactions">Protect Transactions</string>
+    <string name="protect_keys_description">Enable your standard phone authentication method to protect your Seed Phrase and the export of private keys.</string>
+    <string name="protect_transactions_description">Enable your standard phone authentication method to protect all transactions sent from Minerva</string>
+    <string name="protect_transaction_error_title">Protect Transaction error</string>
+    <string name="protect_transaction_error_message">You have to enable "Protect Keys" first, before you can also protect transactions.</string>
     <string name="authentication_title">Use yor phone authentication</string>
     <string name="device_not_secured">Your device is not secured!</string>
     <string name="device_not_secured_message">Please change your device security settings and try again.</string>
@@ -308,6 +312,7 @@
     <string name="active_session_connection_error">Your connection with %s was closed. Check your internet connection and try to reconnect with a refreshed website.</string>
     <string name="session_connection_error">Check your internet connection and try to reconnect with a refreshed website.</string>
     <string name="version_history">Version history</string>
+    <string name="authentication">Authentication</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

@@ -48,4 +48,5 @@ interface TransactionRepository {
     fun toEther(value: BigDecimal): BigDecimal
     fun sendTransaction(chainId: Int, transaction: Transaction): Single<String>
     fun getFiatSymbol(): String
+    fun isProtectTransactionEnabled(): Boolean
 }
