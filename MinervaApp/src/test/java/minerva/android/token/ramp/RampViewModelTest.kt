@@ -33,21 +33,22 @@ class RampViewModelTest : BaseViewModelTest() {
     @Test
     fun `Check getting active account by chainId and getting currently chosen Account`() {
         val currentAccounts = listOf(
-            Account(1, chainId = 3, name = "account1"),
-            Account(2, chainId = 3, name = "account2"),
-            Account(3, chainId = 3, name = "account3"),
-            Account(4, chainId = 3, name = "account4")
+            Account(1, chainId = 3, name = "account1", address = "0x0"),
+            Account(2, chainId = 3, name = "account2", address = "0x0"),
+            Account(3, chainId = 3, name = "account3", address = "0x0"),
+            Account(4, chainId = 3, name = "account4", address = "0x0")
         )
         whenever(accountManager.getAllActiveAccounts(any())).thenReturn(currentAccounts)
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("0xCHECKxSUM")
         viewModel.apply {
             currentChainId shouldBeEqualTo Int.InvalidId
             currentChainId = 3
             getValidAccounts(3)
             currentChainId shouldBeEqualTo 3
             spinnerPosition = 3
-            getCurrentAccount().name shouldBeEqualTo "account4"
+            getCurrentCheckSumAddress() shouldBeEqualTo "0xCHECKxSUM"
             spinnerPosition = 0
-            getCurrentAccount().name shouldBeEqualTo "account1"
+            getCurrentCheckSumAddress() shouldBeEqualTo "0xCHECKxSUM"
             currentChainId shouldBeEqualTo 3
         }
     }

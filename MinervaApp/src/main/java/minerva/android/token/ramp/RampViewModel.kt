@@ -53,7 +53,9 @@ class RampViewModel(
         currentChainId = chainId
     }
 
-    fun getCurrentAccount() = getValidAccounts(currentChainId)[spinnerPosition]
+    fun getCurrentCheckSumAddress() = getValidAccounts(currentChainId)[spinnerPosition].let {
+        accountManager.toChecksumAddress(it.address)
+    }
 
     fun createNewAccount() {
         launchDisposable {
