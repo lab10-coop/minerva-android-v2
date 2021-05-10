@@ -2,6 +2,7 @@ package minerva.android.main.walletconnect
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.prettymuchbryce.abidecoder.Decoder
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -101,9 +102,7 @@ class WalletConnectInteractionsViewModel(
             is OnDisconnect -> Single.just(OnDisconnected())
             is OnEthSendTransaction -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
-                    .flatMap { session ->
-                        getTransactionCosts(session, status)
-                    }
+                    .flatMap { session -> getTransactionCosts(session, status) }
             }
             is OnFailure -> Single.just(if (status.sessionName.isNotEmpty()) OnGeneralError(status.error) else DefaultRequest)
             else -> Single.just(DefaultRequest)
@@ -136,31 +135,25 @@ class WalletConnectInteractionsViewModel(
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
         transactionRepository.getAccountByAddress(session.address)?.let { currentAccount = it }
-        val value = getTransactionValue(status)
-        val transferType = getTransferType(status, value)
-        status.transaction.value = value.toPlainString()
-        val txCostPayload = getTxCostPayload(session.chainId, status, value, transferType)
+        val txValue: BigDecimal = getTransactionValue(status)
+        val transferType: TransferType = getTransferType(status, txValue)
+        status.transaction.value = txValue.toPlainString()
+        val txCostPayload = getTxCostPayload(session.chainId, status, txValue, transferType)
         return transactionRepository.getTransactionCosts(txCostPayload)
             .flatMap { transactionCost ->
                 getFiatRate(session.chainId, transferType, status)
                     .onErrorResumeNext { Single.just(Double.InvalidValue) }
-                    .map {
-                        currentRate = it.toBigDecimal()
+                    .map { rate ->
+                        currentRate = rate.toBigDecimal()
                         val valueInFiat = getValueInFiat(transferType, status)
                         val costInFiat = getConstInFiat(transactionCost.cost)
                         currentTransaction = status.transaction.copy(
-                            value = BalanceUtils.getCryptoBalance(value),
+                            value = BalanceUtils.getCryptoBalance(txValue),
                             fiatValue = valueInFiat.let { fiat ->
-                                BalanceUtils.getFiatBalance(
-                                    fiat,
-                                    transactionRepository.getFiatSymbol()
-                                )
+                                BalanceUtils.getFiatBalance(fiat, transactionRepository.getFiatSymbol())
                             },
                             txCost = transactionCost.copy(
-                                fiatCost = BalanceUtils.getFiatBalance(
-                                    costInFiat,
-                                    transactionRepository.getFiatSymbol()
-                                )
+                                fiatCost = BalanceUtils.getFiatBalance(costInFiat, transactionRepository.getFiatSymbol())
                             ),
                             transactionType = transferType
                         )
@@ -169,10 +162,18 @@ class WalletConnectInteractionsViewModel(
             }
     }
 
-    private fun getTransactionValue(status: OnEthSendTransaction) =
-        status.transaction.value?.let {
-            transactionRepository.toEther(hexToBigInteger(it, BigDecimal.ZERO))
-        }.orElse { BigDecimal.ZERO }
+    private fun getTransactionValue(status: OnEthSendTransaction): BigDecimal =
+        status.transaction.value?.let { value ->
+            val amount = hexToBigInteger(value, BigDecimal.ZERO)
+            { error -> logToFirebase("Error type: ${error}; Transaction: ${status.transaction}") }
+            transactionRepository.toEther(amount)
+        }.orElse {
+            BigDecimal.ZERO
+        }
+
+    private fun logToFirebase(message: String) {
+        FirebaseCrashlytics.getInstance().recordException(Throwable(message))
+    }
 
     private fun getTransferType(status: OnEthSendTransaction, value: BigDecimal): TransferType =
         when {
@@ -281,26 +282,26 @@ class WalletConnectInteractionsViewModel(
     fun sendTransaction() {
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
-                .map {
+                .map { txReceipt ->
                     currentDappSession?.let { session ->
-                        walletConnectRepository.approveTransactionRequest(session.peerId, it)
+                        walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
                     }
-                    it
+                    txReceipt
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _walletConnectStatus.value = ProgressBarState(true) }
                 .doOnError {
-                    currentDappSession?.let {
-                        walletConnectRepository.rejectRequest(it.peerId)
+                    currentDappSession?.let { session ->
+                        walletConnectRepository.rejectRequest(session.peerId)
                     }
                     _walletConnectStatus.value = ProgressBarState(false)
                 }
                 .subscribeBy(
                     onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
-                    onError = {
-                        Timber.e(it)
-                        _walletConnectStatus.value = OnGeneralError(it)
+                    onError = { error ->
+                        Timber.e(error)
+                        _walletConnectStatus.value = OnGeneralError(error)
                     }
                 )
         }

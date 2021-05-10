@@ -51,15 +51,15 @@ class WalletConnectViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { _viewStateLiveData.value = ProgressBarState(false) }
                 .subscribeBy(
-                    onNext = {
-                        _viewStateLiveData.value = when (it) {
+                    onNext = { status ->
+                        _viewStateLiveData.value = when (status) {
                             is OnSessionRequest -> {
-                                topic = it.topic
-                                handshakeId = it.handshakeId
-                                handleSessionRequest(it)
+                                topic = status.topic
+                                handshakeId = status.handshakeId
+                                handleSessionRequest(status)
                             }
-                            is OnDisconnect -> OnDisconnected(it.sessionName)
-                            is OnFailure -> OnWalletConnectConnectionError(it.error, it.sessionName)
+                            is OnDisconnect -> OnDisconnected(status.sessionName)
+                            is OnFailure -> OnWalletConnectConnectionError(status.error, status.sessionName)
                             else -> DefaultRequest
                         }
                     },
