@@ -42,27 +42,24 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     private fun observeViewState() {
-        viewModel.stateLiveData.observe(viewLifecycleOwner, Observer {
-            when (it) {
+        viewModel.stateLiveData.observe(viewLifecycleOwner, Observer { state ->
+            when (state) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
                 is OnDisconnected -> {
-                    if (it.sessionName.isNotEmpty()) {
-                        showToast(getString(R.string.dapp_disconnected, it.sessionName))
+                    if (state.sessionName.isNotEmpty()) {
+                        showToast(getString(R.string.dapp_disconnected, state.sessionName))
                     } else {
                         showAlertDialog(getString(R.string.session_connection_error))
                     }
                 }
                 is ProgressBarState -> {
-                    if (!it.show) {
+                    if (!state.show) {
                         binding.scannerProgressBar.invisible()
                     }
                 }
-                is OnSessionRequestWithDefinedNetwork ->
-                    showConnectionDialog(it.meta, it.network, true)
-                is OnSessionRequestWithUndefinedNetwork ->
-                    showConnectionDialog(it.meta, it.network, false)
-                is UpdateDappsState -> dappsAdapter.updateDapps(it.dapps)
+                is OnSessionRequest -> showConnectionDialog(state.meta, state.network, state.dialogType)
+                is UpdateDappsState -> dappsAdapter.updateDapps(state.dapps)
                 is HideDappsState -> {
                     with(binding) {
                         dappsBottomSheet.dapps.gone()
@@ -70,8 +67,8 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                     }
                 }
                 is OnSessionDeleted -> showToast(getString(R.string.dapp_deleted))
-                is OnGeneralError -> handleError(it.error)
-                is OnWalletConnectConnectionError -> handleWalletConnectError(it)
+                is OnGeneralError -> handleError(state.error)
+                is OnWalletConnectConnectionError -> handleWalletConnectError(state)
             }
         })
         viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver { handleError(it) })
@@ -148,7 +145,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         viewModel.handleQrCode(qrCode)
     }
 
-    private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: String, isNetworkDefined: Boolean) {
+    private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: String, dialogType: WalletConnectAlertType) {
         confirmationDialogDialog = DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession(meta)
@@ -162,16 +159,17 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             }).apply {
             setOnDismissListener { shouldScan = true }
             setView(meta, network)
-            handleNetwork(isNetworkDefined)
+            handleNetwork(dialogType)
             show()
         }
     }
 
-    private fun DappConfirmationDialog.handleNetwork(isNetworkDefined: Boolean) {
-        when {
-            !isNetworkDefined -> setNotDefinedNetworkWarning()
-            isNetworkDefined && viewModel.shouldChangeNetwork ->
-                setWrongNetworkMessage(getString(R.string.wrong_network_message, viewModel.requestedNetwork))
+    private fun DappConfirmationDialog.handleNetwork(dialogType: WalletConnectAlertType) {
+        when(dialogType) {
+            WalletConnectAlertType.NO_ALERT -> {}
+            WalletConnectAlertType.WARNING -> setWrongNetworkWarning(viewModel.requestedNetwork)
+            WalletConnectAlertType.ERROR -> setWrongNetworkMessage(viewModel.requestedNetwork)
+            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning()
         }
     }
 

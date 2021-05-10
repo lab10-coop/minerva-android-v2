@@ -34,7 +34,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     private val stateCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
-    private val meta = WalletConnectPeerMeta(name = "token", url = "url", description = "dsc")
+    private val meta = WalletConnectPeerMeta(name = "token", url = "test.xdai.com", description = "dsc")
 
     @Before
     fun setup() {
@@ -83,13 +83,60 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on session request event test with defined chainId on test net`() {
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"), 1)))
-        NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1))
+        NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1, token="Ethereum"))
+        viewModel.account = Account(1, chainId = 1)
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo OnSessionRequestWithDefinedNetwork(meta, "Ethereum")
+            secondValue shouldBeEqualTo OnSessionRequest(meta, "Ethereum", WalletConnectAlertType.NO_ALERT)
+        }
+    }
+
+    @Test
+    fun `on session request event test with defined chainId on test net with xDai account, Ethereum dapp and url that contain xDai`() {
+        whenever(repository.connectionStatusFlowable)
+            .thenReturn(Flowable.just(OnSessionRequest(meta, 2, Topic("peerID", "remotePeerID"), 1)))
+        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 1, token="xDai"), Network(name = "Ethereum", chainId = 2, token="Ethereum"))
+        viewModel.account = Account(1, chainId = 1)
+        viewModel.stateLiveData.observeForever(stateObserver)
+        viewModel.setConnectionStatusFlowable()
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
+            firstValue shouldBeEqualTo ProgressBarState(false)
+            secondValue shouldBeEqualTo OnSessionRequest(meta, "Ethereum", WalletConnectAlertType.NO_ALERT)
+        }
+    }
+
+    @Test
+    fun `on session request event test with defined chainId on test net with xDai account, Ethereum dapp and url that doesnt contain xDai`() {
+        val meta = WalletConnectPeerMeta(name = "token", url = "test.com", description = "dsc")
+        whenever(repository.connectionStatusFlowable)
+            .thenReturn(Flowable.just(OnSessionRequest(meta, 2, Topic("peerID", "remotePeerID"), 1)))
+        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 1, token="xDai"), Network(name = "Ethereum", chainId = 2, token="Ethereum"))
+        viewModel.account = Account(1, chainId = 1)
+        viewModel.stateLiveData.observeForever(stateObserver)
+        viewModel.setConnectionStatusFlowable()
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
+            firstValue shouldBeEqualTo ProgressBarState(false)
+            secondValue shouldBeEqualTo OnSessionRequest(meta, "Ethereum", WalletConnectAlertType.WARNING)
+        }
+    }
+
+    @Test
+    fun `on session request event test with defined chainId on test net with Ethereum account and xdai dapp`() {
+        whenever(repository.connectionStatusFlowable)
+            .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"), 1)))
+        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 1, token="xDai"), Network(name = "Ethereum", chainId = 2, token="Ethereum"))
+        viewModel.account = Account(1, chainId = 2)
+        viewModel.stateLiveData.observeForever(stateObserver)
+        viewModel.setConnectionStatusFlowable()
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
+            firstValue shouldBeEqualTo ProgressBarState(false)
+            secondValue shouldBeEqualTo OnSessionRequest(meta, "xDai", WalletConnectAlertType.ERROR)
         }
     }
 
@@ -117,7 +164,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo OnSessionRequestWithUndefinedNetwork(meta, "Ethereum (Görli)")
+            secondValue shouldBeEqualTo OnSessionRequest(meta, "Ethereum (Görli)", WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
         }
     }
 
@@ -150,7 +197,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState
-            secondValue shouldBeEqualTo OnSessionRequestWithUndefinedNetwork(meta, "Ethereum")
+            secondValue shouldBeEqualTo OnSessionRequest(meta, "Ethereum", WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
             viewModel.requestedNetwork shouldBeEqualTo "Ethereum"
         }
     }
