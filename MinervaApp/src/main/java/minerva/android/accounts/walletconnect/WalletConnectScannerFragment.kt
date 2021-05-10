@@ -10,10 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
-import minerva.android.extension.gone
-import minerva.android.extension.invisible
-import minerva.android.extension.margin
-import minerva.android.extension.visible
+import minerva.android.extension.*
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
@@ -53,11 +50,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                         showAlertDialog(getString(R.string.session_connection_error))
                     }
                 }
-                is ProgressBarState -> {
-                    if (!state.show) {
-                        binding.scannerProgressBar.invisible()
-                    }
-                }
+                is ProgressBarState -> binding.walletConnectProgress.root.visibleOrInvisible(state.show)
                 is OnSessionRequest -> showConnectionDialog(state.meta, state.network, state.dialogType)
                 is UpdateDappsState -> dappsAdapter.updateDapps(state.dapps)
                 is HideDappsState -> {
@@ -143,6 +136,10 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
 
     override fun onCallbackAction(qrCode: String) {
         viewModel.handleQrCode(qrCode)
+    }
+
+    override fun showProgress() {
+        binding.walletConnectProgress.root.visible()
     }
 
     private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: String, dialogType: WalletConnectAlertType) {
