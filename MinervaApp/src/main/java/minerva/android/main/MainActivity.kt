@@ -216,8 +216,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 this@MainActivity,
                 {
                     if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt(
-                        { sendTransaction() },
-                        { rejectRequest() })
+                        ::sendTransaction,
+                        ::rejectRequest)
                     else sendTransaction()
                     dappDialog = null
                 },

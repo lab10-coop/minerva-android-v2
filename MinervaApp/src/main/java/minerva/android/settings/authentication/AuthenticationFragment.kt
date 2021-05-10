@@ -38,14 +38,14 @@ class AuthenticationFragment : BaseFragment(R.layout.fragment_authentication) {
         binding.apply {
             protectKeysContainer.setOnClickListener { showBiometric { toggleProtectKeys() } }
             protectTransactionsContainer.setOnClickListener {
-                if (protectKeysSwitch.isChecked) showBiometric { toggleProtectTransaction() }
+                if (protectKeysSwitch.isChecked) showBiometric(::toggleProtectTransaction)
                 else showProtectTransactionsWarning()
             }
             with(viewModel) {
-                protectKeysLiveData.observe(viewLifecycleOwner, EventObserver {
-                    protectKeysSwitch.isChecked = it
-                    activateProtectTransactions(it)
-                    if (it) protectTransactionsContainer.isEnabled = true
+                protectKeysLiveData.observe(viewLifecycleOwner, EventObserver { isProtectKeysActive ->
+                    protectKeysSwitch.isChecked = isProtectKeysActive
+                    activateProtectTransactions(isProtectKeysActive)
+                    if (isProtectKeysActive) protectTransactionsContainer.isEnabled = true
                 })
                 protectTransactionsLiveData.observe(viewLifecycleOwner, EventObserver {
                     protectTransactionsSwitch.isChecked = it

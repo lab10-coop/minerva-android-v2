@@ -361,7 +361,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     private fun setSendButtonOnClickListener() {
         binding.apply {
             sendButton.setOnClickListener {
-                if (viewModel.isAuthenticationEnabled()) showBiometricPrompt({ sendTransaction() })
+                if (viewModel.isAuthenticationEnabled()) showBiometricPrompt(::sendTransaction)
                 else sendTransaction()
             }
             receiverInputLayout.setEndIconOnClickListener {
