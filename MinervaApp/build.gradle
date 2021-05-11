@@ -58,8 +58,8 @@ android {
         flavorDimensions 'enviroment'
         staging {
             applicationId "minerva.android.staging"
-            versionCode 33
-            versionName "1.1.1"
+            versionCode 34
+            versionName "1.1.2"
             dimension 'enviroment'
             versionNameSuffix '-staging'
             matchingFallbacks = ["staging"]
