@@ -4,7 +4,6 @@ import minerva.android.BuildConfig
 import minerva.android.R
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.EmptyResource
-import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.settings.SettingsFragment
 
@@ -59,6 +58,12 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     detailText = getString(R.string.backup_alert_message),
                     rowType = SettingsRowType.REMINDER_VIEW,
                     isVisible = !viewModel.isMnemonicRemembered
+                ),
+                SettingRow(
+                    getString(R.string.authentication_alert_title),
+                    detailText = getString(R.string.authentication_alert_message),
+                    rowType = SettingsRowType.REMINDER_VIEW,
+                    isVisible = !viewModel.isAuthenticationEnabled
                 ),
                 SettingRow(
                     getString(R.string.backup),
