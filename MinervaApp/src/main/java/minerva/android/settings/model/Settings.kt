@@ -51,7 +51,7 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     getString(R.string.sync_alert_title),
                     detailText = getString(R.string.sync_alert_message),
                     rowType = SettingsRowType.REMINDER_VIEW,
-                    isVisible = !viewModel.isSynced
+                    isVisible = !isNetworkConnected()
                 ),
                 SettingRow(
                     getString(R.string.backup_alert_title),

@@ -4,18 +4,16 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
-import minerva.android.accounts.enum.ErrorCode
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.databinding.RefreshableRecyclerViewLayoutBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.showBiometricPrompt
-import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.kotlinUtils.function.orElse
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.base.BaseFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -108,6 +106,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun initFragment() {
         binding.apply {
             viewModel.apply {
+                syncError.isGone = isSynced
                 networksHeader.text = getHeader(areMainNetsEnabled)
                 addCryptoButton.apply {
                     text = if (areMainNetsEnabled) {
@@ -158,96 +157,59 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun setupLiveData() {
         viewModel.apply {
             binding.apply {
-                accountsLiveData.observe(viewLifecycleOwner, Observer { accounts ->
+                accountsLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { accounts ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)
                     accountAdapter.updateList(accounts, activeAccounts, viewModel.getFiatSymbol())
                     setTatsButtonListener()
                 })
 
-                dappSessions.observe(viewLifecycleOwner, Observer {
+                dappSessions.observe(viewLifecycleOwner, ObserverWithSyncChecking {
                     accountAdapter.updateSessionCount(it)
                 })
 
-                balanceLiveData.observe(viewLifecycleOwner, Observer {
+                balanceLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking {
                     accountAdapter.updateBalances(it)
                     checkSwipe()
                 })
-                tokenBalanceLiveData.observe(viewLifecycleOwner, Observer {
+                tokenBalanceLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking {
                     accountAdapter.updateTokenBalances()
                     checkSwipe()
                 })
             }
 
-            errorLiveData.observe(viewLifecycleOwner, EventObserver {
-                refreshAddCryptoButton()
-                showErrorFlashbar(
-                    getString(R.string.error_header),
-                    getString(R.string.unexpected_error)
-                )
+            errorLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking { errorState ->
+                when (errorState) {
+                    BaseError -> {
+                        refreshAddCryptoButton()
+                        showErrorFlashbar(R.string.error_header, R.string.unexpected_error)
+                    }
+                    BalanceIsNotEmptyAndHasMoreOwnersError ->
+                        showErrorFlashbar(R.string.cannot_remove_safe_account_title, R.string.cannot_remove_safe_account_message)
+                    BalanceIsNotEmptyError ->
+                        showErrorFlashbar(R.string.cannot_remove_account_title, R.string.cannot_remove_account_message)
+                    IsNotSafeAccountMasterOwnerError -> showErrorFlashbar(R.string.error_header, R.string.safe_account_removal_error)
+                    is AutomaticBackupError -> handleAutomaticBackupError(errorState.throwable)
+                    RefreshCoinBalancesError -> handleRefreshBalancesError(R.string.refresh_balances_error)
+                    RefreshTokenBalancesError -> handleRefreshBalancesError(R.string.refresh_asset_balances_error)
+                    NoFunds ->  MinervaFlashbar.show(requireActivity(), getString(R.string.no_funds), getString(R.string.no_funds_message))
+                }
             })
 
-            noFundsLiveData.observe(viewLifecycleOwner, Observer {
-                MinervaFlashbar.show(
-                    requireActivity(),
-                    getString(R.string.no_funds),
-                    getString(R.string.no_funds_message)
-                )
-            })
-
-            loadingLiveData.observe(viewLifecycleOwner, EventObserver {
+            loadingLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
                 interactor.shouldShowLoadingScreen(it)
             })
 
-            balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.observe(
-                viewLifecycleOwner,
-                EventObserver {
-                    showErrorFlashbar(
-                        getString(R.string.cannot_remove_safe_account_title),
-                        getString(R.string.cannot_remove_safe_account_message)
-                    )
-                })
-
-            balanceIsNotEmptyErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                showErrorFlashbar(
-                    getString(R.string.cannot_remove_account_title),
-                    getString(R.string.cannot_remove_account_message)
-                )
-            })
-
-            isNotSafeAccountMasterOwnerErrorLiveData.observe(viewLifecycleOwner, EventObserver {
-                showErrorFlashbar(
-                    getString(R.string.error_header),
-                    getString(R.string.safe_account_removal_error)
-                )
-            })
-
-            accountRemovedLiveData.observe(viewLifecycleOwner, EventObserver {
+            accountRemovedLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
                 activity?.invalidateOptionsMenu()
                 refreshAddCryptoButton()
             })
 
-            automaticBackupErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
-            refreshBalancesErrorLiveData.observe(viewLifecycleOwner, EventObserver { handleRefreshBalancesError(it) })
-            addFreeAtsLiveData.observe(viewLifecycleOwner, EventObserver { success ->
+            addFreeAtsLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking { success ->
                 (if (success) R.string.refresh_balance_to_check_transaction_status
                 else R.string.free_ats_warning).apply {
                     Toast.makeText(context, this, Toast.LENGTH_SHORT).show()
                 }
             })
-        }
-    }
-
-    private fun handleRefreshBalancesError(it: ErrorCode) {
-        binding.swipeRefresh.isRefreshing = false
-        when (it) {
-            ErrorCode.BALANCE_ERROR -> showErrorFlashbar(
-                getString(R.string.error_header),
-                getString(R.string.refresh_balances_error)
-            )
-            ErrorCode.TOKEN_BALANCE_ERROR -> showErrorFlashbar(
-                getString(R.string.error_header),
-                getString(R.string.refresh_asset_balances_error)
-            )
         }
     }
 
@@ -275,12 +237,30 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             }
         }
 
-    private fun showErrorFlashbar(title: String, message: String? = String.Empty) =
-        message?.let {
-            MinervaFlashbar.show(requireActivity(), title, it)
-        }.orElse {
-            MinervaFlashbar.show(requireActivity(), title, getString(R.string.unexpected_error))
+    private fun handleRefreshBalancesError(messageRes: Int) {
+        binding.swipeRefresh.isRefreshing = false
+        showErrorFlashbar(R.string.error_header, messageRes)
+    }
+
+    private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
+        MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))
+
+
+    private inner class EventObserverWithSyncChecking<T>(private val onEventUnhandledContent: (T) -> Unit) : Observer<Event<T>> {
+        override fun onChanged(event: Event<T>?) {
+            event?.getContentIfNotHandled()?.let {
+                binding.syncError.isGone = viewModel.isSynced
+                onEventUnhandledContent(it)
+            }
         }
+    }
+
+    private inner class ObserverWithSyncChecking<T>(private val onValueChanged: (T) -> Unit) : Observer<T> {
+        override fun onChanged(value: T) {
+            binding.syncError.isGone = viewModel.isSynced
+            onValueChanged(value)
+        }
+    }
 
     companion object {
         @JvmStatic

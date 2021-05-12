@@ -7,7 +7,6 @@ import androidx.lifecycle.Transformations
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import minerva.android.accounts.enum.ErrorCode
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.InvalidId
@@ -50,35 +49,20 @@ class AccountsViewModel(
     private val appUIState: AppUIState
 ) : BaseViewModel() {
 
-    private val _errorLiveData = MutableLiveData<Event<Throwable>>()
-    val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
+    val isSynced
+        get() = walletActionsRepository.isSynced
 
-    private val _refreshBalancesErrorLiveData = MutableLiveData<Event<ErrorCode>>()
-    val refreshBalancesErrorLiveData: LiveData<Event<ErrorCode>> get() = _refreshBalancesErrorLiveData
+    private val _errorLiveData = MutableLiveData<Event<AccountsErrorState>>()
+    val errorLiveData: LiveData<Event<AccountsErrorState>> get() = _errorLiveData
 
-    private val _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData = MutableLiveData<Event<Throwable>>()
-    val balanceIsNotEmptyAndHasMoreOwnersErrorLiveData: LiveData<Event<Throwable>> get() = _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData
-
-    private val _balanceIsNotEmptyErrorLiveData = MutableLiveData<Event<Throwable>>()
-    val balanceIsNotEmptyErrorLiveData: LiveData<Event<Throwable>> get() = _balanceIsNotEmptyErrorLiveData
-
-    private val _isNotSafeAccountMasterOwnerErrorLiveData = MutableLiveData<Event<Throwable>>()
-    val isNotSafeAccountMasterOwnerErrorLiveData: LiveData<Event<Throwable>> get() = _isNotSafeAccountMasterOwnerErrorLiveData
-
-    private val _automaticBackupErrorLiveData = MutableLiveData<Event<Throwable>>()
-    val automaticBackupErrorLiveData: LiveData<Event<Throwable>> get() = _automaticBackupErrorLiveData
+    private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
+    val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
     private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
     val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
 
     private val _tokenBalanceLiveData = MutableLiveData<Unit>()
     val tokenBalanceLiveData: LiveData<Unit> get() = _tokenBalanceLiveData
-
-    private val _noFundsLiveData = MutableLiveData<Event<Unit>>()
-    val noFundsLiveData: LiveData<Event<Unit>> get() = _noFundsLiveData
-
-    private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
-    val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
     private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
     val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
@@ -139,7 +123,7 @@ class AccountsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onNext = { _dappSessions.value = it },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = { _errorLiveData.value = Event(BaseError) }
                 )
         }
     }
@@ -192,7 +176,7 @@ class AccountsViewModel(
                     },
                     onError = {
                         Timber.d("Refresh balance error: ${it.message}")
-                        _refreshBalancesErrorLiveData.value = Event(ErrorCode.BALANCE_ERROR)
+                        _errorLiveData.value = Event(RefreshCoinBalancesError)
                     }
                 )
         }
@@ -226,7 +210,7 @@ class AccountsViewModel(
                     },
                     onError = {
                         Timber.e(it)
-                        _refreshBalancesErrorLiveData.value = Event(ErrorCode.TOKEN_BALANCE_ERROR)
+                        _errorLiveData.value = Event(RefreshTokenBalancesError)
                     }
                 )
         }
@@ -251,13 +235,12 @@ class AccountsViewModel(
     fun isRefreshDone() = balancesRefreshed && tokenBalancesRefreshed
 
     private fun handleRemoveAccountErrors(it: Throwable) {
-        when (it) {
-            is BalanceIsNotEmptyThrowable -> _balanceIsNotEmptyErrorLiveData.value = Event(it)
-            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> _balanceIsNotEmptyAndHasMoreOwnersErrorLiveData.value =
-                Event(it)
-            is IsNotSafeAccountMasterOwnerThrowable -> _isNotSafeAccountMasterOwnerErrorLiveData.value = Event(it)
-            is AutomaticBackupFailedThrowable -> _automaticBackupErrorLiveData.value = Event(it)
-            else -> _errorLiveData.value = Event(Throwable(it.message))
+        _errorLiveData.value = when (it) {
+            is BalanceIsNotEmptyThrowable -> Event(BalanceIsNotEmptyError)
+            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> Event(BalanceIsNotEmptyAndHasMoreOwnersError)
+            is IsNotSafeAccountMasterOwnerThrowable -> Event(IsNotSafeAccountMasterOwnerError)
+            is AutomaticBackupFailedThrowable -> Event(AutomaticBackupError(it))
+            else -> Event(BaseError)
         }
     }
 
@@ -269,7 +252,7 @@ class AccountsViewModel(
 
     fun createSafeAccount(account: Account) {
         if (account.cryptoBalance == BigDecimal.ZERO) {
-            _noFundsLiveData.value = Event(Unit)
+            _errorLiveData.value = Event(NoFunds)
         } else {
             launchDisposable {
                 smartContractRepository.createSafeAccount(account)
@@ -298,7 +281,7 @@ class AccountsViewModel(
                         onComplete = { /*Handled in wallet manager */ },
                         onError = {
                             Timber.e("Creating safe account error: ${it.message}")
-                            _errorLiveData.value = Event(Throwable(it.message))
+                            _errorLiveData.value = Event(BaseError)
                         }
                     )
             }
@@ -319,7 +302,7 @@ class AccountsViewModel(
                             },
                             onError = {
                                 Timber.e("Adding 5 tATS failed: ${it.message}")
-                                _errorLiveData.value = Event(Throwable(it.message))
+                                _errorLiveData.value = Event(BaseError)
                             }
                         )
                 }
