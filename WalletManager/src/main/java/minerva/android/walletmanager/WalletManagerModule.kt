@@ -39,8 +39,8 @@ import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepos
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.LocalStorageImpl
-import minerva.android.walletmanager.storage.TempStorage
-import minerva.android.walletmanager.storage.TempStorageImpl
+import minerva.android.walletmanager.storage.RateStorage
+import minerva.android.walletmanager.storage.RateStorageImpl
 import minerva.android.walletmanager.utils.EnsProvider
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepositoryImpl
@@ -85,7 +85,7 @@ fun createWalletModules() = module {
             "minerva_database"
         ).fallbackToDestructiveMigration().build()
     }
-    single<TempStorage> { TempStorageImpl() }
+    single<RateStorage> { RateStorageImpl() }
 }
 
 private const val MinervaStorage = "MinervaSharedPrefs"

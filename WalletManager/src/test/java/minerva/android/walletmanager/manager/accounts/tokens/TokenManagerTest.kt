@@ -26,7 +26,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenTag
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.storage.TempStorage
+import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.DataProvider
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
@@ -42,7 +42,7 @@ class TokenManagerTest : RxTest() {
     private val cryptoApi: CryptoApi = mock()
     private val localStorage: LocalStorage = mock()
     private val blockchainRepository: BlockchainRegularAccountRepository = mock()
-    private val tempStorage: TempStorage = mock()
+    private val rateStorage: RateStorage = mock()
     private val tokenDao: TokenDao = mock()
 
     private val database: MinervaDatabase = mock {
@@ -50,7 +50,7 @@ class TokenManagerTest : RxTest() {
     }
 
     private val tokenManager =
-        TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, tempStorage, database)
+        TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, rateStorage, database)
 
     @Before
     fun initializeMocks() {
@@ -303,7 +303,7 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `getting token rate test`() {
-        whenever(tempStorage.getRate(any())).thenReturn(3.3)
+        whenever(rateStorage.getRate(any())).thenReturn(3.3)
         tokenManager.getSingleTokenRate("somesome") shouldBeEqualTo 3.3
     }
 
@@ -379,7 +379,7 @@ class TokenManagerTest : RxTest() {
         whenever(tokenDao.getTaggedTokens())
             .thenReturn(Single.just(listOf(ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xS0m3T0k3N", "13"))))
 
-        whenever(tempStorage.getRate(any())).thenReturn(2.0)
+        whenever(rateStorage.getRate(any())).thenReturn(2.0)
 
         tokenManager.refreshTokensBalances(atsTauAccount)
             .test()
@@ -403,20 +403,22 @@ class TokenManagerTest : RxTest() {
             }
     }
 
+
+    //TODO klop fix this test
     @Test
     fun `check getting tokens rate request`() {
         val error = Throwable("ERROR-333")
         val rates = mapOf(Pair("40x0th3r", 1.0), Pair("40xc00k1e", 0.2), Pair("hash03", 3.3))
-        val marketResponse = TokenMarketResponse("id", "tokenName", MarketData(FiatPrice(3.3)))
+        val tokensRateResponse = mapOf("id" to (mapOf("tokenName" to "3.3")))
         val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
 
-        doNothing().whenever(tempStorage).saveRate(any(), any())
-        whenever(tempStorage.getRates()).thenReturn(rates)
-        whenever(cryptoApi.getTokenMarkets(any(), any())).thenReturn(
-            Single.just(marketResponse),
-            Single.just(marketResponse),
-            Single.just(marketResponse),
-            Single.just(marketResponse),
+        doNothing().whenever(rateStorage).saveRate(any(), any())
+        whenever(rateStorage.getRates()).thenReturn(rates)
+        whenever(cryptoApi.getTokensRate(any(), any(), any())).thenReturn(
+            Single.just(tokensRateResponse),
+            Single.just(tokensRateResponse),
+            Single.just(tokensRateResponse),
+            Single.just(tokensRateResponse),
             Single.error(error)
         )
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
@@ -428,9 +430,9 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
 
-        verify(tempStorage, times(8)).getRates()
-        verify(tempStorage, times(8)).saveRate(any(), any())
-        verify(cryptoApi, times(4)).getTokenMarkets(any(), any())
+        verify(rateStorage, times(8)).getRates()
+        verify(rateStorage, times(8)).saveRate(any(), any())
+        verify(cryptoApi, times(4)).getTokensRate(any(), any(), any())
     }
 
     @Test
@@ -440,7 +442,7 @@ class TokenManagerTest : RxTest() {
             AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
         )
         val account = Account(1, name = "account01", accountTokens = accountTokens)
-        whenever(tempStorage.getRate(any())).thenReturn(0.1, 0.3)
+        whenever(rateStorage.getRate(any())).thenReturn(0.1, 0.3)
 
         tokenManager.updateTokensRate(account)
 
