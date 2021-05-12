@@ -1,23 +1,59 @@
 package minerva.android.settings.authentication
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import androidx.lifecycle.Observer
+import com.nhaarman.mockitokotlin2.*
+import minerva.android.BaseViewModelTest
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.storage.LocalStorage
+import org.amshove.kluent.should
+import org.amshove.kluent.shouldBeEqualTo
+import org.junit.Before
 import org.junit.Test
 
-class AuthenticationViewModelTest {
+class AuthenticationViewModelTest : BaseViewModelTest() {
 
     private val localStorage: LocalStorage = mock()
 
-    private val viewModel = AuthenticationViewModel(localStorage)
+    private lateinit var viewModel: AuthenticationViewModel
+
+    private val protectKeysObserver: Observer<Event<Boolean>> = mock()
+    private val protectKeysCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
+
+    private val protectTransactionsObserver: Observer<Event<Boolean>> = mock()
+    private val protectTransactionsCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
+
+    @Before
+    fun setupLiveDataObservers() {
+        localStorage.run {
+            whenever(isProtectKeysEnabled).thenReturn(true)
+            whenever(isProtectTransactionsEnabled).thenReturn(false)
+            viewModel = AuthenticationViewModel(this).apply {
+                protectKeysLiveData.observeForever(protectKeysObserver)
+                protectTransactionsLiveData.observeForever(protectTransactionsObserver)
+            }
+        }
+    }
 
     @Test
-    fun `Check getting authentication setting` () {
-        whenever(localStorage.isAuthenticationEnabled).thenReturn(false)
-        viewModel.isAuthenticationEnabled()
-        viewModel.toggleAuthentication()
-        verify(localStorage, times(2)).isAuthenticationEnabled
+    fun `Check that initializing view model works fine`() {
+        protectKeysCaptor.run { verify(protectKeysObserver).onChanged(capture()) }
+        protectTransactionsCaptor.run { verify(protectTransactionsObserver).onChanged(capture()) }
+    }
+
+    @Test
+    fun `Check that toggling protect keys works fine`() {
+        viewModel.toggleProtectKeys()
+        protectKeysCaptor.run {
+            verify(protectKeysObserver, times(2)).onChanged(capture())
+            firstValue.peekContent() shouldBeEqualTo true
+            secondValue.peekContent() shouldBeEqualTo false
+        }
+        protectTransactionsCaptor.run { verify(protectTransactionsObserver, times(2)).onChanged(capture()) }
+    }
+
+    @Test
+    fun `Check that toggling protect transactions works fine`() {
+        viewModel.toggleProtectTransactions()
+        protectTransactionsCaptor.run { verify(protectTransactionsObserver, times(2)).onChanged(capture()) }
     }
 }

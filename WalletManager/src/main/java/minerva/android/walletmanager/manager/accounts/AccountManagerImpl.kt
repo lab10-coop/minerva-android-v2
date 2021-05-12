@@ -54,7 +54,7 @@ class AccountManagerImpl(
                     chainId = network.chainId,
                     publicKey = keys.publicKey,
                     privateKey = keys.privateKey,
-                    address = blockchainRepository.toChecksumAddress(keys.address)
+                    address = keys.address
                 )
                 addAccount(newAccount, this)
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }.toSingleDefault(accountName)
@@ -81,7 +81,7 @@ class AccountManagerImpl(
                     bindedOwner = ownerAddress,
                     publicKey = keys.publicKey,
                     privateKey = keys.privateKey,
-                    address = blockchainRepository.toChecksumAddress(contract),
+                    address = contract,
                     contractAddress = contract,
                     owners = mutableListOf(ownerAddress)
                 )
@@ -158,8 +158,11 @@ class AccountManagerImpl(
             walletManager.showMainNetworksWarning = value
         }
 
-    override val isAuthenticationEnabled: Boolean
-        get() = localStorage.isAuthenticationEnabled
+    override val isProtectKeysEnabled: Boolean
+        get() = localStorage.isProtectKeysEnabled
+
+    override val isProtectTransactionsEnabled: Boolean
+        get() = localStorage.isProtectTransactionsEnabled
 
     override fun removeAccount(account: Account): Completable =
         walletManager.getWalletConfig().run {

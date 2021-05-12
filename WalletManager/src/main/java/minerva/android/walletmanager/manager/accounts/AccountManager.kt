@@ -29,6 +29,7 @@ interface AccountManager : Manager {
     fun toChecksumAddress(address: String): String
     fun clearFiat()
     val areMainNetworksEnabled: Boolean
-    val isAuthenticationEnabled: Boolean
+    val isProtectKeysEnabled: Boolean
+    val isProtectTransactionsEnabled: Boolean
     var showMainNetworksWarning: Boolean
 }

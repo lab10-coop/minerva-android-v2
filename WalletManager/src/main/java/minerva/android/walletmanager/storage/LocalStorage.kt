@@ -34,6 +34,7 @@ interface LocalStorage {
     var isBackupAllowed: Boolean
     var isSynced: Boolean
     var areMainNetworksEnabled: Boolean
-    var isAuthenticationEnabled: Boolean
+    var isProtectKeysEnabled: Boolean
+    var isProtectTransactionsEnabled: Boolean
     var showMainNetworksWarning: Boolean
 }

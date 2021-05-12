@@ -67,7 +67,7 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     rowType = SettingsRowType.BACKUP
                 ),
                 SettingRow(
-                    getString(R.string.protect_keys),
+                    getString(R.string.authentication),
                     R.drawable.ic_authentication,
                     detailText = getString(R.string.enable),
                     rowType = SettingsRowType.AUTHENTICATION

@@ -42,7 +42,6 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
             }
             continueButton.setOnClickListener { openRampScreen() }
             createNewAccount.setOnClickListener { createNewAccount() }
-
             viewModel.apply {
                 createAccountLiveData.observe(
                     viewLifecycleOwner,
@@ -61,7 +60,7 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
                 .scheme(SCHEME)
                 .authority(BuildConfig.RAMP_API_URL)
                 .appendQueryParameter(SWAP_ASSET, viewModel.rampCrypto[cryptoAdapter.getCryptoPosition()].symbol)
-                .appendQueryParameter(USER_ADDRESS, viewModel.getCurrentAccount().address)
+                .appendQueryParameter(USER_ADDRESS, viewModel.getCurrentCheckSumAddress())
                 .appendQueryParameter(HOST_API_KEY, BuildConfig.RAMP_API_KEY)
                 .appendQueryParameter(HOST_APP_NAME, getString(R.string.app_name))
                 .appendQueryParameter(HOST_LOGO_URL, MINERVA_LOGO_URL)

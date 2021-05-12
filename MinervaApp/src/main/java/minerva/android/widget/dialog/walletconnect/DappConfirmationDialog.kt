@@ -7,6 +7,7 @@ import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Compa
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.invisible
+import minerva.android.extension.setTextWithArgs
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 
@@ -47,9 +48,20 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         showWaring()
     }
 
-    fun setWrongNetworkMessage(message: String) = with(binding) {
+    fun setWrongNetworkWarning(networkName: String) = with(binding) {
+        with(networkHeader.network) {
+            background = context.getDrawable(R.drawable.warning_background)
+            setTextColor(ContextCompat.getColor(context, R.color.warningOrange))
+        }
+        warringIcon.setImageResource(R.drawable.ic_warning)
+        warning.setTextWithArgs(R.string.wrong_network_warning_message, networkName)
+        warning.setTextColor(ContextCompat.getColor(context, R.color.warningMessageOrange))
+        showWaring()
+    }
+
+    fun setWrongNetworkMessage(networkName: String) = with(binding) {
         setNetworkHeader(R.drawable.wrong_network_background)
-        warning.text = message
+        warning.setTextWithArgs(R.string.wrong_network_message, networkName)
         binding.confirmationButtons.connect.isEnabled = false
         showWaring()
     }

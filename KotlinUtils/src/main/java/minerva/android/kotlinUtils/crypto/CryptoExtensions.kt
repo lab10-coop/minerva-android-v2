@@ -1,6 +1,5 @@
 package minerva.android.kotlinUtils.crypto
 
-import android.text.TextUtils
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -22,14 +21,15 @@ val String.getFormattedMessage: String
         this
     }
 
-fun hexToBigInteger(input: String, def: BigDecimal): BigDecimal {
-    val value: BigDecimal? = hexToBigInteger(input)
+fun hexToBigInteger(input: String, def: BigDecimal, logger: (Throwable) -> Unit = {}): BigDecimal {
+    val value: BigDecimal? = hexToBigInteger(input.trim()) { error -> logger(error) }
     return value ?: def
 }
 
-private fun hexToBigInteger(input: String): BigDecimal? {
+private fun hexToBigInteger(input: String, logger: (Throwable) -> Unit): BigDecimal? {
     var hex = input
-    return if (TextUtils.isEmpty(hex)) {
+    return if (hex.isEmpty()) {
+        logger(Throwable("Value to parse is empty: $input"))
         null
     } else try {
         val isHex: Boolean = containsHexPrefix(hex)
@@ -38,8 +38,10 @@ private fun hexToBigInteger(input: String): BigDecimal? {
         }
         BigInteger(hex, if (isHex) HEX else DEC).toBigDecimal()
     } catch (ex: NullPointerException) {
+        logger(NullPointerException("Value to parse: $input"))
         null
     } catch (ex: NumberFormatException) {
+        logger(NumberFormatException("Value to parse: $input"))
         null
     }
 }

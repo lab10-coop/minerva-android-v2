@@ -230,7 +230,7 @@
     <string name="outdated_wallet_error_message">The wallet data seems to be outdated, suggesting that you are using it on another device. If you continue using this wallet on this device anyway, no backups will be made and data may get lost if something happens to this device. If this is the primary device you want to use your wallet with, you need to reinstall the App and recover the latest wallet data with the seed phrase.</string>
     <string name="wallet_connect_with_count_title">WalletConnect (%d)</string>
     <string name="wallet_connect_title">WalletConnect</string>
-    <string name="funds_at_risk_message">The use of main networks like xDai Chain, Etereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your 12-word Seed Phrase.</string>
+    <string name="funds_at_risk_message">The use of main networks like xDai Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your 12-word Seed Phrase.</string>
     <string name="fund_at_risk_warning">Act Carefully!</string>
     <string name="i_understand">I understand</string>
     <string name="refresh_balance_to_check_transaction_status">Your transaction was sent to the network and you have to refresh the screen to see the changed balance, once it was processed.</string>
@@ -260,6 +260,7 @@
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
     <string name="dapp_connection_warning">This WalletConnect Session provides no information on the needed network. Please make sure you selected the correct account/network.</string>
     <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
+    <string name="wrong_network_warning_message">This website requests a connection to %s, which is often wrong for applications on other blockchains. Please proceed with ‘Connect’ if you are sure with your blockchain network selection.</string>
     <string name="dapp_disconnected">%s session disconnected</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
@@ -293,7 +294,11 @@
     <string name="enable">Enable</string>
     <string name="create">Create</string>
     <string name="protect_keys">Protect Keys</string>
-    <string name="protect_minerva_description">Enable your standard phone authentication method to protect your Seed Phrase and the export of private keys.</string>
+    <string name="protect_transactions">Protect Transactions</string>
+    <string name="protect_keys_description">Enable your standard phone authentication method to protect your Seed Phrase and the export of private keys.</string>
+    <string name="protect_transactions_description">Enable your standard phone authentication method to protect all transactions sent from Minerva</string>
+    <string name="protect_transaction_error_title">Protect Transaction error</string>
+    <string name="protect_transaction_error_message">You have to enable "Protect Keys" first, before you can also protect transactions.</string>
     <string name="authentication_title">Use yor phone authentication</string>
     <string name="device_not_secured">Your device is not secured!</string>
     <string name="device_not_secured_message">Please change your device security settings and try again.</string>
@@ -308,6 +313,8 @@
     <string name="active_session_connection_error">Your connection with %s was closed. Check your internet connection and try to reconnect with a refreshed website.</string>
     <string name="session_connection_error">Check your internet connection and try to reconnect with a refreshed website.</string>
     <string name="version_history">Version history</string>
+    <string name="info_dapp_awaiting">Awaiting connection feedback from the DApp</string>
+    <string name="authentication">Authentication</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

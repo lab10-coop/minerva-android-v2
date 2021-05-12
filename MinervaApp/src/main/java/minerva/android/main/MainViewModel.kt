@@ -91,13 +91,6 @@ class MainViewModel(
         }
     }
 
-    private fun handleExecutedAccounts(it: PendingAccount) {
-        if (_updatePendingAccountLiveData.hasActiveObservers()) {
-            transactionRepository.removePendingAccount(it)
-            _updatePendingAccountLiveData.value = Event(it)
-        } else executedAccounts.add(it)
-    }
-
     fun clearWebSocketSubscription() {
         if (transactionRepository.getPendingAccounts().isEmpty()) {
             webSocketSubscriptions.clear()
@@ -134,35 +127,6 @@ class MainViewModel(
             }
         }
         _errorLiveData.value = Event(NotExistedIdentity)
-    }
-
-    private fun performLogin(identity: Identity, requestedData: List<String>) =
-        if (LoginUtils.isIdentityValid(identity, requestedData)) loginPayload.qrCode?.let { minervaLogin(identity, it) }
-        else _errorLiveData.value = Event(RequestedFields(identity.name))
-
-    private fun minervaLogin(identity: Identity, qrCode: ServiceQrCode) {
-        qrCode.callback?.let { callback ->
-            launchDisposable {
-                serviceManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCode), identity.privateKey)
-                    .flatMapCompletable { jwtToken ->
-                        serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
-                    }
-                    .observeOn(Schedulers.io())
-                    .andThen(
-                        walletActionsRepository.saveWalletActions(
-                            listOf(getValuesWalletAction(identity.name, qrCode.serviceName))
-                        )
-                    )
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onError = {
-                            Timber.e("Error while login $it")
-                            _errorLiveData.value = Event(BaseError)
-                        }
-                    )
-            }
-        }
     }
 
     fun getIdentityName(): String? = serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.name
@@ -204,6 +168,61 @@ class MainViewModel(
         }
     }
 
+    fun clearAndUnsubscribe() {
+        clearPendingAccounts()
+        clearWebSocketSubscription()
+    }
+
+    fun getTokensRate() {
+        launchDisposable {
+            transactionRepository.getTokensRate()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = { _updateTokensRateLiveData.value = Event(Unit) },
+                    onError = { Timber.e(it) }
+                )
+        }
+    }
+
+    fun isProtectTransactionEabled() = transactionRepository.isProtectTransactionEnabled()
+
+    private fun handleExecutedAccounts(it: PendingAccount) {
+        if (_updatePendingAccountLiveData.hasActiveObservers()) {
+            transactionRepository.removePendingAccount(it)
+            _updatePendingAccountLiveData.value = Event(it)
+        } else executedAccounts.add(it)
+    }
+
+    private fun performLogin(identity: Identity, requestedData: List<String>) =
+        if (LoginUtils.isIdentityValid(identity, requestedData)) loginPayload.qrCode?.let { minervaLogin(identity, it) }
+        else _errorLiveData.value = Event(RequestedFields(identity.name))
+
+    private fun minervaLogin(identity: Identity, qrCode: ServiceQrCode) {
+        qrCode.callback?.let { callback ->
+            launchDisposable {
+                serviceManager.createJwtToken(LoginUtils.createLoginPayload(identity, qrCode), identity.privateKey)
+                    .flatMapCompletable { jwtToken ->
+                        serviceManager.painlessLogin(callback, jwtToken, identity, getService(qrCode, identity))
+                    }
+                    .observeOn(Schedulers.io())
+                    .andThen(
+                        walletActionsRepository.saveWalletActions(
+                            listOf(getValuesWalletAction(identity.name, qrCode.serviceName))
+                        )
+                    )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                        onError = {
+                            Timber.e("Error while login $it")
+                            _errorLiveData.value = Event(BaseError)
+                        }
+                    )
+            }
+        }
+    }
+
     private fun saveWalletAction(walletAction: WalletAction, error: Throwable? = null) {
         launchDisposable {
             walletActionsRepository.saveWalletActions(listOf(walletAction))
@@ -233,21 +252,4 @@ class MainViewModel(
             lastUsed,
             hashMapOf(WalletActionFields.CREDENTIAL_NAME to name)
         )
-
-    fun clearAndUnsubscribe() {
-        clearPendingAccounts()
-        clearWebSocketSubscription()
-    }
-
-    fun getTokensRate() {
-        launchDisposable {
-            transactionRepository.getTokensRate()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { _updateTokensRateLiveData.value = Event(Unit) },
-                    onError = { Timber.e(it) }
-                )
-        }
-    }
 }

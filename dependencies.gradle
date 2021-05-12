@@ -52,7 +52,7 @@ ext {
     rxbindingVersion = '3.1.0'
 
     spannableStringVersion = '1.1.0'
-    biometricVersion = '1.0.1'
+    biometricVersion = '1.2.0-alpha03'
     cloudMassagingVersion = '20.1.6'
 
     startupVersion = '1.0.0-alpha01'
@@ -60,7 +60,7 @@ ext {
     jsoupVersion = '1.13.1'
     jsonLogicVersion = '0.9.6'
     flexboxVersion = '2.0.1'
-    cookieFlashbarVersion = '1.0.2'
+    flashbarVersion = '1.0.4'
     mockitoInline = '3.4.0'
     roomVersion = '2.2.6'
 
@@ -140,9 +140,9 @@ ext {
 
     uiDependencies = [
             glide          : "com.github.bumptech.glide:glide:$glideVersion",
-            flashbar       : "com.andrognito.flashbar:CookieFlashbar:$cookieFlashbarVersion",
+            flashbar       : "com.github.CookieStudio:Flashbar:$flashbarVersion",
             spannableString: "com.github.hitanshu-dhawan:SpannableStringParser:$spannableStringVersion",
-            biometric      : "androidx.biometric:biometric:$biometricVersion",
+            biometric      : "androidx.biometric:biometric-ktx:$biometricVersion",
             waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion",
             glidetoVector  : "com.github.corouteam:GlideToVectorYou:$glideToVector",
             flexbox        : "com.google.android:flexbox:$flexboxVersion",
