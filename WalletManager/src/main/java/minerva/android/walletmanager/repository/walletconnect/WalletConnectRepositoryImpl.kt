@@ -185,7 +185,7 @@ class WalletConnectRepositoryImpl(
         }
 
     private fun startPing(dapps: List<DappSession>) {
-        pingDisposable = Observable.interval(0, 3, TimeUnit.SECONDS)
+        pingDisposable = Observable.interval(0, PING_TIMEOUT, TimeUnit.SECONDS)
             .doOnNext { ping(dapps) }
             .subscribeOn(Schedulers.io())
             .subscribeBy(onError = { Timber.e("Error while ping: $it") })

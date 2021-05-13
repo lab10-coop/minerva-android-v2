@@ -40,7 +40,6 @@ interface CryptoApi {
         private const val ID = "id"
         private const val IDS = "ids"
         private const val VS_CURRENCIES = "vs_currencies"
-        private const val CONTRACT_ADDRESS = "contract_address"
         private const val CONTRACT_ADDRESSES = "contract_addresses"
     }
 }
