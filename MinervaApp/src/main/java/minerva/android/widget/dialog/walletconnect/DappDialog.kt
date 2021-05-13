@@ -30,7 +30,7 @@ abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val de
                 deny()
                 dismiss()
             }
-            connect.setOnClickListener {
+            confirm.setOnClickListener {
                 approve()
                 dismiss()
             }
