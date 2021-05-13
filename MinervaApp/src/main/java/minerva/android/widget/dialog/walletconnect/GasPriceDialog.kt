@@ -20,7 +20,7 @@ class GasPriceDialog(context: Context, approve: (gasPrice: String) -> Unit) :
                 dismiss()
             }
 
-            buttons.connect.setOnClickListener {
+            buttons.confirm.setOnClickListener {
                 approve(amount.text.toString())
                 dismiss()
             }
