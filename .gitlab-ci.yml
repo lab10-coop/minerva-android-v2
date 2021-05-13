@@ -11,8 +11,8 @@ before_script:
   - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
 
 stages:
-  - validation
-  - distribution
+#  - validation
+#  - distribution
   - deploy
 
 validateBranch:
@@ -68,7 +68,7 @@ distributeProductionBuild:
 
 #Delete when releasing to production
 deployProductionBuild:
-  stage: distribution
+  stage: deploy
   only:
     refs:
       - production
