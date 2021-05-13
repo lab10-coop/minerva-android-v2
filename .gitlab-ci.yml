@@ -66,7 +66,7 @@ distributeProductionBuild:
     paths:
       - ./MinervaApp/build/outputs/apk/production
 
-#Delete when releasing to production, change to deploying to play store
+#Delete when releasing to production
 deployProductionBuild:
   stage: distribution
   only:
@@ -78,7 +78,8 @@ deployProductionBuild:
     - ./gradlew build
     - ./etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
-    - fastlane firebaseProduction
+    - echo $PLAY_JSON > ./json_file.json
+    - fastlane productionBetaRelease json_path:./json_file.json
 
   artifacts:
     paths:

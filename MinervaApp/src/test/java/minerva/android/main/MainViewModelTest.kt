@@ -7,10 +7,12 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.main.error.*
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
@@ -19,6 +21,7 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeInstanceOf
 import org.junit.Before
 import org.junit.Test
 
@@ -31,14 +34,8 @@ class MainViewModelTest : BaseViewModelTest() {
     private val transactionRepository: TransactionRepository = mock()
     private lateinit var viewModel: MainViewModel
 
-    private val notExistedIdentityObserver: Observer<Event<Unit>> = mock()
-    private val notExistedIdentityCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
-
-    private val requestedFieldsObserver: Observer<Event<String>> = mock()
-    private val requestedFieldsCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
-
-    private val errorObserver: Observer<Event<Throwable>> = mock()
-    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
+    private val errorObserver: Observer<Event<MainErrorState>> = mock()
+    private val errorCaptor: KArgumentCaptor<Event<MainErrorState>> = argumentCaptor()
 
     private val updateCredentialObserver: Observer<Event<String>> = mock()
     private val updateCredentialCaptor: KArgumentCaptor<Event<String>> = argumentCaptor()
@@ -48,6 +45,9 @@ class MainViewModelTest : BaseViewModelTest() {
 
     private val timeoutPendingAccountObserver: Observer<Event<List<PendingAccount>>> = mock()
     private val timeoutPendingAccountCaptor: KArgumentCaptor<Event<List<PendingAccount>>> = argumentCaptor()
+
+    private val updateTokensRateObserver: Observer<Event<Unit>> = mock()
+    private val updateTokensRateCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
     @Before
     fun setup() {
@@ -65,11 +65,12 @@ class MainViewModelTest : BaseViewModelTest() {
         viewModel.loginPayload = LoginPayload(1, identityPublicKey = "123")
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(null)
         viewModel.run {
-            notExistedIdentityLiveData.observeForever(notExistedIdentityObserver)
+            errorLiveData.observeForever(errorObserver)
             painlessLogin()
         }
-        notExistedIdentityCaptor.run {
-            verify(notExistedIdentityObserver).onChanged(capture())
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+            firstValue.peekContent().shouldBeInstanceOf(NotExistedIdentity::class.java)
         }
     }
 
@@ -79,12 +80,13 @@ class MainViewModelTest : BaseViewModelTest() {
         viewModel.loginPayload = LoginPayload(1, identityPublicKey = "123", qrCode = qrCode)
         whenever(serviceManager.getLoggedInIdentity(any())).thenReturn(Identity(1, name = "tom"))
         viewModel.run {
-            requestedFieldsLiveData.observeForever(requestedFieldsObserver)
+            errorLiveData.observeForever(errorObserver)
             painlessLogin()
         }
-        requestedFieldsCaptor.run {
-            verify(requestedFieldsObserver).onChanged(capture())
-            firstValue.peekContent() == "tom"
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+            firstValue.peekContent().shouldBeInstanceOf(RequestedFields::class.java)
+            (firstValue.peekContent() as RequestedFields).identityName == "tom"
         }
     }
 
@@ -146,11 +148,12 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).doReturn(Completable.complete())
         viewModel.run {
             qrCode = CredentialQrCode("name", "type")
-            updateCredentialErrorLiveData.observeForever(errorObserver)
+            errorLiveData.observeForever(errorObserver)
             updateBindedCredentials(false)
         }
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
+            firstValue.peekContent().shouldBeInstanceOf(UpdateCredentialError::class.java)
         }
     }
 
@@ -177,12 +180,13 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.subscribeToExecutedTransactions(any())).thenReturn(Flowable.error(error))
         whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
-            updatePendingTransactionErrorLiveData.observeForever(errorObserver)
+            errorLiveData.observeForever(errorObserver)
             subscribeToExecutedTransactions(1)
 
         }
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
+            firstValue.peekContent().shouldBeInstanceOf(UpdatePendingTransactionError::class.java)
         }
     }
 
@@ -215,12 +219,13 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getTransactions()).thenReturn(Single.error(error))
         whenever(transactionRepository.shouldOpenNewWssConnection(any())).thenReturn(true)
         viewModel.run {
-            updatePendingTransactionErrorLiveData.observeForever(errorObserver)
+            errorLiveData.observeForever(errorObserver)
             subscribeToExecutedTransactions(1)
 
         }
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
+            firstValue.peekContent().shouldBeInstanceOf(UpdatePendingTransactionError::class.java)
         }
     }
 
@@ -245,19 +250,33 @@ class MainViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(listOf(PendingAccount(1, "123")))
         whenever(transactionRepository.getTransactions()).thenReturn(Single.error(error))
         viewModel.run {
-            updatePendingTransactionErrorLiveData.observeForever(errorObserver)
+            errorLiveData.observeForever(errorObserver)
             restorePendingTransactions()
 
         }
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
+            firstValue.peekContent().shouldBeInstanceOf(UpdatePendingTransactionError::class.java)
         }
     }
 
     @Test
     fun `Checking token icons updating works fine` () {
-        whenever(transactionRepository.updateTokenIcons()).thenReturn(Completable.complete())
-        viewModel.updateTokenIcons()
-        verify(transactionRepository, times(1)).updateTokenIcons()
+        whenever(transactionRepository.checkMissingTokensDetails()).thenReturn(Completable.complete())
+        viewModel.checkMissingTokensDetails()
+        verify(transactionRepository, times(1)).checkMissingTokensDetails()
+    }
+
+    @Test
+    fun `Check getting token rate success`() {
+        whenever(transactionRepository.getTokensRate()).thenReturn(Completable.complete())
+        viewModel.run {
+            updateTokensRateLiveData.observeForever(updateTokensRateObserver)
+            getTokensRate()
+        }
+
+        updateTokensRateCaptor.run {
+            verify(updateTokensRateObserver).onChanged(capture())
+        }
     }
 }

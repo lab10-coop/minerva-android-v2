@@ -24,9 +24,12 @@ interface AccountManager : Manager {
     fun getLastFreeATSTimestamp(): Long
     fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings
     fun currentTimeMills(): Long
-    fun getAllAccounts(): List<Account>?
+    fun getAllAccounts(): List<Account>
+    fun getAllActiveAccounts(chainId: Int): List<Account>
     fun toChecksumAddress(address: String): String
+    fun clearFiat()
     val areMainNetworksEnabled: Boolean
-    var toggleMainNetsEnabled: Boolean?
-    val enableMainNetsFlowable: Flowable<Boolean>
+    val isProtectKeysEnabled: Boolean
+    val isProtectTransactionsEnabled: Boolean
+    var showMainNetworksWarning: Boolean
 }

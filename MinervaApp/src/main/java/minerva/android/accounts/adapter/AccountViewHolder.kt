@@ -19,9 +19,9 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.widget.token.TokenView
-import minerva.android.widget.TokensAndCollectiblesView
 import minerva.android.widget.repository.getNetworkIcon
+import minerva.android.widget.state.AccountWidgetState
+import minerva.android.widget.token.TokenView
 
 class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
     RecyclerView.ViewHolder(view) {
@@ -31,26 +31,25 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private lateinit var listener: AccountsAdapterListener
     private var rawPosition: Int = Int.InvalidIndex
 
-    private val isOpen
-        get() = binding.container.isVisible
+    private val isWidgetOpen
+        get() = binding.tokensAndCollectibles.isVisible
 
-    override fun onSendTokenTokenClicked(account: Account, tokenIndex: Int) =
-        listener.onSendTokenClicked(account, tokenIndex)
+    private val accountWidgetState: AccountWidgetState by lazy {
+        listener.getAccountWidgetState(rawPosition)
+    }
+
+    override fun onSendTokenTokenClicked(account: Account, tokenAddress: String) = listener.onSendTokenClicked(account, tokenAddress)
 
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
-    fun setListener(listener: AccountsAdapterListener) {
-        this.listener = listener
-    }
-
-    fun setData(index: Int, account: Account, isOpen: Boolean) {
+    fun setData(index: Int, account: Account, fiatSymbol: String, listener: AccountsAdapterListener) {
         rawPosition = index
+        this.listener = listener
         view.apply {
             prepareView(account)
-            prepareToken(account)
-            bindData(account)
+            prepareToken(account, fiatSymbol)
+            bindData(account, fiatSymbol)
             setOnMenuClickListener(rawPosition, account)
-            if (isOpen) binding.container.visible()
         }
 
         binding.qrCode.setOnClickListener {
@@ -58,7 +57,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun View.bindData(account: Account) {
+    private fun View.bindData(account: Account, fiatSymbol: String) {
         with(account) {
             binding.apply {
                 card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
@@ -69,17 +68,14 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 pendingMask.visibleOrGone(isPending)
                 mainIcon.setImageDrawable(getNetworkIcon(context, network.chainId, isSafeAccount))
                 accountName.text = name
-                mainTokenView.initView(account, this@AccountViewHolder)
+                mainTokenView.initView(account, this@AccountViewHolder, fiatSymbol)
             }
         }
     }
 
     private fun prepareView(account: Account) {
-        if (!account.isSafeAccount) {
-            prepareAccountView()
-        } else {
-            prepareSafeAccountView()
-        }
+        if (!account.isSafeAccount) prepareAccountView()
+        else prepareSafeAccountView()
     }
 
     private fun prepareAccountView() {
@@ -129,50 +125,53 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     }
 
     private fun View.setOnItemClickListener(isTokenAreaAvailable: Boolean) =
-        setOnClickListener { if (isTokenAreaAvailable) if (isOpen) close() else open() }
+        setOnClickListener { if (isTokenAreaAvailable) if (isWidgetOpen) close() else open() }
 
-    private fun View.prepareToken(account: Account) {
+    private fun View.prepareToken(account: Account, fiatSymbol: String) {
         binding.apply {
+            tokensAndCollectibles.prepareView(
+                account,
+                viewGroup,
+                this@AccountViewHolder,
+                accountWidgetState.isWidgetOpen,
+                fiatSymbol
+            )
+            //TODO change this statement when collectibles or main coin will be implemented
             account.accountTokens.isNotEmpty().let { visible ->
-                with(container) {
-                    removeAllViews()
-                    //TODO showing/hiding main token in TokensAndCollectiblesView is made using last argument - needs to be updated in the future
-                    addView(
-                        TokensAndCollectiblesView(
-                            viewGroup,
-                            account,
-                            this@AccountViewHolder,
-                            false
-                        ).apply {
-                            visibleOrGone(visible)
-                        })
-                }
                 setOnItemClickListener(visible)
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
-                arrow.visibleOrGone(visible)
+                prepareArrow(visible)
                 containerBackground.visibleOrGone(visible)
             }
         }
     }
 
-    private fun open() {
-        listener.onOpenOrClose(rawPosition, true)
-        TransitionManager.beginDelayedTransition(viewGroup)
+    private fun setOpen(isOpen: Boolean) {
+        accountWidgetState.isWidgetOpen = isOpen
+        listener.updateAccountWidgetState(rawPosition, accountWidgetState)
         binding.apply {
-            arrow.rotate180()
-            container.visible()
+            if (isOpen) arrow.rotate180() else arrow.rotate180back()
+            tokensAndCollectibles.visibleOrGone(isOpen)
         }
     }
 
+    private fun prepareArrow(isVisible: Boolean) {
+        binding.arrow.apply {
+            visibleOrGone(isVisible)
+            rotation = if (accountWidgetState.isWidgetOpen) ROTATE_180_ANGLE else ROTATE_0_ANGLE
+        }
+    }
+
+    private fun open() {
+        TransitionManager.beginDelayedTransition(viewGroup)
+        setOpen(true)
+    }
+
     private fun close() {
-        listener.onOpenOrClose(rawPosition, false)
         TransitionManager.endTransitions(viewGroup)
         TransitionManager.beginDelayedTransition(viewGroup)
-        binding.apply {
-            arrow.rotate180back()
-            container.gone()
-        }
+        setOpen(false)
     }
 
     private fun PopupMenu.setOnItemMenuClickListener(index: Int, account: Account) {

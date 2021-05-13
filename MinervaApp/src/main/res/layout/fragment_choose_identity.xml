@@ -110,7 +110,7 @@
         android:paddingTop="2dp"
         android:paddingRight="@dimen/margin_xsmall"
         android:paddingBottom="2dp"
-        android:text="@string/authentication"
+        android:text="@string/protect_keys"
         android:textAllCaps="true"
         android:textColor="@color/colorPrimary"
         android:textSize="@dimen/text_xsmall"

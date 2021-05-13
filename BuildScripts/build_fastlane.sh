@@ -9,7 +9,6 @@ echo bundler >> /usr/local/rvm/gemsets/global.gems;
 sed -i '3i . /etc/profile.d/rvm.sh\n' ~/.profile;
 . /etc/profile.d/rvm.sh;
 /usr/local/rvm/bin/rvm cleanup all;
-gem install fastlane -qN;
 sed -i 's/mesg.*$/tty -s \&\& mesg n || true/' ~/.profile
 bundle install
 fastlane env

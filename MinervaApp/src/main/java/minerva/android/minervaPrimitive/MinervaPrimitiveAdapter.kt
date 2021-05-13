@@ -17,10 +17,10 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.services.listener.MinervaPrimitiveClickListener
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
-import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.walletconnect.DappSession
 
 class MinervaPrimitiveAdapter(private val listener: MinervaPrimitiveClickListener) :
     RecyclerView.Adapter<MinervaPrimitiveViewHolder>() {
@@ -74,6 +74,7 @@ class MinervaPrimitiveViewHolder(
     private fun showDappSessions(minervaPrimitive: DappSession, binding: MinervaPrimitiveListRowBinding) = with(binding) {
         Glide.with(root.context)
             .load(minervaPrimitive.iconUrl)
+            .error(R.drawable.ic_services)
             .into(minervaPrimitiveLogo)
         setSessionItemsVisibility(true)
         sessionInfoLabel.text = "${minervaPrimitive.accountName}: ${minervaPrimitive.address}"

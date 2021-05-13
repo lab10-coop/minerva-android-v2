@@ -7,7 +7,7 @@ data class TokenBalanceResponse(
     @SerializedName("status")
     val status: String = String.Empty,
     @SerializedName("result")
-    val tokens: List<TokenBalance> = listOf(),
+    val tokens: List<TokenData> = listOf(),
     @SerializedName("message")
     val message: String = String.Empty
 )

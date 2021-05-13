@@ -1,11 +1,15 @@
 package minerva.android.walletmanager.localstorage
 
 import android.content.SharedPreferences
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import io.mockk.*
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.storage.LocalStorageImpl
+import org.amshove.kluent.shouldBeEqualTo
+import org.junit.After
 import org.junit.Test
 
 class LocalStorageTest {
@@ -27,7 +31,6 @@ class LocalStorageTest {
         verify {
             sharedPref.getBoolean(any(), false)
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -36,7 +39,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -45,16 +47,14 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
     fun `areMainNetsEnabled test`() {
-        localStorage.areMainNetsEnabled = true
+        localStorage.areMainNetworksEnabled = true
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
 
@@ -64,7 +64,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putBoolean(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -73,7 +72,6 @@ class LocalStorageTest {
         verify {
             sharedPref.getString(any(), any())
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -85,7 +83,6 @@ class LocalStorageTest {
             sharedPref.edit().putString(any(), any()).apply()
             sharedPref.getString(any(), any())
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -96,7 +93,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putString(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -115,7 +111,6 @@ class LocalStorageTest {
         verify {
             sharedPref.edit().putString(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
@@ -127,18 +122,17 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `save last free ATS timestamp` () {
+    fun `save last free ATS timestamp`() {
         val timestamp = 333L
         localStorage.saveFreeATSTimestamp(timestamp)
         every { localStorage.loadLastFreeATSTimestamp() } returns timestamp
         verify {
             sharedPref.edit().putLong(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
-    fun `load last free ATS timestamp` () {
+    fun `load last free ATS timestamp`() {
         localStorage.loadLastFreeATSTimestamp()
         verify {
             sharedPref.getLong(any(), Long.InvalidValue)
@@ -146,21 +140,74 @@ class LocalStorageTest {
     }
 
     @Test
-    fun `save token icons update timestamp` () {
+    fun `save token icons update timestamp`() {
         val timestamp = 333L
         localStorage.saveTokenIconsUpdateTimestamp(timestamp)
-        every { localStorage.loadTokenIconsUpdateTimestamp()} returns timestamp
+        every { localStorage.loadTokenIconsUpdateTimestamp() } returns timestamp
         verify {
             sharedPref.edit().putLong(any(), any()).apply()
         }
-        confirmVerified(sharedPref)
     }
 
     @Test
-    fun `load token icons update timestamp` () {
+    fun `load token icons update timestamp`() {
         localStorage.loadTokenIconsUpdateTimestamp()
         verify {
             sharedPref.getLong(any(), Long.InvalidValue)
         }
+    }
+
+    @Test
+    fun `check is authentication available`() {
+        localStorage.run {
+            isProtectKeysEnabled = false
+            isProtectTransactionsEnabled = true
+            isProtectKeysEnabled
+            isProtectTransactionsEnabled
+        }
+
+        sharedPref.run {
+            verify(exactly = 2) { edit().putBoolean(any(), any()).apply() }
+            verify(exactly = 3) { getBoolean(any(), any()) }
+        }
+    }
+
+    @Test
+    fun `check showing main networks correctly`() {
+        localStorage.run {
+            areMainNetworksEnabled = true
+            areMainNetworksEnabled
+        }
+        sharedPref.run {
+            verify(exactly = 2) { edit().putBoolean(any(), any()).apply() }
+            verify { getBoolean(any(), any()) }
+        }
+    }
+
+    @Test
+    fun `check the main networks warning should show`() {
+        localStorage.showMainNetworksWarning = true
+        verify {
+            sharedPref.edit().putBoolean(any(), any()).apply()
+        }
+    }
+
+    @Test
+    fun `check saving and loading current fiat`() {
+        localStorage.apply {
+            loadCurrentFiat()
+            saveCurrentFiat("EUR")
+        }
+        verify {
+            sharedPref.apply {
+                edit().putString(any(), any()).apply()
+                getString(any(), any())
+            }
+        }
+    }
+
+    @After
+    fun `double check verification`() {
+        confirmVerified(sharedPref)
     }
 }

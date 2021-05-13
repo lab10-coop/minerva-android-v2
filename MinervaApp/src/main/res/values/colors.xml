@@ -8,6 +8,7 @@
     <color name="lightGray">#f6f6f9</color>
     <color name="darkGray">#3a3944</color>
     <color name="dividerGray">#C9C8D3</color>
+    <color name="lightDivider">#E1E1E1</color>
     <color name="titleColor">#908F9D</color>
     <color name="bodyColor">#3F3F4B</color>
     <color name="borderGray">#908aa6</color>
@@ -63,4 +64,6 @@
     <color name="dappSeparatorColor">#eaeaee</color>
     <color name="transparentErrorRed">#10e42c00</color>
     <color name="errorRed">#e42c00</color>
+    <color name="warningMessageOrange">#dc7500</color>
+    <color name="warningOrange">#fda518</color>
 </resources>

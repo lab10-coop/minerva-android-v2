@@ -66,7 +66,6 @@
     <string name="camera_error">Camera initialization error:</string>
     <string name="login">Login</string>
     <string name="next">Next</string>
-    <string name="authentication">Authentication</string>
     <string name="requested_data">Requested data: </string>
     <string name="required_field">This field is required</string>
     <string name="choose_an_identity">Choose an identity</string>
@@ -231,8 +230,8 @@
     <string name="outdated_wallet_error_message">The wallet data seems to be outdated, suggesting that you are using it on another device. If you continue using this wallet on this device anyway, no backups will be made and data may get lost if something happens to this device. If this is the primary device you want to use your wallet with, you need to reinstall the App and recover the latest wallet data with the seed phrase.</string>
     <string name="wallet_connect_with_count_title">WalletConnect (%d)</string>
     <string name="wallet_connect_title">WalletConnect</string>
-    <string name="funds_at_risk_message">The activation of the ARTIS ∑1, xDai Chain, POA Core and Ethereum network is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your 12-word Seed Phrase.</string>
-    <string name="fund_at_risk_warning">BETA: Act Carefully!</string>
+    <string name="funds_at_risk_message">The use of main networks like xDai Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your 12-word Seed Phrase.</string>
+    <string name="fund_at_risk_warning">Act Carefully!</string>
     <string name="i_understand">I understand</string>
     <string name="refresh_balance_to_check_transaction_status">Your transaction was sent to the network and you have to refresh the screen to see the changed balance, once it was processed.</string>
     <string name="collectibles">Collectibles</string>
@@ -248,6 +247,7 @@
     <string name="invalid_account_address">Error: Invalid account address</string>
     <string name="invalid_token_address">Error: Invalid asset address</string>
     <string name="add_tats">Add 5 tATS</string>
+    <string name="buy_crypto">Buy Crypto</string>
     <string name="wc_message">WalletConnect lets you connect to desktop websites by scaning a QR code.</string>
     <string name="scan_wallet_connect_qr_message">You are obviously scanning a WalletConnect QR code. If you want to connect an account via WalletConnect to a website, you have to go to your accounts and select \'WalletConnect\' in the Options menu</string>
     <string name="connected">Connected</string>
@@ -260,7 +260,8 @@
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
     <string name="dapp_connection_warning">This WalletConnect Session provides no information on the needed network. Please make sure you selected the correct account/network.</string>
     <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
-    <string name="dapp_disconnected">Dapp disconnected</string>
+    <string name="wrong_network_warning_message">This website requests a connection to %s, which is often wrong for applications on other blockchains. Please proceed with ‘Connect’ if you are sure with your blockchain network selection.</string>
+    <string name="dapp_disconnected">%s session disconnected</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
     <string name="confirm">Confirm</string>
@@ -275,7 +276,7 @@
     <string name="to">To</string>
     <string name="from">From</string>
     <string name="transaction_cost">Transaction cost</string>
-    <string name="account_balance_is_to_low">Account balance is to low</string>
+    <string name="account_balance_is_to_low">Account balance is too low</string>
     <string name="custom">Custom</string>
     <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
     <string name="sending">Sending</string>
@@ -289,4 +290,96 @@
     <string name="allowance">Allowance</string>
     <string name="undefined_transaction">Undefined transaction</string>
     <string name="feature_enabled_soon">This feature will be enabled soon</string>
+    <string name="wc_connection_error_message">Your WalletConnect connection was closed, you will have to reconnect again to the website</string>
+    <string name="enable">Enable</string>
+    <string name="create">Create</string>
+    <string name="protect_keys">Protect Keys</string>
+    <string name="protect_transactions">Protect Transactions</string>
+    <string name="protect_keys_description">Enable your standard phone authentication method to protect your Seed Phrase and the export of private keys.</string>
+    <string name="protect_transactions_description">Enable your standard phone authentication method to protect all transactions sent from Minerva</string>
+    <string name="protect_transaction_error_title">Protect Transaction error</string>
+    <string name="protect_transaction_error_message">You have to enable "Protect Keys" first, before you can also protect transactions.</string>
+    <string name="authentication_title">Use yor phone authentication</string>
+    <string name="device_not_secured">Your device is not secured!</string>
+    <string name="device_not_secured_message">Please change your device security settings and try again.</string>
+    <string name="authentication_fail">Authentication failed!</string>
+    <string name="authentication_fail_message">There was unexpected authentication error. Please try again.</string>
+    <string name="choose_your_crypto">Choose your crypto</string>
+    <string name="continue_to_ramp">Continue to Ramp</string>
+    <string name="create_new_account">Create a new Account</string>
+    <string name="no_account_on_network">You don\'t have an Account on this Network. Please create a new Account.</string>
+    <string name="currency">Currency</string>
+    <string name="try_again">Try again</string>
+    <string name="active_session_connection_error">Your connection with %s was closed. Check your internet connection and try to reconnect with a refreshed website.</string>
+    <string name="session_connection_error">Check your internet connection and try to reconnect with a refreshed website.</string>
+    <string name="version_history">Version history</string>
+    <string name="info_dapp_awaiting">Awaiting connection feedback from the DApp</string>
+    <string name="authentication">Authentication</string>
+
+    <string-array name="currencies">
+        <item>EUR|Euro</item>
+        <item>GBP|Pound Sterling</item>
+        <item>USD|US Dollar</item>
+        <item>AED|United Arab Emirates Dirham</item>
+        <item>ARS|Argentine Peso</item>
+        <item>AUD|Australian Dollar</item>
+        <item>BDT|Bangladeshi Taka</item>
+        <item>BHD|Bahraini Dinar</item>
+        <item>BMD|Bermudian Dollar</item>
+        <item>BRL|Brazil Real</item>
+        <item>CAD|Canadian Dollar</item>
+        <item>CHF|Swiss Franc</item>
+        <item>CLP|Chilean Peso</item>
+        <item>CNY|Chinese Yuan</item>
+        <item>CZK|Czech Koruna</item>
+        <item>DKK|Danish Krone</item>
+        <item>HKD|Hong Kong Dollar</item>
+        <item>HUF|Hungarian Forint</item>
+        <item>IDR|Indonesian Rupiah</item>
+        <item>ILS|Israeli New Shekel</item>
+        <item>INR|Indian Rupee</item>
+        <item>JPY|Japanese Yen</item>
+        <item>KRW|South Korean Won</item>
+        <item>KWD|Kuwaiti Dinar</item>
+        <item>LKR|Sri Lankan Rupee</item>
+        <item>MMK|Burmese Kyat</item>
+        <item>MXN|Mexican Peso</item>
+        <item>MYR|Malaysian Ringgit</item>
+        <item>NGN|Nigerian Naira</item>
+        <item>NOK|Norwegian Krone</item>
+        <item>NZD|New Zealand Dollar</item>
+        <item>PHP|Philippine Peso</item>
+        <item>PKR|Pakistani Rupee</item>
+        <item>PLN|Polish Zloty</item>
+        <item>RUB|Russian Ruble</item>
+        <item>SAR|Saudi Riyal</item>
+        <item>SEK|Swedish Krona</item>
+        <item>SGD|Singapore Dollar</item>
+        <item>THB|Thai Baht</item>
+        <item>TRY|Turkish Lira</item>
+        <item>TWD|New Taiwan Dollar</item>
+        <item>UAH|Ukrainian hryvnia</item>
+        <item>VEF|Venezuelan Bolívar Fuerte</item>
+        <item>VND|Vietnamese Đồng</item>
+        <item>XDR|IMF Special Drawing Rights</item>
+        <item>ZAR|South African Rand</item>
+    </string-array>
+
+    <!--  TODO Add real release notes  -->
+    <!--  TIP: Use * to show note with bullet -->
+    <string-array name="release_notes">
+        <item>1.2.0</item>
+        <item>* Secure your keys and transactions</item>
+        <item>* Buy crypto with your fiat currency via Ramp</item>
+        <item>* See all token values in your preferred fiat currency</item>
+        <item>* Improved WalletConnect session management</item>
+        <item>* Refined user interface with lots of improvements</item>
+        <item>1.0.1</item>
+        <item>* Enable WalletConnect for DApps</item>
+        <item>* Automated token discovery (e.g. LP tokens)</item>
+        <item>* Allow exporting private key per account</item>
+        <item>* Dynamically calculate the gas price and gas limit</item>
+        <item>* Provide basic information in activities logs</item>
+        <item>* Manage decentralized identities and credentials</item>
+    </string-array>
 </resources>

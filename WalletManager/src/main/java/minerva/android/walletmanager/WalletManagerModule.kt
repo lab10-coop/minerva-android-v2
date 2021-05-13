@@ -39,6 +39,8 @@ import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepos
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.LocalStorageImpl
+import minerva.android.walletmanager.storage.TempStorage
+import minerva.android.walletmanager.storage.TempStorageImpl
 import minerva.android.walletmanager.utils.EnsProvider
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepositoryImpl
@@ -67,7 +69,7 @@ fun createWalletModules() = module {
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
     factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get()) }
-    factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get()) }
+    factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
     factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get()) }
@@ -83,6 +85,7 @@ fun createWalletModules() = module {
             "minerva_database"
         ).fallbackToDestructiveMigration().build()
     }
+    single<TempStorage> { TempStorageImpl() }
 }
 
 private const val MinervaStorage = "MinervaSharedPrefs"

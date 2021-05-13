@@ -20,8 +20,12 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.services.login.scanner.BaseScannerFragment
+import minerva.android.settings.authentication.AuthenticationFragment
+import minerva.android.settings.fiat.FiatFragment
+import minerva.android.settings.version.AppVersionFragment
 import minerva.android.token.AddTokenFragment
 import minerva.android.token.ManageTokensFragment
+import minerva.android.token.ramp.RampFragment
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.widget.repository.getNetworkIcon
 import java.util.*
@@ -49,7 +53,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
     override fun setScanResult(text: String?) {
         onBack()
         getCurrentFragment()?.let {
-            when(it) {
+            when (it) {
                 is SafeAccountSettingsFragment -> it.setScanResult(text)
                 is AddTokenFragment -> it.setScanResult(text)
             }
@@ -118,6 +122,10 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.SERVICE_ORDER -> EditOrderFragment.newInstance(WalletActionType.SERVICE)
             WrappedFragmentType.CREDENTIAL_ORDER -> EditOrderFragment.newInstance(WalletActionType.CREDENTIAL)
             WrappedFragmentType.MANAGE_TOKENS -> ManageTokensFragment.newInstance(intent.getIntExtra(INDEX, Int.InvalidIndex))
+            WrappedFragmentType.AUTHENTICATION -> AuthenticationFragment.newInstance()
+            WrappedFragmentType.RAMP -> RampFragment.newInstance()
+            WrappedFragmentType.CURRENCY -> FiatFragment.newInstance()
+            WrappedFragmentType.APP_VERSION -> AppVersionFragment.newInstance()
         }
         addFragment(R.id.container, fragment)
     }
@@ -133,6 +141,10 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.SERVICE_ORDER -> getString(R.string.edit_service_order)
             WrappedFragmentType.CREDENTIAL_ORDER -> getString(R.string.edit_credentials_order)
             WrappedFragmentType.MANAGE_TOKENS -> getString(R.string.manage_token)
+            WrappedFragmentType.RAMP -> getString(R.string.buy_crypto)
+            WrappedFragmentType.AUTHENTICATION -> getString(R.string.protect_keys)
+            WrappedFragmentType.CURRENCY -> getString(R.string.currency)
+            WrappedFragmentType.APP_VERSION -> getString(R.string.version)
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
@@ -148,7 +160,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
 
             setDisplayHomeAsUpEnabled(true)
             intent.getIntExtra(CHAIN_ID, Int.InvalidId).let { chainId ->
-                if(chainId != Int.InvalidId) {
+                if (chainId != Int.InvalidId) {
                     setDisplayShowHomeEnabled(true)
                     setDisplayUseLogoEnabled(true)
                     setLogo(getNetworkIcon(this@WrappedActivity, chainId, isSafeAccount))
@@ -185,5 +197,9 @@ enum class WrappedFragmentType {
     CREDENTIAL_ORDER,
     SAFE_ACCOUNT_SETTINGS,
     SERVICE_ORDER,
-    MANAGE_TOKENS
+    MANAGE_TOKENS,
+    AUTHENTICATION,
+    RAMP,
+    CURRENCY,
+    APP_VERSION
 }

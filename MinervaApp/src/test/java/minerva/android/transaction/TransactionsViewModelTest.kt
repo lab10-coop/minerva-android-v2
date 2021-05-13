@@ -6,6 +6,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -82,7 +83,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
-            getAccount(0, -1)
+            getAccount(0, String.Empty)
             sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         }
         transactionCompletedCaptor.run {
@@ -99,7 +100,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
-            getAccount(0, -1)
+            getAccount(0, String.Empty)
             sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         }
         saveActionFailedCaptor.run {
@@ -115,7 +116,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
-            getAccount(0, -1)
+            getAccount(0, String.Empty)
             sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         }
         transactionCompletedCaptor.run {
@@ -132,7 +133,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
-            getAccount(0, -1)
+            getAccount(0, String.Empty)
             sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         }
         transactionCompletedCaptor.run {
@@ -175,9 +176,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 address = "address",
                 chainId = 1,
                 contractAddress = "aa",
-                accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3")))
+                accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0")))
             )
-            tokenIndex = 0
+            tokenAddress = "0x0"
         }
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
@@ -197,9 +198,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.apply {
             account = Account(
                 id = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                chainId = 3, accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3")))
+                chainId = 3, accountTokens = listOf(AccountToken(ERC20Token(3, "name", address = "0x0", decimals = "3")))
             )
-            tokenIndex = 0
+            tokenAddress = "0x0"
         }
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
@@ -215,14 +216,14 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account asset transaction test success`() {
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0"))),
             publicKey = "12",
             privateKey = "12",
             address = "address",
             chainId = 3,
             contractAddress = "aa"
         )
-        viewModel.tokenIndex = 0
+        viewModel.tokenAddress = "0x0"
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
@@ -239,14 +240,14 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3"))),
+            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0"))),
             publicKey = "12",
             privateKey = "12",
             chainId = 3,
             address = "address",
             contractAddress = "aa"
         )
-        viewModel.tokenIndex = 0
+        viewModel.tokenAddress = "0x0"
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
@@ -278,7 +279,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             id = 0,
             publicKey = "12",
             chainId = 1,
-            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol", decimals = "2"), BigDecimal.ZERO))
+            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol", decimals = "2", address = "0x0"), BigDecimal.ZERO))
         )
         whenever(transactionRepository.getTransactionCosts(any())).doReturn(
             Single.just(
@@ -289,7 +290,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getAccount(any())).thenReturn(account)
         viewModel.run {
             transactionCostLiveData.observeForever(getGasLimitObserver)
-            getAccount(1, 0)
+            getAccount(1, "0x0")
             getTransactionCosts("address", BigDecimal.TEN)
         }
         getGasLimitCaptor.run {
@@ -304,7 +305,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getTransactionCosts(any())).doReturn(Single.error(error))
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1))
         viewModel.run {
-            getAccount(0, -1)
+            getAccount(0, String.Empty)
             getTransactionCosts("address", BigDecimal.TEN)
             errorLiveData.observeLiveDataEvent(Event(error))
         }

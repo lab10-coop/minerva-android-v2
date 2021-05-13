@@ -35,7 +35,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         setContentView(binding.root)
         viewModel.apply {
             accountIndex = intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex)
-            getAccount(accountIndex, intent.getIntExtra(ASSET_INDEX, Int.InvalidIndex))
+            getAccount(accountIndex, intent.getStringExtra(TOKEN_ADDRESS) ?: String.Empty)
         }
         initView(intent.getIntExtra(TRANSACTION_SCREEN, SEND_TRANSACTION_INDEX))
     }
@@ -146,7 +146,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         const val SEND_TRANSACTION_INDEX = 0
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
-        const val ASSET_INDEX = "asset_index"
+        const val TOKEN_ADDRESS = "token_address"
         const val TRANSACTION_SCREEN = "transaction_screen"
     }
 }

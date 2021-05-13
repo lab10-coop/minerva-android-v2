@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/settingName"
+        android:id="@+id/setting_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
@@ -15,15 +15,16 @@
         android:drawablePadding="@dimen/margin_small"
         android:fontFamily="@font/rubik_regular"
         android:gravity="center_vertical"
-        android:text="@string/backup"
         android:textColor="@color/settingNameColor"
         android:textSize="@dimen/text_normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:drawableLeft="@drawable/ic_backup"
+        tools:text="@string/backup" />
 
     <TextView
-        android:id="@+id/detailMessage"
+        android:id="@+id/detail_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_small"
@@ -43,10 +44,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="start"
-        app:constraint_referenced_ids="settingsArrow, mainNetworksSwitch" />
+        app:constraint_referenced_ids="settings_arrow, main_networks_switch" />
 
     <ImageView
-        android:id="@+id/settingsArrow"
+        android:id="@+id/settings_arrow"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginTop="@dimen/margin_small"
@@ -60,12 +61,13 @@
         tools:ignore="ContentDescription" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/mainNetworksSwitch"
+        android:id="@+id/main_networks_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_small"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_small"
+        android:clickable="false"
         android:gravity="center_vertical"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"

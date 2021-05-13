@@ -7,7 +7,6 @@ object Validator {
 
     private const val HEX_PREFIX = "0x"
     private const val DOT = "."
-    private const val ZERO = "0"
 
     fun validateIsFilled(content: String?): ValidationResult =
         if (content.isNullOrBlank()) ValidationResult.error(R.string.field_cannot_be_empty)
@@ -17,7 +16,6 @@ object Validator {
         when {
             amount.isNullOrBlank() -> ValidationResult.error(R.string.field_cannot_be_empty)
             BigDecimal(amount) > balance -> ValidationResult.error(R.string.not_enough_funds_error)
-            amount == ZERO -> ValidationResult.error(R.string.amount_cannot_be_zero_error)
             else -> ValidationResult(true)
         }
 

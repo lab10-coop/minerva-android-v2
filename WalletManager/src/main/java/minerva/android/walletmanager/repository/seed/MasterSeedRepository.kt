@@ -17,9 +17,8 @@ interface MasterSeedRepository {
     fun restoreMasterSeed(mnemonic: String): Completable
     fun initWalletConfig()
     fun dispose()
-    fun getValueIterator(): Int
+    fun getAccountIterator(): Int
     val isBackupAllowed: Boolean
     val isSynced: Boolean
-    val areMainNetworksEnabled: Boolean
-    var toggleMainNetsEnabled: Boolean?
+    var areMainNetworksEnabled: Boolean
 }

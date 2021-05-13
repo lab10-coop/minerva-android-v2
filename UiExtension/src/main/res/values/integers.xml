@@ -2,4 +2,5 @@
 <resources>
     <integer name="slide_animation_duration">250</integer>
     <integer name="rotate_animation_duration">250</integer>
+    <integer name="rotate_animation_delay">300</integer>
 </resources>

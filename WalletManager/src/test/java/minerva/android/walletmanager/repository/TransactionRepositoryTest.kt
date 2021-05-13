@@ -11,19 +11,13 @@ import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.defs.ChainId
-import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.defs.TransferType
-import minerva.android.walletmanager.model.minervaprimitives.Identity
-import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -72,7 +66,8 @@ class TransactionRepositoryTest : RxTest() {
     fun `refresh balances test success`() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
             .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.0))))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.0))))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
 
         repository.refreshBalances().test()
             .assertComplete()
@@ -84,6 +79,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `refresh balances test error`() {
         val error = Throwable()
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(
             Single.error(
                 error
@@ -100,6 +96,7 @@ class TransactionRepositoryTest : RxTest() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
             .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         repository.refreshBalances().test()
             .assertComplete()
             .assertValue {
@@ -628,9 +625,9 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `Checking token icon updates`() {
-        whenever(tokenManager.updateTokenIcons()).thenReturn(Completable.complete())
-        repository.updateTokenIcons()
-        verify(tokenManager, times(1)).updateTokenIcons()
+        whenever(tokenManager.checkMissingTokensDetails()).thenReturn(Completable.complete())
+        repository.checkMissingTokensDetails()
+        verify(tokenManager, times(1)).checkMissingTokensDetails()
     }
 
     @Test
@@ -648,8 +645,9 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `get eur rate test`() {
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.2))))
-        repository.getEurRate(2)
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
+        repository.getCoinFiatRate(2)
             .test()
             .assertComplete()
             .assertValue {
@@ -659,8 +657,9 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `get eur rate for eth test`() {
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethPrice = Price(value = 1.2))))
-        repository.getEurRate(1)
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.2))))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
+        repository.getCoinFiatRate(1)
             .test()
             .assertComplete()
             .assertValue {
@@ -701,9 +700,10 @@ class TransactionRepositoryTest : RxTest() {
             AccountToken(ERC20Token(3, "one", address = "0x01"), BigDecimal.TEN),
             AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
         )
-        whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
+        whenever(tokenManager.getTokensRate(any())).thenReturn(Completable.complete())
 
-        repository.refreshTokenBalance().test().assertComplete().assertValue {
+        repository.refreshTokensBalances().test().assertComplete().assertValue {
             it.size == 1
             it["privateKey"]?.size == 2
         }
@@ -712,8 +712,8 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `Checking refreshing token balances error`() {
         val error = Throwable("error")
-        whenever(tokenManager.refreshTokenBalance(any())).thenReturn(Single.error(error))
-        repository.refreshTokenBalance().test().assertError(error)
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.error(error))
+        repository.refreshTokensBalances().test().assertError(error)
     }
 
 
@@ -752,5 +752,15 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
 
         repository.refreshTokensList().test().assertError(error)
+    }
+
+    @Test
+    fun `Check getting current tokens rate` () {
+        val error = Throwable("Error-303")
+        whenever(tokenManager.getTokensRate(any())).thenReturn(Completable.complete(), Completable.error(error))
+
+        repository.getTokensRate().test().assertComplete()
+        repository.getTokensRate().test().assertError(error)
+        verify(tokenManager, times(2)).getTokensRate(any())
     }
 }

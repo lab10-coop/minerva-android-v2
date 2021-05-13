@@ -62,7 +62,9 @@ class WalletConfigManagerImpl(
     private val _walletConfigErrorLiveData = MutableLiveData<Event<Throwable>>()
     override val walletConfigErrorLiveData: LiveData<Event<Throwable>> get() = _walletConfigErrorLiveData
 
-    override fun getWalletConfig(): WalletConfig? = walletConfigLiveData.value?.peekContent()
+    override fun getWalletConfig(): WalletConfig =
+        walletConfigLiveData.value?.peekContent() ?: throw NotInitializedWalletConfigThrowable()
+
     override fun isMasterSeedSaved(): Boolean = keystoreRepository.isMasterSeedSaved()
 
     private var localWalletConfigVersion = Int.InvalidIndex
@@ -73,20 +75,17 @@ class WalletConfigManagerImpl(
     override val isSynced: Boolean
         get() = localStorage.isSynced
 
-    override val areMainNetworksEnabled: Boolean
-        get() = localStorage.areMainNetsEnabled
-
-    private var enableMainNetsBehaviorSubject = BehaviorSubject.create<Boolean>()
-
-    override var toggleMainNetsEnabled: Boolean? by Delegates.observable(localStorage.areMainNetsEnabled) { _, _: Boolean?, newValue: Boolean? ->
-        newValue?.let {
-            localStorage.areMainNetsEnabled = it
-            enableMainNetsBehaviorSubject.onNext(it)
+    override var areMainNetworksEnabled: Boolean
+        get() = localStorage.areMainNetworksEnabled
+        set(value) {
+            localStorage.areMainNetworksEnabled = value
         }
-    }
-    override val enableMainNetsFlowable: Flowable<Boolean>
-        get() = enableMainNetsBehaviorSubject.toFlowable(BackpressureStrategy.LATEST)
-            .filter { toggleMainNetsEnabled != null }
+
+    override var showMainNetworksWarning: Boolean
+        get() = localStorage.showMainNetworksWarning
+        set(value) {
+            localStorage.showMainNetworksWarning = value
+        }
 
     override fun getMnemonic(): String = cryptographyRepository.getMnemonicForMasterSeed(masterSeed.seed)
 
@@ -221,14 +220,10 @@ class WalletConfigManagerImpl(
         disposable = null
     }
 
-    override fun getSafeAccountNumber(ownerAddress: String): Int {
+    override fun getSafeAccountNumber(ownerAddress: String): Int = getWalletConfig().accounts.let {
         var safeAccountNumber = DEFAULT_SAFE_ACCOUNT_NUMBER
-        getWalletConfig()?.accounts?.let {
-            it.forEach { savedValue ->
-                if (savedValue.masterOwnerAddress == ownerAddress) safeAccountNumber++
-            }
-        }
-        return safeAccountNumber
+        it.forEach { savedValue -> if (savedValue.masterOwnerAddress == ownerAddress) safeAccountNumber++ }
+        safeAccountNumber
     }
 
     override fun getSafeAccountMasterOwnerPrivateKey(address: String?): String = getAccount(address).privateKey
@@ -236,7 +231,7 @@ class WalletConfigManagerImpl(
     override fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal = getAccount(address).cryptoBalance
 
     private fun getAccount(address: String?): Account {
-        getWalletConfig()?.accounts?.forEach {
+        getWalletConfig().accounts.forEach {
             if (it.address == address) return it
         }
         return Account(Int.InvalidIndex)
@@ -245,50 +240,34 @@ class WalletConfigManagerImpl(
     override fun updateSafeAccountOwners(
         position: Int,
         owners: List<String>
-    ): Single<List<String>> {
-        getWalletConfig()?.let { config ->
-            config.accounts.forEach { if (it.id == position) it.owners = owners }
-            return updateWalletConfig(
-                config.copy(
-                    version = config.updateVersion,
-                    accounts = config.accounts
-                )
-            ).andThen(Single.just(owners))
-        }
-        throw NotInitializedWalletConfigThrowable()
+    ): Single<List<String>> = getWalletConfig().run {
+        accounts.forEach { if (it.id == position) it.owners = owners }
+        updateWalletConfig(copy(version = updateVersion, accounts = accounts))
+            .andThen(Single.just(owners))
     }
 
-    override fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>> {
-        getWalletConfig()?.let { TODO("Not yet implemented") }
-        return Single.error(NotInitializedWalletConfigThrowable())
+    //TODO("Not yet implemented")
+    override fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>> =
+        Single.error(NotInitializedWalletConfigThrowable())
+
+    override fun getValueIterator(): Int = getWalletConfig().accounts.let {
+        var iterator = 1
+        it.forEach { value -> if (!value.isSafeAccount) iterator += 1 }
+        iterator
     }
 
-    override fun getValueIterator(): Int {
-        getWalletConfig()?.accounts?.let {
-            var iterator = 1
-            it.forEach { value -> if (!value.isSafeAccount) iterator += 1 }
-            return iterator
-        }
-        return Int.InvalidValue
-    }
+    override fun getLoggedInIdentityByPublicKey(publicKey: String): Identity? =
+        getWalletConfig().identities.find { it.publicKey == publicKey }
 
-    override fun getLoggedInIdentityByPublicKey(publicKey: String): Identity? {
-        getWalletConfig()?.identities?.find { it.publicKey == publicKey }
-            ?.let { return it }
-            .orElse { return null }
-    }
-
-    override fun saveService(service: Service): Completable {
-        getWalletConfig()?.run {
+    override fun saveService(service: Service): Completable =
+        getWalletConfig().run {
             val walletConfig = if (services.isEmpty()) {
                 copy(version = updateVersion, services = listOf(service))
             } else {
                 getWalletConfigWithUpdatedService(service, this)
             }
-            return updateWalletConfig(walletConfig)
+            updateWalletConfig(walletConfig)
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
     private fun getWalletConfigWithUpdatedService(newService: Service, config: WalletConfig): WalletConfig =
         with(config) {
@@ -302,14 +281,13 @@ class WalletConfigManagerImpl(
         }
 
     override fun getAccount(accountIndex: Int): Account? {
-        getWalletConfig()?.accounts?.forEachIndexed { index, account ->
+        getWalletConfig().accounts.forEachIndexed { index, account ->
             if (index == accountIndex) return account
         }
         return null
     }
 
-    override fun findIdentityByDid(did: String): Identity? =
-        getWalletConfig()?.let { config -> config.identities.find { it.did == did } }
+    override fun findIdentityByDid(did: String): Identity? = getWalletConfig().run { identities.find { it.did == did } }
 
     private fun completeKeys(
         masterSeed: MasterSeed,
@@ -317,15 +295,9 @@ class WalletConfigManagerImpl(
     ): Observable<WalletConfig> {
         val identitiesResponse = payload.identityResponse
         val accountsResponse = payload.accountResponse
-        return Observable.range(START, identitiesResponse.size)
-            .filter { !identitiesResponse[it].isDeleted }
-            .flatMapSingle {
-                cryptographyRepository.calculateDerivedKeys(
-                    masterSeed.seed,
-                    identitiesResponse[it].index,
-                    DID_PATH
-                )
-            }
+        return Observable.fromIterable(identitiesResponse)
+            .filter { !it.isDeleted }
+            .flatMapSingle { cryptographyRepository.calculateDerivedKeys(masterSeed.seed, it.index, DID_PATH) }
             .toList()
             .map { keys -> completeIdentitiesKeys(payload, keys) }
             .map { completeIdentitiesProfileImages(it) }
@@ -363,8 +335,7 @@ class WalletConfigManagerImpl(
         val accounts = mutableListOf<Account>()
         walletConfigPayload.accountResponse.forEach { accountPayload ->
             val keys = getAccountKeys(derivedKeys, accountPayload)
-            val address =
-                if (accountPayload.contractAddress.isEmpty()) keys.address else accountPayload.contractAddress
+            val address = if (accountPayload.contractAddress.isEmpty()) keys.address else accountPayload.contractAddress
             accounts.add(
                 AccountPayloadToAccountMapper.map(
                     accountPayload,

@@ -23,6 +23,7 @@ import minerva.android.accounts.transaction.fragment.scanner.TransactionAddressS
 import minerva.android.databinding.FragmentTransactionSendBinding
 import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
+import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.defs.WalletActionStatus
@@ -198,7 +199,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                            viewModel.tokenIndex = position - ONE_ELEMENT
+                            viewModel.updateTokenAddress(position - ONE_ELEMENT)
                             setupTexts()
                         }
 
@@ -360,7 +361,8 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     private fun setSendButtonOnClickListener() {
         binding.apply {
             sendButton.setOnClickListener {
-                viewModel.sendTransaction(receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
+                if (viewModel.isAuthenticationEnabled()) showBiometricPrompt(::sendTransaction)
+                else sendTransaction()
             }
             receiverInputLayout.setEndIconOnClickListener {
                 receiver.setText(String.Empty)
@@ -368,6 +370,9 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
             }
         }
     }
+
+    private fun sendTransaction() =
+        viewModel.sendTransaction(binding.receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
 
     private fun getAmount() = BigDecimal(binding.amount.text.toString())
 

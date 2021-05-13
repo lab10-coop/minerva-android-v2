@@ -4,13 +4,16 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import minerva.android.BaseViewModelTest
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
+import minerva.android.walletmanager.storage.LocalStorage
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class SettingsViewModelTest : BaseViewModelTest() {
 
     private val masterSeedRepository: MasterSeedRepository = mock()
-    private val viewModel = SettingsViewModel(masterSeedRepository)
+    private val localStorage: LocalStorage = mock()
+    private val viewModel = SettingsViewModel(masterSeedRepository, localStorage)
 
     @Test
     fun `are main nets enabled returns true test`() {
@@ -52,5 +55,20 @@ class SettingsViewModelTest : BaseViewModelTest() {
         whenever(masterSeedRepository.isSynced).thenReturn(false)
         val result = viewModel.isSynced
         assertEquals(result, false)
+    }
+
+    @Test
+    fun `check getting current fiat index`() {
+        val currencies = arrayOf(
+            "EUR|Euro",
+            "GBP|Pound Sterling",
+            "USD|US Dollar",
+            "PLN|Polish Zloty"
+        )
+
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR", "USD", "WTF")
+        viewModel.getCurrentFiat(currencies) shouldBeEqualTo "Euro (EUR)"
+        viewModel.getCurrentFiat(currencies) shouldBeEqualTo "US Dollar (USD)"
+        viewModel.getCurrentFiat(currencies) shouldBeEqualTo ""
     }
 }

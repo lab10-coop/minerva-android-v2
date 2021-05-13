@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".settings.version.AppVersionFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/release_notes"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never"
+        android:padding="@dimen/margin_normal" />
+
+    <FrameLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/app_version_bottom_bar_size"
+        android:layout_gravity="bottom"
+        android:background="@drawable/transparent_white_gradient">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/margin_xxsmall"
+            android:src="@drawable/ic_arrow_down"
+            app:tint="@color/colorPrimary"
+            tools:ignore="ContentDescription" />
+    </FrameLayout>
+</FrameLayout>

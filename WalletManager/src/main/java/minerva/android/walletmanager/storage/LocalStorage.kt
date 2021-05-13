@@ -28,7 +28,13 @@ interface LocalStorage {
     fun saveTokenIconsUpdateTimestamp(timestamp: Long)
     fun loadTokenIconsUpdateTimestamp(): Long
 
+    fun loadCurrentFiat(): String
+    fun saveCurrentFiat(currency: String)
+
     var isBackupAllowed: Boolean
     var isSynced: Boolean
-    var areMainNetsEnabled: Boolean
+    var areMainNetworksEnabled: Boolean
+    var isProtectKeysEnabled: Boolean
+    var isProtectTransactionsEnabled: Boolean
+    var showMainNetworksWarning: Boolean
 }

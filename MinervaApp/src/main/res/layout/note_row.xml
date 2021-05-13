@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/margin_small"
+    android:paddingBottom="@dimen/margin_small">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/margin_xsmall"
+        android:src="@drawable/purple_round_indicator"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/margin_xxxsmall"
+        android:textSize="@dimen/text_small"
+        tools:text="The first is a non technical method which requires the use of adware removal software. Download free adware and spyware removal." />
+</LinearLayout>

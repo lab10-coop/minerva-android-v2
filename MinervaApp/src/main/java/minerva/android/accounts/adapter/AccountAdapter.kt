@@ -7,10 +7,11 @@ import minerva.android.R
 import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.extension.*
-import minerva.android.kotlinUtils.InvalidId
-import minerva.android.kotlinUtils.list.inBounds
+import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Balance
+import minerva.android.widget.state.AccountWidgetState
 
 class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     RecyclerView.Adapter<AccountViewHolder>(),
@@ -18,7 +19,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     private var activeAccounts = listOf<Account>()
     private var rawAccounts = listOf<Account>()
-    private var openAccounts = mutableListOf<Boolean>()
+    private var fiatSymbol: String = String.Empty
 
     override fun getItemCount(): Int = activeAccounts.size
 
@@ -30,17 +31,14 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
         activeAccounts[position].let {
             val index = rawAccounts.indexOf(it)
-            holder.apply {
-                setData(index, it, openAccounts[position])
-                setListener(this@AccountAdapter)
-            }
+            holder.setData(index, it, fiatSymbol, this@AccountAdapter)
         }
     }
 
-    fun updateList(accounts: List<Account>, activeAccounts: List<Account>) {
+    fun updateList(accounts: List<Account>, activeAccounts: List<Account>, fiatSymbol: String) {
         rawAccounts = accounts
         this.activeAccounts = activeAccounts
-        openAccounts = activeAccounts.map { false }.toMutableList()
+        this.fiatSymbol = fiatSymbol
         notifyDataSetChanged()
     }
 
@@ -56,8 +54,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     fun updateBalances(balances: HashMap<String, Balance>) {
         activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
             account.apply {
-                cryptoBalance = balances[address]?.cryptoBalance ?: Int.InvalidId.toBigDecimal()
-                fiatBalance = balances[address]?.fiatBalance ?: Int.InvalidId.toBigDecimal()
+                cryptoBalance = balances[address]?.cryptoBalance ?: Double.InvalidValue.toBigDecimal()
+                fiatBalance = balances[address]?.fiatBalance ?: Double.InvalidValue.toBigDecimal()
                 notifyItemChanged(index)
             }
         }
@@ -86,20 +84,17 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     override fun onSendAccountClicked(account: Account) =
         listener.onSendTransaction(rawAccounts.indexOf(account))
 
-    override fun onSendTokenClicked(account: Account, tokenIndex: Int) {
-        listener.onSendTokenTransaction(rawAccounts.indexOf(account), tokenIndex)
+    override fun onSendTokenClicked(account: Account, tokenAddress: String) {
+        listener.onSendTokenTransaction(rawAccounts.indexOf(account), tokenAddress)
     }
 
     override fun onAccountRemoved(index: Int) = listener.onAccountRemove(rawAccounts[index])
 
-    override fun onCreateSafeAccountClicked(account: Account) =
-        listener.onCreateSafeAccount(account)
+    override fun onCreateSafeAccountClicked(account: Account) = listener.onCreateSafeAccount(account)
 
-    override fun onShowAddress(account: Account) =
-        listener.onShowAddress(rawAccounts.indexOf(account))
+    override fun onShowAddress(account: Account) = listener.onShowAddress(rawAccounts.indexOf(account))
 
-    override fun onShowSafeAccountSettings(account: Account, index: Int) =
-        listener.onShowSafeAccountSettings(account, index)
+    override fun onShowSafeAccountSettings(account: Account, index: Int) = listener.onShowSafeAccountSettings(account, index)
 
     override fun onWalletConnect(index: Int) = listener.onWalletConnect(index)
 
@@ -107,8 +102,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun onExportPrivateKey(account: Account) = listener.onExportPrivateKey(account)
 
-    override fun onOpenOrClose(index: Int, isOpen: Boolean) {
-        if (openAccounts.inBounds(index)) openAccounts[index] = isOpen
-    }
+    override fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
+        listener.updateAccountWidgetState(index, accountWidgetState)
+
+    override fun getAccountWidgetState(index: Int): AccountWidgetState = listener.getAccountWidgetState(index)
 }
 

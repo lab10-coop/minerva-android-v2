@@ -3,7 +3,6 @@ package minerva.android.main.base
 import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
-import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.utils.AlertDialogHandler

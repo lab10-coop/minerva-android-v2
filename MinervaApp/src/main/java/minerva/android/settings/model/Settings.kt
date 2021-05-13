@@ -3,6 +3,8 @@ package minerva.android.settings.model
 import minerva.android.BuildConfig
 import minerva.android.R
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.EmptyResource
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.settings.SettingsFragment
 
@@ -26,11 +28,23 @@ enum class SettingsSection {
     SECURITY, PREFERENCES, INFO, LEGAL
 }
 
-enum class SettingsRowType {
-    BACKUP, REMINDER_VIEW, AUTHENTICATION, EDIT_NETWORKS, MAIN_NETWORKS, CURRENCY, LANGUAGE, TWITTER, COMMUNITY, APP_VERSION, LICENCE, TERMS_OF_SERVICE, PRIVACY_POLICY
+enum class SettingsRowType(val iconRes: Int) {
+    BACKUP(R.drawable.ic_backup),
+    REMINDER_VIEW(Int.EmptyResource),
+    AUTHENTICATION(R.drawable.ic_authentication),
+    EDIT_NETWORKS(Int.EmptyResource),
+    MAIN_NETWORKS(R.drawable.ic_main_networks),
+    CURRENCY(R.drawable.ic_currency),
+    LANGUAGE(Int.EmptyResource),
+    TWITTER(R.drawable.ic_twitter),
+    COMMUNITY(R.drawable.ic_community),
+    APP_VERSION(Int.EmptyResource),
+    LICENCE(Int.EmptyResource),
+    TERMS_OF_SERVICE(Int.EmptyResource),
+    PRIVACY_POLICY(Int.EmptyResource)
 }
 
-fun SettingsFragment.propagateSettings(): List<Settings> =
+fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
     listOf(
         Settings(
             getString(R.string.security), listOf(
@@ -46,11 +60,28 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
                     rowType = SettingsRowType.REMINDER_VIEW,
                     isVisible = !viewModel.isMnemonicRemembered
                 ),
-                SettingRow(getString(R.string.backup), R.drawable.ic_backup, rowType = SettingsRowType.BACKUP)
+                SettingRow(
+                    getString(R.string.backup),
+                    R.drawable.ic_backup,
+                    detailText = getString(R.string.create),
+                    rowType = SettingsRowType.BACKUP
+                ),
+                SettingRow(
+                    getString(R.string.authentication),
+                    R.drawable.ic_authentication,
+                    detailText = getString(R.string.enable),
+                    rowType = SettingsRowType.AUTHENTICATION
+                )
             ), SettingsSection.SECURITY
         ),
         Settings(
             getString(R.string.your_preferences), listOf(
+                SettingRow(
+                    getString(R.string.currency),
+                    R.drawable.ic_currency,
+                    detailText = currentFiat,
+                    rowType = SettingsRowType.CURRENCY
+                ),
                 SettingRow(
                     getString(R.string.use_main_networks),
                     R.drawable.ic_main_networks,
@@ -87,3 +118,5 @@ fun SettingsFragment.propagateSettings(): List<Settings> =
             ), SettingsSection.LEGAL
         )
     )
+
+

@@ -10,8 +10,10 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
+import minerva.android.walletmanager.exception.ServiceNotFoundThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.QrCode
@@ -63,16 +65,11 @@ class ServiceManagerImpl(
             else -> Single.just(it)
         }
 
-    private fun handleCredentialRequest(map: Map<String, Any?>): ConnectionRequest<Pair<Credential, CredentialRequest>> {
-        walletConfigManager.getWalletConfig()?.credentials?.let { credentials ->
-            return if (credentials.isEmpty()) {
-                ConnectionRequest.VCNotFound
-            } else {
-                findCredential(map, credentials)
-            }
+    private fun handleCredentialRequest(map: Map<String, Any?>): ConnectionRequest<Pair<Credential, CredentialRequest>> =
+        walletConfigManager.getWalletConfig().credentials.let { credentials ->
+            if (credentials.isEmpty()) ConnectionRequest.VCNotFound
+            else findCredential(map, credentials)
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
     private fun findCredential(
         map: Map<String, Any?>,
@@ -98,7 +95,7 @@ class ServiceManagerImpl(
         }
 
     private fun isServiceConnected(credentialRequest: CredentialRequest) =
-        walletConfigManager.getWalletConfig()?.services?.find { it.issuer == credentialRequest.service.issuer } != null
+        walletConfigManager.getWalletConfig().services.find { it.issuer == credentialRequest.service.issuer } != null
 
     private fun isRequestedCredentialAvailable(credential: Credential, requirements: CredentialRequirements) =
         isIssValid(requirements, credential.issuer) &&
@@ -131,39 +128,31 @@ class ServiceManagerImpl(
 
     override fun getLoggedInIdentity(publicKey: String): Identity? = walletConfigManager.getLoggedInIdentityByPublicKey(publicKey)
 
-    override fun removeService(issuer: String): Completable {
-        walletConfigManager.getWalletConfig()?.apply {
+    override fun removeService(issuer: String): Completable =
+        walletConfigManager.getWalletConfig().run {
             val newServices = services.toMutableList()
-            services.forEach {
-                if (it.issuer == issuer) {
-                    newServices.remove(it)
-                    return walletConfigManager.updateWalletConfig(copy(version = updateVersion, services = newServices))
-                }
-            }
+            services.find { it.issuer == issuer }?.let {
+                newServices.remove(it)
+                walletConfigManager.updateWalletConfig(copy(version = updateVersion, services = newServices))
+            }.orElse { Completable.error(ServiceNotFoundThrowable()) }
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
-    override fun isMoreCredentialToBind(qrCode: CredentialQrCode): Boolean {
-        walletConfigManager.getWalletConfig()?.apply {
-            return credentials.filter { !filterCredential(it, CredentialQrCodeToCredentialMapper.map(qrCode)) }.size > ONE_ELEMENT
+    override fun isMoreCredentialToBind(qrCode: CredentialQrCode): Boolean =
+        walletConfigManager.getWalletConfig().run {
+            credentials.filter { !filterCredential(it, CredentialQrCodeToCredentialMapper.map(qrCode)) }.size > ONE_ELEMENT
         }
-        throw NotInitializedWalletConfigThrowable()
-    }
 
-    override fun updateBindedCredential(qrCode: CredentialQrCode, replace: Boolean): Single<String> {
-        walletConfigManager.getWalletConfig()?.apply {
+    override fun updateBindedCredential(qrCode: CredentialQrCode, replace: Boolean): Single<String> =
+        walletConfigManager.getWalletConfig().run {
             val updatedCredential = CredentialQrCodeToCredentialMapper.map(qrCode)
-            credentials.apply {
+            credentials.run {
                 val newCredentials = if (replace) filter { filterCredential(it, updatedCredential) }.toMutableList()
                 else toMutableList()
                 newCredentials.add(updatedCredential)
-                return walletConfigManager.updateWalletConfig(copy(version = updateVersion, credentials = newCredentials))
+                walletConfigManager.updateWalletConfig(copy(version = updateVersion, credentials = newCredentials))
                     .toSingleDefault(walletConfigManager.findIdentityByDid(qrCode.loggedInDid)?.name)
             }
         }
-        throw  NotInitializedWalletConfigThrowable()
-    }
 
     private fun filterCredential(item: Credential, credential: Credential) =
         item.loggedInIdentityDid != credential.loggedInIdentityDid && item.type != credential.type && item.issuer != credential.issuer

@@ -12,6 +12,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -20,12 +21,15 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
-import org.amshove.kluent.shouldBe
+import minerva.android.widget.state.AccountWidgetState
+import minerva.android.widget.state.AppUIState
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
+import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 
@@ -36,6 +40,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
+    private val localStorage: LocalStorage = mock()
+    private val appUIState: AppUIState = mock()
     private lateinit var viewModel: AccountsViewModel
 
     private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
@@ -65,34 +71,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Before
     fun initViewModel() {
-        whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.just(true))
         viewModel = AccountsViewModel(
             accountManager,
             walletActionsRepository,
             smartContractRepository,
             transactionRepository,
-            walletConnectRepository
+            walletConnectRepository,
+            appUIState
         )
-    }
-
-    @Test
-    fun `should show warning success test`() {
-        viewModel.shouldShowWarringLiveData.observeForever(shouldShowWarningObserver)
-        shouldShowWarningCaptor.run {
-            verify(shouldShowWarningObserver).onChanged(capture())
-            firstValue.peekContent()
-        }
-    }
-
-    @Test
-    fun `should show warning error test`() {
-        val error = Throwable()
-        whenever(accountManager.enableMainNetsFlowable).thenReturn(Flowable.error(error))
-        viewModel.shouldShowWarringLiveData.observeForever(shouldShowWarningObserver)
-        shouldShowWarningCaptor.run {
-            verify(shouldShowWarningObserver).onChanged(capture())
-            !firstValue.peekContent()
-        }
     }
 
     @Test
@@ -144,7 +130,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get tokens balance success test`() {
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(
             Single.just(
                 mapOf(
                     Pair(
@@ -155,7 +141,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             )
         )
         viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
-        viewModel.refreshTokenBalance()
+        viewModel.refreshTokensBalances()
         tokensBalanceCaptor.run {
             verify(tokensBalanceObserver).onChanged(capture())
         }
@@ -168,20 +154,20 @@ class AccountsViewModelTest : BaseViewModelTest() {
             Single.just(false),
             Single.error(Throwable("Refresh tokens list error"))
         )
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.just(mapOf()))
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.just(mapOf()))
 
-        viewModel.refreshTokensList()
-        viewModel.refreshTokensList()
-        viewModel.refreshTokensList()
-        verify(transactionRepository, times(1)).refreshTokenBalance()
+        viewModel.discoverNewTokens()
+        viewModel.discoverNewTokens()
+        viewModel.discoverNewTokens()
+        verify(transactionRepository, times(1)).refreshTokensBalances()
     }
 
     @Test
     fun `get tokens balance error test`() {
         val error = Throwable()
-        whenever(transactionRepository.refreshTokenBalance()).thenReturn(Single.error(error))
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.error(error))
         viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
-        viewModel.refreshTokenBalance()
+        viewModel.refreshTokensBalances()
         refreshBalancesErrorCaptor.run {
             verify(refreshBalancesErrorObserver).onChanged(capture())
             firstValue.peekContent() == ErrorCode.TOKEN_BALANCE_ERROR
@@ -251,26 +237,27 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `adding free ATS correct`() {
         NetworkManager.initialize(networks)
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.complete())
-        viewModel.addAtsToken(accounts, "nope")
+        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
+        whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
+        viewModel.apply {
+            activeAccounts = listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
+            addAtsToken()
+        }
         verify(accountManager, times(1)).saveFreeATSTimestamp()
     }
 
     @Test
     fun `adding free ATS error`() {
         NetworkManager.initialize(networks)
-        viewModel.errorLiveData.observeForever(errorObserver)
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.error(Throwable("Some error")))
-        viewModel.addAtsToken(accounts, "nope")
-        errorCaptor.run {
-            verify(errorObserver).onChanged(capture())
+        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
+        whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
+        viewModel.apply {
+            activeAccounts = listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
+            errorLiveData.observeForever(errorObserver)
+            addAtsToken()
         }
-    }
 
-    @Test
-    fun `missing account for adding free ATS test error`() {
-        viewModel.errorLiveData.observeForever(errorObserver)
-        whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0)
-        viewModel.addAtsToken(listOf(), "nope")
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -349,6 +336,18 @@ class AccountsViewModelTest : BaseViewModelTest() {
             viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo null
             verify(settings, times(5)).getTokenVisibility(any(), any())
         }
+    }
+
+    @Test
+    fun `Check getting and updating Account UI State calls`() {
+        doNothing().whenever(appUIState).updateAccountWidgetState(any(), any())
+        whenever(appUIState.getAccountWidgetState(any())).thenReturn(AccountWidgetState())
+
+        viewModel.updateAccountWidgetState(3, AccountWidgetState())
+        viewModel.getAccountWidgetState(3)
+
+        verify(appUIState, times(1)).updateAccountWidgetState(any(), any())
+        verify(appUIState, times(1)).getAccountWidgetState(any())
     }
 
     private val accounts = listOf(

@@ -107,3 +107,27 @@ fun startManageTokensWrappedActivity(context: Context, index: Int) {
         putExtra(WrappedActivity.INDEX, index)
     }
 }
+
+fun startAuthenticationWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.AUTHENTICATION)
+    }
+}
+
+fun startRampWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.RAMP)
+    }
+}
+
+fun startCurrencyWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.CURRENCY)
+    }
+}
+
+fun startAppVersionWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.APP_VERSION)
+    }
+}

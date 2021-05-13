@@ -53,11 +53,12 @@ platform :android do
                   )
     end
 
-  desc "Deploy a Production Build to Beta Channel"
-    lane :productionBetaRelease do
+  desc "Deploy a Production Build to GooglePlay Beta Channel"
+    lane :productionBetaRelease do |options|
       gradle(task: "clean assembleProductionRelease")
       upload_to_play_store(
       track: 'beta',
+      package_name: 'digital.minerva',
       json_key: options[:json_path]
       )
              slack(

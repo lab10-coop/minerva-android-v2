@@ -6,6 +6,7 @@ import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.toByteArray
 import minerva.android.walletConnect.model.enums.MessageType
 import minerva.android.walletConnect.model.enums.WCMethod
@@ -17,6 +18,7 @@ import minerva.android.walletConnect.model.jsonRpc.JsonRpcErrorResponse
 import minerva.android.walletConnect.model.jsonRpc.JsonRpcRequest
 import minerva.android.walletConnect.model.jsonRpc.JsonRpcResponse
 import minerva.android.walletConnect.model.session.*
+import minerva.android.walletConnect.providers.OkHttpProvider
 import minerva.android.walletConnect.utils.WCCipher
 import okhttp3.*
 import okio.ByteString
@@ -24,8 +26,8 @@ import java.util.*
 
 const val JSONRPC_VERSION = "2.0"
 
-open class WCClient(
-    private val httpClient: OkHttpClient = OkHttpClient(),
+class WCClient(
+    private val httpClient: OkHttpClient = OkHttpProvider.okHttpClient,
     builder: GsonBuilder = GsonBuilder()
 ) : WebSocketListener() {
 
@@ -49,13 +51,13 @@ open class WCClient(
 
     private var remotePeerId: String? = null
 
-    private var isConnected: Boolean = false
+    var isConnected: Boolean = false
 
     fun sessionId(): String? =
         if (session != null) session!!.topic
         else null
 
-    private var handshakeId: Long = -1
+    var handshakeId: Long = Long.InvalidValue
 
     var accounts: List<String>? = null
         private set
@@ -63,15 +65,14 @@ open class WCClient(
 
     var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> }
     var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> }
-    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String) -> Unit =
-        { _, _, _, _ -> }
+    var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String, handshakeId: Long) -> Unit =
+        { _, _, _, _, _ -> }
     var onEthSign: (id: Long, message: WCEthereumSignMessage, peerId: String) -> Unit = { _, _, _ -> }
     var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> }
     var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction, peerId: String) -> Unit = { _, _, _ -> }
     var onCustomRequest: (id: Long, payload: String) -> Unit = { _, _ -> }
     var onGetAccounts: (id: Long) -> Unit = { _ -> }
     var onWCOpen: (peerId: String) -> Unit = { _ -> }
-    var onPong: (peerId: String) -> Unit = { _ -> }
     var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = { _, _ -> }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -94,11 +95,6 @@ open class WCClient(
     override fun onMessage(webSocket: WebSocket, text: String) {
         var decrypted: String? = null
         try {
-            if (text.equals("ping")) {
-                onPong(text)
-                return
-            }
-
             val message = gson.fromJson<WCSocketMessage>(text)
             decrypted = decryptMessage(message)
             handleMessage(decrypted)
@@ -110,8 +106,13 @@ open class WCClient(
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        if (session != null) {
+            killSession()
+        }
+
         resetState()
         onFailure(t, peerId)
+        peerId = String.Empty
 
         listeners.forEach { it.onFailure(webSocket, t, response) }
     }
@@ -127,6 +128,7 @@ open class WCClient(
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         onDisconnect(code, peerId)
         resetState()
+        peerId = String.Empty
         listeners.forEach { it.onClosing(webSocket, code, reason) }
     }
 
@@ -152,7 +154,16 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int, peerId: String): Boolean {
+    fun approveSession(
+        accounts: List<String>,
+        chainId: Int,
+        peerId: String,
+        handshake: Long = Long.InvalidValue
+    ): Boolean {
+        if (handshake != Long.InvalidValue) {
+            handshakeId = handshake
+        }
+
         check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
 
         this.accounts = accounts
@@ -172,11 +183,7 @@ open class WCClient(
         return encryptAndSend(gson.toJson(response))
     }
 
-    fun sendPing(): Boolean {
-        return socket?.send("ping") ?: false
-    }
-
-    fun updateSession(
+    private fun updateSession(
         accounts: List<String>? = null,
         chainId: Int? = null,
         approved: Boolean = true
@@ -270,7 +277,7 @@ open class WCClient(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                onSessionRequest(remotePeerId, param.peerMeta, param.chainId?.toInt(), peerId)
+                onSessionRequest(remotePeerId, param.peerMeta, param.chainId?.toInt(), peerId, handshakeId)
             }
             WCMethod.SESSION_UPDATE -> {
                 val param = gson.fromJson<List<WCSessionUpdate>>(request.params)
@@ -374,15 +381,14 @@ open class WCClient(
         listeners.add(listener)
     }
 
-    fun removeSocketListener(listener: WebSocketListener) {
-        listeners.remove(listener)
+    fun removeSocketListener() {
+        listeners.remove(this)
     }
 
     private fun resetState() {
         handshakeId = -1
         isConnected = false
         session = null
-        peerId = String.Empty
         remotePeerId = null
         peerMeta = null
     }

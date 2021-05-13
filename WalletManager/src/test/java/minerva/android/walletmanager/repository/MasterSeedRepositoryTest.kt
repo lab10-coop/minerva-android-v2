@@ -116,7 +116,7 @@ class MasterSeedRepositoryTest : RxTest() {
     fun `get correct new Value number`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         doNothing().whenever(walletConfigManager).initWalletConfig()
-        repository.getValueIterator() shouldBeEqualTo 0
+        repository.getAccountIterator() shouldBeEqualTo 0
     }
 
     @Test
@@ -158,13 +158,6 @@ class MasterSeedRepositoryTest : RxTest() {
     fun `are main nets enabled returns true`() {
         whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(true)
         val result = repository.areMainNetworksEnabled
-        assertEquals(true, result)
-    }
-
-    @Test
-    fun `toggle main nets enabled returns true`() {
-        whenever(walletConfigManager.toggleMainNetsEnabled).thenReturn(true)
-        val result = repository.toggleMainNetsEnabled
         assertEquals(true, result)
     }
 }

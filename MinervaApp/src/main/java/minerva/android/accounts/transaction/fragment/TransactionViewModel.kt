@@ -44,7 +44,7 @@ class TransactionViewModel(
     lateinit var transaction: Transaction
 
     var accountIndex = Int.InvalidIndex
-    var tokenIndex: Int = Int.InvalidIndex
+    var tokenAddress: String = String.Empty
     var account: Account = Account(Int.InvalidIndex)
 
     var transactionCost: BigDecimal = BigDecimal.ZERO
@@ -84,7 +84,7 @@ class TransactionViewModel(
         get() = network.token
 
     val spinnerPosition
-        get() = tokenIndex + ONE_ELEMENT
+        get() = account.getTokenIndex(tokenAddress) + ONE_ELEMENT
 
     val tokensList: List<Token>
         get() = mutableListOf<Token>().apply {
@@ -95,37 +95,36 @@ class TransactionViewModel(
         }
 
     private val isMainTransaction
-        get() = tokenIndex == Int.InvalidIndex && !account.isSafeAccount
+        get() = tokenAddress == String.Empty && !account.isSafeAccount
 
     private val isSafeAccountMainTransaction
-        get() = tokenIndex == Int.InvalidIndex && account.isSafeAccount
+        get() = tokenAddress == String.Empty && account.isSafeAccount
 
     val isTokenTransaction
-        get() = tokenIndex != Int.InvalidIndex && !account.isSafeAccount
+        get() = tokenAddress != String.Empty && !account.isSafeAccount
 
     val isSafeAccountTokenTransaction
-        get() = tokenIndex != Int.InvalidIndex && account.isSafeAccount
-
-    private val contractAddress: String
-        get() = when (tokenIndex) {
-            Int.InvalidIndex -> String.Empty
-            else -> account.accountTokens[tokenIndex].token.address
-        }
+        get() = tokenAddress != String.Empty && account.isSafeAccount
 
     private val tokenDecimals: Int
-        get() = when (tokenIndex) {
-            Int.InvalidIndex -> Int.InvalidValue
-            else -> account.accountTokens[tokenIndex].token.decimals.toInt()
+        get() = when (tokenAddress) {
+            String.Empty -> Int.InvalidValue
+            else -> account.getToken(tokenAddress).token.decimals.toInt()
         }
 
     val cryptoBalance: BigDecimal
-        get() = if (tokenIndex == Int.InvalidIndex) account.cryptoBalance else account.accountTokens[tokenIndex].balance
+        get() = if (tokenAddress == String.Empty) account.cryptoBalance else account.getToken(tokenAddress).balance
 
-    fun getAccount(accountIndex: Int, tokenIndex: Int) {
+    fun getAccount(accountIndex: Int, tokenAddress: String) {
         transactionRepository.getAccount(accountIndex)?.let {
             account = it
-            this.tokenIndex = tokenIndex
+            this.tokenAddress = tokenAddress
         }
+    }
+
+    fun updateTokenAddress(index: Int) {
+        tokenAddress = if (index == Int.InvalidIndex) String.Empty
+        else account.accountTokens[index].token.address
     }
 
     fun loadRecipients() {
@@ -156,6 +155,8 @@ class TransactionViewModel(
         }
     }
 
+    fun isAuthenticationEnabled(): Boolean = transactionRepository.isProtectTransactionEnabled()
+
     private fun getTxCostPayload(to: String, amount: BigDecimal): TxCostPayload =
         TxCostPayload(
             transferType,
@@ -164,7 +165,7 @@ class TransactionViewModel(
             amount,
             chainId = account.network.chainId,
             tokenDecimals = tokenDecimals,
-            contractAddress = contractAddress
+            contractAddress = tokenAddress
         )
 
     private val transferType: TransferType
@@ -210,7 +211,7 @@ class TransactionViewModel(
                             smartContractRepository.transferERC20Token(
                                 network.chainId,
                                 it,
-                                contractAddress
+                                tokenAddress
                             ).toSingleDefault(it)
                         }
                 }
@@ -316,7 +317,7 @@ class TransactionViewModel(
         gasLimit: BigInteger
     ) {
         launchDisposable {
-            resolveENS(receiverKey, amount, gasPrice, gasLimit, contractAddress)
+            resolveENS(receiverKey, amount, gasPrice, gasLimit, tokenAddress)
                 .flatMap { transactionRepository.transferERC20Token(account.network.chainId, it).toSingleDefault(it) }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }
                 .flatMapCompletable { saveWalletAction(SENT, it) }
@@ -345,7 +346,7 @@ class TransactionViewModel(
         transactionRepository.calculateTransactionCost(gasPrice, gasLimit).apply { transactionCost = this }
 
     fun prepareCurrency() =
-        if (tokenIndex != Int.InvalidIndex) account.accountTokens[tokenIndex].token.symbol else token
+        if (tokenAddress != String.Empty) account.getToken(tokenAddress).token.symbol else token
 
     private fun getAccountsWalletAction(transaction: Transaction, token: String, status: Int): WalletAction =
         WalletAction(

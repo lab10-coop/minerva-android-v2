@@ -1,14 +1,13 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
-import android.content.DialogInterface
 import androidx.core.content.ContextCompat
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import minerva.android.R
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.invisible
+import minerva.android.extension.setTextWithArgs
 import minerva.android.extension.visible
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 
@@ -21,8 +20,8 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     init {
         setContentView(binding.root)
         initButtons(binding.confirmationButtons)
+        binding.confirmationButtons.confirm.text = context.getString(R.string.Connect)
         binding.confirmationView.hideRequestedData()
-        expand()
     }
 
     fun setView(meta: WalletConnectPeerMeta, networkName: String) = with(binding) {
@@ -50,10 +49,21 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         showWaring()
     }
 
-    fun setWrongNetworkMessage(message: String) = with(binding) {
+    fun setWrongNetworkWarning(networkName: String) = with(binding) {
+        with(networkHeader.network) {
+            background = context.getDrawable(R.drawable.warning_background)
+            setTextColor(ContextCompat.getColor(context, R.color.warningOrange))
+        }
+        warringIcon.setImageResource(R.drawable.ic_warning)
+        warning.setTextWithArgs(R.string.wrong_network_warning_message, networkName)
+        warning.setTextColor(ContextCompat.getColor(context, R.color.warningMessageOrange))
+        showWaring()
+    }
+
+    fun setWrongNetworkMessage(networkName: String) = with(binding) {
         setNetworkHeader(R.drawable.wrong_network_background)
-        warning.text = message
-        binding.confirmationButtons.connect.isEnabled = false
+        warning.setTextWithArgs(R.string.wrong_network_message, networkName)
+        binding.confirmationButtons.confirm.isEnabled = false
         showWaring()
     }
 

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".settings.authentication.AuthenticationFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/protect_keys_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:padding="@dimen/margin_normal">
+
+        <TextView
+            android:id="@+id/protect_keys_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/protect_keys"
+            android:textColor="@color/settingNameColor"
+            android:textSize="@dimen/text_normal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/protect_keys_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_small"
+            android:clickable="false"
+            app:layout_constraintBottom_toBottomOf="@id/protect_keys_description"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/protect_keys_title" />
+
+        <TextView
+            android:id="@+id/protect_keys_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:text="@string/protect_keys_description"
+            android:textColor="@color/titleColor"
+            android:textSize="@dimen/text_small"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/protect_keys_switch"
+            app:layout_constraintTop_toBottomOf="@id/protect_keys_title" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/protect_transactions_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:padding="@dimen/margin_normal">
+
+        <TextView
+            android:id="@+id/protect_transactions_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/protect_transactions"
+            android:textColor="@color/settingNameColor"
+            android:textSize="@dimen/text_normal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/protect_transactions_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_small"
+            android:clickable="false"
+            app:layout_constraintBottom_toBottomOf="@id/protect_transactions_description"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/protect_transactions_title" />
+
+        <TextView
+            android:id="@+id/protect_transactions_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:text="@string/protect_transactions_description"
+            android:textColor="@color/titleColor"
+            android:textSize="@dimen/text_small"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/protect_transactions_switch"
+            app:layout_constraintTop_toBottomOf="@id/protect_transactions_title" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

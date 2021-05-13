@@ -11,7 +11,7 @@
         android:layout_width="@dimen/connection_icon_size"
         android:layout_height="@dimen/connection_icon_size"
         android:layout_marginStart="20dp"
-        android:src="@drawable/ic_services"
+        android:src="@drawable/ic_default_connection"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/checkboxIcon"

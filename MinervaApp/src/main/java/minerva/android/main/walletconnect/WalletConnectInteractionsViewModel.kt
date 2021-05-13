@@ -2,6 +2,7 @@ package minerva.android.main.walletconnect
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.prettymuchbryce.abidecoder.Decoder
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -29,6 +30,7 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectTransactio
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
+import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -39,7 +41,7 @@ class WalletConnectInteractionsViewModel(
 ) : BaseViewModel() {
 
     internal var currentDappSession: DappSession? = null
-    private var currentRate: BigDecimal = BigDecimal.ZERO
+    private var currentRate: BigDecimal = Double.InvalidValue.toBigDecimal()
     private lateinit var currentTransaction: WalletConnectTransaction
     internal lateinit var currentAccount: Account
     private var tokenDecimal: Int = 0
@@ -79,7 +81,12 @@ class WalletConnectInteractionsViewModel(
     private fun reconnect(dapps: List<DappSession>) {
         dapps.forEach { session ->
             with(session) {
-                walletConnectRepository.connect(WalletConnectSession(topic, version, bridge, key), peerId, remotePeerId)
+                walletConnectRepository.connect(
+                    WalletConnectSession(topic, version, bridge, key),
+                    peerId,
+                    remotePeerId,
+                    dapps
+                )
             }
         }
     }
@@ -92,33 +99,62 @@ class WalletConnectInteractionsViewModel(
                         currentDappSession = session
                         OnEthSignRequest(status.message, session)
                     }
-            is OnDisconnect -> Single.just(OnDisconnected)
-            is OnEthSendTransaction ->
+            is OnDisconnect -> Single.just(OnDisconnected())
+            is OnEthSendTransaction -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
-                    .flatMap { session ->
-                        getTransactionCosts(session, status)
-                    }
+                    .flatMap { session -> getTransactionCosts(session, status) }
+            }
+            is OnFailure -> Single.just(if (status.sessionName.isNotEmpty()) OnGeneralError(status.error) else DefaultRequest)
             else -> Single.just(DefaultRequest)
         }
+
+    private fun getValueInFiat(transferType: TransferType, status: OnEthSendTransaction): BigDecimal =
+        status.transaction.run {
+            if (currentRate == Double.InvalidValue.toBigDecimal()) return currentRate
+            if (isTokenTransaction(transferType)) tokenTransaction.tokenValue.toBigDecimal().multiply(currentRate)
+            else value?.toBigDecimal()?.multiply(currentRate) ?: Double.InvalidValue.toBigDecimal()
+        }
+
+    private fun getConstInFiat(cost: BigDecimal) =
+        if (currentRate == Double.InvalidValue.toBigDecimal()) Double.InvalidValue.toBigDecimal()
+        else cost.multiply(currentRate)
+
+    private fun getFiatRate(chainId: Int, transferType: TransferType, status: OnEthSendTransaction): Single<Double> =
+        if (isTokenTransaction(transferType)) transactionRepository.getTokenFiatRate(getTokenHash(chainId, status))
+        else transactionRepository.getCoinFiatRate(chainId)
+
+    private fun getTokenHash(chainId: Int, status: OnEthSendTransaction): String =
+        currentAccount.accountTokens
+            .find { it.token.symbol == status.transaction.tokenTransaction.tokenSymbol }?.token?.address.let { tokenAddress ->
+                generateTokenHash(chainId, tokenAddress ?: String.Empty)
+            }
+
+    private fun isTokenTransaction(transferType: TransferType) =
+        (transferType == TransferType.TOKEN_SWAP || transferType == TransferType.TOKEN_TRANSFER)
 
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
         transactionRepository.getAccountByAddress(session.address)?.let { currentAccount = it }
-        val value = getTransactionValue(status)
-        val transferType = getTransferType(status, value)
-        status.transaction.value = value.toPlainString()
-        val txCostPayload = getTxCostPayload(session.chainId, status, value, transferType)
+        val txValue: BigDecimal = getTransactionValue(status)
+        val transferType: TransferType = getTransferType(status, txValue)
+        status.transaction.value = txValue.toPlainString()
+        val txCostPayload = getTxCostPayload(session.chainId, status, txValue, transferType)
         return transactionRepository.getTransactionCosts(txCostPayload)
             .flatMap { transactionCost ->
-                transactionRepository.getEurRate(session.chainId)
-                    .onErrorResumeNext { Single.just(0.0) }
-                    .map {
-                        currentRate = it.toBigDecimal()
-                        val valueInFiat = status.transaction.value?.toBigDecimal()?.multiply(currentRate)!!
-                        val costInFiat = transactionCost.cost.multiply(currentRate)
+                getFiatRate(session.chainId, transferType, status)
+                    .onErrorResumeNext { Single.just(Double.InvalidValue) }
+                    .map { rate ->
+                        currentRate = rate.toBigDecimal()
+                        val valueInFiat = getValueInFiat(transferType, status)
+                        val costInFiat = getConstInFiat(transactionCost.cost)
                         currentTransaction = status.transaction.copy(
-                            fiatValue = BalanceUtils.getFiatBalance(valueInFiat),
-                            txCost = transactionCost.copy(fiatCost = BalanceUtils.getFiatBalance(costInFiat)),
+                            value = BalanceUtils.getCryptoBalance(txValue),
+                            fiatValue = valueInFiat.let { fiat ->
+                                BalanceUtils.getFiatBalance(fiat, transactionRepository.getFiatSymbol())
+                            },
+                            txCost = transactionCost.copy(
+                                fiatCost = BalanceUtils.getFiatBalance(costInFiat, transactionRepository.getFiatSymbol())
+                            ),
                             transactionType = transferType
                         )
                         OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
@@ -126,10 +162,18 @@ class WalletConnectInteractionsViewModel(
             }
     }
 
-    private fun getTransactionValue(status: OnEthSendTransaction) =
-        status.transaction.value?.let {
-            transactionRepository.toEther(hexToBigInteger(it, BigDecimal.ZERO))
-        }.orElse { BigDecimal.ZERO }
+    private fun getTransactionValue(status: OnEthSendTransaction): BigDecimal =
+        status.transaction.value?.let { value ->
+            val amount = hexToBigInteger(value, BigDecimal.ZERO)
+            { error -> logToFirebase("Error type: ${error}; Transaction: ${status.transaction}") }
+            transactionRepository.toEther(amount)
+        }.orElse {
+            BigDecimal.ZERO
+        }
+
+    private fun logToFirebase(message: String) {
+        FirebaseCrashlytics.getInstance().recordException(Throwable(message))
+    }
 
     private fun getTransferType(status: OnEthSendTransaction, value: BigDecimal): TransferType =
         when {
@@ -167,11 +211,11 @@ class WalletConnectInteractionsViewModel(
                 val senderTokenContract =
                     "$HEX_PREFIX${((decoded.params[2].value as Array<*>)[0] as ByteArray).toHexString()}"
                 findCurrentToken(senderTokenContract, tokenTransaction)
-
-                (decoded.params[0].value as? BigInteger)?.toBigDecimal()?.let {
-                    tokenTransaction.tokenValue = BalanceUtils.fromWei(it, tokenDecimal).toPlainString()
+                (decoded.params[0].value as? BigInteger)?.toBigDecimal()?.let { value ->
+                    BalanceUtils.convertFromWei(value, tokenDecimal).also {
+                        tokenTransaction.tokenValue = BalanceUtils.getCryptoBalance(it)
+                    }
                 }
-
                 status.transaction.tokenTransaction = tokenTransaction
                 TransferType.TOKEN_SWAP
             }
@@ -197,7 +241,7 @@ class WalletConnectInteractionsViewModel(
 
     private fun getTransactionTypeBasedOnAllowance(decoded: Decoder.DecodedMethod, status: OnEthSendTransaction) =
         if (isAllowanceUnlimited(decoded)) {
-            status.transaction.tokenTransaction.allowance = Int.InvalidValue.toBigDecimal()
+            status.transaction.tokenTransaction.allowance = Double.InvalidValue.toBigDecimal()
             TransferType.TOKEN_SWAP_APPROVAL
         } else {
             (decoded.params[1].value as? BigInteger)?.toBigDecimal()?.let {
@@ -238,39 +282,28 @@ class WalletConnectInteractionsViewModel(
     fun sendTransaction() {
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
-                .map {
+                .map { txReceipt ->
                     currentDappSession?.let { session ->
-                        walletConnectRepository.approveTransactionRequest(session.peerId, it)
+                        walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
                     }
-                    it
+                    txReceipt
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _walletConnectStatus.value = ProgressBarState(true) }
                 .doOnError {
-                    currentDappSession?.let {
-                        walletConnectRepository.rejectRequest(it.peerId)
+                    currentDappSession?.let { session ->
+                        walletConnectRepository.rejectRequest(session.peerId)
                     }
                     _walletConnectStatus.value = ProgressBarState(false)
                 }
                 .subscribeBy(
                     onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
-                    onError = {
-                        Timber.e(it)
-                        _walletConnectStatus.value = OnError(it)
+                    onError = { error ->
+                        Timber.e(error)
+                        _walletConnectStatus.value = OnGeneralError(error)
                     }
                 )
-        }
-    }
-
-    fun killSession() {
-        currentDappSession?.let {
-            launchDisposable {
-                walletConnectRepository.killSession(it.peerId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(onError = { Timber.e(it) })
-            }
         }
     }
 
@@ -290,7 +323,7 @@ class WalletConnectInteractionsViewModel(
 
     fun recalculateTxCost(gasPrice: BigDecimal, transaction: WalletConnectTransaction): WalletConnectTransaction {
         val txCost = transactionRepository.calculateTransactionCost(gasPrice, transaction.txCost.gasLimit)
-        val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(currentRate))
+        val fiatTxCost = BalanceUtils.getFiatBalance(txCost.multiply(currentRate), transactionRepository.getFiatSymbol())
         currentTransaction = transaction.copy(txCost = transaction.txCost.copy(cost = txCost, fiatCost = fiatTxCost))
         return currentTransaction
     }
@@ -313,7 +346,7 @@ class WalletConnectInteractionsViewModel(
         balance < cost || balance == BigDecimal.ZERO
 
     companion object {
-        private const val UNLIMITED = "-1"
+        private const val UNLIMITED = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
         private const val TOKEN_SWAP_PARAMS = 2
     }
 }

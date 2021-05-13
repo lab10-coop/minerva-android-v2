@@ -1,20 +1,20 @@
 package minerva.android.walletmanager.utils
 
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.WalletConfigTestValues.accountsResponse
-import minerva.android.walletmanager.model.WalletConfigTestValues.identityResponse
-import minerva.android.walletmanager.model.WalletConfigTestValues.onlineIdentityResponse
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.CredentialType
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityResponse
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.onlineIdentityResponse
 import minerva.android.walletmanager.model.wallet.WalletConfig
 
 object DataProvider {
@@ -35,15 +35,15 @@ object DataProvider {
         Network(
             chainId = ATS_TAU, httpRpc = "address", testNet = true,
             tokens = listOf(
-                ERC20Token(1, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
-                ERC20Token(1, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
+                ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
+                ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
             )
         ),
         Network(
             chainId = ETH_RIN, httpRpc = "address", testNet = true,
             tokens = listOf(
-                ERC20Token(2, "CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
-                ERC20Token(2, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
+                ERC20Token(ETH_RIN, "CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
+                ERC20Token(ETH_RIN, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
             )
         ),
         Network(chainId = ATS_SIGMA, httpRpc = "address", testNet = true),

@@ -5,10 +5,10 @@ import java.util.concurrent.TimeUnit
 
 object OkHttpProvider {
     val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
-        .writeTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(TIMEOUT, TimeUnit.MINUTES)
+        .readTimeout(TIMEOUT, TimeUnit.MINUTES)
+        .writeTimeout(TIMEOUT, TimeUnit.MINUTES)
         .retryOnConnectionFailure(false)
         .build()
-
 }
+private const val TIMEOUT: Long = 15L

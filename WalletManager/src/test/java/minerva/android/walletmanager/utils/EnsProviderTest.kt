@@ -12,14 +12,14 @@ class EnsProviderTest {
 
     @Test
     fun `provider main net url when main networks enabled`() {
-        whenever(localStorage.areMainNetsEnabled).thenReturn(true)
+        whenever(localStorage.areMainNetworksEnabled).thenReturn(true)
         val result = provider.ensUrl
         result.contains("mainnet")
     }
 
     @Test
     fun `provider test net url when main networks disabled`() {
-        whenever(localStorage.areMainNetsEnabled).thenReturn(false)
+        whenever(localStorage.areMainNetworksEnabled).thenReturn(false)
         val result = provider.ensUrl
         result.contains("infura")
     }

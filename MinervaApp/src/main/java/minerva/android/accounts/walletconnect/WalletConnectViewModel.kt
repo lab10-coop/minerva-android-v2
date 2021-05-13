@@ -35,6 +35,7 @@ class WalletConnectViewModel(
     internal lateinit var account: Account
     var requestedNetwork: String = String.Empty
     internal lateinit var topic: Topic
+    private var handshakeId: Long = 0L
     internal lateinit var currentSession: WalletConnectSession
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectState>()
@@ -50,14 +51,15 @@ class WalletConnectViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { _viewStateLiveData.value = ProgressBarState(false) }
                 .subscribeBy(
-                    onNext = {
-                        _viewStateLiveData.value = when (it) {
+                    onNext = { status ->
+                        _viewStateLiveData.value = when (status) {
                             is OnSessionRequest -> {
-                                topic = it.topic
-                                handleSessionRequest(it)
+                                topic = status.topic
+                                handshakeId = status.handshakeId
+                                handleSessionRequest(status)
                             }
-                            is OnDisconnect -> OnDisconnected
-                            is OnFailure -> OnError(it.error)
+                            is OnDisconnect -> OnDisconnected(status.sessionName)
+                            is OnFailure -> OnWalletConnectConnectionError(status.error, status.sessionName)
                             else -> DefaultRequest
                         }
                     },
@@ -82,12 +84,19 @@ class WalletConnectViewModel(
                             }
 
                         },
-                        onError = { _viewStateLiveData.value = OnError(it) }
+                        onError = {
+                            _viewStateLiveData.value = OnGeneralError(it)
+                        }
                     )
             }
         } else {
-            _viewStateLiveData.value = OnError(InvalidAccountThrowable())
+            _viewStateLiveData.value = OnGeneralError(InvalidAccountThrowable())
         }
+    }
+
+    fun removeDeadSession() {
+        repository.removeDeadSessions()
+        _viewStateLiveData.value = ProgressBarState(false)
     }
 
     fun closeScanner() {
@@ -125,7 +134,9 @@ class WalletConnectViewModel(
             repository.approveSession(listOf(account.address), chainId, topic.peerId, getDapp(meta, chainId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onError = { OnError(it) })
+                .subscribeBy(
+                    onComplete = { closeScanner() },
+                    onError = { OnGeneralError(it) })
         }
     }
 
@@ -141,25 +152,37 @@ class WalletConnectViewModel(
         topic.remotePeerId,
         requestedNetwork,
         account.name,
-        chainId
+        chainId,
+        handshakeId
     )
 
     private fun getIcon(icons: List<String>) =
         if (icons.isEmpty()) String.Empty
         else icons[FIRST_ICON]
 
-    val shouldChangeNetwork: Boolean
-        get() = account.network.name != requestedNetwork
-
     private fun handleSessionRequest(it: OnSessionRequest): WalletConnectState =
         it.chainId?.let { id ->
             requestedNetwork = getNetworkName(id)
-            OnSessionRequestWithDefinedNetwork(it.meta, requestedNetwork)
+            OnSessionRequest(it.meta, requestedNetwork, getAlertType(it.meta.url))
         }.orElse {
             requestedNetwork = account.network.name
-            OnSessionRequestWithUndefinedNetwork(it.meta, requestedNetwork)
+            OnSessionRequest(it.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
         }
+
+    private fun getAlertType(url: String) = when {
+        account.network.name == requestedNetwork -> WalletConnectAlertType.NO_ALERT
+        requestedNetwork == ETHEREUM_NETWORK && isUrlContainAccountNetwork(url) -> WalletConnectAlertType.NO_ALERT
+        requestedNetwork == ETHEREUM_NETWORK && !isUrlContainAccountNetwork(url) -> WalletConnectAlertType.WARNING
+        account.network.name != requestedNetwork -> WalletConnectAlertType.ERROR
+        else -> WalletConnectAlertType.NO_ALERT
+    }
+
+    private fun isUrlContainAccountNetwork(url: String): Boolean = url.contains(account.network.token, true)
 
     private fun getNetworkName(chainId: Int) =
         NetworkManager.networks.find { it.chainId == chainId }?.name.orElse { String.Empty }
+
+    companion object {
+        private val ETHEREUM_NETWORK = "Ethereum"
+    }
 }

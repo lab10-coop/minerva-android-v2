@@ -127,9 +127,7 @@ class BlockchainSafeAccountRepositoryImpl(
 
     private fun getPreviousOwner(owner: String, owners: List<String>): String {
         owners.forEachIndexed { index, address ->
-            if (address == owner.toLowerCase(Locale.getDefault())) {
-                return if (index > 0) address else safeSentinelAddress
-            }
+            if (address.equals(owner, true)) return if (index > 0) address else safeSentinelAddress
         }
         throw IllegalArgumentException("Remove Address is not a owner address!")
     }
