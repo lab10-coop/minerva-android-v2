@@ -12,7 +12,7 @@ before_script:
 
 stages:
 #  - validation
-#  - distribution
+  - distribution
   - deploy
 
 validateBranch:
@@ -68,7 +68,7 @@ distributeProductionBuild:
 
 #Delete when releasing to production
 deployProductionBuild:
-  stage: deploy
+  stage: distribution
   only:
     refs:
       - production
