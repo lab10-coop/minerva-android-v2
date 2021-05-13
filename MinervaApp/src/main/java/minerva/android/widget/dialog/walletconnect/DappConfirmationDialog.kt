@@ -20,6 +20,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     init {
         setContentView(binding.root)
         initButtons(binding.confirmationButtons)
+        binding.confirmationButtons.confirm.text = context.getString(R.string.Connect)
         binding.confirmationView.hideRequestedData()
     }
 
@@ -62,7 +63,7 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
     fun setWrongNetworkMessage(networkName: String) = with(binding) {
         setNetworkHeader(R.drawable.wrong_network_background)
         warning.setTextWithArgs(R.string.wrong_network_message, networkName)
-        binding.confirmationButtons.connect.isEnabled = false
+        binding.confirmationButtons.confirm.isEnabled = false
         showWaring()
     }
 
