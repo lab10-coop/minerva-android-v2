@@ -11,7 +11,7 @@ before_script:
   - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
 
 stages:
-#  - validation
+  - validation
   - distribution
   - deploy
 
@@ -20,6 +20,7 @@ validateBranch:
   except:
     refs:
       - master
+      - production
   script:
     - ./gradlew test
 
@@ -28,6 +29,7 @@ validateLint:
   except:
     refs:
       - master
+      - production
   script:
     - ./gradlew lint
 
@@ -68,7 +70,7 @@ distributeProductionBuild:
 
 #Delete when releasing to production
 deployProductionBuild:
-  stage: distribution
+  stage: deploy
   only:
     refs:
       - production
