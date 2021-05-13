@@ -61,7 +61,9 @@ class WalletConnectInteractionsViewModel(
             walletConnectRepository.getSessions()
                 .map { reconnect(it) }
                 .toFlowable()
-                .switchMap { walletConnectRepository.getSessionsFlowable() }
+                .switchMap {
+                    walletConnectRepository.getSessionsFlowable()
+                }
                 .filter { it.isNotEmpty() }
                 .take(1)
                 .switchMap { walletConnectRepository.connectionStatusFlowable }

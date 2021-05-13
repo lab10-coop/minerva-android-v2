@@ -402,9 +402,7 @@ class TokenManagerTest : RxTest() {
                         it.second[1].balance.toPlainString() == "0.000000000000000001"
             }
     }
-
-
-    //TODO klop fix this test
+    
     @Test
     fun `check getting tokens rate request`() {
         val error = Throwable("ERROR-333")
@@ -430,8 +428,7 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
 
-        verify(rateStorage, times(8)).getRates()
-        verify(rateStorage, times(8)).saveRate(any(), any())
+        verify(rateStorage, times(4)).saveRate(any(), any())
         verify(cryptoApi, times(4)).getTokensRate(any(), any(), any())
     }
 

@@ -9,7 +9,6 @@ import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
 import minerva.android.blockchainprovider.utils.CryptoUtils.encodePublicKey
 import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
 import minerva.android.configProvider.model.walletConfig.AccountPayload
