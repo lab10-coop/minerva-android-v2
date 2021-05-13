@@ -76,7 +76,6 @@ deployProductionBuild:
   script:
     - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
-    - ./etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
     - echo $PLAY_JSON > ./json_file.json
     - fastlane productionBetaRelease json_path:./json_file.json
