@@ -368,7 +368,18 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
-        <item>3.0.3</item>
-        <item>* Release Notes.</item>
+        <item>1.2.0</item>
+        <item>* Secure your keys and transactions</item>
+        <item>* Buy crypto with your fiat currency via Ramp</item>
+        <item>* See all token values in your preferred fiat currency</item>
+        <item>* Improved WalletConnect session management</item>
+        <item>* Refined user interface with lots of improvements</item>
+        <item>1.0.1</item>
+        <item>* Enable WalletConnect for DApps</item>
+        <item>* Automated token discovery (e.g. LP tokens)</item>
+        <item>* Allow exporting private key per account</item>
+        <item>* Dynamically calculate the gas price and gas limit</item>
+        <item>* Provide basic information in activities logs</item>
+        <item>* Manage decentralized identities and credentials</item>
     </string-array>
 </resources>
