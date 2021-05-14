@@ -315,6 +315,8 @@
     <string name="version_history">Version history</string>
     <string name="info_dapp_awaiting">Awaiting connection feedback from the DApp</string>
     <string name="authentication">Authentication</string>
+    <string name="authentication_alert_title">You should enable an authentication method for your Minerva Wallet.</string>
+    <string name="authentication_alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
