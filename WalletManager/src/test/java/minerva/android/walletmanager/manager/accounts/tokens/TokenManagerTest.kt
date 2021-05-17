@@ -152,6 +152,33 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
+    fun `Test updating tokens list with tokens map`() {
+        mapOf(
+            Pair(
+                ATS_TAU, listOf(
+                    ERC20Token(ATS_TAU, "SomeToken01", "some01", "0xt0k3n01", "32"),
+                    ERC20Token(ATS_TAU, "SomeToken02", "some02", "0xt0k3n02", "16")
+                )
+            ),
+            Pair(
+                ETH_RIN, listOf(
+                    ERC20Token(ETH_RIN, "SomeToken03", "some03", "0xt0k3n03", "32"),
+                    ERC20Token(ETH_RIN, "SomeToken04", "some04", "0xC00k1e", "16")
+                )
+            )
+        ).run {
+            val updatedTokens = tokenManager.updateTokens(this, DataProvider.walletConfig.erc20Tokens.toMutableMap())
+            updatedTokens[ATS_TAU]?.size shouldBeEqualTo 4
+            updatedTokens[ATS_TAU]?.get(2)?.name shouldBeEqualTo "SomeToken01"
+            updatedTokens[ATS_TAU]?.get(0)?.name shouldBeEqualTo "CookieTokenATS"
+            updatedTokens[ETH_RIN]?.size shouldBeEqualTo 3
+            updatedTokens[ETH_RIN]?.get(2)?.name shouldBeEqualTo "SomeToken04"
+            updatedTokens[ETH_RIN]?.get(0)?.name shouldBeEqualTo "OtherTokenETH"
+            updatedTokens[ETH_RIN]?.get(1)?.name shouldBeEqualTo "SomeToken03"
+        }
+    }
+
+    @Test
     fun `Check sorting ERC20Token list into map`() {
         val tokens = listOf(
             ERC20Token(1, "chainOne", address = "0x0N3"),
@@ -402,7 +429,7 @@ class TokenManagerTest : RxTest() {
                         it.second[1].balance.toPlainString() == "0.000000000000000001"
             }
     }
-    
+
     @Test
     fun `check getting tokens rate request`() {
         val error = Throwable("ERROR-333")

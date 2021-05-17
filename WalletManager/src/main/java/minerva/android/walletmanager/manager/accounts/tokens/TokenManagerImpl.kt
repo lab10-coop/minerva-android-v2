@@ -44,6 +44,7 @@ import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import java.math.BigDecimal
+import java.util.*
 
 class TokenManagerImpl(
     private val walletManager: WalletConfigManager,
@@ -236,18 +237,18 @@ class TokenManagerImpl(
         }
 
     private fun prepareContractAddresses(tokens: List<ERC20Token>): String =
-        tokens.joinToString(TOKEN_ADDRESS_SEPARATOR) { it.address }
+        tokens.joinToString(TOKEN_ADDRESS_SEPARATOR) { token -> token.address }
 
     private fun updateAccountTokensRate(chainId: Int, contractAddresses: String): Observable<List<Pair<String, Double>>> =
         with(localStorage.loadCurrentFiat()) {
             cryptoApi.getTokensRate(MarketUtils.getMarketId(chainId), contractAddresses, this)
-                .map {
+                .map { tokenRateResponse ->
                     mutableListOf<Pair<String, Double>>().apply {
-                        it.forEach {
+                        tokenRateResponse.forEach { (contractAddress, rate) ->
                             add(
                                 Pair(
-                                    generateTokenHash(chainId, it.key),
-                                    it.value[toLowerCase()]?.toDouble() ?: Double.InvalidValue
+                                    generateTokenHash(chainId, contractAddress),
+                                    rate[toLowerCase(Locale.ROOT)]?.toDouble() ?: Double.InvalidValue
                                 )
                             )
                         }
@@ -259,14 +260,14 @@ class TokenManagerImpl(
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
             with(localStorage.loadCurrentFiat()) {
                 if (currentFiat != this) rateStorage.clearRates()
-                tokens.forEach {
+                tokens.forEach { (chainId, tokens) ->
                     if (!rateStorage.areRatesSynced)
-                        observables.add(updateAccountTokensRate(it.key, prepareContractAddresses(it.value)))
+                        observables.add(updateAccountTokensRate(chainId, prepareContractAddresses(tokens)))
                 }
                 Observable.merge(observables)
-                    .doOnNext {
-                        it.forEach {
-                            rateStorage.saveRate(it.first, it.second)
+                    .doOnNext { rates ->
+                        rates.forEach { (fiatSymbol, rate) ->
+                            rateStorage.saveRate(fiatSymbol, rate)
                         }
                     }.toList()
                     .doOnSuccess {
@@ -279,8 +280,10 @@ class TokenManagerImpl(
 
     override fun updateTokensRate(account: Account) {
         account.apply {
-            accountTokens.forEach {
-                it.tokenPrice = rateStorage.getRate(generateTokenHash(it.token.chainId, it.token.address))
+            accountTokens.forEach { accountToken ->
+                with(accountToken) {
+                    tokenPrice = rateStorage.getRate(generateTokenHash(token.chainId, token.address))
+                }
             }
         }
     }
@@ -350,10 +353,11 @@ class TokenManagerImpl(
      * return statement: Map<ChainId, List<ERC20Token>>
      */
 
-    private fun updateTokens(map: Map<Int, List<ERC20Token>>, tokens: MutableMap<Int, List<ERC20Token>>) =
+    @VisibleForTesting
+    fun updateTokens(map: Map<Int, List<ERC20Token>>, tokens: MutableMap<Int, List<ERC20Token>>) =
         tokens.apply {
-            map.values.forEach {
-                it.forEach { accountToken ->
+            map.values.forEach { newTokens ->
+                newTokens.forEach { accountToken ->
                     (this[accountToken.chainId] ?: listOf()).toMutableList().let { currentTokens ->
                         currentTokens.removeAll { it.address == accountToken.address }
                         currentTokens.add(accountToken)
