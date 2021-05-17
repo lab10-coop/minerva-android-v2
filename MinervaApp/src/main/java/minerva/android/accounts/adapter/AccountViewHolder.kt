@@ -3,6 +3,7 @@ package minerva.android.accounts.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -129,6 +130,9 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     private fun View.prepareToken(account: Account, fiatSymbol: String) {
         binding.apply {
+
+            Log.e("klop", "Widget state for ${account.name} should be open ${accountWidgetState.isWidgetOpen}")
+
             tokensAndCollectibles.prepareView(
                 account,
                 viewGroup,
