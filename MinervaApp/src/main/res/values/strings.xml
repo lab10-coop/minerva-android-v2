@@ -317,6 +317,7 @@
     <string name="authentication">Authentication</string>
     <string name="authentication_alert_title">You should enable an authentication method for your Minerva Wallet.</string>
     <string name="authentication_alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
+    <string name="message_sync_error">If this message is shown despite a good internet connection, contact our support on Telegram or Discord.</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

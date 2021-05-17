@@ -8,4 +8,5 @@ import minerva.android.walletmanager.model.wallet.WalletActionClustered
 interface WalletActionsRepository {
     fun getWalletActions(): Observable<List<WalletActionClustered>>
     fun saveWalletActions(walletActions: List<WalletAction>): Completable
+    val isSynced: Boolean
 }
