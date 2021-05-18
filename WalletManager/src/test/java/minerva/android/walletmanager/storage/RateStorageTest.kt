@@ -4,11 +4,11 @@ import minerva.android.kotlinUtils.InvalidValue
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
-class TempStorageTest {
+class RateStorageTest {
 
     @Test
     fun `checking temp storage`() {
-        val tempStorage = TempStorageImpl()
+        val tempStorage = RateStorageImpl()
         tempStorage.getRate("missing_hash") shouldBeEqualTo Double.InvalidValue
         tempStorage.getRates().size shouldBeEqualTo 0
         tempStorage.saveRate("hash", 3.3)

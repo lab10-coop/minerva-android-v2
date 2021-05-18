@@ -2,13 +2,11 @@ package minerva.android.walletmanager.storage
 
 import minerva.android.kotlinUtils.InvalidValue
 
-class TempStorageImpl : TempStorage {
+class RateStorageImpl : RateStorage {
 
     private val rateMap = mutableMapOf<String, Double>()
 
-    override fun clearRates() {
-        rateMap.clear()
-    }
+    override var areRatesSynced = false
 
     override fun getRates(): Map<String, Double> = rateMap
 
@@ -18,4 +16,7 @@ class TempStorageImpl : TempStorage {
         rateMap[tokenHash] = rate
     }
 
+    override fun clearRates() {
+        rateMap.clear()
+    }
 }
