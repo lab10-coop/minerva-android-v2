@@ -12,7 +12,7 @@
     <item
         android:id="@+id/values"
         android:enabled="true"
-        android:icon="@drawable/ic_values"
+        android:icon="@drawable/ic_bottom_bar_values"
         android:title="@string/accounts_navigation_menu_header"
         app:showAsAction="ifRoom" />
 
