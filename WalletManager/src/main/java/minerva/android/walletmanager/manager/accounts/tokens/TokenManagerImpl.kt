@@ -29,6 +29,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
@@ -234,6 +236,7 @@ class TokenManagerImpl(
     override fun downloadTokensList(account: Account): Single<List<ERC20Token>> =
         when (account.chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokens(account)
+            MATIC, MUMBAI -> Single.just(emptyList()) // Networks without token explorer urls
             else -> getNotEthereumTokens(account)
         }
 

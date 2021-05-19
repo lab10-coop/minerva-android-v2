@@ -141,5 +141,72 @@
     "color": "#5c34a2",
     "testNet": false,
     "chainId": 99
+  },
+  {
+    "name": "Matic PoS Chain",
+    "token": "MATIC",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://matic-rpc.lab10.io",
+    "wsRpc": "",
+    "gasPriceOracle": "https://gasstation-mainnet.matic.network",
+    "gasPrice": "10000000000",
+    "tokens": [
+      {
+        "chainId": 137,
+        "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+        "name": "(POS) Tether USD",
+        "symbol": "USDT",
+        "decimals": 6,
+        "logoURI": "https://assets.coingecko.com/coins/images/325/small/Tether-logo.png?1598003707"
+      },
+      {
+        "name": "USD Coin (POS)",
+        "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 137,
+        "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
+      },
+      {
+        "chainId": 137,
+        "address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+        "name": "(POS) Dai Stablecoin",
+        "symbol": "DAI",
+        "decimals": 18,
+        "logoURI": "https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png?1574218774"
+      },
+      {
+        "name": "(POS) Wrapped BTC",
+        "address": "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+        "symbol": "WBTC",
+        "decimals": 8,
+        "chainId": 137,
+        "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png"
+      },
+      {
+        "chainId": 137,
+        "address": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+        "name": "Wrapped Ether",
+        "symbol": "WETH",
+        "decimals": 18,
+        "logoURI": "https://assets.coingecko.com/coins/images/2518/small/weth.png?1547036627"
+      }
+    ],
+    "color": "#8247e5",
+    "testNet": false,
+    "chainId": 137
+  },
+  {
+    "name": "Mumbai",
+    "token": "tMATIC",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://matic-mumbai.chainstacklabs.com",
+    "wsRpc": "",
+    "gasPriceOracle": "https://gasstation-mumbai.matic.today",
+    "gasPrice": "10000000000",
+    "tokens": [],
+    "color": "#8247e5",
+    "testNet": true,
+    "chainId": 80001
   }
 ]
