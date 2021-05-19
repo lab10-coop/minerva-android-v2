@@ -43,6 +43,21 @@ class BalanceUtilsTest {
 
         val result11 = BalanceUtils.getCryptoBalance(0.0034000999.toBigDecimal())
         assertEquals("0.0034000999", result11)
+
+        val result12 = BalanceUtils.getCryptoBalance(BigDecimal("0.00000001"))
+        assertEquals(result12, "0.00000001")
+
+        val result13 = BalanceUtils.getCryptoBalance(BigDecimal("0.0001"))
+        assertEquals(result13, "0.0001")
+
+        val result14 = BalanceUtils.getCryptoBalance(BigDecimal("0.01"))
+        assertEquals(result14, "0.01")
+
+        val result15 = BalanceUtils.getCryptoBalance(BigDecimal("1"))
+        assertEquals(result15, "1")
+
+        val result16 = BalanceUtils.getCryptoBalance(BigDecimal("270"))
+        assertEquals(result16, "270")
     }
 
     @Test

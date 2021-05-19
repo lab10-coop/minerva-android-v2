@@ -19,10 +19,7 @@ import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxSpeed
 import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnEthSendTransaction
-import minerva.android.walletmanager.repository.walletconnect.OnEthSign
-import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
@@ -54,7 +51,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
@@ -128,7 +126,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `reconnect to saved sessions and handle on eth send transaction test`() {
-        val tx = WalletConnectTransaction("from", "to", value = "100000000", data = "0x0")
+        val tx = WalletConnectTransaction("from", "to", value = "0x100000000", data = "0x0")
         val account =
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
@@ -142,7 +140,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -197,7 +196,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -250,7 +250,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -302,7 +303,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -354,7 +356,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -401,7 +404,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -443,7 +447,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -475,7 +480,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         val transition = WalletConnectTransaction(
             "from",
             "to",
-            value = "22",
+            value = "0x1234",
             data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         )
         val account =
@@ -490,7 +495,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
-        whenever(transactionRepository.toEther(any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -640,5 +646,56 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
         viewModel.rejectRequest()
         verify(walletConnectRepository).rejectRequest(any())
+    }
+
+    @Test
+    fun `coin swap transaction test when transaction value is invalid`() {
+        val transition = WalletConnectTransaction(
+            "from",
+            "to",
+            value = "111",
+            data = "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        )
+        val account =
+            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+        NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
+        whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
+            Flowable.just(OnEthSendTransaction(transition, "peerId"))
+        )
+        whenever(walletConnectRepository.getDappSessionById(any())).thenReturn(Single.just(DappSession(address = "address1")))
+        whenever(walletConnectRepository.getSessions()).thenReturn(
+            Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
+        )
+        doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
+        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.toUserReadableFormat
+            (any())).thenReturn(BigDecimal.TEN)
+        whenever(transactionRepository.getTransactionCosts(any()))
+            .thenReturn(
+                Single.just(
+                    TransactionCost(
+                        BigDecimal.TEN, BigInteger.TEN, BigDecimal.TEN, "12",
+                        listOf(TxSpeed(TxType.FAST, BigDecimal(1)))
+                    )
+                )
+            )
+        whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
+        whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
+        whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
+
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel.currentAccount = account
+        viewModel.currentDappSession = DappSession(address = "address1")
+        viewModel.walletConnectStatus.observeForever(requestObserver)
+        requestCaptor.run {
+            verify(requestObserver).onChanged(capture())
+            firstValue is WrongTransactionValueState
+            (firstValue as WrongTransactionValueState).apply {
+                this.transaction.transactionType shouldBeEqualTo TransferType.UNKNOWN
+                this.transaction.data shouldBeEqualTo "0x095ea7b30000000000000000000000001c232f01118cb8b424793ae03f870aa7d0ac7f77ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                this.transaction.value shouldBeEqualTo "111"
+                this.transaction.from shouldBeEqualTo "from"
+            }
+        }
     }
 }

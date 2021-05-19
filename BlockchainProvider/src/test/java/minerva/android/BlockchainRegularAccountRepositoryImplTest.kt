@@ -356,5 +356,8 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     fun `to ether conversion test`() {
         val result = repository.toEther(BigDecimal.valueOf(1000000000000000000))
         assertEquals(result, BigDecimal.ONE)
+
+        val result2 = repository.toEther(BigDecimal("1"))
+        assertEquals(result2, BigDecimal("1E-18"))
     }
 }

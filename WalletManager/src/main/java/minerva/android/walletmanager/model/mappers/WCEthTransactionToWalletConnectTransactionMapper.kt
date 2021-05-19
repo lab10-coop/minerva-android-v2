@@ -7,14 +7,14 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectTransactio
 object WCEthTransactionToWalletConnectTransactionMapper : Mapper<WCEthereumTransaction, WalletConnectTransaction> {
     override fun map(input: WCEthereumTransaction): WalletConnectTransaction = with(input) {
         WalletConnectTransaction(
-            from,
-            to,
-            nonce,
-            gasPrice,
-            gasLimit,
-            value,
-            null,
-            data
+            from = from,
+            to = to,
+            nonce = nonce,
+            gasPrice = gasPrice,
+            gasLimit = gasLimit,
+            value = value,
+            fiatValue = null,
+            data = data
         )
     }
 }

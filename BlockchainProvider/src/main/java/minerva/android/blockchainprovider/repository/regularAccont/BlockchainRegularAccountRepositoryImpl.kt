@@ -154,11 +154,11 @@ class BlockchainRegularAccountRepositoryImpl(
         web3j.value(chainId)
             .ethGetTransactionCount(transactionPayload.senderAddress, DefaultBlockParameterName.LATEST)
             .flowable()
-            .flatMap {
+            .flatMap { count ->
                 web3j.value(chainId)
                     .ethSendRawTransaction(
                         getSignedTransaction(
-                            it.transactionCount,
+                            count.transactionCount,
                             transactionPayload,
                             chainId.toLong()
                         )
@@ -187,7 +187,7 @@ class BlockchainRegularAccountRepositoryImpl(
             toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger(),
             payload.gasLimit,
             payload.receiverAddress,
-            toWei(payload.amount, Convert.Unit.ETHER).toBigInteger(),
+            payload.amount.toBigInteger(),
             payload.data
         )
 
@@ -230,7 +230,7 @@ class BlockchainRegularAccountRepositoryImpl(
                     BigInteger.ZERO,
                     costData.contractAddress,//token smart contract address
                     BigInteger.ZERO, //value of native coin
-                    FunctionEncoder.encode(
+                    FunctionEncoder.encode( //data hex field, for token transactions
                         getTokenFunctionCall(
                             address,
                             CryptoUtils.convertTokenAmount(costData.amount, costData.tokenDecimals)

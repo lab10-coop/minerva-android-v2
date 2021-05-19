@@ -19,20 +19,7 @@ data class ERC20Token(
 ) : Token {
 
     override fun equals(other: Any?): Boolean =
-        (other as? ERC20Token)?.let {
-            address.equals(it.address, true)
-        }.orElse { false }
-
-//    override fun hashCode(): Int {
-//        var result = chainId
-//        result = 31 * result + name.hashCode()
-//        result = 31 * result + symbol.hashCode()
-//        result = 31 * result + address.hashCode()
-//        result = 31 * result + decimals.hashCode()
-//        result = 31 * result + (logoURI?.hashCode() ?: 0)
-//        result = 31 * result + tag.hashCode()
-//        return result
-//    }
+        (other as? ERC20Token)?.let { token -> address.equals(token.address, true) }.orElse { false }
 
     constructor(chainId: Int, tokenTx: TokenTx) : this(
         chainId,

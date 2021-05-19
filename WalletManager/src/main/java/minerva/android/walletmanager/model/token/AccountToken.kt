@@ -12,9 +12,9 @@ data class AccountToken(
     var tokenPrice: Double? = Double.InvalidValue
 ) {
     override fun equals(other: Any?): Boolean =
-        (other as? AccountToken)?.let {
-            token.address.equals(it.token.address, true)
-        }.orElse { false }
+        (other as? AccountToken)
+            ?.let { accountToken -> token.address.equals(accountToken.token.address, true) }
+            .orElse { false }
 
     val balance: BigDecimal
         get() = if (rawBalance == BigDecimal.ZERO) BigDecimal.ZERO
@@ -22,10 +22,14 @@ data class AccountToken(
 
     val fiatBalance: BigDecimal
         get() =
-            tokenPrice?.let {
-                when (it) {
+            tokenPrice?.let { price ->
+                when (price) {
                     Double.InvalidValue -> Double.InvalidValue.toBigDecimal()
-                    else -> BigDecimal(it).multiply(balance).setScale(13, RoundingMode.HALF_UP)
+                    else -> BigDecimal(price).multiply(balance).setScale(FIAT_SCALE, RoundingMode.HALF_UP)
                 }
             }.orElse { Double.InvalidValue.toBigDecimal() }
+
+    companion object {
+        private const val FIAT_SCALE = 13
+    }
 }
