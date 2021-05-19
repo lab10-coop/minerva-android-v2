@@ -10,9 +10,13 @@ interface CryptoApi {
 
     @GET("simple/price")
     fun getMarkets(@Query(IDS) coinIds: String, @Query(VS_CURRENCIES) currency: String): Single<Markets>
-
-    @GET("coins/{$ID}/contract/{$CONTRACT_ADDRESS}")
-    fun getTokenMarkets(@Path(ID) id: String, @Path(CONTRACT_ADDRESS) contractAddress: String): Single<TokenMarketResponse>
+    
+    @GET("simple/token_price/{$ID}")
+    fun getTokensRate(
+        @Path(ID) chainId: String,
+        @Query(CONTRACT_ADDRESSES) contractAddress: String,
+        @Query(VS_CURRENCIES) currency: String
+    ): Single<Map<String, Map<String, String>>>
 
     @GET
     fun getGasPrice(
@@ -36,6 +40,6 @@ interface CryptoApi {
         private const val ID = "id"
         private const val IDS = "ids"
         private const val VS_CURRENCIES = "vs_currencies"
-        private const val CONTRACT_ADDRESS = "contract_address"
+        private const val CONTRACT_ADDRESSES = "contract_addresses"
     }
 }

@@ -87,4 +87,7 @@ class WalletActionsRepositoryImpl(
         )
             .doOnTerminate { localWalletActionsConfigProvider.saveWalletActionsConfig(walletActionsConfig) }
             .onErrorComplete()
+
+    override val isSynced: Boolean
+        get() = walletConfigManager.isSynced
 }

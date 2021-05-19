@@ -12,10 +12,13 @@ import kotlin.math.pow
 object BalanceUtils {
 
     fun getCryptoBalance(cryptoBalance: BigDecimal): String =
-        if (cryptoBalance == Double.InvalidValue.toBigDecimal()) String.EmptyBalance
-        else {
-            val scaled = cryptoBalance.setScale(CRYPTO_SCALE, RoundingMode.CEILING)
-            DecimalFormat(CRYPTO_FORMAT, DecimalFormatSymbols(Locale.ROOT)).format(scaled)
+        when {
+            cryptoBalance == Double.InvalidValue.toBigDecimal() -> String.EmptyBalance
+            cryptoBalance < MINIMAL_VALUE && cryptoBalance > BigDecimal.ZERO -> BELOW_MINIMAL_VALUE
+            cryptoBalance == BigDecimal.ZERO -> String.EmptyBalance
+            else -> cryptoBalance.setScale(CRYPTO_SCALE, RoundingMode.HALF_UP).let { scaled ->
+                DecimalFormat(CRYPTO_FORMAT, DecimalFormatSymbols(Locale.ROOT)).format(scaled)
+            }
         }
 
     fun getFiatBalance(fiatBalance: BigDecimal, fiatSymbol: String): String =
@@ -28,6 +31,8 @@ object BalanceUtils {
     private const val CURRENCY_FORMAT = "%s %.2f"
     private const val NO_FIAT_VALUE = "%s -.--"
     private const val TEN = 10.0
-    private const val CRYPTO_SCALE = 6
-    private const val CRYPTO_FORMAT = "#.######"
+    private const val CRYPTO_SCALE = 10
+    private const val CRYPTO_FORMAT = "#.##########"
+    private const val BELOW_MINIMAL_VALUE = "<0.0000000001"
+    private val MINIMAL_VALUE = 0.0000000001.toBigDecimal()
 }

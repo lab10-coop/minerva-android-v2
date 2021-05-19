@@ -139,7 +139,7 @@ class TransactionRepositoryImpl(
     private fun getRate(id: String): Single<Markets> =
         cryptoApi.getMarkets(id, localStorage.loadCurrentFiat().toLowerCase(Locale.ROOT))
 
-    override fun toEther(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
+    override fun toUserReadableFormat(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
 
     override fun sendTransaction(chainId: Int, transaction: Transaction): Single<String> =
         blockchainRepository.sendWalletConnectTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))

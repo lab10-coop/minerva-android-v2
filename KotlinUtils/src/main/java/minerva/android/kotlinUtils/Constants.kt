@@ -1,5 +1,7 @@
 package minerva.android.kotlinUtils
 
+import java.math.BigDecimal
+
 val String.Companion.Empty: String
     get() = ""
 
@@ -32,3 +34,6 @@ val Long.Companion.InvalidValue: Long
 
 val Double.Companion.InvalidValue: Double
     get() = -1.0
+
+val Double.Companion.InvalidBigDecimal: BigDecimal
+    get() = (-1.0).toBigDecimal()

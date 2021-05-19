@@ -39,7 +39,8 @@ private fun Fragment.showBiometricPrompt(onSuccessAction: () -> Unit, onCancelle
         })
 
     BiometricPrompt.PromptInfo.Builder().setTitle(context?.getString(R.string.authentication_title).toString()).apply {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+        val allowedAuthenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK.or(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) setAllowedAuthenticators(allowedAuthenticators)
         else setDeviceCredentialAllowed(true)
         biometricPrompt.authenticate(build())
     }

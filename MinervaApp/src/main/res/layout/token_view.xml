@@ -8,7 +8,9 @@
         android:id="@+id/amount_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/margin_xxsmall"
+        android:layout_marginBottom="@dimen/margin_xxsmall"/>
 
     <minerva.android.widget.blockies.BlockiesImageView
         android:id="@+id/token_logo"

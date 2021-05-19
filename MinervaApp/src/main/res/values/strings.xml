@@ -55,13 +55,13 @@
     <string name="i_will_safety_remember">I stored them safely</string>
     <string name="copy">Copy</string>
     <string name="share">Share</string>
-    <string name="backup_instruction">A bip39 seed phrase is an alternative way to backup or remember your private key:</string>
-    <string name="mnemonic_saved_to_clip_board">Mnemonic saved to clip board</string>
-    <string name="no_such_file_error_message">No Minerva Wallet found for the seed phrase you entered. Please make sure that your device is currently online, you entered the words in the correct order and that you\'re using a seed phrase which was created by the Minerva App.</string>
+    <string name="backup_instruction">A bip39 secret words is an alternative way to backup or remember your private key:</string>
+    <string name="mnemonic_saved_to_clip_board">Secret words saved to clip board</string>
+    <string name="no_such_file_error_message">No Minerva Wallet found for the secret words you entered. Please make sure that your device is currently online, you entered the words in the correct order and that you\'re using a secret words which was created by the Minerva App.</string>
     <string name="backup_alert_title">You haven\'t yet made a backup of your Minerva Wallet.</string>
     <string name="sync_alert_title">You haven\'t yet made a sync of your Minerva Wallet.</string>
     <string name="backup_alert_message">This is needed in order to recover identities and accounts in case something goes wrong with your phone.</string>
-    <string name="sync_alert_message">Data related to your wallet could not yet be stored to a remote system. You cannot recover your data within Minerva even with your seed phrase yet. Make sure the device is connected to the Internet and restart the App in order to fix this</string>
+    <string name="sync_alert_message">Data related to your wallet could not yet be stored to a remote system. You cannot recover your data within Minerva even with your secret words yet. Make sure the device is connected to the Internet and restart the App in order to fix this</string>
     <string name="close">Close</string>
     <string name="camera_error">Camera initialization error:</string>
     <string name="login">Login</string>
@@ -227,10 +227,10 @@
     <string name="test_networks">Test networks</string>
     <string name="main_networks">Main networks</string>
     <string name="automatic_backup_failed_error">Automatic backup failed because this wallet was set up on a new device.</string>
-    <string name="outdated_wallet_error_message">The wallet data seems to be outdated, suggesting that you are using it on another device. If you continue using this wallet on this device anyway, no backups will be made and data may get lost if something happens to this device. If this is the primary device you want to use your wallet with, you need to reinstall the App and recover the latest wallet data with the seed phrase.</string>
+    <string name="outdated_wallet_error_message">The wallet data seems to be outdated, suggesting that you are using it on another device. If you continue using this wallet on this device anyway, no backups will be made and data may get lost if something happens to this device. If this is the primary device you want to use your wallet with, you need to reinstall the App and recover the latest wallet data with the secret words.</string>
     <string name="wallet_connect_with_count_title">WalletConnect (%d)</string>
     <string name="wallet_connect_title">WalletConnect</string>
-    <string name="funds_at_risk_message">The use of main networks like xDai Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your 12-word Seed Phrase.</string>
+    <string name="funds_at_risk_message">The use of main networks like xDai Chain, Ethereum, ARTIS ∑1 or POA Core is still in testing stage and funds might still be at risk.\n\nPlease handle with caution and backup your 12 Secret Words.</string>
     <string name="fund_at_risk_warning">Act Carefully!</string>
     <string name="i_understand">I understand</string>
     <string name="refresh_balance_to_check_transaction_status">Your transaction was sent to the network and you have to refresh the screen to see the changed balance, once it was processed.</string>
@@ -295,7 +295,7 @@
     <string name="create">Create</string>
     <string name="protect_keys">Protect Keys</string>
     <string name="protect_transactions">Protect Transactions</string>
-    <string name="protect_keys_description">Enable your standard phone authentication method to protect your Seed Phrase and the export of private keys.</string>
+    <string name="protect_keys_description">Enable your standard phone authentication method to protect your Secret Words and the export of private keys.</string>
     <string name="protect_transactions_description">Enable your standard phone authentication method to protect all transactions sent from Minerva</string>
     <string name="protect_transaction_error_title">Protect Transaction error</string>
     <string name="protect_transaction_error_message">You have to enable "Protect Keys" first, before you can also protect transactions.</string>
@@ -315,6 +315,11 @@
     <string name="version_history">Version history</string>
     <string name="info_dapp_awaiting">Awaiting connection feedback from the DApp</string>
     <string name="authentication">Authentication</string>
+    <string name="authentication_alert_title">You should enable an authentication method for your Minerva Wallet.</string>
+    <string name="authentication_alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
+    <string name="message_sync_error">If this message is shown despite a good internet connection, contact our support on Telegram or Discord.</string>
+    <string name="wrong_tx_value_error">The DApp has sent the wrong amount. It may help if you retry and initiate a new transaction. If you contact our support, please provide the following error-Id: %s</string>
+    <string name="choose_your_account">Choose your Account</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

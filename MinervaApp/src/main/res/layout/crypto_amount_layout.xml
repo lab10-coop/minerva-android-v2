@@ -18,7 +18,6 @@
         android:id="@+id/currencyAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_xxsmall"
         android:textColor="@color/titleColor"
         android:textSize="@dimen/text_xsmall"
         android:gravity="end"

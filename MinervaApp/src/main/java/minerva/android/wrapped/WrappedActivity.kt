@@ -142,7 +142,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.CREDENTIAL_ORDER -> getString(R.string.edit_credentials_order)
             WrappedFragmentType.MANAGE_TOKENS -> getString(R.string.manage_token)
             WrappedFragmentType.RAMP -> getString(R.string.buy_crypto)
-            WrappedFragmentType.AUTHENTICATION -> getString(R.string.protect_keys)
+            WrappedFragmentType.AUTHENTICATION -> getString(R.string.authentication)
             WrappedFragmentType.CURRENCY -> getString(R.string.currency)
             WrappedFragmentType.APP_VERSION -> getString(R.string.version)
         }

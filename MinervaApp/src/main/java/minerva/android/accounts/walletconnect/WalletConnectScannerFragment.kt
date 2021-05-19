@@ -10,7 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
-import minerva.android.extension.*
+import minerva.android.extension.gone
+import minerva.android.extension.margin
+import minerva.android.extension.visible
+import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
@@ -64,7 +67,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is OnWalletConnectConnectionError -> handleWalletConnectError(state)
             }
         })
-        viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver { handleError(it) })
+        viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver { error -> handleError(error) })
     }
 
     private fun handleWalletConnectError(it: OnWalletConnectConnectionError) {
@@ -99,11 +102,11 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         showToast(getErrorMessage(error))
     }
 
-    private fun getErrorMessage(it: Throwable) =
-        if (it is InvalidAccountThrowable) {
+    private fun getErrorMessage(error: Throwable) =
+        if (error is InvalidAccountThrowable) {
             getString(R.string.invalid_account_message)
         } else {
-            it.message
+            error.message ?: getString(R.string.unexpected_error)
         }
 
     private fun showToast(message: String?) {
@@ -147,7 +150,6 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             {
                 viewModel.approveSession(meta)
                 binding.dappsBottomSheet.dapps.visible()
-                shouldScan = true
                 binding.closeButton.margin(bottom = INCREASED_MARGIN)
             },
             {
