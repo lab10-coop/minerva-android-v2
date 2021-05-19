@@ -3,7 +3,6 @@ package minerva.android.accounts.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.transition.TransitionManager
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -35,9 +34,8 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private val isWidgetOpen
         get() = binding.tokensAndCollectibles.isVisible
 
-    private val accountWidgetState: AccountWidgetState by lazy {
-        listener.getAccountWidgetState(rawPosition)
-    }
+    private val accountWidgetState: AccountWidgetState
+        get() = listener.getAccountWidgetState(rawPosition)
 
     override fun onSendTokenTokenClicked(account: Account, tokenAddress: String) = listener.onSendTokenClicked(account, tokenAddress)
 
@@ -125,14 +123,11 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
         }
     }
 
-    private fun View.setOnItemClickListener(isTokenAreaAvailable: Boolean) =
-        setOnClickListener { if (isTokenAreaAvailable) if (isWidgetOpen) close() else open() }
+    private fun View.setOnItemClickListener() =
+        setOnClickListener { if (isWidgetOpen) close() else open() }
 
     private fun View.prepareToken(account: Account, fiatSymbol: String) {
         binding.apply {
-
-            Log.e("klop", "Widget state for ${account.name} should be open ${accountWidgetState.isWidgetOpen}")
-
             tokensAndCollectibles.prepareView(
                 account,
                 viewGroup,
@@ -142,7 +137,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
             )
             //TODO change this statement when collectibles or main coin will be implemented
             account.accountTokens.isNotEmpty().let { visible ->
-                setOnItemClickListener(visible)
+                if (visible) setOnItemClickListener()
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
                 prepareArrow(visible)
@@ -152,8 +147,10 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     }
 
     private fun setOpen(isOpen: Boolean) {
-        accountWidgetState.isWidgetOpen = isOpen
-        listener.updateAccountWidgetState(rawPosition, accountWidgetState)
+        accountWidgetState.apply {
+            isWidgetOpen = isOpen
+            listener.updateAccountWidgetState(rawPosition, this)
+        }
         binding.apply {
             if (isOpen) arrow.rotate180() else arrow.rotate180back()
             tokensAndCollectibles.visibleOrGone(isOpen)
