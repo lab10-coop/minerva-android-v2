@@ -3,7 +3,6 @@ package minerva.android.walletmanager.repository.transaction
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.AccountToken
@@ -45,7 +44,7 @@ interface TransactionRepository {
     fun checkMissingTokensDetails(): Completable
     fun getCoinFiatRate(chainId: Int): Single<Double>
     fun getTokenFiatRate(tokenHash: String): Single<Double>
-    fun toEther(value: BigDecimal): BigDecimal
+    fun toUserReadableFormat(value: BigDecimal): BigDecimal
     fun sendTransaction(chainId: Int, transaction: Transaction): Single<String>
     fun getFiatSymbol(): String
     fun isProtectTransactionEnabled(): Boolean

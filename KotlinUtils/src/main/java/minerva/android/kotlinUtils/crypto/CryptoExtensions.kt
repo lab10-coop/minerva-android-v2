@@ -21,15 +21,14 @@ val String.getFormattedMessage: String
         this
     }
 
-fun hexToBigInteger(input: String, def: BigDecimal, logger: (Throwable) -> Unit = {}): BigDecimal {
-    val value: BigDecimal? = hexToBigInteger(input.trim()) { error -> logger(error) }
+fun hexToBigInteger(input: String, def: BigDecimal): BigDecimal {
+    val value: BigDecimal? = hexToBigInteger(input.trim())
     return value ?: def
 }
 
-private fun hexToBigInteger(input: String, logger: (Throwable) -> Unit): BigDecimal? {
+private fun hexToBigInteger(input: String): BigDecimal? {
     var hex = input
     return if (hex.isEmpty()) {
-        logger(Throwable("Value to parse is empty: $input"))
         null
     } else try {
         val isHex: Boolean = containsHexPrefix(hex)
@@ -38,10 +37,8 @@ private fun hexToBigInteger(input: String, logger: (Throwable) -> Unit): BigDeci
         }
         BigInteger(hex, if (isHex) HEX else DEC).toBigDecimal()
     } catch (ex: NullPointerException) {
-        logger(NullPointerException("Value to parse: $input"))
         null
     } catch (ex: NumberFormatException) {
-        logger(NumberFormatException("Value to parse: $input"))
         null
     }
 }
@@ -123,5 +120,4 @@ private fun cleanHexPrefix(input: String): String =
         input
     }
 
-private fun containsHexPrefix(input: String): Boolean =
-    input.length > 1 && input[0] == '0' && input[1] == 'x'
+fun containsHexPrefix(input: String): Boolean = input.startsWith("0x")

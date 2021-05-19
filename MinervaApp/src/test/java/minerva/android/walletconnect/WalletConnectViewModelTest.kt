@@ -97,9 +97,9 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on session request event test with defined chainId on test net with xDai account, Ethereum dapp and url that contain xDai`() {
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnSessionRequest(meta, 2, Topic("peerID", "remotePeerID"), 1)))
-        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 1, token="xDai"), Network(name = "Ethereum", chainId = 2, token="Ethereum"))
-        viewModel.account = Account(1, chainId = 1)
+            .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"), 1)))
+        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 2, token="xDai"), Network(name = "Ethereum", chainId = 1, token="Ethereum"))
+        viewModel.account = Account(1, chainId = 2)
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
@@ -113,9 +113,9 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     fun `on session request event test with defined chainId on test net with xDai account, Ethereum dapp and url that doesnt contain xDai`() {
         val meta = WalletConnectPeerMeta(name = "token", url = "test.com", description = "dsc")
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnSessionRequest(meta, 2, Topic("peerID", "remotePeerID"), 1)))
-        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 1, token="xDai"), Network(name = "Ethereum", chainId = 2, token="Ethereum"))
-        viewModel.account = Account(1, chainId = 1)
+            .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"), 1)))
+        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 2, token="xDai"), Network(name = "Ethereum", chainId = 1, token="Ethereum"))
+        viewModel.account = Account(1, chainId = 2)
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
@@ -128,9 +128,9 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     @Test
     fun `on session request event test with defined chainId on test net with Ethereum account and xdai dapp`() {
         whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.just(OnSessionRequest(meta, 1, Topic("peerID", "remotePeerID"), 1)))
-        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 1, token="xDai"), Network(name = "Ethereum", chainId = 2, token="Ethereum"))
-        viewModel.account = Account(1, chainId = 2)
+            .thenReturn(Flowable.just(OnSessionRequest(meta, 2, Topic("peerID", "remotePeerID"), 1)))
+        NetworkManager.networks = listOf(Network(name = "xDai", chainId = 2, token="xDai"), Network(name = "Ethereum", chainId = 1, token="Ethereum"))
+        viewModel.account = Account(1, chainId = 1)
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.setConnectionStatusFlowable()
         stateCaptor.run {
