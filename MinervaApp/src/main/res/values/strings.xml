@@ -59,7 +59,7 @@
     <string name="mnemonic_saved_to_clip_board">Secret words saved to clip board</string>
     <string name="no_such_file_error_message">No backup data found for the Secret Words you entered. Please make sure that your device is currently online, you entered the Secret Words in the correct order and that you\’re using Secret Words which was created by the Minerva Wallet.</string>
     <string name="backup_alert_title">You haven\'t yet made a backup of your Minerva Wallet.</string>
-    <string name="sync_alert_title">You haven\'t yet made a sync of your Minerva Wallet.</string>
+    <string name="sync_alert_title">You are currently offline. Please make sure you are online regularly to back up your data needed for a full Minerva Wallet recovery.</string>
     <string name="backup_alert_message">This is needed in order to recover identities and accounts in case something goes wrong with your phone.</string>
     <string name="sync_alert_message">Data related to your Minerva Wallet could not yet be stored to a remote system. You cannot recover your data within Minerva even with your Secret Words yet. Make sure the device is connected to the internet and restart the app in order to fix this.</string>
     <string name="close">Close</string>
