@@ -373,6 +373,12 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.3.0</item>
+        <item>* Security update for WalletConnect sessions</item>
+        <item>* Improved opening and closing of accounts</item>
+        <item>* Secure with biometrics for Android 11</item>
+        <item>* Better wording: Secret Words instead of Seed Phrase</item>
+        <item>* Various smaller bug fixes and UI improvements</item>
         <item>1.2.0</item>
         <item>* Secure your keys and transactions</item>
         <item>* Buy crypto with your fiat currency via Ramp</item>
