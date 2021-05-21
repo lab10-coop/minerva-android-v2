@@ -5,8 +5,13 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.Fiat
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.storage.RateStorage
 
-class FiatViewModel(private val localStorage: LocalStorage, private val accountManager: AccountManager) : BaseViewModel() {
+class FiatViewModel(
+    private val localStorage: LocalStorage,
+    private val accountManager: AccountManager,
+    private val rateStorage: RateStorage
+) : BaseViewModel() {
 
     fun getCurrentFiatPosition(): Int = Fiat.all.indexOf(localStorage.loadCurrentFiat()).let { currentPosition ->
         if (currentPosition == Int.InvalidIndex) FIRST_INDEX
@@ -16,6 +21,7 @@ class FiatViewModel(private val localStorage: LocalStorage, private val accountM
     fun saveCurrentFiat(fiat: String) {
         localStorage.saveCurrentFiat(fiat)
         accountManager.clearFiat()
+        rateStorage.areRatesSynced = false
     }
 
     companion object {

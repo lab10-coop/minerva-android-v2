@@ -5,7 +5,10 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.Commit
+import minerva.android.apiProvider.model.CommitElement
+import minerva.android.apiProvider.model.Committer
+import minerva.android.apiProvider.model.TokenDetails
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.TokenDao
@@ -455,8 +458,8 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
 
-        verify(rateStorage, times(4)).saveRate(any(), any())
-        verify(cryptoApi, times(4)).getTokensRate(any(), any(), any())
+        verify(rateStorage, times(2)).saveRate(any(), any())
+        verify(cryptoApi, times(2)).getTokensRate(any(), any(), any())
     }
 
     @Test

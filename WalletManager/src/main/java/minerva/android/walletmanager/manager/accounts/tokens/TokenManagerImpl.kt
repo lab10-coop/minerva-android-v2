@@ -239,30 +239,15 @@ class TokenManagerImpl(
     private fun prepareContractAddresses(tokens: List<ERC20Token>): String =
         tokens.joinToString(TOKEN_ADDRESS_SEPARATOR) { token -> token.address }
 
-    private fun updateAccountTokensRate(chainId: Int, contractAddresses: String): Observable<List<Pair<String, Double>>> =
-        with(localStorage.loadCurrentFiat()) {
-            cryptoApi.getTokensRate(MarketUtils.getMarketId(chainId), contractAddresses, this)
-                .map { tokenRateResponse ->
-                    mutableListOf<Pair<String, Double>>().apply {
-                        tokenRateResponse.forEach { (contractAddress, rate) ->
-                            add(
-                                Pair(
-                                    generateTokenHash(chainId, contractAddress),
-                                    rate[toLowerCase(Locale.ROOT)]?.toDouble() ?: Double.InvalidValue
-                                )
-                            )
-                        }
-                    }.toList()
-                }.toObservable()
-        }
-
     override fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable =
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
             with(localStorage.loadCurrentFiat()) {
                 if (currentFiat != this) rateStorage.clearRates()
                 tokens.forEach { (chainId, tokens) ->
-                    if (!rateStorage.areRatesSynced)
-                        observables.add(updateAccountTokensRate(chainId, prepareContractAddresses(tokens)))
+                    val marketId = MarketUtils.getMarketId(chainId)
+                    if (!rateStorage.areRatesSynced && marketId != String.Empty) {
+                        observables.add(updateAccountTokensRate(marketId, chainId, prepareContractAddresses(tokens)))
+                    }
                 }
                 Observable.merge(observables)
                     .doOnNext { rates ->
@@ -276,6 +261,27 @@ class TokenManagerImpl(
                     }
                     .ignoreElement()
             }
+        }
+
+    private fun updateAccountTokensRate(
+        marketId: String,
+        chainId: Int,
+        contractAddresses: String
+    ): Observable<List<Pair<String, Double>>> =
+        with(localStorage.loadCurrentFiat()) {
+            cryptoApi.getTokensRate(marketId, contractAddresses, this)
+                .map { tokenRateResponse ->
+                    mutableListOf<Pair<String, Double>>().apply {
+                        tokenRateResponse.forEach { (contractAddress, rate) ->
+                            add(
+                                Pair(
+                                    generateTokenHash(chainId, contractAddress),
+                                    rate[toLowerCase(Locale.ROOT)]?.toDouble() ?: Double.InvalidValue
+                                )
+                            )
+                        }
+                    }.toList()
+                }.toObservable()
         }
 
     override fun updateTokensRate(account: Account) {
