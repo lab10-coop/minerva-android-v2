@@ -38,6 +38,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenTag
+import minerva.android.walletmanager.model.token.Tokens
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
@@ -298,9 +299,9 @@ class TokenManagerImpl(
         cryptoApi.getConnectedTokens(url = getTokensApiURL(account))
             .map { response ->
                 mutableListOf<ERC20Token>().apply {
-                    response.tokens.forEach {
-                        add(TokenDataToERC20Token.map(account.chainId, it))
-                    }
+                    response.tokens
+                        .filter { tokenData -> tokenData.type == Tokens.ERC_20.type }
+                        .forEach { tokenData -> add(TokenDataToERC20Token.map(account.chainId, tokenData)) }
                 }
             }
 
@@ -308,17 +309,15 @@ class TokenManagerImpl(
         cryptoApi.getTokenTx(url = getTokenTxApiURL(account))
             .map { response ->
                 mutableListOf<ERC20Token>().apply {
-                    response.tokens.forEach {
-                        add(ERC20Token(account.chainId, it))
-                    }
+                    response.tokens.forEach { tokenTx -> add(ERC20Token(account.chainId, tokenTx)) }
                 }
             }
 
-    private fun getTokenTxApiURL(account: Account) =
+    private fun getTokenTxApiURL(account: Account): String =
         String.format(ETHEREUM_TOKENTX_REQUEST, getTokenBalanceURL(account.chainId), account.address, ETHERSCAN_KEY)
 
     @VisibleForTesting
-    fun getTokensApiURL(account: Account) =
+    fun getTokensApiURL(account: Account): String =
         String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.chainId), account.address)
 
     private fun getTokenBalanceURL(chainId: Int) =
