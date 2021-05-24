@@ -6,7 +6,6 @@ import com.bumptech.glide.Glide
 import minerva.android.R
 import minerva.android.databinding.WalletActionItemListRowBinding
 import minerva.android.kotlinUtils.DateUtils
-import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.defs.PaymentRequest.Companion.UNDEFINED
 import minerva.android.walletmanager.model.defs.WalletActionFields
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.ACCEPTED
@@ -15,6 +14,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.AUT
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.BACKGROUND_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.CHANGED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAILED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.HIDE
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.LOG_IN
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.RECEIVED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REJECTED
@@ -25,6 +25,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SEN
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SIGNED
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.UPDATED
 import minerva.android.walletmanager.model.defs.WalletActionType
+import minerva.android.walletmanager.model.wallet.WalletAction
 
 class WalletActionView(context: Context) : ConstraintLayout(context) {
 
@@ -67,7 +68,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
         when (walletAction.status) {
             FAILED -> showSentAction(walletAction, R.string.failed_sent_accounts_label)
             SENT -> showSentAction(walletAction, R.string.sent_accounts_label)
-            ADDED, REMOVED -> showAction(
+            ADDED, REMOVED, HIDE -> showAction(
                 walletAction.fields[WalletActionFields.ACCOUNT_NAME],
                 R.string.account_action_label,
                 R.drawable.ic_values
@@ -140,6 +141,7 @@ class WalletActionView(context: Context) : ConstraintLayout(context) {
                 UPDATED -> getString(R.string.wallet_action_header, getString(R.string.updated), lastUsed)
                 REJECTED -> getString(R.string.wallet_action_header, getString(R.string.rejected), lastUsed)
                 ACCEPTED -> getString(R.string.wallet_action_header, getString(R.string.accepted), lastUsed)
+                HIDE -> getString(R.string.wallet_action_header, getString(R.string.hidden), lastUsed)
                 else -> UNDEFINED
             }
         }

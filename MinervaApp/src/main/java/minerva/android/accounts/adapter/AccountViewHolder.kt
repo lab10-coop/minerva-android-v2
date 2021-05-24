@@ -187,7 +187,7 @@ class AccountViewHolder(
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
                 R.id.exportPrivateKey -> listener.onExportPrivateKey(account)
-                R.id.remove -> listener.onAccountRemoved(index)
+                R.id.hide -> listener.onAccountHide(index)
             }
             true
         }

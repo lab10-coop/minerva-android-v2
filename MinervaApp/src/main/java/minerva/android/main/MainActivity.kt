@@ -35,7 +35,6 @@ import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
-import minerva.android.walletmanager.manager.accounts.AccountManagerImpl.Companion.NEW_ACCOUNT_TITLE_PATTERN
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
@@ -449,11 +448,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun startNewAccountActivity() {
         startNewAccountWrappedActivity(
             this,
-            String.format(
-                NEW_ACCOUNT_TITLE_PATTERN,
-                getString(R.string.new_account),
-                viewModel.getAccountIterator()
-            )
+            getString(R.string.new_account)
         )
     }
 

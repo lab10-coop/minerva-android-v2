@@ -58,7 +58,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for identities test`() {
-        val test = repository.calculateDerivedKeys("68a4c6de013faef9b98d7d3e2546ce07", 1, didPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, didPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x94c87a5f423dbe7bbb085a963142cfd12e6c001e"
         }
@@ -66,7 +66,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for test nets test`() {
-        val test = repository.calculateDerivedKeys("68a4c6de013faef9b98d7d3e2546ce07", 1, testNetPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, testNetPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x4ecc9dbd0494b32bbd77c87f46da92ff5f0c2258"
         }
@@ -74,7 +74,7 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `compute derived keys for main nets test`() {
-        val test = repository.calculateDerivedKeys("68a4c6de013faef9b98d7d3e2546ce07", 1, mainNetPath).test()
+        val test = repository.calculateDerivedKeysSingle("68a4c6de013faef9b98d7d3e2546ce07", 1, mainNetPath).test()
         test.assertValue {
             it.index == 1 && it.address == "0x1e7cfbf30f2ae071806a78135f0c1280dece8fda"
         }

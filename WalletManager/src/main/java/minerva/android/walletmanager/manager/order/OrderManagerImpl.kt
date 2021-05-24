@@ -3,7 +3,6 @@ package minerva.android.walletmanager.manager.order
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.exception.NotSupportedAccountThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -54,7 +53,7 @@ class OrderManagerImpl(private val walletConfigManager: WalletConfigManager) : O
         walletConfigManager.getWalletConfig().run {
             when (type) {
                 WalletActionType.IDENTITY -> identities.filter { !it.isDeleted }.size > ONE_ELEMENT
-                WalletActionType.ACCOUNT -> accounts.filter { !it.isDeleted && it.network.testNet != areMainNetsEnabled }.size > ONE_ELEMENT
+                WalletActionType.ACCOUNT -> accounts.filter { !it.isDeleted && it.isTestNetwork != areMainNetsEnabled && !it.isEmptyAccount }.size > ONE_ELEMENT
                 WalletActionType.SERVICE -> services.filter { !it.isDeleted }.size > ONE_ELEMENT
                 WalletActionType.CREDENTIAL -> credentials.filter { !it.isDeleted }.size > ONE_ELEMENT
                 else -> false

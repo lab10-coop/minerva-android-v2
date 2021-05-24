@@ -62,12 +62,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
-    override fun onAccountRemove(account: Account) =
-        AlertDialogHandler.showRemoveDialog(
+    override fun onAccountHide(account: Account) =
+        AlertDialogHandler.showHideAccountDialog(
             requireContext(),
-            account.name,
-            getString(R.string.remove_account_dialog_message)
-        ) { viewModel.removeAccount(account) }
+            getString(R.string.hide_account_dialog_title),
+            getString(R.string.hide_account_dialog_message)
+        ) { viewModel.hideAccount(account) }
 
     override fun onShowAddress(accountIndex: Int) =
         interactor.showTransactionScreen(accountIndex, screenIndex = RECEIVE_TRANSACTION_INDEX)
@@ -213,7 +213,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 interactor.shouldShowLoadingScreen(it)
             })
 
-            accountRemovedLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
+            accountHideLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
                 activity?.invalidateOptionsMenu()
                 refreshAddCryptoButton()
             })

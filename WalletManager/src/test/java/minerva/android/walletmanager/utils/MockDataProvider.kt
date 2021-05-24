@@ -66,19 +66,19 @@ object MockDataProvider {
             Identity(3, "identityName3", "", "privateKey", "address3", data)
         ),
         listOf(
-            Account(1, "publicKey1", "privateKey1", "address1", chainId = ETH_RIN),
-            Account(2, "publicKey2", "privateKey2", "address2", chainId = ATS_TAU),
+            Account(1, "publicKey1", "privateKey1", "address1", chainId = ETH_RIN, _isTestNetwork = true),
+            Account(2, "publicKey2", "privateKey2", "address2", chainId = ATS_TAU, _isTestNetwork = true),
             Account(
                 3, "publicKey3", "privateKey3", "address3", chainId = ATS_TAU,
-                owners = listOf("masterOwner")
+                owners = listOf("masterOwner"), _isTestNetwork = true
             ),
             Account(
                 4, "publicKey4", "privateKey4", "address4", chainId = ATS_TAU,
-                owners = listOf("notMasterOwner", "masterOwner")
+                owners = listOf("notMasterOwner", "masterOwner"), _isTestNetwork = true
             ),
-            Account(1, "publicKey5", "privateKey5", "address4", chainId = ATS_TAU),
-            Account(5, "publicKey1Main", "privateKey1Main", "address1Main", chainId = ATS_SIGMA),
-            Account(6, "publicKey2Main", "privateKey2Main", "address2Main", chainId = POA_CORE)
+            Account(5, "publicKey5", "privateKey5", "address4", chainId = ATS_TAU, _isTestNetwork = true),
+            Account(1, "publicKey1Main", "privateKey1Main", "address1Main", chainId = ATS_SIGMA, _isTestNetwork = false),
+            Account(2, "publicKey2Main", "privateKey2Main", "address2Main", chainId = POA_CORE, _isTestNetwork = false)
         ),
         listOf(
             Service("1", "name")

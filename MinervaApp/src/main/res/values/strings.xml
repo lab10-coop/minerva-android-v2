@@ -73,6 +73,8 @@
     <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
     <string name="remove_service_dialog_message">Do you really want to remove this service?</string>
     <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
+    <string name="hide_account_dialog_message">After confirming this message, this account is hidden but can still be used to receive transfers.\n\nTo make the account visible again, you have to tap on ‘+’ in the Values screen, select it from your addresses list and add the account.</string>
+    <string name="hide_account_dialog_title">Hide account</string>
     <string name="remove_owner">Remove owner</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -118,6 +120,7 @@
     <string name="refresh_asset_balances_error">Error while refreshing assets balances</string>
     <string name="activities_error">Error while fetching activities</string>
     <string name="removed">Removed</string>
+    <string name="hidden">Hidden</string>
     <string name="changed">Changed</string>
     <string name="added">Added</string>
     <string name="received">Received</string>
@@ -320,6 +323,10 @@
     <string name="message_sync_error">If this message is shown despite a good internet connection, contact our support on Telegram or Discord.</string>
     <string name="wrong_tx_value_error">The DApp has sent the wrong amount. It may help if you retry and initiate a new transaction. If you contact our support, please provide the following error-Id: %s</string>
     <string name="choose_your_account">Choose your Account</string>
+    <string name="select_address_header">Select Address</string>
+    <string name="add_account_info">You have to select a network and then choose the address you want to use.</string>
+    <string name="hide_now">Hide now</string>
+    <string name="hide">Hide</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

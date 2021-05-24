@@ -32,7 +32,6 @@ import minerva.android.kotlinUtils.mapper.BitmapMapper
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
@@ -301,7 +300,7 @@ class WalletConfigManagerImpl(
         return Observable.fromIterable(identitiesResponse)
             .filter { identityPayload -> !identityPayload.isDeleted }
             .flatMapSingle { identityPayload ->
-                cryptographyRepository.calculateDerivedKeys(masterSeed.seed, identityPayload.index, DID_PATH)
+                cryptographyRepository.calculateDerivedKeysSingle(masterSeed.seed, identityPayload.index, DID_PATH)
             }
             .toList()
             .map { keys -> completeIdentitiesKeys(payload, keys) }
@@ -309,7 +308,7 @@ class WalletConfigManagerImpl(
             .zipWith(Observable.range(START, accountsResponse.size)
                 .filter { !accountsResponse[it].isDeleted }
                 .flatMapSingle {
-                    cryptographyRepository.calculateDerivedKeys(
+                    cryptographyRepository.calculateDerivedKeysSingle(
                         masterSeed.seed,
                         accountsResponse[it].index,
                         getDerivationPath(accountsResponse, it),
@@ -327,7 +326,7 @@ class WalletConfigManagerImpl(
                         CredentialsPayloadToCredentials.map(payload.credentialResponse),
                         payload.erc20TokenResponse.map { (chainId, tokens) ->
                             chainId to tokens
-                                    /*Needed to remove NFT from wallet config, where we store only ERC-20 tokens, comment can be removed when compatibility with NFT is implemented*/
+                                /*Needed to remove NFT from wallet config, where we store only ERC-20 tokens, comment can be removed when compatibility with NFT is implemented*/
                                 .filter { erC20TokenPayload -> erC20TokenPayload.decimals.isNotEmpty() }
                                 .map { erC20TokenPayload -> ERC20TokenPayloadToERC20TokenMapper.map(erC20TokenPayload) }
                         }.toMap()
@@ -360,7 +359,7 @@ class WalletConfigManagerImpl(
         keys: List<DerivedKeys>,
         accountPayload: AccountPayload
     ): DerivedKeys {
-        val isTestNet = NetworkManager.getNetwork(accountPayload.chainId).testNet
+        val isTestNet = accountPayload.isTestNetwork
         keys.forEach { derivedKeys ->
             if (derivedKeys.index == accountPayload.index && derivedKeys.isTestNet == isTestNet) {
                 return derivedKeys
@@ -377,7 +376,7 @@ class WalletConfigManagerImpl(
         }
 
     private fun isTestNet(accountsResponse: List<AccountPayload>, index: Int) =
-        NetworkManager.getNetwork(accountsResponse[index].chainId).testNet
+        accountsResponse[index].isTestNetwork
 
     private fun completeIdentitiesKeys(
         walletConfigPayload: WalletConfigPayload,

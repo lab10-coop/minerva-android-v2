@@ -21,8 +21,10 @@ interface AccountManager : Manager {
     val getTokenVisibilitySettings: TokenVisibilitySettings
     fun loadAccount(index: Int): Account
     fun createRegularAccount(network: Network): Single<String>
+    fun createEmptyAccounts(numberOfAccounts: Int): Completable
     fun createSafeAccount(account: Account, contract: String): Completable
     fun removeAccount(account: Account): Completable
+    fun hideAccount(account: Account): Completable
     fun getSafeAccountCount(ownerAddress: String): Int
     fun getSafeAccountName(account: Account): String
     fun isAddressValid(address: String): Boolean
@@ -32,6 +34,8 @@ interface AccountManager : Manager {
     fun currentTimeMills(): Long
     fun getAllAccounts(): List<Account>
     fun getAllActiveAccounts(chainId: Int): List<Account>
+    fun getAllAccountsForSelectedNetworksType(): List<Account>
     fun toChecksumAddress(address: String): String
     fun clearFiat()
+    fun connectAccountToNetwork(accountId: Int, isTestNetwork: Boolean, network: Network): Single<String>
 }
