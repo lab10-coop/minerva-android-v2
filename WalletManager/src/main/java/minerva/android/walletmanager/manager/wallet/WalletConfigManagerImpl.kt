@@ -2,7 +2,10 @@ package minerva.android.walletmanager.manager.wallet
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import io.reactivex.*
+import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
@@ -41,7 +44,6 @@ import minerva.android.walletmanager.utils.DefaultWalletConfig
 import minerva.android.walletmanager.utils.handleAutomaticBackupFailedError
 import timber.log.Timber
 import java.math.BigDecimal
-import kotlin.properties.Delegates
 
 class WalletConfigManagerImpl(
     private val keystoreRepository: KeystoreRepository,
@@ -106,24 +108,24 @@ class WalletConfigManagerImpl(
                 completeKeys(masterSeed, DefaultWalletConfig.create)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onNext = {
-                            localWalletConfigVersion = it.version
-                            _walletConfigLiveData.value = Event(it)
+                        onNext = { walletConfig ->
+                            localWalletConfigVersion = walletConfig.version
+                            _walletConfigLiveData.value = Event(walletConfig)
                         }, onError = { Timber.e(it) }
                     )
             }
 
     override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
         minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
-            .map {
+            .map { walletConfigPayload ->
                 keystoreRepository.encryptMasterSeed(masterSeed)
-                localWalletProvider.saveWalletConfig(it)
+                localWalletProvider.saveWalletConfig(walletConfigPayload)
             }.ignoreElement()
 
     override fun initWalletConfig() {
-        keystoreRepository.decryptMasterSeed()?.let {
-            masterSeed = it
-            loadWalletConfig(it)
+        keystoreRepository.decryptMasterSeed()?.let { seed ->
+            masterSeed = seed
+            loadWalletConfig(seed)
         }.orElse {
             _walletConfigErrorLiveData.value = Event(Throwable())
         }
@@ -188,9 +190,9 @@ class WalletConfigManagerImpl(
         minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
             .ignoreElement()
             .andThen(completeKeys(masterSeed, payload))
-            .map {
+            .map { walletConfig ->
                 localStorage.isSynced = true
-                it
+                walletConfig
             }
             .onErrorResumeNext { _: Observer<in WalletConfig> -> completeKeysWhenError(masterSeed, payload) }
 
@@ -203,12 +205,14 @@ class WalletConfigManagerImpl(
         if (localStorage.isBackupAllowed) {
             localWalletProvider.saveWalletConfig(WalletConfigToWalletPayloadMapper.map(walletConfig))
                 .observeOn(AndroidSchedulers.mainThread())
-                .map {
+                .map { walletConfigPayload ->
                     _walletConfigLiveData.value = Event(walletConfig)
-                    it
+                    walletConfigPayload
                 }
                 .observeOn(Schedulers.io())
-                .flatMap { minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), it) }
+                .flatMap { walletConfigPayload ->
+                    minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), walletConfigPayload)
+                }
                 .map { localStorage.isSynced = true }
                 .ignoreElement()
                 .handleAutomaticBackupFailedError(localStorage)
@@ -295,11 +299,13 @@ class WalletConfigManagerImpl(
         val identitiesResponse = payload.identityResponse
         val accountsResponse = payload.accountResponse
         return Observable.fromIterable(identitiesResponse)
-            .filter { !it.isDeleted }
-            .flatMapSingle { cryptographyRepository.calculateDerivedKeys(masterSeed.seed, it.index, DID_PATH) }
+            .filter { identityPayload -> !identityPayload.isDeleted }
+            .flatMapSingle { identityPayload ->
+                cryptographyRepository.calculateDerivedKeys(masterSeed.seed, identityPayload.index, DID_PATH)
+            }
             .toList()
             .map { keys -> completeIdentitiesKeys(payload, keys) }
-            .map { completeIdentitiesProfileImages(it) }
+            .map { identities -> completeIdentitiesProfileImages(identities) }
             .zipWith(Observable.range(START, accountsResponse.size)
                 .filter { !accountsResponse[it].isDeleted }
                 .flatMapSingle {
@@ -319,8 +325,11 @@ class WalletConfigManagerImpl(
                         account,
                         ServicesResponseToServicesMapper.map(payload.serviceResponse),
                         CredentialsPayloadToCredentials.map(payload.credentialResponse),
-                        payload.erc20TokenResponse.map { (key, value) ->
-                            key to value.map { ERC20TokenPayloadToERC20TokenMapper.map(it) }
+                        payload.erc20TokenResponse.map { (chainId, tokens) ->
+                            chainId to tokens
+                                    /*Needed to remove NFT from wallet config, where we store only ERC-20 tokens, comment can be removed when compatibility with NFT is implemented*/
+                                .filter { erC20TokenPayload -> erC20TokenPayload.decimals.isNotEmpty() }
+                                .map { erC20TokenPayload -> ERC20TokenPayloadToERC20TokenMapper.map(erC20TokenPayload) }
                         }.toMap()
                     )
                 }
