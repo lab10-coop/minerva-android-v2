@@ -1,5 +1,11 @@
 package minerva.android.settings
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +27,7 @@ import minerva.android.wrapped.startCurrencyWrappedActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
+
 class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     private lateinit var binding: FragmentSettingsBinding
@@ -28,6 +35,24 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     private val settingsAdapter by lazy {
         SettingsAdapter({ onSettingsRowClicked(it) }, { onUseMainNetworkCheckedChange(it) })
+    }
+
+    private val connectivityManager by lazy {
+        requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+    }
+
+    private val networkCallback by lazy {
+        object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
+                requireActivity().runOnUiThread { updateSettingsAdapter() }
+            }
+
+            override fun onLost(network: Network) {
+                requireActivity().runOnUiThread { updateSettingsAdapter() }
+                super.onLost(network)
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,6 +65,12 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
         super.onResume()
         interactor.changeActionBarColor(R.color.white)
         hideReminder()
+        setupConnectionCallbacks()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        clearConnectionCallbacks()
     }
 
     private fun setupRecycleView() {
@@ -54,6 +85,12 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             if (isMnemonicRemembered && isSynced) {
                 interactor.removeSettingsBadgeIcon()
             }
+            updateSettingsAdapter()
+        }
+    }
+
+    private fun updateSettingsAdapter() {
+        with(viewModel) {
             mapOf(
                 MNEMONIC_REMEMBERED to isMnemonicRemembered,
                 MAIN_NETWORKS_ENABLED to areMainNetsEnabled,
@@ -89,6 +126,24 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     private fun onUseMainNetworkCheckedChange(isChecked: Boolean) {
         viewModel.areMainNetworksEnabled(isChecked)
+    }
+
+    private fun setupConnectionCallbacks() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            connectivityManager?.registerDefaultNetworkCallback(networkCallback)
+        } else {
+            val request = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
+            connectivityManager?.registerNetworkCallback(request, networkCallback)
+        }
+    }
+
+    private fun clearConnectionCallbacks() {
+        connectivityManager?.unregisterNetworkCallback(networkCallback)
+    }
+
+    fun isNetworkConnected(): Boolean {
+        return connectivityManager?.activeNetwork != null
     }
 
     companion object {

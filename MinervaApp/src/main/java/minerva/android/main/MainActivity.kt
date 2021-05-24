@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TOKEN_ADDRESS
@@ -131,13 +133,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     private fun prepareObservers() {
-        walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer {
+        walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer { state ->
             dappDialog?.dismiss()
-            when (it) {
-                is OnEthSignRequest -> dappDialog = getDappSignDialog(it)
-                is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(it)
-                is ProgressBarState -> handleLoadingDialog(it)
+            when (state) {
+                is OnEthSignRequest -> dappDialog = getDappSignDialog(state)
+                is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(state)
+                is ProgressBarState -> handleLoadingDialog(state)
                 is OnGeneralError -> handleWalletConnectError()
+                is WrongTransactionValueState -> handleWrongTransactionValueState(state)
                 else -> dappDialog = null
             }
         })
@@ -163,9 +166,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(true, it)
             })
-            updatePendingAccountLiveData.observe(
-                this@MainActivity,
-                EventObserver { updatePendingAccount(it) })
+            updatePendingAccountLiveData.observe(this@MainActivity, EventObserver { updatePendingAccount(it) })
             handleTimeoutOnPendingTransactionsLiveData.observe(this@MainActivity, EventObserver {
                 it.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
                 stopPendingAccounts()
@@ -174,6 +175,20 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 (getCurrentFragment() as? AccountsFragment)?.updateTokensRate()
             })
         }
+    }
+
+    private fun handleWrongTransactionValueState(state: WrongTransactionValueState) {
+        val firebaseID: String = FirebaseInstanceId.getInstance().id
+        logToFirebase("Transaction with invalid value: ${state.transaction}, firebaseId: $firebaseID")
+        AlertDialogHandler.showDialog(
+            this,
+            getString(R.string.error_header),
+            getString(R.string.wrong_tx_value_error, firebaseID)
+        )
+    }
+
+    private fun logToFirebase(message: String) {
+        FirebaseCrashlytics.getInstance().recordException(Throwable(message))
     }
 
     private fun showToast(message: String) {
@@ -210,14 +225,15 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }
     }
 
-    private fun getSendTransactionDialog(it: OnEthSendTransactionRequest) =
+    private fun getSendTransactionDialog(txRequest: OnEthSendTransactionRequest) =
         with(walletConnectViewModel) {
             DappSendTransactionDialog(
                 this@MainActivity,
                 {
                     if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt(
                         ::sendTransaction,
-                        ::rejectRequest)
+                        ::rejectRequest
+                    )
                     else sendTransaction()
                     dappDialog = null
                 },
@@ -226,9 +242,9 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                     dappDialog = null
                 }).apply {
                 setContent(
-                    it.transaction, it.session, it.account,
-                    { showGasPriceDialog(it) },
-                    { gasPrice -> recalculateTxCost(gasPrice, it.transaction) },
+                    txRequest.transaction, txRequest.session, txRequest.account,
+                    { showGasPriceDialog(txRequest) },
+                    { gasPrice -> recalculateTxCost(gasPrice, txRequest.transaction) },
                     { balance, cost -> isBalanceTooLow(balance, cost) }
 
                 )

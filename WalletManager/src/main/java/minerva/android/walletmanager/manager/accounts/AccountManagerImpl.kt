@@ -138,15 +138,15 @@ class AccountManagerImpl(
     override fun getAllAccounts(): List<Account> = walletManager.getWalletConfig().accounts
 
     override fun getAllActiveAccounts(chainId: Int): List<Account> =
-        getAllAccounts()?.filter { !it.isDeleted && it.chainId == chainId }
+        getAllAccounts().filter { !it.isDeleted && it.chainId == chainId }
 
     override fun toChecksumAddress(address: String): String =
         blockchainRepository.toChecksumAddress(address)
 
     override fun clearFiat() =
-        walletManager.getWalletConfig().accounts.forEach {
-            it.fiatBalance = Double.InvalidValue.toBigDecimal()
-            it.accountTokens.forEach { accountToken -> accountToken.tokenPrice = Double.InvalidValue }
+        walletManager.getWalletConfig().accounts.forEach { account ->
+            account.fiatBalance = Double.InvalidValue.toBigDecimal()
+            account.accountTokens.forEach { accountToken -> accountToken.tokenPrice = Double.InvalidValue }
         }
 
     override val areMainNetworksEnabled: Boolean

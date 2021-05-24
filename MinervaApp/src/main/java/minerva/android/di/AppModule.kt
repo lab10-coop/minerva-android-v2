@@ -81,7 +81,7 @@ private val appModules = module {
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
     viewModel { RampViewModel(get(), get()) }
-    viewModel { FiatViewModel(get(), get()) }
+    viewModel { FiatViewModel(get(), get(), get()) }
 }
 
 private const val MinervaCache = "MinervaCache"

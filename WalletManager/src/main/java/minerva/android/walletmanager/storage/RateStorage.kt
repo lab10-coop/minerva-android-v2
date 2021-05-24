@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.storage
 
-interface TempStorage  {
+interface RateStorage  {
+    var areRatesSynced: Boolean
     fun clearRates()
     fun getRates() : Map<String, Double>
     fun getRate(tokenHash: String): Double

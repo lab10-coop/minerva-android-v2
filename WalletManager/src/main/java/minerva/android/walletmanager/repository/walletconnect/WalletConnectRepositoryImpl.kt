@@ -161,9 +161,7 @@ class WalletConnectRepositoryImpl(
         dappDao.getAll().firstOrError().map { EntitiesToDappSessionsMapper.map(it) }
 
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
-        dappDao.getAll().map {
-            EntitiesToDappSessionsMapper.map(it)
-        }
+        dappDao.getAll().map { sessionEntities -> EntitiesToDappSessionsMapper.map(sessionEntities) }
 
     override fun getDappSessionById(peerId: String): Single<DappSession> =
         dappDao.getDapSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
@@ -193,12 +191,12 @@ class WalletConnectRepositoryImpl(
 
     private fun ping(dapps: List<DappSession>) {
         if (clientMap.isNotEmpty()) {
-            clientMap.forEach {
-                val currentDapp = dapps.find { dapp -> dapp.peerId == it.key }
-                if (shouldPing(it)) {
-                    it.value.approveSession(it.value.accounts!!, it.value.chainId!!, it.key)
-                } else if (dapps.isNotEmpty() && currentDapp != null && it.value.session != null) {
-                    it.value.approveSession(
+            clientMap.forEach { entry ->
+                val currentDapp = dapps.find { dapp -> dapp.peerId == entry.key }
+                if (shouldPing(entry)) {
+                    entry.value.approveSession(entry.value.accounts!!, entry.value.chainId!!, entry.key)
+                } else if (dapps.isNotEmpty() && currentDapp != null && entry.value.session != null) {
+                    entry.value.approveSession(
                         listOf(currentDapp.address),
                         currentDapp.chainId,
                         currentDapp.peerId,

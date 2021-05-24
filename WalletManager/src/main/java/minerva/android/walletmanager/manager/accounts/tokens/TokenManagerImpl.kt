@@ -7,13 +7,11 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
-import minerva.android.apiProvider.model.FiatPrice
-import minerva.android.apiProvider.model.MarketData
-import minerva.android.apiProvider.model.TokenMarketResponse
-import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.TokenDetails
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
 import minerva.android.kotlinUtils.list.removeAll
@@ -42,7 +40,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenTag
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.storage.TempStorage
+import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import java.math.BigDecimal
@@ -53,7 +51,7 @@ class TokenManagerImpl(
     private val cryptoApi: CryptoApi,
     private val localStorage: LocalStorage,
     private val blockchainRepository: BlockchainRegularAccountRepository,
-    private val tempStorage: TempStorage,
+    private val rateStorage: RateStorage,
     database: MinervaDatabase
 ) : TokenManager {
 
@@ -147,7 +145,7 @@ class TokenManagerImpl(
                             AccountToken(
                                 erc20Token,
                                 balance,
-                                tempStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address))
+                                rateStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address))
                             )
                         }.orElse { throw NullPointerException() }
                     }
@@ -225,7 +223,7 @@ class TokenManagerImpl(
             }
         } else Single.just(Pair(false, accountTokens))
 
-    override fun getSingleTokenRate(tokenHash: String): Double = tempStorage.getRate(tokenHash)
+    override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
 
     private fun getTokenIconsURL(): Single<Map<String, String>> =
         cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->
@@ -238,45 +236,60 @@ class TokenManagerImpl(
             else -> getNotEthereumTokens(account)
         }
 
-    private fun updateAccountTokenRate(
-        token: ERC20Token,
-        ratesMap: Map<String, Double>
-    ): Observable<Pair<String, Double>> =
-        generateTokenHash(token.chainId, token.address).let { tokenHash ->
-            ratesMap[tokenHash]?.let {
-                Observable.just(Pair(tokenHash, it))
-            }.orElse {
-                cryptoApi.getTokenMarkets(MarketUtils.getMarketId(token.chainId), token.address)
-                    .onErrorReturn { TokenMarketResponse(marketData = MarketData(FiatPrice())) }
-                    .map {
-                        val tokenMarketRate = it.marketData.currentFiatPrice.getRate(localStorage.loadCurrentFiat())
-                        Pair(tokenHash, tokenMarketRate)
-                    }.toObservable()
+    private fun prepareContractAddresses(tokens: List<ERC20Token>): String =
+        tokens.joinToString(TOKEN_ADDRESS_SEPARATOR) { token -> token.address }
+
+    override fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable =
+        mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
+            with(localStorage.loadCurrentFiat()) {
+                if (currentFiat != this) rateStorage.clearRates()
+                tokens.forEach { (chainId, tokens) ->
+                    val marketId = MarketUtils.getMarketId(chainId)
+                    if (!rateStorage.areRatesSynced && marketId != String.Empty) {
+                        observables.add(updateAccountTokensRate(marketId, chainId, prepareContractAddresses(tokens)))
+                    }
+                }
+                Observable.merge(observables)
+                    .doOnNext { rates ->
+                        rates.forEach { (fiatSymbol, rate) ->
+                            rateStorage.saveRate(fiatSymbol, rate)
+                        }
+                    }.toList()
+                    .doOnSuccess {
+                        currentFiat = this
+                        rateStorage.areRatesSynced = true
+                    }
+                    .ignoreElement()
             }
         }
 
-    override fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable =
-        mutableListOf<Observable<Pair<String, Double>>>().let { observables ->
-            if (currentFiat != localStorage.loadCurrentFiat()) tempStorage.clearRates()
-            tokens.values.forEach {
-                it.forEach {
-                    observables.add(updateAccountTokenRate(it, tempStorage.getRates()))
-                }
-            }
-            Observable.merge(observables)
-                .doOnNext { (tokenHash, rate) ->
-                    tempStorage.saveRate(tokenHash, rate)
-                }.toList()
-                .doOnSuccess {
-                    currentFiat = localStorage.loadCurrentFiat()
-                }
-                .ignoreElement()
+    private fun updateAccountTokensRate(
+        marketId: String,
+        chainId: Int,
+        contractAddresses: String
+    ): Observable<List<Pair<String, Double>>> =
+        with(localStorage.loadCurrentFiat()) {
+            cryptoApi.getTokensRate(marketId, contractAddresses, this)
+                .map { tokenRateResponse ->
+                    mutableListOf<Pair<String, Double>>().apply {
+                        tokenRateResponse.forEach { (contractAddress, rate) ->
+                            add(
+                                Pair(
+                                    generateTokenHash(chainId, contractAddress),
+                                    rate[toLowerCase(Locale.ROOT)]?.toDouble() ?: Double.InvalidValue
+                                )
+                            )
+                        }
+                    }.toList()
+                }.toObservable()
         }
 
     override fun updateTokensRate(account: Account) {
         account.apply {
-            accountTokens.forEach {
-                it.tokenPrice = tempStorage.getRate(generateTokenHash(it.token.chainId, it.token.address))
+            accountTokens.forEach { accountToken ->
+                with(accountToken) {
+                    tokenPrice = rateStorage.getRate(generateTokenHash(token.chainId, token.address))
+                }
             }
         }
     }
@@ -336,6 +349,7 @@ class TokenManagerImpl(
                 currentTokens.removeAll { it.address == token.address }
                 currentTokens.add(token)
                 put(chainId, currentTokens)
+                rateStorage.areRatesSynced = false
             }
         }
 
@@ -345,14 +359,16 @@ class TokenManagerImpl(
      * return statement: Map<ChainId, List<ERC20Token>>
      */
 
-    private fun updateTokens(map: Map<Int, List<ERC20Token>>, tokens: MutableMap<Int, List<ERC20Token>>) =
+    @VisibleForTesting
+    fun updateTokens(map: Map<Int, List<ERC20Token>>, tokens: MutableMap<Int, List<ERC20Token>>) =
         tokens.apply {
-            map.values.forEach {
-                it.forEach { accountToken ->
+            map.values.forEach { newTokens ->
+                newTokens.forEach { accountToken ->
                     (this[accountToken.chainId] ?: listOf()).toMutableList().let { currentTokens ->
                         currentTokens.removeAll { it.address == accountToken.address }
                         currentTokens.add(accountToken)
                         put(accountToken.chainId, currentTokens)
+                        rateStorage.areRatesSynced = false
                     }
                 }
             }
@@ -363,5 +379,6 @@ class TokenManagerImpl(
         private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
         private const val ETHEREUM_TOKENTX_REQUEST =
             "%sapi?module=account&action=tokentx&address=%s&startblock=0&endblock=999999999&sort=asc&apikey=%s"
+        private const val TOKEN_ADDRESS_SEPARATOR = ","
     }
 }

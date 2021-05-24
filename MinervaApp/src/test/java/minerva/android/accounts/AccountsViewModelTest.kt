@@ -6,8 +6,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
-import minerva.android.accounts.enum.ErrorCode
-import minerva.android.accounts.transaction.fragment.AccountsViewModel
+import minerva.android.accounts.transaction.fragment.*
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -50,24 +49,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val tokensBalanceObserver: Observer<Unit> = mock()
     private val tokensBalanceCaptor: KArgumentCaptor<Unit> = argumentCaptor()
 
-    private val noFundsObserver: Observer<Event<Unit>> = mock()
-    private val noFundsCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
-
     private val dappSessionObserver: Observer<HashMap<String, Int>> = mock()
     private val dappSessionCaptor: KArgumentCaptor<HashMap<String, Int>> = argumentCaptor()
 
-    private val errorObserver: Observer<Event<Throwable>> = mock()
-    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
-
-    private val refreshBalancesErrorObserver: Observer<Event<ErrorCode>> = mock()
-    private val refreshBalancesErrorCaptor: KArgumentCaptor<Event<ErrorCode>> = argumentCaptor()
+    private val errorObserver: Observer<Event<AccountsErrorState>> = mock()
+    private val errorCaptor: KArgumentCaptor<Event<AccountsErrorState>> = argumentCaptor()
 
     private val accountRemoveObserver: Observer<Event<Unit>> = mock()
     private val accountRemoveCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
-
-    private val shouldShowWarningObserver: Observer<Event<Boolean>> = mock()
-    private val shouldShowWarningCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
-
 
     @Before
     fun initViewModel() {
@@ -120,11 +109,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshBalances()).thenReturn(Single.error(error))
-        viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
+        viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.refreshBalances()
-        refreshBalancesErrorCaptor.run {
-            verify(refreshBalancesErrorObserver).onChanged(capture())
-            firstValue.peekContent() == ErrorCode.BALANCE_ERROR
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+            firstValue.peekContent() == RefreshCoinBalancesError
         }
     }
 
@@ -166,11 +155,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get tokens balance error test`() {
         val error = Throwable()
         whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.error(error))
-        viewModel.refreshBalancesErrorLiveData.observeForever(refreshBalancesErrorObserver)
+        viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.refreshTokensBalances()
-        refreshBalancesErrorCaptor.run {
-            verify(refreshBalancesErrorObserver).onChanged(capture())
-            firstValue.peekContent() == ErrorCode.TOKEN_BALANCE_ERROR
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+            firstValue.peekContent() == RefreshTokenBalancesError
         }
     }
 
@@ -219,10 +208,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `create safe account when balance is 0`() {
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.just("address"))
-        viewModel.noFundsLiveData.observeForever(noFundsObserver)
+        viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ZERO))
-        noFundsCaptor.run {
-            verify(noFundsObserver).onChanged(capture())
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+            firstValue.peekContent() == NoFunds
         }
     }
 
@@ -240,7 +230,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
         whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
         viewModel.apply {
-            activeAccounts = listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
+            activeAccounts =
+                listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
             addAtsToken()
         }
         verify(accountManager, times(1)).saveFreeATSTimestamp()
@@ -253,7 +244,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
         whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
         viewModel.apply {
-            activeAccounts = listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
+            activeAccounts =
+                listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
             errorLiveData.observeForever(errorObserver)
             addAtsToken()
         }

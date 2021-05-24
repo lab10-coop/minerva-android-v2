@@ -136,7 +136,7 @@ class WalletConnectViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = { closeScanner() },
-                    onError = { OnGeneralError(it) })
+                    onError = { error -> _errorLiveData.value = Event(error) })
         }
     }
 
@@ -160,29 +160,29 @@ class WalletConnectViewModel(
         if (icons.isEmpty()) String.Empty
         else icons[FIRST_ICON]
 
-    private fun handleSessionRequest(it: OnSessionRequest): WalletConnectState =
-        it.chainId?.let { id ->
+    private fun handleSessionRequest(sessionRequest: OnSessionRequest): WalletConnectState =
+        sessionRequest.chainId?.let { id ->
             requestedNetwork = getNetworkName(id)
-            OnSessionRequest(it.meta, requestedNetwork, getAlertType(it.meta.url))
+            OnSessionRequest(sessionRequest.meta, requestedNetwork, getAlertType(sessionRequest.meta.url))
         }.orElse {
             requestedNetwork = account.network.name
-            OnSessionRequest(it.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
+            OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
         }
 
     private fun getAlertType(url: String) = when {
         account.network.name == requestedNetwork -> WalletConnectAlertType.NO_ALERT
-        requestedNetwork == ETHEREUM_NETWORK && isUrlContainAccountNetwork(url) -> WalletConnectAlertType.NO_ALERT
-        requestedNetwork == ETHEREUM_NETWORK && !isUrlContainAccountNetwork(url) -> WalletConnectAlertType.WARNING
+        requestedNetwork == getNetworkName(ETHEREUM_CHAIN_ID) && isUrlContainAccountNetwork(url) -> WalletConnectAlertType.NO_ALERT
+        requestedNetwork == getNetworkName(ETHEREUM_CHAIN_ID) && !isUrlContainAccountNetwork(url) -> WalletConnectAlertType.WARNING
         account.network.name != requestedNetwork -> WalletConnectAlertType.ERROR
         else -> WalletConnectAlertType.NO_ALERT
     }
 
     private fun isUrlContainAccountNetwork(url: String): Boolean = url.contains(account.network.token, true)
 
-    private fun getNetworkName(chainId: Int) =
-        NetworkManager.networks.find { it.chainId == chainId }?.name.orElse { String.Empty }
+    private fun getNetworkName(chainId: Int): String =
+        NetworkManager.networks.find { network ->  network.chainId == chainId }?.name.orElse { String.Empty }
 
     companion object {
-        private val ETHEREUM_NETWORK = "Ethereum"
+        private const val ETHEREUM_CHAIN_ID = 1
     }
 }

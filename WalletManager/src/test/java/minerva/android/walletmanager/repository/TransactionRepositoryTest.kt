@@ -5,7 +5,10 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.FiatPrice
+import minerva.android.apiProvider.model.GasPrices
+import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -670,7 +673,7 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `to ether conversions test`() {
         whenever(blockchainRegularAccountRepository.toEther(any())).thenReturn(BigDecimal.TEN)
-        val result = repository.toEther(BigDecimal.TEN)
+        val result = repository.toUserReadableFormat(BigDecimal.TEN)
         assertEquals(result, BigDecimal.TEN)
     }
 

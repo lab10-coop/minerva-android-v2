@@ -47,7 +47,7 @@
         android:gravity="center_vertical"
         android:paddingTop="@dimen/margin_small"
         android:paddingBottom="@dimen/margin_normal"
-        android:text="@string/choose_your_crypto"
+        android:text="@string/choose_your_account"
         android:textAllCaps="true"
         android:textColor="@color/networksTypeHeader"
         android:textSize="@dimen/text_xsmall"
