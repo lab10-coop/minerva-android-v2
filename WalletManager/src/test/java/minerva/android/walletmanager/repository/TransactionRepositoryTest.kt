@@ -5,10 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.FiatPrice
-import minerva.android.apiProvider.model.GasPrices
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.TransactionSpeed
+import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -555,6 +552,36 @@ class TransactionRepositoryTest : RxTest() {
         ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
         whenever(blockchainRegularAccountRepository.fromWei(any())).thenReturn(BigDecimal.TEN)
         repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 1))
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.gasPrice == BigDecimal.TEN
+            }
+    }
+
+    @Test
+    fun `get transaction costs success when there is gas price from oracle available and it is Matic network`() {
+        NetworkManager.initialize(
+            listOf(
+                Network(
+                    chainId = 137,
+                    httpRpc = "httpRpc",
+                    wsRpc = "wssuri",
+                    gasPriceOracle = "url"
+                )
+            )
+        )
+        whenever(cryptoApi.getGasPriceForMatic(any())).thenReturn(
+            Single.just(
+                GasPricesMatic(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN)
+            )
+        )
+        whenever(
+            blockchainRegularAccountRepository.getTransactionCosts(any(), any())
+        ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
+        whenever(blockchainRegularAccountRepository.toGwei(BigDecimal.TEN)).thenReturn(BigDecimal.valueOf(10000000000))
+        whenever(blockchainRegularAccountRepository.fromWei(BigDecimal.valueOf(10000000000))).thenReturn(BigDecimal.TEN)
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 137))
             .test()
             .assertComplete()
             .assertValue {

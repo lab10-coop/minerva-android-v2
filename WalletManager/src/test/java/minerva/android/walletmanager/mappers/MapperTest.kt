@@ -1,6 +1,5 @@
 package minerva.android.walletmanager.mappers
 
-import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.TokenData
 import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.defs.BlockchainTransactionType
@@ -12,12 +11,6 @@ import minerva.android.configProvider.model.walletConfig.ServicePayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.ServiceQrCode
-import minerva.android.walletmanager.model.token.WalletConfigTestValues.accounts
-import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
-import minerva.android.walletmanager.model.token.WalletConfigTestValues.identities
-import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityData
-import minerva.android.walletmanager.model.token.WalletConfigTestValues.networks
-import minerva.android.walletmanager.model.token.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.mappers.*
@@ -26,6 +19,12 @@ import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.accounts
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.identities
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityData
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.networks
+import minerva.android.walletmanager.model.token.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletConfig
@@ -286,7 +285,7 @@ class MapperTest {
     @Test
     fun `map transaction cost payload to transaction cost test`() {
         val input = TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)
-        val response = TransactionCostPayloadToTransactionCost.map(input, GasPrices("code", TransactionSpeed()), 1) { it }
+        val response = TransactionCostPayloadToTransactionCost.map(input, TransactionSpeed(), 1) { it }
         response.gasLimit shouldBeEqualTo input.gasLimit
         response.gasPrice shouldBeEqualTo input.gasPrice
         response.cost shouldBeEqualTo input.cost

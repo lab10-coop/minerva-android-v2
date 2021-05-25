@@ -6,9 +6,10 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPrices
+import minerva.android.apiProvider.model.GasPricesMatic
 import minerva.android.apiProvider.model.MarketIds
 import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
@@ -20,6 +21,8 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Fiat
 import minerva.android.walletmanager.model.defs.ChainId
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.mappers.PendingTransactionToPendingAccountMapper
 import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTransactionCost
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
@@ -130,6 +133,7 @@ class TransactionRepositoryImpl(
                 ChainId.ETH_MAIN -> getRate(MarketIds.ETHEREUM).map { it.ethFiatPrice?.getRate(currentFiat) }
                 ChainId.POA_CORE -> getRate(MarketIds.POA_NETWORK).map { it.poaFiatPrice?.getRate(currentFiat) }
                 ChainId.XDAI -> getRate(MarketIds.XDAI).map { it.daiFiatPrice?.getRate(currentFiat) }
+                ChainId.MATIC -> getRate(MarketIds.MATIC).map { it.maticFiatPrice?.getRate(currentFiat) }
                 else -> Single.just(ZERO_FIAT_VALUE)
             }
         }
@@ -147,12 +151,18 @@ class TransactionRepositoryImpl(
     override fun getFiatSymbol(): String = Fiat.getFiatSymbol(localStorage.loadCurrentFiat())
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
-        if (shouldGetGasPriceFromApi(chainId)) {
-            cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
-                .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice) }
-                .onErrorResumeNext { getTxCosts(txCostPayload, null) }
-        } else {
-            getTxCosts(txCostPayload, null)
+        when {
+            shouldGetGasPriceFromApi(chainId) && isMaticNetwork(chainId) -> {
+                cryptoApi.getGasPriceForMatic(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
+                    .flatMap { gasPricesMatic -> getTxCosts(txCostPayload, gasPricesMatic.toTransactionSpeed()) }
+                    .onErrorResumeNext { getTxCosts(txCostPayload, null) }
+            }
+            shouldGetGasPriceFromApi(chainId) -> {
+                cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
+                    .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice.speed) }
+                    .onErrorResumeNext { getTxCosts(txCostPayload, null) }
+            }
+            else -> getTxCosts(txCostPayload, null)
         }
     }
 
@@ -234,7 +244,7 @@ class TransactionRepositoryImpl(
 
     private fun downloadTokensList(accounts: List<Account>): Single<List<ERC20Token>> =
         Observable.fromIterable(accounts)
-            .flatMapSingle { tokenManager.downloadTokensList(it) }
+            .flatMapSingle { account -> tokenManager.downloadTokensList(account) }
             .toList()
             .map { mergeLists(it) }
 
@@ -245,13 +255,22 @@ class TransactionRepositoryImpl(
 
     private fun shouldGetGasPriceFromApi(chainId: Int) = NetworkManager.getNetwork(chainId).gasPriceOracle.isNotEmpty()
 
-    private fun getTxCosts(payload: TxCostPayload, gasPrice: GasPrices?): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), gasPrice?.speed?.rapid)
+    private fun isMaticNetwork(chainId: Int) = chainId == MATIC || chainId == MUMBAI
+
+    private fun getTxCosts(payload: TxCostPayload, speed: TransactionSpeed?): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), speed?.rapid)
             .map { txCost ->
-                TransactionCostPayloadToTransactionCost.map(txCost, gasPrice, payload.chainId) {
+                TransactionCostPayloadToTransactionCost.map(txCost, speed, payload.chainId) {
                     blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
                 }
             }
+
+    private fun GasPricesMatic.toTransactionSpeed() = TransactionSpeed(
+        rapid = blockchainRepository.toGwei(rapid),
+        fast = blockchainRepository.toGwei(fast),
+        standard = blockchainRepository.toGwei(standard),
+        slow = blockchainRepository.toGwei(slow)
+    )
 
     private fun getPendingAccountsWithBlockHashes(it: List<Pair<String, String?>>): MutableList<PendingAccount> {
         val pendingList = mutableListOf<PendingAccount>()

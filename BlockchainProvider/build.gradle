@@ -26,6 +26,7 @@ android {
         consumerProguardFiles 'consumer-rules.pro'
 
         buildConfigField "String", "FREE_ATS_URL", '"https://faucet.tau1.artis.network/ats/"'
+        buildConfigField "String", "X_API_KEY", System.env.X_API_KEY ?: localProperty("x.api.key")
     }
 
     buildTypes {

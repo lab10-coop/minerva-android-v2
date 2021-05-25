@@ -15,6 +15,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
@@ -33,6 +35,7 @@ private fun getMainIcon(chainId: Int): Int =
         LUKSO_14 -> R.drawable.ic_lukso
         ETH_KOV, ETH_RIN, ETH_ROP -> R.drawable.ic_etherium_test
         ETH_GOR -> R.drawable.ic_gorli
+        MATIC, MUMBAI -> R.drawable.ic_polygon_matic
         else -> Int.InvalidId
     }
 
@@ -46,6 +49,7 @@ fun getMainTokenIconRes(chainId: Int): Int =
         ETH_KOV, ETH_RIN, ETH_ROP, ETH_GOR -> R.drawable.ic_ethereum_token_test
         POA_SKL -> R.drawable.ic_skl_token
         LUKSO_14 -> R.drawable.ic_lukso
+        MATIC, MUMBAI -> R.drawable.ic_polygon_matic_token
         else -> R.drawable.ic_default_token
     }
 
