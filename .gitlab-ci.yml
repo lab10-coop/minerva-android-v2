@@ -49,23 +49,6 @@ distributeStagingBuild:
     paths:
       - ./MinervaApp/build/outputs/apk/staging
 
-distributeProductionBuild:
-  stage: distribution
-  only:
-    - master
-
-  script:
-    - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
-    - ./gradlew build
-    - . /etc/profile.d/rvm.sh
-    - ./BuildScripts/build_fastlane.sh
-    - fastlane firebaseProduction
-    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
-
-  artifacts:
-    paths:
-      - ./MinervaApp/build/outputs/apk/production
-
 #Delete when releasing to production
 deployProductionBuild:
   stage: distribution

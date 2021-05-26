@@ -41,9 +41,6 @@ class MainViewModel(
     private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
 
-    lateinit var loginPayload: LoginPayload
-    lateinit var qrCode: CredentialQrCode
-
     private val _errorLiveData = MutableLiveData<Event<MainErrorState>>()
     val errorLiveData: LiveData<Event<MainErrorState>> get() = _errorLiveData
 
@@ -62,17 +59,14 @@ class MainViewModel(
     private val _updateTokensRateLiveData = MutableLiveData<Event<Unit>>()
     val updateTokensRateLiveData: LiveData<Event<Unit>> get() = _updateTokensRateLiveData
 
+    lateinit var loginPayload: LoginPayload
+    lateinit var qrCode: CredentialQrCode
     private var webSocketSubscriptions = CompositeDisposable()
     val executedAccounts = mutableListOf<PendingAccount>()
-    val isBackupAllowed: Boolean
-        get() = masterSeedRepository.isBackupAllowed
-
+    val isBackupAllowed: Boolean get() = masterSeedRepository.isBackupAllowed
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
     fun getAccountIterator(): Int = masterSeedRepository.getAccountIterator()
-
-    fun dispose() {
-        masterSeedRepository.dispose()
-    }
+    fun isProtectTransactionEnabled() = transactionRepository.isProtectTransactionEnabled()
 
     fun subscribeToExecutedTransactions(accountIndex: Int) {
         if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {
@@ -91,12 +85,6 @@ class MainViewModel(
         }
     }
 
-    fun clearWebSocketSubscription() {
-        if (transactionRepository.getPendingAccounts().isEmpty()) {
-            webSocketSubscriptions.clear()
-        }
-    }
-
     fun restorePendingTransactions() {
         launchDisposable {
             transactionRepository.getTransactions()
@@ -111,10 +99,6 @@ class MainViewModel(
                     }
                 )
         }
-    }
-
-    fun clearPendingAccounts() {
-        transactionRepository.clearPendingAccounts()
     }
 
     fun isOrderEditAvailable(type: Int) = orderManager.isOrderAvailable(type)
@@ -168,14 +152,9 @@ class MainViewModel(
         }
     }
 
-    fun clearAndUnsubscribe() {
-        clearPendingAccounts()
-        clearWebSocketSubscription()
-    }
-
     fun getTokensRate() {
         launchDisposable {
-            transactionRepository.getTokensRate()
+            transactionRepository.getTokensRates()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -184,8 +163,6 @@ class MainViewModel(
                 )
         }
     }
-
-    fun isProtectTransactionEabled() = transactionRepository.isProtectTransactionEnabled()
 
     private fun handleExecutedAccounts(it: PendingAccount) {
         if (_updatePendingAccountLiveData.hasActiveObservers()) {
@@ -252,4 +229,23 @@ class MainViewModel(
             lastUsed,
             hashMapOf(WalletActionFields.CREDENTIAL_NAME to name)
         )
+
+    fun dispose() {
+        masterSeedRepository.dispose()
+    }
+
+    fun clearWebSocketSubscription() {
+        if (transactionRepository.getPendingAccounts().isEmpty()) {
+            webSocketSubscriptions.clear()
+        }
+    }
+
+    fun clearAndUnsubscribe() {
+        clearPendingAccounts()
+        clearWebSocketSubscription()
+    }
+
+    fun clearPendingAccounts() {
+        transactionRepository.clearPendingAccounts()
+    }
 }

@@ -217,8 +217,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         showFlashbar(getString(R.string.wallet_connect_title), getString(R.string.wc_connection_error_message))
     }
 
-    private fun handleLoadingDialog(it: ProgressBarState) {
-        if (it.show) {
+    private fun handleLoadingDialog(state: ProgressBarState) {
+        if (state.show) {
             loadingDialog = MinervaLoadingDialog(this).apply { show() }
         } else {
             loadingDialog?.dismiss()
@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             DappSendTransactionDialog(
                 this@MainActivity,
                 {
-                    if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt(
+                    if (viewModel.isProtectTransactionEnabled()) getCurrentFragment()?.showBiometricPrompt(
                         ::sendTransaction,
                         ::rejectRequest
                     )

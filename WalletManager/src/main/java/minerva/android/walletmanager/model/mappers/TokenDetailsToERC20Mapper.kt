@@ -16,7 +16,13 @@ object TokenDetailsToERC20TokensMapper : Mapper<List<TokenDetails>, List<ERC20To
 object TokenDetailsToERC20Mapper : Mapper<TokenDetails, ERC20Token> {
     override fun map(input: TokenDetails): ERC20Token = with(input) {
         ERC20Token(
-            chainId, name, symbol, address, decimals.toString(), logoURI, tags.first()
+            chainId = chainId,
+            name = name,
+            symbol = symbol,
+            address = address,
+            decimals = decimals.toString(),
+            logoURI = logoURI,
+            tag = tags.first()
         )
     }
 }

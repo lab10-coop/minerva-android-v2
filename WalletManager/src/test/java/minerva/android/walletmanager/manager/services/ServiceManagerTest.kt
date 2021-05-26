@@ -6,22 +6,23 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.cryptographyProvider.repository.CryptographyRepository
-import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import minerva.android.apiProvider.api.ServicesApi
 import minerva.android.apiProvider.model.LoginResponse
 import minerva.android.apiProvider.model.Profile
+import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
-import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.CredentialQrCode
+import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.CredentialType
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.IncognitoIdentity
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
-import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.MockDataProvider
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
@@ -37,7 +38,7 @@ class ServiceManagerTest : RxTest() {
     @Before
     override fun setupRxSchedulers() {
         super.setupRxSchedulers()
-        whenever(walletConfigManager.getWalletConfig()) doReturn DataProvider.walletConfig
+        whenever(walletConfigManager.getWalletConfig()) doReturn MockDataProvider.walletConfig
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 

@@ -22,6 +22,7 @@ import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity
+import minerva.android.wrapped.WrappedActivity.Companion.ADDRESS
 import minerva.android.wrapped.WrappedActivity.Companion.CHAIN_ID
 import minerva.android.wrapped.WrappedActivity.Companion.PRIVATE_KEY
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -109,8 +110,8 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
 
     private fun prepareLiveData() {
         viewModel.apply {
-            addressDetailsLiveData.observe(viewLifecycleOwner, Observer { showTokenData(it) })
-            loadingLiveData.observe(viewLifecycleOwner, EventObserver { onLoading(it) })
+            addressDetailsLiveData.observe(viewLifecycleOwner, Observer { token -> showTokenData(token) })
+            loadingLiveData.observe(viewLifecycleOwner, EventObserver { isLoading -> onLoading(isLoading) })
             tokenAddedLiveData.observe(viewLifecycleOwner, EventObserver { onBackListener.onBack() })
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 MinervaFlashbar.showError(requireActivity(), it)
@@ -135,9 +136,10 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
 
     private fun initFragment() {
         arguments?.let { bundle ->
-            viewModel.initViewModel(
+            viewModel.setAccountData(
                 bundle.getString(PRIVATE_KEY, String.Empty),
-                bundle.getInt(CHAIN_ID, Int.InvalidId)
+                bundle.getInt(CHAIN_ID, Int.InvalidId),
+                bundle.getString(ADDRESS, String.Empty)
             )
         }
         binding.apply {
@@ -152,10 +154,11 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
     }
 
     companion object {
-        fun newInstance(privateKey: String, chainId: Int) = AddTokenFragment().apply {
+        fun newInstance(privateKey: String, chainId: Int, address: String) = AddTokenFragment().apply {
             arguments = Bundle().apply {
                 putString(PRIVATE_KEY, privateKey)
                 putInt(CHAIN_ID, chainId)
+                putString(ADDRESS, address)
             }
         }
     }

@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.widget.RelativeLayout
 import minerva.android.R
 import minerva.android.databinding.TokenViewBinding
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
@@ -24,11 +23,11 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         account: Account,
         callback: TokenViewCallback,
         fiatSymbol: String,
-        tokenAddress: String = String.Empty
+        token: ERC20Token? = null
     ) {
-        prepareView(account, tokenAddress)
-        prepareListeners(callback, account, tokenAddress)
-        getTokensValues(account, tokenAddress).let { (crypto, fiat) ->
+        prepareView(token, account)
+        prepareListeners(callback, account, token)
+        getTokensValues(account, token).let { (crypto, fiat) ->
             with(binding.amountView) {
                 setCrypto(getCryptoBalance(crypto))
                 setFiat(getFiatBalance(fiat, fiatSymbol))
@@ -36,21 +35,21 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         }
     }
 
-    private fun getTokensValues(account: Account, tokenAddress: String): Pair<BigDecimal, BigDecimal> =
-        if (tokenAddress != String.Empty) Pair(
-            getToken(account, tokenAddress).balance,
-            getToken(account, tokenAddress).fiatBalance
-        )
-        else Pair(account.cryptoBalance, prepareFiatBalance(account))
+    private fun getTokensValues(account: Account, token: ERC20Token?): Pair<BigDecimal, BigDecimal> =
+        if (token != null) {
+            with(getToken(account, token.address)) {
+                Pair(balance, fiatBalance)
+            }
+        } else Pair(account.cryptoBalance, prepareFiatBalance(account))
 
     private fun prepareFiatBalance(account: Account) =
         if (account.network.testNet) BigDecimal.ZERO
         else account.fiatBalance
 
-    private fun prepareView(account: Account, tokenAddress: String) {
+    private fun prepareView(erc20token: ERC20Token?, account: Account) {
         binding.apply {
-            if (tokenAddress != String.Empty)
-                with(getToken(account, tokenAddress).token) {
+            if (erc20token != null)
+                with(erc20token) {
                     tokenLogo.initView(this)
                     tokenName.text = symbol
                 }
@@ -62,12 +61,12 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         }
     }
 
-    private fun prepareListeners(callback: TokenViewCallback, account: Account, tokenAddress: String) {
-        if (tokenAddress != String.Empty) setOnClickListener { callback.onSendTokenTokenClicked(account, tokenAddress) }
+    private fun prepareListeners(callback: TokenViewCallback, account: Account, token: ERC20Token?) {
+        if (token != null) setOnClickListener { callback.onSendTokenTokenClicked(account, token.address) }
         else setOnClickListener { callback.onSendTokenClicked(account) }
     }
 
-    private fun getToken(account: Account, tokenAddress: String) =
+    private fun getToken(account: Account, tokenAddress: String): AccountToken =
         account.accountTokens.find { it.token.address == tokenAddress } ?: AccountToken(ERC20Token(Int.InvalidValue))
 
     interface TokenViewCallback {

@@ -5,10 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.FiatPrice
-import minerva.android.apiProvider.model.GasPrices
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.TransactionSpeed
+import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.PendingTransaction
 import minerva.android.blockchainprovider.model.TransactionCostPayload
@@ -30,9 +27,10 @@ import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.MockDataProvider
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -60,8 +58,8 @@ class TransactionRepositoryTest : RxTest() {
 
     @Before
     fun initialize() {
-        NetworkManager.initialize(DataProvider.networks)
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 
@@ -72,7 +70,7 @@ class TransactionRepositoryTest : RxTest() {
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.0))))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
 
-        repository.refreshBalances().test()
+        repository.refreshCoinBalances().test()
             .assertComplete()
             .assertValue {
                 it["address1"]?.cryptoBalance == BigDecimal.ONE
@@ -89,7 +87,7 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
-        repository.refreshBalances().test()
+        repository.refreshCoinBalances().test()
             .assertError(error)
     }
 
@@ -100,7 +98,7 @@ class TransactionRepositoryTest : RxTest() {
             .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
-        repository.refreshBalances().test()
+        repository.refreshCoinBalances().test()
             .assertComplete()
             .assertValue {
                 it["address1"]?.cryptoBalance == BigDecimal.ONE
@@ -563,6 +561,36 @@ class TransactionRepositoryTest : RxTest() {
     }
 
     @Test
+    fun `get transaction costs success when there is gas price from oracle available and it is Matic network`() {
+        NetworkManager.initialize(
+            listOf(
+                Network(
+                    chainId = 137,
+                    httpRpc = "httpRpc",
+                    wsRpc = "wssuri",
+                    gasPriceOracle = "url"
+                )
+            )
+        )
+        whenever(cryptoApi.getGasPriceForMatic(any())).thenReturn(
+            Single.just(
+                GasPricesMatic(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN)
+            )
+        )
+        whenever(
+            blockchainRegularAccountRepository.getTransactionCosts(any(), any())
+        ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
+        whenever(blockchainRegularAccountRepository.toGwei(BigDecimal.TEN)).thenReturn(BigDecimal.valueOf(10000000000))
+        whenever(blockchainRegularAccountRepository.fromWei(BigDecimal.valueOf(10000000000))).thenReturn(BigDecimal.TEN)
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 137))
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.gasPrice == BigDecimal.TEN
+            }
+    }
+
+    @Test
     fun `get transaction costs error when there is no gas price from oracle`() {
         val error = Throwable()
         NetworkManager.initialize(
@@ -679,7 +707,12 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `send transaction success`() {
-        whenever(blockchainRegularAccountRepository.sendWalletConnectTransaction(any(), any())).thenReturn(Single.just("txHash"))
+        whenever(
+            blockchainRegularAccountRepository.sendWalletConnectTransaction(
+                any(),
+                any()
+            )
+        ).thenReturn(Single.just("txHash"))
         repository.sendTransaction(111, Transaction(address = "address"))
             .test()
             .assertComplete()
@@ -691,7 +724,11 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `send transaction error`() {
         val error = Throwable()
-        whenever(blockchainRegularAccountRepository.sendWalletConnectTransaction(any(), any())).thenReturn(Single.error(error))
+        whenever(blockchainRegularAccountRepository.sendWalletConnectTransaction(any(), any())).thenReturn(
+            Single.error(
+                error
+            )
+        )
         repository.sendTransaction(111, Transaction(address = "address"))
             .test()
             .assertError(error)
@@ -700,16 +737,44 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `Checking refreshing token balances success`() {
         val accountTokens = listOf(
-            AccountToken(ERC20Token(3, "one", address = "0x01"), BigDecimal.TEN),
-            AccountToken(ERC20Token(3, "tow", address = "0x02"), BigDecimal.TEN)
+            AccountToken(ERC20Token(3, "one", address = "0x01", decimals = "10"), rawBalance = BigDecimal.TEN),
+            AccountToken(ERC20Token(3, "tow", address = "0x02", decimals = "10"), rawBalance = BigDecimal.TEN)
         )
         whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
-        whenever(tokenManager.getTokensRate(any())).thenReturn(Completable.complete())
+        whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
 
         repository.refreshTokensBalances().test().assertComplete().assertValue {
-            it.size == 1
+            it.size shouldBeEqualTo 1
             it["privateKey"]?.size == 2
         }
+    }
+
+    @Test
+    fun `Checking refreshing token balances when new tokens are detected without account address`() {
+        val accountTokens = listOf(
+            AccountToken(
+                ERC20Token(3, "one", address = "0x01", decimals = "10", accountAddress = ""),
+                rawBalance = BigDecimal.TEN
+            ),
+            AccountToken(
+                ERC20Token(3, "tow", address = "0x02", decimals = "10", accountAddress = ""),
+                rawBalance = BigDecimal.TEN
+            )
+        )
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Pair("privateKey3", accountTokens)))
+        whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+
+        repository.refreshTokensBalances()
+            .test()
+            .await()
+            .assertComplete()
+            .assertValue {
+                it.size == 1 &&
+                        it["privateKey3"]?.size == 2 &&
+                        it["privateKey3"]!![0].token.accountAddress == ""
+            }
     }
 
     @Test
@@ -720,50 +785,91 @@ class TransactionRepositoryTest : RxTest() {
     }
 
 
+//    @Test
+//    fun `Check refreshing tokens list success`() {
+//        val tokensList = listOf(
+//            ERC20Token(3, "Token01", address = "0x0N3"),
+//            ERC20Token(3, "Token02", address = "0xTW0"),
+//            ERC20Token(3, "Token03", address = "0xTHR33")
+//        )
+//
+//        val tokensMap = mapOf(Pair(3, tokensList))
+//        val updatedTokensMap = Pair(true, tokensMap)
+//
+//        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.just(tokensList))
+//        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
+//        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
+//        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
+//            Single.just(updatedTokensMap),
+//            Single.error(Throwable("Stop thread"))
+//        )
+//        whenever(tokenManager.saveTokens(any(), any(), newTokens)).thenReturn(
+//            Single.just(true),
+//            Single.error(Throwable("Stop thread"))
+//        )
+//
+//        repository.discoverNewTokens().test().assertComplete().assertValue { it }
+//        repository.discoverNewTokens().test().assertComplete().assertValue { !it }
+//    }
+//
+//    @Test
+//    fun `Check refreshing tokens list fail`() {
+//        val error = Throwable("error")
+//        val tokensMap = mapOf(Pair(3, listOf<ERC20Token>()))
+//        val updatedTokensMap = Pair(true, tokensMap)
+//        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.error(error))
+//        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
+//        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
+//        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
+//
+//        repository.discoverNewTokens().test().assertError(error)
+//    }
+
     @Test
-    fun `Check refreshing tokens list success`() {
-        val tokensList = listOf(
-            ERC20Token(3, "Token01", address = "0x0N3"),
-            ERC20Token(3, "Token02", address = "0xTW0"),
-            ERC20Token(3, "Token03", address = "0xTHR33")
-        )
-
-        val tokensMap = mapOf(Pair(3, tokensList))
-        val updatedTokensMap = Pair(true, tokensMap)
-
-        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.just(tokensList))
-        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
-        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
-        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
-            Single.just(updatedTokensMap),
-            Single.error(Throwable("Stop thread"))
-        )
-        whenever(tokenManager.saveTokens(any(), any())).thenReturn(Single.just(true), Single.error(Throwable("Stop thread")))
-
-        repository.refreshTokensList().test().assertComplete().assertValue { it }
-        repository.refreshTokensList().test().assertComplete().assertValue { !it }
-    }
-
-    @Test
-    fun `Check refreshing tokens list fail`() {
-        val error = Throwable("error")
-        val tokensMap = mapOf(Pair(3, listOf<ERC20Token>()))
-        val updatedTokensMap = Pair(true, tokensMap)
-        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.error(error))
-        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
-        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
-        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
-
-        repository.refreshTokensList().test().assertError(error)
-    }
-
-    @Test
-    fun `Check getting current tokens rate` () {
+    fun `Check getting current tokens rate`() {
         val error = Throwable("Error-303")
-        whenever(tokenManager.getTokensRate(any())).thenReturn(Completable.complete(), Completable.error(error))
+        whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete(), Completable.error(error))
 
-        repository.getTokensRate().test().assertComplete()
-        repository.getTokensRate().test().assertError(error)
-        verify(tokenManager, times(2)).getTokensRate(any())
+        repository.getTokensRates().test().assertComplete()
+        repository.getTokensRates().test().assertError(error)
+        verify(tokenManager, times(2)).getTokensRates(any())
+    }
+
+    @Test
+    fun `fill missing account address test`() {
+        val accounts =
+            listOf(
+                Account(1, chainId = 1, address = "address1", privateKey = "priv1"),
+                Account(1, chainId = 2, address = "address2", privateKey = "priv2")
+            )
+
+        val map = mapOf(
+            "priv1" to listOf(
+                AccountToken(
+                    ERC20Token(1, "one", address = "0x01", decimals = "10", accountAddress = ""),
+                    rawBalance = BigDecimal.TEN
+                )
+            ),
+            "priv2" to listOf(
+                AccountToken(
+                    ERC20Token(2, "tow", address = "0x02", decimals = "10", accountAddress = "", tag = "super"),
+                    rawBalance = BigDecimal.TEN
+                ),
+                AccountToken(
+                    ERC20Token(2, "tow", address = "0x02", decimals = "10", accountAddress = "", tag = "super1"),
+                    rawBalance = BigDecimal.TEN
+                )
+            )
+        )
+
+        val result = repository.getTokensWithAccountAddress(accounts, map)
+        result[1]!![0].accountAddress shouldBeEqualTo  "address1"
+        result[1]!![0].tag shouldBeEqualTo  ""
+
+        result[2]!![0].accountAddress shouldBeEqualTo  "address2"
+        result[2]!![0].tag shouldBeEqualTo  "super"
+
+        result[2]!![1].accountAddress shouldBeEqualTo  "address2"
+        result[2]!![1].tag shouldBeEqualTo  "super1"
     }
 }
