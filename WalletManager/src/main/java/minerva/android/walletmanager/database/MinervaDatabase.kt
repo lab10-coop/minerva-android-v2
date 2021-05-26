@@ -7,7 +7,7 @@ import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.database.entity.DappSessionEntity
 import minerva.android.walletmanager.model.token.ERC20Token
 
-@Database(entities = [DappSessionEntity::class, ERC20Token::class], version = 8)
+@Database(entities = [DappSessionEntity::class, ERC20Token::class], version = 10)
 abstract class MinervaDatabase : RoomDatabase() {
     abstract fun dappDao(): DappSessionDao
     abstract fun tokenDao(): TokenDao

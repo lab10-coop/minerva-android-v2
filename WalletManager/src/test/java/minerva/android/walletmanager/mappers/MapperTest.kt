@@ -28,7 +28,7 @@ import minerva.android.walletmanager.model.token.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletConfig
-import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.MockDataProvider
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigDecimal
@@ -118,7 +118,7 @@ class MapperTest {
 
     @Test
     fun `Mapping Account to AccountResponse Test`() {
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         val value = Account(
             0,
             "publicKey",
@@ -137,7 +137,7 @@ class MapperTest {
 
     @Test
     fun `Mapping ERC20Token to ERC20TokenPayload Test`() {
-        val value = ERC20Token(3, "name", "symbol", "address", "decimals", "logoUri")
+        val value = ERC20Token(3, "name", "symbol", "address", "decimals", "key")
         val valueResponse = ERC20TokenToERC20TokenPayloadMapper.map(value)
 
         value.name shouldBeEqualTo valueResponse.name
@@ -145,6 +145,7 @@ class MapperTest {
         value.address shouldBeEqualTo valueResponse.address
         value.decimals shouldBeEqualTo valueResponse.decimals
         value.logoURI shouldBeEqualTo valueResponse.logoURI
+        value.accountAddress shouldBeEqualTo "key"
     }
 
     @Test
@@ -321,7 +322,7 @@ class MapperTest {
 
     @Test
     fun `Mapping WalletConfig to WalletPayload Test`() {
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         val walletConfig = WalletConfig(
             0,
             identities,
@@ -382,7 +383,7 @@ class MapperTest {
 
     @Test
     fun `map TokenBalance to AccountToken`() {
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         val tokenBalance01 = TokenData(
             "type",
             "symbol",
@@ -399,10 +400,10 @@ class MapperTest {
             "0xC00KiE02",
             "200000000000000000"
         )
-        val result01 = TokenDataToERC20Token.map(ATS_TAU, tokenBalance01)
+        val result01 = TokenDataToERC20Token.map(ATS_TAU, tokenBalance01, "key")
         result01.name shouldBeEqualTo "Cookie Token"
         result01.address shouldBeEqualTo "0xC00KiE01"
-        val result02 = TokenDataToERC20Token.map(ATS_TAU, tokenBalance02)
+        val result02 = TokenDataToERC20Token.map(ATS_TAU, tokenBalance02, "key")
         result02.name shouldBeEqualTo "Cookie Token 2"
         result02.address shouldBeEqualTo "0xC00KiE02"
     }

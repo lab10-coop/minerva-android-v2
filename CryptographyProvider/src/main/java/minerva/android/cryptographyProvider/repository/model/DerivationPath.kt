@@ -12,6 +12,7 @@ annotation class DerivationPath {
     companion object {
         const val MASTER_KEYS_PATH = "m/"
         const val DID_PATH = "m/73'/0'/0'/"
+
         const val MAIN_NET_PATH = "m/44'/60'/0'/0/"
         const val TEST_NET_PATH = "m/44'/1'/0'/0/"
     }

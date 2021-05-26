@@ -18,7 +18,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.MockDataProvider
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Rule
@@ -43,7 +43,7 @@ class SmartContractRepositoryTest {
 
     @Before
     fun setup() {
-        whenever(walletConfigManager.getWalletConfig()) doReturn DataProvider.walletConfig
+        whenever(walletConfigManager.getWalletConfig()) doReturn MockDataProvider.walletConfig
     }
 
     @get:Rule
@@ -52,7 +52,7 @@ class SmartContractRepositoryTest {
 
     @Test
     fun `create safe account success`() {
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         whenever(blockchainSafeAccountRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.just("address"))
         smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE, chainId = 4)).test()
             .assertNoErrors()
@@ -65,7 +65,7 @@ class SmartContractRepositoryTest {
     @Test
     fun `create safe account error`() {
         val error = Throwable()
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         whenever(blockchainSafeAccountRepository.deployGnosisSafeContract(any(), any(), any())).thenReturn(Single.error(error))
         smartContractRepository.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE, chainId = 4)).test()
             .assertError(error)
@@ -222,7 +222,7 @@ class SmartContractRepositoryTest {
         val name = "CookieToken"
         val symbol = "Cookie"
         val decimal = BigInteger.ONE
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         (blockchainRegularAccountRepository).run {
             whenever(getERC20TokenName(any(), any(), any())).thenReturn(
                 Observable.just(name),

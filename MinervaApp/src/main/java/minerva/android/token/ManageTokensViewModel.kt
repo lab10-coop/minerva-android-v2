@@ -17,6 +17,7 @@ class ManageTokensViewModel(
 ) : BaseViewModel() {
 
     lateinit var account: Account
+
     @VisibleForTesting
     lateinit var tokenVisibilitySettings: TokenVisibilitySettings
 
@@ -25,17 +26,24 @@ class ManageTokensViewModel(
         tokenVisibilitySettings = localStorage.getTokenVisibilitySettings()
     }
 
-    fun loadTokens() = account.network.let {
-        listOf(NativeToken(it.chainId, it.name, it.token, logoRes = getMainTokenIconRes(it.chainId))) + tokenManager.loadCurrentTokens(it.chainId)
+    fun loadTokens() = account.network.let { network ->
+        listOf(
+            NativeToken(
+                network.chainId,
+                network.name,
+                network.token,
+                logoRes = getMainTokenIconRes(network.chainId)
+            )
+        ) + tokenManager.loadCurrentTokensPerNetwork(account)
     }
 
-    fun getTokenVisibilitySettings(assetAddress: String): Boolean =
-        tokenVisibilitySettings.getTokenVisibility(account.address, assetAddress) ?: false
+    fun getTokenVisibilitySettings(tokenAddress: String): Boolean =
+        tokenVisibilitySettings.getTokenVisibility(account.address, tokenAddress) ?: false
 
 
-    fun saveTokenVisibilitySettings(assetAddress: String, visibility: Boolean) {
+    fun saveTokenVisibilitySettings(tokenAddress: String, visibility: Boolean) {
         tokenVisibilitySettings = localStorage.saveTokenVisibilitySettings(
-            tokenVisibilitySettings.updateTokenVisibility(account.address, assetAddress, visibility)
+            tokenVisibilitySettings.updateTokenVisibility(account.address, tokenAddress, visibility)
         )
     }
 }

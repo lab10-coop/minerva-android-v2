@@ -14,18 +14,20 @@ data class ERC20Token(
     @PrimaryKey val address: String = String.Empty,
     //TODO change to int
     val decimals: String = String.Empty,
+    var accountAddress: String = String.Empty,
     var logoURI: String? = null,
-    val tag: String = String.Empty
+    var tag: String = String.Empty
 ) : Token {
 
     override fun equals(other: Any?): Boolean =
-        (other as? ERC20Token)?.let { token -> address.equals(token.address, true) }.orElse { false }
+        (other as? ERC20Token)?.let { address.equals(it.address, true) }.orElse { false }
 
-    constructor(chainId: Int, tokenTx: TokenTx) : this(
+    constructor(chainId: Int, tokenTx: TokenTx, accountAddress: String) : this(
         chainId,
         tokenTx.tokenName,
         tokenTx.tokenSymbol,
         tokenTx.address,
-        tokenTx.tokenDecimal
+        tokenTx.tokenDecimal,
+        accountAddress
     )
 }

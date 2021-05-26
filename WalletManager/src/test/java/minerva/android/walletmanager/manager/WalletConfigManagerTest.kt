@@ -26,9 +26,9 @@ import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.DataProvider
-import minerva.android.walletmanager.utils.DataProvider.localWalletConfigPayload
-import minerva.android.walletmanager.utils.DataProvider.onlineWalletConfigResponse
+import minerva.android.walletmanager.utils.MockDataProvider
+import minerva.android.walletmanager.utils.MockDataProvider.localWalletConfigPayload
+import minerva.android.walletmanager.utils.MockDataProvider.onlineWalletConfigResponse
 import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -90,7 +90,7 @@ class WalletConfigManagerTest {
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
         whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
         whenever(localStorage.isBackupAllowed).thenReturn(true)
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
     }
 
     @Test

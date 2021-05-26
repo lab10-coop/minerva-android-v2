@@ -205,9 +205,9 @@ class WalletConfigManagerImpl(
         if (localStorage.isBackupAllowed) {
             localWalletProvider.saveWalletConfig(WalletConfigToWalletPayloadMapper.map(walletConfig))
                 .observeOn(AndroidSchedulers.mainThread())
-                .map { walletConfigPayload ->
+                .map { configPayload ->
                     _walletConfigLiveData.value = Event(walletConfig)
-                    walletConfigPayload
+                    configPayload
                 }
                 .observeOn(Schedulers.io())
                 .flatMap { walletConfigPayload ->

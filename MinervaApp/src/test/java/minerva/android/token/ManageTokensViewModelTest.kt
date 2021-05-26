@@ -5,11 +5,11 @@ import minerva.android.BaseViewModelTest
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.TokenVisibilitySettings
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -44,7 +44,7 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(networks)
         whenever(accountManager.loadAccount(any())).thenReturn(account)
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
-        whenever(tokenManager.loadCurrentTokens(any())).thenReturn(listOf(ERC20Token(1, symbol = "token1"), ERC20Token(3, symbol = "token2")))
+        whenever(tokenManager.loadCurrentTokensPerNetwork(any())).thenReturn(listOf(ERC20Token(1, symbol = "token1"), ERC20Token(3, symbol = "token2")))
         viewModel.initViewModel(0)
 
         val tokens = viewModel.loadTokens()
