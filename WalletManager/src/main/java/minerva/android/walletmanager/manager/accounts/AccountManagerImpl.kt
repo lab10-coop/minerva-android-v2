@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.manager.accounts
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
@@ -21,6 +22,7 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
@@ -36,9 +38,31 @@ class AccountManagerImpl(
     private val localStorage: LocalStorage,
     private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
 ) : AccountManager {
-
+    override var hasAvailableAccounts: Boolean = false
+    override var activeAccounts: List<Account> = emptyList()
+    override var cachedTokens: Map<Int, List<ERC20Token>> = mapOf()
+    override val areMainNetworksEnabled: Boolean get() = walletManager.areMainNetworksEnabled
+    override val isProtectKeysEnabled: Boolean get() = localStorage.isProtectKeysEnabled
+    override val isProtectTransactionsEnabled: Boolean get() = localStorage.isProtectTransactionsEnabled
+    override val masterSeed: MasterSeed get() = walletManager.masterSeed
+    override val getTokenVisibilitySettings: TokenVisibilitySettings get() = localStorage.getTokenVisibilitySettings()
+    override var showMainNetworksWarning: Boolean
+        get() = walletManager.showMainNetworksWarning
+        set(value) {
+            walletManager.showMainNetworksWarning = value
+        }
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
-        get() = walletManager.walletConfigLiveData
+        get() = Transformations.map(walletManager.walletConfigLiveData) { walletConfigEvent ->
+            with(walletConfigEvent.peekContent()) {
+                hasAvailableAccounts = hasActiveAccount
+                activeAccounts = getActiveAccounts(this)
+                cachedTokens = filterCachedTokens(erc20Tokens)
+            }
+            walletConfigEvent
+        }
+
+    internal fun getActiveAccounts(walletConfig: WalletConfig): List<Account> =
+        walletConfig.accounts.filter { account -> !account.isDeleted && account.network.testNet == !areMainNetworksEnabled }
 
     override fun createRegularAccount(network: Network): Single<String> =
         walletManager.getWalletConfig().run {
@@ -57,7 +81,7 @@ class AccountManagerImpl(
                     address = keys.address
                 )
                 addAccount(newAccount, this)
-            }.flatMapCompletable { walletManager.updateWalletConfig(it) }.toSingleDefault(accountName)
+            }.flatMapCompletable { config -> walletManager.updateWalletConfig(config) }.toSingleDefault(accountName)
         }
 
     private fun addAccount(newAccount: Account, config: WalletConfig): WalletConfig {
@@ -89,15 +113,34 @@ class AccountManagerImpl(
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }
         }
 
+    internal fun filterCachedTokens(tokenMap: Map<Int, List<ERC20Token>>): Map<Int, List<ERC20Token>> {
+        val newMap: MutableMap<Int, MutableList<ERC20Token>> = mutableMapOf()
+        activeAccounts.filter { account -> !account.isPending }.forEach { account ->
+            if (newMap.containsKey(account.chainId)) {
+                newMap[account.chainId]?.addAll(getVisibleTokensList(tokenMap, account))
+            } else {
+                newMap[account.chainId] = getVisibleTokensList(tokenMap, account).toMutableList()
+            }
+        }
+        return newMap
+    }
+
+    private fun getVisibleTokensList(tokenMap: Map<Int, List<ERC20Token>>, account: Account): List<ERC20Token> =
+        tokenMap[account.chainId]?.let { tokens ->
+            tokens.filter { token ->
+                token.accountAddress.equals(account.address, true) &&
+                        getTokenVisibilitySettings.getTokenVisibility(account.address, token.address) == true
+            }
+        } ?: emptyList()
+
     private fun getIndexWithDerivationPath(
         network: Network,
         config: WalletConfig
-    ): Pair<Int, String> =
-        if (network.testNet) {
-            Pair(config.newTestNetworkIndex, DerivationPath.TEST_NET_PATH)
-        } else {
-            Pair(config.newMainNetworkIndex, DerivationPath.MAIN_NET_PATH)
-        }
+    ): Pair<Int, String> = if (network.testNet) {
+        Pair(config.newTestNetworkIndex, DerivationPath.TEST_NET_PATH)
+    } else {
+        Pair(config.newMainNetworkIndex, DerivationPath.MAIN_NET_PATH)
+    }
 
     private fun addSafeAccount(
         config: WalletConfig,
@@ -117,18 +160,13 @@ class AccountManagerImpl(
     override fun getSafeAccountName(account: Account): String =
         account.name.replaceFirst(String.Space, " | ${getSafeAccountCount(account.address)} ")
 
-    override fun isAddressValid(address: String): Boolean =
-        blockchainRepository.isAddressValid(address)
-
-    override fun getTokenVisibilitySettings(): TokenVisibilitySettings =
-        localStorage.getTokenVisibilitySettings()
+    override fun isAddressValid(address: String): Boolean = blockchainRepository.isAddressValid(address)
 
     override fun saveFreeATSTimestamp() {
         localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills())
     }
 
-    override fun getLastFreeATSTimestamp(): Long =
-        localStorage.loadLastFreeATSTimestamp()
+    override fun getLastFreeATSTimestamp(): Long = localStorage.loadLastFreeATSTimestamp()
 
     override fun saveTokenVisibilitySettings(settings: TokenVisibilitySettings): TokenVisibilitySettings =
         localStorage.saveTokenVisibilitySettings(settings)
@@ -138,31 +176,15 @@ class AccountManagerImpl(
     override fun getAllAccounts(): List<Account> = walletManager.getWalletConfig().accounts
 
     override fun getAllActiveAccounts(chainId: Int): List<Account> =
-        getAllAccounts().filter { !it.isDeleted && it.chainId == chainId }
+        getAllAccounts().filter { account -> !account.isDeleted && account.chainId == chainId }
 
-    override fun toChecksumAddress(address: String): String =
-        blockchainRepository.toChecksumAddress(address)
+    override fun toChecksumAddress(address: String): String = blockchainRepository.toChecksumAddress(address)
 
     override fun clearFiat() =
         walletManager.getWalletConfig().accounts.forEach { account ->
             account.fiatBalance = Double.InvalidValue.toBigDecimal()
             account.accountTokens.forEach { accountToken -> accountToken.tokenPrice = Double.InvalidValue }
         }
-
-    override val areMainNetworksEnabled: Boolean
-        get() = walletManager.areMainNetworksEnabled
-
-    override var showMainNetworksWarning: Boolean
-        get() = walletManager.showMainNetworksWarning
-        set(value) {
-            walletManager.showMainNetworksWarning = value
-        }
-
-    override val isProtectKeysEnabled: Boolean
-        get() = localStorage.isProtectKeysEnabled
-
-    override val isProtectTransactionsEnabled: Boolean
-        get() = localStorage.isProtectTransactionsEnabled
 
     override fun removeAccount(account: Account): Completable =
         walletManager.getWalletConfig().run {
@@ -204,8 +226,8 @@ class AccountManagerImpl(
     }
 
     private fun areFundsOnValue(balance: BigDecimal, accountTokens: List<AccountToken>): Boolean {
-        accountTokens.forEach {
-            if (it.rawBalance.toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
+        accountTokens.forEach { accountToken ->
+            if (accountToken.rawBalance.toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
         return blockchainRepository.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
     }
@@ -213,9 +235,6 @@ class AccountManagerImpl(
     override fun getSafeAccountCount(ownerAddress: String): Int =
         if (ownerAddress == String.Empty) NO_SAFE_ACCOUNTS
         else walletManager.getSafeAccountNumber(ownerAddress)
-
-    override val masterSeed: MasterSeed
-        get() = walletManager.masterSeed
 
     override fun loadAccount(index: Int): Account = walletManager.getWalletConfig().accounts.run {
         if (inBounds(index)) {

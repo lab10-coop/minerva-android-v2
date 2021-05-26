@@ -13,9 +13,9 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.widget.state.AccountWidgetState
 
-class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
-    RecyclerView.Adapter<AccountViewHolder>(),
-    AccountsAdapterListener {
+class AccountAdapter(
+    private val listener: AccountsFragmentToAdapterListener
+) : RecyclerView.Adapter<AccountViewHolder>(), AccountsAdapterListener {
 
     private var activeAccounts = listOf<Account>()
     private var rawAccounts = listOf<Account>()
@@ -23,32 +23,23 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun getItemCount(): Int = activeAccounts.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder = AccountViewHolder(
-        LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
-        parent
-    )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
+        AccountViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false), parent)
 
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
-        activeAccounts[position].let {
-            val index = rawAccounts.indexOf(it)
-            holder.setData(index, it, fiatSymbol, this@AccountAdapter)
+        val account = activeAccounts[position]
+        with(holder) {
+            setupListener(this@AccountAdapter)
+            setupAccountIndex(rawAccounts.indexOf(account))
+            setupAccountView(account, fiatSymbol, listener.getTokens(account))
         }
     }
 
-    fun updateList(accounts: List<Account>, activeAccounts: List<Account>, fiatSymbol: String) {
+    fun setAccounts(accounts: List<Account>, activeAccounts: List<Account>, fiatSymbol: String) {
         rawAccounts = accounts
         this.activeAccounts = activeAccounts
         this.fiatSymbol = fiatSymbol
         notifyDataSetChanged()
-    }
-
-    fun updateSessionCount(accounts: HashMap<String, Int>) {
-        activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
-            account.apply {
-                dappSessionCount = accounts[address] ?: 0
-                notifyItemChanged(index)
-            }
-        }
     }
 
     fun updateBalances(balances: HashMap<String, Balance>) {
@@ -65,6 +56,16 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         notifyDataSetChanged()
     }
 
+
+    fun updateSessionCount(accounts: HashMap<String, Int>) {
+        activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
+            account.apply {
+                dappSessionCount = accounts[address] ?: NO_DAPP_SESSION
+                notifyItemChanged(index)
+            }
+        }
+    }
+
     fun setPending(index: Int, isPending: Boolean, areMainNetsEnabled: Boolean) {
         rawAccounts.forEachIndexed { position, account ->
             if (account.id == index && account.network.testNet != areMainNetsEnabled) {
@@ -75,9 +76,7 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
     }
 
     fun stopPendingTransactions() {
-        rawAccounts.forEach {
-            it.isPending = false
-        }
+        rawAccounts.forEach { account -> account.isPending = false }
         notifyDataSetChanged()
     }
 
@@ -94,7 +93,8 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
 
     override fun onShowAddress(account: Account) = listener.onShowAddress(rawAccounts.indexOf(account))
 
-    override fun onShowSafeAccountSettings(account: Account, index: Int) = listener.onShowSafeAccountSettings(account, index)
+    override fun onShowSafeAccountSettings(account: Account, index: Int) =
+        listener.onShowSafeAccountSettings(account, index)
 
     override fun onWalletConnect(index: Int) = listener.onWalletConnect(index)
 
@@ -106,5 +106,9 @@ class AccountAdapter(private val listener: AccountsFragmentToAdapterListener) :
         listener.updateAccountWidgetState(index, accountWidgetState)
 
     override fun getAccountWidgetState(index: Int): AccountWidgetState = listener.getAccountWidgetState(index)
+
+    companion object{
+        private const val NO_DAPP_SESSION = 0
+    }
 }
 

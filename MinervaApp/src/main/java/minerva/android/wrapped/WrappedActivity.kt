@@ -180,6 +180,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
         const val POSITION = "position"
         const val FRAGMENT = "fragment"
         const val CHAIN_ID = "chainId"
+        const val ADDRESS = "address"
         const val FRAGMENT_TYPE = "type"
         const val SERVICE_QR_CODE = "service_qr_code"
         const val IS_SAFE_ACCOUNT = "is_safe_account"

@@ -17,7 +17,7 @@ import minerva.android.walletmanager.model.token.WalletConfigTestValues.identity
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.onlineIdentityResponse
 import minerva.android.walletmanager.model.wallet.WalletConfig
 
-object DataProvider {
+object MockDataProvider {
 
     val data = linkedMapOf(
         "key1" to "value1",
@@ -47,7 +47,14 @@ object DataProvider {
             )
         ),
         Network(chainId = ATS_SIGMA, httpRpc = "address", testNet = true),
-        Network(chainId = POA_CORE, httpRpc = "address", testNet = true)
+        Network(chainId = POA_CORE, httpRpc = "address", testNet = true),
+        Network(
+            chainId = 1, httpRpc = "address", testNet = false,
+            tokens = listOf(
+                ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
+                ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
+            )
+        )
     )
 
     val walletConfig = WalletConfig(
@@ -85,14 +92,16 @@ object DataProvider {
         mapOf(
             Pair(
                 ATS_TAU, listOf(
-                    ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xC00k1e", "13"),
-                    ERC20Token(ATS_TAU, "OtherTokenATS", "OtherC", "0x0th3r", "32")
+                    ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xC00k1eN", "13", accountAddress = "0xADDRESSxONE"),
+                    ERC20Token(ATS_TAU, "OtherTokenATS1", "OtherC", "0xS0m3T0k3N", "32", accountAddress = "0xADDRESSxONE"),
+                    ERC20Token(ATS_TAU, "OtherTokenATS", "OtherC", "0xC00k1e", "32", accountAddress = "0xADDRESSxONE"),
+                    ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "0x0th3r", "32", accountAddress = "0xADDRESSxONE")
                 )
             ),
             Pair(
                 ETH_RIN, listOf(
-                    ERC20Token(ETH_RIN, "OtherTokenETH", "OtherC", "0x0th3r", "32", "someLogoURI"),
-                    ERC20Token(ETH_RIN, "CookieTokenETH", "Cookie", "0xC00k1e", "13", "someLogoURI_II")
+                    ERC20Token(ETH_RIN, "OtherTokenETH", "OtherC", "0x0th3r", "32", logoURI = "someLogoURI"),
+                    ERC20Token(ETH_RIN, "CookieTokenETH", "Cookie", "0xC00k1e", "13", logoURI = "someLogoURI_II")
                 )
             ),
             Pair(

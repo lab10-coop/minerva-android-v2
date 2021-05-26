@@ -2,17 +2,16 @@ package minerva.android.walletmanager.manager.accounts
 
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -21,7 +20,8 @@ import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.MockDataProvider
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -47,7 +47,7 @@ class AccountManagerTest : RxTest() {
     @Before
     override fun setupRxSchedulers() {
         super.setupRxSchedulers()
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 
@@ -72,7 +72,7 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager don't save new regular account`() {
         val error = Throwable()
         val network = Network(chainId = 4, httpRpc = "some")
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn(String.Empty)
         whenever(
@@ -221,7 +221,7 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `create safe account success`() {
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
@@ -274,7 +274,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `get token visibility test`() {
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
-        manager.getTokenVisibilitySettings()
+        manager.getTokenVisibilitySettings
         verify(localStorage).getTokenVisibilitySettings()
     }
 
@@ -312,7 +312,7 @@ class AccountManagerTest : RxTest() {
     fun `get all accounts test`() {
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, accounts = listOf(Account(1))))
         val result = manager.getAllAccounts()
-        assertEquals(result?.get(0)?.id, 1)
+        assertEquals(result.get(0).id, 1)
     }
 
     @Test
@@ -364,12 +364,62 @@ class AccountManagerTest : RxTest() {
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         walletConfigManager.getWalletConfig().accounts[0].apply {
             fiatBalance shouldBeEqualTo 13f.toBigDecimal()
-            
+
         }
 
         walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo 13f.toBigDecimal()
         walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo 13f.toBigDecimal()
         manager.clearFiat()
         walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo Double.InvalidValue.toBigDecimal()
+    }
+
+    @Test
+    fun `test filtering cached tokens`() {
+        manager.activeAccounts = listOf(
+            Account(2, chainId = 1, address = "account1"),
+            Account(3, chainId = 1, address = "account2")
+        )
+        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(mock())
+        with(localStorage.getTokenVisibilitySettings()) {
+            whenever(getTokenVisibility("account1", "tokenAddress1")).thenReturn(true)
+            whenever(getTokenVisibility("account1", "tokenAddress2")).thenReturn(true)
+            whenever(getTokenVisibility("account1", "tokenAddress3")).thenReturn(false)
+            whenever(getTokenVisibility("account1", "tokenAddress4")).thenReturn(true)
+
+            whenever(getTokenVisibility("account2", "tokenAddress2")).thenReturn(false)
+            whenever(getTokenVisibility("account2", "tokenAddress5")).thenReturn(true)
+        }
+        val result: Map<Int, List<ERC20Token>> = manager.filterCachedTokens(tokenMap)
+        result[1]?.size shouldBeEqualTo 4
+    }
+
+    private val tokenMap = mapOf(
+        1 to mutableListOf(
+            ERC20Token(1, "token1", address = "tokenAddress1", accountAddress = "account1"),
+            ERC20Token(1, "token2", address = "tokenAddress2", accountAddress = "account1"),
+            ERC20Token(1, "token3", address = "tokenAddress3", accountAddress = "account1"),
+            ERC20Token(1, "token4", address = "tokenAddress4", accountAddress = "account1"),
+
+            ERC20Token(1, "token5", address = "tokenAddress2", accountAddress = "account2"),
+            ERC20Token(1, "token6", address = "tokenAddress5", accountAddress = "account2")
+        )
+    )
+
+    @Test
+    fun `get active accounts on test networks test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(false)
+        val config = WalletConfig(1, accounts = listOf(Account(1, chainId = ChainId.ATS_TAU)))
+        val result = manager.getActiveAccounts(config)
+        result.size shouldBeEqualTo 1
+    }
+
+    @Test
+    fun `get active accounts on main networks test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(true)
+        val config = WalletConfig(1, accounts = listOf(Account(1, chainId = 1)))
+        val result = manager.getActiveAccounts(config)
+        result.size shouldBeEqualTo 1
     }
 }

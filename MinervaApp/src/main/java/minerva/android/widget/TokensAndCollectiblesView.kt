@@ -17,13 +17,15 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_PADDING
 import minerva.android.walletmanager.model.Collectible
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.token.TokenView
 
 class TokensAndCollectiblesView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 
-    private var binding = TokensAndCollectiblesLayoutBinding.bind(inflate(context, R.layout.tokens_and_collectibles_layout, this))
+    private var binding =
+        TokensAndCollectiblesLayoutBinding.bind(inflate(context, R.layout.tokens_and_collectibles_layout, this))
     private lateinit var callback: TokenView.TokenViewCallback
     private lateinit var parent: ViewGroup
     private var showMainToken = false
@@ -34,17 +36,18 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     }
 
     fun prepareView(
-        account: Account,
         viewGroup: ViewGroup,
         callback: TokenView.TokenViewCallback,
-        isOpen: Boolean,
-        fiatSymbol: String
+        isOpen: Boolean
     ) {
         parent = viewGroup
         this.callback = callback
         visibleOrGone(isOpen)
+    }
+
+    fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) {
         initMainToken(account, fiatSymbol, callback)
-        initTokensList(account, fiatSymbol)
+        initTokensList(account, fiatSymbol, tokens)
     }
 
     private fun initView() {
@@ -59,18 +62,17 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         isFocusable = true
     }
 
-    private fun initTokensList(account: Account, fiatSymbol: String) {
+    private fun initTokensList(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) {
         binding.apply {
             tokensContainer.removeAllViews()
-            account.accountTokens.isNotEmpty().let { areTokensVisible ->
+            tokens.isNotEmpty().let { areTokensVisible ->
                 tokensHeader.visibleOrGone(areTokensVisible)
                 tokensContainer.visibleOrGone(areTokensVisible)
-                account.accountTokens.sortedByDescending { it.fiatBalance }.forEach {
+                tokens.forEach { token ->
                     tokensContainer.addView(TokenView(context).apply {
-                        initView(account, callback, fiatSymbol, it.token.address)
-                        resources.getDimensionPixelOffset(R.dimen.margin_xxsmall).let {
-                            updatePadding(Int.NO_PADDING, it, Int.NO_PADDING, it)
-                        }
+                        initView(account, callback, fiatSymbol, token)
+                        resources.getDimensionPixelOffset(R.dimen.margin_xxsmall)
+                            .let { padding -> updatePadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding) }
                     })
                 }
             }

@@ -7,7 +7,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 data class AccountToken(
-    val token: ERC20Token,
+    var token: ERC20Token,
     var rawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var tokenPrice: Double? = Double.InvalidValue
 ) {
@@ -17,7 +17,7 @@ data class AccountToken(
             .orElse { false }
 
     val balance: BigDecimal
-        get() = if (rawBalance == BigDecimal.ZERO) BigDecimal.ZERO
+        get() = if (rawBalance ==  Double.InvalidValue.toBigDecimal()) BigDecimal.ZERO
         else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
 
     val fiatBalance: BigDecimal

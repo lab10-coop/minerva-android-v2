@@ -42,7 +42,7 @@ interface BlockchainRegularAccountRepository {
     fun refreshTokenBalance(
         privateKey: String,
         chainId: Int,
-        contractAddress: String,
+        tokenAddress: String,
         safeAccountAddress: String
     ): Observable<Pair<String, BigDecimal>>
 }

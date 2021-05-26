@@ -95,9 +95,9 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
                 MNEMONIC_REMEMBERED to isMnemonicRemembered,
                 MAIN_NETWORKS_ENABLED to areMainNetsEnabled,
                 AUTHENTICATION_ENABLED to isAuthenticationEnabled
-            ).let {
+            ).let { flagsMap ->
                 settingsAdapter.updateList(
-                    it,
+                    flagsMap,
                     propagateSettings(viewModel.getCurrentFiat(requireContext().resources.getStringArray(R.array.currencies)))
                 )
             }
