@@ -50,8 +50,13 @@ open class BlockiesImageView(context: Context, attributeSet: AttributeSet?) : Ap
     }
 
     private fun prepareERC20TokenIcon(token: ERC20Token) {
-        token.logoURI?.let {
-            Glide.with(this).load(it).apply(RequestOptions.circleCropTransform()).into(this)
+        token.logoURI?.let { uri ->
+            val icon = when {
+                uri.isEmpty() && token.symbol == USDT_SYMBOL -> { R.drawable.ic_coin_usdt }
+                uri.isEmpty() && token.symbol == DAI_SYMBOL -> { R.drawable.ic_coin_dai }
+                else -> uri
+            }
+            Glide.with(this).load(icon).apply(RequestOptions.circleCropTransform()).into(this)
             return
         }
         blockies = Blockies.fromAddress(token.address)
@@ -60,5 +65,10 @@ open class BlockiesImageView(context: Context, attributeSet: AttributeSet?) : Ap
 
     private fun drawBlockies(canvas: Canvas, blockies: Blockies) {
         painter.draw(canvas, blockies)
+    }
+
+    companion object {
+        private const val USDT_SYMBOL = "USDT"
+        private const val DAI_SYMBOL = "DAI"
     }
 }
