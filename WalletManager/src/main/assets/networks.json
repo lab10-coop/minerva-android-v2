@@ -157,7 +157,7 @@
         "name": "(POS) Tether USD",
         "symbol": "USDT",
         "decimals": 6,
-        "logoURI": "https://assets.coingecko.com/coins/images/325/small/Tether-logo.png?1598003707",
+        "logoURI": "",
         "accountAddress": "",
         "tag": ""
       },
@@ -177,7 +177,7 @@
         "name": "(POS) Dai Stablecoin",
         "symbol": "DAI",
         "decimals": 18,
-        "logoURI": "https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png?1574218774",
+        "logoURI": "",
         "accountAddress": "",
         "tag": ""
       },
