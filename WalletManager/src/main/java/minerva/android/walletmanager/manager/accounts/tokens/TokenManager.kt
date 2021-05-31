@@ -9,7 +9,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 
 interface TokenManager {
     fun checkMissingTokensDetails(): Completable
-    fun loadCurrentTokensPerNetwork(account: Account): List<ERC20Token>
+    fun getActiveTokensPerAccount(account: Account): List<ERC20Token>
     fun saveToken(chainId: Int, token: ERC20Token): Completable
 
     /**

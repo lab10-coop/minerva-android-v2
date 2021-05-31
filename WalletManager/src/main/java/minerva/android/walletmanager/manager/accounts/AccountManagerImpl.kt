@@ -197,10 +197,8 @@ class AccountManagerImpl(
             Completable.error(MissingAccountThrowable())
         }
 
-    private fun handleRemovingAccount(
-        item: Account, config: WalletConfig,
-        newAccounts: MutableList<Account>, index: Int
-    ): Completable =
+    private fun handleRemovingAccount(item: Account, config: WalletConfig, newAccounts: MutableList<Account>, index: Int)
+    : Completable =
         when {
             areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
             isNotSAMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())

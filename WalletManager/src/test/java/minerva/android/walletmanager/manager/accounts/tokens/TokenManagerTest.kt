@@ -47,35 +47,34 @@ class TokenManagerTest : RxTest() {
     private val blockchainRepository: BlockchainRegularAccountRepository = mock()
     private val rateStorage: RateStorage = mock()
     private val tokenDao: TokenDao = mock()
-
-    private val database: MinervaDatabase = mock {
-        whenever(mock.tokenDao()).thenReturn(tokenDao)
-    }
-
-    private val tokenManager =
-        TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, rateStorage, database)
+    private lateinit var database: MinervaDatabase
+    private lateinit var tokenManager: TokenManagerImpl
 
     @Before
     fun initializeMocks() {
         whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig, MockDataProvider.walletConfig)
         whenever(walletManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        database =  mock { whenever(mock.tokenDao()).thenReturn(tokenDao) }
+        tokenManager =
+            TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, rateStorage, database)
     }
 
     @Test
     fun `Test loading tokens list`() {
         NetworkManager.initialize(MockDataProvider.networks)
-        tokenManager.loadCurrentTokensPerNetwork(Account(1, chainId = ATS_TAU)).let {
-            it.size shouldBeEqualTo 4
-            it[0].name shouldBeEqualTo "CookieTokenDATS"
-            it[1].name shouldBeEqualTo "SomeSomeTokenDATS"
-            it[2].name shouldBeEqualTo "OtherTokenATS"
-            it[3].name shouldBeEqualTo "TokenTest1"
+        whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
+
+        tokenManager.getActiveTokensPerAccount(Account(1, chainId = ETH_RIN, address = "address123")).let {
+            it.size shouldBeEqualTo 2
+            it[0].name shouldBeEqualTo "OtherTokenETH"
+            it[1].name shouldBeEqualTo "CookieTokenETH"
         }
-        tokenManager.loadCurrentTokensPerNetwork(Account(1, chainId = ETH_RIN)).let {
+
+        tokenManager.getActiveTokensPerAccount(Account(2, chainId = ATS_SIGMA, address = "0xADDRESSxTWO")).let {
             it.size shouldBeEqualTo 3
-            it[0].name shouldBeEqualTo "CookieTokenDETH"
-            it[1].name shouldBeEqualTo "OtherTokenDETH"
-            it[2].name shouldBeEqualTo "OtherTokenETH"
+            it[0].name shouldBeEqualTo "CookieTokenATS"
+            it[1].name shouldBeEqualTo "SecondOtherATS"
+            it[2].name shouldBeEqualTo "OtherTokenATS"
         }
     }
 
@@ -141,8 +140,7 @@ class TokenManagerTest : RxTest() {
         val newToken = ERC20Token(1, "SomeToken", "some", "0xt0k3n", "32", accountAddress = "address1")
 
         ATS_TAU.let { ATS ->
-            val updatedTokens =
-                tokenManager.updateTokens(ATS, newToken, MockDataProvider.walletConfig.erc20Tokens.toMutableMap())
+            val updatedTokens = tokenManager.updateTokens(ATS, newToken, MockDataProvider.walletConfig.erc20Tokens.toMutableMap())
             updatedTokens[ATS]?.size shouldBeEqualTo 5
             updatedTokens[ATS]?.get(0)?.name shouldBeEqualTo "CookieTokenATS"
             updatedTokens[ATS]?.get(1)?.name shouldBeEqualTo "OtherTokenATS1"
@@ -473,7 +471,7 @@ class TokenManagerTest : RxTest() {
 
     @Test
     fun `Test refreshing token balance`() {
-        val atsTauAccount = Account(1, chainId = ATS_TAU, address = "0xADDRESSxONE")
+        val atsTauAccount = Account(1, chainId = ATS_TAU, address = "address4455")
         val tauTokenResponse01 = Observable.just(Pair("0xC00k1eN", 10000.toBigDecimal()))
         val tauTokenResponse02 = Observable.just(Pair("0xS0m3T0k3N", 100000000.toBigDecimal()))
         val tauTokenResponse03 = Observable.just(Pair("0xC00k1e", 100000000.toBigDecimal()))

@@ -102,11 +102,15 @@ class AccountsViewModel(
 
     fun getTokens(account: Account): List<ERC20Token> =
         if (account.accountTokens.isNotEmpty()) {
-            account.accountTokens.sortedByDescending { accountToken -> accountToken.fiatBalance }
+            account.accountTokens
+                .sortedByDescending { accountToken -> accountToken.fiatBalance }
                 .map { accountToken -> accountToken.token }.toList()
         } else {
             cachedTokens[account.chainId]
-                ?.filter { token -> token.accountAddress.equals(account.address, true) } ?: emptyList()
+                ?.filter { token ->
+                    token.accountAddress.equals(account.address, true) &&
+                            tokenVisibilitySettings.getTokenVisibility(account.address, token.address) == true
+                } ?: emptyList()
         }
 
     internal fun getSessions(accounts: List<Account>) {
@@ -196,22 +200,22 @@ class AccountsViewModel(
         }
 
     private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>) {
-        activeAccounts.filter { !it.isPending }.forEach { account ->
-            accountTokenBalances[account.privateKey]?.let { tokensList ->
-                account.accountTokens = tokensList.filter { accountToken ->
-                    isTokenVisible(account.address, accountToken).orElse {
-                        saveTokenVisible(account.address, accountToken.token.address, true)
-                        hasFunds(accountToken.balance)
+        activeAccounts.filter { account -> !account.isPending }
+            .forEach { account ->
+                accountTokenBalances[account.privateKey]?.let { tokensList ->
+                    account.accountTokens = tokensList.filter { accountToken ->
+                        isTokenVisible(account.address, accountToken).orElse {
+                            saveTokenVisible(account.address, accountToken.token.address, true)
+                            hasFunds(accountToken.balance)
+                        }
                     }
                 }
             }
-        }
     }
 
     fun isTokenVisible(accountAddress: String, accountToken: AccountToken): Boolean? =
-        tokenVisibilitySettings.getTokenVisibility(accountAddress, accountToken.token.address)?.let { isTokenVisible ->
-            isTokenVisible && hasFunds(accountToken.balance)
-        }
+        tokenVisibilitySettings.getTokenVisibility(accountAddress, accountToken.token.address)
+            ?.let { isTokenVisible -> isTokenVisible && hasFunds(accountToken.balance) }
 
     fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
         appUIState.updateAccountWidgetState(index, accountWidgetState)

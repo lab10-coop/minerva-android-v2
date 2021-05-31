@@ -36,6 +36,8 @@ object MockDataProvider {
             chainId = ATS_TAU, httpRpc = "address", testNet = true,
             tokens = listOf(
                 ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
+                ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32"),
+                ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
                 ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
             )
         ),
@@ -92,23 +94,46 @@ object MockDataProvider {
         mapOf(
             Pair(
                 ATS_TAU, listOf(
-                    ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xC00k1eN", "13", accountAddress = "0xADDRESSxONE"),
-                    ERC20Token(ATS_TAU, "OtherTokenATS1", "OtherC", "0xS0m3T0k3N", "32", accountAddress = "0xADDRESSxONE"),
-                    ERC20Token(ATS_TAU, "OtherTokenATS", "OtherC", "0xC00k1e", "32", accountAddress = "0xADDRESSxONE"),
-                    ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "0x0th3r", "32", accountAddress = "0xADDRESSxONE")
+                    ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xC00k1eN", "13", accountAddress = "address4455"),
+                    ERC20Token(
+                        ATS_TAU,
+                        "OtherTokenATS1",
+                        "OtherC",
+                        "0xS0m3T0k3N",
+                        "32",
+                        accountAddress = "address4455"
+                    ),
+                    ERC20Token(ATS_TAU, "OtherTokenATS", "OtherC", "0xC00k1e", "32", accountAddress = "address4455"),
+                    ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "0x0th3r", "32", accountAddress = "address4455")
                 )
             ),
             Pair(
                 ETH_RIN, listOf(
-                    ERC20Token(ETH_RIN, "OtherTokenETH", "OtherC", "0x0th3r", "32", logoURI = "someLogoURI"),
-                    ERC20Token(ETH_RIN, "CookieTokenETH", "Cookie", "0xC00k1e", "13", logoURI = "someLogoURI_II")
+                    ERC20Token(
+                        ETH_RIN,
+                        "OtherTokenETH",
+                        "OtherC",
+                        "0x0th3r",
+                        "32",
+                        logoURI = "someLogoURI",
+                        accountAddress = "address123"
+                    ),
+                    ERC20Token(
+                        ETH_RIN,
+                        "CookieTokenETH",
+                        "Cookie",
+                        "0xC00k1e",
+                        "13",
+                        logoURI = "someLogoURI_II",
+                        accountAddress = "address123"
+                    )
                 )
             ),
             Pair(
                 ATS_SIGMA, listOf(
-                    ERC20Token(ATS_SIGMA, "CookieTokenATS", "Cookie", "0xC00k1e", "13"),
-                    ERC20Token(ATS_SIGMA, "SecondOtherATS", "Other22", "0x0th3r22", "22"),
-                    ERC20Token(ATS_SIGMA, "OtherTokenATS", "OtherC", "0x0th3r", "32")
+                    ERC20Token(ATS_SIGMA, "CookieTokenATS", "Cookie", "0xC00k1e", "13", "0xADDRESSxTWO"),
+                    ERC20Token(ATS_SIGMA, "SecondOtherATS", "Other22", "0x0th3r22", "22", "0xADDRESSxTWO"),
+                    ERC20Token(ATS_SIGMA, "OtherTokenATS", "OtherC", "0x0th3r", "32", "0xADDRESSxTWO")
                 )
             )
         )

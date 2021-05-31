@@ -418,12 +418,17 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 1 to listOf(
                     ERC20Token(
                         1,
+                        address = "tokenAddress",
                         name = "cachedToken",
                         accountAddress = "address1"
                     )
                 )
             )
         )
+        viewModel.tokenVisibilitySettings = mock()
+        with(viewModel.tokenVisibilitySettings) {
+            whenever(getTokenVisibility("address1", "tokenAddress")).thenReturn(true)
+        }
         val account = Account(1, address = "address1", chainId = 1)
         val result = viewModel.getTokens(account)
         result[0].name shouldBeEqualTo "cachedToken"

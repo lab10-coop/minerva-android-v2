@@ -44,7 +44,7 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(networks)
         whenever(accountManager.loadAccount(any())).thenReturn(account)
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
-        whenever(tokenManager.loadCurrentTokensPerNetwork(any())).thenReturn(listOf(ERC20Token(1, symbol = "token1"), ERC20Token(3, symbol = "token2")))
+        whenever(tokenManager.getActiveTokensPerAccount(any())).thenReturn(listOf(ERC20Token(1, symbol = "token1"), ERC20Token(3, symbol = "token2")))
         viewModel.initViewModel(0)
 
         val tokens = viewModel.loadTokens()
