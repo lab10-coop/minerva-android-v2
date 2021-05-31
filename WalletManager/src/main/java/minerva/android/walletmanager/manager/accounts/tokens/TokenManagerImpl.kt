@@ -130,17 +130,15 @@ class TokenManagerImpl(
             }?.logoURI ?: String.Empty
         }
 
-    override fun loadCurrentTokensPerNetwork(account: Account): List<ERC20Token> =
-        walletManager.getWalletConfig().run {
-            NetworkManager.getTokens(account.chainId)
-                .mergeWithoutDuplicates(erc20Tokens[account.chainId] ?: listOf())
-        }
+    override fun getActiveTokensPerAccount(account: Account): List<ERC20Token> =
+        walletManager.getWalletConfig().erc20Tokens[account.chainId]
+            ?.filter { token -> token.accountAddress.equals(account.address, true) } ?: listOf()
 
-    private fun getTokensPerAccount(account: Account): List<ERC20Token> {
+    private fun getAllTokensPerAccount(account: Account): List<ERC20Token> {
         val localTokensPerNetwork = NetworkManager.getTokens(account.chainId)
         val remoteTokensPerNetwork = walletManager.getWalletConfig().erc20Tokens[account.chainId] ?: listOf()
         if (remoteTokensPerNetwork.isNotEmpty() && remoteTokensPerNetwork.all { token -> token.accountAddress.isEmpty() }) {
-            return loadCurrentTokensPerNetwork(account)
+            return getActiveTokensPerAccount(account)
         } else {
             return mutableListOf<ERC20Token>().apply {
                 addAll(remoteTokensPerNetwork.filter { remoteToken ->
@@ -163,11 +161,14 @@ class TokenManagerImpl(
 
     override fun refreshTokensBalances(account: Account): Single<Pair<String, List<AccountToken>>> =
         tokenDao.getTaggedTokens()
-            .zipWith(Single.just(getTokensPerAccount(account)))
+            .zipWith(Single.just(getAllTokensPerAccount(account)))
             .flatMap { (taggedTokens, tokensPerAccount) ->
+
                 fillActiveTokensWithTags(taggedTokens, account, tokensPerAccount)
+
                 val tokens = tokensPerAccount.mergeWithoutDuplicates(taggedTokens)
                     .filter { token -> token.chainId == account.chainId }
+
                 Observable.fromIterable(tokens)
                     .flatMap { token ->
                         blockchainRepository.refreshTokenBalance(
@@ -178,13 +179,14 @@ class TokenManagerImpl(
                         )
                     }
                     .map { (tokenAddress, balance) ->
-                        tokens.find { token -> token.address.equals(tokenAddress, true) }?.let { erc20Token ->
-                            AccountToken(
-                                erc20Token,
-                                balance,
-                                rateStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address))
-                            )
-                        }.orElse { throw NullPointerException() }
+                        tokens.find { token -> token.address.equals(tokenAddress, true) }
+                            ?.let { erc20Token ->
+                                AccountToken(
+                                    erc20Token,
+                                    balance,
+                                    rateStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address))
+                                )
+                            }.orElse { throw NullPointerException() }
                     }
                     .toList()
                     .map { accountTokens -> Pair(account.privateKey, accountTokens) }
@@ -250,11 +252,8 @@ class TokenManagerImpl(
                     }
                 }
                 Observable.merge(observables)
-                    .doOnNext { rates ->
-                        rates.forEach { (fiatSymbol, rate) ->
-                            rateStorage.saveRate(fiatSymbol, rate)
-                        }
-                    }.toList()
+                    .doOnNext { rates -> rates.forEach { (fiatSymbol, rate) -> rateStorage.saveRate(fiatSymbol, rate) } }
+                    .toList()
                     .doOnSuccess {
                         currentFiat = this
                         rateStorage.areRatesSynced = true

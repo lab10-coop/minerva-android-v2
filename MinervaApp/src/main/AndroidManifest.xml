@@ -22,7 +22,10 @@
         <activity
             android:name=".accounts.walletconnect.WalletConnectActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".splash.SplashScreenActivity">
+        <activity
+            android:name=".splash.SplashScreenActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
