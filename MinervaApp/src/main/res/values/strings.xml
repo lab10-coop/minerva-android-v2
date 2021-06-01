@@ -316,7 +316,7 @@
     <string name="info_dapp_awaiting">Awaiting connection feedback from the DApp</string>
     <string name="authentication">Authentication</string>
     <string name="authentication_alert_title">You should enable an authentication method for your Minerva Wallet.</string>
-    <string name="authentication_alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
+    <string name="authentication_alert_message">This helps protect your money and assets from others accessing your unlocked phone.</string>
     <string name="message_sync_error">If this message is shown despite a good internet connection, contact our support on Telegram or Discord.</string>
     <string name="wrong_tx_value_error">The DApp has sent the wrong amount. It may help if you retry and initiate a new transaction. If you contact our support, please provide the following error-Id: %s</string>
     <string name="choose_your_account">Choose your Account</string>
