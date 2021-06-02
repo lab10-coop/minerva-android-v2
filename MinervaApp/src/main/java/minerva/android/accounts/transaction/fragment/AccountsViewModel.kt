@@ -18,10 +18,9 @@ import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.WalletActionFields
-import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.REMOVED
-import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SAFE_ACCOUNT_REMOVED
+import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.HIDE
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -81,8 +80,8 @@ class AccountsViewModel(
     private val _tokenBalanceLiveData = MutableLiveData<Unit>()
     val tokenBalanceLiveData: LiveData<Unit> get() = _tokenBalanceLiveData
 
-    private val _accountRemovedLiveData = MutableLiveData<Event<Unit>>()
-    val accountRemovedLiveData: LiveData<Event<Unit>> get() = _accountRemovedLiveData
+    private val _accountHideLiveData = MutableLiveData<Event<Unit>>()
+    val accountHideLiveData: LiveData<Event<Unit>> get() = _accountHideLiveData
 
     private val _addFreeAtsLiveData = MutableLiveData<Event<Boolean>>()
     val addFreeAtsLiveData: LiveData<Event<Boolean>> get() = _addFreeAtsLiveData
@@ -142,19 +141,19 @@ class AccountsViewModel(
     private fun isCurrentSession(sessions: List<DappSession>, account: Account) =
         sessions.find { session -> session.address == accountManager.toChecksumAddress(account.address) } != null
 
-    fun removeAccount(account: Account) {
+    fun hideAccount(account: Account) {
         launchDisposable {
-            accountManager.removeAccount(account)
+            accountManager.hideAccount(account)
                 .observeOn(Schedulers.io())
                 .andThen(walletConnectRepository.killAllAccountSessions(accountManager.toChecksumAddress(account.address)))
-                .andThen(walletActionsRepository.saveWalletActions(listOf(getRemovedAccountAction(account))))
+                .andThen(walletActionsRepository.saveWalletActions(listOf(getHideAccountAction(account))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onComplete = { _accountRemovedLiveData.value = Event(Unit) },
+                    onComplete = { _accountHideLiveData.value = Event(Unit) },
                     onError = {
-                        Timber.e("Removing account with index ${account.id} failure")
-                        handleRemoveAccountErrors(it)
+                        Timber.e("Hiding account with index ${account.id} failure")
+                        handleHideAccountErrors(it)
                     }
                 )
         }
@@ -241,7 +240,7 @@ class AccountsViewModel(
                 )
         }
 
-    private fun handleRemoveAccountErrors(it: Throwable) {
+    private fun handleHideAccountErrors(it: Throwable) {
         _errorLiveData.value = when (it) {
             is BalanceIsNotEmptyThrowable -> Event(BalanceIsNotEmptyError)
             is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> Event(BalanceIsNotEmptyAndHasMoreOwnersError)
@@ -251,10 +250,9 @@ class AccountsViewModel(
         }
     }
 
-    private fun getRemovedAccountAction(account: Account) =
+    private fun getHideAccountAction(account: Account) =
         account.run {
-            if (isSafeAccount) getWalletAction(SAFE_ACCOUNT_REMOVED, name)
-            else getWalletAction(REMOVED, name)
+            getWalletAction(HIDE, name)
         }
 
     fun createSafeAccount(account: Account) {
@@ -308,7 +306,7 @@ class AccountsViewModel(
     }
 
     fun isAddingFreeATSAvailable(accounts: List<Account>): Boolean =
-        shouldGetFreeAts() && accounts.any { account -> account.network.chainId == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].chainId }
+        shouldGetFreeAts() && accounts.any { account -> account.network.chainId == NetworkManager.networks[FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId }
 
     private fun shouldGetFreeAts() =
         ((accountManager.getLastFreeATSTimestamp() + TimeUnit.HOURS.toMillis(DAY)) < accountManager.currentTimeMills())
@@ -316,7 +314,7 @@ class AccountsViewModel(
     @VisibleForTesting
     fun getAccountForFreeATS(accounts: List<Account>): Account =
         accounts.find { account ->
-            account.network.chainId == NetworkManager.networks[FIRST_DEFAULT_NETWORK_INDEX].chainId
+            account.network.chainId == NetworkManager.networks[FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
         } ?: Account(Int.InvalidId)
 
     private fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {

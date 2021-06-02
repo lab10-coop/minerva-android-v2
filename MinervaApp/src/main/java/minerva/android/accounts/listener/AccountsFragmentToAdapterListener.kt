@@ -8,7 +8,7 @@ interface AccountsFragmentToAdapterListener {
     fun onSendTransaction(index: Int)
     fun onSendTokenTransaction(accountIndex: Int, tokenAddress: String)
     fun onCreateSafeAccount(account: Account)
-    fun onAccountRemove(account: Account)
+    fun onAccountHide(account: Account)
     fun onShowAddress(accountIndex: Int)
     fun onShowSafeAccountSettings(account: Account, position: Int)
     fun onWalletConnect(index: Int)

@@ -87,7 +87,7 @@ class AccountAdapter(
         listener.onSendTokenTransaction(rawAccounts.indexOf(account), tokenAddress)
     }
 
-    override fun onAccountRemoved(index: Int) = listener.onAccountRemove(rawAccounts[index])
+    override fun onAccountHide(index: Int) = listener.onAccountHide(rawAccounts[index])
 
     override fun onCreateSafeAccountClicked(account: Account) = listener.onCreateSafeAccount(account)
 
@@ -107,7 +107,7 @@ class AccountAdapter(
 
     override fun getAccountWidgetState(index: Int): AccountWidgetState = listener.getAccountWidgetState(index)
 
-    companion object{
+    companion object {
         private const val NO_DAPP_SESSION = 0
     }
 }

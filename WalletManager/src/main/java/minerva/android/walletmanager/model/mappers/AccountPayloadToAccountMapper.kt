@@ -21,6 +21,8 @@ object AccountPayloadToAccountMapper {
             response.isDeleted,
             owners = response.owners,
             contractAddress = response.contractAddress,
-            bindedOwner = response.bindedOwner
+            bindedOwner = response.bindedOwner,
+            _isTestNetwork = response.isTestNetwork,
+            isHide = response.isHide
         )
 }

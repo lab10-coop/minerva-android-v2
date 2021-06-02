@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="@dimen/margin_normal">
+
+    <ImageView
+        android:id="@+id/indexIcon"
+        android:layout_width="@dimen/xsmall_logo_size"
+        android:layout_height="@dimen/xsmall_logo_size"
+        android:src="@drawable/ic_oval"
+        tools:ignore="ContentDescription"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/indexValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_bold"
+        android:textSize="@dimen/text_normal"
+        android:textColor="@color/titleColor"
+        tools:text="#1"
+        app:layout_constraintEnd_toEndOf="@id/indexIcon"
+        app:layout_constraintStart_toStartOf="@id/indexIcon"
+        app:layout_constraintBottom_toBottomOf="@id/indexIcon"
+        app:layout_constraintTop_toTopOf="@id/indexIcon"/>
+
+    <TextView
+        android:id="@+id/address"
+        android:layout_width="135dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center_vertical"
+        android:textColor="@color/gray"
+        android:singleLine="true"
+        android:ellipsize="middle"
+        android:textSize="@dimen/text_normal"
+        tools:text="0x427D6427D6f427D6f427D6f427D6f427D6f427D6f"
+        tools:ignore="RelativeOverlap"
+        app:layout_constraintStart_toEndOf="@id/indexIcon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageView
+        android:id="@+id/checkButton"
+        android:layout_width="@dimen/xsmall_logo_size"
+        android:layout_height="@dimen/xsmall_logo_size"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/check_button_selector"
+        tools:ignore="ContentDescription"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

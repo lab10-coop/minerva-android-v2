@@ -6,7 +6,7 @@ import minerva.android.widget.state.AccountWidgetState
 interface AccountsAdapterListener {
     fun onSendAccountClicked(account: Account)
     fun onSendTokenClicked(account: Account, tokenAddress: String)
-    fun onAccountRemoved(index: Int)
+    fun onAccountHide(index: Int)
     fun onCreateSafeAccountClicked(account: Account)
     fun onShowAddress(account: Account)
     fun onShowSafeAccountSettings(account: Account, index: Int)

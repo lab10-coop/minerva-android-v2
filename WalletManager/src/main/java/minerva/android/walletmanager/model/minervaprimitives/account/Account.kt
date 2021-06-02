@@ -16,7 +16,7 @@ data class Account(
     var privateKey: String = String.Empty,
     override var address: String = String.Empty,
     override var name: String = String.Empty,
-    val chainId: Int = Int.InvalidValue,
+    var chainId: Int = Int.InvalidValue,
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = BigDecimal.ZERO,
     var accountTokens: List<AccountToken> = listOf(),
@@ -25,29 +25,29 @@ data class Account(
     var contractAddress: String = String.Empty,
     var isPending: Boolean = false,
     var dappSessionCount: Int = 0,
-    override val bindedOwner: String = String.Empty
+    override val bindedOwner: String = String.Empty,
+    override var isHide: Boolean = false,
+    private val _isTestNetwork: Boolean = false
 ) : MinervaPrimitive(address, name, isDeleted, bindedOwner) {
-    constructor(account: Account, isDeleted: Boolean) : this(
-        account.id,
-        account.publicKey,
-        account.privateKey,
-        account.address,
-        String.Empty,
-        account.chainId,
-        isDeleted,
-        owners = account.owners,
-        isPending = false,
-        dappSessionCount = 0
-    )
 
     val masterOwnerAddress: String
         get() = owners?.last().orEmpty()
 
     val network: Network
-        get() = NetworkManager.getNetwork(chainId)
+        get() = if (isEmptyAccount) Network(chainId = Int.InvalidValue) else NetworkManager.getNetwork(chainId)
+
+    val isEmptyAccount: Boolean
+        get() = chainId == Int.InvalidValue
+
+    val shouldShow: Boolean
+        get() = !isEmptyAccount && !isHide && !isDeleted
+
+    val isTestNetwork: Boolean
+        get() = if (network.chainId != Int.InvalidValue) network.testNet else _isTestNetwork
 
     fun getToken(tokenAddress: String): AccountToken =
         accountTokens.find { it.token.address == tokenAddress } ?: AccountToken(ERC20Token(Int.InvalidIndex))
 
     fun getTokenIndex(tokenAddress: String) = accountTokens.indexOf(getToken(tokenAddress))
+
 }

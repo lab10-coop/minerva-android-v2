@@ -7,12 +7,18 @@ interface CryptographyRepository {
     /*seed, publicKey, privateKey*/
     fun createMasterSeed(): Single<Triple<String, String, String>>
     fun getMnemonicForMasterSeed(seed: String): String
-    fun calculateDerivedKeys(
+    fun calculateDerivedKeysSingle(
         seed: String,
         index: Int,
         derivationPathPrefix: String,
         isTestNet: Boolean = true
     ): Single<DerivedKeys>
+    fun calculateDerivedKeys(
+        seed: String,
+        index: Int,
+        derivationPathPrefix: String,
+        isTestNet: Boolean = true
+    ): DerivedKeys
 
     /*seed, publicKey, privateKey*/
     fun restoreMasterSeed(mnemonic: String): Single<Triple<String, String, String>>

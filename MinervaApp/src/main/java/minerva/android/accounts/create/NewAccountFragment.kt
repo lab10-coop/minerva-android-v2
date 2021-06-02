@@ -2,9 +2,11 @@ package minerva.android.accounts.create
 
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
 import androidx.recyclerview.widget.LinearLayoutManager
 import minerva.android.R
-import minerva.android.accounts.adapter.NetworkAdapter
+import minerva.android.accounts.adapter.NetworkSpinnerAdapter
+import minerva.android.accounts.adapter.NewAccountAdapter
 import minerva.android.databinding.FragmentNewAccountBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.EventObserver
@@ -16,15 +18,21 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
 
     private lateinit var binding: FragmentNewAccountBinding
     private val viewModel: NewAccountViewModel by viewModel()
-    private val networkAdapter by lazy {
-        NetworkAdapter(NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled })
+    private val addressAdapter = NewAccountAdapter()
+
+    private val networkSpinnerAdapter by lazy {
+        NetworkSpinnerAdapter(
+            requireContext(),
+            R.layout.spinner_network,
+            NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled }
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentNewAccountBinding.bind(view)
-        initializeFragment()
         setupRecycleView()
+        initializeFragment()
         setupCreateButton()
     }
 
@@ -36,6 +44,7 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
             errorLiveData.observe(
                 viewLifecycleOwner,
                 EventObserver { handleAutomaticBackupError(it, noAutomaticBackupErrorAction = { activity?.finish() }) })
+            refreshAddressesLiveData.observe(viewLifecycleOwner, EventObserver { refreshAddressAdapterList() })
         }
     }
 
@@ -47,15 +56,42 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
     }
 
     private fun setupRecycleView() {
-        binding.networks.apply {
+        binding.addressRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = networkAdapter
+            adapter = addressAdapter.apply { updateList(viewModel.unusedAccounts) }
+        }
+        binding.networkSpinner.apply {
+            setBackgroundResource(R.drawable.rounded_spinner_background)
+            adapter = networkSpinnerAdapter.apply { setDropDownViewResource(R.layout.spinner_token) }
+            setPopupBackgroundResource(R.drawable.rounded_white_background)
+            setSelection(viewModel.selectedNetworkPosition, false)
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    adapterView: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    viewModel.selectedNetworkPosition = position
+                }
+
+                override fun onNothingSelected(adapterView: AdapterView<*>?) =
+                    setSelection(viewModel.selectedNetworkPosition, true)
+            }
         }
     }
 
-    private fun setupCreateButton() {
-        binding.createButton.setOnClickListener {
-            viewModel.createNewAccount(networkAdapter.getSelectedNetwork())
+    private fun refreshAddressAdapterList() {
+        addressAdapter.updateList(viewModel.unusedAccounts)
+        binding.createButton.isEnabled = !addressAdapter.isEmpty()
+    }
+
+    private fun setupCreateButton() = with(binding.createButton) {
+        isEnabled = !addressAdapter.isEmpty()
+        setOnClickListener {
+            val account = addressAdapter.getSelectedAccount()
+            val network = networkSpinnerAdapter.getItem(viewModel.selectedNetworkPosition)
+            viewModel.connectAccountToNetwork(account.id, account.isTestNetwork, network)
         }
     }
 

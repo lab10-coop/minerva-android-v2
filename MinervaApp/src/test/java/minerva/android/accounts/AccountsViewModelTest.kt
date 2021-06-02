@@ -221,14 +221,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `Remove value error`() {
         val error = Throwable("error")
-        whenever(accountManager.removeAccount(any())).thenReturn(Completable.error(error))
+        whenever(accountManager.hideAccount(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
             Completable.error(error)
         )
         whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.removeAccount(Account(1, "test"))
+        viewModel.hideAccount(Account(1, "test"))
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -236,12 +236,12 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `Remove value success`() {
-        whenever(accountManager.removeAccount(any())).thenReturn(Completable.complete())
+        whenever(accountManager.hideAccount(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
-        viewModel.accountRemovedLiveData.observeForever(accountRemoveObserver)
-        viewModel.removeAccount(Account(1, "test"))
+        viewModel.accountHideLiveData.observeForever(accountRemoveObserver)
+        viewModel.hideAccount(Account(1, "test"))
         accountRemoveCaptor.run {
             verify(accountRemoveObserver).onChanged(capture())
         }
@@ -289,7 +289,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 listOf(
                     Account(
                         1, chainId =
-                        NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId
+                        NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
                     )
                 )
             )
@@ -310,7 +310,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 listOf(
                     Account(
                         1, chainId =
-                        NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId
+                        NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
                     )
                 )
             )
