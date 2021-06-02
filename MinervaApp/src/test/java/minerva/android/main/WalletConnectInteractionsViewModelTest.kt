@@ -7,6 +7,7 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
+import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
@@ -32,6 +33,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
 
     private val walletConnectRepository: WalletConnectRepository = mock()
     private val transactionRepository: TransactionRepository = mock()
+    private val logger: Logger = mock()
     private lateinit var viewModel: WalletConnectInteractionsViewModel
 
     private val requestObserver: Observer<WalletConnectState> = mock()
@@ -64,7 +66,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 )
             )
         whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
         requestCaptor.run {
@@ -80,7 +82,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         whenever(walletConnectRepository.getSessions()).thenReturn(Single.just(listOf()))
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         verify(walletConnectRepository, times(0)).connect(any(), any(), any(), any())
     }
 
@@ -95,7 +97,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
         requestCaptor.run {
@@ -115,7 +117,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
         requestCaptor.run {
@@ -154,7 +156,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getCoinFiatRate(any())).thenReturn(Single.just(2.0))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -212,7 +214,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
         whenever(transactionRepository.getTokenFiatRate(any())).thenReturn(Single.just(3.0))
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -266,7 +268,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -319,7 +321,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
         whenever(transactionRepository.getTokenFiatRate(any())).thenReturn(Single.just(3.0))
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -371,7 +373,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -419,7 +421,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -462,7 +464,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -510,7 +512,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
@@ -541,7 +543,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.sendTransaction(any(), any())).thenReturn(Single.just("txHash"))
         doNothing().whenever(walletConnectRepository).approveTransactionRequest(any(), any())
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
         viewModel.walletConnectStatus.observeForever(requestObserver)
         requestCaptor.run {
@@ -563,7 +565,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         doNothing().whenever(walletConnectRepository).rejectRequest(any())
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.sendTransaction(any(), any())).thenReturn(Single.error(error))
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
         viewModel.walletConnectStatus.observeForever(requestObserver)
         requestCaptor.run {
@@ -584,7 +586,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
 
         val result = viewModel.recalculateTxCost(
             BigDecimal.TEN,
@@ -604,7 +606,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
 
         val result = viewModel.isBalanceTooLow(BigDecimal.TEN, BigDecimal.ONE)
         assertEquals(result, false)
@@ -625,7 +627,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getAccountByAddress(any())).thenReturn(Account(1))
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
         viewModel.acceptRequest()
         verify(walletConnectRepository).approveRequest(any(), any())
@@ -642,7 +644,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
         viewModel.rejectRequest()
         verify(walletConnectRepository).rejectRequest(any())
@@ -683,7 +685,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getFiatSymbol()).thenReturn("EUR")
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
 
-        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository)
+        viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentAccount = account
         viewModel.currentDappSession = DappSession(address = "address1")
         viewModel.walletConnectStatus.observeForever(requestObserver)
