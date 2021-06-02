@@ -27,6 +27,8 @@ import minerva.android.splash.SplashScreenViewModel
 import minerva.android.token.AddTokenViewModel
 import minerva.android.token.ManageTokensViewModel
 import minerva.android.token.ramp.RampViewModel
+import minerva.android.utils.logger.Logger
+import minerva.android.utils.logger.LoggerImpl
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletmanager.createWalletManagerModules
 import minerva.android.widget.clubCard.CacheStorage
@@ -55,9 +57,10 @@ private val appModules = module {
     single<AppUIState> { AppUIStateImpl() }
     factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
     factory<CacheStorage> { CacheStorageImpl(get()) }
+    single<Logger> { LoggerImpl() }
     viewModel { ClubCardViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get()) }
-    viewModel { WalletConnectInteractionsViewModel(get(), get()) }
+    viewModel { WalletConnectInteractionsViewModel(get(), get(), get()) }
     viewModel { SplashScreenViewModel(get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }
