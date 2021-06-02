@@ -62,13 +62,13 @@ class AccountManagerImpl(
         }
 
     internal fun getActiveAccounts(walletConfig: WalletConfig): List<Account> =
-        walletConfig.accounts.filter { account -> !account.isDeleted && account.network.testNet == !areMainNetworksEnabled }
+        walletConfig.accounts.filter { account -> account.shouldShow && account.isTestNetwork == !areMainNetworksEnabled }
 
     override fun createRegularAccount(network: Network): Single<String> =
         walletManager.getWalletConfig().run {
-            val (index, derivationPath) = getIndexWithDerivationPath(network, this)
+            val (index, derivationPath) = getIndexWithDerivationPath(network.testNet, this)
             val accountName = CryptoUtils.prepareName(network.name, index)
-            cryptographyRepository.calculateDerivedKeys(
+            cryptographyRepository.calculateDerivedKeysSingle(
                 walletManager.masterSeed.seed,
                 index, derivationPath, network.testNet
             ).map { keys ->
@@ -84,16 +84,56 @@ class AccountManagerImpl(
             }.flatMapCompletable { config -> walletManager.updateWalletConfig(config) }.toSingleDefault(accountName)
         }
 
+    override fun createEmptyAccounts(numberOfAccounts: Int) =
+        walletManager.getWalletConfig().run {
+            val newAccounts = mutableListOf<Account>()
+            val (firstFreeIndex, derivationPath) = getIndexWithDerivationPath(!areMainNetworksEnabled, this)
+
+            for (shift in 0 until numberOfAccounts) {
+                val index = firstFreeIndex + shift
+                val keys = cryptographyRepository.calculateDerivedKeys(
+                    walletManager.masterSeed.seed, index, derivationPath, !areMainNetworksEnabled
+                )
+                newAccounts.add(
+                    Account(
+                        index,
+                        publicKey = keys.publicKey,
+                        privateKey = keys.privateKey,
+                        address = keys.address,
+                        _isTestNetwork = !areMainNetworksEnabled
+                    )
+                )
+            }
+            walletManager.updateWalletConfig(getWalletConfigWithNewAccounts(newAccounts, this))
+        }
+
     private fun addAccount(newAccount: Account, config: WalletConfig): WalletConfig {
         val newAccounts = config.accounts.toMutableList()
         newAccounts.add(config.accounts.size, newAccount)
         return config.copy(version = config.updateVersion, accounts = newAccounts)
     }
 
+    private fun getWalletConfigWithNewAccounts(accounts: List<Account>, config: WalletConfig): WalletConfig {
+        val newAccounts = config.accounts.toMutableList().apply { addAll(accounts) }
+        return config.copy(version = config.updateVersion, accounts = newAccounts)
+    }
+
+    override fun connectAccountToNetwork(index: Int, isTestNetwork: Boolean, network: Network): Single<String> {
+        val accountName = CryptoUtils.prepareName(network.name, index)
+        walletManager.getWalletConfig().run {
+            accounts.find { account -> account.id == index && account.isTestNetwork == isTestNetwork }?.apply {
+                name = accountName
+                chainId = network.chainId
+                isHide = false
+            }
+            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts)).toSingleDefault(accountName)
+        }
+    }
+
     override fun createSafeAccount(account: Account, contract: String): Completable =
         walletManager.getWalletConfig().run {
-            val (index, derivationPath) = getIndexWithDerivationPath(account.network, this)
-            return cryptographyRepository.calculateDerivedKeys(
+            val (index, derivationPath) = getIndexWithDerivationPath(account.network.testNet, this)
+            return cryptographyRepository.calculateDerivedKeysSingle(
                 walletManager.masterSeed.seed,
                 index, derivationPath, account.network.testNet
             ).map { keys ->
@@ -134,13 +174,14 @@ class AccountManagerImpl(
         } ?: emptyList()
 
     private fun getIndexWithDerivationPath(
-        network: Network,
+        isTestNetwork: Boolean,
         config: WalletConfig
-    ): Pair<Int, String> = if (network.testNet) {
-        Pair(config.newTestNetworkIndex, DerivationPath.TEST_NET_PATH)
-    } else {
-        Pair(config.newMainNetworkIndex, DerivationPath.MAIN_NET_PATH)
-    }
+    ): Pair<Int, String> =
+        if (isTestNetwork) {
+            Pair(config.newTestNetworkIndex, DerivationPath.TEST_NET_PATH)
+        } else {
+            Pair(config.newMainNetworkIndex, DerivationPath.MAIN_NET_PATH)
+        }
 
     private fun addSafeAccount(
         config: WalletConfig,
@@ -176,9 +217,12 @@ class AccountManagerImpl(
     override fun getAllAccounts(): List<Account> = walletManager.getWalletConfig().accounts
 
     override fun getAllActiveAccounts(chainId: Int): List<Account> =
-        getAllAccounts().filter { account -> !account.isDeleted && account.chainId == chainId }
+        getAllAccounts().filter { account -> !account.isHide && !account.isDeleted && account.chainId == chainId }
 
     override fun toChecksumAddress(address: String): String = blockchainRepository.toChecksumAddress(address)
+
+    override fun getAllAccountsForSelectedNetworksType(): List<Account> =
+        getAllAccounts().filter { account -> account.isTestNetwork == !areMainNetworksEnabled }
 
     override fun clearFiat() =
         walletManager.getWalletConfig().accounts.forEach { account ->
@@ -197,15 +241,36 @@ class AccountManagerImpl(
             Completable.error(MissingAccountThrowable())
         }
 
-    private fun handleRemovingAccount(
-        item: Account, config: WalletConfig,
-        newAccounts: MutableList<Account>, index: Int
-    ): Completable =
+    private fun handleRemovingAccount(item: Account, config: WalletConfig, newAccounts: MutableList<Account>, index: Int)
+            : Completable =
         when {
             areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
             isNotSAMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
             else -> {
-                newAccounts[index] = Account(item, true)
+                newAccounts[index] = item.copy(isDeleted = true)
+                walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+            }
+        }
+
+    override fun hideAccount(account: Account): Completable =
+        walletManager.getWalletConfig().run {
+            val newAccounts: MutableList<Account> = accounts.toMutableList()
+            accounts.forEachIndexed { index, item ->
+                if (item.address.equals(account.address, true) && item.isTestNetwork == !areMainNetworksEnabled) {
+                    return handleHidingAccount(item, this, newAccounts, index)
+                }
+            }
+            Completable.error(MissingAccountThrowable())
+        }
+
+    private fun handleHidingAccount(
+        account: Account, config: WalletConfig,
+        newAccounts: MutableList<Account>, index: Int
+    ): Completable =
+        when {
+            isNotSAMasterOwner(config.accounts, account) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+            else -> {
+                newAccounts[index] = account.copy(isHide = true)
                 walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
             }
         }
@@ -246,6 +311,5 @@ class AccountManagerImpl(
     companion object {
         private val MAX_GWEI_TO_REMOVE_VALUE = BigInteger.valueOf(300)
         private const val NO_SAFE_ACCOUNTS = 0
-        const val NEW_ACCOUNT_TITLE_PATTERN = "%s #%d"
     }
 }

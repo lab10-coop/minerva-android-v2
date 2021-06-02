@@ -55,7 +55,7 @@ class TransactionRepositoryImpl(
         get() = walletConfigManager.masterSeed
 
     override fun refreshCoinBalances(): Single<HashMap<String, Balance>> =
-        walletConfigManager.getWalletConfig().accounts.filter { account -> accountsFilter(account) }.let { accounts ->
+        walletConfigManager.getWalletConfig().accounts.filter { account -> accountsFilter(account)  && !account.isEmptyAccount }.let { accounts ->
             blockchainRepository.refreshBalances(getAddresses(accounts))
                 .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
                 .map { (cryptoBalances, markets) ->
@@ -97,7 +97,7 @@ class TransactionRepositoryImpl(
     private fun accountsFilter(account: Account) =
         refreshBalanceFilter(account) && account.network.testNet == !localStorage.areMainNetworksEnabled
 
-    private fun refreshBalanceFilter(account: Account) = !account.isDeleted && !account.isPending
+    private fun refreshBalanceFilter(account: Account) = !account.isHide && !account.isDeleted && !account.isPending
 
     override fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>> = tokenManager.getTaggedTokensUpdate()
 

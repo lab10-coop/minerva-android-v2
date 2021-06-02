@@ -346,8 +346,11 @@ class BlockchainRegularAccountRepositoryImpl(
         privateKey: String,
         address: String
     ): Observable<Pair<String, BigDecimal>> =
-        loadERC20(privateKey, chainId, tokenAddress).balanceOf(address).flowable()
-            .map { balance -> Pair(tokenAddress, balance.toBigDecimal()) }.toObservable()
+        loadERC20(privateKey, chainId, tokenAddress)
+            .balanceOf(address)
+            .flowable()
+            .map { balance -> Pair(tokenAddress, balance.toBigDecimal()) }
+            .toObservable()
 
     private fun increaseGasLimitByTenPercent(gasLimit: BigInteger) = gasLimit.add(getBuffer(gasLimit))
 

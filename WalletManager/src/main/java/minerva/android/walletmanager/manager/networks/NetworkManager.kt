@@ -9,7 +9,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
 import java.math.BigInteger
 
 object NetworkManager {
@@ -31,7 +31,7 @@ object NetworkManager {
 
     fun getNetwork(chainId: Int): Network = networkMap.value(chainId)
 
-    fun firstDefaultValueNetwork(): Network = networks[FIRST_DEFAULT_NETWORK_INDEX]
+    fun firstDefaultValueNetwork(): Network = networks[FIRST_DEFAULT_TEST_NETWORK_INDEX]
 
     fun getNetworkByIndex(index: Int): Network =
         if (networks.size > ONE_ELEMENT && isActiveNetwork(networks[index])) networks[index]

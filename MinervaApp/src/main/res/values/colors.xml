@@ -66,4 +66,5 @@
     <color name="errorRed">#e42c00</color>
     <color name="warningMessageOrange">#dc7500</color>
     <color name="warningOrange">#fda518</color>
+    <color name="darkGray70">#B33A3944</color>
 </resources>

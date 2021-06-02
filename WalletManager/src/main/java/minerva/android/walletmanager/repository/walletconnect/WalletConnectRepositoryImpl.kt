@@ -234,7 +234,7 @@ class WalletConnectRepositoryImpl(
     override fun killAllAccountSessions(address: String): Completable =
         getSessions()
             .map { sessions ->
-                sessions.filter { it.address == address }.forEach { session ->
+                sessions.filter { it.address.equals(address, true) }.forEach { session ->
                     with(clientMap) {
                         this[session.peerId]?.killSession()
                         remove(session.peerId)

@@ -18,6 +18,7 @@ import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.model.contract.ContractTransactions
 import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.TransferType
@@ -39,7 +40,8 @@ import java.math.BigInteger
 
 class WalletConnectInteractionsViewModel(
     private val transactionRepository: TransactionRepository,
-    private val walletConnectRepository: WalletConnectRepository
+    private val walletConnectRepository: WalletConnectRepository,
+    private val logger: Logger
 ) : BaseViewModel() {
 
     internal var currentDappSession: DappSession? = null
@@ -103,9 +105,11 @@ class WalletConnectInteractionsViewModel(
                         OnEthSignRequest(status.message, session)
                     }
             is OnDisconnect -> Single.just(OnDisconnected())
-            is OnEthSendTransaction ->
+            is OnEthSendTransaction -> {
+                logToFirebase("Transaction payload from WalletConnect: ${status.transaction}")
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }
+            }
             is OnFailure -> Single.just(if (status.sessionName.isNotEmpty()) OnGeneralError(status.error) else DefaultRequest)
             else -> Single.just(DefaultRequest)
         }
@@ -295,6 +299,11 @@ class WalletConnectInteractionsViewModel(
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map { txReceipt ->
+                    logToFirebase(
+                        "Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt," +
+                                "token transaction: ${currentTransaction.tokenTransaction}"
+                    )
+                    weiCoinTransactionValue = NO_COIN_TX_VALUE
                     currentDappSession?.let { session ->
                         walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
                     }
@@ -356,6 +365,10 @@ class WalletConnectInteractionsViewModel(
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =
         balance < cost || balance == BigDecimal.ZERO
+
+    fun logToFirebase(message: String) {
+        logger.logToFirebase(message)
+    }
 
     companion object {
         private const val UNLIMITED = "115792089237316195423570985008687907853269984665640564039457584007913129639935"

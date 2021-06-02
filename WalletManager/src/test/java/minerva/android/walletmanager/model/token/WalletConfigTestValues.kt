@@ -3,8 +3,8 @@ package minerva.android.walletmanager.model.token
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 
 object WalletConfigTestValues {
 
@@ -66,7 +66,7 @@ object WalletConfigTestValues {
     )
 
     val accountsResponse = listOf(
-        AccountPayload(1, "ValuePayload1", networks[0].chainId, false, _contractAddress = "contractAddress"),
-        AccountPayload(2, "ValuePayload2", networks[1].chainId, false, _contractAddress = "contractAddress")
+        AccountPayload(1, "ValuePayload1", networks[0].chainId, false, _contractAddress = "contractAddress", _isTestNetwork = true),
+        AccountPayload(2, "ValuePayload2", networks[1].chainId, false, _contractAddress = "contractAddress", _isTestNetwork = true)
     )
 }

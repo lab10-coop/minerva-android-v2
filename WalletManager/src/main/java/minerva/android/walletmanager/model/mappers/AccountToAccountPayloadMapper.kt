@@ -13,6 +13,8 @@ object AccountToAccountPayloadMapper : Mapper<Account, AccountPayload> {
             input.isDeleted,
             input.owners,
             input.contractAddress,
-            input.bindedOwner
+            input.bindedOwner,
+            input.isTestNetwork,
+            input.isHide
         )
 }

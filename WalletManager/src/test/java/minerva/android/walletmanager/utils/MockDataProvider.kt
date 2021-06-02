@@ -36,6 +36,8 @@ object MockDataProvider {
             chainId = ATS_TAU, httpRpc = "address", testNet = true,
             tokens = listOf(
                 ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
+                ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32"),
+                ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
                 ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
             )
         ),
@@ -64,19 +66,19 @@ object MockDataProvider {
             Identity(3, "identityName3", "", "privateKey", "address3", data)
         ),
         listOf(
-            Account(1, "publicKey1", "privateKey1", "address1", chainId = ETH_RIN),
-            Account(2, "publicKey2", "privateKey2", "address2", chainId = ATS_TAU),
+            Account(1, "publicKey1", "privateKey1", "address1", chainId = ETH_RIN, _isTestNetwork = true),
+            Account(2, "publicKey2", "privateKey2", "address2", chainId = ATS_TAU, _isTestNetwork = true),
             Account(
                 3, "publicKey3", "privateKey3", "address3", chainId = ATS_TAU,
-                owners = listOf("masterOwner")
+                owners = listOf("masterOwner"), _isTestNetwork = true
             ),
             Account(
                 4, "publicKey4", "privateKey4", "address4", chainId = ATS_TAU,
-                owners = listOf("notMasterOwner", "masterOwner")
+                owners = listOf("notMasterOwner", "masterOwner"), _isTestNetwork = true
             ),
-            Account(1, "publicKey5", "privateKey5", "address4", chainId = ATS_TAU),
-            Account(5, "publicKey1Main", "privateKey1Main", "address1Main", chainId = ATS_SIGMA),
-            Account(6, "publicKey2Main", "privateKey2Main", "address2Main", chainId = POA_CORE)
+            Account(5, "publicKey5", "privateKey5", "address4", chainId = ATS_TAU, _isTestNetwork = true),
+            Account(1, "publicKey1Main", "privateKey1Main", "address1Main", chainId = ATS_SIGMA, _isTestNetwork = false),
+            Account(2, "publicKey2Main", "privateKey2Main", "address2Main", chainId = POA_CORE, _isTestNetwork = false)
         ),
         listOf(
             Service("1", "name")
@@ -92,23 +94,46 @@ object MockDataProvider {
         mapOf(
             Pair(
                 ATS_TAU, listOf(
-                    ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xC00k1eN", "13", accountAddress = "0xADDRESSxONE"),
-                    ERC20Token(ATS_TAU, "OtherTokenATS1", "OtherC", "0xS0m3T0k3N", "32", accountAddress = "0xADDRESSxONE"),
-                    ERC20Token(ATS_TAU, "OtherTokenATS", "OtherC", "0xC00k1e", "32", accountAddress = "0xADDRESSxONE"),
-                    ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "0x0th3r", "32", accountAddress = "0xADDRESSxONE")
+                    ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xC00k1eN", "13", accountAddress = "address4455"),
+                    ERC20Token(
+                        ATS_TAU,
+                        "OtherTokenATS1",
+                        "OtherC",
+                        "0xS0m3T0k3N",
+                        "32",
+                        accountAddress = "address4455"
+                    ),
+                    ERC20Token(ATS_TAU, "OtherTokenATS", "OtherC", "0xC00k1e", "32", accountAddress = "address4455"),
+                    ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "0x0th3r", "32", accountAddress = "address4455")
                 )
             ),
             Pair(
                 ETH_RIN, listOf(
-                    ERC20Token(ETH_RIN, "OtherTokenETH", "OtherC", "0x0th3r", "32", logoURI = "someLogoURI"),
-                    ERC20Token(ETH_RIN, "CookieTokenETH", "Cookie", "0xC00k1e", "13", logoURI = "someLogoURI_II")
+                    ERC20Token(
+                        ETH_RIN,
+                        "OtherTokenETH",
+                        "OtherC",
+                        "0x0th3r",
+                        "32",
+                        logoURI = "someLogoURI",
+                        accountAddress = "address123"
+                    ),
+                    ERC20Token(
+                        ETH_RIN,
+                        "CookieTokenETH",
+                        "Cookie",
+                        "0xC00k1e",
+                        "13",
+                        logoURI = "someLogoURI_II",
+                        accountAddress = "address123"
+                    )
                 )
             ),
             Pair(
                 ATS_SIGMA, listOf(
-                    ERC20Token(ATS_SIGMA, "CookieTokenATS", "Cookie", "0xC00k1e", "13"),
-                    ERC20Token(ATS_SIGMA, "SecondOtherATS", "Other22", "0x0th3r22", "22"),
-                    ERC20Token(ATS_SIGMA, "OtherTokenATS", "OtherC", "0x0th3r", "32")
+                    ERC20Token(ATS_SIGMA, "CookieTokenATS", "Cookie", "0xC00k1e", "13", "0xADDRESSxTWO"),
+                    ERC20Token(ATS_SIGMA, "SecondOtherATS", "Other22", "0x0th3r22", "22", "0xADDRESSxTWO"),
+                    ERC20Token(ATS_SIGMA, "OtherTokenATS", "OtherC", "0x0th3r", "32", "0xADDRESSxTWO")
                 )
             )
         )
