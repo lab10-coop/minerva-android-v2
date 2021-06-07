@@ -35,7 +35,8 @@ interface AccountManager : Manager {
     fun getAllAccounts(): List<Account>
     fun getAllActiveAccounts(chainId: Int): List<Account>
     fun getAllAccountsForSelectedNetworksType(): List<Account>
+    fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>>
     fun toChecksumAddress(address: String): String
     fun clearFiat()
-    fun connectAccountToNetwork(accountId: Int, isTestNetwork: Boolean, network: Network): Single<String>
+    fun connectAccountToNetwork(index: Int, network: Network): Single<String>
 }

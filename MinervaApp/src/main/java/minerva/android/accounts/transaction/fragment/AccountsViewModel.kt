@@ -24,10 +24,11 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.HID
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
-import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
@@ -49,7 +50,7 @@ class AccountsViewModel(
     private val appUIState: AppUIState
 ) : BaseViewModel() {
     val hasAvailableAccounts: Boolean get() = accountManager.hasAvailableAccounts
-    val activeAccounts: List<Account> get() = accountManager.activeAccounts
+    val activeAccounts: List<Account> get() = accountManager.activeAccounts.sortedBy { account -> account.id }
     private val cachedTokens: Map<Int, List<ERC20Token>> get() = accountManager.cachedTokens
     var tokenVisibilitySettings: TokenVisibilitySettings = accountManager.getTokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
@@ -74,8 +75,8 @@ class AccountsViewModel(
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
-    private val _balanceLiveData = MutableLiveData<HashMap<String, Balance>>()
-    val balanceLiveData: LiveData<HashMap<String, Balance>> get() = _balanceLiveData
+    private val _balanceLiveData = MutableLiveData<List<CoinBalance>>()
+    val balanceLiveData: LiveData<List<CoinBalance>> get() = _balanceLiveData
 
     private val _tokenBalanceLiveData = MutableLiveData<Unit>()
     val tokenBalanceLiveData: LiveData<Unit> get() = _tokenBalanceLiveData
@@ -88,7 +89,6 @@ class AccountsViewModel(
 
     private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
     val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
-
 
     override fun onResume() {
         super.onResume()
@@ -198,10 +198,12 @@ class AccountsViewModel(
                 )
         }
 
-    private fun filterNotVisibleTokens(accountTokenBalances: Map<String, List<AccountToken>>) {
+    private fun filterNotVisibleTokens(accountTokenBalances: List<TokenBalance>) {
         activeAccounts.filter { account -> !account.isPending }
             .forEach { account ->
-                accountTokenBalances[account.privateKey]?.let { tokensList ->
+                accountTokenBalances.find { tokenBalance ->
+                    tokenBalance.chainId == account.chainId && tokenBalance.privateKey == account.privateKey
+                }?.accountTokenList?.let { tokensList ->
                     account.accountTokens = tokensList.filter { accountToken ->
                         isTokenVisible(account.address, accountToken).orElse {
                             saveTokenVisible(account.address, accountToken.token.address, true)

@@ -12,7 +12,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 interface BlockchainRegularAccountRepository {
-    fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Pair<String, BigDecimal>>>
+    fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Triple<Int, String, BigDecimal>>>
 
     fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal
     fun transferNativeCoin(

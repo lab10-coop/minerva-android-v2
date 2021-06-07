@@ -46,7 +46,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
             .test()
             .await()
             .assertValue {
-                it[0].first == "0x9866208bea68b10f04697c00b891541a305df851"
+                it[0].second == "0x9866208bea68b10f04697c00b891541a305df851"
             }
     }
 

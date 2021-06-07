@@ -10,7 +10,7 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.transactions.Balance
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.widget.state.AccountWidgetState
 
 class AccountAdapter(
@@ -42,11 +42,12 @@ class AccountAdapter(
         notifyDataSetChanged()
     }
 
-    fun updateBalances(balances: HashMap<String, Balance>) {
+    fun updateBalances(balances: List<CoinBalance>) {
         activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
             account.apply {
-                cryptoBalance = balances[address]?.cryptoBalance ?: Double.InvalidValue.toBigDecimal()
-                fiatBalance = balances[address]?.fiatBalance ?: Double.InvalidValue.toBigDecimal()
+                val balanceData = balances.find { balance -> balance.chainId == account.chainId && balance.address.equals(account.address, true) }
+                cryptoBalance = balanceData?.balance?.cryptoBalance ?: Double.InvalidValue.toBigDecimal()
+                fiatBalance = balanceData?.balance?.fiatBalance ?: Double.InvalidValue.toBigDecimal()
                 notifyItemChanged(index)
             }
         }

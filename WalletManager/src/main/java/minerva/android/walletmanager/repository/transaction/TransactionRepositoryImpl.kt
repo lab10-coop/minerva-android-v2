@@ -28,10 +28,15 @@ import minerva.android.walletmanager.model.mappers.TransactionCostPayloadToTrans
 import minerva.android.walletmanager.model.mappers.TransactionToTransactionPayloadMapper
 import minerva.android.walletmanager.model.mappers.TxCostPayloadToTxCostDataMapper
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.model.transactions.*
+import minerva.android.walletmanager.model.transactions.Recipient
+import minerva.android.walletmanager.model.transactions.Transaction
+import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
@@ -54,25 +59,26 @@ class TransactionRepositoryImpl(
     override val masterSeed: MasterSeed
         get() = walletConfigManager.masterSeed
 
-    override fun refreshCoinBalances(): Single<HashMap<String, Balance>> =
-        walletConfigManager.getWalletConfig().accounts.filter { account -> accountsFilter(account)  && !account.isEmptyAccount }.let { accounts ->
-            blockchainRepository.refreshBalances(getAddresses(accounts))
-                .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
-                .map { (cryptoBalances, markets) ->
-                    MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, localStorage.loadCurrentFiat())
-                }
-        }
+    override fun refreshCoinBalances(): Single<List<CoinBalance>> =
+        walletConfigManager.getWalletConfig().accounts.filter { account -> accountsFilter(account) && !account.isEmptyAccount }
+            .let { accounts ->
+                blockchainRepository.refreshBalances(getAddresses(accounts))
+                    .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
+                    .map { (cryptoBalances, markets) ->
+                        MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, localStorage.loadCurrentFiat())
+                    }
+            }
 
     private fun getAddresses(accounts: List<Account>): List<Pair<Int, String>> =
         accounts.map { account -> account.network.chainId to account.address }
 
-    override fun refreshTokensBalances(): Single<Map<String, List<AccountToken>>> =
+    override fun refreshTokensBalances(): Single<List<TokenBalance>> =
         accountsForTokenBalanceRefresh.let { accounts ->
             Observable.fromIterable(accounts)
                 .flatMapSingle { account -> tokenManager.refreshTokensBalances(account) }
                 .toList()
-                .map { accountTokensPerAccountList -> parseAccountTokensPerAccountListToMap(accountTokensPerAccountList) }
-                .flatMap { accountTokensPerAccountMap -> handleNewAddedTokens(accountTokensPerAccountMap, accounts) }
+                .map { accountTokensPerAccountList -> parseAccountTokensPerAccountListToTokenBalanceList(accountTokensPerAccountList) }
+                .flatMap { tokenBalanceList -> handleNewAddedTokens(tokenBalanceList, accounts) }
         }
 
     private val accountsForTokenBalanceRefresh: List<Account>
@@ -97,30 +103,30 @@ class TransactionRepositoryImpl(
     private fun accountsFilter(account: Account) =
         refreshBalanceFilter(account) && account.network.testNet == !localStorage.areMainNetworksEnabled
 
-    private fun refreshBalanceFilter(account: Account) = !account.isHide && !account.isDeleted && !account.isPending
+    private fun refreshBalanceFilter(account: Account) = !account.isDeleted && !account.isPending
 
     override fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>> = tokenManager.getTaggedTokensUpdate()
 
     private fun handleNewAddedTokens(
-        accountTokensPerAccountMap: Map<String, List<AccountToken>>,
+        tokenBalanceList: List<TokenBalance>,
         accounts: List<Account>
-    ): Single<Map<String, List<AccountToken>>> =
-        if (shouldSetAccountAddress(accountTokensPerAccountMap)) {
-            updateCachedTokens(getTokensWithAccountAddress(accounts, accountTokensPerAccountMap))
-                .toSingleDefault(accountTokensPerAccountMap)
-                .onErrorResumeNext { Single.just(accountTokensPerAccountMap) }
+    ): Single<List<TokenBalance>> =
+        if (shouldSetAccountAddress(tokenBalanceList)) {
+            updateCachedTokens(getTokensWithAccountAddress(accounts, tokenBalanceList))
+                .toSingleDefault(tokenBalanceList)
+                .onErrorResumeNext { Single.just(tokenBalanceList) }
             //TODO what should be done when error happens? should crash app to prevent losing data?
         } else {
-            Single.just(accountTokensPerAccountMap)
+            Single.just(tokenBalanceList)
         }
 
     internal fun getTokensWithAccountAddress(
         accounts: List<Account>,
-        accountTokensPerAccountMap: Map<String, List<AccountToken>>
+        tokenBalanceList: List<TokenBalance>
     ): Map<Int, List<ERC20Token>> {
         val allTokens: MutableList<ERC20Token> = mutableListOf()
         accounts.forEach { account ->
-            accountTokensPerAccountMap[account.privateKey]?.forEach { accountToken ->
+            tokenBalanceList.find { tokenBalance -> account.privateKey == tokenBalance.privateKey && account.chainId == tokenBalance.chainId }?.accountTokenList?.forEach { accountToken ->
                 if (accountToken.balance > BigDecimal.ZERO) {
                     allTokens.add(accountToken.token.copy(accountAddress = account.address, tag = accountToken.token.tag))
                 }
@@ -129,16 +135,22 @@ class TransactionRepositoryImpl(
         return allTokens.groupBy { token -> token.chainId }
     }
 
-    private fun shouldSetAccountAddress(accountTokensPerAccountMap: Map<String, List<AccountToken>>): Boolean =
-        accountTokensPerAccountMap.values.any { accountTokens ->
-            accountTokens.find { accountToken -> accountToken.balance > BigDecimal.ZERO && accountToken.token.accountAddress.isBlank() } != null
+    private fun shouldSetAccountAddress(tokenBalanceList: List<TokenBalance>): Boolean {
+        var shouldSetAccountAddress = false
+        tokenBalanceList.forEach { tokenBalance ->
+            shouldSetAccountAddress = tokenBalance.accountTokenList.find { accountToken ->
+                accountToken.balance > BigDecimal.ZERO && accountToken.token.accountAddress.isBlank()
+            } != null
         }
+        return shouldSetAccountAddress
+    }
 
-    private fun parseAccountTokensPerAccountListToMap(accountTokenPerAccountList: List<Pair<String, List<AccountToken>>>) =
-        mutableMapOf<String, List<AccountToken>>()
-            .apply {
-                accountTokenPerAccountList.forEach { (privateKey, accountTokens) -> put(privateKey, accountTokens) }
-            }.toMap()
+    private fun parseAccountTokensPerAccountListToTokenBalanceList(accountTokenPerAccountList: List<Triple<Int, String, List<AccountToken>>>) =
+        mutableListOf<TokenBalance>().apply {
+            accountTokenPerAccountList.forEach { (chainId, privateKey, accountTokens) ->
+                add(TokenBalance(chainId, privateKey, accountTokens))
+            }
+        }
 
     private fun updateCachedTokens(updatedTokens: Map<Int, List<ERC20Token>>): Completable =
         with(walletConfigManager.getWalletConfig()) {

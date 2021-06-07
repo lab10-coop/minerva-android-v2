@@ -1,12 +1,12 @@
 package minerva.android.walletmanager.utils
 
-import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.FiatPrice
+import minerva.android.apiProvider.model.Markets
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import org.junit.Test
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -14,13 +14,14 @@ import kotlin.test.assertEquals
 
 class MarketUtilsTest {
 
-    private val cryptoBalances: List<Pair<String, BigDecimal>> =
-        listOf(Pair("address1", BigDecimal(12)), Pair("address2", BigDecimal(10)))
     private val poaNetwork = Network(testNet = false, chainId = POA_CORE, httpRpc = "some")
     private val xdaiNetwork = Network(testNet = false, chainId = XDAI, httpRpc = "some")
 
     private val poaTestNetwork = Network(testNet = true, chainId = POA_CORE)
     private val xdaiTestNetwork = Network(testNet = true, chainId = XDAI)
+
+    private val cryptoBalances: List<Triple<Int, String, BigDecimal>> =
+        listOf(Triple( poaNetwork.chainId, "address1", BigDecimal(12)), Triple(xdaiNetwork.chainId, "address2", BigDecimal(10)))
 
     private val testNetworksAccount =
         listOf(
@@ -39,16 +40,28 @@ class MarketUtilsTest {
         NetworkManager.initialize(listOf(poaNetwork, xdaiNetwork))
         val result = MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, "EUR")
         val expectedFiatBalance = BigDecimal.valueOf(6.00).setScale(2, RoundingMode.HALF_DOWN)
-        assertEquals(expectedFiatBalance, result["address1"]?.fiatBalance)
-        assertEquals(BigDecimal(10), result["address2"]?.cryptoBalance)
+        assertEquals(
+            expectedFiatBalance,
+            result.find { coinBalance -> coinBalance.chainId == poaNetwork.chainId && coinBalance.address == "address1" }?.balance?.fiatBalance
+        )
+        assertEquals(
+            BigDecimal(10),
+            result.find { coinBalance -> coinBalance.chainId == xdaiNetwork.chainId && coinBalance.address == "address2" }?.balance?.cryptoBalance
+        )
     }
 
     @Test
     fun `calculate fiat balance in euro for xdai and poa when main nets disabled`() {
         val result = MarketUtils.calculateFiatBalances(cryptoBalances, testNetworksAccount, markets, "EUR")
         val expectedFiatBalance = BigDecimal.valueOf(6.00).setScale(2, RoundingMode.HALF_DOWN)
-        assertEquals(expectedFiatBalance, result["address1"]?.fiatBalance)
-        assertEquals(BigDecimal(10), result["address2"]?.cryptoBalance)
+        assertEquals(
+            expectedFiatBalance,
+            result.find { coinBalance -> coinBalance.chainId == poaNetwork.chainId && coinBalance.address == "address1" }?.balance?.fiatBalance
+        )
+        assertEquals(
+            BigDecimal(10),
+            result.find { coinBalance -> coinBalance.chainId == xdaiNetwork.chainId && coinBalance.address == "address2" }?.balance?.cryptoBalance
+        )
     }
 
     @Test
