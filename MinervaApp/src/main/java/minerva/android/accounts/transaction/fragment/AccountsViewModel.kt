@@ -12,6 +12,7 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
@@ -34,8 +35,6 @@ import minerva.android.walletmanager.repository.smartContract.SmartContractRepos
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
-import minerva.android.widget.state.AccountWidgetState
-import minerva.android.widget.state.AppUIState
 import timber.log.Timber
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
@@ -46,7 +45,7 @@ class AccountsViewModel(
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository,
     private val walletConnectRepository: WalletConnectRepository,
-    private val appUIState: AppUIState
+    private val logger: Logger
 ) : BaseViewModel() {
     val hasAvailableAccounts: Boolean get() = accountManager.hasAvailableAccounts
     val activeAccounts: List<Account> get() = accountManager.activeAccounts
@@ -170,8 +169,8 @@ class AccountsViewModel(
                         balancesRefreshed = true
                         _balanceLiveData.value = balancePerAccountMap
                     },
-                    onError = {
-                        Timber.d("Refresh balance error: ${it.message}")
+                    onError = { error ->
+                        logError("Refresh balance error: $error")
                         _errorLiveData.value = Event(RefreshCoinBalancesError)
                     }
                 )
@@ -192,7 +191,7 @@ class AccountsViewModel(
                         _tokenBalanceLiveData.value = Unit
                     },
                     onError = { error ->
-                        Timber.e(error)
+                        logError("Refresh tokens error: $error")
                         _errorLiveData.value = Event(RefreshTokenBalancesError)
                     }
                 )
@@ -216,11 +215,6 @@ class AccountsViewModel(
         tokenVisibilitySettings.getTokenVisibility(accountAddress, accountToken.token.address)
             ?.let { isTokenVisible -> isTokenVisible && hasFunds(accountToken.balance) }
 
-    fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
-        appUIState.updateAccountWidgetState(index, accountWidgetState)
-
-    fun getAccountWidgetState(index: Int) = appUIState.getAccountWidgetState(index)
-
     private fun hasFunds(balance: BigDecimal) = balance > BigDecimal.ZERO
 
     fun updateTokensRate() {
@@ -236,16 +230,22 @@ class AccountsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onSuccess = { refreshTokensBalances() },
-                    onError = { Timber.e(it) }
+                    onError = { error -> logError("Error while token auto-discovery: $error") }
                 )
         }
 
-    private fun handleHideAccountErrors(it: Throwable) {
-        _errorLiveData.value = when (it) {
+    private fun logError(message: String) {
+        logger.logToFirebase(message)
+        Timber.d(message)
+    }
+
+    private fun handleHideAccountErrors(error: Throwable) {
+        logError("Error while hiding account: $error")
+        _errorLiveData.value = when (error) {
             is BalanceIsNotEmptyThrowable -> Event(BalanceIsNotEmptyError)
             is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> Event(BalanceIsNotEmptyAndHasMoreOwnersError)
             is IsNotSafeAccountMasterOwnerThrowable -> Event(IsNotSafeAccountMasterOwnerError)
-            is AutomaticBackupFailedThrowable -> Event(AutomaticBackupError(it))
+            is AutomaticBackupFailedThrowable -> Event(AutomaticBackupError(error))
             else -> Event(BaseError)
         }
     }

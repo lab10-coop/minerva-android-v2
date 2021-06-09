@@ -23,14 +23,17 @@ import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.FundsAtRiskDialog
 import minerva.android.widget.state.AccountWidgetState
+import minerva.android.widget.state.AppUIState
 import minerva.android.wrapped.startManageTokensWrappedActivity
 import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout), AccountsFragmentToAdapterListener {
 
     private val viewModel: AccountsViewModel by viewModel()
+    private val appUIState: AppUIState by inject()
     private val accountAdapter by lazy { AccountAdapter(this) }
 
     private lateinit var binding: RefreshableRecyclerViewLayoutBinding
@@ -92,9 +95,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
 
     override fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
-        viewModel.updateAccountWidgetState(index, accountWidgetState)
+        appUIState.updateAccountWidgetState(index, accountWidgetState)
 
-    override fun getAccountWidgetState(index: Int): AccountWidgetState = viewModel.getAccountWidgetState(index)
+    override fun getAccountWidgetState(index: Int): AccountWidgetState = appUIState.getAccountWidgetState(index)
 
     override fun getTokens(account: Account): List<ERC20Token> = viewModel.getTokens(account)
 
