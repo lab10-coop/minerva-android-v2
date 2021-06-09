@@ -52,7 +52,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
@@ -141,7 +141,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
@@ -197,7 +197,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
@@ -251,7 +251,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
@@ -304,7 +304,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
@@ -357,7 +357,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
@@ -405,7 +405,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
@@ -448,7 +448,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
@@ -496,7 +496,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
@@ -626,7 +626,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(Account(1))
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(Account(1))
         viewModel = WalletConnectInteractionsViewModel(transactionRepository, walletConnectRepository, logger)
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
         viewModel.acceptRequest()
@@ -669,7 +669,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
-        whenever(transactionRepository.getAccountByAddress(any())).thenReturn(account)
+        whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
         whenever(transactionRepository.toUserReadableFormat
             (any())).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))

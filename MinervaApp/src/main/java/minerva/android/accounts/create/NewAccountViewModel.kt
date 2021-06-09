@@ -24,13 +24,16 @@ class NewAccountViewModel(
 ) : BaseViewModel() {
 
     var selectedNetworkPosition: Int = DEFAULT_NETWORK_POSITION
+    var selectedNetworkChainId: Int? = null
 
     init {
         shouldAddAccount()
     }
 
-    val unusedAccounts
-        get() = accountManager.getAllAccountsForSelectedNetworksType().filter { account -> account.isHide || account.isEmptyAccount }
+    val unusedAddresses
+        get() = selectedNetworkChainId?.let { chainId ->
+            accountManager.getAllFreeAccountForNetwork(chainId)
+        } ?: emptyList()
 
     private val _createAccountLiveData = MutableLiveData<Event<Unit>>()
     val createAccountLiveData: LiveData<Event<Unit>> get() = _createAccountLiveData
@@ -44,9 +47,9 @@ class NewAccountViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> = _errorLiveData
 
-    fun connectAccountToNetwork(accountId: Int, isTestNetwork: Boolean, network: Network) {
+    fun connectAccountToNetwork(index: Int, network: Network) {
         launchDisposable {
-            accountManager.connectAccountToNetwork(accountId, isTestNetwork, network)
+            accountManager.connectAccountToNetwork(index, network)
                 .flatMapCompletable { walletActionsRepository.saveWalletActions(listOf(getWalletAction(it))) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -64,7 +67,7 @@ class NewAccountViewModel(
 
     @VisibleForTesting
     fun shouldAddAccount() {
-        val accounts = accountManager.getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted }.size
+        val accounts = accountManager.getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted }.distinctBy { account -> account.id }.size
         if (accounts < FREE_ACCOUNT_MAX_NUMBER) {
             launchDisposable {
                 accountManager.createEmptyAccounts(FREE_ACCOUNT_MAX_NUMBER - accounts)

@@ -526,24 +526,24 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
             .assertValue {
-                it.second.size == 5 &&
-                        it.second[0].token.name == "CookieTokenATS" &&
-                        it.second[0].balance.toPlainString() == "0.000000001" &&
-                        it.second[0].token.tag == "super2" &&
-                        it.second[1].token.name == "OtherTokenATS1" &&
-                        it.second[1].token.tag == "super1" &&
-                        it.second[1].token.accountAddress == ""
+                it.third.size == 5 &&
+                        it.third[0].token.name == "CookieTokenATS" &&
+                        it.third[0].balance.toPlainString() == "0.000000001" &&
+                        it.third[0].token.tag == "super2" &&
+                        it.third[1].token.name == "OtherTokenATS1" &&
+                        it.third[1].token.tag == "super1" &&
+                        it.third[1].token.accountAddress == ""
             }
         tokenManager.refreshTokensBalances(atsSigmaAccount)
             .test()
             .await()
             .assertComplete()
             .assertValue {
-                it.second.size == 3 &&
-                        it.second[0].token.name == "SecondOtherATS" &&
-                        it.second[0].balance.toPlainString() == "0.000000000000000001" &&
-                        it.second[1].token.name == "OtherTokenATS" &&
-                        it.second[1].balance.toPlainString() == "0.0000000000000000000000000001"
+                it.third.size == 3 &&
+                        it.third[0].token.name == "SecondOtherATS" &&
+                        it.third[0].balance.toPlainString() == "0.000000000000000001" &&
+                        it.third[1].token.name == "OtherTokenATS" &&
+                        it.third[1].balance.toPlainString() == "0.0000000000000000000000000001"
             }
     }
 

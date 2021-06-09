@@ -327,6 +327,7 @@
     <string name="add_account_info">You have to select a network and then choose the address you want to use.</string>
     <string name="hide_now">Hide now</string>
     <string name="hide">Hide</string>
+    <string name="no_addresses_left_info">You reached the maximum number of accounts</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

@@ -9,10 +9,13 @@ import minerva.android.BaseViewModelTest
 import minerva.android.accounts.transaction.fragment.*
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.mock.*
+import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Balance
@@ -21,8 +24,6 @@ import minerva.android.walletmanager.repository.smartContract.SmartContractRepos
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
-import minerva.android.widget.state.AccountWidgetState
-import minerva.android.widget.state.AppUIState
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
@@ -38,11 +39,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
-    private val appUIState: AppUIState = mock()
+    private val logger: Logger = mock()
     private lateinit var viewModel: AccountsViewModel
 
-    private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
-    private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
+    private val balanceObserver: Observer<List<CoinBalance>> = mock()
+    private val balanceCaptor: KArgumentCaptor<List<CoinBalance>> = argumentCaptor()
 
     private val tokensBalanceObserver: Observer<Unit> = mock()
     private val tokensBalanceCaptor: KArgumentCaptor<Unit> = argumentCaptor()
@@ -64,7 +65,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             smartContractRepository,
             transactionRepository,
             walletConnectRepository,
-            appUIState
+            logger
         )
     }
 
@@ -89,13 +90,13 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshCoinBalances()).thenReturn(
-            Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
+            Single.just(listOf(CoinBalance(1,"123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
         )
         viewModel.balanceLiveData.observeForever(balanceObserver)
         viewModel.refreshCoinBalances()
         balanceCaptor.run {
             verify(balanceObserver).onChanged(capture())
-            firstValue["123"]!!.cryptoBalance == BigDecimal.ONE
+            firstValue.find { balance -> balance.chainId == 1 && balance.address == "123" }?.balance?.cryptoBalance == BigDecimal.ONE
         }
     }
 
@@ -120,7 +121,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getTaggedTokensUpdate())
             .thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
         whenever(transactionRepository.refreshTokensBalances())
-            .thenReturn(Single.just(mapOf(Pair("test", listOf(AccountToken(ERC20Token(1, "name")))))))
+            .thenReturn(Single.just(listOf(TokenBalance(1, "test", listOf(AccountToken(ERC20Token(1, "name")))))))
         viewModel.refreshTokensBalances()
         viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
         tokensBalanceCaptor.run {
@@ -132,7 +133,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get tokens balance success when tagged tokens are empty test`() {
         whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(Flowable.just(emptyList()))
         whenever(transactionRepository.refreshTokensBalances())
-            .thenReturn(Single.just(mapOf(Pair("test", listOf(AccountToken(ERC20Token(1, "name")))))))
+            .thenReturn(Single.just(listOf(TokenBalance(1,"test", listOf(AccountToken(ERC20Token(1, "name")))))))
         viewModel.refreshTokensBalances()
         viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
         tokensBalanceCaptor.run {
@@ -149,9 +150,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.refreshTokensBalances())
             .thenReturn(
                 Single.just(
-                    mapOf(
-                        Pair("privateKey1", accountTokensForPrivateKey1),
-                        Pair("privateKey2", accountTokensForPrivateKey2)
+                    listOf(
+                        TokenBalance(1,"privateKey1", accountTokensForPrivateKey1),
+                        TokenBalance(2, "privateKey2", accountTokensForPrivateKey2)
                     )
                 )
             )
@@ -182,8 +183,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
         tokensBalanceCaptor.run {
             verify(tokensBalanceObserver).onChanged(capture())
         }
-        viewModel.activeAccounts[0].accountTokens.size shouldBeEqualTo 1
-        viewModel.activeAccounts[1].accountTokens.size shouldBeEqualTo 2
     }
 
     @Test
@@ -210,7 +209,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             .thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
-        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.just(mapOf()))
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.just(emptyList()))
 
         viewModel.discoverNewTokens()
         viewModel.discoverNewTokens()
@@ -397,18 +396,6 @@ class AccountsViewModelTest : BaseViewModelTest() {
             viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo null
             verify(settings, times(5)).getTokenVisibility(any(), any())
         }
-    }
-
-    @Test
-    fun `Check getting and updating Account UI State calls`() {
-        doNothing().whenever(appUIState).updateAccountWidgetState(any(), any())
-        whenever(appUIState.getAccountWidgetState(any())).thenReturn(AccountWidgetState())
-
-        viewModel.updateAccountWidgetState(3, AccountWidgetState())
-        viewModel.getAccountWidgetState(3)
-
-        verify(appUIState, times(1)).updateAccountWidgetState(any(), any())
-        verify(appUIState, times(1)).getAccountWidgetState(any())
     }
 
     @Test

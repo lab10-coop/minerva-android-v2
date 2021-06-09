@@ -11,6 +11,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.transactions.Balance
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -21,24 +22,24 @@ object MarketUtils {
     private const val SCALE = 2
 
     internal fun calculateFiatBalances(
-        cryptoBalances: List<Pair<String, BigDecimal>>,
+        cryptoBalances: List<Triple<Int, String, BigDecimal>>,
         accounts: List<Account>?,
         markets: Markets,
         currentFiat: String
-    ): HashMap<String, Balance> = hashMapOf<String, Balance>().apply {
+    ): List<CoinBalance> = mutableListOf<CoinBalance>().apply {
         accounts?.let {
             if (it.isNotEmpty()) {
                 cryptoBalances.forEachIndexed { index, cryptoBalance ->
-                    if (cryptoBalance.first == it[index]?.address) {
-                        getBalance(this, cryptoBalance, getRate(accounts[index].network.chainId, markets, currentFiat))
+                    if (cryptoBalance.first == it[index].chainId && cryptoBalance.second == it[index]?.address) {
+                        this.addBalance(cryptoBalance, getRate(accounts[index].network.chainId, markets, currentFiat))
                     }
                 }
             }
         }
     }
 
-    private fun getBalance(balances: HashMap<String, Balance>, cryptoBalance: Pair<String, BigDecimal>, rate: Double?) {
-        balances[cryptoBalance.first] = Balance(cryptoBalance.second, fiatBalance = calculateFiatBalance(cryptoBalance.second, rate))
+    private fun MutableList<CoinBalance>.addBalance(cryptoBalance: Triple<Int, String, BigDecimal>, rate: Double?) {
+        this.add(CoinBalance(cryptoBalance.first, cryptoBalance.second, Balance(cryptoBalance.third, fiatBalance = calculateFiatBalance(cryptoBalance.third, rate))))
     }
 
     private fun calculateFiatBalance(value: BigDecimal, rate: Double?): BigDecimal =
@@ -60,7 +61,7 @@ object MarketUtils {
             ETH_MAIN -> MarketIds.ETHEREUM
             POA_CORE -> MarketIds.POA_NETWORK
             XDAI -> MarketIds.XDAI
-            MATIC -> MarketIds.MATIC
+            MATIC -> MarketIds.POLYGON
             else -> String.Empty
         }
 

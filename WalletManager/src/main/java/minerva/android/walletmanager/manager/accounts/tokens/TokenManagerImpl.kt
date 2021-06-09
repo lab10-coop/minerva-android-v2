@@ -138,7 +138,7 @@ class TokenManagerImpl(
         val localTokensPerNetwork = NetworkManager.getTokens(account.chainId)
         val remoteTokensPerNetwork = walletManager.getWalletConfig().erc20Tokens[account.chainId] ?: listOf()
         if (remoteTokensPerNetwork.isNotEmpty() && remoteTokensPerNetwork.all { token -> token.accountAddress.isEmpty() }) {
-            return getActiveTokensPerAccount(account)
+            return remoteTokensPerNetwork
         } else {
             return mutableListOf<ERC20Token>().apply {
                 addAll(remoteTokensPerNetwork.filter { remoteToken ->
@@ -159,7 +159,7 @@ class TokenManagerImpl(
         }
     }
 
-    override fun refreshTokensBalances(account: Account): Single<Pair<String, List<AccountToken>>> =
+    override fun refreshTokensBalances(account: Account): Single<Triple<Int, String, List<AccountToken>>> =
         tokenDao.getTaggedTokens()
             .zipWith(Single.just(getAllTokensPerAccount(account)))
             .flatMap { (taggedTokens, tokensPerAccount) ->
@@ -189,7 +189,7 @@ class TokenManagerImpl(
                             }.orElse { throw NullPointerException() }
                     }
                     .toList()
-                    .map { accountTokens -> Pair(account.privateKey, accountTokens) }
+                    .map { accountTokens -> Triple(account.chainId, account.privateKey, accountTokens) }
             }
 
     private fun fillActiveTokensWithTags(
