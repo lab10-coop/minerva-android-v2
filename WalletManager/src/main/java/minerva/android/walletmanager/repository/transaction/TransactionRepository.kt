@@ -31,7 +31,7 @@ interface TransactionRepository {
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
     fun getAccount(accountIndex: Int): Account?
-    fun getAccountByAddress(address: String): Account?
+    fun getAccountByAddressAndChainId(address: String, chainId: Int): Account?
     fun getFreeATS(address: String): Completable
     fun getTokensRates(): Completable
     fun updateTokensRate()

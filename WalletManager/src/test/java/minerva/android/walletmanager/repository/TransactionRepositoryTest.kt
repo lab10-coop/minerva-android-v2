@@ -664,16 +664,17 @@ class TransactionRepositoryTest : RxTest() {
     }
 
     @Test
-    fun `get account by address test`() {
+    fun `get account by address and chain id test`() {
         whenever(walletConfigManager.getWalletConfig()).thenReturn(
             WalletConfig(
                 version = 1,
-                accounts = listOf(Account(1, address = "address"))
+                accounts = listOf(Account(1, chainId = 1, address = "address"))
             )
         )
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
-        val result = repository.getAccountByAddress("address")
+        val result = repository.getAccountByAddressAndChainId("address", 1)
         assertEquals(result?.address, "address")
+        assertEquals(result?.chainId, 1)
     }
 
     @Test
