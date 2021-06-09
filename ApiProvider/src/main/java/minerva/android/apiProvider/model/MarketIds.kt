@@ -7,5 +7,6 @@ annotation class MarketIds {
         const val POA_NETWORK = "poa-network"
         const val XDAI = "xdai"
         const val MATIC = "matic-network"
+        const val POLYGON = "polygon-pos"
     }
 }

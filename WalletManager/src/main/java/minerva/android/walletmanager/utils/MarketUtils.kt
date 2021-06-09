@@ -61,7 +61,7 @@ object MarketUtils {
             ETH_MAIN -> MarketIds.ETHEREUM
             POA_CORE -> MarketIds.POA_NETWORK
             XDAI -> MarketIds.XDAI
-            MATIC -> MarketIds.MATIC
+            MATIC -> MarketIds.POLYGON
             else -> String.Empty
         }
 
