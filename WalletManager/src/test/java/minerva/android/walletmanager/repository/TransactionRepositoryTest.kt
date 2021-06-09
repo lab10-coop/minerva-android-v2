@@ -15,9 +15,11 @@ import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -66,14 +68,14 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `refresh balances test success`() {
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
-            .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
+            .thenReturn(Single.just(listOf(Triple(4, "address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.0))))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
 
         repository.refreshCoinBalances().test()
             .assertComplete()
             .assertValue {
-                it["address1"]?.cryptoBalance == BigDecimal.ONE
+                it.find { balance -> balance.chainId == 4 && balance.address == "address1" }?.balance?.cryptoBalance == BigDecimal.ONE
             }
     }
 
@@ -95,13 +97,13 @@ class TransactionRepositoryTest : RxTest() {
     fun `refresh balances test when crypto api returns error success`() {
         val error = Throwable()
         whenever(blockchainRegularAccountRepository.refreshBalances(any()))
-            .thenReturn(Single.just(listOf(Pair("address1", BigDecimal.ONE))))
+            .thenReturn(Single.just(listOf(Triple(4, "address1", BigDecimal.ONE))))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         repository.refreshCoinBalances().test()
             .assertComplete()
             .assertValue {
-                it["address1"]?.cryptoBalance == BigDecimal.ONE
+                it.find { balance -> balance.chainId == 4 && balance.address == "address1" }?.balance?.cryptoBalance == BigDecimal.ONE
             }
     }
 
@@ -736,33 +738,42 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `Checking refreshing token balances success`() {
-        val accountTokens = listOf(
-            AccountToken(ERC20Token(3, "one", address = "0x01", decimals = "10"), rawBalance = BigDecimal.TEN),
-            AccountToken(ERC20Token(3, "tow", address = "0x02", decimals = "10"), rawBalance = BigDecimal.TEN)
+        val accounts = listOf(
+            Account(1, "publicKey", "privateKey", "address", chainId = ChainId.ETH_RIN, _isTestNetwork = true)
         )
-        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Pair("privateKey", accountTokens)))
+        val accountTokens = listOf(
+            AccountToken(ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10"), rawBalance = BigDecimal.TEN),
+            AccountToken(ERC20Token(ChainId.ETH_RIN, "tow", address = "0x02", decimals = "10"), rawBalance = BigDecimal.TEN)
+        )
+
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Triple(ChainId.ETH_RIN, "privateKey", accountTokens)))
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
 
         repository.refreshTokensBalances().test().assertComplete().assertValue {
             it.size shouldBeEqualTo 1
-            it["privateKey"]?.size == 2
+            it.find { balance -> balance.chainId == ChainId.ETH_RIN && balance.privateKey == "privateKey" }?.accountTokenList?.size == 2
         }
     }
 
     @Test
     fun `Checking refreshing token balances when new tokens are detected without account address`() {
+        val accounts = listOf(
+            Account(1, "publicKey", "privateKey", "address", chainId = ChainId.ETH_RIN, _isTestNetwork = true)
+        )
         val accountTokens = listOf(
             AccountToken(
-                ERC20Token(3, "one", address = "0x01", decimals = "10", accountAddress = ""),
+                ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", accountAddress = ""),
                 rawBalance = BigDecimal.TEN
             ),
             AccountToken(
-                ERC20Token(3, "tow", address = "0x02", decimals = "10", accountAddress = ""),
+                ERC20Token(ChainId.ETH_RIN, "tow", address = "0x02", decimals = "10", accountAddress = ""),
                 rawBalance = BigDecimal.TEN
             )
         )
-        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Pair("privateKey3", accountTokens)))
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Triple(ChainId.ETH_RIN, "privateKey", accountTokens)))
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
 
@@ -771,9 +782,11 @@ class TransactionRepositoryTest : RxTest() {
             .await()
             .assertComplete()
             .assertValue {
+                val accountTokenList =
+                    it.find { balance -> balance.chainId == ChainId.ETH_RIN && balance.privateKey == "privateKey" }?.accountTokenList
                 it.size == 1 &&
-                        it["privateKey3"]?.size == 2 &&
-                        it["privateKey3"]!![0].token.accountAddress == ""
+                        accountTokenList?.size == 2 &&
+                        accountTokenList!![0].token.accountAddress == ""
             }
     }
 
@@ -843,33 +856,37 @@ class TransactionRepositoryTest : RxTest() {
                 Account(1, chainId = 2, address = "address2", privateKey = "priv2")
             )
 
-        val map = mapOf(
-            "priv1" to listOf(
-                AccountToken(
-                    ERC20Token(1, "one", address = "0x01", decimals = "10", accountAddress = ""),
-                    rawBalance = BigDecimal.TEN
+        val map = listOf(
+            TokenBalance(
+                1, "priv1", listOf(
+                    AccountToken(
+                        ERC20Token(1, "one", address = "0x01", decimals = "10", accountAddress = ""),
+                        rawBalance = BigDecimal.TEN
+                    )
                 )
             ),
-            "priv2" to listOf(
-                AccountToken(
-                    ERC20Token(2, "tow", address = "0x02", decimals = "10", accountAddress = "", tag = "super"),
-                    rawBalance = BigDecimal.TEN
-                ),
-                AccountToken(
-                    ERC20Token(2, "tow", address = "0x02", decimals = "10", accountAddress = "", tag = "super1"),
-                    rawBalance = BigDecimal.TEN
+            TokenBalance(
+                2, "priv2", listOf(
+                    AccountToken(
+                        ERC20Token(2, "tow", address = "0x02", decimals = "10", accountAddress = "", tag = "super"),
+                        rawBalance = BigDecimal.TEN
+                    ),
+                    AccountToken(
+                        ERC20Token(2, "tow", address = "0x02", decimals = "10", accountAddress = "", tag = "super1"),
+                        rawBalance = BigDecimal.TEN
+                    )
                 )
             )
         )
 
         val result = repository.getTokensWithAccountAddress(accounts, map)
-        result[1]!![0].accountAddress shouldBeEqualTo  "address1"
-        result[1]!![0].tag shouldBeEqualTo  ""
+        result[1]!![0].accountAddress shouldBeEqualTo "address1"
+        result[1]!![0].tag shouldBeEqualTo ""
 
-        result[2]!![0].accountAddress shouldBeEqualTo  "address2"
-        result[2]!![0].tag shouldBeEqualTo  "super"
+        result[2]!![0].accountAddress shouldBeEqualTo "address2"
+        result[2]!![0].tag shouldBeEqualTo "super"
 
-        result[2]!![1].accountAddress shouldBeEqualTo  "address2"
-        result[2]!![1].tag shouldBeEqualTo  "super1"
+        result[2]!![1].accountAddress shouldBeEqualTo "address2"
+        result[2]!![1].tag shouldBeEqualTo "super1"
     }
 }

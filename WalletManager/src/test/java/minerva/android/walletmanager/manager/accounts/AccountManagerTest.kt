@@ -122,18 +122,56 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager connect network to empty account`() {
         NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(
+                    1, chainId = Int.InvalidValue, publicKey = "publicKey", privateKey = "privateKey", address = "address1", _isTestNetwork = true
+                )
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
-            .thenReturn(DerivedKeys(0, "publicKey", "privateKey", "address1"))
 
-        manager.createEmptyAccounts(2).test()
+        manager.connectAccountToNetwork(1, Network(chainId = 4, name = "Ethereum"))
+        verify(walletConfigManager).updateWalletConfig(
+            WalletConfig(
+                2, accounts = listOf(
+                    Account(
+                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
+                        chainId = 4, isHide = false, _isTestNetwork = true
+                    )
+                )
+            )
+        )
+    }
 
-        manager.connectAccountToNetwork(1, true, Network(chainId = 4, name = "Ethereum"))
-        manager.loadAccount(0).apply {
-            name shouldBeEqualTo "#2 Ethereum"
-            chainId shouldBeEqualTo 4
-        }
+    @Test
+    fun `Check that wallet unhide account`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(
+                    1, chainId = 4, name = "#2 Ethereum", publicKey = "publicKey", privateKey = "privateKey",
+                    address = "address1", _isTestNetwork = true, isHide = true
+                )
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+
+        manager.connectAccountToNetwork(1, Network(chainId = 4, name = "Ethereum"))
+        verify(walletConfigManager).updateWalletConfig(
+            WalletConfig(
+                2, accounts = listOf(
+                    Account(
+                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
+                        chainId = 4, isHide = false, _isTestNetwork = true
+                    )
+                )
+            )
+        )
     }
 
     @Test

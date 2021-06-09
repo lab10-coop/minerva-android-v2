@@ -104,7 +104,7 @@ class BlockchainRegularAccountRepositoryImpl(
     /**
      * List arguments: first - network short name, second - wallet address (public)
      */
-    override fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Pair<String, BigDecimal>>> =
+    override fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Triple<Int, String, BigDecimal>>> =
         Observable.fromIterable(networkAddress)
             .flatMapSingle { (chainId, address) -> getBalance(chainId, address) }
             .toList()
@@ -334,10 +334,10 @@ class BlockchainRegularAccountRepositoryImpl(
         ContractGasProvider(payload.gasPriceWei, payload.gasLimit)
     )
 
-    private fun getBalance(chainId: Int, address: String): Single<Pair<String, BigDecimal>> =
+    private fun getBalance(chainId: Int, address: String): Single<Triple<Int, String, BigDecimal>> =
         web3j.value(chainId).ethGetBalance(address, DefaultBlockParameterName.LATEST)
             .flowable()
-            .map { Pair(address, toEther(BigDecimal(it.balance))) }
+            .map { Triple(chainId, address, toEther(BigDecimal(it.balance))) }
             .firstOrError()
 
     private fun getERC20Balance(

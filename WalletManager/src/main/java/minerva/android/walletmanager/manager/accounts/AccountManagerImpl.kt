@@ -67,21 +67,7 @@ class AccountManagerImpl(
     override fun createRegularAccount(network: Network): Single<String> =
         walletManager.getWalletConfig().run {
             val (index, derivationPath) = getIndexWithDerivationPath(network.testNet, this)
-            val accountName = CryptoUtils.prepareName(network.name, index)
-            cryptographyRepository.calculateDerivedKeysSingle(
-                walletManager.masterSeed.seed,
-                index, derivationPath, network.testNet
-            ).map { keys ->
-                val newAccount = Account(
-                    index,
-                    name = accountName,
-                    chainId = network.chainId,
-                    publicKey = keys.publicKey,
-                    privateKey = keys.privateKey,
-                    address = keys.address
-                )
-                addAccount(newAccount, this)
-            }.flatMapCompletable { config -> walletManager.updateWalletConfig(config) }.toSingleDefault(accountName)
+            createRegularAccountWithGivenIndex(index, derivationPath, network)
         }
 
     override fun createEmptyAccounts(numberOfAccounts: Int) =
@@ -107,6 +93,25 @@ class AccountManagerImpl(
             walletManager.updateWalletConfig(getWalletConfigWithNewAccounts(newAccounts, this))
         }
 
+    private fun createRegularAccountWithGivenIndex(index: Int, derivationPath: String, network: Network): Single<String> =
+        walletManager.getWalletConfig().run {
+            val accountName = CryptoUtils.prepareName(network.name, index)
+            cryptographyRepository.calculateDerivedKeysSingle(
+                walletManager.masterSeed.seed,
+                index, derivationPath, network.testNet
+            ).map { keys ->
+                val newAccount = Account(
+                    index,
+                    name = accountName,
+                    chainId = network.chainId,
+                    publicKey = keys.publicKey,
+                    privateKey = keys.privateKey,
+                    address = keys.address
+                )
+                addAccount(newAccount, this)
+            }.flatMapCompletable { config -> walletManager.updateWalletConfig(config) }.toSingleDefault(accountName)
+        }
+
     private fun addAccount(newAccount: Account, config: WalletConfig): WalletConfig {
         val newAccounts = config.accounts.toMutableList()
         newAccounts.add(config.accounts.size, newAccount)
@@ -118,15 +123,30 @@ class AccountManagerImpl(
         return config.copy(version = config.updateVersion, accounts = newAccounts)
     }
 
-    override fun connectAccountToNetwork(index: Int, isTestNetwork: Boolean, network: Network): Single<String> {
-        val accountName = CryptoUtils.prepareName(network.name, index)
+    override fun connectAccountToNetwork(index: Int, network: Network): Single<String> {
+        val existAccount =
+            walletManager.getWalletConfig().accounts.filter { account -> account.id == index && account.isTestNetwork == network.testNet }
+                .find { account -> account.chainId == Int.InvalidValue || (account.chainId == network.chainId && account.isHide) }
+        return when {
+            existAccount != null -> updateAccount(existAccount, network)
+            else -> {
+                val derivationPath = if (network.testNet) DerivationPath.TEST_NET_PATH else DerivationPath.MAIN_NET_PATH
+                createRegularAccountWithGivenIndex(index, derivationPath, network)
+            }
+        }
+    }
+
+    private fun updateAccount(existAccount: Account, network: Network): Single<String> {
+        val accountName = CryptoUtils.prepareName(network.name, existAccount.id)
         walletManager.getWalletConfig().run {
-            accounts.find { account -> account.id == index && account.isTestNetwork == isTestNetwork }?.apply {
+            val existAccountIndex = accounts.indexOf(existAccount)
+            accounts[existAccountIndex].apply {
                 name = accountName
                 chainId = network.chainId
                 isHide = false
             }
-            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts)).toSingleDefault(accountName)
+            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts))
+                .toSingleDefault(accountName)
         }
     }
 
@@ -224,6 +244,12 @@ class AccountManagerImpl(
     override fun getAllAccountsForSelectedNetworksType(): List<Account> =
         getAllAccounts().filter { account -> account.isTestNetwork == !areMainNetworksEnabled }
 
+    override fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>> {
+        val usedIds = getAllActiveAccounts(chainId).map { account -> account.id }
+        return getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted && !usedIds.contains(account.id) }
+            .map { account -> account.id to account.address }.distinctBy { account -> account.first }
+    }
+
     override fun clearFiat() =
         walletManager.getWalletConfig().accounts.forEach { account ->
             account.fiatBalance = Double.InvalidValue.toBigDecimal()
@@ -256,7 +282,7 @@ class AccountManagerImpl(
         walletManager.getWalletConfig().run {
             val newAccounts: MutableList<Account> = accounts.toMutableList()
             accounts.forEachIndexed { index, item ->
-                if (item.address.equals(account.address, true) && item.isTestNetwork == !areMainNetworksEnabled) {
+                if (item.id == account.id && item.network == account.network) {
                     return handleHidingAccount(item, this, newAccounts, index)
                 }
             }

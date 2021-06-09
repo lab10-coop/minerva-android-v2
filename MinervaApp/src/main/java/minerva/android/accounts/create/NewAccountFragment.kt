@@ -5,8 +5,8 @@ import android.view.View
 import android.widget.AdapterView
 import androidx.recyclerview.widget.LinearLayoutManager
 import minerva.android.R
+import minerva.android.accounts.adapter.AddressesAdapter
 import minerva.android.accounts.adapter.NetworkSpinnerAdapter
-import minerva.android.accounts.adapter.NewAccountAdapter
 import minerva.android.databinding.FragmentNewAccountBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.EventObserver
@@ -18,7 +18,7 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
 
     private lateinit var binding: FragmentNewAccountBinding
     private val viewModel: NewAccountViewModel by viewModel()
-    private val addressAdapter = NewAccountAdapter()
+    private val addressAdapter = AddressesAdapter()
 
     private val networkSpinnerAdapter by lazy {
         NetworkSpinnerAdapter(
@@ -55,16 +55,14 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
         }
     }
 
-    private fun setupRecycleView() {
-        binding.addressRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = addressAdapter.apply { updateList(viewModel.unusedAccounts) }
-        }
-        binding.networkSpinner.apply {
+    private fun setupRecycleView() = with(binding) {
+        networkSpinner.apply {
             setBackgroundResource(R.drawable.rounded_spinner_background)
             adapter = networkSpinnerAdapter.apply { setDropDownViewResource(R.layout.spinner_token) }
             setPopupBackgroundResource(R.drawable.rounded_white_background)
-            setSelection(viewModel.selectedNetworkPosition, false)
+            setSelection(viewModel.selectedNetworkPosition, false).also {
+                viewModel.selectedNetworkChainId = networkSpinnerAdapter.getItem(viewModel.selectedNetworkPosition).chainId
+            }
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
                     adapterView: AdapterView<*>?,
@@ -73,25 +71,43 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
                     id: Long
                 ) {
                     viewModel.selectedNetworkPosition = position
+                    viewModel.selectedNetworkChainId = networkSpinnerAdapter.getItem(position).chainId
+                    refreshAddressAdapterList()
                 }
 
-                override fun onNothingSelected(adapterView: AdapterView<*>?) =
+                override fun onNothingSelected(adapterView: AdapterView<*>?) {
                     setSelection(viewModel.selectedNetworkPosition, true)
+                    viewModel.selectedNetworkChainId = networkSpinnerAdapter.getItem(viewModel.selectedNetworkPosition).chainId
+                    refreshAddressAdapterList()
+                }
             }
+        }
+        viewModel.unusedAddresses.let { newAddresses ->
+            addressRecyclerView.apply {
+                layoutManager = LinearLayoutManager(context)
+                adapter = addressAdapter.apply { updateList(newAddresses) }
+                visibleOrGone(newAddresses.isNotEmpty())
+            }
+            noAddressesInfo.root.visibleOrGone(newAddresses.isEmpty())
         }
     }
 
-    private fun refreshAddressAdapterList() {
-        addressAdapter.updateList(viewModel.unusedAccounts)
-        binding.createButton.isEnabled = !addressAdapter.isEmpty()
+    private fun refreshAddressAdapterList() = with(binding) {
+        viewModel.unusedAddresses.let { newAddresses ->
+            addressAdapter.updateList(newAddresses)
+            createButton.isEnabled = !addressAdapter.isEmpty()
+            addressRecyclerView.visibleOrGone(newAddresses.isNotEmpty())
+            noAddressesInfo.root.visibleOrGone(newAddresses.isEmpty())
+        }
+
     }
 
     private fun setupCreateButton() = with(binding.createButton) {
         isEnabled = !addressAdapter.isEmpty()
         setOnClickListener {
-            val account = addressAdapter.getSelectedAccount()
+            val index = addressAdapter.getSelectedIndex()
             val network = networkSpinnerAdapter.getItem(viewModel.selectedNetworkPosition)
-            viewModel.connectAccountToNetwork(account.id, account.isTestNetwork, network)
+            viewModel.connectAccountToNetwork(index, network)
         }
     }
 
