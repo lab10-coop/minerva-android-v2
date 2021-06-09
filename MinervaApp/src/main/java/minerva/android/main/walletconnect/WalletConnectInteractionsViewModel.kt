@@ -116,7 +116,7 @@ class WalletConnectInteractionsViewModel(
 
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
-        transactionRepository.getAccountByAddress(session.address)?.let { account -> currentAccount = account }
+        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let { account -> currentAccount = account }
         val txValue: BigDecimal = getTransactionValue(status.transaction.value)
         if (txValue == WRONG_TX_VALUE) {
             rejectRequest()
@@ -350,7 +350,7 @@ class WalletConnectInteractionsViewModel(
 
     fun acceptRequest() {
         currentDappSession?.let { session ->
-            transactionRepository.getAccountByAddress(session.address)?.let {
+            transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
                 walletConnectRepository.approveRequest(session.peerId, it.privateKey)
             }
         }

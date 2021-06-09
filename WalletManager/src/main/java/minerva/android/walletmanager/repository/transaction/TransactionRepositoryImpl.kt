@@ -313,8 +313,10 @@ class TransactionRepositoryImpl(
     override fun loadRecipients(): List<Recipient> = localStorage.getRecipients()
     override fun resolveENS(ensName: String): Single<String> = blockchainRepository.resolveENS(ensName)
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
-    override fun getAccountByAddress(address: String): Account? =
-        walletConfigManager.getWalletConfig().accounts.find { it.address.equals(address, true) }
+    override fun getAccountByAddressAndChainId(address: String, chainId: Int): Account? =
+        walletConfigManager.getWalletConfig().accounts.find { account ->
+            account.address.equals(address, true) && account.chainId == chainId
+        }
 
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
     override fun checkMissingTokensDetails(): Completable = tokenManager.checkMissingTokensDetails()
