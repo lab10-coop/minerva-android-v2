@@ -49,7 +49,7 @@ class AccountsViewModel(
     private val logger: Logger
 ) : BaseViewModel() {
     val hasAvailableAccounts: Boolean get() = accountManager.hasAvailableAccounts
-    val activeAccounts: List<Account> get() = accountManager.activeAccounts.sortedBy { account -> account.id }
+    val activeAccounts: List<Account> get() = accountManager.activeAccounts
     private val cachedTokens: Map<Int, List<ERC20Token>> get() = accountManager.cachedTokens
     var tokenVisibilitySettings: TokenVisibilitySettings = accountManager.getTokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled

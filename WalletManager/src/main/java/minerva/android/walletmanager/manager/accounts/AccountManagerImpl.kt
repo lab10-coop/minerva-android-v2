@@ -247,7 +247,7 @@ class AccountManagerImpl(
     override fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>> {
         val usedIds = getAllActiveAccounts(chainId).map { account -> account.id }
         return getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted && !usedIds.contains(account.id) }
-            .map { account -> account.id to account.address }.distinctBy { account -> account.first }
+            .map { account -> account.id to account.address }.distinctBy { account -> account.first }.sortedBy { account -> account.first }
     }
 
     override fun clearFiat() =
