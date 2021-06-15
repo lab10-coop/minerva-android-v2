@@ -14,8 +14,13 @@ import minerva.android.kotlinUtils.InvalidId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.repository.getNetworkIcon
 
-class AccountSpinnerAdapter(context: Context, @LayoutRes private val layoutResource: Int, private val accounts: List<Account>) :
-        ArrayAdapter<Account>(context, layoutResource, accounts) {
+class AccountSpinnerAdapter(
+    context: Context,
+    @LayoutRes private val layoutResource: Int,
+    private val accounts: List<Account>,
+    private val numberOfAccountsToUse: Int
+) :
+    ArrayAdapter<Account>(context, layoutResource, accounts) {
 
     override fun getCount(): Int = accounts.size
 
@@ -23,24 +28,34 @@ class AccountSpinnerAdapter(context: Context, @LayoutRes private val layoutResou
 
     override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = convertView ?: createView(position, parent)
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = createView(position, parent)
 
-    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View =
-            convertView ?: createView(position, parent)
+    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View = createView(position, parent)
 
     private fun createView(position: Int, parent: ViewGroup): View =
-            LayoutInflater.from(context).inflate(layoutResource, parent, false).apply {
-                accounts[position].let { account ->
-                    SpinnerNetworkBinding.bind(this).row.apply {
-                        text = if (account.id == Int.InvalidId) {
+        LayoutInflater.from(context).inflate(layoutResource, parent, false).apply {
+            accounts[position].let { account ->
+                SpinnerNetworkBinding.bind(this).row.apply {
+                    text = when {
+                        account.id == Int.InvalidId && accounts.size > numberOfAccountsToUse -> {
+                            setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_light_error, NO_ICON, NO_ICON, NO_ICON)
+                            context.getString(R.string.no_addresses_left_info)
+                        }
+                        account.id == Int.InvalidId -> {
                             setTextColor(ContextCompat.getColor(context, R.color.colorPrimary))
                             gravity = Gravity.CENTER
                             context.getString(R.string.create_new_account)
-                        } else {
+                        }
+                        else -> {
                             setCompoundDrawablesWithIntrinsicBounds(getNetworkIcon(context, account.chainId), null, null, null)
                             account.name
                         }
                     }
                 }
             }
+        }
+
+    companion object {
+        private const val NO_ICON = 0
+    }
 }
