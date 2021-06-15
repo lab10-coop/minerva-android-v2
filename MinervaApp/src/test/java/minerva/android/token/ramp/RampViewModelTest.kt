@@ -54,6 +54,22 @@ class RampViewModelTest : BaseViewModelTest() {
     }
 
     @Test
+    fun `Check getting active account by chainId with limitation`() {
+        val currentAccounts = listOf(
+            Account(1, chainId = 3, name = "account1", address = "0x0"),
+            Account(2, chainId = 3, name = "account2", address = "0x0"),
+            Account(3, chainId = 3, name = "account3", address = "0x0"),
+            Account(4, chainId = 3, name = "account4", address = "0x0")
+        )
+        whenever(accountManager.getAllActiveAccounts(any())).thenReturn(currentAccounts)
+        whenever(accountManager.getNumberOfAccountsToUse()).thenReturn(currentAccounts.size)
+        val accountsWithLimitation = viewModel.getValidAccountsAndLimit(chainId = 3)
+        accountsWithLimitation.first shouldBeEqualTo 4
+        accountsWithLimitation.second shouldBeEqualTo currentAccounts
+    }
+
+
+    @Test
     fun `check Creating new Account flow`() {
         val error = Throwable("error")
         NetworkManager.initialize(listOf(Network(chainId = 3, httpRpc = "some_rpc")))

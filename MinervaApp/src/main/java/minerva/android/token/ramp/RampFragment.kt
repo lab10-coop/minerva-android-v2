@@ -6,7 +6,8 @@ import android.os.Bundle
 import android.transition.TransitionManager
 import android.view.View
 import android.widget.AdapterView
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayoutMediator
 import minerva.android.BuildConfig
 import minerva.android.R
 import minerva.android.databinding.FragmentRampBinding
@@ -14,9 +15,9 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
+import minerva.android.token.ramp.RampViewModel.Companion.rampCrypto
 import minerva.android.token.ramp.adapter.AccountSpinnerAdapter
 import minerva.android.token.ramp.adapter.RampCryptoAdapter
-import minerva.android.token.ramp.adapter.RampCryptoViewHolder.Companion.DEFAULT_RAMP_CRYPTO_POSITION
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -25,31 +26,45 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
 
     private lateinit var binding: FragmentRampBinding
     private val viewModel: RampViewModel by viewModel()
-    private val cryptoAdapter by lazy { RampCryptoAdapter(viewModel.rampCrypto) { showCurrentAccounts(viewModel.getValidAccounts(it)) } }
+    private val cryptoAdapter by lazy {
+        RampCryptoAdapter(rampCrypto) { chainId, symbol ->
+            viewModel.setAccountSpinnerDefaultPosition()
+            showCurrentAccounts(viewModel.getValidAccountsAndLimit(chainId))
+            viewModel.currentSymbol = symbol
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentRampBinding.bind(view)
-        initializeFragment(view)
-        showCurrentAccounts(viewModel.getValidAccounts(viewModel.rampCrypto[DEFAULT_RAMP_CRYPTO_POSITION].chainId))
+        initializeFragment()
+        showCurrentAccounts(viewModel.getValidAccountsAndLimit(rampCrypto[DEFAULT_RAMP_CRYPTO_POSITION].chainId))
     }
 
-    private fun initializeFragment(view: View) {
+    private fun initializeFragment() {
         binding.apply {
-            cryptoRecycler.apply {
-                layoutManager = GridLayoutManager(view.context, RAMP_CRYPTO_COLUMNS)
+            tokensViewPager.apply {
                 adapter = cryptoAdapter
+                TabLayoutMediator(tabLayout, tokensViewPager) { _, _ -> }.attach()
+                tokensViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        tokensViewPager.post {
+                            cryptoAdapter.notifyData()
+                        }
+                    }
+                })
             }
             continueButton.setOnClickListener { openRampScreen() }
             createNewAccount.setOnClickListener { createNewAccount() }
             viewModel.apply {
                 createAccountLiveData.observe(
                     viewLifecycleOwner,
-                    EventObserver { showCurrentAccounts(viewModel.currentAccounts) })
-                loadingLiveData.observe(viewLifecycleOwner, EventObserver { showProgressBar(it) })
+                    EventObserver { showCurrentAccounts(viewModel.getValidAccountsAndLimit()) })
+                loadingLiveData.observe(viewLifecycleOwner, EventObserver { isLoading -> showProgressBar(isLoading) })
                 errorLiveData.observe(
                     viewLifecycleOwner,
-                    EventObserver { MinervaFlashbar.showError(requireActivity(), it) })
+                    EventObserver { error -> MinervaFlashbar.showError(requireActivity(), error) })
             }
         }
     }
@@ -59,7 +74,7 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
             data = Uri.Builder()
                 .scheme(SCHEME)
                 .authority(BuildConfig.RAMP_API_URL)
-                .appendQueryParameter(SWAP_ASSET, viewModel.rampCrypto[cryptoAdapter.getCryptoPosition()].symbol)
+                .appendQueryParameter(SWAP_ASSET, viewModel.currentSymbol)
                 .appendQueryParameter(USER_ADDRESS, viewModel.getCurrentCheckSumAddress())
                 .appendQueryParameter(HOST_API_KEY, BuildConfig.RAMP_API_KEY)
                 .appendQueryParameter(HOST_APP_NAME, getString(R.string.app_name))
@@ -71,46 +86,50 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
 
     private fun createNewAccount() = viewModel.createNewAccount()
 
-    private fun showCurrentAccounts(accounts: List<Account>) {
-        if (viewModel.rampCrypto.isNotEmpty()) {
+    private fun showCurrentAccounts(accountsInfo: Pair<Int, List<Account>>) {
+        if (rampCrypto.isNotEmpty()) {
             binding.apply {
                 TransitionManager.beginDelayedTransition(container)
-                noAccountLayout.visibleOrGone(accounts.isEmpty())
-                accounts.isNotEmpty().let {
-                    continueButton.isEnabled = it
-                    cryptoSpinner.visibleOrGone(it)
-                    if (it) updateSpinner(accounts)
+                noAccountLayout.visibleOrGone(accountsInfo.second.isEmpty())
+                accountsInfo.second.isNotEmpty().let { isNotEmpty ->
+                    continueButton.isEnabled = isNotEmpty
+                    cryptoSpinner.visibleOrGone(isNotEmpty)
+                    if (isNotEmpty) updateSpinner(accountsInfo.first, accountsInfo.second)
                 }
             }
         }
     }
 
-    private fun updateSpinner(accounts: List<Account>) =
-        binding.apply {
-            cryptoSpinner.apply {
-                setBackgroundResource(R.drawable.rounded_spinner_background)
-                adapter = AccountSpinnerAdapter(
-                    context,
-                    R.layout.spinner_network,
-                    accounts + Account(Int.InvalidId)
-                )
-                    .apply { setDropDownViewResource(R.layout.spinner_token) }
-                setSelection(viewModel.spinnerPosition, false)
-                setPopupBackgroundResource(R.drawable.rounded_white_background)
-                onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        adapterView: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        if (position == accounts.size) createNewAccount()
-                        viewModel.spinnerPosition = position
+    private fun updateSpinner(numberOfAccountsToUse: Int, accounts: List<Account>) =
+        binding.cryptoSpinner.apply {
+            setBackgroundResource(R.drawable.rounded_spinner_background)
+            adapter = AccountSpinnerAdapter(
+                context,
+                R.layout.spinner_network,
+                accounts + Account(Int.InvalidId),
+                numberOfAccountsToUse
+            ).apply { setDropDownViewResource(R.layout.spinner_token) }
+            setSelection(viewModel.spinnerPosition, false)
+            setPopupBackgroundResource(R.drawable.rounded_white_background)
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    adapterView: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    when {
+                        position == accounts.size && accounts.size < numberOfAccountsToUse -> {
+                            createNewAccount()
+                            viewModel.spinnerPosition = position
+                        }
+                        position == accounts.size && accounts.size >= numberOfAccountsToUse -> setSelection(viewModel.spinnerPosition)
+                        else -> viewModel.spinnerPosition = position
                     }
-
-                    override fun onNothingSelected(adapterView: AdapterView<*>?) =
-                        setSelection(viewModel.spinnerPosition, true)
                 }
+
+                override fun onNothingSelected(adapterView: AdapterView<*>?) =
+                    setSelection(viewModel.spinnerPosition, true)
             }
         }
 
@@ -127,7 +146,7 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
     companion object {
         @JvmStatic
         fun newInstance() = RampFragment()
-        private const val RAMP_CRYPTO_COLUMNS = 2
+        const val DEFAULT_RAMP_CRYPTO_POSITION = 0
         private const val SCHEME = "https"
         private const val SWAP_ASSET = "swapAsset"
         private const val USER_ADDRESS = "userAddress"

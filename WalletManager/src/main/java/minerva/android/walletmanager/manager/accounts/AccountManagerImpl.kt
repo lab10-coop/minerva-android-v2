@@ -66,9 +66,15 @@ class AccountManagerImpl(
 
     override fun createRegularAccount(network: Network): Single<String> =
         walletManager.getWalletConfig().run {
-            val (index, derivationPath) = getIndexWithDerivationPath(network.testNet, this)
-            createRegularAccountWithGivenIndex(index, derivationPath, network)
+            val index = getNextAvailableIndexForNetwork(network)
+            createRegularAccountWithGivenIndex(index, network)
         }
+
+    private fun getNextAvailableIndexForNetwork(network: Network): Int {
+        val usedIds = getAllActiveAccounts(network.chainId).map { account -> account.id }
+        return getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted && !usedIds.contains(account.id) }
+            .minBy { account -> account.id }!!.id
+    }
 
     override fun createEmptyAccounts(numberOfAccounts: Int) =
         walletManager.getWalletConfig().run {
@@ -93,8 +99,9 @@ class AccountManagerImpl(
             walletManager.updateWalletConfig(getWalletConfigWithNewAccounts(newAccounts, this))
         }
 
-    private fun createRegularAccountWithGivenIndex(index: Int, derivationPath: String, network: Network): Single<String> =
+    private fun createRegularAccountWithGivenIndex(index: Int, network: Network): Single<String> =
         walletManager.getWalletConfig().run {
+            val derivationPath = if (network.testNet) DerivationPath.TEST_NET_PATH else DerivationPath.MAIN_NET_PATH
             val accountName = CryptoUtils.prepareName(network.name, index)
             cryptographyRepository.calculateDerivedKeysSingle(
                 walletManager.masterSeed.seed,
@@ -129,10 +136,7 @@ class AccountManagerImpl(
                 .find { account -> account.chainId == Int.InvalidValue || (account.chainId == network.chainId && account.isHide) }
         return when {
             existAccount != null -> updateAccount(existAccount, network)
-            else -> {
-                val derivationPath = if (network.testNet) DerivationPath.TEST_NET_PATH else DerivationPath.MAIN_NET_PATH
-                createRegularAccountWithGivenIndex(index, derivationPath, network)
-            }
+            else -> createRegularAccountWithGivenIndex(index, network)
         }
     }
 
@@ -247,8 +251,11 @@ class AccountManagerImpl(
     override fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>> {
         val usedIds = getAllActiveAccounts(chainId).map { account -> account.id }
         return getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted && !usedIds.contains(account.id) }
-            .map { account -> account.id to account.address }.distinctBy { account -> account.first }
+            .map { account -> account.id to account.address }.distinctBy { account -> account.first }.sortedBy { account -> account.first }
     }
+
+    override fun getNumberOfAccountsToUse() = getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted }
+        .distinctBy { account -> account.id }.size
 
     override fun clearFiat() =
         walletManager.getWalletConfig().accounts.forEach { account ->

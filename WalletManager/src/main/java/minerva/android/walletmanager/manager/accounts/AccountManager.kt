@@ -34,6 +34,7 @@ interface AccountManager : Manager {
     fun currentTimeMills(): Long
     fun getAllAccounts(): List<Account>
     fun getAllActiveAccounts(chainId: Int): List<Account>
+    fun getNumberOfAccountsToUse(): Int
     fun getAllAccountsForSelectedNetworksType(): List<Account>
     fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>>
     fun toChecksumAddress(address: String): String

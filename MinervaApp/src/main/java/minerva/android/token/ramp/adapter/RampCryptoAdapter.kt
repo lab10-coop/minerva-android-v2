@@ -3,58 +3,64 @@ package minerva.android.token.ramp.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
-import minerva.android.databinding.RampCryptoRowBinding
+import minerva.android.databinding.RampCryptoGridBinding
 import minerva.android.token.ramp.model.RampCrypto
 
-class RampCryptoAdapter(private val crypto: List<RampCrypto>, private val onRampChanged: (chainId: Int) -> Unit) :
-    RecyclerView.Adapter<RampCryptoViewHolder>() {
-
-    private var currentCryptoPosition = 0
-
-    override fun getItemCount() = crypto.size
+class RampCryptoAdapter(
+    private var tokens: List<RampCrypto>,
+    private val onTokenSelected: (chainId: Int, symbol: String) -> Unit
+) : RecyclerView.Adapter<RampCryptoViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        RampCryptoViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.ramp_crypto_row, parent, false))
+        RampCryptoViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.ramp_crypto_grid, parent, false))
 
     override fun onBindViewHolder(holder: RampCryptoViewHolder, position: Int) {
-        holder.apply {
-            setData(position, crypto[position]) { onRampClicked(it) }
-            showSelected(position == currentCryptoPosition)
+        when (position) {
+            FIRST_PAGE -> holder.setTokens(tokens.subList(0, 4))
+            SECOND_PAGE -> holder.setTokens(tokens.subList(4, 8))
         }
     }
 
-    private fun onRampClicked(position: Int) {
-        currentCryptoPosition = position
-        onRampChanged(crypto[position].chainId)
+    private fun RampCryptoViewHolder.setTokens(tokens: List<RampCrypto>) {
+        setData(TokensAdapter(tokens)) { chainId, symbol -> updateTokens(chainId, symbol) }
+    }
+
+    private fun updateTokens(chainId: Int, symbol: String) {
+        onTokenSelected(chainId, symbol)
+        tokens.forEach { token -> token.isSelected = false }
+        tokens.find { token -> token.chainId == chainId && token.symbol == symbol }?.isSelected = true
+    }
+
+    override fun getItemCount() = PAGES
+
+    fun notifyData() {
         notifyDataSetChanged()
     }
 
-    fun getCryptoPosition() = currentCryptoPosition
+    companion object {
+        private const val FIRST_PAGE = 0
+        private const val SECOND_PAGE = 1
+        private const val PAGES = 2
+    }
 }
 
 class RampCryptoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-    private val binding = RampCryptoRowBinding.bind(view)
+    private val binding = RampCryptoGridBinding.bind(view)
 
-    fun setData(position: Int, rampCrypto: RampCrypto, onRampClicked: (chainId: Int) -> Unit) {
-        binding.cryptoView.apply {
-            text = rampCrypto.symbol
-            setCompoundDrawablesWithIntrinsicBounds(NO_IMAGE, rampCrypto.iconRes, NO_IMAGE, NO_IMAGE)
-            setOnClickListener { onRampClicked(position) }
+    fun setData(tokensAdapter: TokensAdapter, onTokenSelected: (chainId: Int, symbol: String) -> Unit) {
+        tokensAdapter.updateTokens { chainId, symbol -> onTokenSelected(chainId, symbol) }
+        binding.cryptoRecycler.apply {
+            layoutManager = GridLayoutManager(context, RAMP_CRYPTO_COLUMNS)
+            adapter = tokensAdapter
         }
     }
 
-    fun showSelected(value: Boolean) {
-        binding.cryptoView.setBackgroundResource(
-            if (value) R.drawable.rounded_white_frame_purple
-            else R.drawable.rounded_white_button
-        )
+    companion object {
+        private const val RAMP_CRYPTO_COLUMNS = 2
     }
 
-    companion object {
-        const val DEFAULT_RAMP_CRYPTO_POSITION = 0
-        private const val NO_IMAGE = 0
-    }
 }

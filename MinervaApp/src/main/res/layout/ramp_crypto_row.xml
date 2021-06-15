@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/crypto_view"
     android:layout_width="match_parent"
@@ -10,8 +10,30 @@
     android:layout_marginBottom="@dimen/margin_xxsmall"
     android:background="@drawable/rounded_white_button"
     android:drawablePadding="@dimen/margin_small"
-    android:gravity="center"
-    android:padding="@dimen/margin_normal"
-    android:textColor="@color/gray"
-    tools:drawableTop="@drawable/ic_ethereum"
-    tools:text="ETH" />
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/token_symbol"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_medium"
+        android:gravity="center"
+        android:paddingStart="@dimen/margin_normal"
+        android:paddingTop="@dimen/margin_normal"
+        android:paddingEnd="@dimen/margin_normal"
+        android:textColor="@color/darkGray80"
+        tools:drawableTop="@drawable/ic_ethereum"
+        tools:text="ETH" />
+
+    <TextView
+        android:id="@+id/network"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_medium"
+        android:gravity="center"
+        android:paddingBottom="@dimen/margin_normal"
+        android:textColor="@color/lightGray90"
+        android:textSize="@dimen/text_xsmall"
+        tools:text="(Ethereum)" />
+
+</LinearLayout>

@@ -125,7 +125,12 @@ class AccountManagerTest : RxTest() {
         val walletConfig = WalletConfig(
             1, accounts = listOf(
                 Account(
-                    1, chainId = Int.InvalidValue, publicKey = "publicKey", privateKey = "privateKey", address = "address1", _isTestNetwork = true
+                    1,
+                    chainId = Int.InvalidValue,
+                    publicKey = "publicKey",
+                    privateKey = "privateKey",
+                    address = "address1",
+                    _isTestNetwork = true
                 )
             )
         )
@@ -521,5 +526,53 @@ class AccountManagerTest : RxTest() {
         val config = WalletConfig(1, accounts = listOf(Account(1, chainId = 1)))
         val result = manager.getActiveAccounts(config)
         result.size shouldBeEqualTo 1
+    }
+
+    @Test
+    fun `get all free addresses for network test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false),
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = true),
+                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
+                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
+                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(4, chainId = ChainId.ATS_SIGMA, address = "address4", _isTestNetwork = true, isHide = true, isDeleted = true),
+                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        val result = manager.getAllFreeAccountForNetwork(ChainId.ATS_TAU)
+        result[0].first shouldBeEqualTo 1
+        result[0].second shouldBeEqualTo "address1"
+        result[1].first shouldBeEqualTo 3
+        result[1].second shouldBeEqualTo "address3"
+        result[2].first shouldBeEqualTo 5
+        result[2].second shouldBeEqualTo "address5"
+        result[3].first shouldBeEqualTo 6
+        result[3].second shouldBeEqualTo "address6"
+    }
+
+    @Test
+    fun `get number of accounts to use test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false),
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = true),
+                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
+                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
+                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(4, chainId = ChainId.ATS_SIGMA, address = "address4", _isTestNetwork = true, isHide = true, isDeleted = true),
+                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.getNumberOfAccountsToUse() shouldBeEqualTo 6
     }
 }
