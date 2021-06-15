@@ -67,4 +67,6 @@
     <color name="warningMessageOrange">#dc7500</color>
     <color name="warningOrange">#fda518</color>
     <color name="darkGray70">#B33A3944</color>
+    <color name="darkGray80">#3f3f4b</color>
+    <color name="lightGray90">#908f9d</color>
 </resources>
