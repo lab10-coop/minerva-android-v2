@@ -63,4 +63,5 @@
     <dimen name="drag_view_margin">120dp</dimen>
     <dimen name="app_version_bottom_bar_size">60dp</dimen>
     <dimen name="progress_dialog_size">200dp</dimen>
+    <dimen name="spinner_item_height">60dp</dimen>
 </resources>
