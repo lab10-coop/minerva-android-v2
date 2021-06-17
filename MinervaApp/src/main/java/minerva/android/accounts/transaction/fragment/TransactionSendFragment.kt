@@ -129,9 +129,10 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     }
 
     private fun handleTransactionStatus(status: Pair<String, Int>) {
-        when (status.second) {
-            WalletActionStatus.SENT -> listener.onTransactionAccepted(status.first)
-            WalletActionStatus.FAILED -> listener.onError(status.first)
+        val (message, state) = status
+        when (state) {
+            WalletActionStatus.SENT -> listener.onTransactionAccepted(message)
+            WalletActionStatus.FAILED -> listener.onError(message)
         }
     }
 
@@ -171,7 +172,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                 .subscribeBy(
                     onNext = {
                         viewModel.isTransactionAvailable(it).let { isAvailable ->
-                            sendButton.isEnabled = isAvailable
+                            sendButton.isEnabled = true//isAvailable
                             balanceToLowError.visibleOrGone(!isAvailable)
                             transactionCostAmount.setTextColor(getTransactionCostColor(isAvailable))
                         }

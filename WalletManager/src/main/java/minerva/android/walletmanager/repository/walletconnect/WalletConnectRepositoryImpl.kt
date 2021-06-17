@@ -63,7 +63,7 @@ class WalletConnectRepositoryImpl(
             }
 
             onFailure = { error, peerId ->
-                Timber.e("WalletConnect onFailure: $error, peerId: $peerId")
+                Timber.e("WalletConnect onFailure: $error, peerId: $peerId \n")
                 removeDappSession(peerId, onSuccess = { session ->
                     removeWcClient(session.peerId)
                     status.onNext(OnFailure(error, session.name))
@@ -93,6 +93,9 @@ class WalletConnectRepositoryImpl(
             }
 
             onEthSendTransaction = { id, transaction, peerId ->
+
+                Timber.tag("kobe").e("WalletConnect raw transaction: $transaction")
+
                 currentRequestId = id
                 status.onNext(
                     OnEthSendTransaction(
