@@ -79,7 +79,10 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
 
     fun setReceiver(result: String?) {
         result?.let {
-            binding.receiver.setText(result)
+            binding.receiver.apply {
+                setText(result)
+                requestFocus()
+            }
         }
     }
 
@@ -178,6 +181,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                         balanceToLowError.visibleOrGone(false)
                     }
                 )
+            amount.afterTextChanged { inputText -> allPressed = inputText == viewModel.recalculateAmount.toString() }
         }
     }
 
@@ -291,7 +295,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
         txCostObservable = viewModel.calculateTransactionCost(gasPrice, gasLimit)
     }
 
-    private fun setAddressScannerListener() {
+    private fun setGetAllBalanceListener() {
         binding.amount.onRightDrawableClicked {
             allPressed = true
             it.setText(viewModel.getAllAvailableFunds())
@@ -321,7 +325,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
         setAddressScannerListener()
     }
 
-    private fun setGetAllBalanceListener() {
+    private fun setAddressScannerListener() {
         binding.receiver.onRightDrawableClicked {
             listener.showScanner(TransactionAddressScanner.newInstance(viewModel.accountIndex))
         }
