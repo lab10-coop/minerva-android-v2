@@ -73,10 +73,8 @@ class TokenManagerImpl(
         if (shouldBeSaved) {
             walletManager.getWalletConfig()
                 .run {
-                    copy(
-                        version = updateVersion,
-                        erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap)
-                    ).let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
+                    copy(version = updateVersion, erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap))
+                        .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
                         .toSingle { shouldBeSaved }
                         .onErrorReturn { shouldBeSaved }
                 }
@@ -248,7 +246,13 @@ class TokenManagerImpl(
                 tokens.forEach { (chainId, tokens) ->
                     val marketId = MarketUtils.getMarketId(chainId)
                     if (!rateStorage.areRatesSynced && marketId != String.Empty) {
-                        observables.add(updateAccountTokensRate(marketId, chainId, prepareContractAddresses(tokens)))
+                        observables.add(
+                            updateAccountTokensRate(
+                                marketId,
+                                chainId,
+                                prepareContractAddresses(tokens.distinctBy { it.address })
+                            )
+                        )
                     }
                 }
                 Observable.merge(observables)
