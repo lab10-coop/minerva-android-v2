@@ -10,7 +10,9 @@ import minerva.android.databinding.OrderListRowBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.loadImageUrl
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.model.minervaprimitives.*
+import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
+import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.widget.ProfileImage
@@ -35,7 +37,7 @@ class OrderAdapter : RecyclerView.Adapter<OrderViewHolder>() {
     fun updateList(data: List<MinervaPrimitive>, areMainNetsEnabled: Boolean) {
         with(data) {
             displayedList =
-                filter { !it.isDeleted && !it.isSafeAccount && areAccountsActive(it, areMainNetsEnabled) }.toMutableList()
+                filter { !it.isDeleted && !it.isSafeAccount && it.name.isNotBlank() && areAccountsActive(it, areMainNetsEnabled) }.toMutableList()
             inactiveList = filter { it.isDeleted }
             safeAccountsList = filter { !it.isDeleted && it.isSafeAccount }
             inactiveAccountList = filter { !it.isDeleted && !it.isSafeAccount && filterInactiveAccounts(it, areMainNetsEnabled) }
