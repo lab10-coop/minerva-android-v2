@@ -248,7 +248,13 @@ class TokenManagerImpl(
                 tokens.forEach { (chainId, tokens) ->
                     val marketId = MarketUtils.getMarketId(chainId)
                     if (!rateStorage.areRatesSynced && marketId != String.Empty) {
-                        observables.add(updateAccountTokensRate(marketId, chainId, prepareContractAddresses(tokens)))
+                        observables.add(
+                            updateAccountTokensRate(
+                                marketId,
+                                chainId,
+                                prepareContractAddresses(tokens.distinctBy { it.address })
+                            )
+                        )
                     }
                 }
                 Observable.merge(observables)
