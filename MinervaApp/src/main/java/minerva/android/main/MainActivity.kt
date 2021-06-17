@@ -382,8 +382,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 viewModel.subscribeToExecutedTransactions(index)
                 (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
             } else {
-                getStringExtra(TRANSACTION_MESSAGE)?.let {
-                    showFlashbar(getString(R.string.transaction_success_title), it)
+                getStringExtra(TRANSACTION_MESSAGE)?.let { message ->
+                    showFlashbar(getString(R.string.transaction_success_title), message)
                 }
             }
         }

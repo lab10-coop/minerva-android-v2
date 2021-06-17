@@ -142,15 +142,10 @@ class TransactionRepositoryImpl(
         return allTokens.groupBy { token -> token.chainId }
     }
 
-    private fun shouldSetAccountAddress(tokenBalanceList: List<TokenBalance>): Boolean {
-        var shouldSetAccountAddress = false
-        tokenBalanceList.forEach { tokenBalance ->
-            shouldSetAccountAddress = tokenBalance.accountTokenList.find { accountToken ->
-                accountToken.balance > BigDecimal.ZERO && accountToken.token.accountAddress.isBlank()
-            } != null
+    private fun shouldSetAccountAddress(tokenBalanceList: List<TokenBalance>): Boolean =
+        tokenBalanceList.any { accountTokens ->
+            accountTokens.accountTokenList.find { accountToken -> accountToken.balance > BigDecimal.ZERO && accountToken.token.accountAddress.isBlank() } != null
         }
-        return shouldSetAccountAddress
-    }
 
     private fun parseAccountTokensPerAccountListToTokenBalanceList(accountTokenPerAccountList: List<Triple<Int, String, List<AccountToken>>>) =
         mutableListOf<TokenBalance>().apply {

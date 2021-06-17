@@ -29,6 +29,7 @@ import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
+import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.repository.getMainTokenIconRes
 import timber.log.Timber
@@ -222,10 +223,14 @@ class TransactionViewModel(
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
-                    onComplete = { _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT)) },
+                    onComplete = {
+                        _sendTransactionLiveData.value =
+                            Event(Pair("${BalanceUtils.getCryptoBalance(amount)} ${prepareCurrency()}", SENT))
+                    },
                     onError = {
                         Timber.e("Send safe account transaction error: ${it.message}")
-                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
+                        _saveWalletActionFailedLiveData.value =
+                            Event(Pair("${BalanceUtils.getCryptoBalance(amount)} ${prepareCurrency()}", SENT))
                     }
                 )
         }
@@ -259,11 +264,13 @@ class TransactionViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = {
-                        _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
+                        _sendTransactionLiveData.value =
+                            Event(Pair("${BalanceUtils.getCryptoBalance(amount)} ${prepareCurrency()}", SENT))
                     },
                     onError = {
                         Timber.e("Send safe account transaction error: ${it.message}")
-                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
+                        _saveWalletActionFailedLiveData.value =
+                            Event(Pair("${BalanceUtils.getCryptoBalance(amount)} ${prepareCurrency()}", SENT))
                     }
                 )
         }
@@ -304,7 +311,8 @@ class TransactionViewModel(
                     onComplete = { _transactionCompletedLiveData.value = Event(Any()) },
                     onError = {
                         Timber.e("Send transaction error: ${it.message}")
-                        _saveWalletActionFailedLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
+                        _saveWalletActionFailedLiveData.value =
+                            Event(Pair("${BalanceUtils.getCryptoBalance(amount)} ${prepareCurrency()}", SENT))
                     }
                 )
         }
@@ -327,7 +335,8 @@ class TransactionViewModel(
                 .doOnEvent { _loadingLiveData.value = Event(false) }
                 .subscribeBy(
                     onComplete = {
-                        _sendTransactionLiveData.value = Event(Pair("$amount ${prepareCurrency()}", SENT))
+                        _sendTransactionLiveData.value =
+                            Event(Pair("${BalanceUtils.getCryptoBalance(amount)} ${prepareCurrency()}", SENT))
                     },
                     onError = { _errorLiveData.value = Event(it) }
                 )
