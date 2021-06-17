@@ -6,6 +6,6 @@ data class WCEthereumTransaction(
     val nonce: String?,
     val gasPrice: String?,
     val gasLimit: String?,
-    val value: String?,
+    val value: String,
     val data: String
 )
