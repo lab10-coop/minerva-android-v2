@@ -73,10 +73,8 @@ class TokenManagerImpl(
         if (shouldBeSaved) {
             walletManager.getWalletConfig()
                 .run {
-                    copy(
-                        version = updateVersion,
-                        erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap)
-                    ).let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
+                    copy(version = updateVersion, erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap))
+                        .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
                         .toSingle { shouldBeSaved }
                         .onErrorReturn { shouldBeSaved }
                 }

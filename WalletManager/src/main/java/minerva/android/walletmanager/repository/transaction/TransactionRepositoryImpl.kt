@@ -65,7 +65,12 @@ class TransactionRepositoryImpl(
                 blockchainRepository.refreshBalances(getAddresses(accounts))
                     .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
                     .map { (cryptoBalances, markets) ->
-                        MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, localStorage.loadCurrentFiat())
+                        MarketUtils.calculateFiatBalances(
+                            cryptoBalances,
+                            accounts,
+                            markets,
+                            localStorage.loadCurrentFiat()
+                        )
                     }
             }
 
@@ -77,7 +82,9 @@ class TransactionRepositoryImpl(
             Observable.fromIterable(accounts)
                 .flatMapSingle { account -> tokenManager.refreshTokensBalances(account) }
                 .toList()
-                .map { accountTokensPerAccountList -> parseAccountTokensPerAccountListToTokenBalanceList(accountTokensPerAccountList) }
+                .map { accountTokensPerAccountList ->
+                    parseAccountTokensPerAccountListToTokenBalanceList(accountTokensPerAccountList)
+                }
                 .flatMap { tokenBalanceList -> handleNewAddedTokens(tokenBalanceList, accounts) }
         }
 
