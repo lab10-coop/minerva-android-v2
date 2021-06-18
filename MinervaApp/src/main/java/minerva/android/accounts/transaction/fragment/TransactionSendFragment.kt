@@ -172,7 +172,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                 .subscribeBy(
                     onNext = {
                         viewModel.isTransactionAvailable(it).let { isAvailable ->
-                            sendButton.isEnabled = true//isAvailable
+                            sendButton.isEnabled = isAvailable
                             balanceToLowError.visibleOrGone(!isAvailable)
                             transactionCostAmount.setTextColor(getTransactionCostColor(isAvailable))
                         }
