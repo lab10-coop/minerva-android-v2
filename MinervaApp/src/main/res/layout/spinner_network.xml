@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/row"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/spinner_item_height"
     android:drawablePadding="@dimen/margin_normal"
     android:fontFamily="@font/rubik_regular"
     android:gravity="center_vertical"
