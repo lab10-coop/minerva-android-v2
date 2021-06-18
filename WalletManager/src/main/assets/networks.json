@@ -150,58 +150,7 @@
     "wsRpc": "",
     "gasPriceOracle": "https://gasstation-mainnet.matic.network",
     "gasPrice": "10000000000",
-    "tokens": [
-      {
-        "chainId": 137,
-        "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-        "name": "(POS) Tether USD",
-        "symbol": "USDT",
-        "decimals": 6,
-        "logoURI": "",
-        "accountAddress": "",
-        "tag": ""
-      },
-      {
-        "name": "USD Coin (POS)",
-        "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
-        "symbol": "USDC",
-        "decimals": 6,
-        "chainId": 137,
-        "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
-        "accountAddress": "",
-        "tag": ""
-      },
-      {
-        "chainId": 137,
-        "address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
-        "name": "(POS) Dai Stablecoin",
-        "symbol": "DAI",
-        "decimals": 18,
-        "logoURI": "",
-        "accountAddress": "",
-        "tag": ""
-      },
-      {
-        "name": "(POS) Wrapped BTC",
-        "address": "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
-        "symbol": "WBTC",
-        "decimals": 8,
-        "chainId": 137,
-        "logoURI": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
-        "accountAddress": "",
-        "tag": ""
-      },
-      {
-        "chainId": 137,
-        "address": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
-        "name": "Wrapped Ether",
-        "symbol": "WETH",
-        "decimals": 18,
-        "logoURI": "https://assets.coingecko.com/coins/images/2518/small/weth.png?1547036627",
-        "accountAddress": "",
-        "tag": ""
-      }
-    ],
+    "tokens": [],
     "color": "#8247e5",
     "testNet": false,
     "chainId": 137

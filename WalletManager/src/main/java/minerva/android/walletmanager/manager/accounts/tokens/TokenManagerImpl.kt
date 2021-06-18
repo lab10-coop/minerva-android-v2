@@ -73,10 +73,8 @@ class TokenManagerImpl(
         if (shouldBeSaved) {
             walletManager.getWalletConfig()
                 .run {
-                    copy(
-                        version = updateVersion,
-                        erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap)
-                    ).let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
+                    copy(version = updateVersion, erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap))
+                        .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
                         .toSingle { shouldBeSaved }
                         .onErrorReturn { shouldBeSaved }
                 }
@@ -233,9 +231,9 @@ class TokenManagerImpl(
 
     override fun downloadTokensList(account: Account): Single<List<ERC20Token>> =
         when (account.chainId) {
-            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokens(account)
-            MATIC, MUMBAI -> Single.just(emptyList()) // Networks without token explorer urls
-            else -> getNotEthereumTokens(account)
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, MATIC -> getTokensFromTx(account)
+            MUMBAI -> Single.just(emptyList()) // Networks without token explorer urls
+            else -> getTokensForAccount(account)
         }
 
     private fun prepareContractAddresses(tokens: List<ERC20Token>): String =
@@ -248,7 +246,13 @@ class TokenManagerImpl(
                 tokens.forEach { (chainId, tokens) ->
                     val marketId = MarketUtils.getMarketId(chainId)
                     if (!rateStorage.areRatesSynced && marketId != String.Empty) {
-                        observables.add(updateAccountTokensRate(marketId, chainId, prepareContractAddresses(tokens)))
+                        observables.add(
+                            updateAccountTokensRate(
+                                marketId,
+                                chainId,
+                                prepareContractAddresses(tokens.distinctBy { it.address })
+                            )
+                        )
                     }
                 }
                 Observable.merge(observables)
@@ -293,7 +297,7 @@ class TokenManagerImpl(
         }
     }
 
-    private fun getNotEthereumTokens(account: Account): Single<List<ERC20Token>> =
+    private fun getTokensForAccount(account: Account): Single<List<ERC20Token>> =
         cryptoApi.getConnectedTokens(url = getTokensApiURL(account))
             .map { response ->
                 mutableListOf<ERC20Token>().apply {
@@ -305,7 +309,7 @@ class TokenManagerImpl(
                 }
             }
 
-    private fun getEthereumTokens(account: Account): Single<List<ERC20Token>> =
+    private fun getTokensFromTx(account: Account): Single<List<ERC20Token>> =
         cryptoApi.getTokenTx(url = getTokenTxApiURL(account))
             .map { response ->
                 mutableListOf<ERC20Token>().apply {
@@ -316,13 +320,20 @@ class TokenManagerImpl(
             }
 
     private fun getTokenTxApiURL(account: Account): String =
-        String.format(ETHEREUM_TOKENTX_REQUEST, getTokenBalanceURL(account.chainId), account.address, ETHERSCAN_KEY)
+        String.format(ETHEREUM_TOKENTX_REQUEST, getTokenExplorerURL(account.chainId), account.address, getAPIKey(account.chainId))
 
     @VisibleForTesting
     fun getTokensApiURL(account: Account): String =
-        String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.chainId), account.address)
+        String.format(TOKEN_BALANCE_REQUEST, getTokenExplorerURL(account.chainId), account.address)
 
-    private fun getTokenBalanceURL(chainId: Int) =
+    private fun getAPIKey(chainId: Int) =
+        when (chainId) {
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHERSCAN_KEY
+            MATIC -> POLYGONSCAN_KEY
+            else -> throw NetworkNotFoundThrowable()
+        }
+
+    private fun getTokenExplorerURL(chainId: Int) =
         when (chainId) {
             ETH_MAIN -> ETHEREUM_MAINNET_TOKEN_BALANCE_URL
             ETH_RIN -> ETHEREUM_RINKEBY_TOKEN_BALANCE_URL
@@ -335,6 +346,7 @@ class TokenManagerImpl(
             POA_CORE -> POA_CORE_TOKEN_BALANCE_URL
             XDAI -> X_DAI_TOKEN_BALANCE_URL
             LUKSO_14 -> LUKSO_TOKEN_BALANCE_URL
+            MATIC -> POLYGON_TOKEN_BALANCE_URL
             else -> throw NetworkNotFoundThrowable()
         }
 

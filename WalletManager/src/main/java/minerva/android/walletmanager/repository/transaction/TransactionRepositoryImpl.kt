@@ -65,7 +65,12 @@ class TransactionRepositoryImpl(
                 blockchainRepository.refreshBalances(getAddresses(accounts))
                     .zipWith(getRate(MarketUtils.getMarketsIds(accounts)).onErrorReturnItem(Markets()))
                     .map { (cryptoBalances, markets) ->
-                        MarketUtils.calculateFiatBalances(cryptoBalances, accounts, markets, localStorage.loadCurrentFiat())
+                        MarketUtils.calculateFiatBalances(
+                            cryptoBalances,
+                            accounts,
+                            markets,
+                            localStorage.loadCurrentFiat()
+                        )
                     }
             }
 
@@ -77,7 +82,9 @@ class TransactionRepositoryImpl(
             Observable.fromIterable(accounts)
                 .flatMapSingle { account -> tokenManager.refreshTokensBalances(account) }
                 .toList()
-                .map { accountTokensPerAccountList -> parseAccountTokensPerAccountListToTokenBalanceList(accountTokensPerAccountList) }
+                .map { accountTokensPerAccountList ->
+                    parseAccountTokensPerAccountListToTokenBalanceList(accountTokensPerAccountList)
+                }
                 .flatMap { tokenBalanceList -> handleNewAddedTokens(tokenBalanceList, accounts) }
         }
 
@@ -321,7 +328,7 @@ class TransactionRepositoryImpl(
     private fun isMaticNetwork(chainId: Int) = chainId == MATIC || chainId == MUMBAI
 
     private fun getTxCosts(payload: TxCostPayload, speed: TransactionSpeed?): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), speed?.rapid)
+        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), speed?.fast)
             .map { txCost ->
                 TransactionCostPayloadToTransactionCost.map(txCost, speed, payload.chainId) {
                     blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
