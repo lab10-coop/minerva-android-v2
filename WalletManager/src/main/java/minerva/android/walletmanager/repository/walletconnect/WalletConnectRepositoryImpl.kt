@@ -93,9 +93,6 @@ class WalletConnectRepositoryImpl(
             }
 
             onEthSendTransaction = { id, transaction, peerId ->
-
-                Timber.tag("kobe").e("WalletConnect raw transaction: $transaction")
-
                 currentRequestId = id
                 status.onNext(
                     OnEthSendTransaction(

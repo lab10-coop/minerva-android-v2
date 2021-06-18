@@ -106,9 +106,6 @@ class WalletConnectInteractionsViewModel(
                     }
             is OnDisconnect -> Single.just(OnDisconnected())
             is OnEthSendTransaction -> {
-
-                Timber.tag("kobe").e("WalletConnect raw after mapping transaction: ${status.transaction} \n")
-
                 logToFirebase("Transaction payload from WalletConnect: ${status.transaction}")
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }
@@ -140,8 +137,6 @@ class WalletConnectInteractionsViewModel(
                             txCost = transactionCost.copy(fiatCost = getFiatTransactionCost(transactionCost)),
                             transactionType = transferType
                         )
-
-                        Timber.tag("kobe").e("Shown transaction: $currentTransaction \n")
                         logToFirebase("Shown transaction: $currentTransaction")
                         OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
                     }
@@ -327,7 +322,7 @@ class WalletConnectInteractionsViewModel(
                     onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
                     onError = { error ->
                         Timber.e(error)
-                        _walletConnectStatus.value = OnGeneralError(error)
+                        _walletConnectStatus.value = OnWalletConnectTransactionError(error)
                     }
                 )
         }
