@@ -11,6 +11,7 @@ object CloseScannerState : WalletConnectState()
 object WrongQrCodeState : WalletConnectState()
 object CorrectQrCodeState : WalletConnectState()
 data class OnGeneralError(val error: Throwable, val sessionName: String = String.Empty) : WalletConnectState()
+data class OnWalletConnectTransactionError(val error: Throwable) : WalletConnectState()
 data class OnWalletConnectConnectionError(val error: Throwable, val sessionName: String = String.Empty) :
     WalletConnectState()
 
