@@ -63,7 +63,7 @@ class WalletConnectRepositoryImpl(
             }
 
             onFailure = { error, peerId ->
-                Timber.e("WalletConnect onFailure: $error, peerId: $peerId \n")
+                Timber.e("WalletConnect onFailure: $error, peerId: $peerId")
                 removeDappSession(peerId, onSuccess = { session ->
                     removeWcClient(session.peerId)
                     status.onNext(OnFailure(error, session.name))
