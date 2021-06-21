@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(state)
                 is ProgressBarState -> handleLoadingDialog(state)
                 is OnGeneralError -> handleWalletConnectError()
+                is OnWalletConnectTransactionError -> handleWalletConnectTransactionError(state)
                 is WrongTransactionValueState -> handleWrongTransactionValueState(state)
                 else -> dappDialog = null
             }
@@ -173,6 +174,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 (getCurrentFragment() as? AccountsFragment)?.updateTokensRate()
             })
         }
+    }
+
+    private fun handleWalletConnectTransactionError(state: OnWalletConnectTransactionError) {
+        dappDialog?.dismiss()
+        showFlashbar(
+            getString(R.string.transactions_error_title),
+            state.error.message ?: getString(R.string.transactions_error_message)
+        )
     }
 
     private fun handleWrongTransactionValueState(state: WrongTransactionValueState) {
@@ -382,8 +391,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 viewModel.subscribeToExecutedTransactions(index)
                 (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
             } else {
-                getStringExtra(TRANSACTION_MESSAGE)?.let {
-                    showFlashbar(getString(R.string.transaction_success_title), it)
+                getStringExtra(TRANSACTION_MESSAGE)?.let { message ->
+                    showFlashbar(getString(R.string.transaction_success_title), message)
                 }
             }
         }
