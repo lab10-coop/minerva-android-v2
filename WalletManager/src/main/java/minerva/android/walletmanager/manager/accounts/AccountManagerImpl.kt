@@ -46,11 +46,7 @@ class AccountManagerImpl(
     override val isProtectTransactionsEnabled: Boolean get() = localStorage.isProtectTransactionsEnabled
     override val masterSeed: MasterSeed get() = walletManager.masterSeed
     override val getTokenVisibilitySettings: TokenVisibilitySettings get() = localStorage.getTokenVisibilitySettings()
-    override var showMainNetworksWarning: Boolean
-        get() = walletManager.showMainNetworksWarning
-        set(value) {
-            walletManager.showMainNetworksWarning = value
-        }
+
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = Transformations.map(walletManager.walletConfigLiveData) { walletConfigEvent ->
             with(walletConfigEvent.peekContent()) {

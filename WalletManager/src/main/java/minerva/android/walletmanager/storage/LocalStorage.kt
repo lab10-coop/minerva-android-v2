@@ -1,7 +1,7 @@
 package minerva.android.walletmanager.storage
 
-import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Recipient
 
 interface LocalStorage {
@@ -36,5 +36,4 @@ interface LocalStorage {
     var areMainNetworksEnabled: Boolean
     var isProtectKeysEnabled: Boolean
     var isProtectTransactionsEnabled: Boolean
-    var showMainNetworksWarning: Boolean
 }
