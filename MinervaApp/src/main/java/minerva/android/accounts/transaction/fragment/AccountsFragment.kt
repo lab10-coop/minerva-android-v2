@@ -21,7 +21,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
-import minerva.android.widget.dialog.FundsAtRiskDialog
+import minerva.android.widget.dialog.SelectPredefinedAccountDialog
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.state.AppUIState
 import minerva.android.wrapped.startManageTokensWrappedActivity
@@ -115,9 +115,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 syncError.isGone = isSynced
                 networksHeader.text = getHeader(areMainNetsEnabled)
                 addCryptoButton.apply { text = getBuyCryptoButtonText(this) }
-                if (showMainNetworksWarning) {
-                    FundsAtRiskDialog(requireContext()).show()
-                    showMainNetworksWarning = false
+                if (isFirstLaunch) {
+                    SelectPredefinedAccountDialog(requireContext(), ::createAccountForSelectedNetwork).show()
                 }
             }
         }
@@ -262,6 +261,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
         MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))
 
+    private fun createAccountForSelectedNetwork(chainId: Int) {
+        viewModel.createNewAccount(chainId)
+    }
 
     private inner class EventObserverWithSyncChecking<T>(private val onEventUnhandledContent: (T) -> Unit) :
         Observer<Event<T>> {

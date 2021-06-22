@@ -64,6 +64,9 @@ class AccountManagerImpl(
     internal fun getActiveAccounts(walletConfig: WalletConfig): List<Account> =
         walletConfig.accounts.filter { account -> account.shouldShow && account.isTestNetwork == !areMainNetworksEnabled }
 
+    override fun areAllEmptyMainNetworkAccounts(): Boolean =
+        walletManager.getWalletConfig().accounts.find { account -> !account.isEmptyAccount && !account.isTestNetwork} == null
+
     override fun createRegularAccount(network: Network): Single<String> =
         walletManager.getWalletConfig().run {
             val index = getNextAvailableIndexForNetwork(network)

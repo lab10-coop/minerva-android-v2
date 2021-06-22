@@ -19,6 +19,7 @@ interface AccountManager : Manager {
     var activeAccounts: List<Account>
     var cachedTokens: Map<Int, List<ERC20Token>>
     val getTokenVisibilitySettings: TokenVisibilitySettings
+    fun areAllEmptyMainNetworkAccounts(): Boolean
     fun loadAccount(index: Int): Account
     fun createRegularAccount(network: Network): Single<String>
     fun createEmptyAccounts(numberOfAccounts: Int): Completable

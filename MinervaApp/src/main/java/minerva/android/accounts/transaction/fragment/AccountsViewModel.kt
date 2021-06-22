@@ -21,6 +21,7 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.WalletActionFields
+import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.HIDE
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
@@ -60,11 +61,8 @@ class AccountsViewModel(
     private var balancesRefreshed = false
     private var tokenBalancesRefreshed = false
     val fiatSymbol = transactionRepository.getFiatSymbol()
-    var showMainNetworksWarning: Boolean
-        get() = accountManager.showMainNetworksWarning
-        set(value) {
-            accountManager.showMainNetworksWarning = value
-        }
+    val isFirstLaunch: Boolean get() = accountManager.areAllEmptyMainNetworkAccounts()
+
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) { event -> event.peekContent().accounts }
 
@@ -323,6 +321,23 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
             tokenVisibilitySettings.updateTokenVisibility(networkAddress, tokenAddress, visibility)
         )
+    }
+
+    fun createNewAccount(chainId: Int) {
+        launchDisposable {
+            accountManager.createRegularAccount(NetworkManager.getNetwork(chainId))
+                .flatMapCompletable { walletActionsRepository.saveWalletActions(listOf(getWalletAction(WalletActionStatus.ADDED, it))) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _loadingLiveData.value = Event(true) }
+                .doOnEvent { _loadingLiveData.value = Event(false) }
+                .subscribeBy(
+                    onError = {
+                        Timber.e(it)
+                        _errorLiveData.value = Event(BaseError)
+                    }
+                )
+        }
     }
 
     private fun getWalletAction(status: Int, name: String) =

@@ -575,4 +575,37 @@ class AccountManagerTest : RxTest() {
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         manager.getNumberOfAccountsToUse() shouldBeEqualTo 6
     }
+
+    @Test
+    fun `all main network accounts are not empty test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, chainId = ChainId.ETH_MAIN, _isTestNetwork = false),
+                Account(1, _isTestNetwork = true),
+                Account(1, _isTestNetwork = false),
+                Account(4, _isTestNetwork = false)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.areAllEmptyMainNetworkAccounts() shouldBeEqualTo false
+    }
+
+    @Test
+    fun `all main network accounts are empty test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, _isTestNetwork = true),
+                Account(1, _isTestNetwork = true),
+                Account(2, _isTestNetwork = true),
+                Account(3, _isTestNetwork = true),
+                Account(1, _isTestNetwork = false),
+                Account(4, _isTestNetwork = false),
+                Account(5, _isTestNetwork = false)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.areAllEmptyMainNetworkAccounts() shouldBeEqualTo true
+    }
 }
