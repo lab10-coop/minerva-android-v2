@@ -309,7 +309,7 @@
     <string name="authentication_fail_message">There was unexpected authentication error. Please try again.</string>
     <string name="choose_your_crypto">Choose your crypto</string>
     <string name="continue_to_ramp">Continue to Ramp</string>
-    <string name="create_new_account">Create a new Account</string>
+    <string name="create_new_account">Add account</string>
     <string name="no_account_on_network">You don\'t have an Account on this Network. Please create a new Account.</string>
     <string name="currency">Currency</string>
     <string name="try_again">Try again</string>
@@ -328,6 +328,12 @@
     <string name="hide_now">Hide now</string>
     <string name="hide">Hide</string>
     <string name="no_addresses_left_info">You reached the maximum number of accounts</string>
+    <string name="ethereum_label">Ethereum</string>
+    <string name="polygon_label">Polygon (Matic)</string>
+    <string name="xdai_label">xDai Chain</string>
+    <string name="create_your_first_account_header">Create your \nfirst account!</string>
+    <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
+    <string name="skip">Skip</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

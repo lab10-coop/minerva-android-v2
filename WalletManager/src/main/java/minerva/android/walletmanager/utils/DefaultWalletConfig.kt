@@ -24,8 +24,6 @@ object DefaultWalletConfig {
 
     private val firstDefaultTestNetwork = NetworkManager.firstDefaultValueNetwork()
     private val secondDefaultTestNetwork = NetworkManager.getNetworkByIndex(SECOND_DEFAULT_TEST_NETWORK_INDEX)
-    private val firstDefaultMainNetwork = NetworkManager.getNetworkByIndex(THIRD_DEFAULT_TEST_NETWORK_INDEX)
-    private val secondDefaultMainNetwork = NetworkManager.getNetworkByIndex(FOURTH_DEFAULT_TEST_NETWORK_INDEX)
 
     val create: WalletConfigPayload
         get() =
@@ -60,14 +58,10 @@ object DefaultWalletConfig {
                         _isTestNetwork = true
                     ),
                     AccountPayload(
-                        FIRST_DEFAULT_MAIN_NETWORK_INDEX,
-                        CryptoUtils.prepareName(firstDefaultMainNetwork.name, FIRST_DEFAULT_MAIN_NETWORK_INDEX),
-                        firstDefaultMainNetwork.chainId
+                        FIRST_DEFAULT_MAIN_NETWORK_INDEX
                     ),
                     AccountPayload(
-                        SECOND_DEFAULT_MAIN_NETWORK_INDEX,
-                        CryptoUtils.prepareName(secondDefaultMainNetwork.name, SECOND_DEFAULT_MAIN_NETWORK_INDEX),
-                        secondDefaultMainNetwork.chainId
+                        SECOND_DEFAULT_MAIN_NETWORK_INDEX
                     ),
                     AccountPayload(
                         THIRD_DEFAULT_MAIN_NETWORK_INDEX

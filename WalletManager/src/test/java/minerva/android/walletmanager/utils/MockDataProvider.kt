@@ -4,6 +4,7 @@ import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.CredentialType
@@ -51,7 +52,7 @@ object MockDataProvider {
         Network(chainId = ATS_SIGMA, httpRpc = "address", testNet = true),
         Network(chainId = POA_CORE, httpRpc = "address", testNet = true),
         Network(
-            chainId = 1, httpRpc = "address", testNet = false,
+            chainId = ETH_MAIN, httpRpc = "address", testNet = false,
             tokens = listOf(
                 ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
                 ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")

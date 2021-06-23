@@ -81,12 +81,6 @@ class WalletConfigManagerImpl(
             localStorage.areMainNetworksEnabled = value
         }
 
-    override var showMainNetworksWarning: Boolean
-        get() = localStorage.showMainNetworksWarning
-        set(value) {
-            localStorage.showMainNetworksWarning = value
-        }
-
     override fun getMnemonic(): String = cryptographyRepository.getMnemonicForMasterSeed(masterSeed.seed)
 
     override fun saveIsMnemonicRemembered() {

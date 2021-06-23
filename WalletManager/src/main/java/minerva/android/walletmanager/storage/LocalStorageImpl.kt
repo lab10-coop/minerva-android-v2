@@ -25,15 +25,8 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
     override var areMainNetworksEnabled: Boolean
         set(value) {
             sharedPreferences.edit().putBoolean(ARE_MAIN_NETS_ENABLED, value).apply()
-            showMainNetworksWarning = true
         }
         get() = sharedPreferences.getBoolean(ARE_MAIN_NETS_ENABLED, BuildConfig.ARE_MAIN_NETS_ENABLED)
-
-    override var showMainNetworksWarning: Boolean
-        set(value) = sharedPreferences.edit().putBoolean(SHOW_MAIN_NETWORKS_WARNING, value).apply()
-        get() = sharedPreferences.run {
-            getBoolean(SHOW_MAIN_NETWORKS_WARNING, true) && areMainNetworksEnabled
-        }
 
     override fun saveIsMnemonicRemembered(isRemembered: Boolean) {
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()
@@ -145,7 +138,6 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val ICON_UPDATE_TIMESTAMP = "last_update_timestamp"
         private const val PROTECT_KEYS_ENABLED = "protect_keys_enabled"
         private const val PROTECT_TRANSACTIONS_ENABLED = "protect_transactions_enabled"
-        private const val SHOW_MAIN_NETWORKS_WARNING = "show_main_networks_warning"
         private const val CURRENT_FIAT = "current_fiat"
         private const val DEFAULT_CURRENCY = "EUR"
     }

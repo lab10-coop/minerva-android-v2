@@ -12,6 +12,7 @@ import minerva.android.mock.*
 import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
@@ -57,6 +58,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountRemoveObserver: Observer<Event<Unit>> = mock()
     private val accountRemoveCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
+    private val loadingObserver: Observer<Event<Boolean>> = mock()
+    private val loadingCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
+
     @Before
     fun initViewModel() {
         viewModel = AccountsViewModel(
@@ -90,7 +94,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshCoinBalances()).thenReturn(
-            Single.just(listOf(CoinBalance(1,"123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
+            Single.just(listOf(CoinBalance(1, "123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
         )
         viewModel.balanceLiveData.observeForever(balanceObserver)
         viewModel.refreshCoinBalances()
@@ -133,7 +137,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get tokens balance success when tagged tokens are empty test`() {
         whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(Flowable.just(emptyList()))
         whenever(transactionRepository.refreshTokensBalances())
-            .thenReturn(Single.just(listOf(TokenBalance(1,"test", listOf(AccountToken(ERC20Token(1, "name")))))))
+            .thenReturn(Single.just(listOf(TokenBalance(1, "test", listOf(AccountToken(ERC20Token(1, "name")))))))
         viewModel.refreshTokensBalances()
         viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
         tokensBalanceCaptor.run {
@@ -151,7 +155,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             .thenReturn(
                 Single.just(
                     listOf(
-                        TokenBalance(1,"privateKey1", accountTokensForPrivateKey1),
+                        TokenBalance(1, "privateKey1", accountTokensForPrivateKey1),
                         TokenBalance(2, "privateKey2", accountTokensForPrivateKey2)
                     )
                 )
@@ -449,5 +453,22 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val result = viewModel.getTokens(account)
         result[0].name shouldBeEqualTo "cachedToken1"
         result[1].name shouldBeEqualTo "cachedToken2"
+    }
+
+    @Test
+    fun `check creating new account flow`() {
+        val error = Throwable("error")
+        NetworkManager.initialize(listOf(Network(chainId = 3, httpRpc = "some_rpc")))
+        whenever(accountManager.createRegularAccount(any())).thenReturn(Single.just("Cookie Account"), Single.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        viewModel.run {
+            loadingLiveData.observeForever(loadingObserver)
+            errorLiveData.observeForever(errorObserver)
+            createNewAccount(3)
+            createNewAccount(3)
+        }
+
+        verify(loadingObserver, times(4)).onChanged(loadingCaptor.capture())
+        verify(errorObserver).onChanged(errorCaptor.capture())
     }
 }

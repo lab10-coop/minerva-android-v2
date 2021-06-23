@@ -37,26 +37,31 @@ class OrderAdapter : RecyclerView.Adapter<OrderViewHolder>() {
     fun updateList(data: List<MinervaPrimitive>, areMainNetsEnabled: Boolean) {
         with(data) {
             displayedList =
-                filter { !it.isDeleted && !it.isSafeAccount && it.name.isNotBlank() && areAccountsActive(it, areMainNetsEnabled) }.toMutableList()
-            inactiveList = filter { it.isDeleted }
-            safeAccountsList = filter { !it.isDeleted && it.isSafeAccount }
-            inactiveAccountList = filter { !it.isDeleted && !it.isSafeAccount && filterInactiveAccounts(it, areMainNetsEnabled) }
+                filter { filterDisplayAccount(it, areMainNetsEnabled) }.toMutableList()
+            inactiveList = filter { account -> account.isDeleted || account.isHide || account.name.isBlank() }
+            safeAccountsList = filter { account -> (!account.isHide || !account.isDeleted) && account.isSafeAccount }
+            inactiveAccountList = filter { account ->
+                (!account.isHide && !account.isDeleted && account.name.isNotBlank()) && !account.isSafeAccount && filterInactiveAccounts(account, areMainNetsEnabled)
+            }
         }
         notifyDataSetChanged()
     }
 
-    private fun filterInactiveAccounts(it: MinervaPrimitive, areMainNetsEnabled: Boolean) =
-        if (it is Account) it.network.testNet == areMainNetsEnabled
+    private fun filterDisplayAccount(account: MinervaPrimitive, areMainNetsEnabled: Boolean) =
+        !account.isHide && !account.isDeleted && !account.isSafeAccount && account.name.isNotBlank() && areAccountsActive(account, areMainNetsEnabled)
+
+    private fun filterInactiveAccounts(minervaPrimitive: MinervaPrimitive, areMainNetsEnabled: Boolean) =
+        if (minervaPrimitive is Account) minervaPrimitive.isTestNetwork == areMainNetsEnabled
         else false
 
-    private fun areAccountsActive(it: MinervaPrimitive, areMainNetsEnabled: Boolean) =
-        if (it is Account) it.network.testNet != areMainNetsEnabled
+    private fun areAccountsActive(minervaPrimitive: MinervaPrimitive, areMainNetsEnabled: Boolean) =
+        if (minervaPrimitive is Account) minervaPrimitive.isTestNetwork != areMainNetsEnabled
         else true
 
     fun swapItems(fromPosition: Int, toPosition: Int) {
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition) {
-                displayedList[i] = displayedList.set(i + 1, displayedList[i]);
+                displayedList[i] = displayedList.set(i + 1, displayedList[i])
             }
         } else {
             for (i in fromPosition..toPosition + 1) {
