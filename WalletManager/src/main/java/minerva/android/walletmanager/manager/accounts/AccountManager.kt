@@ -14,11 +14,11 @@ interface AccountManager : Manager {
     val areMainNetworksEnabled: Boolean
     val isProtectKeysEnabled: Boolean
     val isProtectTransactionsEnabled: Boolean
-    var showMainNetworksWarning: Boolean
     var hasAvailableAccounts: Boolean
     var activeAccounts: List<Account>
     var cachedTokens: Map<Int, List<ERC20Token>>
     val getTokenVisibilitySettings: TokenVisibilitySettings
+    fun areAllEmptyMainNetworkAccounts(): Boolean
     fun loadAccount(index: Int): Account
     fun createRegularAccount(network: Network): Single<String>
     fun createEmptyAccounts(numberOfAccounts: Int): Completable

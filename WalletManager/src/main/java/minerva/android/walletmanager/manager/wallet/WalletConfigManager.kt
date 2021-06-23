@@ -2,13 +2,12 @@ package minerva.android.walletmanager.manager.wallet
 
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.Manager
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import java.math.BigDecimal
@@ -45,5 +44,4 @@ interface WalletConfigManager : Manager {
     val isBackupAllowed: Boolean
     val isSynced: Boolean
     var areMainNetworksEnabled: Boolean
-    var showMainNetworksWarning: Boolean
 }

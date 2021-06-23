@@ -46,11 +46,7 @@ class AccountManagerImpl(
     override val isProtectTransactionsEnabled: Boolean get() = localStorage.isProtectTransactionsEnabled
     override val masterSeed: MasterSeed get() = walletManager.masterSeed
     override val getTokenVisibilitySettings: TokenVisibilitySettings get() = localStorage.getTokenVisibilitySettings()
-    override var showMainNetworksWarning: Boolean
-        get() = walletManager.showMainNetworksWarning
-        set(value) {
-            walletManager.showMainNetworksWarning = value
-        }
+
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = Transformations.map(walletManager.walletConfigLiveData) { walletConfigEvent ->
             with(walletConfigEvent.peekContent()) {
@@ -63,6 +59,9 @@ class AccountManagerImpl(
 
     internal fun getActiveAccounts(walletConfig: WalletConfig): List<Account> =
         walletConfig.accounts.filter { account -> account.shouldShow && account.isTestNetwork == !areMainNetworksEnabled }
+
+    override fun areAllEmptyMainNetworkAccounts(): Boolean =
+        walletManager.getWalletConfig().accounts.find { account -> !account.isEmptyAccount && !account.isTestNetwork} == null
 
     override fun createRegularAccount(network: Network): Single<String> =
         walletManager.getWalletConfig().run {

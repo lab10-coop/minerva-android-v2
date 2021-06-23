@@ -28,6 +28,7 @@
     <dimen name="logo_size">72dp</dimen>
     <dimen name="icon_size">40dp</dimen>
     <dimen name="rounded_background_radius">16dp</dimen>
+    <dimen name="rounded_background_big">20dp</dimen>
     <dimen name="xsmall_logo_size">32dp</dimen>
     <dimen name="small_logo_size">36dp</dimen>
     <dimen name="dapp_logo_size">60dp</dimen>
@@ -54,6 +55,7 @@
     <dimen name="tab_height">30dp</dimen>
     <dimen name="elevation_small">3dp</dimen>
     <dimen name="elevation_xsmall">2dp</dimen>
+    <dimen name="no_elevation">0dp</dimen>
     <dimen name="divider_height">2dp</dimen>
     <dimen name="scrollbar_size">3dp</dimen>
     <dimen name="check_box_offset">6dp</dimen>
@@ -64,4 +66,6 @@
     <dimen name="app_version_bottom_bar_size">60dp</dimen>
     <dimen name="progress_dialog_size">200dp</dimen>
     <dimen name="spinner_item_height">60dp</dimen>
+    <dimen name="predefined_network_row_height">84dp</dimen>
+    <dimen name="divider_height_small">1dp</dimen>
 </resources>
