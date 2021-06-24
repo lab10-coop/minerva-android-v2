@@ -7,7 +7,6 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
-import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
@@ -22,6 +21,7 @@ import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
+import minerva.android.walletmanager.utils.logger.Logger
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test

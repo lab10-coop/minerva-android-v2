@@ -17,6 +17,7 @@ import minerva.android.walletmanager.database.entity.DappSessionEntity
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepositoryImpl
+import minerva.android.walletmanager.utils.logger.Logger
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -28,6 +29,7 @@ class WalletConnectRepositoryTest {
 
     private val client: WCClient = mock()
     private val signatureRepository: SignatureRepository = mock()
+    private val logger: Logger = mock()
     private lateinit var clientMap: ConcurrentHashMap<String, WCClient>
     private lateinit var repository: WalletConnectRepository
 
@@ -51,8 +53,9 @@ class WalletConnectRepositoryTest {
 
         clientMap = ConcurrentHashMap()
         clientMap["peerId"] = client
-        repository = WalletConnectRepositoryImpl(signatureRepository, database, client, clientMap).also {
-            it.currentEthMessage = WCEthereumSignMessage(type = WCEthereumSignMessage.WCSignType.MESSAGE, raw = listOf("test1", "test2"))
+        repository = WalletConnectRepositoryImpl(signatureRepository, database, logger, client, clientMap).also {
+            it.currentEthMessage =
+                WCEthereumSignMessage(type = WCEthereumSignMessage.WCSignType.MESSAGE, raw = listOf("test1", "test2"))
         }
     }
 

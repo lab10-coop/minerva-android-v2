@@ -27,10 +27,10 @@ import minerva.android.splash.SplashScreenViewModel
 import minerva.android.token.AddTokenViewModel
 import minerva.android.token.ManageTokensViewModel
 import minerva.android.token.ramp.RampViewModel
-import minerva.android.utils.logger.Logger
-import minerva.android.utils.logger.LoggerImpl
 import minerva.android.walletActions.WalletActionsViewModel
 import minerva.android.walletmanager.createWalletManagerModules
+import minerva.android.walletmanager.utils.logger.Logger
+import minerva.android.walletmanager.utils.logger.LoggerImpl
 import minerva.android.widget.clubCard.CacheStorage
 import minerva.android.widget.clubCard.CacheStorageImpl
 import minerva.android.widget.clubCard.ClubCardViewModel

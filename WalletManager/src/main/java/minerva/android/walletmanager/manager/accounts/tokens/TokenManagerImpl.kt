@@ -67,18 +67,18 @@ class TokenManagerImpl(
         }
 
     override fun saveTokens(
-        shouldBeSaved: Boolean,
+        shouldSafeNewTokens: Boolean,
         newAndLocalTokensPerChainIdMap: Map<Int, List<ERC20Token>>
     ): Single<Boolean> =
-        if (shouldBeSaved) {
+        if (shouldSafeNewTokens) {
             walletManager.getWalletConfig()
                 .run {
                     copy(version = updateVersion, erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap))
                         .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
-                        .toSingle { shouldBeSaved }
-                        .onErrorReturn { shouldBeSaved }
+                        .toSingle { shouldSafeNewTokens }
+                        .onErrorReturn { shouldSafeNewTokens }
                 }
-        } else Single.just(shouldBeSaved)
+        } else Single.just(shouldSafeNewTokens)
 
     override fun checkMissingTokensDetails(): Completable =
         cryptoApi.getLastCommitFromTokenList(url = ERC20_TOKEN_DATA_LAST_COMMIT)
@@ -161,9 +161,7 @@ class TokenManagerImpl(
         tokenDao.getTaggedTokens()
             .zipWith(Single.just(getAllTokensPerAccount(account)))
             .flatMap { (taggedTokens, tokensPerAccount) ->
-
                 fillActiveTokensWithTags(taggedTokens, account, tokensPerAccount)
-
                 val tokens = tokensPerAccount.mergeWithoutDuplicates(taggedTokens)
                     .filter { token -> token.chainId == account.chainId }
 
@@ -210,14 +208,6 @@ class TokenManagerImpl(
 
             }
     }
-
-    override fun sortTokensByChainId(tokenList: List<ERC20Token>): Map<Int, List<ERC20Token>> =
-        mutableMapOf<Int, MutableList<ERC20Token>>().apply {
-            tokenList.forEach { token ->
-                get(token.chainId)?.add(token)
-                    .orElse { put(token.chainId, mutableListOf(token)) }
-            }
-        }
 
     override fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>> = tokenDao.getTaggedTokensFlowable()
     override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
@@ -320,7 +310,12 @@ class TokenManagerImpl(
             }
 
     private fun getTokenTxApiURL(account: Account): String =
-        String.format(ETHEREUM_TOKENTX_REQUEST, getTokenExplorerURL(account.chainId), account.address, getAPIKey(account.chainId))
+        String.format(
+            ETHEREUM_TOKENTX_REQUEST,
+            getTokenExplorerURL(account.chainId),
+            account.address,
+            getAPIKey(account.chainId)
+        )
 
     @VisibleForTesting
     fun getTokensApiURL(account: Account): String =
@@ -369,20 +364,29 @@ class TokenManagerImpl(
             }
         }
 
+    override fun sortTokensByChainId(tokenList: List<ERC20Token>): Map<Int, List<ERC20Token>> =
+        mutableMapOf<Int, MutableList<ERC20Token>>().apply {
+            tokenList.forEach { token ->
+                get(token.chainId)?.add(token)
+                    .orElse { put(token.chainId, mutableListOf(token)) }
+            }
+        }
 
     override fun mergeWithLocalTokensList(newTokensPerChainIdMap: Map<Int, List<ERC20Token>>): Pair<Boolean, Map<Int, List<ERC20Token>>> =
         walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
-            var updateLogosURI = false
+            var shouldUpdateLogosURI = false
             val allLocalTokensMap = allLocalTokens.toMutableMap()
             for ((chainId, newTokens) in newTokensPerChainIdMap) {
                 val localChainTokens = allLocalTokensMap[chainId] ?: listOf()
                 mergeNewTokensWithLocal(localChainTokens, newTokens)
                     .let { tokenList ->
-                        updateLogosURI = localChainTokens.size != tokenList.size
+                        if (!shouldUpdateLogosURI) {
+                            shouldUpdateLogosURI = localChainTokens.size != tokenList.size
+                        }
                         allLocalTokensMap[chainId] = tokenList
                     }
             }
-            Pair(updateLogosURI, allLocalTokensMap)
+            Pair(shouldUpdateLogosURI, allLocalTokensMap)
         }
 
     private fun mergeNewTokensWithLocal(localChainTokens: List<ERC20Token>, newTokens: List<ERC20Token>) =
