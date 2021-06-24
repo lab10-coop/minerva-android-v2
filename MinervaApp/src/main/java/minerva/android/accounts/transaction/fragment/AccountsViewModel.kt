@@ -12,7 +12,6 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
@@ -36,6 +35,7 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
@@ -326,7 +326,9 @@ class AccountsViewModel(
     fun createNewAccount(chainId: Int) {
         launchDisposable {
             accountManager.createRegularAccount(NetworkManager.getNetwork(chainId))
-                .flatMapCompletable { walletActionsRepository.saveWalletActions(listOf(getWalletAction(WalletActionStatus.ADDED, it))) }
+                .flatMapCompletable {
+                    walletActionsRepository.saveWalletActions(listOf(getWalletAction(WalletActionStatus.ADDED, it)))
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _loadingLiveData.value = Event(true) }
