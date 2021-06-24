@@ -20,6 +20,7 @@ import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.EditAccountNameDialog
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
 import minerva.android.widget.dialog.SelectPredefinedAccountDialog
 import minerva.android.widget.state.AccountWidgetState
@@ -71,6 +72,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             getString(R.string.hide_account_dialog_title),
             getString(R.string.hide_account_dialog_message)
         ) { viewModel.hideAccount(account) }
+
+    override fun onEditName(account: Account) = EditAccountNameDialog(requireContext(), account, ::changeAccountName).show()
+
+    private fun changeAccountName(account: Account, newName: String) {
+        viewModel.changeAccountName(account, newName)
+    }
 
     override fun onShowAddress(accountIndex: Int) =
         interactor.showTransactionScreen(accountIndex, screenIndex = RECEIVE_TRANSACTION_INDEX)

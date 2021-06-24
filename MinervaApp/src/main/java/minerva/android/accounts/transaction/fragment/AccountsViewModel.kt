@@ -350,6 +350,20 @@ class AccountsViewModel(
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
 
+    fun changeAccountName(account: Account, newName: String) {
+        launchDisposable {
+            accountManager.changeAccountName(account, newName)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = {
+                        Timber.e(it)
+                        _errorLiveData.value = Event(BaseError)
+                    }
+                )
+        }
+    }
+
     companion object {
         private const val DAY: Long = 24L
     }

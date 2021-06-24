@@ -471,4 +471,16 @@ class AccountsViewModelTest : BaseViewModelTest() {
         verify(loadingObserver, times(4)).onChanged(loadingCaptor.capture())
         verify(errorObserver).onChanged(errorCaptor.capture())
     }
+
+    @Test
+    fun `change account name flow`() {
+        val error = Throwable("error")
+        whenever(accountManager.changeAccountName(any(), any())).thenReturn(Completable.complete(), Completable.error(error))
+        viewModel.run {
+            errorLiveData.observeForever(errorObserver)
+            changeAccountName(Account(1), "new name")
+            changeAccountName(Account(1), "new name")
+        }
+        verify(errorObserver).onChanged(errorCaptor.capture())
+    }
 }

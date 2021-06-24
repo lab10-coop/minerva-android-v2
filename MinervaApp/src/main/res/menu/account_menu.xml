@@ -41,6 +41,13 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/editName"
+        android:enabled="true"
+        android:icon="@drawable/ic_edit_name"
+        android:title="@string/edit_name"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/hide"
         android:enabled="true"
         android:icon="@drawable/ic_visibility_off_gray"

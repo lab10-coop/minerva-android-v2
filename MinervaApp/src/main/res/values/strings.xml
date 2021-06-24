@@ -334,6 +334,8 @@
     <string name="create_your_first_account_header">Create your \nfirst account!</string>
     <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
     <string name="skip">Skip</string>
+    <string name="edit_name">Edit Name</string>
+    <string name="account_name_label">Account name</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
