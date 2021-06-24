@@ -16,7 +16,7 @@ interface TokenManager {
      * return statement: Map<AccountPrivateKey, List<AccountToken>>
      */
     fun saveTokens(
-        shouldBeSaved: Boolean,
+        shouldSafeNewTokens: Boolean,
         newAndLocalTokensPerChainIdMap: Map<Int, List<ERC20Token>>
     ): Single<Boolean>
 

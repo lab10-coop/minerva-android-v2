@@ -121,6 +121,9 @@ dependencies {
         exclude group: 'org.iq80.leveldb', module: 'leveldb-api'
     }
 
+    implementation('com.google.firebase:firebase-crashlytics') {
+        transitive = true
+    }
     implementation firebaseDepenedencies.values()
     implementation crashlyticsDependencies.values()
     implementation qrDependency.values()

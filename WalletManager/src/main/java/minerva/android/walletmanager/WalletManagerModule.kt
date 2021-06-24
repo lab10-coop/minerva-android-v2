@@ -77,7 +77,7 @@ fun createWalletModules() = module {
     factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
     factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
-    single<WalletConnectRepository> { WalletConnectRepositoryImpl(get(), get()) }
+    single<WalletConnectRepository> { WalletConnectRepositoryImpl(get(), get(), get()) }
     single {
         Room.databaseBuilder(
             androidContext(),

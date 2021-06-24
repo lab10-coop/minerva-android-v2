@@ -9,7 +9,6 @@ import minerva.android.BaseViewModelTest
 import minerva.android.accounts.transaction.fragment.*
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.mock.*
-import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
@@ -24,6 +23,7 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before

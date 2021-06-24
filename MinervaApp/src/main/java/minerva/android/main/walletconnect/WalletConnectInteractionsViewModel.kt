@@ -18,7 +18,6 @@ import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.utils.logger.Logger
 import minerva.android.walletmanager.model.contract.ContractTransactions
 import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.TransferType
@@ -34,6 +33,7 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
+import minerva.android.walletmanager.utils.logger.Logger
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
