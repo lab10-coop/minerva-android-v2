@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.NO_DATA
-import minerva.android.walletmanager.BuildConfig
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -26,7 +25,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         set(value) {
             sharedPreferences.edit().putBoolean(ARE_MAIN_NETS_ENABLED, value).apply()
         }
-        get() = sharedPreferences.getBoolean(ARE_MAIN_NETS_ENABLED, BuildConfig.ARE_MAIN_NETS_ENABLED)
+        get() = sharedPreferences.getBoolean(ARE_MAIN_NETS_ENABLED, true)
 
     override fun saveIsMnemonicRemembered(isRemembered: Boolean) {
         sharedPreferences.edit().putBoolean(IS_MNEMONIC_REMEMBERED, isRemembered).apply()

@@ -179,15 +179,15 @@ class TransactionRepositoryImpl(
                                 .map { newTokensPerChainIdMap ->
                                     tokenManager.mergeWithLocalTokensList(newTokensPerChainIdMap)
                                 }
-                                .flatMap { (shouldBeUpdated, newAndLocalTokensPerChainIdMap) ->
-                                    tokenManager.updateTokenIcons(shouldBeUpdated, newAndLocalTokensPerChainIdMap)
+                                .flatMap { (shouldUpdateIcon, newAndLocalTokensPerChainIdMap) ->
+                                    tokenManager.updateTokenIcons(shouldUpdateIcon, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)
                                             Pair(false, newAndLocalTokensPerChainIdMap)
                                         }
                                 }
-                                .flatMap { (shouldBeSaved, newAndLocalTokensPerChainIdMap) ->
-                                    tokenManager.saveTokens(shouldBeSaved, newAndLocalTokensPerChainIdMap)
+                                .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
+                                    tokenManager.saveTokens(shouldSafeNewTokens, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)
                                             false

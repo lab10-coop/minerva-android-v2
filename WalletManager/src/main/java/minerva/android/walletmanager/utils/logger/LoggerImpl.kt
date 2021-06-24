@@ -1,4 +1,4 @@
-package minerva.android.utils.logger
+package minerva.android.walletmanager.utils.logger
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 
