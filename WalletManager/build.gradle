@@ -46,14 +46,6 @@ android {
     }
 
     flavorDimensions 'enviroment'
-    productFlavors {
-        staging {
-            buildConfigField "boolean", "ARE_MAIN_NETS_ENABLED", "false"
-        }
-        production {
-            buildConfigField "boolean", "ARE_MAIN_NETS_ENABLED", "true"
-        }
-    }
 }
 
 dependencies {
