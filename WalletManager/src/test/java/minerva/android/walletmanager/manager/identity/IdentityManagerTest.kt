@@ -9,16 +9,16 @@ import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
-import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.*
-import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.minervaprimitives.Identity
+import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.DataProvider
-import minerva.android.walletmanager.utils.DataProvider.walletConfig
+import minerva.android.walletmanager.utils.MockDataProvider
+import minerva.android.walletmanager.utils.MockDataProvider.walletConfig
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
@@ -59,7 +59,7 @@ class IdentityManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager saves new identity`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val newIdentity = Identity(0, "identityName1")
@@ -73,7 +73,7 @@ class IdentityManagerTest : RxTest() {
     @Test
     fun `Check that wallet manager doesn't save when server error`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(Throwable()))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         val newIdentity = Identity(0, "identityName")
@@ -84,9 +84,9 @@ class IdentityManagerTest : RxTest() {
 
     @Test
     fun `Check that wallet manager removes correct identity`() {
-        val identityToRemove = Identity(0, "identityName2", "", "privateKey", "address", DataProvider.data)
+        val identityToRemove = Identity(0, "identityName2", "", "privateKey", "address", MockDataProvider.data)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()
@@ -100,7 +100,7 @@ class IdentityManagerTest : RxTest() {
     fun `Check that wallet manager doesn't remove identity when server error`() {
         val identityToRemove = Identity(1)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(Throwable()))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()
@@ -116,12 +116,12 @@ class IdentityManagerTest : RxTest() {
         val identityToRemove = Identity(0)
         val walletConfig = WalletConfig(
             0, listOf(
-                Identity(0, "identityName1", "", "privateKey", "address", DataProvider.data),
-                Identity(1, "identityName1", "", "privateKey", "address", DataProvider.data, isDeleted = true)
+                Identity(0, "identityName1", "", "privateKey", "address", MockDataProvider.data),
+                Identity(1, "identityName1", "", "privateKey", "address", MockDataProvider.data, isDeleted = true)
             )
         )
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
         )
         doNothing().whenever(walletConfigManager).initWalletConfig()

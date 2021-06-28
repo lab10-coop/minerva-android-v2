@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.R
 import minerva.android.accounts.transaction.activity.TransactionActivity
@@ -35,7 +34,6 @@ import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
-import minerva.android.walletmanager.manager.accounts.AccountManagerImpl.Companion.NEW_ACCOUNT_TITLE_PATTERN
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
@@ -140,6 +138,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(state)
                 is ProgressBarState -> handleLoadingDialog(state)
                 is OnGeneralError -> handleWalletConnectError()
+                is OnWalletConnectTransactionError -> handleWalletConnectTransactionError(state)
                 is WrongTransactionValueState -> handleWrongTransactionValueState(state)
                 else -> dappDialog = null
             }
@@ -167,8 +166,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 showBindCredentialFlashbar(true, it)
             })
             updatePendingAccountLiveData.observe(this@MainActivity, EventObserver { updatePendingAccount(it) })
-            handleTimeoutOnPendingTransactionsLiveData.observe(this@MainActivity, EventObserver {
-                it.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
+            handleTimeoutOnPendingTransactionsLiveData.observe(this@MainActivity, EventObserver { pendingAccounts ->
+                pendingAccounts.forEach { pendingAccount -> handlePendingAccountsResults(pendingAccount) }
                 stopPendingAccounts()
             })
             updateTokensRateLiveData.observe(this@MainActivity, EventObserver {
@@ -177,18 +176,22 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }
     }
 
+    private fun handleWalletConnectTransactionError(state: OnWalletConnectTransactionError) {
+        dappDialog?.dismiss()
+        showFlashbar(
+            getString(R.string.transactions_error_title),
+            state.error.message ?: getString(R.string.transactions_error_message)
+        )
+    }
+
     private fun handleWrongTransactionValueState(state: WrongTransactionValueState) {
         val firebaseID: String = FirebaseInstanceId.getInstance().id
-        logToFirebase("Transaction with invalid value: ${state.transaction}, firebaseId: $firebaseID")
+        walletConnectViewModel.logToFirebase("Transaction with invalid value: ${state.transaction}, firebaseId: $firebaseID")
         AlertDialogHandler.showDialog(
             this,
             getString(R.string.error_header),
             getString(R.string.wrong_tx_value_error, firebaseID)
         )
-    }
-
-    private fun logToFirebase(message: String) {
-        FirebaseCrashlytics.getInstance().recordException(Throwable(message))
     }
 
     private fun showToast(message: String) {
@@ -217,8 +220,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         showFlashbar(getString(R.string.wallet_connect_title), getString(R.string.wc_connection_error_message))
     }
 
-    private fun handleLoadingDialog(it: ProgressBarState) {
-        if (it.show) {
+    private fun handleLoadingDialog(state: ProgressBarState) {
+        if (state.show) {
             loadingDialog = MinervaLoadingDialog(this).apply { show() }
         } else {
             loadingDialog?.dismiss()
@@ -230,7 +233,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             DappSendTransactionDialog(
                 this@MainActivity,
                 {
-                    if (viewModel.isProtectTransactionEabled()) getCurrentFragment()?.showBiometricPrompt(
+                    if (viewModel.isProtectTransactionEnabled()) getCurrentFragment()?.showBiometricPrompt(
                         ::sendTransaction,
                         ::rejectRequest
                     )
@@ -388,8 +391,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 viewModel.subscribeToExecutedTransactions(index)
                 (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
             } else {
-                getStringExtra(TRANSACTION_MESSAGE)?.let {
-                    showFlashbar(getString(R.string.transaction_success_title), it)
+                getStringExtra(TRANSACTION_MESSAGE)?.let { message ->
+                    showFlashbar(getString(R.string.transaction_success_title), message)
                 }
             }
         }
@@ -449,11 +452,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun startNewAccountActivity() {
         startNewAccountWrappedActivity(
             this,
-            String.format(
-                NEW_ACCOUNT_TITLE_PATTERN,
-                getString(R.string.new_account),
-                viewModel.getAccountIterator()
-            )
+            getString(R.string.new_account)
         )
     }
 

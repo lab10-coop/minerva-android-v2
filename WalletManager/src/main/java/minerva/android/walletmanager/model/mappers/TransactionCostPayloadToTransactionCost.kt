@@ -1,6 +1,6 @@
 package minerva.android.walletmanager.model.mappers
 
-import minerva.android.apiProvider.model.GasPrices
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.defs.TxType
@@ -13,21 +13,21 @@ object TransactionCostPayloadToTransactionCost {
 
     fun map(
         input: TransactionCostPayload,
-        gasPrices: GasPrices?,
+        transactionSpeed: TransactionSpeed?,
         chainId: Int,
         convert: (value: BigDecimal) -> BigDecimal
     ): TransactionCost =
-        gasPrices?.let {
+        transactionSpeed?.let {
             input.run {
                 TransactionCost(
                     gasPrice = gasPrice,
                     gasLimit = gasLimit,
                     cost = cost,
                     txSpeeds = listOf(
-                        TxSpeed(TxType.RAPID, convert(gasPrices.speed.rapid)),
-                        TxSpeed(TxType.FAST, convert(gasPrices.speed.fast)),
-                        TxSpeed(TxType.STANDARD, convert(gasPrices.speed.standard)),
-                        TxSpeed(TxType.SLOW, convert(gasPrices.speed.slow))
+                        TxSpeed(TxType.RAPID, convert(transactionSpeed.rapid)),
+                        TxSpeed(TxType.FAST, convert(transactionSpeed.fast)),
+                        TxSpeed(TxType.STANDARD, convert(transactionSpeed.standard)),
+                        TxSpeed(TxType.SLOW, convert(transactionSpeed.slow))
                     )
                 )
             }

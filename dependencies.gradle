@@ -156,7 +156,6 @@ ext {
 
     firebaseDepenedencies = [
             cloudMassaging: "com.google.firebase:firebase-messaging:$cloudMassagingVersion",
-            crashlytics   : "com.google.firebase:firebase-crashlytics",
             analytics     : "com.google.firebase:firebase-analytics"
     ]
 

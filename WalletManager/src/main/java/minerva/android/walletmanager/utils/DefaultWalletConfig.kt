@@ -8,20 +8,22 @@ import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigFields.Companion.DEFAULT_IDENTITY_NAME
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIFTH_DEFAULT_MAIN_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIFTH_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_MAIN_NETWORK_INDEX
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_IDENTITY_INDEX
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FOURTH_DEFAULT_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FOURTH_DEFAULT_MAIN_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FOURTH_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_DEFAULT_MAIN_NETWORK_INDEX
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_DEFAULT_NETWORK_INDEX
-import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.THIRD_DEFAULT_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.SECOND_DEFAULT_TEST_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.THIRD_DEFAULT_MAIN_NETWORK_INDEX
+import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.THIRD_DEFAULT_TEST_NETWORK_INDEX
 
 object DefaultWalletConfig {
 
     private val firstDefaultTestNetwork = NetworkManager.firstDefaultValueNetwork()
-    private val secondDefaultTestNetwork = NetworkManager.getNetworkByIndex(SECOND_DEFAULT_NETWORK_INDEX)
-    private val firstDefaultMainNetwork = NetworkManager.getNetworkByIndex(THIRD_DEFAULT_NETWORK_INDEX)
-    private val secondDefaultMainNetwork = NetworkManager.getNetworkByIndex(FOURTH_DEFAULT_NETWORK_INDEX)
+    private val secondDefaultTestNetwork = NetworkManager.getNetworkByIndex(SECOND_DEFAULT_TEST_NETWORK_INDEX)
 
     val create: WalletConfigPayload
         get() =
@@ -31,24 +33,44 @@ object DefaultWalletConfig {
                 _identityPayloads = listOf(IdentityPayload(FIRST_IDENTITY_INDEX, DEFAULT_IDENTITY_NAME)),
                 _accountPayloads = listOf(
                     AccountPayload(
-                        FIRST_DEFAULT_NETWORK_INDEX,
-                        CryptoUtils.prepareName(firstDefaultTestNetwork.name, FIRST_DEFAULT_NETWORK_INDEX),
-                        firstDefaultTestNetwork.chainId
+                        FIRST_DEFAULT_TEST_NETWORK_INDEX,
+                        CryptoUtils.prepareName(firstDefaultTestNetwork.name, FIRST_DEFAULT_TEST_NETWORK_INDEX),
+                        firstDefaultTestNetwork.chainId,
+                        _isTestNetwork = true
                     ),
                     AccountPayload(
-                        SECOND_DEFAULT_NETWORK_INDEX,
-                        CryptoUtils.prepareName(secondDefaultTestNetwork.name, SECOND_DEFAULT_NETWORK_INDEX),
-                        secondDefaultTestNetwork.chainId
+                        SECOND_DEFAULT_TEST_NETWORK_INDEX,
+                        CryptoUtils.prepareName(secondDefaultTestNetwork.name, SECOND_DEFAULT_TEST_NETWORK_INDEX),
+                        secondDefaultTestNetwork.chainId,
+                        _isTestNetwork = true
                     ),
                     AccountPayload(
-                        FIRST_DEFAULT_MAIN_NETWORK_INDEX,
-                        CryptoUtils.prepareName(firstDefaultMainNetwork.name, FIRST_DEFAULT_MAIN_NETWORK_INDEX),
-                        firstDefaultMainNetwork.chainId
+                        THIRD_DEFAULT_TEST_NETWORK_INDEX,
+                        _isTestNetwork = true
+
                     ),
                     AccountPayload(
-                        SECOND_DEFAULT_MAIN_NETWORK_INDEX,
-                        CryptoUtils.prepareName(secondDefaultMainNetwork.name, SECOND_DEFAULT_MAIN_NETWORK_INDEX),
-                        secondDefaultMainNetwork.chainId
+                        FOURTH_DEFAULT_TEST_NETWORK_INDEX,
+                        _isTestNetwork = true
+                    ),
+                    AccountPayload(
+                        FIFTH_DEFAULT_TEST_NETWORK_INDEX,
+                        _isTestNetwork = true
+                    ),
+                    AccountPayload(
+                        FIRST_DEFAULT_MAIN_NETWORK_INDEX
+                    ),
+                    AccountPayload(
+                        SECOND_DEFAULT_MAIN_NETWORK_INDEX
+                    ),
+                    AccountPayload(
+                        THIRD_DEFAULT_MAIN_NETWORK_INDEX
+                    ),
+                    AccountPayload(
+                        FOURTH_DEFAULT_MAIN_NETWORK_INDEX
+                    ),
+                    AccountPayload(
+                        FIFTH_DEFAULT_MAIN_NETWORK_INDEX
                     )
                 )
             )

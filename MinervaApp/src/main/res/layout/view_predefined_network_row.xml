@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/row"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/predefined_network_row_height"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:drawablePadding="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_medium"
+        android:gravity="center_vertical"
+        android:padding="@dimen/margin_small"
+        android:textColor="@color/darkGray"
+        android:textSize="@dimen/text_normal"
+        tools:drawableLeft="@drawable/ic_ethereum"
+        tools:text="#1 Ethereum" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center_vertical"
+        android:layout_marginEnd="@dimen/margin_xbig"
+        android:src="@drawable/ic_arrow_right"
+        tools:ignore="ContentDescription" />
+</FrameLayout>

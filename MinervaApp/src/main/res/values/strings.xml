@@ -73,6 +73,8 @@
     <string name="remove_account_dialog_message">Do you really want to remove this account?</string>
     <string name="remove_service_dialog_message">Do you really want to remove this service?</string>
     <string name="remove_safe_account_dialog_message">Remove %1$s from %2$s safe account?</string>
+    <string name="hide_account_dialog_message">After confirming this message, this account is hidden but can still be used to receive transfers.\n\nTo make the account visible again, you have to tap on ‘+’ in the Values screen, select it from your addresses list and add the account.</string>
+    <string name="hide_account_dialog_title">Hide account</string>
     <string name="remove_owner">Remove owner</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -118,6 +120,7 @@
     <string name="refresh_asset_balances_error">Error while refreshing assets balances</string>
     <string name="activities_error">Error while fetching activities</string>
     <string name="removed">Removed</string>
+    <string name="hidden">Hidden</string>
     <string name="changed">Changed</string>
     <string name="added">Added</string>
     <string name="received">Received</string>
@@ -306,7 +309,7 @@
     <string name="authentication_fail_message">There was unexpected authentication error. Please try again.</string>
     <string name="choose_your_crypto">Choose your crypto</string>
     <string name="continue_to_ramp">Continue to Ramp</string>
-    <string name="create_new_account">Create a new Account</string>
+    <string name="create_new_account">Add account</string>
     <string name="no_account_on_network">You don\'t have an Account on this Network. Please create a new Account.</string>
     <string name="currency">Currency</string>
     <string name="try_again">Try again</string>
@@ -316,10 +319,21 @@
     <string name="info_dapp_awaiting">Awaiting connection feedback from the DApp</string>
     <string name="authentication">Authentication</string>
     <string name="authentication_alert_title">You should enable an authentication method for your Minerva Wallet.</string>
-    <string name="authentication_alert_message">This is needed in order to recover identities and values in case something goes wrong with your phone.</string>
+    <string name="authentication_alert_message">This helps protect your money and assets from others accessing your unlocked phone.</string>
     <string name="message_sync_error">If this message is shown despite a good internet connection, contact our support on Telegram or Discord.</string>
     <string name="wrong_tx_value_error">The DApp has sent the wrong amount. It may help if you retry and initiate a new transaction. If you contact our support, please provide the following error-Id: %s</string>
     <string name="choose_your_account">Choose your Account</string>
+    <string name="select_address_header">Select Address</string>
+    <string name="add_account_info">You have to select a network and then choose the address you want to use.</string>
+    <string name="hide_now">Hide now</string>
+    <string name="hide">Hide</string>
+    <string name="no_addresses_left_info">You reached the maximum number of accounts</string>
+    <string name="ethereum_label">Ethereum</string>
+    <string name="polygon_label">Polygon (Matic)</string>
+    <string name="xdai_label">xDai Chain</string>
+    <string name="create_your_first_account_header">Create your \nfirst account!</string>
+    <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
+    <string name="skip">Skip</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
@@ -373,6 +387,13 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.4.0</item>
+        <item>* Full Polygon PoS chain and Mumbai testnet integration</item>
+        <item>* Buy crypto on Polygon via Ramp.Network</item>
+        <item>* Major revision of the account management for all networks</item>
+        <item>* Enable hiding of accounts</item>
+        <item>* Integrate token caching for faster balance updates</item>
+        <item>* WalletConnect stability improvements</item>
         <item>1.3.0</item>
         <item>* Security update for WalletConnect sessions</item>
         <item>* Improved opening and closing of accounts</item>

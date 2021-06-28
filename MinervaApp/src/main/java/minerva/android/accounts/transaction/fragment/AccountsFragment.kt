@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.button.MaterialButton
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
@@ -17,19 +18,22 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.base.BaseFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
-import minerva.android.widget.dialog.FundsAtRiskDialog
+import minerva.android.widget.dialog.SelectPredefinedAccountDialog
 import minerva.android.widget.state.AccountWidgetState
+import minerva.android.widget.state.AppUIState
 import minerva.android.wrapped.startManageTokensWrappedActivity
 import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
-    AccountsFragmentToAdapterListener {
+class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout), AccountsFragmentToAdapterListener {
 
     private val viewModel: AccountsViewModel by viewModel()
+    private val appUIState: AppUIState by inject()
     private val accountAdapter by lazy { AccountAdapter(this) }
 
     private lateinit var binding: RefreshableRecyclerViewLayoutBinding
@@ -48,7 +52,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         viewModel.apply {
             onResume()
             refreshAddCryptoButton()
-            if (arePendingAccountsEmpty()) accountAdapter.stopPendingTransactions()
+            if (arePendingAccountsEmpty) accountAdapter.stopPendingTransactions()
         }
     }
 
@@ -61,12 +65,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
-    override fun onAccountRemove(account: Account) =
-        AlertDialogHandler.showRemoveDialog(
+    override fun onAccountHide(account: Account) =
+        AlertDialogHandler.showHideAccountDialog(
             requireContext(),
-            account.name,
-            getString(R.string.remove_account_dialog_message)
-        ) { viewModel.removeAccount(account) }
+            getString(R.string.hide_account_dialog_title),
+            getString(R.string.hide_account_dialog_message)
+        ) { viewModel.hideAccount(account) }
 
     override fun onShowAddress(accountIndex: Int) =
         interactor.showTransactionScreen(accountIndex, screenIndex = RECEIVE_TRANSACTION_INDEX)
@@ -85,15 +89,17 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
 
     override fun onExportPrivateKey(account: Account) =
-        if (viewModel.isProtectKeysEnabled()) showBiometricPrompt({ showExportDialog(account) })
+        if (viewModel.isProtectKeysEnabled) showBiometricPrompt({ showExportDialog(account) })
         else showExportDialog(account)
 
     private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
 
     override fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
-        viewModel.updateAccountWidgetState(index, accountWidgetState)
+        appUIState.updateAccountWidgetState(index, accountWidgetState)
 
-    override fun getAccountWidgetState(index: Int): AccountWidgetState = viewModel.getAccountWidgetState(index)
+    override fun getAccountWidgetState(index: Int): AccountWidgetState = appUIState.getAccountWidgetState(index)
+
+    override fun getTokens(account: Account): List<ERC20Token> = viewModel.getTokens(account)
 
     fun setPendingAccount(index: Int, pending: Boolean) {
         accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)
@@ -101,29 +107,29 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     fun updateTokensRate() = viewModel.updateTokensRate()
 
-    fun refreshBalances() = viewModel.refreshBalances()
+    fun refreshBalances() = viewModel.refreshCoinBalances()
 
     private fun initFragment() {
         binding.apply {
             viewModel.apply {
                 syncError.isGone = isSynced
                 networksHeader.text = getHeader(areMainNetsEnabled)
-                addCryptoButton.apply {
-                    text = if (areMainNetsEnabled) {
-                        setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary))
-                        getString(R.string.buy_crypto)
-                    } else {
-                        setBackgroundColor(ContextCompat.getColor(context, R.color.artis))
-                        getString(R.string.add_tats)
-                    }
-                }
-                if (showMainNetworksWarning) {
-                    FundsAtRiskDialog(requireContext()).show()
-                    showMainNetworksWarning = false
+                addCryptoButton.apply { text = getBuyCryptoButtonText(this) }
+                if (isFirstLaunch) {
+                    SelectPredefinedAccountDialog(requireContext(), ::createAccountForSelectedNetwork).show()
                 }
             }
         }
     }
+
+    private fun getBuyCryptoButtonText(materialButton: MaterialButton): String =
+        if (viewModel.areMainNetsEnabled) {
+            materialButton.setBackgroundColor(ContextCompat.getColor(materialButton.context, R.color.colorPrimary))
+            getString(R.string.buy_crypto)
+        } else {
+            materialButton.setBackgroundColor(ContextCompat.getColor(materialButton.context, R.color.artis))
+            getString(R.string.add_tats)
+        }
 
     private fun setupRecycleView(view: View) {
         binding.apply {
@@ -136,7 +142,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 )
                 setOnRefreshListener {
                     with(viewModel) {
-                        refreshBalances()
+                        refreshCoinBalances()
                         refreshTokensBalances()
                         discoverNewTokens()
                     }
@@ -151,7 +157,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     private fun checkSwipe() = binding.swipeRefresh.run {
-        if (isRefreshing) isRefreshing = !viewModel.isRefreshDone()
+        if (isRefreshing) isRefreshing = !viewModel.isRefreshDone
     }
 
     private fun setupLiveData() {
@@ -159,7 +165,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             binding.apply {
                 accountsLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { accounts ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)
-                    accountAdapter.updateList(accounts, activeAccounts, viewModel.getFiatSymbol())
+                    accountAdapter.setAccounts(accounts, activeAccounts, fiatSymbol)
                     setTatsButtonListener()
                 })
 
@@ -184,14 +190,24 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                         showErrorFlashbar(R.string.error_header, R.string.unexpected_error)
                     }
                     BalanceIsNotEmptyAndHasMoreOwnersError ->
-                        showErrorFlashbar(R.string.cannot_remove_safe_account_title, R.string.cannot_remove_safe_account_message)
+                        showErrorFlashbar(
+                            R.string.cannot_remove_safe_account_title,
+                            R.string.cannot_remove_safe_account_message
+                        )
                     BalanceIsNotEmptyError ->
                         showErrorFlashbar(R.string.cannot_remove_account_title, R.string.cannot_remove_account_message)
-                    IsNotSafeAccountMasterOwnerError -> showErrorFlashbar(R.string.error_header, R.string.safe_account_removal_error)
+                    IsNotSafeAccountMasterOwnerError -> showErrorFlashbar(
+                        R.string.error_header,
+                        R.string.safe_account_removal_error
+                    )
                     is AutomaticBackupError -> handleAutomaticBackupError(errorState.throwable)
                     RefreshCoinBalancesError -> handleRefreshBalancesError(R.string.refresh_balances_error)
                     RefreshTokenBalancesError -> handleRefreshBalancesError(R.string.refresh_asset_balances_error)
-                    NoFunds ->  MinervaFlashbar.show(requireActivity(), getString(R.string.no_funds), getString(R.string.no_funds_message))
+                    NoFunds -> MinervaFlashbar.show(
+                        requireActivity(),
+                        getString(R.string.no_funds),
+                        getString(R.string.no_funds_message)
+                    )
                 }
             })
 
@@ -199,7 +215,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 interactor.shouldShowLoadingScreen(it)
             })
 
-            accountRemovedLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
+            accountHideLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
                 activity?.invalidateOptionsMenu()
                 refreshAddCryptoButton()
             })
@@ -227,11 +243,11 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     private fun setTatsButtonListener() =
-        binding.addCryptoButton.setOnClickListener {
+        binding.addCryptoButton.setOnClickListener { view ->
             viewModel.apply {
                 if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
                 else {
-                    it.setBackgroundColor(ContextCompat.getColor(it.context, R.color.inactiveButtonColor))
+                    view.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.inactiveButtonColor))
                     addAtsToken()
                 }
             }
@@ -245,8 +261,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
         MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))
 
+    private fun createAccountForSelectedNetwork(chainId: Int) {
+        viewModel.createNewAccount(chainId)
+    }
 
-    private inner class EventObserverWithSyncChecking<T>(private val onEventUnhandledContent: (T) -> Unit) : Observer<Event<T>> {
+    private inner class EventObserverWithSyncChecking<T>(private val onEventUnhandledContent: (T) -> Unit) :
+        Observer<Event<T>> {
         override fun onChanged(event: Event<T>?) {
             event?.getContentIfNotHandled()?.let {
                 binding.syncError.isGone = viewModel.isSynced

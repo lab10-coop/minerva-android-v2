@@ -9,7 +9,9 @@ import com.google.android.material.tabs.TabLayoutMediator
 import minerva.android.R
 import minerva.android.databinding.GasPriceSelectorBinding
 import minerva.android.extension.invisible
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.main.walletconnect.transaction.TransactionSpeedAdapter
+import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.transactions.TxSpeed
 
 class GasPriceSelector @JvmOverloads constructor(
@@ -40,6 +42,13 @@ class GasPriceSelector @JvmOverloads constructor(
                 }
                 recalculateTxCost(adapter.getCurrentTxSpeed(txSpeedViewPager.currentItem))
             }
+        }
+    }
+
+    fun setDefaultPosition(txType: TxType) = with(binding) {
+        val position = adapter.getPositionOfTxType(txType)
+        if (position != Int.InvalidIndex) {
+            txSpeedViewPager.currentItem = position
         }
     }
 

@@ -2,6 +2,7 @@ package minerva.android.walletmanager.manager.accounts.tokens
 
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
@@ -14,7 +15,6 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.list.mergeWithoutDuplicates
-import minerva.android.kotlinUtils.list.removeAll
 import minerva.android.walletmanager.BuildConfig.*
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.TokenDao
@@ -29,6 +29,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
@@ -44,7 +46,6 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
-import java.math.BigDecimal
 import java.util.*
 
 class TokenManagerImpl(
@@ -55,51 +56,47 @@ class TokenManagerImpl(
     private val rateStorage: RateStorage,
     database: MinervaDatabase
 ) : TokenManager {
-
     private val currentTimeProvider = CurrentTimeProviderImpl()
     private val tokenDao: TokenDao = database.tokenDao()
     private var currentFiat = String.Empty
 
-    override fun loadCurrentTokens(chainId: Int): List<ERC20Token> =
-        walletManager.getWalletConfig().run {
-            NetworkManager.getTokens(chainId).mergeWithoutDuplicates(erc20Tokens[chainId] ?: listOf())
-        }
-
     override fun saveToken(chainId: Int, token: ERC20Token): Completable =
         walletManager.getWalletConfig().run {
-            copy(version = updateVersion, erc20Tokens = updateTokens(chainId, token, erc20Tokens.toMutableMap())).let {
-                walletManager.updateWalletConfig(it)
-            }
+            copy(version = updateVersion, erc20Tokens = updateTokens(chainId, token, erc20Tokens.toMutableMap()))
+                .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
         }
 
-    override fun saveTokens(shouldBeSaved: Boolean, map: Map<Int, List<ERC20Token>>): Single<Boolean> =
-        if (shouldBeSaved) {
-            walletManager.getWalletConfig().run {
-                copy(version = updateVersion, erc20Tokens = updateTokens(map, erc20Tokens.toMutableMap())).let {
-                    walletManager.updateWalletConfig(it)
-                }.toSingle { shouldBeSaved }.onErrorReturn { shouldBeSaved }
-            }
-        } else Single.just(shouldBeSaved)
+    override fun saveTokens(
+        shouldSafeNewTokens: Boolean,
+        newAndLocalTokensPerChainIdMap: Map<Int, List<ERC20Token>>
+    ): Single<Boolean> =
+        if (shouldSafeNewTokens) {
+            walletManager.getWalletConfig()
+                .run {
+                    copy(version = updateVersion, erc20Tokens = updateTokens(newAndLocalTokensPerChainIdMap))
+                        .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
+                        .toSingle { shouldSafeNewTokens }
+                        .onErrorReturn { shouldSafeNewTokens }
+                }
+        } else Single.just(shouldSafeNewTokens)
 
     override fun checkMissingTokensDetails(): Completable =
         cryptoApi.getLastCommitFromTokenList(url = ERC20_TOKEN_DATA_LAST_COMMIT)
             .zipWith(tokenDao.getTaggedTokens())
             .filter { (commits, tokens) -> isNewCommit(commits) || tokens.isEmpty() }
             .flatMapSingle { getMissingTokensDetails() }
-            .flatMap { tokenDetailsMap ->
-                updateTokensIcons(tokenDetailsMap)
-                    .toSingleDefault(tokenDetailsMap.values.toList())
+            .map { tokenDetailsMap ->
+                tokenDao.updateTaggedTokens(TokenDetailsToERC20TokensMapper.map(filterTaggedTokens(tokenDetailsMap)))
+                tokenDetailsMap
             }
-            .map { tokenDetailsList ->
-                tokenDetailsList.filter {
-                    it.tags.isNotEmpty() && (it.tags.contains(TokenTag.SUPER_TOKEN.tag) ||
-                            it.tags.contains(TokenTag.WRAPPER_TOKEN.tag))
-                }
-            }
-            .map { taggedTokens ->
-                localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills())
-                tokenDao.updateTokens(TokenDetailsToERC20TokensMapper.map(taggedTokens))
-            }.ignoreElement()
+            .flatMapCompletable { tokenDetailsMap -> updateTokensIcons(tokenDetailsMap) }
+            .doOnComplete { localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills()) }
+
+    private fun filterTaggedTokens(tokenDetailsMap: Map<String, TokenDetails>): List<TokenDetails> =
+        tokenDetailsMap.values.toList().filter { tokenDetails ->
+            tokenDetails.tags.isNotEmpty() && (tokenDetails.tags.contains(TokenTag.SUPER_TOKEN.tag) ||
+                    tokenDetails.tags.contains(TokenTag.WRAPPER_TOKEN.tag))
+        }
 
     private fun isNewCommit(list: List<CommitElement>): Boolean =
         list[LAST_UPDATE_INDEX].lastCommitDate.let {
@@ -108,13 +105,17 @@ class TokenManagerImpl(
 
     private fun getMissingTokensDetails(): Single<Map<String, TokenDetails>> =
         cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL)
-            .map { tokens -> tokens.associateBy { generateTokenHash(it.chainId, it.address) } }
+            .map { tokens ->
+                tokens.associateBy { tokenDetails ->
+                    generateTokenHash(tokenDetails.chainId, tokenDetails.address)
+                }
+            }
 
     private fun updateTokensIcons(tokens: Map<String, TokenDetails>): Completable =
         walletManager.getWalletConfig().run {
-            erc20Tokens.forEach { (key, value) ->
-                value.forEach {
-                    it.logoURI = tokens[generateTokenHash(key, it.address)]?.logoURI
+            erc20Tokens.forEach { (id, tokenList) ->
+                tokenList.forEach { token ->
+                    token.logoURI = tokens[generateTokenHash(id, token.address)]?.logoURI
                 }
             }
             walletManager.updateWalletConfig(copy(version = updateVersion))
@@ -122,140 +123,131 @@ class TokenManagerImpl(
 
     override fun getTokenIconURL(chainId: Int, address: String): Single<String> =
         cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->
-            data.find { chainId == it.chainId && address == it.address }?.logoURI ?: String.Empty
+            data.find { tokenDetails ->
+                chainId == tokenDetails.chainId && address == tokenDetails.address
+            }?.logoURI ?: String.Empty
         }
 
-    //TODO add refreshing optimalization for tokens for current account, do: per account not per network
-    override fun refreshTokensBalances(account: Account): Single<Pair<String, List<AccountToken>>> =
-        tokenDao.getTaggedTokens()
-            .zipWith(Single.just(loadCurrentTokens(account.chainId)))
-            .flatMap { (taggedTokens, activeTokens) ->
-                val tokens = taggedTokens.mergeWithoutDuplicates(activeTokens)
-                    .filter { token -> token.chainId == account.chainId }
-                Observable.fromIterable(tokens)
-                    .flatMap {
-                        blockchainRepository.refreshTokenBalance(
-                            account.privateKey,
-                            account.chainId,
-                            it.address,
-                            account.address
-                        )
-                    }
-                    .map { (address, balance) ->
-                        tokens.find { it.address == address }?.let { erc20Token ->
-                            AccountToken(
-                                erc20Token,
-                                balance,
-                                rateStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address))
-                            )
-                        }.orElse { throw NullPointerException() }
-                    }
-                    .toList()
-                    .flatMap { accountTokens ->
-                        makeTaggedTokensActive(accountTokens.toList(), activeTokens, account.chainId)
-                    }
-                    .map { accountTokens -> Pair(account.privateKey, accountTokens) }
-            }
+    override fun getActiveTokensPerAccount(account: Account): List<ERC20Token> =
+        walletManager.getWalletConfig().erc20Tokens[account.chainId]
+            ?.filter { token -> token.accountAddress.equals(account.address, true) } ?: listOf()
 
-    private fun makeTaggedTokensActive(
-        accountTokens: List<AccountToken>,
-        activeTokens: List<ERC20Token>,
-        chainId: Int
-    ): Single<List<AccountToken>> {
-        val taggedActiveTokens = mutableListOf<ERC20Token>()
-        accountTokens
-            .filter { accountToken -> accountToken.token.tag != String.Empty && accountToken.balance > BigDecimal.ZERO }
-            .onEach { taggedActiveTokens.add(it.token) }
-
-        return if (shouldMakeTaggedTokensActive(taggedActiveTokens, activeTokens)) {
-            saveTokens(true, mapOf(chainId to taggedActiveTokens))
-                .ignoreElement()
-                .onErrorComplete()
-                .toSingleDefault(accountTokens)
-
+    private fun getAllTokensPerAccount(account: Account): List<ERC20Token> {
+        val localTokensPerNetwork = NetworkManager.getTokens(account.chainId)
+        val remoteTokensPerNetwork = walletManager.getWalletConfig().erc20Tokens[account.chainId] ?: listOf()
+        if (remoteTokensPerNetwork.isNotEmpty() && remoteTokensPerNetwork.all { token -> token.accountAddress.isEmpty() }) {
+            return remoteTokensPerNetwork
         } else {
-            Single.just(accountTokens)
+            return mutableListOf<ERC20Token>().apply {
+                addAll(remoteTokensPerNetwork.filter { remoteToken ->
+                    remoteToken.accountAddress.equals(account.address, true)
+                })
+                if (isEmpty() && localTokensPerNetwork.isNotEmpty()) {
+                    addAll(localTokensPerNetwork)
+                    return@apply
+                } else if (isEmpty()) {
+                    return@apply
+                }
+                localTokensPerNetwork.forEach { localToken ->
+                    if (find { remoteToken -> remoteToken.address.equals(localToken.address, true) } == null) {
+                        add(localToken)
+                    }
+                }
+            }
         }
     }
 
-    private fun shouldMakeTaggedTokensActive(
-        taggedActiveTokens: MutableList<ERC20Token>,
+    override fun refreshTokensBalances(account: Account): Single<Triple<Int, String, List<AccountToken>>> =
+        tokenDao.getTaggedTokens()
+            .zipWith(Single.just(getAllTokensPerAccount(account)))
+            .flatMap { (taggedTokens, tokensPerAccount) ->
+                fillActiveTokensWithTags(taggedTokens, account, tokensPerAccount)
+                val tokens = tokensPerAccount.mergeWithoutDuplicates(taggedTokens)
+                    .filter { token -> token.chainId == account.chainId }
+
+                Observable.fromIterable(tokens)
+                    .flatMap { token ->
+                        blockchainRepository.refreshTokenBalance(
+                            account.privateKey,
+                            account.chainId,
+                            token.address,
+                            account.address
+                        )
+                    }
+                    .map { (tokenAddress, balance) ->
+                        tokens.find { token -> token.address.equals(tokenAddress, true) }
+                            ?.let { erc20Token ->
+                                AccountToken(
+                                    erc20Token,
+                                    balance,
+                                    rateStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address))
+                                )
+                            }.orElse { throw NullPointerException() }
+                    }
+                    .toList()
+                    .map { accountTokens -> Triple(account.chainId, account.privateKey, accountTokens) }
+            }
+
+    private fun fillActiveTokensWithTags(
+        taggedTokens: List<ERC20Token>,
+        account: Account,
         activeTokens: List<ERC20Token>
-    ) = taggedActiveTokens.isNotEmpty() && !activeTokens.containsAll(taggedActiveTokens)
-
-    override fun sortTokensByChainId(tokenList: List<ERC20Token>): Map<Int, List<ERC20Token>> =
-        mutableMapOf<Int, MutableList<ERC20Token>>().apply {
-            tokenList.forEach { token ->
-                get(token.chainId)?.add(token)
-                    .orElse { put(token.chainId, mutableListOf(token)) }
-            }
-        }
-
-    override fun mergeWithLocalTokensList(map: Map<Int, List<ERC20Token>>): Pair<Boolean, Map<Int, List<ERC20Token>>> =
-        walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
-            var updateLogosURI = false
-            val updatedMap = allLocalTokens.toMutableMap()
-            for ((chainId, tokens) in map) {
-                val localChainTokens = updatedMap[chainId] ?: listOf()
-                localChainTokens.mergeWithoutDuplicates(tokens).let {
-                    updateLogosURI = localChainTokens.size != it.size
-                    updatedMap[chainId] = it
-                }
-            }
-            Pair(updateLogosURI, updatedMap)
-        }
-
-    override fun updateTokenIcons(
-        shouldBeUpdated: Boolean,
-        accountTokens: Map<Int, List<ERC20Token>>
-    ): Single<Pair<Boolean, Map<Int, List<ERC20Token>>>> =
-        if (shouldBeUpdated) {
-            getTokenIconsURL().map { logoUrls ->
-                accountTokens.values.forEach { accountTokens ->
-                    accountTokens.forEach {
-                        it.apply {
-                            logoUrls[generateTokenHash(chainId, address)]?.let { newLogoURI ->
-                                logoURI = newLogoURI
+    ) {
+        taggedTokens
+            .filter { taggedToken -> taggedToken.chainId == account.chainId }
+            .forEach { taggedToken ->
+                activeTokens.filter { activeToken -> activeToken.address.equals(taggedToken.address, true) }
+                    .forEach { activeToken ->
+                        with(activeToken) {
+                            if (tag.isEmpty()) {
+                                tag = taggedToken.tag
+                                accountAddress = String.Empty
                             }
                         }
                     }
-                }
-                Pair(true, accountTokens)
-            }
-        } else Single.just(Pair(false, accountTokens))
 
+            }
+    }
+
+    override fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>> = tokenDao.getTaggedTokensFlowable()
     override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
 
     private fun getTokenIconsURL(): Single<Map<String, String>> =
         cryptoApi.getTokenDetails(url = ERC20_TOKEN_DATA_URL).map { data ->
-            data.associate { generateTokenHash(it.chainId, it.address) to it.logoURI }
+            data.associate { tokenDetails ->
+                generateTokenHash(tokenDetails.chainId, tokenDetails.address) to tokenDetails.logoURI
+            }
         }
 
     override fun downloadTokensList(account: Account): Single<List<ERC20Token>> =
         when (account.chainId) {
-            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> getEthereumTokens(account)
-            else -> getNotEthereumTokens(account)
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, MATIC -> getTokensFromTx(account)
+            MUMBAI -> Single.just(emptyList()) // Networks without token explorer urls
+            else -> getTokensForAccount(account)
         }
 
     private fun prepareContractAddresses(tokens: List<ERC20Token>): String =
         tokens.joinToString(TOKEN_ADDRESS_SEPARATOR) { token -> token.address }
 
-    override fun getTokensRate(tokens: Map<Int, List<ERC20Token>>): Completable =
+    override fun getTokensRates(tokens: Map<Int, List<ERC20Token>>): Completable =
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
             with(localStorage.loadCurrentFiat()) {
                 if (currentFiat != this) rateStorage.clearRates()
                 tokens.forEach { (chainId, tokens) ->
                     val marketId = MarketUtils.getMarketId(chainId)
                     if (!rateStorage.areRatesSynced && marketId != String.Empty) {
-                        observables.add(updateAccountTokensRate(marketId, chainId, prepareContractAddresses(tokens)))
+                        observables.add(
+                            updateAccountTokensRate(
+                                marketId,
+                                chainId,
+                                prepareContractAddresses(tokens.distinctBy { it.address })
+                            )
+                        )
                     }
                 }
                 Observable.merge(observables)
-                    .doOnNext { rates ->
-                        rates.forEach { (fiatSymbol, rate) ->
-                            rateStorage.saveRate(fiatSymbol, rate)
-                        }
-                    }.toList()
+                    .doOnNext { rates -> rates.forEach { (fiatSymbol, rate) -> rateStorage.saveRate(fiatSymbol, rate) } }
+                    .toList()
                     .doOnSuccess {
                         currentFiat = this
                         rateStorage.areRatesSynced = true
@@ -295,32 +287,48 @@ class TokenManagerImpl(
         }
     }
 
-    private fun getNotEthereumTokens(account: Account): Single<List<ERC20Token>> =
+    private fun getTokensForAccount(account: Account): Single<List<ERC20Token>> =
         cryptoApi.getConnectedTokens(url = getTokensApiURL(account))
             .map { response ->
                 mutableListOf<ERC20Token>().apply {
                     response.tokens
                         .filter { tokenData -> tokenData.type == Tokens.ERC_20.type }
-                        .forEach { tokenData -> add(TokenDataToERC20Token.map(account.chainId, tokenData)) }
+                        .forEach { tokenData ->
+                            add(TokenDataToERC20Token.map(account.chainId, tokenData, account.address))
+                        }
                 }
             }
 
-    private fun getEthereumTokens(account: Account): Single<List<ERC20Token>> =
+    private fun getTokensFromTx(account: Account): Single<List<ERC20Token>> =
         cryptoApi.getTokenTx(url = getTokenTxApiURL(account))
             .map { response ->
                 mutableListOf<ERC20Token>().apply {
-                    response.tokens.forEach { tokenTx -> add(ERC20Token(account.chainId, tokenTx)) }
+                    response.tokens.forEach { tokenTx ->
+                        add(ERC20Token(account.chainId, tokenTx, account.address))
+                    }
                 }
             }
 
     private fun getTokenTxApiURL(account: Account): String =
-        String.format(ETHEREUM_TOKENTX_REQUEST, getTokenBalanceURL(account.chainId), account.address, ETHERSCAN_KEY)
+        String.format(
+            ETHEREUM_TOKENTX_REQUEST,
+            getTokenExplorerURL(account.chainId),
+            account.address,
+            getAPIKey(account.chainId)
+        )
 
     @VisibleForTesting
     fun getTokensApiURL(account: Account): String =
-        String.format(TOKEN_BALANCE_REQUEST, getTokenBalanceURL(account.chainId), account.address)
+        String.format(TOKEN_BALANCE_REQUEST, getTokenExplorerURL(account.chainId), account.address)
 
-    private fun getTokenBalanceURL(chainId: Int) =
+    private fun getAPIKey(chainId: Int) =
+        when (chainId) {
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHERSCAN_KEY
+            MATIC -> POLYGONSCAN_KEY
+            else -> throw NetworkNotFoundThrowable()
+        }
+
+    private fun getTokenExplorerURL(chainId: Int) =
         when (chainId) {
             ETH_MAIN -> ETHEREUM_MAINNET_TOKEN_BALANCE_URL
             ETH_RIN -> ETHEREUM_RINKEBY_TOKEN_BALANCE_URL
@@ -333,6 +341,7 @@ class TokenManagerImpl(
             POA_CORE -> POA_CORE_TOKEN_BALANCE_URL
             XDAI -> X_DAI_TOKEN_BALANCE_URL
             LUKSO_14 -> LUKSO_TOKEN_BALANCE_URL
+            MATIC -> POLYGON_TOKEN_BALANCE_URL
             else -> throw NetworkNotFoundThrowable()
         }
 
@@ -342,15 +351,84 @@ class TokenManagerImpl(
      */
 
     @VisibleForTesting
-    fun updateTokens(chainId: Int, token: ERC20Token, tokens: MutableMap<Int, List<ERC20Token>>) =
+    fun updateTokens(
+        chainId: Int,
+        newToken: ERC20Token,
+        tokens: MutableMap<Int, List<ERC20Token>>
+    ): Map<Int, List<ERC20Token>> =
         tokens.apply {
             (this[chainId] ?: listOf()).toMutableList().let { currentTokens ->
-                currentTokens.removeAll { it.address == token.address }
-                currentTokens.add(token)
+                currentTokens.add(newToken)
                 put(chainId, currentTokens)
                 rateStorage.areRatesSynced = false
             }
         }
+
+    override fun sortTokensByChainId(tokenList: List<ERC20Token>): Map<Int, List<ERC20Token>> =
+        mutableMapOf<Int, MutableList<ERC20Token>>().apply {
+            tokenList.forEach { token ->
+                get(token.chainId)?.add(token)
+                    .orElse { put(token.chainId, mutableListOf(token)) }
+            }
+        }
+
+    override fun mergeWithLocalTokensList(newTokensPerChainIdMap: Map<Int, List<ERC20Token>>): Pair<Boolean, Map<Int, List<ERC20Token>>> =
+        walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
+            var shouldUpdateLogosURI = false
+            val allLocalTokensMap = allLocalTokens.toMutableMap()
+            for ((chainId, newTokens) in newTokensPerChainIdMap) {
+                val localChainTokens = allLocalTokensMap[chainId] ?: listOf()
+                mergeNewTokensWithLocal(localChainTokens, newTokens)
+                    .let { tokenList ->
+                        if (!shouldUpdateLogosURI) {
+                            shouldUpdateLogosURI = localChainTokens.size != tokenList.size
+                        }
+                        allLocalTokensMap[chainId] = tokenList
+                    }
+            }
+            Pair(shouldUpdateLogosURI, allLocalTokensMap)
+        }
+
+    private fun mergeNewTokensWithLocal(localChainTokens: List<ERC20Token>, newTokens: List<ERC20Token>) =
+        mutableListOf<ERC20Token>().apply {
+            addAll(localChainTokens)
+            newTokens.forEach { newToken ->
+                if (isNewToken(newToken)) {
+                    add(newToken)
+                } else if (isNewTokenForAccount(newToken)) {
+                    add(newToken)
+                }
+            }
+        }
+
+    private fun MutableList<ERC20Token>.isNewTokenForAccount(newToken: ERC20Token) =
+        find { localToken ->
+            localToken.address.equals(newToken.address, true) &&
+                    localToken.accountAddress.equals(newToken.accountAddress, true)
+        } == null
+
+    private fun MutableList<ERC20Token>.isNewToken(newToken: ERC20Token) =
+        find { localToken -> localToken.address.equals(newToken.address, true) } == null
+
+
+    override fun updateTokenIcons(
+        shouldBeUpdated: Boolean,
+        tokensPerChainIdMap: Map<Int, List<ERC20Token>>
+    ): Single<Pair<Boolean, Map<Int, List<ERC20Token>>>> =
+        if (shouldBeUpdated) {
+            getTokenIconsURL().map { logoUrls ->
+                tokensPerChainIdMap.values.forEach { tokens ->
+                    tokens.forEach { token ->
+                        token.apply {
+                            logoUrls[generateTokenHash(chainId, address)]?.let { newLogoURI ->
+                                logoURI = newLogoURI
+                            }
+                        }
+                    }
+                }
+                Pair(true, tokensPerChainIdMap)
+            }
+        } else Single.just(Pair(false, tokensPerChainIdMap))
 
     /**
      *
@@ -359,19 +437,15 @@ class TokenManagerImpl(
      */
 
     @VisibleForTesting
-    fun updateTokens(map: Map<Int, List<ERC20Token>>, tokens: MutableMap<Int, List<ERC20Token>>) =
-        tokens.apply {
-            map.values.forEach { newTokens ->
-                newTokens.forEach { accountToken ->
-                    (this[accountToken.chainId] ?: listOf()).toMutableList().let { currentTokens ->
-                        currentTokens.removeAll { it.address == accountToken.address }
-                        currentTokens.add(accountToken)
-                        put(accountToken.chainId, currentTokens)
-                        rateStorage.areRatesSynced = false
-                    }
-                }
+    fun updateTokens(newTokensWithIcons: Map<Int, List<ERC20Token>>): Map<Int, List<ERC20Token>> {
+        return mutableMapOf<Int, List<ERC20Token>>().apply {
+            for ((chainId, tokens) in newTokensWithIcons) {
+                tokens.onEach { token -> token.accountAddress = token.accountAddress.toLowerCase(Locale.ROOT) }
+                this[chainId] = tokens.distinct()
             }
+            rateStorage.areRatesSynced = false
         }
+    }
 
     companion object {
         private const val LAST_UPDATE_INDEX = 0

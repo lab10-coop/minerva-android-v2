@@ -19,20 +19,19 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.token.TokenView
 
-class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup) : TokenView.TokenViewCallback,
-    RecyclerView.ViewHolder(view) {
-
+class AccountViewHolder(
+    private val view: View,
+    private val viewGroup: ViewGroup
+) : TokenView.TokenViewCallback, RecyclerView.ViewHolder(view) {
     private var binding = AccountListRowBinding.bind(view)
-
     private lateinit var listener: AccountsAdapterListener
     private var rawPosition: Int = Int.InvalidIndex
-
-    private val isWidgetOpen
-        get() = binding.tokensAndCollectibles.isVisible
+    private val isWidgetOpen get() = binding.tokensAndCollectibles.isVisible
 
     private val accountWidgetState: AccountWidgetState
         get() = listener.getAccountWidgetState(rawPosition)
@@ -41,19 +40,26 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
 
     override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
 
-    fun setData(index: Int, account: Account, fiatSymbol: String, listener: AccountsAdapterListener) {
-        rawPosition = index
+    fun setupListener(listener: AccountsAdapterListener) {
         this.listener = listener
+    }
+
+    fun setupAccountIndex(index: Int) {
+        rawPosition = index
+    }
+
+    fun setupAccountView(
+        account: Account,
+        fiatSymbol: String,
+        tokens: List<ERC20Token>
+    ) {
         view.apply {
             prepareView(account)
-            prepareToken(account, fiatSymbol)
+            prepareTokens(account, fiatSymbol, tokens)
             bindData(account, fiatSymbol)
             setOnMenuClickListener(rawPosition, account)
         }
-
-        binding.qrCode.setOnClickListener {
-            listener.onShowAddress(account)
-        }
+        binding.qrCode.setOnClickListener { listener.onShowAddress(account) }
     }
 
     private fun View.bindData(account: Account, fiatSymbol: String) {
@@ -126,17 +132,15 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
     private fun View.setOnItemClickListener() =
         setOnClickListener { if (isWidgetOpen) close() else open() }
 
-    private fun View.prepareToken(account: Account, fiatSymbol: String) {
+    private fun View.prepareTokens(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) {
         binding.apply {
             tokensAndCollectibles.prepareView(
-                account,
                 viewGroup,
                 this@AccountViewHolder,
-                accountWidgetState.isWidgetOpen,
-                fiatSymbol
+                accountWidgetState.isWidgetOpen
             )
-            //TODO change this statement when collectibles or main coin will be implemented
-            account.accountTokens.isNotEmpty().let { visible ->
+            tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens)
+            tokens.isNotEmpty().let { visible ->
                 if (visible) setOnItemClickListener()
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
@@ -183,7 +187,7 @@ class AccountViewHolder(private val view: View, private val viewGroup: ViewGroup
                 R.id.safeAccountSettings -> listener.onShowSafeAccountSettings(account, index)
                 R.id.addSafeAccount -> listener.onCreateSafeAccountClicked(account)
                 R.id.exportPrivateKey -> listener.onExportPrivateKey(account)
-                R.id.remove -> listener.onAccountRemoved(index)
+                R.id.hide -> listener.onAccountHide(index)
             }
             true
         }

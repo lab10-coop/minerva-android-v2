@@ -26,16 +26,25 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/crypto_recycler"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/tokens_view_pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_xsmall"
-        android:layout_marginRight="@dimen/margin_xsmall"
-        android:overScrollMode="never"
-        android:scrollbars="none"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/tab_layout"
         app:layout_constraintHeight_max="256dp"
         app:layout_constraintTop_toBottomOf="@id/networks_header" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_gravity="bottom"
+        android:background="@color/lightGray"
+        app:layout_constraintTop_toBottomOf="@+id/tokens_view_pager"
+        app:tabBackground="@drawable/tab_selector"
+        app:tabGravity="center"
+        app:tabIndicatorHeight="0dp"
+        app:tabMode="fixed" />
 
     <TextView
         android:id="@+id/accounts_header"
@@ -52,7 +61,7 @@
         android:textColor="@color/networksTypeHeader"
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/crypto_recycler" />
+        app:layout_constraintTop_toBottomOf="@id/tab_layout" />
 
     <LinearLayout
         android:id="@+id/no_account_layout"

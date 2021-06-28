@@ -8,11 +8,14 @@ import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.transaction.fragment.*
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.mock.*
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Balance
@@ -20,10 +23,8 @@ import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
-import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
-import minerva.android.widget.state.AccountWidgetState
-import minerva.android.widget.state.AppUIState
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
@@ -39,12 +40,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
-    private val localStorage: LocalStorage = mock()
-    private val appUIState: AppUIState = mock()
+    private val logger: Logger = mock()
     private lateinit var viewModel: AccountsViewModel
 
-    private val balanceObserver: Observer<HashMap<String, Balance>> = mock()
-    private val balanceCaptor: KArgumentCaptor<HashMap<String, Balance>> = argumentCaptor()
+    private val balanceObserver: Observer<List<CoinBalance>> = mock()
+    private val balanceCaptor: KArgumentCaptor<List<CoinBalance>> = argumentCaptor()
 
     private val tokensBalanceObserver: Observer<Unit> = mock()
     private val tokensBalanceCaptor: KArgumentCaptor<Unit> = argumentCaptor()
@@ -58,6 +58,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val accountRemoveObserver: Observer<Event<Unit>> = mock()
     private val accountRemoveCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
 
+    private val loadingObserver: Observer<Event<Boolean>> = mock()
+    private val loadingCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
+
     @Before
     fun initViewModel() {
         viewModel = AccountsViewModel(
@@ -66,14 +69,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
             smartContractRepository,
             transactionRepository,
             walletConnectRepository,
-            appUIState
+            logger
         )
     }
 
     @Test
     fun `are pending transactions empty`() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(emptyList())
-        val result = viewModel.arePendingAccountsEmpty()
+        val result = viewModel.arePendingAccountsEmpty
         assertEquals(true, result)
     }
 
@@ -90,14 +93,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
-        whenever(transactionRepository.refreshBalances()).thenReturn(
-            Single.just(hashMapOf(Pair("123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
+        whenever(transactionRepository.refreshCoinBalances()).thenReturn(
+            Single.just(listOf(CoinBalance(1, "123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
         )
         viewModel.balanceLiveData.observeForever(balanceObserver)
-        viewModel.refreshBalances()
+        viewModel.refreshCoinBalances()
         balanceCaptor.run {
             verify(balanceObserver).onChanged(capture())
-            firstValue["123"]!!.cryptoBalance == BigDecimal.ONE
+            firstValue.find { balance -> balance.chainId == 1 && balance.address == "123" }?.balance?.cryptoBalance == BigDecimal.ONE
         }
     }
 
@@ -108,9 +111,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
-        whenever(transactionRepository.refreshBalances()).thenReturn(Single.error(error))
+        whenever(transactionRepository.refreshCoinBalances()).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.refreshBalances()
+        viewModel.refreshCoinBalances()
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
             firstValue.peekContent() == RefreshCoinBalancesError
@@ -118,43 +121,79 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `get tokens balance success test`() {
-        whenever(transactionRepository.refreshTokensBalances()).thenReturn(
-            Single.just(
-                mapOf(
-                    Pair(
-                        "test",
-                        listOf(AccountToken(ERC20Token(1, "name")))
-                    )
-                )
-            )
-        )
-        viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
+    fun `get tokens balance success when tagged tokens are not empty test`() {
+        whenever(transactionRepository.getTaggedTokensUpdate())
+            .thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
+        whenever(transactionRepository.refreshTokensBalances())
+            .thenReturn(Single.just(listOf(TokenBalance(1, "test", listOf(AccountToken(ERC20Token(1, "name")))))))
         viewModel.refreshTokensBalances()
+        viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
         tokensBalanceCaptor.run {
             verify(tokensBalanceObserver).onChanged(capture())
         }
     }
 
     @Test
-    fun `get tokens list test`() {
-        whenever(transactionRepository.refreshTokensList()).thenReturn(
-            Single.just(true),
-            Single.just(false),
-            Single.error(Throwable("Refresh tokens list error"))
-        )
-        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.just(mapOf()))
+    fun `get tokens balance success when tagged tokens are empty test`() {
+        whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(Flowable.just(emptyList()))
+        whenever(transactionRepository.refreshTokensBalances())
+            .thenReturn(Single.just(listOf(TokenBalance(1, "test", listOf(AccountToken(ERC20Token(1, "name")))))))
+        viewModel.refreshTokensBalances()
+        viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
+        tokensBalanceCaptor.run {
+            verifyNoMoreInteractions(tokensBalanceObserver)
+        }
+    }
 
-        viewModel.discoverNewTokens()
-        viewModel.discoverNewTokens()
-        viewModel.discoverNewTokens()
-        verify(transactionRepository, times(1)).refreshTokensBalances()
+    @Test
+    fun `get tokens balance success when tagged tokens are not empty and check tokens visibility test`() {
+        whenever(transactionRepository.getTaggedTokensUpdate())
+            .thenReturn(
+                Flowable.just(listOf(ERC20Token(1, "name1", address = "tokenAddress1", tag = "tag")))
+            )
+        whenever(transactionRepository.refreshTokensBalances())
+            .thenReturn(
+                Single.just(
+                    listOf(
+                        TokenBalance(1, "privateKey1", accountTokensForPrivateKey1),
+                        TokenBalance(2, "privateKey2", accountTokensForPrivateKey2)
+                    )
+                )
+            )
+
+        whenever(accountManager.activeAccounts).thenReturn(
+            listOf(
+                Account(
+                    1,
+                    privateKey = "privateKey1",
+                    address = "address1"
+                ),
+                Account(
+                    2,
+                    privateKey = "privateKey2",
+                    address = "address2"
+                )
+            )
+        )
+        viewModel.tokenVisibilitySettings = mock()
+        with(viewModel.tokenVisibilitySettings) {
+            whenever(getTokenVisibility("address1", "tokenAddress1")).thenReturn(true)
+            whenever(getTokenVisibility("address1", "tokenAddress2")).thenReturn(false)
+            whenever(getTokenVisibility("address2", "tokenAddress3")).thenReturn(true)
+            whenever(getTokenVisibility("address2", "tokenAddress4")).thenReturn(true)
+        }
+        viewModel.refreshTokensBalances()
+        viewModel.tokenBalanceLiveData.observeForever(tokensBalanceObserver)
+        tokensBalanceCaptor.run {
+            verify(tokensBalanceObserver).onChanged(capture())
+        }
     }
 
     @Test
     fun `get tokens balance error test`() {
         val error = Throwable()
         whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.error(error))
+        whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.refreshTokensBalances()
         errorCaptor.run {
@@ -164,16 +203,35 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
+    fun `get tokens list test`() {
+        whenever(transactionRepository.discoverNewTokens()).thenReturn(
+            Single.just(true),
+            Single.just(false),
+            Single.error(Throwable("Refresh tokens list error"))
+        )
+        whenever(transactionRepository.getTaggedTokensUpdate())
+            .thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
+        whenever(walletConnectRepository.getSessionsFlowable())
+            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+        whenever(transactionRepository.refreshTokensBalances()).thenReturn(Single.just(emptyList()))
+
+        viewModel.discoverNewTokens()
+        viewModel.discoverNewTokens()
+        viewModel.discoverNewTokens()
+        verify(transactionRepository, times(1)).refreshTokensBalances()
+    }
+
+    @Test
     fun `Remove value error`() {
         val error = Throwable("error")
-        whenever(accountManager.removeAccount(any())).thenReturn(Completable.error(error))
+        whenever(accountManager.hideAccount(any())).thenReturn(Completable.error(error))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
             Completable.error(error)
         )
         whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.removeAccount(Account(1, "test"))
+        viewModel.hideAccount(Account(1, "test"))
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -181,12 +239,12 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `Remove value success`() {
-        whenever(accountManager.removeAccount(any())).thenReturn(Completable.complete())
+        whenever(accountManager.hideAccount(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
-        viewModel.accountRemovedLiveData.observeForever(accountRemoveObserver)
-        viewModel.removeAccount(Account(1, "test"))
+        viewModel.accountHideLiveData.observeForever(accountRemoveObserver)
+        viewModel.hideAccount(Account(1, "test"))
         accountRemoveCaptor.run {
             verify(accountRemoveObserver).onChanged(capture())
         }
@@ -229,9 +287,16 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.complete())
         whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
         whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
+        whenever(accountManager.activeAccounts)
+            .thenReturn(
+                listOf(
+                    Account(
+                        1, chainId =
+                        NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
+                    )
+                )
+            )
         viewModel.apply {
-            activeAccounts =
-                listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
             addAtsToken()
         }
         verify(accountManager, times(1)).saveFreeATSTimestamp()
@@ -243,9 +308,16 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getFreeATS(any())).thenReturn(Completable.error(Throwable("Some error")))
         whenever(accountManager.getLastFreeATSTimestamp()).thenReturn(0L)
         whenever(accountManager.currentTimeMills()).thenReturn(TimeUnit.HOURS.toMillis(24L) + 3003)
+        whenever(accountManager.activeAccounts)
+            .thenReturn(
+                listOf(
+                    Account(
+                        1, chainId =
+                        NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
+                    )
+                )
+            )
         viewModel.apply {
-            activeAccounts =
-                listOf(Account(1, chainId = NetworkManager.networks[DefaultWalletConfigIndexes.FIRST_DEFAULT_NETWORK_INDEX].chainId))
             errorLiveData.observeForever(errorObserver)
             addAtsToken()
         }
@@ -331,32 +403,72 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `Check getting and updating Account UI State calls`() {
-        doNothing().whenever(appUIState).updateAccountWidgetState(any(), any())
-        whenever(appUIState.getAccountWidgetState(any())).thenReturn(AccountWidgetState())
-
-        viewModel.updateAccountWidgetState(3, AccountWidgetState())
-        viewModel.getAccountWidgetState(3)
-
-        verify(appUIState, times(1)).updateAccountWidgetState(any(), any())
-        verify(appUIState, times(1)).getAccountWidgetState(any())
+    fun `get cached tokens when no account tokens test`() {
+        whenever(accountManager.cachedTokens).thenReturn(
+            mapOf(
+                1 to listOf(
+                    ERC20Token(
+                        1,
+                        address = "tokenAddress",
+                        name = "cachedToken",
+                        accountAddress = "address1"
+                    )
+                )
+            )
+        )
+        viewModel.tokenVisibilitySettings = mock()
+        with(viewModel.tokenVisibilitySettings) {
+            whenever(getTokenVisibility("address1", "tokenAddress")).thenReturn(true)
+        }
+        val account = Account(1, address = "address1", chainId = 1)
+        val result = viewModel.getTokens(account)
+        result[0].name shouldBeEqualTo "cachedToken"
     }
 
-    private val accounts = listOf(
-        Account(1, chainId = 2),
-        Account(2, chainId = 1),
-        Account(3, chainId = 1),
-        Account(4, chainId = 3)
-    )
+    @Test
+    fun `get account tokens test`() {
+        whenever(accountManager.cachedTokens).thenReturn(
+            mapOf(
+                1 to listOf(
+                    ERC20Token(
+                        1,
+                        name = "cachedToken",
+                        accountAddress = "address1"
+                    )
+                )
+            )
+        )
+        val account = Account(
+            1,
+            address = "address1",
+            chainId = 1,
+            accountTokens = listOf(
+                AccountToken(
+                    tokenPrice = 2.0,
+                    token = ERC20Token(1, name = "cachedToken1", accountAddress = "address1")
+                ),
+                AccountToken(tokenPrice = 3.0, token = ERC20Token(1, name = "cachedToken2", accountAddress = "address1"))
+            )
+        )
+        val result = viewModel.getTokens(account)
+        result[0].name shouldBeEqualTo "cachedToken1"
+        result[1].name shouldBeEqualTo "cachedToken2"
+    }
 
-    private val accountsWithoutPrimaryAccount = listOf(
-        Account(1, chainId = 2),
-        Account(4, chainId = 3)
-    )
+    @Test
+    fun `check creating new account flow`() {
+        val error = Throwable("error")
+        NetworkManager.initialize(listOf(Network(chainId = 3, httpRpc = "some_rpc")))
+        whenever(accountManager.createRegularAccount(any())).thenReturn(Single.just("Cookie Account"), Single.error(error))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        viewModel.run {
+            loadingLiveData.observeForever(loadingObserver)
+            errorLiveData.observeForever(errorObserver)
+            createNewAccount(3)
+            createNewAccount(3)
+        }
 
-    private val networks = listOf(
-        Network(httpRpc = "some_rpc", chainId = 1),
-        Network(httpRpc = "some_rpc", chainId = 2),
-        Network(httpRpc = "some_rpc", chainId = 3)
-    )
+        verify(loadingObserver, times(4)).onChanged(loadingCaptor.capture())
+        verify(errorObserver).onChanged(errorCaptor.capture())
+    }
 }

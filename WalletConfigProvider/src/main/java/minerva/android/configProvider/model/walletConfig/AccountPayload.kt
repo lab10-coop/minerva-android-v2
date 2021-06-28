@@ -19,7 +19,11 @@ data class AccountPayload(
     @SerializedName("smartContractAddress")
     private val _contractAddress: String? = null,
     @SerializedName("bindedOwner")
-    private val _bindedOwner: String? = String.Empty
+    private val _bindedOwner: String? = String.Empty,
+    @SerializedName("isTestNetwork")
+    private val _isTestNetwork: Boolean? = false,
+    @SerializedName("isHide")
+    private val _isHide: Boolean? = false
 ) {
     val index: Int
         get() = _index ?: Int.InvalidId
@@ -35,4 +39,8 @@ data class AccountPayload(
         get() = _contractAddress ?: String.Empty
     val bindedOwner: String
         get() = _bindedOwner ?: String.Empty
+    val isTestNetwork: Boolean
+        get() = _isTestNetwork ?: false
+    val isHide: Boolean
+        get() = _isHide ?: false
 }

@@ -2,17 +2,16 @@ package minerva.android.walletmanager.manager.accounts
 
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.walletmanager.utils.RxTest
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.*
+import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -21,7 +20,8 @@ import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.DataProvider
+import minerva.android.walletmanager.utils.MockDataProvider
+import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -47,7 +47,7 @@ class AccountManagerTest : RxTest() {
     @Before
     override fun setupRxSchedulers() {
         super.setupRxSchedulers()
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(DataProvider.walletConfig)
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
     }
 
@@ -55,7 +55,7 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager creates new regular account`() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1")))
 
         val test = manager.createRegularAccount(Network()).test()
@@ -72,11 +72,11 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager don't save new regular account`() {
         val error = Throwable()
         val network = Network(chainId = 4, httpRpc = "some")
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn(String.Empty)
         whenever(
-            cryptographyRepository.calculateDerivedKeys(
+            cryptographyRepository.calculateDerivedKeysSingle(
                 any(),
                 any(),
                 any(),
@@ -96,10 +96,94 @@ class AccountManagerTest : RxTest() {
     }
 
     @Test
+    fun `Check that wallet manager creates empty account`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+            .thenReturn(DerivedKeys(0, "publicKey", "privateKey", "address1"))
+
+        val test = manager.createEmptyAccounts(2).test()
+        test.assertNoErrors()
+        manager.loadAccount(1).apply {
+            id shouldBeEqualTo 2
+            publicKey shouldBeEqualTo "publicKey2"
+            privateKey shouldBeEqualTo "privateKey2"
+            address shouldBeEqualTo "address1"
+        }
+        manager.loadAccount(2).apply {
+            id shouldBeEqualTo 3
+            publicKey shouldBeEqualTo "publicKey3"
+            privateKey shouldBeEqualTo "privateKey3"
+            address shouldBeEqualTo "address1"
+        }
+    }
+
+    @Test
+    fun `Check that wallet manager connect network to empty account`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(
+                    1,
+                    chainId = Int.InvalidValue,
+                    publicKey = "publicKey",
+                    privateKey = "privateKey",
+                    address = "address1",
+                    _isTestNetwork = true
+                )
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+
+        manager.connectAccountToNetwork(1, Network(chainId = 4, name = "Ethereum"))
+        verify(walletConfigManager).updateWalletConfig(
+            WalletConfig(
+                2, accounts = listOf(
+                    Account(
+                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
+                        chainId = 4, isHide = false, _isTestNetwork = true
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Check that wallet unhide account`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(
+                    1, chainId = 4, name = "#2 Ethereum", publicKey = "publicKey", privateKey = "privateKey",
+                    address = "address1", _isTestNetwork = true, isHide = true
+                )
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+
+        manager.connectAccountToNetwork(1, Network(chainId = 4, name = "Ethereum"))
+        verify(walletConfigManager).updateWalletConfig(
+            WalletConfig(
+                2, accounts = listOf(
+                    Account(
+                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
+                        chainId = 4, isHide = false, _isTestNetwork = true
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun `Check that wallet manager removes correct empty value`() {
         val account = Account(2)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any())).thenReturn(
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
         )
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
@@ -115,9 +199,10 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `Check that wallet manager removes correct not empty value`() {
+        NetworkManager.initialize(MockDataProvider.networks)
         val account = Account(1)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey1", "privateKey1", "address1")))
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
@@ -138,7 +223,7 @@ class AccountManagerTest : RxTest() {
         val account2 = Account(6)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(
-            cryptographyRepository.calculateDerivedKeys(
+            cryptographyRepository.calculateDerivedKeysSingle(
                 any(),
                 any(),
                 any(),
@@ -168,7 +253,7 @@ class AccountManagerTest : RxTest() {
         val account = Account(5)
         val account2 = Account(6)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1")))
         whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
@@ -221,8 +306,8 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `create safe account success`() {
-        NetworkManager.initialize(DataProvider.networks)
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
@@ -234,7 +319,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `create safe account error`() {
         val error = Throwable()
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
         whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
@@ -274,7 +359,7 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `get token visibility test`() {
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
-        manager.getTokenVisibilitySettings()
+        manager.getTokenVisibilitySettings
         verify(localStorage).getTokenVisibilitySettings()
     }
 
@@ -312,7 +397,7 @@ class AccountManagerTest : RxTest() {
     fun `get all accounts test`() {
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, accounts = listOf(Account(1))))
         val result = manager.getAllAccounts()
-        assertEquals(result?.get(0)?.id, 1)
+        assertEquals(result.get(0).id, 1)
     }
 
     @Test
@@ -342,6 +427,26 @@ class AccountManagerTest : RxTest() {
     }
 
     @Test
+    fun `checking returning all accounts for selected networks type`() {
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(1, _isTestNetwork = true),
+                Account(2, _isTestNetwork = false),
+                Account(3, _isTestNetwork = false),
+                Account(4, _isTestNetwork = true),
+                Account(5, _isTestNetwork = true)
+            )
+        )
+
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        val accounts = manager.getAllAccountsForSelectedNetworksType()
+        accounts.size shouldBeEqualTo 3
+        accounts[0].id shouldBeEqualTo 1
+        accounts[1].id shouldBeEqualTo 4
+        accounts[2].id shouldBeEqualTo 5
+    }
+
+    @Test
     fun `Checking clearing current fiats values for main coin and tokens`() {
         val walletConfig = WalletConfig(
             1, accounts = listOf(
@@ -364,12 +469,143 @@ class AccountManagerTest : RxTest() {
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         walletConfigManager.getWalletConfig().accounts[0].apply {
             fiatBalance shouldBeEqualTo 13f.toBigDecimal()
-            
+
         }
 
         walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo 13f.toBigDecimal()
         walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo 13f.toBigDecimal()
         manager.clearFiat()
         walletConfigManager.getWalletConfig().accounts[0].fiatBalance shouldBeEqualTo Double.InvalidValue.toBigDecimal()
+    }
+
+    @Test
+    fun `test filtering cached tokens`() {
+        manager.activeAccounts = listOf(
+            Account(2, chainId = 1, address = "account1"),
+            Account(3, chainId = 1, address = "account2")
+        )
+        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(mock())
+        with(localStorage.getTokenVisibilitySettings()) {
+            whenever(getTokenVisibility("account1", "tokenAddress1")).thenReturn(true)
+            whenever(getTokenVisibility("account1", "tokenAddress2")).thenReturn(true)
+            whenever(getTokenVisibility("account1", "tokenAddress3")).thenReturn(false)
+            whenever(getTokenVisibility("account1", "tokenAddress4")).thenReturn(true)
+
+            whenever(getTokenVisibility("account2", "tokenAddress2")).thenReturn(false)
+            whenever(getTokenVisibility("account2", "tokenAddress5")).thenReturn(true)
+        }
+        val result: Map<Int, List<ERC20Token>> = manager.filterCachedTokens(tokenMap)
+        result[1]?.size shouldBeEqualTo 4
+    }
+
+    private val tokenMap = mapOf(
+        1 to mutableListOf(
+            ERC20Token(1, "token1", address = "tokenAddress1", accountAddress = "account1"),
+            ERC20Token(1, "token2", address = "tokenAddress2", accountAddress = "account1"),
+            ERC20Token(1, "token3", address = "tokenAddress3", accountAddress = "account1"),
+            ERC20Token(1, "token4", address = "tokenAddress4", accountAddress = "account1"),
+
+            ERC20Token(1, "token5", address = "tokenAddress2", accountAddress = "account2"),
+            ERC20Token(1, "token6", address = "tokenAddress5", accountAddress = "account2")
+        )
+    )
+
+    @Test
+    fun `get active accounts on test networks test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(false)
+        val config = WalletConfig(1, accounts = listOf(Account(1, chainId = ChainId.ATS_TAU)))
+        val result = manager.getActiveAccounts(config)
+        result.size shouldBeEqualTo 1
+    }
+
+    @Test
+    fun `get active accounts on main networks test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(walletConfigManager.areMainNetworksEnabled).thenReturn(true)
+        val config = WalletConfig(1, accounts = listOf(Account(1, chainId = 1)))
+        val result = manager.getActiveAccounts(config)
+        result.size shouldBeEqualTo 1
+    }
+
+    @Test
+    fun `get all free addresses for network test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false),
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = true),
+                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
+                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
+                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(4, chainId = ChainId.ATS_SIGMA, address = "address4", _isTestNetwork = true, isHide = true, isDeleted = true),
+                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        val result = manager.getAllFreeAccountForNetwork(ChainId.ATS_TAU)
+        result[0].first shouldBeEqualTo 1
+        result[0].second shouldBeEqualTo "address1"
+        result[1].first shouldBeEqualTo 3
+        result[1].second shouldBeEqualTo "address3"
+        result[2].first shouldBeEqualTo 5
+        result[2].second shouldBeEqualTo "address5"
+        result[3].first shouldBeEqualTo 6
+        result[3].second shouldBeEqualTo "address6"
+    }
+
+    @Test
+    fun `get number of accounts to use test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false),
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = true),
+                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
+                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
+                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(4, chainId = ChainId.ATS_SIGMA, address = "address4", _isTestNetwork = true, isHide = true, isDeleted = true),
+                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.getNumberOfAccountsToUse() shouldBeEqualTo 6
+    }
+
+    @Test
+    fun `all main network accounts are not empty test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, chainId = ChainId.ETH_MAIN, _isTestNetwork = false),
+                Account(1, _isTestNetwork = true),
+                Account(1, _isTestNetwork = false),
+                Account(4, _isTestNetwork = false)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.areAllEmptyMainNetworkAccounts() shouldBeEqualTo false
+    }
+
+    @Test
+    fun `all main network accounts are empty test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, _isTestNetwork = true),
+                Account(1, _isTestNetwork = true),
+                Account(2, _isTestNetwork = true),
+                Account(3, _isTestNetwork = true),
+                Account(1, _isTestNetwork = false),
+                Account(4, _isTestNetwork = false),
+                Account(5, _isTestNetwork = false)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.areAllEmptyMainNetworkAccounts() shouldBeEqualTo true
     }
 }

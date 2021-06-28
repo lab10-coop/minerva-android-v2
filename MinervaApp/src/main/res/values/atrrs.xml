@@ -5,4 +5,9 @@
         <attr name="loadingImage" format="integer" />
         <attr name="video" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="PredefinedNetworkView">
+        <attr name="icon" format="reference" />
+        <attr name="name" format="reference" />
+    </declare-styleable>
 </resources>

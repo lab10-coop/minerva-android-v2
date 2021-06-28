@@ -25,6 +25,11 @@ interface CryptoApi {
     ): Single<GasPrices>
 
     @GET
+    fun getGasPriceForMatic(
+        @Url url: String
+    ): Single<GasPricesMatic>
+
+    @GET
     fun getTokenDetails(@Url url: String): Single<List<TokenDetails>>
 
     @GET

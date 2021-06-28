@@ -26,9 +26,9 @@ import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
-import minerva.android.walletmanager.utils.DataProvider
-import minerva.android.walletmanager.utils.DataProvider.localWalletConfigPayload
-import minerva.android.walletmanager.utils.DataProvider.onlineWalletConfigResponse
+import minerva.android.walletmanager.utils.MockDataProvider
+import minerva.android.walletmanager.utils.MockDataProvider.localWalletConfigPayload
+import minerva.android.walletmanager.utils.MockDataProvider.onlineWalletConfigResponse
 import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
@@ -82,15 +82,15 @@ class WalletConfigManagerTest {
         whenever(localWalletConfigProvider.getWalletConfig()).thenReturn(Single.just(localWalletConfigPayload))
         whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.just(onlineWalletConfigResponse))
         whenever(minervaApi.saveWalletActions(any(), any())).doReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(0), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), eq(0), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(1), any(), any()))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), eq(1), any(), any()))
             .thenReturn(Single.just(DerivedKeys(1, "publicKey", "privateKey", "address")))
-        whenever(cryptographyRepository.calculateDerivedKeys(any(), eq(2), any(), com.nhaarman.mockitokotlin2.any()))
+        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), eq(2), any(), any()))
             .thenReturn(Single.just(DerivedKeys(2, "publicKey", "privateKey", "address")))
         whenever(localStorage.getProfileImage(any())).thenReturn(String.Empty)
         whenever(localStorage.isBackupAllowed).thenReturn(true)
-        NetworkManager.initialize(DataProvider.networks)
+        NetworkManager.initialize(MockDataProvider.networks)
     }
 
     @Test

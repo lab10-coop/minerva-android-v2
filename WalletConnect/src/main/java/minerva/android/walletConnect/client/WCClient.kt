@@ -109,7 +109,6 @@ class WCClient(
         if (session != null) {
             killSession()
         }
-
         resetState()
         onFailure(t, peerId)
         peerId = String.Empty

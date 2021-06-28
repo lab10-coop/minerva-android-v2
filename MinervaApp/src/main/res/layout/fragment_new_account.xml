@@ -1,52 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="@dimen/margin_small"
-    android:clipToPadding="false"
-    tools:context=".accounts.create.NewAccountFragment">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/card"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/rounded_white_background"
-        android:elevation="@dimen/cardview_default_elevation"
-        android:orientation="vertical"
-        android:layout_marginBottom="@dimen/bottom_button_margin"
-        android:padding="@dimen/margin_normal"
-        tools:ignore="PrivateResource">
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/create_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/networks_header"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/rubik_medium"
-            android:text="@string/test_networks"
-            android:textAllCaps="true"
-            android:textColor="@color/colorPrimary" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/networks"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="vertical"
-            android:scrollbarThumbVertical="@drawable/scrollbar_thumb"
-            android:scrollbarSize="@dimen/scrollbar_size"
-            android:layout_marginTop="@dimen/margin_normal" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="@dimen/margin_normal"
+            tools:context=".accounts.create.NewAccountFragment">
 
-    <ProgressBar
-        android:id="@+id/add_account_progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginRight="@dimen/margin_normal"
-        android:layout_marginBottom="@dimen/margin_normal"
-        android:gravity="center"
-        android:visibility="gone" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_large"
+                android:fontFamily="@font/rubik_regular"
+                android:text="@string/add_account_info"
+                android:textColor="@color/darkGray70"
+                android:textSize="@dimen/text_normal" />
+
+            <TextView
+                android:id="@+id/networks_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/rubik_medium"
+                android:padding="@dimen/margin_normal"
+                android:text="@string/test_networks"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimary" />
+
+            <Spinner
+                android:id="@+id/network_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_small"
+                android:background="@drawable/rounded_spinner_background"
+                android:elevation="@dimen/cardview_default_elevation"
+                android:spinnerMode="dropdown" />
+
+            <LinearLayout
+                android:id="@+id/card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_large"
+                android:background="@drawable/rounded_white_background"
+                android:elevation="@dimen/cardview_default_elevation"
+                android:orientation="vertical"
+                android:padding="@dimen/margin_normal"
+                tools:ignore="PrivateResource">
+
+                <TextView
+                    android:id="@+id/address_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/rubik_medium"
+                    android:text="@string/select_address_header"
+                    android:textAllCaps="true"
+                    android:textColor="@color/colorPrimary" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/address_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_normal"
+                    android:scrollbarSize="@dimen/scrollbar_size"
+                    android:scrollbarThumbVertical="@drawable/scrollbar_thumb"
+                    android:scrollbars="vertical" />
+
+                <include
+                    android:id="@+id/no_addresses_info"
+                    layout="@layout/no_addresses_view"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/add_account_progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="@dimen/margin_normal"
+                android:layout_marginRight="@dimen/margin_normal"
+                android:layout_marginBottom="@dimen/margin_normal"
+                android:gravity="center"
+                android:visibility="gone" />
+
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/create_button"
@@ -54,5 +105,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:text="@string/add_new_account" />
-</FrameLayout>
+        android:text="@string/add_new_account"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

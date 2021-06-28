@@ -24,6 +24,7 @@ class AddTokenViewModel(
 ) : BaseViewModel() {
 
     private var privateKey = String.Empty
+    private var accountAddress = String.Empty
     private var chainId = Int.InvalidId
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
@@ -38,9 +39,10 @@ class AddTokenViewModel(
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
-    fun initViewModel(privateKey: String, chainId: Int) {
+    fun setAccountData(privateKey: String, chainId: Int, accountAddress: String) {
         this.privateKey = privateKey
         this.chainId = chainId
+        this.accountAddress = accountAddress
     }
 
     fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address)
@@ -51,7 +53,7 @@ class AddTokenViewModel(
                 .zipWith(tokenManager.getTokenIconURL(chainId, address),
                     BiFunction<ERC20Token, String, ERC20Token> { token, logoURI ->
                         token.apply {
-                            this.logoURI = if(logoURI != String.Empty) logoURI
+                            this.logoURI = if (logoURI != String.Empty) logoURI
                             else null
                         }
                     }
@@ -73,7 +75,7 @@ class AddTokenViewModel(
 
     fun addToken(token: ERC20Token) =
         launchDisposable {
-            tokenManager.saveToken(chainId, token)
+            tokenManager.saveToken(chainId, token.copy(accountAddress = accountAddress))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(

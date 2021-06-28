@@ -33,13 +33,15 @@ import minerva.android.walletmanager.repository.transaction.TransactionRepositor
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
+import minerva.android.walletmanager.utils.logger.Logger
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 
 class WalletConnectInteractionsViewModel(
     private val transactionRepository: TransactionRepository,
-    private val walletConnectRepository: WalletConnectRepository
+    private val walletConnectRepository: WalletConnectRepository,
+    private val logger: Logger
 ) : BaseViewModel() {
 
     internal var currentDappSession: DappSession? = null
@@ -103,16 +105,18 @@ class WalletConnectInteractionsViewModel(
                         OnEthSignRequest(status.message, session)
                     }
             is OnDisconnect -> Single.just(OnDisconnected())
-            is OnEthSendTransaction ->
+            is OnEthSendTransaction -> {
+                logToFirebase("Transaction payload from WalletConnect: ${status.transaction}")
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }
+            }
             is OnFailure -> Single.just(if (status.sessionName.isNotEmpty()) OnGeneralError(status.error) else DefaultRequest)
             else -> Single.just(DefaultRequest)
         }
 
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
-        transactionRepository.getAccountByAddress(session.address)?.let { account -> currentAccount = account }
+        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let { account -> currentAccount = account }
         val txValue: BigDecimal = getTransactionValue(status.transaction.value)
         if (txValue == WRONG_TX_VALUE) {
             rejectRequest()
@@ -133,6 +137,7 @@ class WalletConnectInteractionsViewModel(
                             txCost = transactionCost.copy(fiatCost = getFiatTransactionCost(transactionCost)),
                             transactionType = transferType
                         )
+                        logToFirebase("Shown transaction: $currentTransaction")
                         OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
                     }
             }
@@ -295,6 +300,11 @@ class WalletConnectInteractionsViewModel(
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map { txReceipt ->
+                    logToFirebase(
+                        "Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt," +
+                                "token transaction: ${currentTransaction.tokenTransaction}"
+                    )
+                    weiCoinTransactionValue = NO_COIN_TX_VALUE
                     currentDappSession?.let { session ->
                         walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
                     }
@@ -312,7 +322,7 @@ class WalletConnectInteractionsViewModel(
                     onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
                     onError = { error ->
                         Timber.e(error)
-                        _walletConnectStatus.value = OnGeneralError(error)
+                        _walletConnectStatus.value = OnWalletConnectTransactionError(error)
                     }
                 )
         }
@@ -341,7 +351,7 @@ class WalletConnectInteractionsViewModel(
 
     fun acceptRequest() {
         currentDappSession?.let { session ->
-            transactionRepository.getAccountByAddress(session.address)?.let {
+            transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
                 walletConnectRepository.approveRequest(session.peerId, it.privateKey)
             }
         }
@@ -356,6 +366,10 @@ class WalletConnectInteractionsViewModel(
 
     fun isBalanceTooLow(balance: BigDecimal, cost: BigDecimal): Boolean =
         balance < cost || balance == BigDecimal.ZERO
+
+    fun logToFirebase(message: String) {
+        logger.logToFirebase(message)
+    }
 
     companion object {
         private const val UNLIMITED = "115792089237316195423570985008687907853269984665640564039457584007913129639935"

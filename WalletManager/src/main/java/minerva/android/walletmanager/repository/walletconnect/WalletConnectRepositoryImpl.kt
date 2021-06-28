@@ -22,6 +22,7 @@ import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
+import minerva.android.walletmanager.utils.logger.Logger
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit
 class WalletConnectRepositoryImpl(
     private val signatureRepository: SignatureRepository,
     minervaDatabase: MinervaDatabase,
+    private val logger: Logger,
     private var wcClient: WCClient = WCClient(),
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
@@ -43,7 +45,6 @@ class WalletConnectRepositoryImpl(
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?, dapps: List<DappSession>) {
         wcClient = WCClient()
         with(wcClient) {
-
             onWCOpen = { peerId ->
                 clientMap[peerId] = this
                 if (pingDisposable == null) {
@@ -93,6 +94,7 @@ class WalletConnectRepositoryImpl(
             }
 
             onEthSendTransaction = { id, transaction, peerId ->
+                logger.logToFirebase("WalletConnect transaction: peerId: $peerId; transaction: $transaction")
                 currentRequestId = id
                 status.onNext(
                     OnEthSendTransaction(
@@ -234,7 +236,7 @@ class WalletConnectRepositoryImpl(
     override fun killAllAccountSessions(address: String): Completable =
         getSessions()
             .map { sessions ->
-                sessions.filter { it.address == address }.forEach { session ->
+                sessions.filter { it.address.equals(address, true) }.forEach { session ->
                     with(clientMap) {
                         this[session.peerId]?.killSession()
                         remove(session.peerId)

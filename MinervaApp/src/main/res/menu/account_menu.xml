@@ -41,9 +41,9 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/remove"
+        android:id="@+id/hide"
         android:enabled="true"
-        android:icon="@drawable/ic_delete"
-        android:title="@string/remove"
+        android:icon="@drawable/ic_visibility_off_gray"
+        android:title="@string/hide"
         app:showAsAction="ifRoom" />
 </menu>

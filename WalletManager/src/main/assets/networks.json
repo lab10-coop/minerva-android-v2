@@ -42,8 +42,8 @@
     "name": "xDai Chain",
     "token": "xDAI",
     "isSafeAccountAvailable": "false",
-    "httpRpc": "https://rpc.xdaichain.com",
-    "wsRpc": "wss://rpc.xdaichain.com/wss",
+    "httpRpc": "https://xdai-rpc.lab10.io",
+    "wsRpc": "wss://xdai-rpc.lab10.io/wss",
     "gasPriceOracle": "",
     "gasPrice": "1000000000",
     "tokens": [],
@@ -141,5 +141,31 @@
     "color": "#5c34a2",
     "testNet": false,
     "chainId": 99
+  },
+  {
+    "name": "Matic PoS Chain",
+    "token": "MATIC",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://matic-rpc.lab10.io",
+    "wsRpc": "",
+    "gasPriceOracle": "https://gasstation-mainnet.matic.network",
+    "gasPrice": "10000000000",
+    "tokens": [],
+    "color": "#8247e5",
+    "testNet": false,
+    "chainId": 137
+  },
+  {
+    "name": "Mumbai",
+    "token": "tMATIC",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://matic-mumbai.chainstacklabs.com",
+    "wsRpc": "",
+    "gasPriceOracle": "https://gasstation-mumbai.matic.today",
+    "gasPrice": "10000000000",
+    "tokens": [],
+    "color": "#8247e5",
+    "testNet": true,
+    "chainId": 80001
   }
 ]

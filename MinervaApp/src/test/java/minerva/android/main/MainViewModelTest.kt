@@ -269,7 +269,7 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `Check getting token rate success`() {
-        whenever(transactionRepository.getTokensRate()).thenReturn(Completable.complete())
+        whenever(transactionRepository.getTokensRates()).thenReturn(Completable.complete())
         viewModel.run {
             updateTokensRateLiveData.observeForever(updateTokensRateObserver)
             getTokensRate()

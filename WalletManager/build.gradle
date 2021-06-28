@@ -32,6 +32,8 @@ android {
         buildConfigField "String", "POA_CORE_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/core/"'
         buildConfigField "String", "X_DAI_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/xdai/"'
         buildConfigField "String", "LUKSO_TOKEN_BALANCE_URL", '"https://blockscout.com/lukso/l14/"'
+        buildConfigField "String", "POLYGON_TOKEN_BALANCE_URL", '"https://api.polygonscan.com/"'
+        buildConfigField "String", "POLYGONSCAN_KEY", System.env.POLYGONSCAN_KEY ?: localProperty("polygonscan.key")
         buildConfigField "String", "ETHERSCAN_KEY", System.env.ETHERSCAN_KEY ?: localProperty("etherscan.key")
         buildConfigField "String", "INFURA_API_KEY", System.env.INFURA_API_KEY ?: localProperty("infura.key")
     }
@@ -44,18 +46,11 @@ android {
     }
 
     flavorDimensions 'enviroment'
-    productFlavors {
-        staging {
-            buildConfigField "boolean", "ARE_MAIN_NETS_ENABLED", "false"
-        }
-        production {
-            buildConfigField "boolean", "ARE_MAIN_NETS_ENABLED", "true"
-        }
-    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation platform('com.google.firebase:firebase-bom:25.12.0')
     implementation project(':CryptographyProvider')
     implementation project(':KotlinUtils')
     implementation project(':WalletConfigProvider')
@@ -63,6 +58,9 @@ dependencies {
     implementation project(':BlockchainProvider')
     implementation project(':WalletConnect')
 
+    implementation('com.google.firebase:firebase-crashlytics') {
+        transitive = true
+    }
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
     implementation coreDependencies.values()
