@@ -29,6 +29,8 @@ class TransactionSpeedAdapter : RecyclerView.Adapter<TransactionSpeedViewHolder>
     }
 
     fun getCurrentTxSpeed(position: Int): TxSpeed = speeds[position]
+
+    fun getPositionOfTxType(txType: TxType): Int = speeds.indexOfFirst { txSpeed -> txSpeed.type == txType }
 }
 
 class TransactionSpeedViewHolder(private val binding: TransactionSpeedItemBinding) :

@@ -11,7 +11,9 @@ import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.defs.TransferType
+import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
@@ -61,6 +63,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         }
         editTxTime.setOnClickListener { showGasPriceDialog() }
         gasPriceSelector.setAdapter(transaction.txCost.txSpeeds) { setTxCost(recalculateTxCost(it.value), account) }
+        gasPriceSelector.setDefaultPosition(getDefaultTxType(account?.chainId))
         setTxCost(transaction, account)
         transaction.fiatValue?.let { value.text = it }
         closeCustomTime.setOnClickListener {
@@ -74,6 +77,11 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             handleBalanceTooLow(account, isBalanceTooLow, transaction)
         }
     }
+
+
+    private fun getDefaultTxType(chainId: Int?) = if (isMaticNetwork(chainId)) TxType.STANDARD else TxType.FAST
+
+    private fun isMaticNetwork(chainId: Int?) = chainId == ChainId.MATIC
 
     private fun prepareTransactions(transaction: WalletConnectTransaction, account: Account?) = with(binding) {
         when (transaction.transactionType) {
