@@ -387,6 +387,13 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.4.0</item>
+        <item>* Full Polygon PoS chain and Mumbai testnet integration</item>
+        <item>* Buy crypto on Polygon via Ramp.Network</item>
+        <item>* Major revision of the account management for all networks</item>
+        <item>* Enable hiding of accounts</item>
+        <item>* Integrate token caching for faster balance updates</item>
+        <item>* WalletConnect stability improvements</item>
         <item>1.3.0</item>
         <item>* Security update for WalletConnect sessions</item>
         <item>* Improved opening and closing of accounts</item>
