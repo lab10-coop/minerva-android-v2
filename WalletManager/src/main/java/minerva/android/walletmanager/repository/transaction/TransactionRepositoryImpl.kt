@@ -261,15 +261,21 @@ class TransactionRepositoryImpl(
         when {
             shouldGetGasPriceFromApi(chainId) && isMaticNetwork(chainId) -> {
                 cryptoApi.getGasPriceForMatic(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
-                    .flatMap { gasPricesMatic -> getTxCosts(txCostPayload, gasPricesMatic.toTransactionSpeed()) }
-                    .onErrorResumeNext { getTxCosts(txCostPayload, null) }
+                    .flatMap { gasPricesMatic ->
+                        getTxCosts(
+                            txCostPayload,
+                            gasPricesMatic.toTransactionSpeed(),
+                            gasPricesMatic.toTransactionSpeed().standard
+                        )
+                    }
+                    .onErrorResumeNext { getTxCosts(txCostPayload, null, null) }
             }
             shouldGetGasPriceFromApi(chainId) -> {
                 cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
-                    .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice.speed) }
-                    .onErrorResumeNext { getTxCosts(txCostPayload, null) }
+                    .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice.speed, gasPrice.speed.fast) }
+                    .onErrorResumeNext { getTxCosts(txCostPayload, null, null) }
             }
-            else -> getTxCosts(txCostPayload, null)
+            else -> getTxCosts(txCostPayload, null, null)
         }
     }
 
@@ -327,8 +333,8 @@ class TransactionRepositoryImpl(
 
     private fun isMaticNetwork(chainId: Int) = chainId == MATIC || chainId == MUMBAI
 
-    private fun getTxCosts(payload: TxCostPayload, speed: TransactionSpeed?): Single<TransactionCost> =
-        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), speed?.fast)
+    private fun getTxCosts(payload: TxCostPayload, speed: TransactionSpeed?, defaultGasPrice: BigDecimal?): Single<TransactionCost> =
+        blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), defaultGasPrice)
             .map { txCost ->
                 TransactionCostPayloadToTransactionCost.map(txCost, speed, payload.chainId) {
                     blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
