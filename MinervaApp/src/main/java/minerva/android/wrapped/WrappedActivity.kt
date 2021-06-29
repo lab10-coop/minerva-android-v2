@@ -134,7 +134,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
         when (fragmentType) {
             WrappedFragmentType.IDENTITY -> getString(R.string.new_identity)
             WrappedFragmentType.IDENTITY_ORDER -> getString(R.string.edit_identity_order)
-            WrappedFragmentType.ACCOUNT -> getString(R.string.new_account)
+            WrappedFragmentType.ACCOUNT -> getString(R.string.add_account)
             WrappedFragmentType.ACCOUNT_ADDRESS, WrappedFragmentType.IDENTITY_ADDRESS -> String.Empty
             WrappedFragmentType.ACCOUNT_ORDER -> getString(R.string.edit_account_order)
             WrappedFragmentType.SAFE_ACCOUNT_SETTINGS -> getString(R.string.settings)

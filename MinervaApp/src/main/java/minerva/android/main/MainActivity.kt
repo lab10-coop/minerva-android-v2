@@ -452,7 +452,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     private fun startNewAccountActivity() {
         startNewAccountWrappedActivity(
             this,
-            getString(R.string.new_account)
+            getString(R.string.add_account)
         )
     }
 
