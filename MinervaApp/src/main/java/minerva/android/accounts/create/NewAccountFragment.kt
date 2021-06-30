@@ -18,7 +18,7 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
 
     private lateinit var binding: FragmentNewAccountBinding
     private val viewModel: NewAccountViewModel by viewModel()
-    private val addressAdapter = AddressesAdapter()
+    private val addressAdapter = AddressesAdapter(::onAddressClick)
 
     private val networkSpinnerAdapter by lazy {
         NetworkSpinnerAdapter(
@@ -37,7 +37,6 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
     }
 
     private fun initializeFragment() {
-        binding.networksHeader.text = getHeader(viewModel.areMainNetsEnabled)
         viewModel.apply {
             createAccountLiveData.observe(viewLifecycleOwner, EventObserver { activity?.finish() })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { handleLoader(it) })
@@ -92,10 +91,14 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
         }
     }
 
+    private fun onAddressClick(isEmptyOrNoSelection: Boolean) = with(binding) {
+        createButton.isEnabled = !isEmptyOrNoSelection
+    }
+
     private fun refreshAddressAdapterList() = with(binding) {
         viewModel.unusedAddresses.let { newAddresses ->
             addressAdapter.updateList(newAddresses)
-            createButton.isEnabled = !addressAdapter.isEmpty()
+            createButton.isEnabled = !addressAdapter.isEmptyOrNoSelection()
             addressRecyclerView.visibleOrGone(newAddresses.isNotEmpty())
             noAddressesInfo.root.visibleOrGone(newAddresses.isEmpty())
         }
@@ -103,11 +106,12 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
     }
 
     private fun setupCreateButton() = with(binding.createButton) {
-        isEnabled = !addressAdapter.isEmpty()
+        isEnabled = !addressAdapter.isEmptyOrNoSelection()
         setOnClickListener {
-            val index = addressAdapter.getSelectedIndex()
-            val network = networkSpinnerAdapter.getItem(viewModel.selectedNetworkPosition)
-            viewModel.connectAccountToNetwork(index, network)
+           addressAdapter.getSelectedIndex()?.let { index ->
+                val network = networkSpinnerAdapter.getItem(viewModel.selectedNetworkPosition)
+                viewModel.connectAccountToNetwork(index, network)
+            }
         }
     }
 

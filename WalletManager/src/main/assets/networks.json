@@ -26,32 +26,6 @@
     "chainId": 4
   },
   {
-    "name": "ARTIS Σ1",
-    "token": "ATS",
-    "isSafeAccountAvailable": "false",
-    "httpRpc": "https://rpc.sigma1.artis.network",
-    "wsRpc": "wss://ws.sigma1.artis.network",
-    "gasPriceOracle": "",
-    "gasPrice": "100000000000",
-    "tokens": [],
-    "color": "#129c6b",
-    "testNet": false,
-    "chainId": 246529
-  },
-  {
-    "name": "xDai Chain",
-    "token": "xDAI",
-    "isSafeAccountAvailable": "false",
-    "httpRpc": "https://xdai-rpc.lab10.io",
-    "wsRpc": "wss://xdai-rpc.lab10.io/wss",
-    "gasPriceOracle": "",
-    "gasPrice": "1000000000",
-    "tokens": [],
-    "color": "#48a9a6",
-    "testNet": false,
-    "chainId": 100
-  },
-  {
     "name": "POA Sokol",
     "token": "tPOA",
     "isSafeAccountAvailable": "false",
@@ -117,6 +91,19 @@
     "chainId": 3
   },
   {
+    "name": "Mumbai",
+    "token": "tMATIC",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://matic-mumbai.chainstacklabs.com",
+    "wsRpc": "",
+    "gasPriceOracle": "https://gasstation-mumbai.matic.today",
+    "gasPrice": "10000000000",
+    "tokens": [],
+    "color": "#8247e5",
+    "testNet": true,
+    "chainId": 80001
+  },
+  {
     "name": "Ethereum",
     "token": "ETH",
     "isSafeAccountAvailable": "false",
@@ -130,20 +117,20 @@
     "chainId": 1
   },
   {
-    "name": "POA Core",
-    "token": "POA",
+    "name": "xDai Chain",
+    "token": "xDAI",
     "isSafeAccountAvailable": "false",
-    "httpRpc": "https://core.poanetwork.dev",
-    "wsRpc": "",
+    "httpRpc": "https://xdai-rpc.lab10.io",
+    "wsRpc": "wss://xdai-rpc.lab10.io/wss",
     "gasPriceOracle": "",
-    "gasPrice": "10000000000",
+    "gasPrice": "1000000000",
     "tokens": [],
-    "color": "#5c34a2",
+    "color": "#48a9a6",
     "testNet": false,
-    "chainId": 99
+    "chainId": 100
   },
   {
-    "name": "Matic PoS Chain",
+    "name": "Polygon (MATIC)",
     "token": "MATIC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://matic-rpc.lab10.io",
@@ -156,16 +143,29 @@
     "chainId": 137
   },
   {
-    "name": "Mumbai",
-    "token": "tMATIC",
+    "name": "ARTIS Σ1",
+    "token": "ATS",
     "isSafeAccountAvailable": "false",
-    "httpRpc": "https://matic-mumbai.chainstacklabs.com",
+    "httpRpc": "https://rpc.sigma1.artis.network",
+    "wsRpc": "wss://ws.sigma1.artis.network",
+    "gasPriceOracle": "",
+    "gasPrice": "100000000000",
+    "tokens": [],
+    "color": "#129c6b",
+    "testNet": false,
+    "chainId": 246529
+  },
+  {
+    "name": "POA Core",
+    "token": "POA",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://core.poanetwork.dev",
     "wsRpc": "",
-    "gasPriceOracle": "https://gasstation-mumbai.matic.today",
+    "gasPriceOracle": "",
     "gasPrice": "10000000000",
     "tokens": [],
-    "color": "#8247e5",
-    "testNet": true,
-    "chainId": 80001
+    "color": "#5c34a2",
+    "testNet": false,
+    "chainId": 99
   }
 ]
