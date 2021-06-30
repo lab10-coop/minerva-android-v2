@@ -106,7 +106,6 @@ class WalletConnectInteractionsViewModel(
                     }
             is OnDisconnect -> Single.just(OnDisconnected())
             is OnEthSendTransaction -> {
-                logToFirebase("Transaction payload from WalletConnect: ${status.transaction}")
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }
             }
@@ -116,7 +115,8 @@ class WalletConnectInteractionsViewModel(
 
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
-        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let { account -> currentAccount = account }
+        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)
+            ?.let { account -> currentAccount = account }
         val txValue: BigDecimal = getTransactionValue(status.transaction.value)
         if (txValue == WRONG_TX_VALUE) {
             rejectRequest()
@@ -300,10 +300,7 @@ class WalletConnectInteractionsViewModel(
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map { txReceipt ->
-                    logToFirebase(
-                        "Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt," +
-                                "token transaction: ${currentTransaction.tokenTransaction}"
-                    )
+                    logToFirebase("Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt")
                     weiCoinTransactionValue = NO_COIN_TX_VALUE
                     currentDappSession?.let { session ->
                         walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
@@ -321,6 +318,7 @@ class WalletConnectInteractionsViewModel(
                 .subscribeBy(
                     onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
                     onError = { error ->
+                        logToFirebase("WalletConnect transaction error: $error; $currentTransaction")
                         Timber.e(error)
                         _walletConnectStatus.value = OnWalletConnectTransactionError(error)
                     }
