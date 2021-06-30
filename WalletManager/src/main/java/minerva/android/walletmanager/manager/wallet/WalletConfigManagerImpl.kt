@@ -161,7 +161,9 @@ class WalletConfigManagerImpl(
                 localStorage.isBackupAllowed = false
                 completeKeys(masterSeed, payload)
             }
-            shouldSync(version) -> syncWalletConfig(masterSeed, payload)
+            shouldSync(version) -> {
+                syncWalletConfig(masterSeed, payload)
+            }
             else -> {
                 localStorage.isSynced = true
                 completeKeys(masterSeed, payload)

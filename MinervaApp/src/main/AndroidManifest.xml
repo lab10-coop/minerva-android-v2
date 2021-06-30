@@ -33,6 +33,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".main.MainActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".integration.ThirdPartyIntegrationActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -68,10 +73,6 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".main.MainActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
 
         <service
             android:name=".notification.MinervaMessagingService"

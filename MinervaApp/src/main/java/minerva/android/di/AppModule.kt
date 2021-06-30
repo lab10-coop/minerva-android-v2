@@ -8,6 +8,7 @@ import minerva.android.accounts.create.NewAccountViewModel
 import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.accounts.walletconnect.WalletConnectViewModel
+import minerva.android.app.AppViewModel
 import minerva.android.edit.EditOrderViewModel
 import minerva.android.identities.MinervaPrimitivesViewModel
 import minerva.android.identities.edit.EditIdentityViewModel
@@ -58,10 +59,11 @@ private val appModules = module {
     factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
     factory<CacheStorage> { CacheStorageImpl(get()) }
     single<Logger> { LoggerImpl() }
+    viewModel { AppViewModel(get(), get()) }
     viewModel { ClubCardViewModel(get()) }
-    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { WalletConnectInteractionsViewModel(get(), get(), get()) }
-    viewModel { SplashScreenViewModel(get()) }
+    viewModel { SplashScreenViewModel(get(), get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }

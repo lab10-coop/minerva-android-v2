@@ -48,13 +48,14 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.getSessions()).thenReturn(
             Single.just(listOf(DappSession(address = "address1"), DappSession(address = "address2")))
         )
-        val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
+        val account = Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN)
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.just(listOf(DappSession())))
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
@@ -142,8 +143,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -184,9 +187,17 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             tokenTransaction = TokenTransaction(tokenSymbol = "WTF")
         )
         val account =
-            Account(1, cryptoBalance = BigDecimal.TEN, fiatBalance = BigDecimal(13), chainId = ETH_MAIN, accountTokens = listOf(AccountToken(
-                ERC20Token(1, symbol = "WTF")
-            )))
+            Account(
+                1,
+                cryptoBalance = BigDecimal.TEN,
+                fiatBalance = BigDecimal(13),
+                chainId = ETH_MAIN,
+                accountTokens = listOf(
+                    AccountToken(
+                        ERC20Token(1, symbol = "WTF")
+                    )
+                )
+            )
         NetworkManager.initialize(listOf(Network(chainId = ETH_MAIN, httpRpc = "url")))
         whenever(walletConnectRepository.connectionStatusFlowable).thenReturn(
             Flowable.just(OnEthSendTransaction(transition, "peerId"))
@@ -198,8 +209,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -252,8 +265,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -305,8 +320,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -358,8 +375,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -406,8 +425,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -449,8 +470,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -497,8 +520,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(
@@ -670,8 +695,10 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         )
         doNothing().whenever(walletConnectRepository).connect(any(), any(), any(), any())
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(account)
-        whenever(transactionRepository.toUserReadableFormat
-            (any())).thenReturn(BigDecimal.TEN)
+        whenever(
+            transactionRepository.toUserReadableFormat
+                (any())
+        ).thenReturn(BigDecimal.TEN)
         whenever(transactionRepository.getTransactionCosts(any()))
             .thenReturn(
                 Single.just(

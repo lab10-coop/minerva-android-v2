@@ -48,11 +48,13 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     override fun onResume() {
         super.onResume()
-        interactor.changeActionBarColor(R.color.lightGray)
-        viewModel.apply {
-            onResume()
-            refreshAddCryptoButton()
-            if (arePendingAccountsEmpty) accountAdapter.stopPendingTransactions()
+        if (!appUIState.shouldShowSplashScreen) {
+            interactor.changeActionBarColor(R.color.lightGray)
+            viewModel.apply {
+                onResume()
+                refreshAddCryptoButton()
+                if (arePendingAccountsEmpty) accountAdapter.stopPendingTransactions()
+            }
         }
     }
 
@@ -115,7 +117,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 syncError.isGone = isSynced
                 networksHeader.text = getHeader(areMainNetsEnabled)
                 addCryptoButton.apply { text = getBuyCryptoButtonText(this) }
-                if (isFirstLaunch) {
+                if (!appUIState.shouldShowSplashScreen && isFirstLaunch) {
                     SelectPredefinedAccountDialog(requireContext(), ::createAccountForSelectedNetwork).show()
                 }
             }

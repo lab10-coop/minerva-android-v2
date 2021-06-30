@@ -32,6 +32,7 @@ import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.LoginScannerActivity
+import minerva.android.splash.SplashScreenActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
@@ -60,10 +61,22 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        prepareBottomNavMenu()
-        replaceFragment(AccountsFragment.newInstance())
-        prepareSettingsIcon()
-        prepareObservers()
+        observeSplashScreenRedirection()
+        if (!viewModel.shouldShowSplashScreen()) {
+            prepareBottomNavMenu()
+            replaceFragment(AccountsFragment.newInstance())
+            prepareSettingsIcon()
+            prepareObservers()
+            handleOutdatedWalletErrorDialog()
+            //todo move to viewModel init ??
+            with(viewModel) {
+                restorePendingTransactions()
+                checkMissingTokensDetails()
+            }
+        }
+    }
+
+    private fun handleOutdatedWalletErrorDialog() {
         if (!viewModel.isBackupAllowed) {
             AlertDialogHandler.showDialog(
                 this,
@@ -71,19 +84,15 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 getString(R.string.outdated_wallet_error_message)
             )
         }
-
-        //todo move to viewModel init ??
-        with(viewModel) {
-            restorePendingTransactions()
-            checkMissingTokensDetails()
-        }
     }
 
     override fun onResume() {
         super.onResume()
-        shouldShowLoadingScreen(false)
-        handleExecutedAccounts()
-        viewModel.getTokensRate()
+        if (!viewModel.shouldShowSplashScreen()) {
+            shouldShowLoadingScreen(false)
+            handleExecutedAccounts()
+            viewModel.getTokensRate()
+        }
     }
 
     override fun onAttachFragment(fragment: Fragment) {
@@ -174,6 +183,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 (getCurrentFragment() as? AccountsFragment)?.updateTokensRate()
             })
         }
+    }
+
+    private fun observeSplashScreenRedirection() {
+        viewModel.redirectToSplashScreenLiveData.observe(this@MainActivity, EventObserver {
+            launchActivity<SplashScreenActivity> { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
+        })
     }
 
     private fun handleWalletConnectTransactionError(state: OnWalletConnectTransactionError) {
