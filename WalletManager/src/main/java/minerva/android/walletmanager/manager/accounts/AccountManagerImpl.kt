@@ -61,7 +61,7 @@ class AccountManagerImpl(
         walletConfig.accounts.filter { account -> account.shouldShow && account.isTestNetwork == !areMainNetworksEnabled }
 
     override fun areAllEmptyMainNetworkAccounts(): Boolean =
-        walletManager.getWalletConfig().accounts.find { account -> !account.isEmptyAccount && !account.isTestNetwork} == null
+        walletManager.getWalletConfig().accounts.find { account -> !account.isEmptyAccount && !account.isTestNetwork } == null
 
     override fun createRegularAccount(network: Network): Single<String> =
         walletManager.getWalletConfig().run {
@@ -130,19 +130,20 @@ class AccountManagerImpl(
     }
 
     override fun connectAccountToNetwork(index: Int, network: Network): Single<String> {
-        val existAccount =
+        val existedAccount =
             walletManager.getWalletConfig().accounts.filter { account -> account.id == index && account.isTestNetwork == network.testNet }
                 .find { account -> account.chainId == Int.InvalidValue || (account.chainId == network.chainId && account.isHide) }
         return when {
-            existAccount != null -> updateAccount(existAccount, network)
+            existedAccount != null -> updateAccount(existedAccount, network)
             else -> createRegularAccountWithGivenIndex(index, network)
         }
     }
 
-    private fun updateAccount(existAccount: Account, network: Network): Single<String> {
-        val accountName = CryptoUtils.prepareName(network.name, existAccount.id)
+    private fun updateAccount(existedAccount: Account, network: Network): Single<String> {
+        val accountName =
+            if (existedAccount.name.isBlank()) CryptoUtils.prepareName(network.name, existedAccount.id) else existedAccount.name
         walletManager.getWalletConfig().run {
-            val existAccountIndex = accounts.indexOf(existAccount)
+            val existAccountIndex = accounts.indexOf(existedAccount)
             accounts[existAccountIndex].apply {
                 name = accountName
                 chainId = network.chainId
@@ -152,6 +153,18 @@ class AccountManagerImpl(
                 .toSingleDefault(accountName)
         }
     }
+
+    override fun changeAccountName(existedAccount: Account, newName: String): Completable {
+        val accountName = CryptoUtils.prepareName(newName, existedAccount.id)
+        walletManager.getWalletConfig().run {
+            val existedAccountIndex = accounts.indexOf(existedAccount)
+            accounts[existedAccountIndex].apply {
+                name = accountName
+            }
+            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts))
+        }
+    }
+
 
     override fun createSafeAccount(account: Account, contract: String): Completable =
         walletManager.getWalletConfig().run {
@@ -250,7 +263,8 @@ class AccountManagerImpl(
     override fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>> {
         val usedIds = getAllActiveAccounts(chainId).map { account -> account.id }
         return getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted && !usedIds.contains(account.id) }
-            .map { account -> account.id to account.address }.distinctBy { account -> account.first }.sortedBy { account -> account.first }
+            .map { account -> account.id to account.address }.distinctBy { account -> account.first }
+            .sortedBy { account -> account.first }
     }
 
     override fun getNumberOfAccountsToUse() = getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted }

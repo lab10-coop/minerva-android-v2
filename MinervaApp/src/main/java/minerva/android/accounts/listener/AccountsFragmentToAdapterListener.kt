@@ -17,4 +17,5 @@ interface AccountsFragmentToAdapterListener {
     fun updateAccountWidgetState(index: Int, isOpen: AccountWidgetState)
     fun getAccountWidgetState(index: Int): AccountWidgetState
     fun getTokens(account: Account): List<ERC20Token>
+    fun onEditName(account: Account)
 }
