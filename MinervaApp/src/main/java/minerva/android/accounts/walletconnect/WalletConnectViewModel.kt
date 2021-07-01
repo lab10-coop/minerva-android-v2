@@ -180,7 +180,7 @@ class WalletConnectViewModel(
     private fun isUrlContainAccountNetwork(url: String): Boolean = url.contains(account.network.token, true)
 
     private fun getNetworkName(chainId: Int): String =
-        NetworkManager.networks.find { network ->  network.chainId == chainId }?.name.orElse { String.Empty }
+        NetworkManager.networks.find { network -> network.chainId == chainId }?.name.orElse { String.Empty }
 
     companion object {
         private const val ETHEREUM_CHAIN_ID = 1
