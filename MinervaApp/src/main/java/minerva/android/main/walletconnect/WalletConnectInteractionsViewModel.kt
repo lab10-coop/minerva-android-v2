@@ -18,6 +18,7 @@ import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.model.contract.ContractTransactions
 import minerva.android.walletmanager.model.contract.TokenStandardJson
 import minerva.android.walletmanager.model.defs.TransferType
@@ -41,9 +42,9 @@ import java.math.BigInteger
 class WalletConnectInteractionsViewModel(
     private val transactionRepository: TransactionRepository,
     private val walletConnectRepository: WalletConnectRepository,
-    private val logger: Logger
+    private val logger: Logger,
+    private val tokenManager: TokenManager
 ) : BaseViewModel() {
-
     internal var currentDappSession: DappSession? = null
     private var currentRate: BigDecimal = Double.InvalidBigDecimal
     private lateinit var currentTransaction: WalletConnectTransaction
@@ -59,6 +60,7 @@ class WalletConnectInteractionsViewModel(
 
     fun dispose() {
         walletConnectRepository.dispose()
+        onCleared()
     }
 
     init {
@@ -106,7 +108,6 @@ class WalletConnectInteractionsViewModel(
                     }
             is OnDisconnect -> Single.just(OnDisconnected())
             is OnEthSendTransaction -> {
-                logToFirebase("Transaction payload from WalletConnect: ${status.transaction}")
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }
             }
@@ -116,7 +117,8 @@ class WalletConnectInteractionsViewModel(
 
     private fun getTransactionCosts(session: DappSession, status: OnEthSendTransaction): Single<WalletConnectState> {
         currentDappSession = session
-        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let { account -> currentAccount = account }
+        transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)
+            ?.let { account -> currentAccount = account }
         val txValue: BigDecimal = getTransactionValue(status.transaction.value)
         if (txValue == WRONG_TX_VALUE) {
             rejectRequest()
@@ -137,7 +139,6 @@ class WalletConnectInteractionsViewModel(
                             txCost = transactionCost.copy(fiatCost = getFiatTransactionCost(transactionCost)),
                             transactionType = transferType
                         )
-                        logToFirebase("Shown transaction: $currentTransaction")
                         OnEthSendTransactionRequest(currentTransaction, session, currentAccount)
                     }
             }
@@ -246,11 +247,11 @@ class WalletConnectInteractionsViewModel(
     }
 
     private fun findCurrentToken(tokenAddress: String, tokenTransaction: TokenTransaction) {
-        currentAccount.accountTokens
-            .find { accountToken -> accountToken.token.address.equals(tokenAddress, true) }
-            ?.let { accountToken ->
-                tokenTransaction.tokenSymbol = accountToken.token.symbol
-                tokenDecimal = accountToken.token.decimals.toInt()
+        tokenManager.getActiveTokensPerAccount(currentAccount)
+            .find { token -> token.address.equals(tokenAddress, true) }
+            ?.let { token ->
+                tokenTransaction.tokenSymbol = token.symbol
+                tokenDecimal = token.decimals.toInt()
             }.orElse {
                 tokenDecimal = DEFAULT_TOKEN_DECIMALS
             }
@@ -300,10 +301,7 @@ class WalletConnectInteractionsViewModel(
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map { txReceipt ->
-                    logToFirebase(
-                        "Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt," +
-                                "token transaction: ${currentTransaction.tokenTransaction}"
-                    )
+                    logToFirebase("Transaction sent by WalletConnect: ${currentTransaction}, receipt: $txReceipt")
                     weiCoinTransactionValue = NO_COIN_TX_VALUE
                     currentDappSession?.let { session ->
                         walletConnectRepository.approveTransactionRequest(session.peerId, txReceipt)
@@ -321,6 +319,7 @@ class WalletConnectInteractionsViewModel(
                 .subscribeBy(
                     onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
                     onError = { error ->
+                        logToFirebase("WalletConnect transaction error: $error; $currentTransaction")
                         Timber.e(error)
                         _walletConnectStatus.value = OnWalletConnectTransactionError(error)
                     }

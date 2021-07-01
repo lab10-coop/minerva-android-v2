@@ -8,4 +8,6 @@ class AppUIStateImpl : AppUIState {
     override fun updateAccountWidgetState(index: Int, state: AccountWidgetState) {
         accountStates[index] = state
     }
+
+    override var shouldShowSplashScreen: Boolean = false
 }

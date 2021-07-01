@@ -538,7 +538,14 @@ class AccountManagerTest : RxTest() {
                 Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
                 Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
                 Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
-                Account(4, chainId = ChainId.ATS_SIGMA, address = "address4", _isTestNetwork = true, isHide = true, isDeleted = true),
+                Account(
+                    4,
+                    chainId = ChainId.ATS_SIGMA,
+                    address = "address4",
+                    _isTestNetwork = true,
+                    isHide = true,
+                    isDeleted = true
+                ),
                 Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
                 Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
                 Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
@@ -566,7 +573,14 @@ class AccountManagerTest : RxTest() {
                 Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
                 Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
                 Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
-                Account(4, chainId = ChainId.ATS_SIGMA, address = "address4", _isTestNetwork = true, isHide = true, isDeleted = true),
+                Account(
+                    4,
+                    chainId = ChainId.ATS_SIGMA,
+                    address = "address4",
+                    _isTestNetwork = true,
+                    isHide = true,
+                    isDeleted = true
+                ),
                 Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
                 Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
                 Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
@@ -607,5 +621,27 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         manager.areAllEmptyMainNetworkAccounts() shouldBeEqualTo true
+    }
+
+    @Test
+    fun `change account name test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val account = Account(0, chainId = 1, name = "#1 account")
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                account,
+                Account(1, chainId = 1, name = "#2 account")
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.changeAccountName(account, "new name")
+        verify(walletConfigManager, times(1)).updateWalletConfig(
+            WalletConfig(
+                2, accounts = listOf(
+                    Account(0, chainId = 1, name = "#1 new name"),
+                    Account(1, chainId = 1, name = "#2 account")
+                )
+            )
+        )
     }
 }

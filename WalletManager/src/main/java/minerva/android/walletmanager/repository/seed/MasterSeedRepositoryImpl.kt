@@ -19,27 +19,18 @@ class MasterSeedRepositoryImpl(
     override val walletConfigErrorLiveData: LiveData<Event<Throwable>>
         get() = walletConfigManager.walletConfigErrorLiveData
 
+    override var areMainNetworksEnabled: Boolean
+        get() = walletConfigManager.areMainNetworksEnabled
+        set(value) {
+            walletConfigManager.areMainNetworksEnabled = value
+        }
+    override val isBackupAllowed: Boolean get() = walletConfigManager.isBackupAllowed
+    override val isSynced: Boolean get() = walletConfigManager.isSynced
+    override fun getAccountIterator(): Int = walletConfigManager.getValueIterator()
+    override fun getWalletConfig(): WalletConfig = walletConfigManager.getWalletConfig()
     override fun isMasterSeedAvailable(): Boolean = walletConfigManager.isMasterSeedSaved()
-
-    override fun restoreMasterSeed(mnemonic: String): Completable =
-        cryptographyRepository.restoreMasterSeed(mnemonic)
-            .flatMapCompletable { (seed, publicKey, privateKey) ->
-                walletConfigManager.restoreWalletConfig(MasterSeed(seed, publicKey, privateKey))
-            }
-
-    override fun saveIsMnemonicRemembered() {
-        walletConfigManager.saveIsMnemonicRemembered()
-    }
-
     override fun isMnemonicRemembered(): Boolean = walletConfigManager.isMnemonicRemembered()
-
     override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
-
-    override fun createWalletConfig(): Completable =
-        cryptographyRepository.createMasterSeed()
-            .flatMapCompletable { (seed, publicKey, privateKey) ->
-                walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
-            }
 
     override fun getMnemonic(): String =
         cryptographyRepository.getMnemonicForMasterSeed(walletConfigManager.masterSeed.seed)
@@ -52,17 +43,19 @@ class MasterSeedRepositoryImpl(
         walletConfigManager.dispose()
     }
 
-    override fun getAccountIterator(): Int = walletConfigManager.getValueIterator()
+    override fun restoreMasterSeed(mnemonic: String): Completable =
+        cryptographyRepository.restoreMasterSeed(mnemonic)
+            .flatMapCompletable { (seed, publicKey, privateKey) ->
+                walletConfigManager.restoreWalletConfig(MasterSeed(seed, publicKey, privateKey))
+            }
 
-    override val isBackupAllowed: Boolean
-        get() = walletConfigManager.isBackupAllowed
+    override fun saveIsMnemonicRemembered() {
+        walletConfigManager.saveIsMnemonicRemembered()
+    }
 
-    override val isSynced: Boolean
-        get() = walletConfigManager.isSynced
-
-    override var areMainNetworksEnabled: Boolean
-        get() = walletConfigManager.areMainNetworksEnabled
-        set(value) {
-            walletConfigManager.areMainNetworksEnabled = value
-        }
+    override fun createWalletConfig(): Completable =
+        cryptographyRepository.createMasterSeed()
+            .flatMapCompletable { (seed, publicKey, privateKey) ->
+                walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
+            }
 }

@@ -8,6 +8,10 @@ import minerva.android.walletmanager.model.wallet.WalletConfig
 interface MasterSeedRepository {
     val walletConfigLiveData: LiveData<Event<WalletConfig>>
     val walletConfigErrorLiveData: LiveData<Event<Throwable>>
+    val isBackupAllowed: Boolean
+    val isSynced: Boolean
+    var areMainNetworksEnabled: Boolean
+
     fun validateMnemonic(mnemonic: String): List<String>
     fun getMnemonic(): String
     fun saveIsMnemonicRemembered()
@@ -18,7 +22,5 @@ interface MasterSeedRepository {
     fun initWalletConfig()
     fun dispose()
     fun getAccountIterator(): Int
-    val isBackupAllowed: Boolean
-    val isSynced: Boolean
-    var areMainNetworksEnabled: Boolean
+    fun getWalletConfig(): WalletConfig
 }

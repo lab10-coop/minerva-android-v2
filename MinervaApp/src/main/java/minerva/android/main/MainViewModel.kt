@@ -31,6 +31,7 @@ import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.widget.state.AppUIState
 import timber.log.Timber
 
 class MainViewModel(
@@ -38,7 +39,8 @@ class MainViewModel(
     private val serviceManager: ServiceManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val orderManager: OrderManager,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val appUIState: AppUIState
 ) : BaseViewModel() {
 
     private val _errorLiveData = MutableLiveData<Event<MainErrorState>>()
@@ -59,14 +61,22 @@ class MainViewModel(
     private val _updateTokensRateLiveData = MutableLiveData<Event<Unit>>()
     val updateTokensRateLiveData: LiveData<Event<Unit>> get() = _updateTokensRateLiveData
 
+    private val _redirectToSplashScreenLiveData = MutableLiveData<Event<Unit>>()
+    val redirectToSplashScreenLiveData: LiveData<Event<Unit>> get() = _redirectToSplashScreenLiveData
+
     lateinit var loginPayload: LoginPayload
     lateinit var qrCode: CredentialQrCode
     private var webSocketSubscriptions = CompositeDisposable()
     val executedAccounts = mutableListOf<PendingAccount>()
     val isBackupAllowed: Boolean get() = masterSeedRepository.isBackupAllowed
     fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
-    fun getAccountIterator(): Int = masterSeedRepository.getAccountIterator()
     fun isProtectTransactionEnabled() = transactionRepository.isProtectTransactionEnabled()
+
+    init {
+        if (shouldShowSplashScreen()) {
+            _redirectToSplashScreenLiveData.value = Event(Unit)
+        }
+    }
 
     fun subscribeToExecutedTransactions(accountIndex: Int) {
         if (transactionRepository.shouldOpenNewWssConnection(accountIndex)) {
@@ -101,7 +111,9 @@ class MainViewModel(
         }
     }
 
-    fun isOrderEditAvailable(type: Int) = orderManager.isOrderAvailable(type)
+    fun isOrderEditAvailable(type: Int): Boolean = if (!appUIState.shouldShowSplashScreen) orderManager.isOrderAvailable(type) else false
+
+    fun shouldShowSplashScreen() = appUIState.shouldShowSplashScreen
 
     fun painlessLogin() {
         serviceManager.getLoggedInIdentity(loginPayload.identityPublicKey)?.let { identity ->
