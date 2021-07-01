@@ -24,7 +24,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".splash.SplashScreenActivity"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

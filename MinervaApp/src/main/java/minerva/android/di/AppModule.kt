@@ -62,7 +62,7 @@ private val appModules = module {
     viewModel { AppViewModel(get(), get()) }
     viewModel { ClubCardViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { WalletConnectInteractionsViewModel(get(), get(), get()) }
+    viewModel { WalletConnectInteractionsViewModel(get(), get(), get(), get()) }
     viewModel { SplashScreenViewModel(get(), get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }

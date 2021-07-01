@@ -34,10 +34,10 @@ class WalletConnectRepositoryImpl(
     private var wcClient: WCClient = WCClient(),
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
+    private var status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
+    override var connectionStatusFlowable: Flowable<WalletConnectStatus> = status.toFlowable(BackpressureStrategy.DROP)
     private var currentRequestId: Long = Long.InvalidValue
     internal lateinit var currentEthMessage: WCEthereumSignMessage
-    private val status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
-    override val connectionStatusFlowable: Flowable<WalletConnectStatus> get() = status.toFlowable(BackpressureStrategy.DROP)
     private var disposable: CompositeDisposable = CompositeDisposable()
     private var pingDisposable: Disposable? = null
     private val dappDao = minervaDatabase.dappDao()
@@ -45,6 +45,7 @@ class WalletConnectRepositoryImpl(
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?, dapps: List<DappSession>) {
         wcClient = WCClient()
         with(wcClient) {
+
             onWCOpen = { peerId ->
                 clientMap[peerId] = this
                 if (pingDisposable == null) {
@@ -246,12 +247,6 @@ class WalletConnectRepositoryImpl(
                 dappDao.deleteAllDappsForAccount(address)
             }
 
-    override fun dispose() {
-        disposable.dispose()
-        pingDisposable?.dispose()
-        pingDisposable = null
-    }
-
     override fun killSession(peerId: String): Completable =
         deleteDappSession(peerId)
             .andThen {
@@ -262,6 +257,14 @@ class WalletConnectRepositoryImpl(
                     remove(peerId)
                 }
             }
+
+    override fun dispose() {
+        disposable.dispose()
+        pingDisposable?.dispose()
+        pingDisposable = null
+        clientMap.forEach { (_: String, client: WCClient) -> client.disconnect() }
+        clientMap.clear()
+    }
 
     companion object {
         const val PING_TIMEOUT: Long = 60
