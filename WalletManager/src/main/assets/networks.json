@@ -123,7 +123,7 @@
     "httpRpc": "https://xdai-rpc.lab10.io",
     "wsRpc": "wss://xdai-rpc.lab10.io/wss",
     "gasPriceOracle": "",
-    "gasPrice": "1000000000",
+    "gasPrice": "20000000000",
     "tokens": [],
     "color": "#48a9a6",
     "testNet": false,
