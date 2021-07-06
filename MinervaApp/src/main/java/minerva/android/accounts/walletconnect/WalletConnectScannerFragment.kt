@@ -34,7 +34,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         observeViewState()
         showWalletConnectViews()
         setupBottomSheet()

@@ -25,11 +25,13 @@ import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnFailure
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.utils.logger.Logger
 import timber.log.Timber
 
 class WalletConnectViewModel(
     private val accountManager: AccountManager,
-    private val repository: WalletConnectRepository
+    private val repository: WalletConnectRepository,
+    private val logger: Logger
 ) : BaseViewModel() {
 
     internal lateinit var account: Account
@@ -44,7 +46,7 @@ class WalletConnectViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
-    fun setConnectionStatusFlowable() {
+    fun subscribeToConnectionStatusFlowable() {
         launchDisposable {
             repository.connectionStatusFlowable
                 .subscribeOn(Schedulers.io())
@@ -59,11 +61,17 @@ class WalletConnectViewModel(
                                 handleSessionRequest(status)
                             }
                             is OnDisconnect -> OnDisconnected(status.sessionName)
-                            is OnFailure -> OnWalletConnectConnectionError(status.error, status.sessionName)
+                            is OnFailure -> {
+                                logger.logToFirebase("OnWalletConnectConnectionError: ${status.error}")
+                                OnWalletConnectConnectionError(status.error, status.sessionName)
+                            }
                             else -> DefaultRequest
                         }
                     },
-                    onError = { _errorLiveData.value = Event(it) }
+                    onError = {
+                        logger.logToFirebase("WalletConnect statuses error: $it")
+                        _errorLiveData.value = Event(it)
+                    }
                 )
         }
     }

@@ -8,7 +8,8 @@ object OkHttpProvider {
         .connectTimeout(TIMEOUT, TimeUnit.MINUTES)
         .readTimeout(TIMEOUT, TimeUnit.MINUTES)
         .writeTimeout(TIMEOUT, TimeUnit.MINUTES)
-        .retryOnConnectionFailure(false)
+        .retryOnConnectionFailure(true)
         .build()
 }
+
 private const val TIMEOUT: Long = 15L
