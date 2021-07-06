@@ -41,12 +41,16 @@ class WalletConnectRepositoryImpl(
     private var disposable: CompositeDisposable = CompositeDisposable()
     private var pingDisposable: Disposable? = null
     private val dappDao = minervaDatabase.dappDao()
+    private var reconnectionAttempts: MutableMap<String, Int> = mutableMapOf()
 
     override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?, dapps: List<DappSession>) {
         wcClient = WCClient()
         with(wcClient) {
 
             onWCOpen = { peerId ->
+                if (reconnectionAttempts.isNotEmpty()) {
+                    reconnectionAttempts.clear()
+                }
                 clientMap[peerId] = this
                 if (pingDisposable == null) {
                     startPing(dapps)
@@ -64,18 +68,17 @@ class WalletConnectRepositoryImpl(
                 )
             }
 
-            onFailure = { error, peerId ->
-                Timber.e("WalletConnect onFailure: $error, peerId: $peerId")
-                removeDappSession(peerId, onSuccess = { session ->
-                    removeWcClient(session.peerId)
-                    status.onNext(OnFailure(error, session.name))
-                }, onError = {
-                    removeWcClient(peerId)
-                    status.onNext(OnFailure(error, String.Empty))
-                })
+            onFailure = { error, peerId, isForceTermination ->
+                logger.logToFirebase("WalletConnect onFailure: $error, peerId: $peerId")
+                if (isForceTermination) {
+                    terminateConnection(peerId, error)
+                } else {
+                    reconnect(peerId, error, remotePeerId)
+                }
             }
             onDisconnect = { _, peerId ->
                 peerId?.let {
+                    if (reconnectionAttempts.containsKey(peerId)) reconnectionAttempts.remove(peerId)
                     removeDappSession(it, onSuccess = { session ->
                         removeWcClient(session.peerId)
                         status.onNext(OnDisconnect(session.name))
@@ -113,12 +116,51 @@ class WalletConnectRepositoryImpl(
         }
     }
 
+    private fun reconnect(peerId: String, error: Throwable, remotePeerId: String?) {
+        if (reconnectionAttempts[peerId] == MAX_RECONNECTION_ATTEMPTS) {
+            terminateConnection(peerId, error)
+        } else {
+            retryConnection(peerId, remotePeerId)
+        }
+    }
+
+    private fun terminateConnection(peerId: String, error: Throwable) {
+        if (reconnectionAttempts.containsKey(peerId)) {
+            reconnectionAttempts.remove(peerId)
+        }
+        removeDappSession(peerId, onSuccess = { session ->
+            removeWcClient(session.peerId)
+            status.onNext(OnFailure(error, session.name))
+        }, onError = {
+            removeWcClient(peerId)
+            status.onNext(OnFailure(error, String.Empty))
+        })
+    }
+
+    private fun retryConnection(peerId: String, remotePeerId: String?) {
+        Observable.timer(RETRY_DELAY, TimeUnit.SECONDS)
+            .flatMapSingle { getDappSessionById(peerId) }
+            .map { session ->
+                var attempt: Int = reconnectionAttempts[peerId] ?: INIT_ATTEMPT
+                attempt += ONE_ATTEMPT
+                reconnectionAttempts[peerId] = attempt
+                with(session) {
+                    clientMap[peerId]!!.connect(
+                        WalletConnectSessionMapper.map(WalletConnectSession(topic, version, bridge, key)),
+                        peerMeta = WCPeerMeta(),
+                        peerId = peerId,
+                        remotePeerId = remotePeerId
+                    )
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribeBy(onError = { Timber.e(it) })
+            .addTo(disposable)
+    }
+
     private fun removeDappSession(peerId: String, onSuccess: (session: DappSession) -> Unit, onError: () -> Unit) {
         getDappSessionById(peerId)
-            .flatMap { session ->
-                deleteDappSession(session.peerId)
-                    .toSingleDefault(session)
-            }
+            .flatMap { session -> deleteDappSession(session.peerId).toSingleDefault(session) }
             .map { session -> onSuccess(session) }
             .doOnError { onError() }
             .subscribeOn(Schedulers.io())
@@ -264,9 +306,14 @@ class WalletConnectRepositoryImpl(
         pingDisposable = null
         clientMap.forEach { (_: String, client: WCClient) -> client.disconnect() }
         clientMap.clear()
+        reconnectionAttempts.clear()
     }
 
     companion object {
         const val PING_TIMEOUT: Long = 60
+        const val RETRY_DELAY: Long = 5
+        const val MAX_RECONNECTION_ATTEMPTS: Int = 3
+        const val INIT_ATTEMPT: Int = 0
+        const val ONE_ATTEMPT: Int = 1
     }
 }
