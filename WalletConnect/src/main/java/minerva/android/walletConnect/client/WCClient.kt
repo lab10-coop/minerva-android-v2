@@ -63,7 +63,7 @@ class WCClient(
         private set
     var chainId: Int? = null
 
-    var onFailure: (error: Throwable, peerId: String) -> Unit = { _, _ -> }
+    var onFailure: (error: Throwable, peerId: String, isForceTermination: Boolean) -> Unit = { _, _, _ -> }
     var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> }
     var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String, handshakeId: Long) -> Unit =
         { _, _, _, _, _ -> }
@@ -98,22 +98,26 @@ class WCClient(
             val message = gson.fromJson<WCSocketMessage>(text)
             decrypted = decryptMessage(message)
             handleMessage(decrypted)
-        } catch (e: Exception) {
-            onFailure(e, peerId)
+        } catch (error: Exception) {
+            onFailure(error, peerId, error.isForceTerminationError())
         } finally {
             listeners.forEach { it.onMessage(webSocket, decrypted ?: text) }
         }
     }
 
-    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        if (session != null) {
-            killSession()
+    override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response?) {
+        var isForceTermination: Boolean = false
+        if (throwable.isForceTerminationError() || response.isForceTerminationError()) {
+            resetState()
+            isForceTermination = true
         }
-        resetState()
-        onFailure(t, peerId)
-        peerId = String.Empty
+        onFailure(throwable, peerId, isForceTermination)
 
-        listeners.forEach { it.onFailure(webSocket, t, response) }
+        if (throwable.isForceTerminationError() || response.isForceTerminationError()) {
+            peerId = String.Empty
+        }
+
+        listeners.forEach { it.onFailure(webSocket, throwable, response) }
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
