@@ -58,7 +58,7 @@ private val appModules = module {
     single<AppUIState> { AppUIStateImpl() }
     factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
     factory<CacheStorage> { CacheStorageImpl(get()) }
-    single<Logger> { LoggerImpl() }
+    single<Logger> { LoggerImpl(get()) }
     viewModel { AppViewModel(get(), get()) }
     viewModel { ClubCardViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
