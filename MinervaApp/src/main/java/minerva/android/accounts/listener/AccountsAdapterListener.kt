@@ -15,4 +15,5 @@ interface AccountsAdapterListener {
     fun onExportPrivateKey(account: Account)
     fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState)
     fun getAccountWidgetState(index: Int): AccountWidgetState
+    fun onEditName(account: Account)
 }

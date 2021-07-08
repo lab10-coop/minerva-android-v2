@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/rubik_medium"
                 android:padding="@dimen/margin_normal"
-                android:text="@string/test_networks"
+                android:text="@string/select_network"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimary" />
 
@@ -76,7 +76,9 @@
                     android:layout_marginTop="@dimen/margin_normal"
                     android:scrollbarSize="@dimen/scrollbar_size"
                     android:scrollbarThumbVertical="@drawable/scrollbar_thumb"
-                    android:scrollbars="vertical" />
+                    android:scrollbars="vertical"
+                    tools:itemCount="4"
+                    tools:listitem="@layout/address_list_row" />
 
                 <include
                     android:id="@+id/no_addresses_info"
@@ -105,7 +107,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:text="@string/add_new_account"
+        android:text="@string/add_account"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

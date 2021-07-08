@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_splash_screen.*
 import minerva.android.R
 import minerva.android.extension.launchActivity
@@ -13,7 +12,9 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.MainActivity
 import minerva.android.onboarding.OnBoardingActivity
+import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class SplashScreenActivity : AppCompatActivity(), PassiveVideoToActivityInteractor {
 
@@ -65,10 +66,15 @@ class SplashScreenActivity : AppCompatActivity(), PassiveVideoToActivityInteract
     }
 
     override fun onAnimationEnd() {
-        viewModel.apply {
-            walletConfigLiveData.observe(this@SplashScreenActivity, Observer { showMainActivity() })
-            walletConfigErrorLiveData.observe(this@SplashScreenActivity, EventObserver { showOnBoardingActivity() })
+        try {
+            viewModel.getWalletConfig()
+            showMainActivity()
+        } catch (error: NotInitializedWalletConfigThrowable) {
+            Timber.e(error)
+            initWalletConfig()
+            viewModel.walletConfigLiveData.observe(this@SplashScreenActivity, EventObserver { showMainActivity() })
         }
+        viewModel.walletConfigErrorLiveData.observe(this@SplashScreenActivity, EventObserver { showOnBoardingActivity() })
     }
 
     override fun initWalletConfig() {

@@ -18,6 +18,7 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
+import minerva.android.walletmanager.utils.logger.Logger
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -29,6 +30,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     private val repository: WalletConnectRepository = mock()
     private val manager: AccountManager = mock()
+    private val logger: Logger = mock()
     private lateinit var viewModel: WalletConnectViewModel
     private val stateObserver: Observer<WalletConnectState> = mock()
     private val stateCaptor: KArgumentCaptor<WalletConnectState> = argumentCaptor()
@@ -38,7 +40,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Before
     fun setup() {
-        viewModel = WalletConnectViewModel(manager, repository)
+        viewModel = WalletConnectViewModel(manager, repository, logger)
     }
 
     @Test
@@ -47,7 +49,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -59,7 +61,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -70,7 +72,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnDisconnect()))
         viewModel.stateLiveData.observeForever(stateObserver)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState &&
@@ -86,7 +88,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1, token="Ethereum"))
         viewModel.account = Account(1, chainId = 1)
         viewModel.stateLiveData.observeForever(stateObserver)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
@@ -101,7 +103,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.networks = listOf(Network(name = "xDai", chainId = 2, token="xDai"), Network(name = "Ethereum", chainId = 1, token="Ethereum"))
         viewModel.account = Account(1, chainId = 2)
         viewModel.stateLiveData.observeForever(stateObserver)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
@@ -117,7 +119,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.networks = listOf(Network(name = "xDai", chainId = 2, token="xDai"), Network(name = "Ethereum", chainId = 1, token="Ethereum"))
         viewModel.account = Account(1, chainId = 2)
         viewModel.stateLiveData.observeForever(stateObserver)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
@@ -132,7 +134,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         NetworkManager.networks = listOf(Network(name = "xDai", chainId = 2, token="xDai"), Network(name = "Ethereum", chainId = 1, token="Ethereum"))
         viewModel.account = Account(1, chainId = 1)
         viewModel.stateLiveData.observeForever(stateObserver)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
@@ -160,7 +162,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
             )
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.account = Account(1, chainId = 5)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
@@ -193,7 +195,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
             )
         viewModel.account = Account(1, chainId = 1)
         viewModel.stateLiveData.observeForever(stateObserver)
-        viewModel.setConnectionStatusFlowable()
+        viewModel.subscribeToConnectionStatusFlowable()
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState

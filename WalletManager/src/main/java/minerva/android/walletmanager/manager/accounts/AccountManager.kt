@@ -40,4 +40,5 @@ interface AccountManager : Manager {
     fun toChecksumAddress(address: String): String
     fun clearFiat()
     fun connectAccountToNetwork(index: Int, network: Network): Single<String>
+    fun changeAccountName(existedAccount: Account, newName: String): Completable
 }

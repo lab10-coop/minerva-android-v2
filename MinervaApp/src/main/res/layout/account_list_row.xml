@@ -29,25 +29,28 @@
             android:id="@+id/main_icon"
             android:layout_width="@dimen/small_logo_size"
             android:layout_height="@dimen/small_logo_size"
-            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_normal"
-            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription"
             tools:src="@drawable/ic_artis" />
 
         <TextView
             android:id="@+id/account_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_small"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginEnd="@dimen/margin_xsmall"
+            android:ellipsize="end"
             android:fontFamily="@font/rubik_medium"
+            android:lines="1"
             android:textSize="@dimen/text_normal"
             app:layout_constraintBottom_toBottomOf="@id/main_icon"
-            app:layout_constraintLeft_toRightOf="@id/main_icon"
+            app:layout_constraintEnd_toStartOf="@id/qr_code"
+            app:layout_constraintStart_toEndOf="@id/main_icon"
             app:layout_constraintTop_toTopOf="@id/main_icon"
-            tools:ignore="RtlHardcoded"
-            tools:text="#1 ARTIS" />
+            tools:text="#1 My veeeeeeery long account name" />
 
         <ImageView
             android:id="@+id/qr_code"
@@ -56,7 +59,7 @@
             android:scaleType="center"
             android:src="@drawable/ic_qr_code"
             app:layout_constraintBottom_toBottomOf="@id/main_icon"
-            app:layout_constraintRight_toLeftOf="@+id/menu"
+            app:layout_constraintEnd_toStartOf="@+id/menu"
             app:layout_constraintTop_toTopOf="@id/main_icon"
             tools:ignore="ContentDescription" />
 
@@ -64,11 +67,11 @@
             android:id="@+id/menu"
             android:layout_width="@dimen/clickable_area"
             android:layout_height="@dimen/clickable_area"
-            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_normal"
             android:scaleType="center"
             android:src="@drawable/ic_three_dots"
             app:layout_constraintBottom_toBottomOf="@id/main_icon"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/main_icon"
             tools:ignore="ContentDescription" />
 
@@ -77,9 +80,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginRight="@dimen/margin_normal"
-            app:layout_constraintLeft_toLeftOf="@id/main_icon"
-            app:layout_constraintRight_toRightOf="@id/menu"
+            android:layout_marginEnd="@dimen/margin_normal"
+            app:layout_constraintStart_toStartOf="@id/main_icon"
+            app:layout_constraintEnd_toEndOf="@id/menu"
             app:layout_constraintTop_toBottomOf="@id/main_icon" />
 
         <View
@@ -88,26 +91,26 @@
             android:layout_height="0dp"
             android:background="@color/lightGray"
             app:layout_constraintBottom_toBottomOf="@id/divider_bottom"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/divider_top" />
 
         <minerva.android.widget.TokensAndCollectiblesView
             android:id="@+id/tokens_and_collectibles"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginRight="@dimen/margin_normal"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
             android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/divider_top" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/margin_normal"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/main_token_view" />
 
         <View
@@ -116,8 +119,8 @@
             android:layout_height="1dp"
             android:layout_marginTop="@dimen/margin_xxsmall"
             android:background="@color/separatorColor"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/main_token_view" />
 
         <View
@@ -125,8 +128,8 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/separatorColor"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tokens_and_collectibles" />
 
         <ImageView
@@ -135,8 +138,8 @@
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/margin_xxsmall"
             android:src="@drawable/ic_arrow_down"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tokens_and_collectibles"
             tools:ignore="ContentDescription" />
 
@@ -150,8 +153,8 @@
             android:focusable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
     </androidx.constraintlayout.widget.ConstraintLayout>

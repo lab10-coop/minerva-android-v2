@@ -19,6 +19,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.PendingAcco
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
+import minerva.android.widget.state.AppUIState
 import org.amshove.kluent.any
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
@@ -32,8 +33,8 @@ class MainViewModelTest : BaseViewModelTest() {
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
     private val transactionRepository: TransactionRepository = mock()
+    private val appUIState: AppUIState = mock()
     private lateinit var viewModel: MainViewModel
-
     private val errorObserver: Observer<Event<MainErrorState>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<MainErrorState>> = argumentCaptor()
 
@@ -56,7 +57,8 @@ class MainViewModelTest : BaseViewModelTest() {
             serviceManager,
             walletActionsRepository,
             orderManager,
-            transactionRepository
+            transactionRepository,
+            appUIState
         )
     }
 

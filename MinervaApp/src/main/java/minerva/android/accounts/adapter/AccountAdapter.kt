@@ -108,6 +108,8 @@ class AccountAdapter(
 
     override fun getAccountWidgetState(index: Int): AccountWidgetState = listener.getAccountWidgetState(index)
 
+    override fun onEditName(account: Account) = listener.onEditName(account)
+
     companion object {
         private const val NO_DAPP_SESSION = 0
     }

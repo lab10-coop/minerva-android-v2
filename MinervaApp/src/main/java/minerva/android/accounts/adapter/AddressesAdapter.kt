@@ -7,16 +7,17 @@ import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.databinding.AddressListRowBinding
 
-class AddressesAdapter : RecyclerView.Adapter<AddressViewHolder>() {
+class AddressesAdapter(private val onAddressClick: (Boolean) -> Unit) : RecyclerView.Adapter<AddressViewHolder>() {
 
-    private var selectedPosition: Int = FIRST_POSITION
+    private var selectedPosition: Int = WRONG_POSITION
 
     private var addresses: List<Pair<Int, String>> = emptyList()
 
-    fun isEmpty() = addresses.isEmpty()
+    fun isEmptyOrNoSelection() = addresses.isEmpty() || selectedPosition == WRONG_POSITION
 
     fun updateList(newAddresses: List<Pair<Int, String>>) {
         addresses = newAddresses
+        selectedPosition = WRONG_POSITION
         notifyDataSetChanged()
     }
 
@@ -27,18 +28,18 @@ class AddressesAdapter : RecyclerView.Adapter<AddressViewHolder>() {
 
 
     override fun onBindViewHolder(holder: AddressViewHolder, position: Int) {
-
         holder.bind(addresses[position], selectedPosition == position) {
             notifyItemChanged(selectedPosition)
             selectedPosition = position
+            onAddressClick(isEmptyOrNoSelection())
             notifyItemChanged(selectedPosition)
         }
     }
 
-    fun getSelectedIndex() = addresses[selectedPosition].first
+    fun getSelectedIndex() = addresses.getOrNull(selectedPosition)?.first
 
     companion object {
-        private const val FIRST_POSITION = 0
+        private const val WRONG_POSITION = -1
     }
 }
 

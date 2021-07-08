@@ -108,7 +108,7 @@
                     android:lines="2"
                     android:textColor="@color/white"
                     android:textSize="@dimen/text_large"
-                    app:icon="@drawable/ic_xdai_token"
+                    app:icon="@drawable/ic_xdai"
                     app:name="@string/xdai_label" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
