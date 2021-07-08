@@ -389,6 +389,11 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.4.1</item>
+        <item>* Account name change enabled</item>
+        <item>* WalletConnect connection issues fixed</item>
+        <item>* Stability issues fixed</item>
+        <item>* Several format and naming issues fixed</item>
         <item>1.4.0</item>
         <item>* Full Polygon PoS chain and Mumbai testnet integration</item>
         <item>* Buy crypto on Polygon via Ramp.Network</item>
