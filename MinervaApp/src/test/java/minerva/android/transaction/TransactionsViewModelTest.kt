@@ -53,6 +53,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Before
     fun init() {
         NetworkManager.initialize(networks)
+        whenever(transactionRepository.getCoinFiatRate(any())).doReturn(Single.just(1.5))
     }
 
     @Test
@@ -70,8 +71,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
         val tokenList = viewModel.tokensList
         tokenList.size shouldBeEqualTo 2
-        tokenList[0].symbol shouldBeEqualTo "cookie"
-        tokenList[1].symbol shouldBeEqualTo "SomeSymbol"
+        tokenList[0].token.symbol shouldBeEqualTo "cookie"
+        tokenList[1].token.symbol shouldBeEqualTo "SomeSymbol"
     }
 
     @Test
@@ -279,7 +280,12 @@ class TransactionViewModelTest : BaseViewModelTest() {
             id = 0,
             publicKey = "12",
             chainId = 1,
-            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol", decimals = "2", address = "0x0"), BigDecimal.ZERO))
+            accountTokens = listOf(
+                AccountToken(
+                    ERC20Token(3, symbol = "SomeSymbol", decimals = "2", address = "0x0"),
+                    BigDecimal.ZERO
+                )
+            )
         )
         whenever(transactionRepository.getTransactionCosts(any())).doReturn(
             Single.just(
@@ -323,5 +329,35 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.isAddressValid(any())).thenReturn(false)
         val result = viewModel.isAddressValid("eeee")
         assertEquals(false, result)
+    }
+
+    @Test
+    fun `is update fiat rate and recalculate fiat amount valid for coins`() {
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1))
+        whenever(transactionRepository.getCoinFiatRate(any())).doReturn(Single.just(2.00))
+        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        viewModel.run {
+            getAccount(0, String.Empty)
+            updateFiatRate()
+            recalculateFiatAmount(BigDecimal("10.51")) shouldBeEqualTo BigDecimal("21.02")
+        }
+    }
+
+    @Test
+    fun `is update fiat rate and recalculate fiat amount valid for tokens`() {
+        whenever(transactionRepository.getAccount(any())).thenReturn(
+            Account(
+                0,
+                chainId = 1,
+                accountTokens = listOf(AccountToken(ERC20Token(1, address = "address01"), BigDecimal.TEN, 5.0))
+            )
+        )
+        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        viewModel.run {
+            getAccount(0, String.Empty)
+            updateTokenAddress(0)
+            updateFiatRate()
+            recalculateFiatAmount(BigDecimal("1.01")) shouldBeEqualTo BigDecimal("5.05")
+        }
     }
 }

@@ -25,10 +25,12 @@ import minerva.android.extension.*
 import minerva.android.extension.validator.Validator
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.math.BigDecimal
@@ -59,10 +61,11 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTransactionSendBinding.bind(view)
+        viewModel.updateFiatRate()
         prepareTokenDropdown()
         setupTexts()
         setupListeners()
-        binding.transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
+        prepareEmptyAmountsView()
         prepareRecipients()
         prepareObservers()
     }
@@ -84,6 +87,11 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                 requestFocus()
             }
         }
+    }
+
+    private fun prepareEmptyAmountsView() = with(binding) {
+        transactionCostAmount.text = getString(R.string.transaction_cost_amount, EMPTY_VALUE, viewModel.token)
+        fiatAmountValue.text = BalanceUtils.getFiatBalance(Double.InvalidValue.toBigDecimal(), viewModel.fiatSymbol)
     }
 
     private fun prepareObservers() {
@@ -182,7 +190,11 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                         balanceToLowError.visibleOrGone(false)
                     }
                 )
-            amount.afterTextChanged { inputText -> allPressed = inputText == viewModel.recalculateAmount.toString() }
+            amount.afterTextChanged { inputText ->
+                allPressed = inputText == viewModel.recalculateAmount.toString()
+                binding.fiatAmountValue.text =
+                    BalanceUtils.getFiatBalance(viewModel.recalculateFiatAmount(getAmount()), viewModel.fiatSymbol)
+            }
         }
     }
 
@@ -198,13 +210,16 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                 viewModel.tokensList.let { tokens ->
                     setBackgroundResource(getSpinnerBackground(tokens.size))
                     isEnabled = isSpinnerEnabled(tokens.size)
-                    adapter = TokenAdapter(context, R.layout.spinner_token, tokens)
-                        .apply { setDropDownViewResource(R.layout.spinner_token) }
+                    adapter = TokenAdapter(context, R.layout.spinner_token, tokens, viewModel.account, viewModel.fiatSymbol)
+                        .apply { setDropDownViewResource(R.layout.spinner_dropdown_view) }
                     setSelection(viewModel.spinnerPosition, false)
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                            viewModel.updateTokenAddress(position - ONE_ELEMENT)
+                            viewModel.run {
+                                updateTokenAddress(position - ONE_ELEMENT)
+                                updateFiatRate()
+                            }
                             setupTexts()
                         }
 
@@ -379,7 +394,10 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     private fun sendTransaction() =
         viewModel.sendTransaction(binding.receiver.text.toString(), getAmount(), getGasPrice(), getGasLimit())
 
-    private fun getAmount() = BigDecimal(binding.amount.text.toString())
+    private fun getAmount(): BigDecimal {
+        val amountString = binding.amount.text.toString()
+        return if (amountString.isNotBlank()) BigDecimal(amountString) else BigDecimal.ZERO
+    }
 
     private fun getGasLimit() = BigInteger(binding.gasLimitEditText.text.toString())
 
@@ -388,9 +406,13 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     @SuppressLint("SetTextI18n")
     private fun setupTexts() {
         binding.apply {
-            viewModel.prepareCurrency().let {
-                amountInputLayout.hint = "${getString(R.string.amount)} ($it)"
-                sendButton.text = "${getString(R.string.send)} $it"
+            viewModel.apply {
+                prepareCurrency().let {
+                    amountInputLayout.hint = "${getString(R.string.amount)} ($it)"
+                    sendButton.text = "${getString(R.string.send)} $it"
+                }
+                fiatAmountValue.text =
+                    BalanceUtils.getFiatBalance(recalculateFiatAmount(getAmount()), fiatSymbol)
             }
         }
     }
