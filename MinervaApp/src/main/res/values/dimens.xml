@@ -29,6 +29,7 @@
     <dimen name="icon_size">40dp</dimen>
     <dimen name="rounded_background_radius">16dp</dimen>
     <dimen name="rounded_background_big">20dp</dimen>
+    <dimen name="xxsmall_logo_size">16dp</dimen>
     <dimen name="xsmall_logo_size">32dp</dimen>
     <dimen name="small_logo_size">36dp</dimen>
     <dimen name="dapp_logo_size">60dp</dimen>

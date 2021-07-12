@@ -11,8 +11,8 @@
         android:id="@+id/token_logo"
         android:layout_width="@dimen/small_logo_size"
         android:layout_height="@dimen/small_logo_size"
-        android:src="@drawable/ic_default_token"
         android:padding="@dimen/margin_xxxsmall"
+        android:src="@drawable/ic_default_token"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -36,28 +36,9 @@
         android:fontFamily="@font/rubik_medium"
         android:textColor="@color/gray"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/token_logo"
-        app:layout_constraintEnd_toStartOf="@id/amount_view"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/token_logo"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="SOME SOME" />
-
-    <minerva.android.widget.CryptoAmountView
-        android:id="@+id/amount_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/arrow"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/arrow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/ic_arrow_down_black"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
