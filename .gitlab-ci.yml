@@ -20,6 +20,7 @@ validateBranch:
   except:
     refs:
       - master
+      - production
   script:
     - ./gradlew test
 
@@ -28,6 +29,7 @@ validateLint:
   except:
     refs:
       - master
+      - production
   script:
     - ./gradlew lint
 
@@ -49,9 +51,8 @@ distributeStagingBuild:
     paths:
       - ./MinervaApp/build/outputs/apk/staging
 
-#Delete when releasing to production
-deployProductionBuild:
-  stage: distribution
+alphaGooglePlayStore:
+  stage: deploy
   only:
     refs:
       - production
@@ -59,30 +60,11 @@ deployProductionBuild:
   script:
     - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
-    - ./etc/profile.d/rvm.sh
+    - . /etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
     - echo $PLAY_JSON > ./json_file.json
-    - fastlane productionBetaRelease json_path:./json_file.json
+    - fastlane productionAlphaRelease json_path:./json_file.json
 
   artifacts:
     paths:
       - ./MinervaApp/build/outputs/apk/production
-
-#Uncomment when production app is ready, to upload every new version automatically. Check if the Google Play credential file is needed at this stage ?
-#productionReleaseBuild:
-#  stage: diploy
-#  only:
-#    refs:
-#      - production
-#
-#  script:
-#  - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
-#    - ./gradlew build
-#    - . /etc/profile.d/rvm.sh
-#    - ./BuildScripts/build_fastlane.sh
-#    - fastlane productionRelease
-#    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
-#
-#  artifacts:
-#    paths:
-#      - ./MinervaApp/build/outputs/apk/production
