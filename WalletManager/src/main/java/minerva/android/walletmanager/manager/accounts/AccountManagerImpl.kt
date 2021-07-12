@@ -255,6 +255,13 @@ class AccountManagerImpl(
     override fun getAllActiveAccounts(chainId: Int): List<Account> =
         getAllAccounts().filter { account -> !account.isHide && !account.isDeleted && account.chainId == chainId }
 
+    override fun getFirstActiveAccountForAllNetworks(): List<Account> =
+        getAllAccountsForSelectedNetworksType().filter { account -> account.shouldShow }
+            .distinctBy { account -> account.chainId }
+
+    override fun getFirstActiveAccountOrNull(chainId: Int): Account? =
+        getAllActiveAccounts(chainId).firstOrNull()
+
     override fun toChecksumAddress(address: String): String = blockchainRepository.toChecksumAddress(address)
 
     override fun getAllAccountsForSelectedNetworksType(): List<Account> =

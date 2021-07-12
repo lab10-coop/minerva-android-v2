@@ -41,4 +41,6 @@ interface AccountManager : Manager {
     fun clearFiat()
     fun connectAccountToNetwork(index: Int, network: Network): Single<String>
     fun changeAccountName(existedAccount: Account, newName: String): Completable
+    fun getFirstActiveAccountOrNull(chainId: Int): Account?
+    fun getFirstActiveAccountForAllNetworks(): List<Account>
 }

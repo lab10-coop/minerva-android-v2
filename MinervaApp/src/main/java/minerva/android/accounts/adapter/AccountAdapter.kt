@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
+import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
@@ -58,10 +59,10 @@ class AccountAdapter(
     }
 
 
-    fun updateSessionCount(accounts: HashMap<String, Int>) {
+    fun updateSessionCount(dappSessionDataList: List<DappSessionData>) {
         activeAccounts.filter { !it.isPending }.forEachIndexed { index, account ->
             account.apply {
-                dappSessionCount = accounts[address] ?: NO_DAPP_SESSION
+                dappSessionCount = dappSessionDataList.find { data -> data.address == address && data.chainId == chainId }?.count ?: NO_DAPP_SESSION
                 notifyItemChanged(index)
             }
         }

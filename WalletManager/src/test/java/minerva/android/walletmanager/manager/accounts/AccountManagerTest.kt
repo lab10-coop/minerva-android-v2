@@ -644,4 +644,63 @@ class AccountManagerTest : RxTest() {
             )
         )
     }
+
+    @Test
+    fun `get first active account test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = true),
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
+                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
+                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(
+                    4,
+                    chainId = ChainId.ATS_SIGMA,
+                    address = "address4",
+                    _isTestNetwork = true,
+                    isHide = true,
+                    isDeleted = true
+                ),
+                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.getFirstActiveAccountOrNull(ChainId.ATS_TAU) shouldBeEqualTo
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false)
+        manager.getFirstActiveAccountOrNull(ChainId.ATS_SIGMA) shouldBeEqualTo null
+    }
+
+    @Test
+    fun `get all first active accounts test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = true),
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
+                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
+                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(
+                    4,
+                    chainId = ChainId.ATS_SIGMA,
+                    address = "address4",
+                    _isTestNetwork = true,
+                    isHide = true,
+                    isDeleted = true
+                ),
+                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
+                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.getFirstActiveAccountForAllNetworks() shouldBeEqualTo listOf(
+            Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
+            Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false)
+        )
+    }
 }
