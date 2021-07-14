@@ -11,9 +11,9 @@
         android:id="@+id/token_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
         android:spinnerMode="dropdown"
         android:background="@drawable/rounded_spinner_background"
         android:elevation="@dimen/cardview_default_elevation" />
@@ -21,9 +21,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
         android:background="@drawable/rounded_white_background"
         android:elevation="@dimen/cardview_default_elevation"
         android:orientation="vertical"
@@ -34,9 +34,9 @@
             style="@style/FormTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginRight="@dimen/margin_normal">
+            android:layout_marginStart="@dimen/margin_normal">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/amount"
@@ -47,13 +47,49 @@
                 android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <LinearLayout
+            android:id="@+id/fiat_amount_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_large"
+            android:orientation="horizontal"
+            tools:ignore="UseCompoundDrawables">
+
+            <TextView
+                android:id="@+id/fiat_amount_label"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/margin_xxsmall"
+                android:fontFamily="@font/rubik_regular"
+                android:gravity="center_vertical"
+                android:text="@string/value"
+                android:textColor="@color/gray" />
+
+            <TextView
+                android:id="@+id/fiat_amount_value"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/rubik_regular"
+                android:gravity="center_vertical"
+                android:text="@string/transaction_cost_amount"
+                android:textColor="@color/gray" />
+
+            <ProgressBar
+                android:id="@+id/fiat_amount_progress_bar"
+                android:layout_width="@dimen/progressbar_size"
+                android:layout_height="@dimen/progressbar_size"
+                android:visibility="gone" />
+        </LinearLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/receiver_input_layout"
             style="@style/FormTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
             android:hint="@string/receiver">
 
             <AutoCompleteTextView
@@ -71,9 +107,9 @@
             android:id="@+id/transaction_cost_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/margin_normal"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginTop="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_large"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_normal"
             android:orientation="horizontal"
             tools:ignore="UseCompoundDrawables">
 
@@ -117,8 +153,8 @@
             style="@style/FormTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
             android:hint="@string/gas_price_gwei"
             android:visibility="gone">
 
@@ -135,8 +171,8 @@
             style="@style/FormTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_normal"
-            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginBottom="@dimen/margin_normal"
             android:hint="@string/gas_limit"
             android:visibility="gone">
@@ -154,9 +190,9 @@
             style="@style/RoundedRedLabelStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_xlarge"
-            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
             android:gravity="center"
             android:text="@string/account_balance_is_to_low"
             android:textAllCaps="true"

@@ -53,29 +53,18 @@ platform :android do
                   )
     end
 
-  desc "Deploy a Production Build to GooglePlay Beta Channel"
-    lane :productionBetaRelease do |options|
+  desc "Deploy a Production Build to GooglePlay Closed Testing (Alpha Channel)"
+    lane :productionAlphaRelease do |options|
       gradle(task: "clean assembleProductionRelease")
       upload_to_play_store(
-      track: 'beta',
+      track: 'alpha',
       package_name: 'digital.minerva',
       json_key: options[:json_path]
       )
              slack(
-               message: "Fresh and funky production build is deployed to BETA channel!",
+               message: "Fresh and funky production build is deployed to Alpha channel!",
                channel: "#minerva_wallet_status",
                slack_url: "https://hooks.slack.com/services/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",
                   )
     end
-
-  desc "Deploy a Production Build to Google Play Store"
-        lane :productionRelease do
-          gradle(task: "clean assembleProductionRelease")
-          upload_to_play_store
-                 slack(
-                   message: "Fresh and funky production build is deployed!",
-                   channel: "#minerva_wallet_status",
-                   slack_url: "https://hooks.slack.com/services/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",
-                      )
-        end
 end

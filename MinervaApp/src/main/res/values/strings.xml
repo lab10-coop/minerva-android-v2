@@ -336,6 +336,7 @@
     <string name="skip">Skip</string>
     <string name="edit_name">Edit Name</string>
     <string name="account_name_label">Account name</string>
+    <string name="value">Value:</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

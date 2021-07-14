@@ -57,7 +57,7 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
     private fun setupRecycleView() = with(binding) {
         networkSpinner.apply {
             setBackgroundResource(R.drawable.rounded_spinner_background)
-            adapter = networkSpinnerAdapter.apply { setDropDownViewResource(R.layout.spinner_token) }
+            adapter = networkSpinnerAdapter
             setPopupBackgroundResource(R.drawable.rounded_white_background)
             setSelection(viewModel.selectedNetworkPosition, false).also {
                 viewModel.selectedNetworkChainId = networkSpinnerAdapter.getItem(viewModel.selectedNetworkPosition).chainId

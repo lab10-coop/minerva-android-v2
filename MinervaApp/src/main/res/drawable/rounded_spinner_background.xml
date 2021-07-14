@@ -6,10 +6,4 @@
             <solid android:color="@android:color/white" />
         </shape>
     </item>
-    <item
-        android:height="@dimen/xsmall_logo_size"
-        android:width="@dimen/xsmall_logo_size"
-        android:right="@dimen/margin_normal"
-        android:gravity="end|center_vertical"
-        android:drawable="@drawable/ic_arrow_down_black" />
 </layer-list>

@@ -108,7 +108,7 @@ class RampFragment : BaseFragment(R.layout.fragment_ramp) {
                 R.layout.spinner_network,
                 accounts + Account(Int.InvalidId),
                 numberOfAccountsToUse
-            ).apply { setDropDownViewResource(R.layout.spinner_token) }
+            )
             setSelection(viewModel.spinnerPosition, false)
             setPopupBackgroundResource(R.drawable.rounded_white_background)
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
