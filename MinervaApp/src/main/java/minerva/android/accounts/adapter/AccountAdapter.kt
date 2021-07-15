@@ -48,6 +48,7 @@ class AccountAdapter(
                 val balanceData = balances.find { balance -> balance.chainId == account.chainId && balance.address.equals(account.address, true) }
                 cryptoBalance = balanceData?.balance?.cryptoBalance ?: Double.InvalidValue.toBigDecimal()
                 fiatBalance = balanceData?.balance?.fiatBalance ?: Double.InvalidValue.toBigDecimal()
+                coinRate = balanceData?.rate ?: Double.InvalidValue
                 notifyItemChanged(index)
             }
         }

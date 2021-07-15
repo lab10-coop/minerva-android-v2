@@ -333,8 +333,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `is update fiat rate and recalculate fiat amount valid for coins`() {
-        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1))
-        whenever(transactionRepository.getCoinFiatRate(any())).doReturn(Single.just(2.00))
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1, coinRate = 2.0))
         NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
         viewModel.run {
             getAccount(0, String.Empty)

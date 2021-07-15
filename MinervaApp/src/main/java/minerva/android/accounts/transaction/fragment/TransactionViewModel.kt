@@ -31,12 +31,12 @@ import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.utils.BalanceUtils
+import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.repository.getMainTokenIconRes
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.math.RoundingMode
 
 class TransactionViewModel(
     private val walletActionsRepository: WalletActionsRepository,
@@ -134,7 +134,7 @@ class TransactionViewModel(
         transactionRepository.getAccount(accountIndex)?.let {
             account = it
             this.tokenAddress = tokenAddress
-            getCoinFiatRate()
+            coinFiatRate = account.coinRate
         }
     }
 
@@ -438,7 +438,7 @@ class TransactionViewModel(
     fun recalculateFiatAmount(amount: BigDecimal): BigDecimal =
         when (fiatRate) {
             Double.InvalidValue -> Double.InvalidValue.toBigDecimal()
-            else -> BigDecimal(fiatRate).multiply(amount).setScale(FIAT_SCALE, RoundingMode.HALF_UP)
+            else -> MarketUtils.calculateFiatBalance(amount, fiatRate)
         }
 
 
@@ -450,25 +450,7 @@ class TransactionViewModel(
         }
     }
 
-    private fun getCoinFiatRate() {
-        launchDisposable {
-            transactionRepository.getCoinFiatRate(account.chainId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = { coinRate ->
-                        coinFiatRate = coinRate
-                    },
-                    onError = {
-                        Timber.e("Get coin fiat error $it")
-                        coinFiatRate = Double.InvalidValue
-                    }
-                )
-        }
-    }
-
     companion object {
         const val ONE_ELEMENT = 1
-        private const val FIAT_SCALE = 2
     }
 }

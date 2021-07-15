@@ -2,6 +2,7 @@ package minerva.android.walletmanager.utils
 
 import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.apiProvider.model.Markets
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
@@ -88,5 +89,18 @@ class MarketUtilsTest {
         val accounts = emptyList<Account>()
         val result = MarketUtils.getMarketsIds(accounts)
         assertEquals("", result)
+    }
+
+    @Test
+    fun `calculate fiat balance with correct values`() {
+        val result = MarketUtils.calculateFiatBalance(BigDecimal.TEN, 2.0)
+        val expectedBalance = BigDecimal.valueOf(20.00).setScale(2, RoundingMode.HALF_DOWN)
+        assertEquals(expectedBalance, result)
+    }
+
+    @Test
+    fun `calculate fiat balance with empty rate`() {
+        val result = MarketUtils.calculateFiatBalance(BigDecimal.TEN, null)
+        assertEquals(Double.InvalidValue.toBigDecimal(), result)
     }
 }
