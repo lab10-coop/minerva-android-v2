@@ -20,6 +20,7 @@ data class Account(
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = BigDecimal.ZERO,
     var accountTokens: List<AccountToken> = listOf(),
+    var coinRate: Double = Double.InvalidValue,
     var fiatBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var owners: List<String>? = null,
     var contractAddress: String = String.Empty,

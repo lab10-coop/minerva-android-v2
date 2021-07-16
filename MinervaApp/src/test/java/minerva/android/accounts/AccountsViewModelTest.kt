@@ -94,7 +94,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.refreshCoinBalances()).thenReturn(
-            Single.just(listOf(CoinBalance(1, "123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN))))
+            Single.just(listOf(CoinBalance(1, "123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN), 10.0)))
         )
         viewModel.balanceLiveData.observeForever(balanceObserver)
         viewModel.refreshCoinBalances()

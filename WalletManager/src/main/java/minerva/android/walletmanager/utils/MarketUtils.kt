@@ -39,10 +39,17 @@ object MarketUtils {
     }
 
     private fun MutableList<CoinBalance>.addBalance(cryptoBalance: Triple<Int, String, BigDecimal>, rate: Double?) {
-        this.add(CoinBalance(cryptoBalance.first, cryptoBalance.second, Balance(cryptoBalance.third, fiatBalance = calculateFiatBalance(cryptoBalance.third, rate))))
+        this.add(
+            CoinBalance(
+                cryptoBalance.first,
+                cryptoBalance.second,
+                Balance(cryptoBalance.third, fiatBalance = calculateFiatBalance(cryptoBalance.third, rate)),
+                rate
+            )
+        )
     }
 
-    private fun calculateFiatBalance(value: BigDecimal, rate: Double?): BigDecimal =
+    fun calculateFiatBalance(value: BigDecimal, rate: Double?): BigDecimal =
         rate?.let { value.multiply(BigDecimal(it)).setScale(SCALE, RoundingMode.HALF_DOWN) }
             .orElse { Double.InvalidValue.toBigDecimal() }
 
