@@ -20,6 +20,7 @@ data class Account(
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = BigDecimal.ZERO,
     var accountTokens: List<AccountToken> = listOf(),
+    var coinRate: Double = Double.InvalidValue,
     var fiatBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var owners: List<String>? = null,
     var contractAddress: String = String.Empty,
@@ -27,7 +28,8 @@ data class Account(
     var dappSessionCount: Int = 0,
     override val bindedOwner: String = String.Empty,
     override var isHide: Boolean = false,
-    private val _isTestNetwork: Boolean = false
+    private val _isTestNetwork: Boolean = false,
+    var isError: Boolean = false
 ) : MinervaPrimitive(address, name, isDeleted, bindedOwner) {
 
     val masterOwnerAddress: String

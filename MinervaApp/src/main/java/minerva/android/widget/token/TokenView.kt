@@ -29,7 +29,10 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
         prepareListeners(callback, account, token)
         getTokensValues(account, token).let { (crypto, fiat) ->
             with(binding.amountView) {
-                setCrypto(getCryptoBalance(crypto))
+                setCryptoBalance(getCryptoBalance(crypto))
+                if (account.isError) {
+                    setErrorColor()
+                }
                 setFiat(getFiatBalance(fiat, fiatSymbol))
             }
         }

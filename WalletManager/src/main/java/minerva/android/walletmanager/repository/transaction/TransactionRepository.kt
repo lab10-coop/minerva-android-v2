@@ -4,7 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.Coin
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -18,7 +18,7 @@ import java.math.BigInteger
 
 interface TransactionRepository {
     val masterSeed: MasterSeed
-    fun refreshCoinBalances(): Single<List<CoinBalance>>
+    fun refreshCoinBalances(): Flowable<Coin>
 
     /**
      * return statement: Map<AccountPrivateKey, List<AccountToken>>

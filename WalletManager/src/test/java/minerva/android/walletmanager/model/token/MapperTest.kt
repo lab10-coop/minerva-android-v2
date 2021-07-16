@@ -1,14 +1,17 @@
-package minerva.android.walletmanager.mappers
+package minerva.android.walletmanager.model.token
 
 import minerva.android.apiProvider.model.TokenData
 import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.defs.BlockchainTransactionType
+import minerva.android.blockchainprovider.model.TokenWithBalance
+import minerva.android.blockchainprovider.model.TokenWithError
 import minerva.android.blockchainprovider.model.TransactionCostPayload
 import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.manager.networks.NetworkManager.networks
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
@@ -18,12 +21,10 @@ import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
-import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.accounts
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.identities
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityData
-import minerva.android.walletmanager.model.token.WalletConfigTestValues.networks
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.tokens
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TxCostPayload
@@ -420,5 +421,23 @@ class MapperTest {
         result.transferType shouldBeEqualTo BlockchainTransactionType.COIN_TRANSFER
         result.from shouldBeEqualTo "address1"
         result.to shouldBeEqualTo "address2"
+    }
+
+    @Test
+    fun `map token with balance to coin crypto balance test`() {
+        val input = TokenWithBalance(1, "aa", BigDecimal.TEN)
+        val result = TokenToCoinCryptoBalanceMapper.map(input)
+        result.address shouldBeEqualTo "aa"
+        result.chainId shouldBeEqualTo 1
+        result.balance shouldBeEqualTo BigDecimal.TEN
+    }
+
+    @Test
+    fun `map token with balance error to coin crypto balance error test`() {
+        val input = TokenWithError(1, "aa", Throwable("Balance Error"))
+        val result = TokenToCoinBalanceErrorMapper.map(input)
+        result.address shouldBeEqualTo "aa"
+        result.chainId shouldBeEqualTo 1
+        result.error.message shouldBeEqualTo "Balance Error"
     }
 }

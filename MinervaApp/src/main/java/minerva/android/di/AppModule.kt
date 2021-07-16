@@ -2,10 +2,10 @@ package minerva.android.di
 
 import android.content.Context
 import minerva.android.BuildConfig
+import minerva.android.accounts.AccountsViewModel
 import minerva.android.accounts.address.AddressViewModel
 import minerva.android.accounts.akm.SafeAccountSettingsViewModel
 import minerva.android.accounts.create.NewAccountViewModel
-import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.accounts.walletconnect.WalletConnectViewModel
 import minerva.android.app.AppViewModel

@@ -1,4 +1,4 @@
-package minerva.android.accounts.transaction.fragment
+package minerva.android.accounts
 
 import android.os.Bundle
 import android.view.View
@@ -7,10 +7,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.button.MaterialButton
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
+import minerva.android.accounts.state.*
+import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.databinding.RefreshableRecyclerViewLayoutBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.showBiometricPrompt
@@ -32,11 +35,9 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout), AccountsFragmentToAdapterListener {
-
     private val viewModel: AccountsViewModel by viewModel()
     private val appUIState: AppUIState by inject()
     private val accountAdapter by lazy { AccountAdapter(this) }
-
     private lateinit var binding: RefreshableRecyclerViewLayoutBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -61,28 +62,56 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     fun stopPendingTransactions() = accountAdapter.stopPendingTransactions()
 
-    override fun onSendTransaction(index: Int) = interactor.showTransactionScreen(index)
+    override fun onSendTransaction(account: Account) =
+        interactor.showTransactionScreen(viewModel.indexOfRawAccounts(account), isBalanceError = account.isError)
 
-    override fun onSendTokenTransaction(accountIndex: Int, tokenAddress: String) =
-        interactor.showTransactionScreen(accountIndex, tokenAddress)
+    override fun onSendTokenTransaction(account: Account, tokenAddress: String) =
+        interactor.showTransactionScreen(
+            viewModel.indexOfRawAccounts(account),
+            tokenAddress,
+            isBalanceError = account.isError
+        )
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
-    override fun onAccountHide(account: Account) =
+    override fun onAccountHide(index: Int) =
         AlertDialogHandler.showHideAccountDialog(
             requireContext(),
             getString(R.string.hide_account_dialog_title),
             getString(R.string.hide_account_dialog_message)
-        ) { viewModel.hideAccount(account) }
+        ) { viewModel.hideAccount(index) }
 
-    override fun onEditName(account: Account) = EditAccountNameDialog(requireContext(), account, ::changeAccountName).show()
+    override fun onEditName(account: Account) =
+        EditAccountNameDialog(requireContext(), account, ::changeAccountName).show()
+
+    override fun updateSessionCount(
+        sessionsPerAccount: List<DappSessionData>,
+        passIndex: (index: Int) -> Unit
+    ) {
+        viewModel.updateSessionCount(sessionsPerAccount, passIndex)
+    }
+
+    override fun showPendingAccount(
+        index: Int,
+        chainId: Int,
+        areMainNetsEnabled: Boolean,
+        isPending: Boolean,
+        passIndex: (index: Int) -> Unit
+    ) {
+        viewModel.showPendingAccount(index, chainId, areMainNetsEnabled, isPending, passIndex)
+    }
+
+    override fun indexOf(account: Account): Int = viewModel.indexOfRawAccounts(account)
+    override fun stopPendingAccounts() {
+        viewModel.stopPendingAccounts()
+    }
 
     private fun changeAccountName(account: Account, newName: String) {
         viewModel.changeAccountName(account, newName)
     }
 
-    override fun onShowAddress(accountIndex: Int) =
-        interactor.showTransactionScreen(accountIndex, screenIndex = RECEIVE_TRANSACTION_INDEX)
+    override fun onShowAddress(account: Account) =
+        interactor.showTransactionScreen(viewModel.indexOfRawAccounts(account), screenIndex = RECEIVE_TRANSACTION_INDEX)
 
     override fun onShowSafeAccountSettings(account: Account, position: Int) =
         startSafeAccountWrappedActivity(
@@ -94,29 +123,24 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         )
 
     override fun onWalletConnect(index: Int) = interactor.showWalletConnectScanner(index)
-
     override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
-
     override fun onExportPrivateKey(account: Account) =
         if (viewModel.isProtectKeysEnabled) showBiometricPrompt({ showExportDialog(account) })
         else showExportDialog(account)
-
-    private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
 
     override fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
         appUIState.updateAccountWidgetState(index, accountWidgetState)
 
     override fun getAccountWidgetState(index: Int): AccountWidgetState = appUIState.getAccountWidgetState(index)
-
     override fun getTokens(account: Account): List<ERC20Token> = viewModel.getTokens(account)
-
-    fun setPendingAccount(index: Int, pending: Boolean) {
-        accountAdapter.setPending(index, pending, viewModel.areMainNetsEnabled)
+    fun updateTokensRate() = viewModel.updateTokensRate()
+    fun refreshBalances() = viewModel.refreshCoinBalances()
+    fun setPendingAccount(index: Int, chainId: Int, pending: Boolean) {
+        accountAdapter.setPending(index, chainId, pending, viewModel.areMainNetsEnabled)
     }
 
-    fun updateTokensRate() = viewModel.updateTokensRate()
+    private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
 
-    fun refreshBalances() = viewModel.refreshCoinBalances()
 
     private fun initFragment() {
         binding.apply {
@@ -161,6 +185,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             recyclerView.apply {
                 layoutManager = LinearLayoutManager(view.context)
                 adapter = accountAdapter
+                (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
             }
         }
     }
@@ -172,19 +197,22 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun setupLiveData() {
         viewModel.apply {
             binding.apply {
-                accountsLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { accounts ->
+                accountsLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { _ ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)
-                    accountAdapter.setAccounts(accounts, activeAccounts, fiatSymbol)
+                    accountAdapter.submitList(activeAccounts)
+                    accountAdapter.setFiat(fiatSymbol)
                     setTatsButtonListener()
                 })
 
-                dappSessions.observe(viewLifecycleOwner, ObserverWithSyncChecking {
-                    accountAdapter.updateSessionCount(it)
+                dappSessions.observe(viewLifecycleOwner, ObserverWithSyncChecking { sessionsPerAccount ->
+                    accountAdapter.updateSessionCount(sessionsPerAccount)
                 })
 
-                balanceLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking {
-                    accountAdapter.updateBalances(it)
-                    checkSwipe()
+                coinBalanceLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { state ->
+                    when (state) {
+                        is CoinBalanceUpdate -> accountAdapter.updateCoinBalances(state.index)
+                        is CoinBalanceCompleted -> checkSwipe()
+                    }
                 })
                 tokenBalanceLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking {
                     accountAdapter.updateTokenBalances()
@@ -210,7 +238,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                         R.string.safe_account_removal_error
                     )
                     is AutomaticBackupError -> handleAutomaticBackupError(errorState.throwable)
-                    RefreshCoinBalancesError -> handleRefreshBalancesError(R.string.refresh_balances_error)
+                    RefreshCoinBalancesError -> binding.swipeRefresh.isRefreshing = false
                     RefreshTokenBalancesError -> handleRefreshBalancesError(R.string.refresh_asset_balances_error)
                     NoFunds -> MinervaFlashbar.show(
                         requireActivity(),

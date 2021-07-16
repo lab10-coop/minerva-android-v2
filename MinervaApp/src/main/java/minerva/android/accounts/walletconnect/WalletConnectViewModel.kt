@@ -10,12 +10,14 @@ import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLE
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
@@ -45,6 +47,23 @@ class WalletConnectViewModel(
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
+
+    val availableNetworks: List<NetworkDataSpinnerItem> get() = prepareAvailableNetworks()
+    private val baseNetwork get() = if (accountManager.areMainNetworksEnabled) ChainId.ETH_MAIN else ChainId.ETH_GOR
+
+    private fun prepareAvailableNetworks(): List<NetworkDataSpinnerItem> =
+        mutableListOf<NetworkDataSpinnerItem>().apply {
+            val availableAccountList = accountManager.getFirstActiveAccountForAllNetworks()
+            add(
+                Int.FirstIndex,
+                NetworkDataSpinnerItem(
+                    getNetworkName(baseNetwork),
+                    baseNetwork,
+                    availableAccountList.find { account -> account.chainId == baseNetwork } != null))
+            addAll(availableAccountList.filter { account -> account.chainId != baseNetwork }
+                .map { account -> NetworkDataSpinnerItem(account.network.name, account.chainId) }
+            )
+        }
 
     fun subscribeToConnectionStatusFlowable() {
         launchDisposable {
@@ -168,29 +187,43 @@ class WalletConnectViewModel(
         if (icons.isEmpty()) String.Empty
         else icons[FIRST_ICON]
 
-    private fun handleSessionRequest(sessionRequest: OnSessionRequest): WalletConnectState =
-        sessionRequest.chainId?.let { id ->
-            requestedNetwork = getNetworkName(id)
-            OnSessionRequest(sessionRequest.meta, requestedNetwork, getAlertType(sessionRequest.meta.url))
-        }.orElse {
-            requestedNetwork = account.network.name
-            OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
+    private fun handleSessionRequest(sessionRequest: OnSessionRequest): WalletConnectState {
+        val id = sessionRequest.chainId
+        return when {
+            id == null -> OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
+            isNetworkNotSupported(chainId = id) -> OnSessionRequest(
+                sessionRequest.meta,
+                id.toString(),
+                WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
+            )
+            account.chainId != id -> getWalletConnectStateForNotEqualNetworks(sessionRequest, id)
+            else -> {
+                requestedNetwork = getNetworkName(id)
+                OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.NO_ALERT)
+            }
         }
 
-    private fun getAlertType(url: String) = when {
-        account.network.name == requestedNetwork -> WalletConnectAlertType.NO_ALERT
-        requestedNetwork == getNetworkName(ETHEREUM_CHAIN_ID) && isUrlContainAccountNetwork(url) -> WalletConnectAlertType.NO_ALERT
-        requestedNetwork == getNetworkName(ETHEREUM_CHAIN_ID) && !isUrlContainAccountNetwork(url) -> WalletConnectAlertType.WARNING
-        account.network.name != requestedNetwork -> WalletConnectAlertType.ERROR
-        else -> WalletConnectAlertType.NO_ALERT
     }
 
-    private fun isUrlContainAccountNetwork(url: String): Boolean = url.contains(account.network.token, true)
+    private fun getWalletConnectStateForNotEqualNetworks(sessionRequest: OnSessionRequest, chainId: Int): WalletConnectState {
+        requestedNetwork = getNetworkName(chainId)
+        return accountManager.getFirstActiveAccountOrNull(chainId)?.let { newAccount ->
+            account = newAccount
+            OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.CHANGE_ACCOUNT_WARNING)
+        }.orElse {
+            OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR)
+        }
+    }
 
     private fun getNetworkName(chainId: Int): String =
         NetworkManager.networks.find { network -> network.chainId == chainId }?.name.orElse { String.Empty }
 
-    companion object {
-        private const val ETHEREUM_CHAIN_ID = 1
+    private fun isNetworkNotSupported(chainId: Int): Boolean =
+        NetworkManager.networks.find { network -> network.chainId == chainId } == null
+
+    fun setAccountForSelectedNetwork(chainId: Int) {
+        accountManager.getFirstActiveAccountOrNull(chainId)?.let { newAccount ->
+            account = newAccount
+        }
     }
 }

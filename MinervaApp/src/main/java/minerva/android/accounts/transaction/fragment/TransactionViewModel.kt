@@ -31,27 +31,36 @@ import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.utils.BalanceUtils
+import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.repository.getMainTokenIconRes
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.math.RoundingMode
 
 class TransactionViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
-
     lateinit var transaction: Transaction
-
+    val wssUri get() = account.network.wsRpc
+    val network get() = account.network
+    val token get() = network.token
+    val spinnerPosition get() = account.getTokenIndex(tokenAddress) + ONE_ELEMENT
     var accountIndex = Int.InvalidIndex
     var tokenAddress: String = String.Empty
     var account: Account = Account(Int.InvalidIndex)
-
     var transactionCost: BigDecimal = BigDecimal.ZERO
     lateinit var recipients: List<Recipient>
+    val fiatSymbol: String = transactionRepository.getFiatSymbol()
+    val isTokenTransaction get() = tokenAddress != String.Empty && !account.isSafeAccount
+    val isSafeAccountTokenTransaction get() = tokenAddress != String.Empty && account.isSafeAccount
+    var isBalanceError: Boolean = false
+    private var fiatRate: Double = Double.InvalidValue
+    private var coinFiatRate: Double = Double.InvalidValue
+    private val isMainTransaction get() = tokenAddress == String.Empty && !account.isSafeAccount
+    private val isSafeAccountMainTransaction get() = tokenAddress == String.Empty && account.isSafeAccount
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -77,18 +86,6 @@ class TransactionViewModel(
     private val _transactionCostLiveData = MutableLiveData<Event<TransactionCost>>()
     val transactionCostLiveData: LiveData<Event<TransactionCost>> get() = _transactionCostLiveData
 
-    val wssUri
-        get() = account.network.wsRpc
-
-    val network
-        get() = account.network
-
-    val token
-        get() = network.token
-
-    val spinnerPosition
-        get() = account.getTokenIndex(tokenAddress) + ONE_ELEMENT
-
     val tokensList: List<TokenWithBalances>
         get() = mutableListOf<TokenWithBalances>().apply {
             with(account.network) {
@@ -103,24 +100,6 @@ class TransactionViewModel(
             }
         }
 
-    val fiatSymbol: String = transactionRepository.getFiatSymbol()
-
-    private var fiatRate: Double = Double.InvalidValue
-
-    private var coinFiatRate: Double = Double.InvalidValue
-
-    private val isMainTransaction
-        get() = tokenAddress == String.Empty && !account.isSafeAccount
-
-    private val isSafeAccountMainTransaction
-        get() = tokenAddress == String.Empty && account.isSafeAccount
-
-    val isTokenTransaction
-        get() = tokenAddress != String.Empty && !account.isSafeAccount
-
-    val isSafeAccountTokenTransaction
-        get() = tokenAddress != String.Empty && account.isSafeAccount
-
     private val tokenDecimals: Int
         get() = when (tokenAddress) {
             String.Empty -> Int.InvalidValue
@@ -134,7 +113,7 @@ class TransactionViewModel(
         transactionRepository.getAccount(accountIndex)?.let {
             account = it
             this.tokenAddress = tokenAddress
-            getCoinFiatRate()
+            coinFiatRate = account.coinRate
         }
     }
 
@@ -438,7 +417,7 @@ class TransactionViewModel(
     fun recalculateFiatAmount(amount: BigDecimal): BigDecimal =
         when (fiatRate) {
             Double.InvalidValue -> Double.InvalidValue.toBigDecimal()
-            else -> BigDecimal(fiatRate).multiply(amount).setScale(FIAT_SCALE, RoundingMode.HALF_UP)
+            else -> MarketUtils.calculateFiatBalance(amount, fiatRate)
         }
 
 
@@ -450,25 +429,7 @@ class TransactionViewModel(
         }
     }
 
-    private fun getCoinFiatRate() {
-        launchDisposable {
-            transactionRepository.getCoinFiatRate(account.chainId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onSuccess = { coinRate ->
-                        coinFiatRate = coinRate
-                    },
-                    onError = {
-                        Timber.e("Get coin fiat error $it")
-                        coinFiatRate = Double.InvalidValue
-                    }
-                )
-        }
-    }
-
     companion object {
         const val ONE_ELEMENT = 1
-        private const val FIAT_SCALE = 2
     }
 }

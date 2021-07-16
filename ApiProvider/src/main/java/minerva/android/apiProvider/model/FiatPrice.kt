@@ -100,8 +100,8 @@ data class FiatPrice(
     val zar: Double? = Double.InvalidValue
 ) {
 
-    fun getRate(fiat: String): Double =
-        getFiatPrices()[fiat] ?: Double.InvalidValue
+    fun getRate(currentCurrency: String): Double =
+        getFiatPrices()[currentCurrency] ?: Double.InvalidValue
 
     private fun getFiatPrices(): Map<String, Double> =
         mutableMapOf<String, Double>().apply {

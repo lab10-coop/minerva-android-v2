@@ -6,9 +6,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
-import minerva.android.blockchainprovider.model.ExecutedTransaction
-import minerva.android.blockchainprovider.model.PendingTransaction
-import minerva.android.blockchainprovider.model.TransactionCostPayload
+import minerva.android.blockchainprovider.model.*
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
@@ -17,9 +15,7 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.defs.TransferType
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
-import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -66,44 +62,69 @@ class TransactionRepositoryTest : RxTest() {
     }
 
     @Test
-    fun `refresh balances test success`() {
-        whenever(blockchainRegularAccountRepository.refreshBalances(any()))
-            .thenReturn(Single.just(listOf(Triple(4, "address1", BigDecimal.ONE))))
-        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 1.0))))
+    fun `refresh coin balances test success`() {
+        whenever(blockchainRegularAccountRepository.getCoinBalances(any()))
+            .thenReturn(Flowable.just(TokenWithBalance(1, "address1", BigDecimal.ONE)))
+        whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 3.0))))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
-
         repository.refreshCoinBalances().test()
             .assertComplete()
-            .assertValue {
-                it.find { balance -> balance.chainId == 4 && balance.address == "address1" }?.balance?.cryptoBalance == BigDecimal.ONE
+            .assertValue { coin ->
+                coin as CoinBalance
+                coin.chainId == 1 &&
+                        coin.address == "address1" &&
+                        coin.balance.cryptoBalance == BigDecimal.ONE
             }
     }
 
     @Test
-    fun `refresh balances test error`() {
-        val error = Throwable()
+    fun `refresh coin balances test error`() {
+        val error = Throwable("Balance Error")
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
-        whenever(blockchainRegularAccountRepository.refreshBalances(any())).thenReturn(
-            Single.error(
-                error
-            )
-        )
+        whenever(blockchainRegularAccountRepository.getCoinBalances(any()))
+            .thenReturn(Flowable.just(TokenWithError(1, "address1", error)))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
-        repository.refreshCoinBalances().test()
-            .assertError(error)
+        repository.refreshCoinBalances()
+            .test()
+            .assertNoErrors()
+            .assertValue { coin ->
+                coin as CoinError
+                coin.address == "address1" &&
+                        coin.error.message == "Balance Error"
+            }
     }
 
     @Test
     fun `refresh balances test when crypto api returns error success`() {
         val error = Throwable()
-        whenever(blockchainRegularAccountRepository.refreshBalances(any()))
-            .thenReturn(Single.just(listOf(Triple(4, "address1", BigDecimal.ONE))))
+        whenever(blockchainRegularAccountRepository.getCoinBalances(any()))
+            .thenReturn(Flowable.just(TokenWithBalance(1, "address1", BigDecimal.ONE)))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
         repository.refreshCoinBalances().test()
             .assertComplete()
-            .assertValue {
-                it.find { balance -> balance.chainId == 4 && balance.address == "address1" }?.balance?.cryptoBalance == BigDecimal.ONE
+            .assertValue { coin ->
+                coin as CoinBalance
+                coin.chainId == 1 &&
+                        coin.address == "address1" &&
+                        coin.balance.cryptoBalance == BigDecimal.ONE
+
+            }
+    }
+
+    @Test
+    fun `refresh balances test when balance of coin is 0`() {
+        whenever(blockchainRegularAccountRepository.getCoinBalances(any()))
+            .thenReturn(Flowable.just(TokenWithBalance(1, "address1", BigDecimal.ZERO)))
+        whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
+        repository.refreshCoinBalances().test()
+            .assertComplete()
+            .assertValue { coin ->
+                coin as CoinBalance
+                coin.chainId == 1 &&
+                        coin.address == "address1" &&
+                        coin.balance.cryptoBalance == BigDecimal.ZERO
+
             }
     }
 
@@ -743,12 +764,26 @@ class TransactionRepositoryTest : RxTest() {
             Account(1, "publicKey", "privateKey", "address", chainId = ChainId.ETH_RIN, _isTestNetwork = true)
         )
         val accountTokens = listOf(
-            AccountToken(ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10"), rawBalance = BigDecimal.TEN),
-            AccountToken(ERC20Token(ChainId.ETH_RIN, "tow", address = "0x02", decimals = "10"), rawBalance = BigDecimal.TEN)
+            AccountToken(
+                ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10"),
+                rawBalance = BigDecimal.TEN
+            ),
+            AccountToken(
+                ERC20Token(ChainId.ETH_RIN, "tow", address = "0x02", decimals = "10"),
+                rawBalance = BigDecimal.TEN
+            )
         )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
-        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Triple(ChainId.ETH_RIN, "privateKey", accountTokens)))
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(
+            Single.just(
+                Triple(
+                    ChainId.ETH_RIN,
+                    "privateKey",
+                    accountTokens
+                )
+            )
+        )
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
 
@@ -774,7 +809,15 @@ class TransactionRepositoryTest : RxTest() {
             )
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
-        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.just(Triple(ChainId.ETH_RIN, "privateKey", accountTokens)))
+        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(
+            Single.just(
+                Triple(
+                    ChainId.ETH_RIN,
+                    "privateKey",
+                    accountTokens
+                )
+            )
+        )
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
 
@@ -787,7 +830,7 @@ class TransactionRepositoryTest : RxTest() {
                     it.find { balance -> balance.chainId == ChainId.ETH_RIN && balance.privateKey == "privateKey" }?.accountTokenList
                 it.size == 1 &&
                         accountTokenList?.size == 2 &&
-                        accountTokenList!![0].token.accountAddress == ""
+                        accountTokenList[0].token.accountAddress == ""
             }
     }
 

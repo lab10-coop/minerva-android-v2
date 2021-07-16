@@ -4,7 +4,13 @@ import minerva.android.accounts.transaction.activity.TransactionActivity.Compani
 import minerva.android.kotlinUtils.Empty
 
 interface FragmentInteractorListener {
-    fun showTransactionScreen(index: Int, tokenAddress: String = String.Empty, screenIndex: Int = SEND_TRANSACTION_INDEX)
+    fun showTransactionScreen(
+        index: Int,
+        tokenAddress: String = String.Empty,
+        screenIndex: Int = SEND_TRANSACTION_INDEX,
+        isBalanceError: Boolean = false
+    )
+
     fun shouldShowLoadingScreen(isLoading: Boolean)
     fun changeActionBarColor(color: Int)
     fun removeSettingsBadgeIcon()

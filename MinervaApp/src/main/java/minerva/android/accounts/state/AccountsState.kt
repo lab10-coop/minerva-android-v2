@@ -1,4 +1,4 @@
-package minerva.android.accounts.transaction.fragment
+package minerva.android.accounts.state
 
 sealed class AccountsErrorState
 object BaseError : AccountsErrorState()
@@ -9,3 +9,7 @@ class AutomaticBackupError(val throwable: Throwable) : AccountsErrorState()
 object RefreshCoinBalancesError : AccountsErrorState()
 object RefreshTokenBalancesError : AccountsErrorState()
 object NoFunds : AccountsErrorState()
+
+sealed class CoinBalanceState
+class CoinBalanceUpdate(val index: Int) : CoinBalanceState()
+object CoinBalanceCompleted : CoinBalanceState()

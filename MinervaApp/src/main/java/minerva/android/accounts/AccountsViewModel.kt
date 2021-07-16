@@ -1,15 +1,20 @@
-package minerva.android.accounts.transaction.fragment
+package minerva.android.accounts
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.accounts.state.*
+import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
@@ -24,9 +29,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.HIDE
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SA_ADDED
 import minerva.android.walletmanager.model.defs.WalletActionType
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
-import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
@@ -51,18 +54,18 @@ class AccountsViewModel(
 ) : BaseViewModel() {
     val hasAvailableAccounts: Boolean get() = accountManager.hasAvailableAccounts
     val activeAccounts: List<Account> get() = accountManager.activeAccounts
+    val rawAccounts: List<Account> get() = accountManager.rawAccounts
     private val cachedTokens: Map<Int, List<ERC20Token>> get() = accountManager.cachedTokens
     var tokenVisibilitySettings: TokenVisibilitySettings = accountManager.getTokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
     val isProtectKeysEnabled: Boolean get() = accountManager.isProtectKeysEnabled
     val arePendingAccountsEmpty: Boolean get() = transactionRepository.getPendingAccounts().isEmpty()
     val isSynced: Boolean get() = walletActionsRepository.isSynced
-    val isRefreshDone: Boolean get() = balancesRefreshed && tokenBalancesRefreshed
-    private var balancesRefreshed = false
+    val isRefreshDone: Boolean get() = coinBalancesRefreshed && tokenBalancesRefreshed
+    private var coinBalancesRefreshed = false
     private var tokenBalancesRefreshed = false
-    val fiatSymbol = transactionRepository.getFiatSymbol()
+    val fiatSymbol: String = transactionRepository.getFiatSymbol()
     val isFirstLaunch: Boolean get() = accountManager.areAllEmptyMainNetworkAccounts()
-
     val accountsLiveData: LiveData<List<Account>> =
         Transformations.map(accountManager.walletConfigLiveData) { event -> event.peekContent().accounts }
 
@@ -72,8 +75,8 @@ class AccountsViewModel(
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
-    private val _balanceLiveData = MutableLiveData<List<CoinBalance>>()
-    val balanceLiveData: LiveData<List<CoinBalance>> get() = _balanceLiveData
+    private val _coinBalanceLiveData = MutableLiveData<CoinBalanceState>()
+    val coinBalanceLiveData: LiveData<CoinBalanceState> get() = _coinBalanceLiveData
 
     private val _tokenBalanceLiveData = MutableLiveData<Unit>()
     val tokenBalanceLiveData: LiveData<Unit> get() = _tokenBalanceLiveData
@@ -84,8 +87,8 @@ class AccountsViewModel(
     private val _addFreeAtsLiveData = MutableLiveData<Event<Boolean>>()
     val addFreeAtsLiveData: LiveData<Event<Boolean>> get() = _addFreeAtsLiveData
 
-    private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
-    val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
+    private val _dappSessions = MutableLiveData<List<DappSessionData>>()
+    val dappSessions: LiveData<List<DappSessionData>> get() = _dappSessions
 
     override fun onResume() {
         super.onResume()
@@ -122,23 +125,28 @@ class AccountsViewModel(
         }
     }
 
-    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>): HashMap<String, Int> =
+    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>): List<DappSessionData> =
         if (sessions.isNotEmpty()) {
-            hashMapOf<String, Int>().apply {
+            mutableListOf<DappSessionData>().apply {
                 accounts.forEach { account ->
                     if (isCurrentSession(sessions, account)) {
                         val count =
-                            sessions.count { session -> session.address == accountManager.toChecksumAddress(account.address) }
-                        this[account.address] = count
+                            sessions.count { session ->
+                                session.address.equals(account.address, true) && session.chainId == account.chainId
+                            }
+                        add(DappSessionData(account.address, account.chainId, count))
                     }
                 }
             }
-        } else hashMapOf()
+        } else emptyList()
 
     private fun isCurrentSession(sessions: List<DappSession>, account: Account) =
-        sessions.find { session -> session.address == accountManager.toChecksumAddress(account.address) } != null
+        sessions.find { session ->
+            session.address.equals(account.address, true) && session.chainId == account.chainId
+        } != null
 
-    fun hideAccount(account: Account) {
+    fun hideAccount(index: Int) {
+        val account = rawAccounts[index]
         launchDisposable {
             accountManager.hideAccount(account)
                 .observeOn(Schedulers.io())
@@ -158,21 +166,77 @@ class AccountsViewModel(
 
     fun refreshCoinBalances() =
         launchDisposable {
-            balancesRefreshed = false
+            coinBalancesRefreshed = false
             transactionRepository.refreshCoinBalances()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { balancePerAccountMap ->
-                        balancesRefreshed = true
-                        _balanceLiveData.value = balancePerAccountMap
+                    onComplete = {
+                        coinBalancesRefreshed = true
+                        _coinBalanceLiveData.value = CoinBalanceCompleted
+                    },
+                    onNext = { coin ->
+                        val index = when (coin) {
+                            is CoinBalance -> getAccountIndexToUpdate(coin)
+                            is CoinError -> {
+                                logError("Refresh balance error: ${coin.error}")
+                                getAccountIndexWithError(coin)
+                            }
+                            else -> Int.InvalidIndex
+                        }
+
+                        if (index != Int.InvalidIndex) {
+                            _coinBalanceLiveData.value = CoinBalanceUpdate(index)
+                        }
                     },
                     onError = { error ->
-                        logError("Refresh balance error: $error")
+                        val errorMessage: String = if (error is CompositeException) {
+                            "${error.exceptions}"
+                        } else {
+                            "$error"
+                        }
+                        logError("Refresh balance error: $errorMessage")
                         _errorLiveData.value = Event(RefreshCoinBalancesError)
                     }
                 )
         }
+
+    private fun getAccountIndexWithError(coin: CoinError): Int {
+        activeAccounts
+            .filter { account -> !account.isPending }
+            .forEachIndexed { index, account ->
+                if (isAccountToUpdate(account, coin) && !account.isError) {
+                    account.isError = true
+                    return index
+                }
+            }
+        return Int.InvalidIndex
+    }
+
+    private fun getAccountIndexToUpdate(coinBalance: CoinBalance): Int {
+        activeAccounts
+            .filter { account -> !account.isPending }
+            .forEachIndexed { index, account ->
+                if (isCoinBalanceToUpdated(account, coinBalance)) {
+                    account.cryptoBalance = coinBalance.balance.cryptoBalance
+                    account.fiatBalance = coinBalance.balance.fiatBalance
+                    account.coinRate = coinBalance.rate ?: Double.InvalidValue
+                    return index
+
+                } else if (isAccountToUpdate(account, coinBalance) && account.isError) {
+                    account.isError = false
+                    return index
+                }
+            }
+        return Int.InvalidIndex
+    }
+
+    private fun isCoinBalanceToUpdated(account: Account, coinBalance: CoinBalance): Boolean =
+        isAccountToUpdate(account, coinBalance) &&
+                (account.cryptoBalance != coinBalance.balance.cryptoBalance || account.fiatBalance != coinBalance.balance.fiatBalance)
+
+    private fun isAccountToUpdate(account: Account, coinBalance: Coin) =
+        (account.address.equals(coinBalance.address, true) && account.chainId == coinBalance.chainId)
 
     fun refreshTokensBalances() =
         launchDisposable {
@@ -364,7 +428,49 @@ class AccountsViewModel(
         }
     }
 
+    fun updateSessionCount(
+        sessionsPerAccount: List<DappSessionData>,
+        passIndex: (index: Int) -> Unit
+    ) {
+        activeAccounts
+            .filter { account -> !account.isPending }
+            .forEachIndexed { index, account ->
+                account.apply {
+                    dappSessionCount = sessionsPerAccount
+                        .find { data ->
+                            data.address.equals(address, true) && data.chainId == chainId
+                        }?.count
+                        ?: NO_DAPP_SESSION
+                    passIndex(index)
+                }
+            }
+    }
+
+    fun showPendingAccount(
+        index: Int,
+        chainId: Int,
+        areMainNetsEnabled: Boolean,
+        isPending: Boolean,
+        passIndex: (index: Int) -> Unit
+    ) {
+        rawAccounts.forEachIndexed { position, account ->
+            if (shouldShowPending(account, index, chainId, areMainNetsEnabled)) {
+                account.isPending = isPending
+                passIndex(position)
+            }
+        }
+    }
+
+    fun indexOfRawAccounts(account: Account): Int = rawAccounts.indexOf(account)
+    fun stopPendingAccounts() {
+        rawAccounts.forEach { account -> account.isPending = false }
+    }
+
+    private fun shouldShowPending(account: Account, index: Int, chainId: Int, areMainNetsEnabled: Boolean): Boolean =
+        account.id == index && account.chainId == chainId && account.network.testNet != areMainNetsEnabled
+
     companion object {
         private const val DAY: Long = 24L
+        private const val NO_DAPP_SESSION = 0
     }
 }

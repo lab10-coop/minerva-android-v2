@@ -40,6 +40,7 @@ class AccountManagerImpl(
 ) : AccountManager {
     override var hasAvailableAccounts: Boolean = false
     override var activeAccounts: List<Account> = emptyList()
+    override var rawAccounts: List<Account> = emptyList()
     override var cachedTokens: Map<Int, List<ERC20Token>> = mapOf()
     override val areMainNetworksEnabled: Boolean get() = walletManager.areMainNetworksEnabled
     override val isProtectKeysEnabled: Boolean get() = localStorage.isProtectKeysEnabled
@@ -53,6 +54,7 @@ class AccountManagerImpl(
                 hasAvailableAccounts = hasActiveAccount
                 activeAccounts = getActiveAccounts(this)
                 cachedTokens = filterCachedTokens(erc20Tokens)
+                rawAccounts = accounts
             }
             walletConfigEvent
         }
@@ -141,7 +143,10 @@ class AccountManagerImpl(
 
     private fun updateAccount(existedAccount: Account, network: Network): Single<String> {
         val accountName =
-            if (existedAccount.name.isBlank()) CryptoUtils.prepareName(network.name, existedAccount.id) else existedAccount.name
+            if (existedAccount.name.isBlank()) CryptoUtils.prepareName(
+                network.name,
+                existedAccount.id
+            ) else existedAccount.name
         walletManager.getWalletConfig().run {
             val existAccountIndex = accounts.indexOf(existedAccount)
             accounts[existAccountIndex].apply {
@@ -255,6 +260,13 @@ class AccountManagerImpl(
     override fun getAllActiveAccounts(chainId: Int): List<Account> =
         getAllAccounts().filter { account -> !account.isHide && !account.isDeleted && account.chainId == chainId }
 
+    override fun getFirstActiveAccountForAllNetworks(): List<Account> =
+        getAllAccountsForSelectedNetworksType().filter { account -> account.shouldShow }
+            .distinctBy { account -> account.chainId }
+
+    override fun getFirstActiveAccountOrNull(chainId: Int): Account? =
+        getAllActiveAccounts(chainId).firstOrNull()
+
     override fun toChecksumAddress(address: String): String = blockchainRepository.toChecksumAddress(address)
 
     override fun getAllAccountsForSelectedNetworksType(): List<Account> =
@@ -267,8 +279,9 @@ class AccountManagerImpl(
             .sortedBy { account -> account.first }
     }
 
-    override fun getNumberOfAccountsToUse() = getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted }
-        .distinctBy { account -> account.id }.size
+    override fun getNumberOfAccountsToUse() =
+        getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted }
+            .distinctBy { account -> account.id }.size
 
     override fun clearFiat() =
         walletManager.getWalletConfig().accounts.forEach { account ->

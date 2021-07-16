@@ -1,7 +1,7 @@
-package minerva.android.walletmanager.mappers
+package minerva.android.walletmanager.model.token
 
-import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.mappers.WalletActionPayloadMapper
+import minerva.android.walletmanager.model.wallet.WalletAction
 import org.amshove.kluent.shouldBe
 import org.junit.Test
 

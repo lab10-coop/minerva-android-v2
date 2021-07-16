@@ -158,17 +158,21 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             }).apply {
             setOnDismissListener { shouldScan = true }
             setView(meta, network)
-            handleNetwork(dialogType)
+            handleNetwork(network, dialogType)
             show()
         }
     }
 
-    private fun DappConfirmationDialog.handleNetwork(dialogType: WalletConnectAlertType) {
-        when(dialogType) {
-            WalletConnectAlertType.NO_ALERT -> {}
-            WalletConnectAlertType.WARNING -> setWrongNetworkWarning(viewModel.requestedNetwork)
-            WalletConnectAlertType.ERROR -> setWrongNetworkMessage(viewModel.requestedNetwork)
-            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning()
+    private fun DappConfirmationDialog.handleNetwork(network: String, dialogType: WalletConnectAlertType) {
+        when (dialogType) {
+            WalletConnectAlertType.NO_ALERT -> {
+            }
+            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning(viewModel.availableNetworks) { chainId ->
+                viewModel.setAccountForSelectedNetwork(chainId)
+            }
+            WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(viewModel.requestedNetwork)
+            WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(viewModel.requestedNetwork)
+            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network)
         }
     }
 
