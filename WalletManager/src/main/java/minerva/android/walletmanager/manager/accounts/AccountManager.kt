@@ -16,6 +16,7 @@ interface AccountManager : Manager {
     val isProtectTransactionsEnabled: Boolean
     var hasAvailableAccounts: Boolean
     var activeAccounts: List<Account>
+    var rawAccounts: List<Account>
     var cachedTokens: Map<Int, List<ERC20Token>>
     val getTokenVisibilitySettings: TokenVisibilitySettings
     fun areAllEmptyMainNetworkAccounts(): Boolean

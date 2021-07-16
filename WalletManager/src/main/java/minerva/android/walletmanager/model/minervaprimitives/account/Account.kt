@@ -28,7 +28,8 @@ data class Account(
     var dappSessionCount: Int = 0,
     override val bindedOwner: String = String.Empty,
     override var isHide: Boolean = false,
-    private val _isTestNetwork: Boolean = false
+    private val _isTestNetwork: Boolean = false,
+    var isError: Boolean = false
 ) : MinervaPrimitive(address, name, isDeleted, bindedOwner) {
 
     val masterOwnerAddress: String

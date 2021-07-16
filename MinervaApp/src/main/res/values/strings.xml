@@ -343,6 +343,7 @@
     <string name="account_name_label">Account name</string>
     <string name="change_account_warning">This DApp requests a connection to %s and therefore it has been adjusted.</string>
     <string name="value">Value:</string>
+    <string name="token_balance_unlcear_message">Token balance unclear - transaction could fail</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

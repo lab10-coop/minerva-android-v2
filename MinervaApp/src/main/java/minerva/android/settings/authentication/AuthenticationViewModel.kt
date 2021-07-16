@@ -2,7 +2,6 @@ package minerva.android.settings.authentication
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import minerva.android.accounts.enum.ErrorCode
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.storage.LocalStorage

@@ -11,11 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.R
+import minerva.android.accounts.AccountsFragment
 import minerva.android.accounts.transaction.activity.TransactionActivity
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.BALANCE_ERROR
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TOKEN_ADDRESS
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
-import minerva.android.accounts.transaction.fragment.AccountsFragment
 import minerva.android.accounts.walletconnect.*
 import minerva.android.databinding.ActivityMainBinding
 import minerva.android.extension.*
@@ -168,9 +169,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                     NotExistedIdentity -> showToast(getString(R.string.not_existed_identity_message))
                 }
             })
-            loadingLiveData.observe(this@MainActivity, EventObserver {
-                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(it.first, it.second)
-            })
             updateCredentialSuccessLiveData.observe(this@MainActivity, EventObserver {
                 showBindCredentialFlashbar(true, it)
             })
@@ -293,13 +291,13 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             show()
         }
 
-    private fun updatePendingAccount(it: PendingAccount) {
+    private fun updatePendingAccount(account: PendingAccount) {
         showFlashbar(
             getString(R.string.transaction_success_title),
-            getString(R.string.transaction_success_message, it.amount, getNetwork(it.chainId).token)
+            getString(R.string.transaction_success_message, account.amount, getNetwork(account.chainId).token)
         )
         (getCurrentFragment() as? AccountsFragment)?.apply {
-            updateAccountFragment { setPendingAccount(it.index, false) }
+            updateAccountFragment { setPendingAccount(account.index, account.chainId, false) }
         }
         viewModel.clearWebSocketSubscription()
     }
@@ -403,22 +401,23 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         data?.apply {
             val index = getIntExtra(ACCOUNT_INDEX, Int.InvalidValue)
             if (index != Int.InvalidValue) {
+                val chainId = getIntExtra(ACCOUNT_CHAIN_ID, Int.InvalidValue)
                 viewModel.subscribeToExecutedTransactions(index)
-                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, true)
+                (getCurrentFragment() as? AccountsFragment)?.setPendingAccount(index, chainId, true)
             } else {
                 getStringExtra(TRANSACTION_MESSAGE)?.let { message ->
                     showFlashbar(getString(R.string.transaction_success_title), message)
                 }
             }
         }
-
     }
 
-    override fun showTransactionScreen(index: Int, tokenAddress: String, screenIndex: Int) {
+    override fun showTransactionScreen(index: Int, tokenAddress: String, screenIndex: Int, isBalanceError: Boolean) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
             putExtra(ACCOUNT_INDEX, index)
             putExtra(TOKEN_ADDRESS, tokenAddress)
             putExtra(TRANSACTION_SCREEN, screenIndex)
+            putExtra(BALANCE_ERROR, isBalanceError)
         }
     }
 
@@ -497,5 +496,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
         const val JWT = "jwt"
         const val ACCOUNT_INDEX = "account_index"
+        const val ACCOUNT_CHAIN_ID = "account_indicator"
     }
 }

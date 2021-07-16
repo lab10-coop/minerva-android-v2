@@ -4,16 +4,12 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.model.PendingTransaction
-import minerva.android.blockchainprovider.model.TransactionCostPayload
-import minerva.android.blockchainprovider.model.TransactionPayload
-import minerva.android.blockchainprovider.model.TxCostData
+import minerva.android.blockchainprovider.model.*
 import java.math.BigDecimal
 import java.math.BigInteger
 
 interface BlockchainRegularAccountRepository {
-    fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Triple<Int, String, BigDecimal>>>
-
+    fun getCoinBalances(addresses: List<Pair<Int, String>>): Flowable<Token>
     fun getTransactionCostInEth(gasPrice: BigDecimal, gasLimit: BigDecimal): BigDecimal
     fun transferNativeCoin(
         chainId: Int,

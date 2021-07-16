@@ -5,12 +5,10 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
+import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.defs.Operation
-import minerva.android.blockchainprovider.model.PendingTransaction
-import minerva.android.blockchainprovider.model.TransactionCostPayload
-import minerva.android.blockchainprovider.model.TransactionPayload
-import minerva.android.blockchainprovider.model.TxCostData
+import minerva.android.blockchainprovider.model.*
 import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.smartContracts.ERC20
@@ -99,15 +97,31 @@ class BlockchainRegularAccountRepositoryImpl(
         web3j.value(chainId)
             .ethBlockNumber()
             .flowable()
-            .map { it.blockNumber }
+            .map { ethBlock -> ethBlock.blockNumber }
 
     /**
-     * List arguments: first - network short name, second - wallet address (public)
+     * List arguments: first - chainId, second - network short name, third - wallet address (public)
      */
-    override fun refreshBalances(networkAddress: List<Pair<Int, String>>): Single<List<Triple<Int, String, BigDecimal>>> =
-        Observable.fromIterable(networkAddress)
-            .flatMapSingle { (chainId, address) -> getBalance(chainId, address) }
-            .toList()
+    override fun getCoinBalances(addresses: List<Pair<Int, String>>): Flowable<Token> {
+        val coinBalanceFlowables = mutableListOf<Flowable<Token>>()
+        addresses.onEach { (chainId, address) ->
+            coinBalanceFlowables.add(getCoinBalance(chainId, address).subscribeOn(Schedulers.io()))
+        }
+        return Flowable.mergeDelayError(coinBalanceFlowables)
+    }
+
+    private fun getCoinBalance(chainId: Int, address: String): Flowable<Token> =
+        web3j.value(chainId).ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .flowable()
+            .map { ethBalance ->
+                if (ethBalance.error != null) {
+                    TokenWithError(chainId, address, Throwable(ethBalance.error.message))
+                } else {
+                    TokenWithBalance(chainId, address, toEther(BigDecimal(ethBalance.balance)))
+                }
+            }.onErrorReturn { error ->
+                TokenWithError(chainId, address, error)
+            }
 
     override fun toChecksumAddress(address: String): String = Keys.toChecksumAddress(address)
 
@@ -333,12 +347,6 @@ class BlockchainRegularAccountRepositoryImpl(
         ),
         ContractGasProvider(payload.gasPriceWei, payload.gasLimit)
     )
-
-    private fun getBalance(chainId: Int, address: String): Single<Triple<Int, String, BigDecimal>> =
-        web3j.value(chainId).ethGetBalance(address, DefaultBlockParameterName.LATEST)
-            .flowable()
-            .map { Triple(chainId, address, toEther(BigDecimal(it.balance))) }
-            .firstOrError()
 
     private fun getERC20Balance(
         tokenAddress: String,

@@ -45,7 +45,7 @@ class TokenAdapter(
                     arrow.visibleOrGone(count > ONE_ELEMENT)
                 }
                 amountView.apply {
-                    setCrypto(getCryptoBalance(item.balance))
+                    setCryptoBalance(getCryptoBalance(item.balance))
                     setFiat(getFiatBalance(item.fiatBalance, fiatSymbol))
                 }
             }

@@ -186,7 +186,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:id="@+id/balance_to_low_error"
+            android:id="@+id/error_view"
             style="@style/RoundedRedLabelStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
