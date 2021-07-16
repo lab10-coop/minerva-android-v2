@@ -263,7 +263,12 @@
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
     <string name="dapp_connection_warning">This WalletConnect Session provides no information on the needed network. Please make sure you selected the correct account/network.</string>
     <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
+    <string name="unsupported_network_message">This website requests a connection to Chain id: %s, which is not yet supported by Minerva Wallet.</string>
+    <string name="chain_id">Chain id: %s</string>
+    <string name="missing_account_message">You don\'t have an account on %s yet. Please add it first on your Values screen, by clicking \'+\'.</string>
     <string name="wrong_network_warning_message">This website requests a connection to %s, which is often wrong for applications on other blockchains. Please proceed with ‘Connect’ if you are sure with your blockchain network selection.</string>
+    <string name="not_defined_warning_ethereum_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.\n\nYou don\'t have an account on Ethereum yet. Please add it first on your Values screen, by clicking \'+\'.</string>
+    <string name="not_defined_warning_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.</string>
     <string name="dapp_disconnected">%s session disconnected</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
@@ -336,6 +341,7 @@
     <string name="skip">Skip</string>
     <string name="edit_name">Edit Name</string>
     <string name="account_name_label">Account name</string>
+    <string name="change_account_warning">This DApp requests a connection to %s and therefore it has been adjusted.</string>
     <string name="value">Value:</string>
 
     <string-array name="currencies">

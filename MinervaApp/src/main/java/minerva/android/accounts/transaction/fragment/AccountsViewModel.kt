@@ -7,6 +7,7 @@ import androidx.lifecycle.Transformations
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.InvalidId
@@ -84,8 +85,8 @@ class AccountsViewModel(
     private val _addFreeAtsLiveData = MutableLiveData<Event<Boolean>>()
     val addFreeAtsLiveData: LiveData<Event<Boolean>> get() = _addFreeAtsLiveData
 
-    private val _dappSessions = MutableLiveData<HashMap<String, Int>>()
-    val dappSessions: LiveData<HashMap<String, Int>> get() = _dappSessions
+    private val _dappSessions = MutableLiveData<List<DappSessionData>>()
+    val dappSessions: LiveData<List<DappSessionData>> get() = _dappSessions
 
     override fun onResume() {
         super.onResume()
@@ -122,21 +123,25 @@ class AccountsViewModel(
         }
     }
 
-    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>): HashMap<String, Int> =
+    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>): List<DappSessionData> =
         if (sessions.isNotEmpty()) {
-            hashMapOf<String, Int>().apply {
+            mutableListOf<DappSessionData>().apply {
                 accounts.forEach { account ->
                     if (isCurrentSession(sessions, account)) {
                         val count =
-                            sessions.count { session -> session.address == accountManager.toChecksumAddress(account.address) }
-                        this[account.address] = count
+                            sessions.count { session ->
+                                session.address.equals(account.address, true) && session.chainId == account.chainId
+                            }
+                        add(DappSessionData(account.address, account.chainId, count))
                     }
                 }
             }
-        } else hashMapOf()
+        } else emptyList()
 
     private fun isCurrentSession(sessions: List<DappSession>, account: Account) =
-        sessions.find { session -> session.address == accountManager.toChecksumAddress(account.address) } != null
+        sessions.find { session ->
+            session.address.equals(account.address, true) && session.chainId == account.chainId
+        } != null
 
     fun hideAccount(account: Account) {
         launchDisposable {

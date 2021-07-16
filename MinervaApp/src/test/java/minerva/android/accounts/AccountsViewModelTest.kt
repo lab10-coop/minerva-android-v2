@@ -7,6 +7,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.transaction.fragment.*
+import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.mock.*
 import minerva.android.walletmanager.manager.accounts.AccountManager
@@ -49,8 +50,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val tokensBalanceObserver: Observer<Unit> = mock()
     private val tokensBalanceCaptor: KArgumentCaptor<Unit> = argumentCaptor()
 
-    private val dappSessionObserver: Observer<HashMap<String, Int>> = mock()
-    private val dappSessionCaptor: KArgumentCaptor<HashMap<String, Int>> = argumentCaptor()
+    private val dappSessionObserver: Observer<List<DappSessionData>> = mock()
+    private val dappSessionCaptor: KArgumentCaptor<List<DappSessionData>> = argumentCaptor()
 
     private val errorObserver: Observer<Event<AccountsErrorState>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<AccountsErrorState>> = argumentCaptor()
@@ -361,7 +362,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {
             verify(dappSessionObserver).onChanged(capture())
-            firstValue["address"] == 1
+            firstValue.find { data -> data.address == "address" && data.chainId == 1 }?.count == 1
         }
     }
 
