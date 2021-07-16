@@ -280,7 +280,7 @@
         android:layout_marginTop="@dimen/margin_small"
         android:layout_marginEnd="@dimen/margin_small"
         android:layout_marginBottom="@dimen/margin_small"
-        app:layout_constraintBottom_toTopOf="@+id/balance_to_low_error"
+        app:layout_constraintBottom_toTopOf="@+id/error_view"
         app:layout_constraintLeft_toRightOf="@+id/transaction_cost"
         app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
         app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
@@ -339,7 +339,7 @@
         tools:ignore="ContentDescription" />
 
     <TextView
-        android:id="@+id/balance_to_low_error"
+        android:id="@+id/error_view"
         style="@style/RoundedRedLabelStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -361,6 +361,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_normal"
-        app:layout_constraintTop_toBottomOf="@+id/balance_to_low_error" />
+        app:layout_constraintTop_toBottomOf="@+id/error_view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

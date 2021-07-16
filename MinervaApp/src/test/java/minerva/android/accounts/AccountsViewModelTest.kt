@@ -6,7 +6,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
-import minerva.android.accounts.transaction.fragment.*
+import minerva.android.accounts.state.*
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.mock.*
@@ -16,6 +16,7 @@ import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinError
 import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -44,8 +45,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val logger: Logger = mock()
     private lateinit var viewModel: AccountsViewModel
 
-    private val balanceObserver: Observer<List<CoinBalance>> = mock()
-    private val balanceCaptor: KArgumentCaptor<List<CoinBalance>> = argumentCaptor()
+    private val balanceObserver: Observer<CoinBalanceState> = mock()
+    private val balanceCaptor: KArgumentCaptor<CoinBalanceState> = argumentCaptor()
 
     private val tokensBalanceObserver: Observer<Unit> = mock()
     private val tokensBalanceCaptor: KArgumentCaptor<Unit> = argumentCaptor()
@@ -89,35 +90,61 @@ class AccountsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `refresh balances success`() {
+    fun `refresh balances coin balance test`() {
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
-        whenever(transactionRepository.refreshCoinBalances()).thenReturn(
-            Single.just(listOf(CoinBalance(1, "123", Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN), 10.0)))
-        )
-        viewModel.balanceLiveData.observeForever(balanceObserver)
+        whenever(transactionRepository.refreshCoinBalances())
+            .thenReturn(
+                Flowable.just(
+                    CoinBalance(
+                        1, "123",
+                        Balance(cryptoBalance = BigDecimal.ONE, fiatBalance = BigDecimal.TEN),
+                        1.0
+                    )
+                )
+            )
+        viewModel.coinBalanceLiveData.observeForever(balanceObserver)
         viewModel.refreshCoinBalances()
         balanceCaptor.run {
             verify(balanceObserver).onChanged(capture())
-            firstValue.find { balance -> balance.chainId == 1 && balance.address == "123" }?.balance?.cryptoBalance == BigDecimal.ONE
+            firstValue as CoinBalanceCompleted
         }
     }
 
     @Test
-    fun `refresh balances error`() {
-        val error = Throwable()
+    fun `refresh balances return coin balance error test`() {
+        val error = Throwable("Error Balance")
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
-        whenever(transactionRepository.refreshCoinBalances()).thenReturn(Single.error(error))
+        whenever(transactionRepository.refreshCoinBalances())
+            .thenReturn(Flowable.just(CoinError(1, "123", error)))
+        viewModel.coinBalanceLiveData.observeForever(balanceObserver)
+        viewModel.refreshCoinBalances()
+        balanceCaptor.run {
+            verify(balanceObserver).onChanged(capture())
+            firstValue as CoinBalanceCompleted
+        }
+    }
+
+
+    @Test
+    fun `refresh balances return error test`() {
+        val error = Throwable("Error Balance")
+        whenever(walletConnectRepository.getSessionsFlowable())
+            .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
+        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.getAllAccounts()).thenReturn(accounts)
+        whenever(transactionRepository.refreshCoinBalances())
+            .thenReturn(Flowable.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.refreshCoinBalances()
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
-            firstValue.peekContent() == RefreshCoinBalancesError
+            firstValue.peekContent() as RefreshCoinBalancesError
         }
     }
 
@@ -231,8 +258,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
         )
         whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.hideAccount(Account(1, "test"))
+        viewModel.hideAccount(0)
         errorCaptor.run {
             verify(errorObserver).onChanged(capture())
         }
@@ -244,8 +272,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.accountHideLiveData.observeForever(accountRemoveObserver)
-        viewModel.hideAccount(Account(1, "test"))
+        viewModel.hideAccount(0)
         accountRemoveCaptor.run {
             verify(accountRemoveObserver).onChanged(capture())
         }
@@ -460,7 +489,10 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `check creating new account flow`() {
         val error = Throwable("error")
         NetworkManager.initialize(listOf(Network(chainId = 3, httpRpc = "some_rpc")))
-        whenever(accountManager.createRegularAccount(any())).thenReturn(Single.just("Cookie Account"), Single.error(error))
+        whenever(accountManager.createRegularAccount(any())).thenReturn(
+            Single.just("Cookie Account"),
+            Single.error(error)
+        )
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         viewModel.run {
             loadingLiveData.observeForever(loadingObserver)
@@ -476,12 +508,56 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `change account name flow`() {
         val error = Throwable("error")
-        whenever(accountManager.changeAccountName(any(), any())).thenReturn(Completable.complete(), Completable.error(error))
+        whenever(accountManager.changeAccountName(any(), any())).thenReturn(
+            Completable.complete(),
+            Completable.error(error)
+        )
         viewModel.run {
             errorLiveData.observeForever(errorObserver)
             changeAccountName(Account(1), "new name")
             changeAccountName(Account(1), "new name")
         }
         verify(errorObserver).onChanged(errorCaptor.capture())
+    }
+
+    @Test
+    fun `update session count test`() {
+        val accounts = listOf(
+            Account(1, address = "address1", chainId = 1),
+            Account(2, address = "address2", chainId = 2)
+        )
+        whenever(accountManager.activeAccounts).thenReturn(accounts)
+        val lis = listOf(DappSessionData("address1", 1, 2), DappSessionData("address2", 2, 3))
+        viewModel.updateSessionCount(lis) {}
+
+        accounts[0].dappSessionCount shouldBeEqualTo 2
+        accounts[1].dappSessionCount shouldBeEqualTo 3
+    }
+
+    @Test
+    fun `show pending account test test`() {
+        NetworkManager.initialize(listOf(Network(chainId = 99, httpRpc = "url")))
+        val accounts = listOf(
+            Account(1, address = "address1", chainId = 99),
+            Account(2, address = "address2", chainId = 99)
+        )
+        whenever(accountManager.rawAccounts).thenReturn(accounts)
+        viewModel.showPendingAccount(1, 99, areMainNetsEnabled = false, isPending = true) {}
+
+        accounts[0].isPending shouldBeEqualTo true
+        accounts[1].isPending shouldBeEqualTo false
+    }
+
+    @Test
+    fun `stop pending accounts test`() {
+        val accounts = listOf(
+            Account(1, address = "address1", chainId = 99, isPending = true),
+            Account(2, address = "address2", chainId = 99, isPending = true)
+        )
+        whenever(accountManager.rawAccounts).thenReturn(accounts)
+        viewModel.stopPendingAccounts()
+        accounts.all {
+            it.isPending shouldBeEqualTo false
+        }
     }
 }

@@ -68,6 +68,17 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
         prepareEmptyAmountsView()
         prepareRecipients()
         prepareObservers()
+        showBalanceError()
+    }
+
+    private fun showBalanceError() {
+        if (viewModel.isBalanceError) {
+            with(binding.errorView) {
+                visible()
+                text = getString(R.string.token_balance_unlcear_message)
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.warningOrange))
+            }
+        }
     }
 
     override fun onResume() {
@@ -100,13 +111,23 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                 viewLifecycleOwner,
                 EventObserver { listener.onTransactionAccepted(getString(R.string.refresh_balance_to_check_transaction_status)) })
             sendTransactionLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionStatus(it) })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver {
-                it.message?.let { message -> showErrorFlashBar(message) } ?: showErrorFlashBar()
-            })
-            loadingLiveData.observe(viewLifecycleOwner, EventObserver { if (it) showLoader() else hideLoader() })
-            saveWalletActionFailedLiveData.observe(viewLifecycleOwner, EventObserver { listener.onError(it.first) })
-            transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCosts(it) })
-            transactionCostLoadingLiveData.observe(viewLifecycleOwner, EventObserver { handleTransactionCostLoader(it) })
+            errorLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { error ->
+                    error.message?.let { message -> showErrorFlashBar(message) } ?: showErrorFlashBar()
+                })
+            loadingLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { isShown -> if (isShown) showLoader() else hideLoader() })
+            saveWalletActionFailedLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { (balance, _) -> listener.onError(balance) })
+            transactionCostLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { txCost -> handleTransactionCosts(txCost) })
+            transactionCostLoadingLiveData.observe(
+                viewLifecycleOwner,
+                EventObserver { isShown -> handleTransactionCostLoader(isShown) })
             overrideTxCostLiveData.observe(viewLifecycleOwner, EventObserver { shouldOverrideTransactionCost = true })
         }
     }
@@ -181,13 +202,13 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                     onNext = {
                         viewModel.isTransactionAvailable(it).let { isAvailable ->
                             sendButton.isEnabled = isAvailable
-                            balanceToLowError.visibleOrGone(!isAvailable)
+                            errorView.visibleOrGone(!isAvailable)
                             transactionCostAmount.setTextColor(getTransactionCostColor(isAvailable))
                         }
                     },
                     onError = {
                         sendButton.isEnabled = false
-                        balanceToLowError.visibleOrGone(false)
+                        errorView.visibleOrGone(false)
                     }
                 )
             amount.afterTextChanged { inputText ->
@@ -210,8 +231,9 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                 viewModel.tokensList.let { tokens ->
                     setBackgroundResource(getSpinnerBackground(tokens.size))
                     isEnabled = isSpinnerEnabled(tokens.size)
-                    adapter = TokenAdapter(context, R.layout.spinner_token, tokens, viewModel.account, viewModel.fiatSymbol)
-                        .apply { setDropDownViewResource(R.layout.spinner_dropdown_view) }
+                    adapter =
+                        TokenAdapter(context, R.layout.spinner_token, tokens, viewModel.account, viewModel.fiatSymbol)
+                            .apply { setDropDownViewResource(R.layout.spinner_dropdown_view) }
                     setSelection(viewModel.spinnerPosition, false)
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

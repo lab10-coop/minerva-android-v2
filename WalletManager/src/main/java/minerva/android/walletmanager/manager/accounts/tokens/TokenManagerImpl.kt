@@ -234,7 +234,7 @@ class TokenManagerImpl(
             with(localStorage.loadCurrentFiat()) {
                 if (currentFiat != this) rateStorage.clearRates()
                 tokens.forEach { (chainId, tokens) ->
-                    val marketId = MarketUtils.getMarketId(chainId)
+                    val marketId = MarketUtils.getTokenGeckoMarketId(chainId)
                     if (!rateStorage.areRatesSynced && marketId != String.Empty) {
                         observables.add(
                             updateAccountTokensRate(

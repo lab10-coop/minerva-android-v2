@@ -57,7 +57,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
 
             if (isBalanceTooLow(it.cryptoBalance, transaction.txCost.cost)) {
-                balanceToLowError.visible()
+                errorView.visible()
                 balance.setTextColor(context.getColor(R.color.errorRed))
             }
         }
@@ -137,10 +137,10 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
     ) = with(binding) {
         account?.let {
             if (isBalanceTooLow(it.cryptoBalance, transaction.txCost.cost)) {
-                balanceToLowError.visible()
+                errorView.visible()
                 balance.setTextColor(context.getColor(R.color.errorRed))
             } else {
-                balanceToLowError.invisible()
+                errorView.invisible()
                 balance.setTextColor(context.getColor(R.color.dappLabelColorGray))
             }
         }
