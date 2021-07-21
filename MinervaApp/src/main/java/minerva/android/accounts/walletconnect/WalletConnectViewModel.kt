@@ -49,6 +49,9 @@ class WalletConnectViewModel(
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
     val availableNetworks: List<NetworkDataSpinnerItem> get() = prepareAvailableNetworks()
+
+    val availableAccounts: List<Account> get() = accountManager.getAllActiveAccounts(account.chainId)
+
     private val baseNetwork get() = if (accountManager.areMainNetworksEnabled) ChainId.ETH_MAIN else ChainId.ETH_GOR
 
     private fun prepareAvailableNetworks(): List<NetworkDataSpinnerItem> =
@@ -225,5 +228,9 @@ class WalletConnectViewModel(
         accountManager.getFirstActiveAccountOrNull(chainId)?.let { newAccount ->
             account = newAccount
         }
+    }
+
+    fun setNewAccount(newAccount: Account) {
+        account = newAccount
     }
 }

@@ -354,4 +354,24 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.setAccountForSelectedNetwork(1)
         viewModel.account shouldBeEqualTo account
     }
+
+    @Test
+    fun `set selected account test`() {
+        val account = Account(1, chainId = 1, address = "address123", _isTestNetwork = false, isHide = false)
+        viewModel.setNewAccount(account)
+        viewModel.account shouldBeEqualTo account
+    }
+
+    @Test
+    fun `set get all accounts for selected network test`() {
+        val account = Account(1, chainId = 1, address = "address123")
+        val accounts = listOf(
+            Account(1, chainId = 1, address = "address121"),
+            Account(2, chainId = 1, address = "address122"),
+            Account(3, chainId = 1, address = "address123")
+        )
+        whenever(manager.getAllActiveAccounts(1)).thenReturn(accounts)
+        viewModel.setNewAccount(account)
+        viewModel.availableAccounts shouldBeEqualTo accounts
+    }
 }

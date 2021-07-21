@@ -10,19 +10,20 @@ import androidx.core.content.ContextCompat
 import minerva.android.R
 import minerva.android.databinding.SpinnerNetworkWalletConnectBinding
 import minerva.android.kotlinUtils.EmptyResource
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
 
-class DappNetworksSpinnerAdapter(
+class DappAccountsSpinnerAdapter(
     context: Context,
     @LayoutRes
     private val layoutResource: Int,
-    private val networks: List<NetworkDataSpinnerItem>
-) : ArrayAdapter<NetworkDataSpinnerItem>(context, layoutResource, networks) {
+    private val accounts: List<Account>
+) : ArrayAdapter<Account>(context, layoutResource, accounts) {
 
     var selectedItemWidth: Int? = null
 
-    override fun getCount(): Int = networks.size
+    override fun getCount(): Int = accounts.size
 
-    override fun getItem(position: Int): NetworkDataSpinnerItem = networks[position]
+    override fun getItem(position: Int): Account = accounts[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
@@ -32,22 +33,17 @@ class DappNetworksSpinnerAdapter(
 
     private fun createView(position: Int, parent: ViewGroup, isDropdown: Boolean): View =
         LayoutInflater.from(context).inflate(layoutResource, parent, false).apply {
-            networks[position].let { networkItem ->
+            getItem(position).let { item ->
                 SpinnerNetworkWalletConnectBinding.bind(this).network.apply {
-                    text = networkItem.networkName
-                    val networkRes = if (isDropdown) {
+                    text = item.name
+                    setTextColor(ContextCompat.getColor(context, R.color.gray))
+                    val arrowRes = if (isDropdown) {
                         selectedItemWidth?.let { selectedItemWidth -> width = selectedItemWidth }
-                        R.color.darkGray80 to Int.EmptyResource
-                    } else {
-                        R.color.warningOrange to R.drawable.ic_dropdown_yellow
-                    }
-                    setTextColor(ContextCompat.getColor(context, networkRes.first))
-                    setCompoundDrawablesWithIntrinsicBounds(
-                        Int.EmptyResource,
-                        Int.EmptyResource,
-                        networkRes.second,
                         Int.EmptyResource
-                    )
+                    } else {
+                        R.drawable.ic_dropdown_purple
+                    }
+                    setCompoundDrawablesWithIntrinsicBounds(Int.EmptyResource, Int.EmptyResource, arrowRes, Int.EmptyResource)
                 }
             }
         }
