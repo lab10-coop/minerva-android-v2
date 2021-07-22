@@ -158,8 +158,15 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             }).apply {
             setOnDismissListener { shouldScan = true }
             setView(meta, network)
+            updateAccountSpinner()
             handleNetwork(network, dialogType)
             show()
+        }
+    }
+
+    private fun DappConfirmationDialog.updateAccountSpinner() {
+        setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts) { account ->
+            viewModel.setNewAccount(account)
         }
     }
 
@@ -169,6 +176,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             }
             WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning(viewModel.availableNetworks) { chainId ->
                 viewModel.setAccountForSelectedNetwork(chainId)
+                updateAccountSpinner()
             }
             WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(viewModel.requestedNetwork)
             WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(viewModel.requestedNetwork)
