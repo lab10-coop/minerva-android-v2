@@ -152,6 +152,66 @@ class AccountManagerTest : RxTest() {
     }
 
     @Test
+    fun `Check that wallet manager create from empty account`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(
+                    1,
+                    chainId = Int.InvalidValue,
+                    publicKey = "publicKey",
+                    privateKey = "privateKey",
+                    address = "address1",
+                    _isTestNetwork = true
+                )
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+
+        manager.createOrUnhideAccount(Network(chainId = 4, name = "Ethereum"))
+        verify(walletConfigManager).updateWalletConfig(
+            WalletConfig(
+                2, accounts = listOf(
+                    Account(
+                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
+                        chainId = 4, isHide = false, _isTestNetwork = true
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Check that wallet manager unhide account`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(
+                    id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
+                    chainId = 4, isHide = true, _isTestNetwork = true
+                )
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+
+        manager.createOrUnhideAccount(Network(chainId = 4, name = "Ethereum"))
+        verify(walletConfigManager).updateWalletConfig(
+            WalletConfig(
+                2, accounts = listOf(
+                    Account(
+                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
+                        chainId = 4, isHide = false, _isTestNetwork = true
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun `Check that wallet unhide account`() {
         NetworkManager.initialize(MockDataProvider.networks)
         val walletConfig = WalletConfig(
