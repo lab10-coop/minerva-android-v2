@@ -19,12 +19,12 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.base.BaseFragment
-import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.EditAccountNameDialog
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
+import minerva.android.widget.dialog.HideAccountDialog
 import minerva.android.widget.dialog.SelectPredefinedAccountDialog
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.state.AppUIState
@@ -75,11 +75,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
     override fun onAccountHide(index: Int) =
-        AlertDialogHandler.showHideAccountDialog(
-            requireContext(),
-            getString(R.string.hide_account_dialog_title),
-            getString(R.string.hide_account_dialog_message)
-        ) { viewModel.hideAccount(index) }
+        HideAccountDialog(requireContext(), index, ::hideAccount).show()
+
+    private fun hideAccount(index: Int) = viewModel.hideAccount(index)
 
     override fun onEditName(account: Account) =
         EditAccountNameDialog(requireContext(), account, ::changeAccountName).show()

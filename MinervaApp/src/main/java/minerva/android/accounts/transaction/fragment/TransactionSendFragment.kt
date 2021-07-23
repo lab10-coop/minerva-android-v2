@@ -418,7 +418,11 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
 
     private fun getAmount(): BigDecimal {
         val amountString = binding.amount.text.toString()
-        return if (amountString.isNotBlank()) BigDecimal(amountString) else BigDecimal.ZERO
+        return try {
+            BigDecimal(amountString)
+        } catch (e: NumberFormatException) {
+            BigDecimal.ZERO
+        }
     }
 
     private fun getGasLimit() = BigInteger(binding.gasLimitEditText.text.toString())
