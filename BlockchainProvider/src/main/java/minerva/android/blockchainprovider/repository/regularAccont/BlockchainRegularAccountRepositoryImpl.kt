@@ -123,6 +123,30 @@ class BlockchainRegularAccountRepositoryImpl(
                 TokenWithError(chainId, address, error)
             }
 
+    override fun getTokenBalance(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        safeAccountAddress: String
+    ): Flowable<Token> =
+        if (safeAccountAddress.isEmpty()) {
+            getERC20Balance(tokenAddress, chainId, privateKey, Credentials.create(privateKey).address)
+        } else {
+            getERC20Balance(tokenAddress, chainId, privateKey, safeAccountAddress)
+        }
+
+    private fun getERC20Balance(
+        tokenAddress: String,
+        chainId: Int,
+        privateKey: String,
+        address: String
+    ): Flowable<Token> =
+        loadERC20(privateKey, chainId, tokenAddress)
+            .balanceOf(address)
+            .flowable()
+            .map { balance -> TokenWithBalance(chainId, tokenAddress, balance.toBigDecimal()) as Token }
+            .onErrorReturn { error -> TokenWithError(chainId, tokenAddress, error) }
+
     override fun toChecksumAddress(address: String): String = Keys.toChecksumAddress(address)
 
     override fun isAddressValid(address: String): Boolean =
@@ -297,21 +321,6 @@ class BlockchainRegularAccountRepositoryImpl(
             else -> increaseGasLimitByTenPercent(gasLimit)
         }
 
-    override fun refreshTokenBalance(
-        privateKey: String,
-        chainId: Int,
-        tokenAddress: String,
-        safeAccountAddress: String
-    ): Observable<Pair<String, BigDecimal>> =
-        if (safeAccountAddress.isEmpty()) getERC20Balance(
-            tokenAddress,
-            chainId,
-            privateKey,
-            Credentials.create(privateKey).address
-        )
-        else getERC20Balance(tokenAddress, chainId, privateKey, safeAccountAddress)
-
-
     override fun toGwei(amount: BigDecimal): BigDecimal = toWei(amount, Convert.Unit.GWEI)
     override fun fromWei(value: BigDecimal): BigDecimal = fromWei(value, Convert.Unit.GWEI)
     override fun toEther(value: BigDecimal): BigDecimal = fromWei(value, Convert.Unit.ETHER)
@@ -347,18 +356,6 @@ class BlockchainRegularAccountRepositoryImpl(
         ),
         ContractGasProvider(payload.gasPriceWei, payload.gasLimit)
     )
-
-    private fun getERC20Balance(
-        tokenAddress: String,
-        chainId: Int,
-        privateKey: String,
-        address: String
-    ): Observable<Pair<String, BigDecimal>> =
-        loadERC20(privateKey, chainId, tokenAddress)
-            .balanceOf(address)
-            .flowable()
-            .map { balance -> Pair(tokenAddress, balance.toBigDecimal()) }
-            .toObservable()
 
     private fun increaseGasLimitByTenPercent(gasLimit: BigInteger) = gasLimit.add(getBuffer(gasLimit))
 

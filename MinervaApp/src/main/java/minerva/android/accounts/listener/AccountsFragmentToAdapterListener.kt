@@ -7,7 +7,7 @@ import minerva.android.widget.state.AccountWidgetState
 
 interface AccountsFragmentToAdapterListener {
     fun onSendTransaction(account: Account)
-    fun onSendTokenTransaction(account: Account, tokenAddress: String)
+    fun onSendTokenTransaction(account: Account, tokenAddress: String, isTokenError: Boolean)
     fun onCreateSafeAccount(account: Account)
     fun onAccountHide(index: Int)
     fun onShowAddress(account: Account)

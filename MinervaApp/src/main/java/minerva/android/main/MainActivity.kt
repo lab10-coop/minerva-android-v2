@@ -13,8 +13,9 @@ import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.R
 import minerva.android.accounts.AccountsFragment
 import minerva.android.accounts.transaction.activity.TransactionActivity
-import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.BALANCE_ERROR
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.COIN_BALANCE_ERROR
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TOKEN_ADDRESS
+import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TOKEN_BALANCE_ERROR
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
 import minerva.android.accounts.walletconnect.*
@@ -412,12 +413,19 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }
     }
 
-    override fun showTransactionScreen(index: Int, tokenAddress: String, screenIndex: Int, isBalanceError: Boolean) {
+    override fun showTransactionScreen(
+        index: Int,
+        tokenAddress: String,
+        screenIndex: Int,
+        isCoinBalanceError: Boolean,
+        isTokenBalanceError: Boolean
+    ) {
         launchActivityForResult<TransactionActivity>(TRANSACTION_RESULT_REQUEST_CODE) {
             putExtra(ACCOUNT_INDEX, index)
             putExtra(TOKEN_ADDRESS, tokenAddress)
             putExtra(TRANSACTION_SCREEN, screenIndex)
-            putExtra(BALANCE_ERROR, isBalanceError)
+            putExtra(COIN_BALANCE_ERROR, isCoinBalanceError)
+            putExtra(TOKEN_BALANCE_ERROR, isTokenBalanceError)
         }
     }
 

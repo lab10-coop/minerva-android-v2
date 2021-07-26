@@ -35,10 +35,10 @@ interface BlockchainRegularAccountRepository {
     fun fromWei(value: BigDecimal): BigDecimal
     fun toEther(value: BigDecimal): BigDecimal
     fun sendWalletConnectTransaction(chainId: Int, transactionPayload: TransactionPayload): Single<String>
-    fun refreshTokenBalance(
+    fun getTokenBalance(
         privateKey: String,
         chainId: Int,
         tokenAddress: String,
         safeAccountAddress: String
-    ): Observable<Pair<String, BigDecimal>>
+    ): Flowable<Token>
 }

@@ -10,14 +10,15 @@ data class AccountToken(
     override var token: ERC20Token,
     var rawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var tokenPrice: Double? = Double.InvalidValue
-): TokenWithBalances {
+) : TokenWithBalances {
+
     override fun equals(other: Any?): Boolean =
         (other as? AccountToken)
             ?.let { accountToken -> token.address.equals(accountToken.token.address, true) }
             .orElse { false }
 
     override val balance: BigDecimal
-        get() = if (rawBalance ==  Double.InvalidValue.toBigDecimal()) BigDecimal.ZERO
+        get() = if (rawBalance == Double.InvalidValue.toBigDecimal()) BigDecimal.ZERO
         else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
 
     override val fiatBalance: BigDecimal

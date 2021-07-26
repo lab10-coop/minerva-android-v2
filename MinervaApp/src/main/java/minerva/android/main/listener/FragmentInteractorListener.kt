@@ -8,7 +8,8 @@ interface FragmentInteractorListener {
         index: Int,
         tokenAddress: String = String.Empty,
         screenIndex: Int = SEND_TRANSACTION_INDEX,
-        isBalanceError: Boolean = false
+        isCoinBalanceError: Boolean = false,
+        isTokenBalanceError: Boolean = false
     )
 
     fun shouldShowLoadingScreen(isLoading: Boolean)

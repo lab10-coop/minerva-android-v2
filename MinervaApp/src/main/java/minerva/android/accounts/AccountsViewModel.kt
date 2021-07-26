@@ -54,7 +54,7 @@ class AccountsViewModel(
 ) : BaseViewModel() {
     val hasAvailableAccounts: Boolean get() = accountManager.hasAvailableAccounts
     val activeAccounts: List<Account> get() = accountManager.activeAccounts
-    val rawAccounts: List<Account> get() = accountManager.rawAccounts
+    private val rawAccounts: List<Account> get() = accountManager.rawAccounts
     private val cachedTokens: Map<Int, List<ERC20Token>> get() = accountManager.cachedTokens
     var tokenVisibilitySettings: TokenVisibilitySettings = accountManager.getTokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
@@ -75,11 +75,8 @@ class AccountsViewModel(
     private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
     val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
 
-    private val _coinBalanceLiveData = MutableLiveData<CoinBalanceState>()
-    val coinBalanceLiveData: LiveData<CoinBalanceState> get() = _coinBalanceLiveData
-
-    private val _tokenBalanceLiveData = MutableLiveData<Unit>()
-    val tokenBalanceLiveData: LiveData<Unit> get() = _tokenBalanceLiveData
+    private val _balanceStateLiveData = MutableLiveData<BalanceState>()
+    val balanceStateLiveData: LiveData<BalanceState> get() = _balanceStateLiveData
 
     private val _accountHideLiveData = MutableLiveData<Event<Unit>>()
     val accountHideLiveData: LiveData<Event<Unit>> get() = _accountHideLiveData
@@ -98,19 +95,6 @@ class AccountsViewModel(
         discoverNewTokens()
         getSessions(accountManager.getAllAccounts())
     }
-
-    fun getTokens(account: Account): List<ERC20Token> =
-        if (account.accountTokens.isNotEmpty()) {
-            account.accountTokens
-                .sortedByDescending { accountToken -> accountToken.fiatBalance }
-                .map { accountToken -> accountToken.token }.toList()
-        } else {
-            cachedTokens[account.chainId]
-                ?.filter { token ->
-                    token.accountAddress.equals(account.address, true) &&
-                            tokenVisibilitySettings.getTokenVisibility(account.address, token.address) == true
-                } ?: emptyList()
-        }
 
     internal fun getSessions(accounts: List<Account>) {
         launchDisposable {
@@ -167,41 +151,32 @@ class AccountsViewModel(
     fun refreshCoinBalances() =
         launchDisposable {
             coinBalancesRefreshed = false
-            transactionRepository.refreshCoinBalances()
+            transactionRepository.getCoinBalance()
+                .map { coin ->
+                    when (coin) {
+                        is CoinBalance -> getAccountIndexToUpdate(coin)
+                        is CoinError -> getAccountIndexWithError(coin)
+                        else -> Int.InvalidIndex
+                    }
+                }
+                .filter { index -> index != Int.InvalidIndex }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
                     onComplete = {
                         coinBalancesRefreshed = true
-                        _coinBalanceLiveData.value = CoinBalanceCompleted
+                        _balanceStateLiveData.value = CoinBalanceCompleted
                     },
-                    onNext = { coin ->
-                        val index = when (coin) {
-                            is CoinBalance -> getAccountIndexToUpdate(coin)
-                            is CoinError -> {
-                                logError("Refresh balance error: ${coin.error}")
-                                getAccountIndexWithError(coin)
-                            }
-                            else -> Int.InvalidIndex
-                        }
-
-                        if (index != Int.InvalidIndex) {
-                            _coinBalanceLiveData.value = CoinBalanceUpdate(index)
-                        }
-                    },
+                    onNext = { index -> _balanceStateLiveData.value = CoinBalanceUpdate(index) },
                     onError = { error ->
-                        val errorMessage: String = if (error is CompositeException) {
-                            "${error.exceptions}"
-                        } else {
-                            "$error"
-                        }
-                        logError("Refresh balance error: $errorMessage")
-                        _errorLiveData.value = Event(RefreshCoinBalancesError)
+                        logError("Refresh balance error: ${getError(error)}")
+                        _errorLiveData.value = Event(RefreshBalanceError)
                     }
                 )
         }
 
     private fun getAccountIndexWithError(coin: CoinError): Int {
+        logError("Refresh balance error: ${coin.error}")
         activeAccounts
             .filter { account -> !account.isPending }
             .forEachIndexed { index, account ->
@@ -217,12 +192,12 @@ class AccountsViewModel(
         activeAccounts
             .filter { account -> !account.isPending }
             .forEachIndexed { index, account ->
-                if (isCoinBalanceToUpdated(account, coinBalance)) {
+                if (shouldUpdateCoinBalance(account, coinBalance)) {
                     account.cryptoBalance = coinBalance.balance.cryptoBalance
                     account.fiatBalance = coinBalance.balance.fiatBalance
                     account.coinRate = coinBalance.rate ?: Double.InvalidValue
+                    account.isError = false
                     return index
-
                 } else if (isAccountToUpdate(account, coinBalance) && account.isError) {
                     account.isError = false
                     return index
@@ -231,59 +206,189 @@ class AccountsViewModel(
         return Int.InvalidIndex
     }
 
-    private fun isCoinBalanceToUpdated(account: Account, coinBalance: CoinBalance): Boolean =
+    private fun shouldUpdateCoinBalance(account: Account, coinBalance: CoinBalance): Boolean =
         isAccountToUpdate(account, coinBalance) &&
                 (account.cryptoBalance != coinBalance.balance.cryptoBalance || account.fiatBalance != coinBalance.balance.fiatBalance)
 
     private fun isAccountToUpdate(account: Account, coinBalance: Coin) =
         (account.address.equals(coinBalance.address, true) && account.chainId == coinBalance.chainId)
 
-    fun refreshTokensBalances() =
+    fun refreshTokensBalances() {
         launchDisposable {
             tokenBalancesRefreshed = false
             transactionRepository.getTaggedTokensUpdate()
                 .filter { taggedTokens -> taggedTokens.isNotEmpty() }
-                .switchMapSingle { transactionRepository.refreshTokensBalances() }
-                .map { accountTokensMap -> filterNotVisibleTokens(accountTokensMap) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onNext = {
-                        tokenBalancesRefreshed = true
-                        _tokenBalanceLiveData.value = Unit
-                    },
-                    onError = { error ->
-                        logError("Refresh tokens error: $error")
-                        _errorLiveData.value = Event(RefreshTokenBalancesError)
-                    }
-                )
+                .doOnNext {
+                    transactionRepository.getTokenBalance()
+                        .map { asset ->
+                            when (asset) {
+                                is AssetBalance -> updateTokenAndReturnIndex(asset)
+                                is AssetError -> updateTokenErrorAndReturnIndex(asset)
+                                else -> Int.InvalidIndex
+                            }
+                        }
+                        .filter { index -> index != Int.InvalidIndex }
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeBy(
+                            onComplete = {
+                                tokenBalancesRefreshed = true
+                                _balanceStateLiveData.value = TokenBalanceCompleted
+                            },
+                            onNext = { index -> _balanceStateLiveData.value = TokenBalanceUpdate(index) },
+                            onError = { error ->
+                                logError("Refresh tokens error: ${getError(error)}")
+                                _errorLiveData.value = Event(RefreshBalanceError)
+                            }
+                        )
+                }.subscribe()
+        }
+    }
+
+    private fun getError(error: Throwable): String =
+        if (error is CompositeException) {
+            "${error.exceptions}"
+        } else {
+            "$error"
         }
 
-    private fun filterNotVisibleTokens(accountTokenBalances: List<TokenBalance>) {
-        activeAccounts.filter { account -> !account.isPending }
-            .forEach { account ->
-                accountTokenBalances.find { tokenBalance ->
-                    tokenBalance.chainId == account.chainId && tokenBalance.privateKey == account.privateKey
-                }?.accountTokenList?.let { tokensList ->
-                    account.accountTokens = tokensList.filter { accountToken ->
-                        isTokenVisible(account.address, accountToken).orElse {
-                            saveTokenVisible(account.address, accountToken.token.address, true)
-                            hasFunds(accountToken.balance)
+    fun getTokens(account: Account): List<ERC20Token> =
+        if (account.accountTokens.isNotEmpty()) {
+            account.accountTokens
+                .filter { accountToken -> shouldShowAccountToken(account, accountToken) }
+                .sortedByDescending { accountToken -> accountToken.fiatBalance }
+                .map { accountToken -> accountToken.token }
+                .toList()
+        } else {
+            cachedTokens[account.chainId]
+                ?.filter { token -> shouldShowCachedToken(token, account) }
+                ?.apply {
+                    if (account.accountTokens.isEmpty()) {
+                        forEach { erc20Token -> account.accountTokens.add(AccountToken(token = erc20Token)) }
+                    }
+                }
+                ?: emptyList()
+        }
+
+    private fun shouldShowCachedToken(token: ERC20Token, account: Account): Boolean =
+        token.accountAddress.equals(account.address, true) &&
+                tokenVisibilitySettings.getTokenVisibility(account.address, token.address) == true
+
+    private fun shouldShowAccountToken(account: Account, accountToken: AccountToken): Boolean =
+        tokenVisibilitySettings.getTokenVisibility(account.address, accountToken.token.address) == true &&
+                (hasFunds(accountToken.balance) || accountToken.token.isError)
+
+    private fun updateTokenErrorAndReturnIndex(balance: AssetError): Int {
+        var accountIndex: Int = Int.InvalidIndex
+        activeAccounts
+            .filter { account -> !account.isPending }
+            .forEachIndexed { index, account ->
+                if (isTokenInAccount(balance, account)) {
+                    val tokenAddress = balance.tokenAddress
+                    val accountAddress = balance.accountAddress
+                    account.accountTokens.forEach { accountToken ->
+                        if (isTheSameToken(accountToken, tokenAddress, accountAddress) && !accountToken.token.isError) {
+                            accountToken.token.isError = true
+                            accountIndex = index
                         }
                     }
                 }
             }
+        return accountIndex
+    }
+
+    private fun updateTokenAndReturnIndex(balance: AssetBalance): Int {
+        activeAccounts
+            .filter { account -> !account.isPending }
+            .forEachIndexed { index, account ->
+                if (isTokenInAccount(balance, account)) {
+                    return updateTokenVisibilityAndReturnIndex(account, balance, index)
+                }
+            }
+        return Int.InvalidIndex
+    }
+
+    private fun isTokenInAccount(balance: Asset, account: Account): Boolean =
+        balance.chainId == account.chainId && balance.privateKey.equals(account.privateKey, true)
+
+    private fun updateTokenVisibilityAndReturnIndex(account: Account, asset: AssetBalance, index: Int): Int {
+        var accountIndex: Int = Int.InvalidIndex
+        isTokenVisible(account.address, asset.accountToken)?.let { isVisible ->
+            accountIndex = if (isVisible) {
+                updateVisibleTokenAndReturnIndex(account, asset, index)
+            } else {
+                updateNotVisibleTokenAndReturnIndex(account, asset, index)
+            }
+        }.orElse {
+            accountIndex = updateNewTokenAndReturnIndex(account, asset, index)
+        }
+        return accountIndex
     }
 
     fun isTokenVisible(accountAddress: String, accountToken: AccountToken): Boolean? =
         tokenVisibilitySettings.getTokenVisibility(accountAddress, accountToken.token.address)
-            ?.let { isTokenVisible -> isTokenVisible && hasFunds(accountToken.balance) }
+
+    private fun updateNewTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
+        var accountIndex: Int = Int.InvalidIndex
+        if (hasFunds(balance.accountToken.balance)) {
+            saveTokenVisible(account.address, balance.accountToken.token.address, true)
+            account.accountTokens.add(balance.accountToken)
+            accountIndex = index
+        }
+        return accountIndex
+    }
+
+    private fun updateNotVisibleTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
+        var accountIndex: Int = Int.InvalidIndex
+        if (isTokenShown(account, balance.accountToken.token)) {
+            account.accountTokens.remove(balance.accountToken)
+            accountIndex = index
+        }
+        return accountIndex
+    }
+
+    private fun updateVisibleTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
+        var accountIndex: Int = Int.InvalidIndex
+        if (isTokenShown(account, balance.accountToken.token)) {
+            val tokenAddress = balance.accountToken.token.address
+            val accountAddress = balance.accountToken.token.accountAddress
+            account.accountTokens.find { token -> isTheSameToken(token, tokenAddress, accountAddress) }
+                ?.let { accountToken ->
+                    if (shouldUpdateBalance(accountToken, balance)) {
+                        accountToken.rawBalance = balance.accountToken.rawBalance
+                        accountToken.tokenPrice = balance.accountToken.tokenPrice
+                        accountToken.token.isError = false
+                        accountIndex = index
+                    } else if (accountToken.token.isError) {
+                        accountToken.token.isError = false
+                        accountIndex = index
+                    }
+                }
+        } else {
+            account.accountTokens.add(balance.accountToken)
+            accountIndex = index
+        }
+        return accountIndex
+    }
+
+    private fun shouldUpdateBalance(accountToken: AccountToken?, balance: AssetBalance) =
+        accountToken?.rawBalance != balance.accountToken.rawBalance ||
+                accountToken.tokenPrice != balance.accountToken.tokenPrice
+
+    private fun isTokenShown(account: Account, token: ERC20Token) =
+        account.accountTokens.find { accountToken ->
+            isTheSameToken(accountToken, token.address, token.accountAddress)
+        } != null
+
+    private fun isTheSameToken(accountToken: AccountToken, tokenAddress: String, accountAddress: String): Boolean =
+        accountToken.token.address.equals(tokenAddress, true) &&
+                accountToken.token.accountAddress.equals(accountAddress, true)
 
     private fun hasFunds(balance: BigDecimal) = balance > BigDecimal.ZERO
 
     fun updateTokensRate() {
         transactionRepository.updateTokensRate()
-        _tokenBalanceLiveData.value = Unit
+        _balanceStateLiveData.value = UpdateAllState
     }
 
     fun discoverNewTokens() =
@@ -344,7 +449,7 @@ class AccountsViewModel(
         }
     }
 
-    private fun getSafeAccountWalletAction(account: Account) =
+    private fun getSafeAccountWalletAction(account: Account): List<WalletAction> =
         listOf(getWalletAction(SA_ADDED, accountManager.getSafeAccountName(account)))
 
     fun addAtsToken() {
@@ -428,19 +533,16 @@ class AccountsViewModel(
         }
     }
 
-    fun updateSessionCount(
-        sessionsPerAccount: List<DappSessionData>,
-        passIndex: (index: Int) -> Unit
-    ) {
+    fun updateSessionCount(sessionsPerAccount: List<DappSessionData>, passIndex: (index: Int) -> Unit) {
         activeAccounts
             .filter { account -> !account.isPending }
             .forEachIndexed { index, account ->
                 account.apply {
                     dappSessionCount = sessionsPerAccount
                         .find { data ->
-                            data.address.equals(address, true) && data.chainId == chainId
-                        }?.count
-                        ?: NO_DAPP_SESSION
+                            data.address.equals(address, true) &&
+                                    data.chainId == chainId
+                        }?.count ?: NO_DAPP_SESSION
                     passIndex(index)
                 }
             }

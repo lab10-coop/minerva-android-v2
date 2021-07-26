@@ -6,9 +6,13 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
+import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.TokenDetails
+import minerva.android.blockchainprovider.model.Token
+import minerva.android.blockchainprovider.model.TokenWithBalance
+import minerva.android.blockchainprovider.model.TokenWithError
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.Empty
@@ -36,7 +40,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.mappers.TokenDataToERC20Token
 import minerva.android.walletmanager.model.mappers.TokenDetailsToERC20TokensMapper
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.mappers.TokenToAssetBalanceErrorMapper
+import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenTag
@@ -46,6 +51,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
+import java.math.BigDecimal
 import java.util.*
 
 class TokenManagerImpl(
@@ -157,46 +163,58 @@ class TokenManagerImpl(
         }
     }
 
-    override fun refreshTokensBalances(account: Account): Single<Triple<Int, String, List<AccountToken>>> =
-        tokenDao.getTaggedTokens()
-            .zipWith(Single.just(getAllTokensPerAccount(account)))
-            .flatMap { (taggedTokens, tokensPerAccount) ->
-                fillActiveTokensWithTags(taggedTokens, account, tokensPerAccount)
-                val tokens = tokensPerAccount.mergeWithoutDuplicates(taggedTokens)
-                    .filter { token -> token.chainId == account.chainId }
+    override fun getTokenBalance(account: Account): Flowable<Asset> {
+        with(account) {
+            return tokenDao.getTaggedTokens()
+                .zipWith(Single.just(getAllTokensPerAccount(this)))
+                .flatMapPublisher { (taggedTokens, tokensPerAccount) ->
+                    fillActiveTokensWithTags(taggedTokens, this, tokensPerAccount)
+                    val tokens = getTokensForAccount(tokensPerAccount, taggedTokens, this)
+                    Flowable.mergeDelayError(getTokenBalanceFlowables(tokens, this))
+                        .map { token ->
+                            when (token) {
+                                is TokenWithBalance -> getAssetBalance(tokens, token, this)
+                                else -> TokenToAssetBalanceErrorMapper.map(account, token as TokenWithError)
+                            }
+                        }
+                }
+        }
+    }
 
-                Observable.fromIterable(tokens)
-                    .flatMap { token ->
-                        blockchainRepository.refreshTokenBalance(
-                            account.privateKey,
-                            account.chainId,
-                            token.address,
-                            account.address
-                        )
-                    }
-                    .map { (tokenAddress, balance) ->
-                        tokens.find { token -> token.address.equals(tokenAddress, true) }
-                            ?.let { erc20Token ->
-                                AccountToken(
-                                    erc20Token,
-                                    balance,
-                                    rateStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address))
-                                )
-                            }.orElse { throw NullPointerException() }
-                    }
-                    .toList()
-                    .map { accountTokens -> Triple(account.chainId, account.privateKey, accountTokens) }
+    private fun getAssetBalance(tokens: List<ERC20Token>, balance: TokenWithBalance, account: Account): AssetBalance =
+        tokens.find { token -> token.address.equals(balance.address, true) }
+            ?.let { token -> AssetBalance(account.chainId, account.privateKey, getAccountToken(token, balance.balance)) }
+            .orElse { throw NullPointerException() }
+
+    private fun getTokenBalanceFlowables(tokens: List<ERC20Token>, account: Account): List<Flowable<Token>> =
+        with(account) {
+            val tokenBalanceFlowables = mutableListOf<Flowable<Token>>()
+            tokens.forEach { token ->
+                tokenBalanceFlowables.add(
+                    blockchainRepository.getTokenBalance(privateKey, chainId, token.address, address)
+                        .subscribeOn(Schedulers.io())
+                )
             }
+            return tokenBalanceFlowables
+        }
 
-    private fun fillActiveTokensWithTags(
-        taggedTokens: List<ERC20Token>,
-        account: Account,
-        activeTokens: List<ERC20Token>
-    ) {
+    private fun getAccountToken(erc20Token: ERC20Token, balance: BigDecimal): AccountToken =
+        AccountToken(erc20Token, balance, rateStorage.getRate(generateTokenHash(erc20Token.chainId, erc20Token.address)))
+
+    private fun getTokensForAccount(
+        tokensPerAccount: List<ERC20Token>,
+        tagged: List<ERC20Token>,
+        account: Account
+    ): List<ERC20Token> =
+        tokensPerAccount
+            .mergeWithoutDuplicates(tagged)
+            .filter { token -> token.chainId == account.chainId }
+
+    private fun fillActiveTokensWithTags(taggedTokens: List<ERC20Token>, account: Account, tokens: List<ERC20Token>) {
         taggedTokens
             .filter { taggedToken -> taggedToken.chainId == account.chainId }
             .forEach { taggedToken ->
-                activeTokens.filter { activeToken -> activeToken.address.equals(taggedToken.address, true) }
+                tokens.filter { activeToken -> activeToken.address.equals(taggedToken.address, true) }
                     .forEach { activeToken ->
                         with(activeToken) {
                             if (tag.isEmpty()) {
@@ -205,7 +223,6 @@ class TokenManagerImpl(
                             }
                         }
                     }
-
             }
     }
 
