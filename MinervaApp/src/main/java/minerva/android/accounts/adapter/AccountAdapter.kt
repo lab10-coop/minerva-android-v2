@@ -33,12 +33,15 @@ class AccountAdapter(
         this.fiatSymbol = fiatSymbol
     }
 
-    fun updateCoinBalances(index: Int) {
+    fun updateCoinBalance(index: Int) {
         notifyItemChanged(index)
     }
 
-    fun updateTokenBalances() {
-        //TODO update only when token balance changes: MNR-476
+    fun updateTokenBalance(index: Int) {
+        notifyItemChanged(index)
+    }
+
+    fun refreshList() {
         notifyDataSetChanged()
     }
 
@@ -57,10 +60,10 @@ class AccountAdapter(
         notifyDataSetChanged()
     }
 
-    override fun onSendAccountClicked(account: Account) = listener.onSendTransaction(account)
+    override fun onSendCoinClicked(account: Account) = listener.onSendTransaction(account)
 
-    override fun onSendTokenClicked(account: Account, tokenAddress: String) {
-        listener.onSendTokenTransaction(account, tokenAddress)
+    override fun onSendTokenClicked(account: Account, tokenAddress: String, isTokenError: Boolean) {
+        listener.onSendTokenTransaction(account, tokenAddress, isTokenError)
     }
 
     override fun onAccountHide(index: Int) = listener.onAccountHide(index)

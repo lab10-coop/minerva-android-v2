@@ -36,7 +36,7 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         address = "address",
         contractAddress = "aa",
         bindedOwner = "binded",
-        accountTokens = listOf(AccountToken(ERC20Token(1, symbol = "SomeSymbol"), BigDecimal.ZERO))
+        accountTokens = mutableListOf(AccountToken(ERC20Token(1, symbol = "SomeSymbol"), BigDecimal.ZERO))
     )
 
     @Test

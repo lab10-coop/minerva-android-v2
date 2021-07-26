@@ -37,7 +37,8 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         viewModel.apply {
             accountIndex = intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex)
             getAccount(accountIndex, intent.getStringExtra(TOKEN_ADDRESS) ?: String.Empty)
-            isBalanceError = intent.getBooleanExtra(BALANCE_ERROR, false)
+            isCoinBalanceError = intent.getBooleanExtra(COIN_BALANCE_ERROR, false)
+            isTokenBalanceError = intent.getBooleanExtra(TOKEN_BALANCE_ERROR, false)
         }
         prepareActionBar()
         setupViewPager(intent.getIntExtra(TRANSACTION_SCREEN, SEND_TRANSACTION_INDEX))
@@ -147,6 +148,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val TOKEN_ADDRESS = "token_address"
         const val TRANSACTION_SCREEN = "transaction_screen"
-        const val BALANCE_ERROR = "balance_error"
+        const val COIN_BALANCE_ERROR = "coin_balance_error"
+        const val TOKEN_BALANCE_ERROR = "token_balance_error"
     }
 }

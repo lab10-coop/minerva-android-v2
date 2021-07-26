@@ -452,14 +452,14 @@ class AccountManagerTest : RxTest() {
             1, accounts = listOf(
                 Account(
                     1, chainId = 1, name = "account01", isDeleted = false, fiatBalance = 13f.toBigDecimal(),
-                    accountTokens = listOf(
+                    accountTokens = mutableListOf(
                         AccountToken(ERC20Token(1, "CookieToken", address = "0x0"), tokenPrice = 13.3),
                         AccountToken(ERC20Token(2, "AnotherToken", address = "0x1"), tokenPrice = 23.3)
                     )
                 ),
                 Account(
                     2, chainId = 1, name = "account02", isDeleted = false, fiatBalance = 3f.toBigDecimal(),
-                    accountTokens = listOf(
+                    accountTokens = mutableListOf(
                         AccountToken(ERC20Token(3, "CookieToken", address = "0x0"), tokenPrice = 33.3),
                         AccountToken(ERC20Token(4, "CookieToken", address = "0x0"), tokenPrice = 43.3)
                     )

@@ -56,7 +56,8 @@ class TransactionViewModel(
     val fiatSymbol: String = transactionRepository.getFiatSymbol()
     val isTokenTransaction get() = tokenAddress != String.Empty && !account.isSafeAccount
     val isSafeAccountTokenTransaction get() = tokenAddress != String.Empty && account.isSafeAccount
-    var isBalanceError: Boolean = false
+    var isCoinBalanceError: Boolean = false
+    var isTokenBalanceError: Boolean = false
     private var fiatRate: Double = Double.InvalidValue
     private var coinFiatRate: Double = Double.InvalidValue
     private val isMainTransaction get() = tokenAddress == String.Empty && !account.isSafeAccount

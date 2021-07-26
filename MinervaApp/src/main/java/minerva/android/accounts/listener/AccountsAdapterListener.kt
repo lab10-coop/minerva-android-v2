@@ -4,8 +4,8 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.widget.state.AccountWidgetState
 
 interface AccountsAdapterListener {
-    fun onSendAccountClicked(account: Account)
-    fun onSendTokenClicked(account: Account, tokenAddress: String)
+    fun onSendCoinClicked(account: Account)
+    fun onSendTokenClicked(account: Account, tokenAddress: String, isTokenError: Boolean)
     fun onAccountHide(index: Int)
     fun onCreateSafeAccountClicked(account: Account)
     fun onShowAddress(account: Account)

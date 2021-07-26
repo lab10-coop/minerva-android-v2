@@ -63,14 +63,15 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     fun stopPendingTransactions() = accountAdapter.stopPendingTransactions()
 
     override fun onSendTransaction(account: Account) =
-        interactor.showTransactionScreen(viewModel.indexOfRawAccounts(account), isBalanceError = account.isError)
+        interactor.showTransactionScreen(viewModel.indexOfRawAccounts(account), isCoinBalanceError = account.isError)
 
-    override fun onSendTokenTransaction(account: Account, tokenAddress: String) =
+    override fun onSendTokenTransaction(account: Account, tokenAddress: String, isTokenError: Boolean) {
         interactor.showTransactionScreen(
             viewModel.indexOfRawAccounts(account),
             tokenAddress,
-            isBalanceError = account.isError
+            isTokenBalanceError = isTokenError
         )
+    }
 
     override fun onCreateSafeAccount(account: Account) = viewModel.createSafeAccount(account)
 
@@ -206,15 +207,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     accountAdapter.updateSessionCount(sessionsPerAccount)
                 })
 
-                coinBalanceLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { state ->
+                balanceStateLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { state ->
                     when (state) {
-                        is CoinBalanceUpdate -> accountAdapter.updateCoinBalances(state.index)
-                        is CoinBalanceCompleted -> checkSwipe()
+                        is CoinBalanceState -> updateCoinBalanceState(state)
+                        is TokenBalanceState -> updateTokenBalanceState(state)
+                        is UpdateAllState -> accountAdapter.refreshList()
                     }
-                })
-                tokenBalanceLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking {
-                    accountAdapter.updateTokenBalances()
-                    checkSwipe()
                 })
             }
 
@@ -236,8 +234,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                         R.string.safe_account_removal_error
                     )
                     is AutomaticBackupError -> handleAutomaticBackupError(errorState.throwable)
-                    RefreshCoinBalancesError -> binding.swipeRefresh.isRefreshing = false
-                    RefreshTokenBalancesError -> handleRefreshBalancesError(R.string.refresh_asset_balances_error)
+                    RefreshBalanceError -> binding.swipeRefresh.isRefreshing = false
                     NoFunds -> MinervaFlashbar.show(
                         requireActivity(),
                         getString(R.string.no_funds),
@@ -246,8 +243,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 }
             })
 
-            loadingLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
-                interactor.shouldShowLoadingScreen(it)
+            loadingLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking { isVisible ->
+                interactor.shouldShowLoadingScreen(isVisible)
             })
 
             accountHideLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking {
@@ -261,6 +258,20 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     Toast.makeText(context, this, Toast.LENGTH_SHORT).show()
                 }
             })
+        }
+    }
+
+    private fun updateCoinBalanceState(state: CoinBalanceState) {
+        when (state) {
+            is CoinBalanceUpdate -> accountAdapter.updateCoinBalance(state.index)
+            is CoinBalanceCompleted -> checkSwipe()
+        }
+    }
+
+    private fun updateTokenBalanceState(state: TokenBalanceState) {
+        when (state) {
+            is TokenBalanceUpdate -> accountAdapter.updateTokenBalance(state.index)
+            is TokenBalanceCompleted -> checkSwipe()
         }
     }
 
@@ -287,11 +298,6 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 }
             }
         }
-
-    private fun handleRefreshBalancesError(messageRes: Int) {
-        binding.swipeRefresh.isRefreshing = false
-        showErrorFlashbar(R.string.error_header, messageRes)
-    }
 
     private fun showErrorFlashbar(titleRes: Int, messageRes: Int) =
         MinervaFlashbar.show(requireActivity(), getString(titleRes), getString(messageRes))

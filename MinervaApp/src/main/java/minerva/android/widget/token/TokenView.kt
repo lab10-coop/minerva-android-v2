@@ -27,11 +27,17 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     ) {
         prepareView(token, account)
         prepareListeners(callback, account, token)
+
         getTokensValues(account, token).let { (crypto, fiat) ->
             with(binding.amountView) {
                 setCryptoBalance(getCryptoBalance(crypto))
                 if (account.isError) {
                     setErrorColor()
+                }
+                token?.let {
+                    if (it.isError) {
+                        setErrorColor()
+                    }
                 }
                 setFiat(getFiatBalance(fiat, fiatSymbol))
             }
@@ -65,15 +71,15 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     }
 
     private fun prepareListeners(callback: TokenViewCallback, account: Account, token: ERC20Token?) {
-        if (token != null) setOnClickListener { callback.onSendTokenTokenClicked(account, token.address) }
-        else setOnClickListener { callback.onSendTokenClicked(account) }
+        if (token != null) setOnClickListener { callback.onSendTokenClicked(account, token.address, token.isError) }
+        else setOnClickListener { callback.onSendCoinClicked(account) }
     }
 
     private fun getToken(account: Account, tokenAddress: String): AccountToken =
         account.accountTokens.find { it.token.address == tokenAddress } ?: AccountToken(ERC20Token(Int.InvalidValue))
 
     interface TokenViewCallback {
-        fun onSendTokenTokenClicked(account: Account, tokenAddress: String)
-        fun onSendTokenClicked(account: Account)
+        fun onSendTokenClicked(account: Account, tokenAddress: String, isTokenError: Boolean)
+        fun onSendCoinClicked(account: Account)
     }
 }
