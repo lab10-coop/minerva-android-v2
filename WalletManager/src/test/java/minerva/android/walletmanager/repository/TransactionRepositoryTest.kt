@@ -67,7 +67,7 @@ class TransactionRepositoryTest : RxTest() {
             .thenReturn(Flowable.just(TokenWithBalance(1, "address1", BigDecimal.ONE)))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.just(Markets(ethFiatPrice = FiatPrice(eur = 3.0))))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
-        repository.refreshCoinBalances().test()
+        repository.getCoinBalance().test()
             .assertComplete()
             .assertValue { coin ->
                 coin as CoinBalance
@@ -84,7 +84,7 @@ class TransactionRepositoryTest : RxTest() {
         whenever(blockchainRegularAccountRepository.getCoinBalances(any()))
             .thenReturn(Flowable.just(TokenWithError(1, "address1", error)))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
-        repository.refreshCoinBalances()
+        repository.getCoinBalance()
             .test()
             .assertNoErrors()
             .assertValue { coin ->
@@ -101,7 +101,7 @@ class TransactionRepositoryTest : RxTest() {
             .thenReturn(Flowable.just(TokenWithBalance(1, "address1", BigDecimal.ONE)))
         whenever(cryptoApi.getMarkets(any(), any())).thenReturn(Single.error(error))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
-        repository.refreshCoinBalances().test()
+        repository.getCoinBalance().test()
             .assertComplete()
             .assertValue { coin ->
                 coin as CoinBalance
@@ -117,7 +117,7 @@ class TransactionRepositoryTest : RxTest() {
         whenever(blockchainRegularAccountRepository.getCoinBalances(any()))
             .thenReturn(Flowable.just(TokenWithBalance(1, "address1", BigDecimal.ZERO)))
         whenever(localStorage.loadCurrentFiat()).thenReturn("EUR")
-        repository.refreshCoinBalances().test()
+        repository.getCoinBalance().test()
             .assertComplete()
             .assertValue { coin ->
                 coin as CoinBalance
@@ -763,34 +763,24 @@ class TransactionRepositoryTest : RxTest() {
         val accounts = listOf(
             Account(1, "publicKey", "privateKey", "address", chainId = ChainId.ETH_RIN, _isTestNetwork = true)
         )
-        val accountTokens = listOf(
+        val accountToken =
             AccountToken(
                 ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10"),
                 rawBalance = BigDecimal.TEN
-            ),
-            AccountToken(
-                ERC20Token(ChainId.ETH_RIN, "tow", address = "0x02", decimals = "10"),
-                rawBalance = BigDecimal.TEN
             )
-        )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
-        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(
-            Single.just(
-                Triple(
-                    ChainId.ETH_RIN,
-                    "privateKey",
-                    accountTokens
-                )
-            )
+        whenever(tokenManager.getTokenBalance(any())).thenReturn(
+            Flowable.just(AssetBalance(ChainId.ETH_RIN, "privateKey", accountToken))
         )
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
 
-        repository.refreshTokensBalances().test().assertComplete().assertValue {
-            it.size shouldBeEqualTo 1
-            it.find { balance -> balance.chainId == ChainId.ETH_RIN && balance.privateKey == "privateKey" }?.accountTokenList?.size == 2
-        }
+        repository.getTokenBalance()
+            .test()
+            .await()
+            .assertComplete()
+            .assertValueCount(0)
     }
 
     @Test
@@ -798,47 +788,52 @@ class TransactionRepositoryTest : RxTest() {
         val accounts = listOf(
             Account(1, "publicKey", "privateKey", "address", chainId = ChainId.ETH_RIN, _isTestNetwork = true)
         )
-        val accountTokens = listOf(
+        val accountToken =
             AccountToken(
                 ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", accountAddress = ""),
                 rawBalance = BigDecimal.TEN
-            ),
-            AccountToken(
-                ERC20Token(ChainId.ETH_RIN, "tow", address = "0x02", decimals = "10", accountAddress = ""),
-                rawBalance = BigDecimal.TEN
             )
-        )
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
-        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(
-            Single.just(
-                Triple(
-                    ChainId.ETH_RIN,
-                    "privateKey",
-                    accountTokens
-                )
-            )
+        whenever(tokenManager.getTokenBalance(any())).thenReturn(
+            Flowable.just(AssetBalance(ChainId.ETH_RIN, "privateKey", accountToken))
         )
         whenever(tokenManager.getTokensRates(any())).thenReturn(Completable.complete())
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
 
-        repository.refreshTokensBalances()
+        repository.getTokenBalance()
             .test()
             .await()
             .assertComplete()
-            .assertValue {
-                val accountTokenList =
-                    it.find { balance -> balance.chainId == ChainId.ETH_RIN && balance.privateKey == "privateKey" }?.accountTokenList
-                it.size == 1 &&
-                        accountTokenList?.size == 2 &&
-                        accountTokenList[0].token.accountAddress == ""
-            }
+            .assertValueCount(0)
     }
 
     @Test
     fun `Checking refreshing token balances error`() {
-        val error = Throwable("error")
-        whenever(tokenManager.refreshTokensBalances(any())).thenReturn(Single.error(error))
-        repository.refreshTokensBalances().test().assertError(error)
+        val error = Throwable("Balance error")
+        whenever(tokenManager.getTokenBalance(any())).thenReturn(
+            Flowable.just(
+                AssetError(
+                    1,
+                    "key",
+                    "accAdd",
+                    "tokenAdd",
+                    error
+                )
+            )
+        )
+
+        val testObserver = repository.getTokenBalance().test()
+        testObserver.awaitTerminalEvent()
+        testObserver
+            .assertNoErrors()
+            .assertValueAt(
+                0, AssetError(
+                    1,
+                    "key",
+                    "accAdd",
+                    "tokenAdd",
+                    error
+                )
+            )
     }
 
 
@@ -900,37 +895,19 @@ class TransactionRepositoryTest : RxTest() {
                 Account(1, chainId = 2, address = "address2", privateKey = "priv2")
             )
 
-        val map = listOf(
-            TokenBalance(
-                1, "priv1", listOf(
-                    AccountToken(
-                        ERC20Token(1, "one", address = "0x01", decimals = "10", accountAddress = ""),
-                        rawBalance = BigDecimal.TEN
-                    )
-                )
-            ),
-            TokenBalance(
-                2, "priv2", listOf(
-                    AccountToken(
-                        ERC20Token(2, "tow", address = "0x02", decimals = "10", accountAddress = "", tag = "super"),
-                        rawBalance = BigDecimal.TEN
-                    ),
-                    AccountToken(
-                        ERC20Token(2, "tow", address = "0x02", decimals = "10", accountAddress = "", tag = "super1"),
-                        rawBalance = BigDecimal.TEN
-                    )
+        val assetBalance =
+            AssetBalance(
+                1, "priv1",
+                AccountToken(
+                    ERC20Token(1, "one", address = "0x01", decimals = "10", accountAddress = ""),
+                    rawBalance = BigDecimal.TEN
                 )
             )
-        )
 
-        val result = repository.getTokensWithAccountAddress(accounts, map)
+        val result = repository.getTokensWithAccountAddress(accounts, assetBalance)
+        result.size shouldBeEqualTo 1
+
         result[1]!![0].accountAddress shouldBeEqualTo "address1"
         result[1]!![0].tag shouldBeEqualTo ""
-
-        result[2]!![0].accountAddress shouldBeEqualTo "address2"
-        result[2]!![0].tag shouldBeEqualTo "super"
-
-        result[2]!![1].accountAddress shouldBeEqualTo "address2"
-        result[2]!![1].tag shouldBeEqualTo "super1"
     }
 }

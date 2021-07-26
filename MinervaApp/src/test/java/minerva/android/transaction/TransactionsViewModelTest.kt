@@ -66,7 +66,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             address = "address",
             contractAddress = "aa",
             bindedOwner = "binded",
-            accountTokens = listOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol"), BigDecimal.ZERO))
+            accountTokens = mutableListOf(AccountToken(ERC20Token(3, symbol = "SomeSymbol"), BigDecimal.ZERO))
         )
 
         val tokenList = viewModel.tokensList
@@ -177,7 +177,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 address = "address",
                 chainId = 1,
                 contractAddress = "aa",
-                accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0")))
+                accountTokens = mutableListOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0")))
             )
             tokenAddress = "0x0"
         }
@@ -199,7 +199,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         viewModel.apply {
             account = Account(
                 id = 0, publicKey = "12", privateKey = "12", address = "address", contractAddress = "aa",
-                chainId = 3, accountTokens = listOf(AccountToken(ERC20Token(3, "name", address = "0x0", decimals = "3")))
+                chainId = 3, accountTokens = mutableListOf(AccountToken(ERC20Token(3, "name", address = "0x0", decimals = "3")))
             )
             tokenAddress = "0x0"
         }
@@ -217,7 +217,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
     fun `send safe account asset transaction test success`() {
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0"))),
+            accountTokens = mutableListOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0"))),
             publicKey = "12",
             privateKey = "12",
             address = "address",
@@ -241,7 +241,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         viewModel.account = Account(
             id = 0,
-            accountTokens = listOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0"))),
+            accountTokens = mutableListOf(AccountToken(ERC20Token(3, "name", decimals = "3", address = "0x0"))),
             publicKey = "12",
             privateKey = "12",
             chainId = 3,
@@ -280,7 +280,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             id = 0,
             publicKey = "12",
             chainId = 1,
-            accountTokens = listOf(
+            accountTokens = mutableListOf(
                 AccountToken(
                     ERC20Token(3, symbol = "SomeSymbol", decimals = "2", address = "0x0"),
                     BigDecimal.ZERO
@@ -348,7 +348,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
             Account(
                 0,
                 chainId = 1,
-                accountTokens = listOf(AccountToken(ERC20Token(1, address = "address01"), BigDecimal.TEN, 5.0))
+                accountTokens = mutableListOf(AccountToken(ERC20Token(1, address = "address01"), BigDecimal.TEN, 5.0))
             )
         )
         NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))

@@ -36,9 +36,11 @@ class AccountViewHolder(
     private val accountWidgetState: AccountWidgetState
         get() = listener.getAccountWidgetState(rawPosition)
 
-    override fun onSendTokenTokenClicked(account: Account, tokenAddress: String) = listener.onSendTokenClicked(account, tokenAddress)
+    override fun onSendTokenClicked(account: Account, tokenAddress: String, isTokenError: Boolean) {
+        listener.onSendTokenClicked(account, tokenAddress, isTokenError)
+    }
 
-    override fun onSendTokenClicked(account: Account) = listener.onSendAccountClicked(account)
+    override fun onSendCoinClicked(account: Account) = listener.onSendCoinClicked(account)
 
     fun setupListener(listener: AccountsAdapterListener) {
         this.listener = listener
@@ -55,7 +57,9 @@ class AccountViewHolder(
     ) {
         view.apply {
             prepareView(account)
+
             prepareTokens(account, fiatSymbol, tokens)
+
             bindData(account, fiatSymbol)
             setOnMenuClickListener(rawPosition, account)
         }

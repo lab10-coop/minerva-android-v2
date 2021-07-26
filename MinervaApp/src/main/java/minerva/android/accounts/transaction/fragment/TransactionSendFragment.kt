@@ -72,7 +72,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     }
 
     private fun showBalanceError() {
-        if (viewModel.isBalanceError) {
+        if (viewModel.isCoinBalanceError || viewModel.isTokenBalanceError) {
             with(binding.errorView) {
                 visible()
                 text = getString(R.string.token_balance_unlcear_message)
