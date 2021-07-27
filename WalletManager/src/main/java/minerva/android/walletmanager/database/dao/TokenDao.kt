@@ -11,6 +11,9 @@ interface TokenDao {
     @Query("SELECT * FROM tokens")
     fun getTaggedTokens(): Single<List<ERC20Token>>
 
+    @Query("SELECT * FROM tokens WHERE address = :tokenAddress")
+    fun getTaggedTokenByAddress(tokenAddress: String): Single<ERC20Token>
+
     @Query("SELECT * FROM tokens")
     fun getTaggedTokensFlowable(): Flowable<List<ERC20Token>>
 
