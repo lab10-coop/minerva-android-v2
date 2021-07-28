@@ -8,6 +8,7 @@ import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Network
@@ -24,6 +25,7 @@ import minerva.android.walletmanager.utils.MockDataProvider
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeInstanceOf
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -702,5 +704,44 @@ class AccountManagerTest : RxTest() {
             Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
             Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false)
         )
+    }
+
+    @Test
+    fun `succesfull hide accounts test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val account = Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                account,
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(0, chainId = ChainId.ETH_RIN, address = "address2", _isTestNetwork = true, isHide = false)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        manager.hideAccount(account)
+        verify(walletConfigManager).updateWalletConfig(
+            WalletConfig(
+                2, accounts = listOf(
+                    Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = true),
+                    Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
+                    Account(0, chainId = ChainId.ETH_RIN, address = "address2", _isTestNetwork = true, isHide = false)
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `error hide accounts test`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val account = Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false)
+        val walletConfig = WalletConfig(
+            1, accounts = listOf(
+                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(0, chainId = ChainId.ETH_RIN, address = "address2", _isTestNetwork = true, isHide = false)
+            )
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
+        val result = manager.hideAccount(account)
+        result.blockingGet() shouldBeInstanceOf MissingAccountThrowable::class
     }
 }
