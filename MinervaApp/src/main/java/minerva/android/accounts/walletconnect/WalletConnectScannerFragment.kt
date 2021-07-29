@@ -18,6 +18,7 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
+import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.widget.dialog.walletconnect.DappConfirmationDialog
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -65,6 +66,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 is OnSessionDeleted -> showToast(getString(R.string.dapp_deleted))
                 is OnGeneralError -> handleError(state.error)
                 is OnWalletConnectConnectionError -> handleWalletConnectError(state)
+                is UpdateOnSessionRequest -> updateConnectionDialog(state.network, state.dialogType)
             }
         })
         viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver { error -> handleError(error) })
@@ -145,7 +147,14 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         binding.walletConnectProgress.root.visible()
     }
 
-    private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: String, dialogType: WalletConnectAlertType) {
+    private fun updateConnectionDialog(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
+        confirmationDialogDialog?.apply {
+            updateAccountSpinner()
+            handleNetwork(network, dialogType)
+        }
+    }
+
+    private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         confirmationDialogDialog = DappConfirmationDialog(requireContext(),
             {
                 viewModel.approveSession(meta)
@@ -155,11 +164,14 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             {
                 viewModel.rejectSession()
                 shouldScan = true
+            },
+            { chainId ->
+                viewModel.addAccount(chainId, dialogType)
             }).apply {
             setOnDismissListener { shouldScan = true }
-            setView(meta, network)
-            updateAccountSpinner()
+            setView(meta, network.name)
             handleNetwork(network, dialogType)
+            updateAccountSpinner()
             show()
         }
     }
@@ -170,17 +182,16 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         }
     }
 
-    private fun DappConfirmationDialog.handleNetwork(network: String, dialogType: WalletConnectAlertType) {
+    private fun DappConfirmationDialog.handleNetwork(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         when (dialogType) {
-            WalletConnectAlertType.NO_ALERT -> {
-            }
+            WalletConnectAlertType.NO_ALERT -> setNoAlert()
             WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning(viewModel.availableNetworks) { chainId ->
                 viewModel.setAccountForSelectedNetwork(chainId)
                 updateAccountSpinner()
             }
-            WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(viewModel.requestedNetwork)
-            WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(viewModel.requestedNetwork)
-            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network)
+            WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
+            WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)
+            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network.chainId.toString())
         }
     }
 

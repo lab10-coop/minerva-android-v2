@@ -23,6 +23,9 @@ val Int.Companion.NO_PADDING: Int
 val Int.Companion.FirstIndex: Int
     get() = 0
 
+val Int.Companion.OneElement: Int
+    get() = 1
+
 val Int.Companion.InvalidIndex: Int
     get() = -1
 

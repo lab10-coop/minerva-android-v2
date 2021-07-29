@@ -4,21 +4,22 @@ import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Single
 import minerva.android.BaseViewModelTest
 import minerva.android.accounts.walletconnect.*
+import minerva.android.extension.empty
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.walletconnect.Topic
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
-import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
+import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -29,6 +30,7 @@ import kotlin.test.assertEquals
 class WalletConnectViewModelTest : BaseViewModelTest() {
 
     private val repository: WalletConnectRepository = mock()
+    private val walletActionsRepository: WalletActionsRepository = mock()
     private val manager: AccountManager = mock()
     private val logger: Logger = mock()
     private lateinit var viewModel: WalletConnectViewModel
@@ -40,7 +42,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Before
     fun setup() {
-        viewModel = WalletConnectViewModel(manager, repository, logger)
+        viewModel = WalletConnectViewModel(manager, repository, logger, walletActionsRepository)
     }
 
     @Test
@@ -92,7 +94,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo OnSessionRequest(meta, "Ethereum", WalletConnectAlertType.NO_ALERT)
+            secondValue shouldBeEqualTo OnSessionRequest(meta, BaseNetworkData(1, "Ethereum"), WalletConnectAlertType.NO_ALERT)
         }
     }
 
@@ -110,7 +112,11 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo OnSessionRequest(meta, "Ethereum", WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR)
+            secondValue shouldBeEqualTo OnSessionRequest(
+                meta,
+                BaseNetworkData(1, "Ethereum"),
+                WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR
+            )
         }
     }
 
@@ -129,7 +135,11 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo OnSessionRequest(meta, "Ethereum", WalletConnectAlertType.CHANGE_ACCOUNT_WARNING)
+            secondValue shouldBeEqualTo OnSessionRequest(
+                meta,
+                BaseNetworkData(1, "Ethereum"),
+                WalletConnectAlertType.CHANGE_ACCOUNT_WARNING
+            )
         }
         viewModel.account shouldBeEqualTo ethereumAccount
     }
@@ -146,7 +156,11 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo OnSessionRequest(meta, "5", WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING)
+            secondValue shouldBeEqualTo OnSessionRequest(
+                meta,
+                BaseNetworkData(5, String.empty),
+                WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
+            )
         }
     }
 
@@ -174,7 +188,11 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
-            secondValue shouldBeEqualTo OnSessionRequest(meta, "", WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
+            secondValue shouldBeEqualTo OnSessionRequest(
+                meta,
+                BaseNetworkData(Int.InvalidId, String.empty),
+                WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
+            )
         }
     }
 
@@ -207,8 +225,12 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         stateCaptor.run {
             verify(stateObserver, times(2)).onChanged(capture())
             firstValue is ProgressBarState
-            secondValue shouldBeEqualTo OnSessionRequest(meta, "", WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
-            viewModel.requestedNetwork shouldBeEqualTo ""
+            secondValue shouldBeEqualTo OnSessionRequest(
+                meta,
+                BaseNetworkData(Int.InvalidId, String.empty),
+                WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
+            )
+            viewModel.requestedNetwork shouldBeEqualTo BaseNetworkData(Int.InvalidId, String.empty)
         }
     }
 
@@ -373,5 +395,28 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         whenever(manager.getAllActiveAccounts(1)).thenReturn(accounts)
         viewModel.setNewAccount(account)
         viewModel.availableAccounts shouldBeEqualTo accounts
+    }
+
+    @Test
+    fun `check Creating new Account flow`() {
+        NetworkManager.initialize(listOf(Network(chainId = 3, name = "xDai", httpRpc = "some_rpc")))
+        whenever(manager.createOrUnhideAccount(any())).thenReturn(Single.just("Cookie Account"))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        viewModel.run {
+            stateLiveData.observeForever(stateObserver)
+            errorLiveData.observeForever(errorObserver)
+            requestedNetwork = BaseNetworkData(3, "xDai")
+            addAccount(3, WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR)
+            addAccount(3, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
+        }
+
+        stateCaptor.run {
+            verify(stateObserver, times(2)).onChanged(capture())
+            firstValue shouldBeEqualTo UpdateOnSessionRequest(BaseNetworkData(3, "xDai"), WalletConnectAlertType.NO_ALERT)
+            secondValue shouldBeEqualTo UpdateOnSessionRequest(
+                BaseNetworkData(3, "xDai"),
+                WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
+            )
+        }
     }
 }

@@ -141,6 +141,11 @@ class AccountManagerImpl(
         }
     }
 
+    override fun createOrUnhideAccount(network: Network): Single<String> {
+        val index = getNextAvailableIndexForNetwork(network)
+        return connectAccountToNetwork(index, network)
+    }
+
     private fun updateAccount(existedAccount: Account, network: Network): Single<String> {
         val accountName =
             if (existedAccount.name.isBlank()) CryptoUtils.prepareName(

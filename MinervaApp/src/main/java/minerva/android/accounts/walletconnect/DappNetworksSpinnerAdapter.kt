@@ -9,7 +9,9 @@ import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import minerva.android.R
 import minerva.android.databinding.SpinnerNetworkWalletConnectBinding
+import minerva.android.extension.dpToPx
 import minerva.android.kotlinUtils.EmptyResource
+import minerva.android.kotlinUtils.OneElement
 
 class DappNetworksSpinnerAdapter(
     context: Context,
@@ -37,6 +39,8 @@ class DappNetworksSpinnerAdapter(
                     text = networkItem.networkName
                     val networkRes = if (isDropdown) {
                         selectedItemWidth?.let { selectedItemWidth -> width = selectedItemWidth }
+                        height = dpToPx(DROPDOWN_HEIGHT)
+                        maxLines = Int.OneElement
                         R.color.darkGray80 to Int.EmptyResource
                     } else {
                         R.color.warningOrange to R.drawable.ic_dropdown_yellow
@@ -51,4 +55,8 @@ class DappNetworksSpinnerAdapter(
                 }
             }
         }
+
+    companion object {
+        private const val DROPDOWN_HEIGHT = 40f
+    }
 }

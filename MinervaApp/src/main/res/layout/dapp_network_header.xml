@@ -38,8 +38,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/margin_xsmall"
-        android:orientation="horizontal"
         android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/name">
@@ -76,7 +76,27 @@
             android:spinnerMode="dropdown"
             android:textAlignment="center"
             android:visibility="gone"
-            tools:listitem="@layout/spinner_network_wallet_connect"  />
+            tools:listitem="@layout/spinner_network_wallet_connect" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/add_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_xsmall"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginEnd="@dimen/margin_xsmall"
+            android:background="@drawable/rounded_background_purple_frame"
+            android:drawablePadding="@dimen/margin_xsmall"
+            android:fontFamily="@font/rubik_medium"
+            android:gravity="center"
+            android:lines="1"
+            android:paddingStart="@dimen/margin_normal"
+            android:paddingTop="@dimen/margin_xxsmall"
+            android:paddingEnd="@dimen/margin_normal"
+            android:paddingBottom="@dimen/margin_xxsmall"
+            android:text="@string/add_account_label"
+            android:textColor="@color/colorPrimary"
+            android:visibility="gone" />
 
         <minerva.android.widget.DynamicWidthSpinner
             android:id="@+id/account_spinner"
