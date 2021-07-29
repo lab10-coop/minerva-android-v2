@@ -84,8 +84,21 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `Test saving tokens for given network`() {
         NetworkManager.initialize(MockDataProvider.networks)
+        whenever(tokenDao.getTaggedTokens()).thenReturn(
+            Single.just(
+                listOf(
+                    ERC20Token(
+                        ATS_TAU,
+                        "CookieTokenATS",
+                        "Cookie",
+                        "0xS0m3T0k3N",
+                        "13"
+                    )
+                )
+            )
+        )
         val firstToken = ERC20Token(1, "CookieToken", "COOKiE", "0xC00k1e", "C00")
-        tokenManager.saveToken(ATS_TAU, firstToken).test().assertComplete()
+        tokenManager.saveToken("accountAddress", ATS_TAU, firstToken).test().assertComplete()
         verify(walletManager, times(1)).updateWalletConfig(any())
     }
 

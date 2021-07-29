@@ -66,11 +66,23 @@ class TokenManagerImpl(
     private val tokenDao: TokenDao = database.tokenDao()
     private var currentFiat = String.Empty
 
-    override fun saveToken(chainId: Int, token: ERC20Token): Completable =
-        walletManager.getWalletConfig().run {
-            copy(version = updateVersion, erc20Tokens = updateTokens(chainId, token, erc20Tokens.toMutableMap()))
-                .let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
-        }
+    override fun saveToken(accountAddress: String, chainId: Int, token: ERC20Token): Completable =
+        tokenDao.getTaggedTokens()
+            .flatMapCompletable { tokens ->
+                var tag = String.Empty
+                tokens.find { taggedToken -> taggedToken.address.equals(token.address, true) }
+                    ?.let { tag = it.tag }
+                walletManager.getWalletConfig().run {
+                    copy(
+                        version = updateVersion,
+                        erc20Tokens = updateTokens(
+                            chainId, token.copy(accountAddress = accountAddress, tag = tag),
+                            erc20Tokens.toMutableMap()
+                        )
+                    ).let { walletConfig -> walletManager.updateWalletConfig(walletConfig) }
+                }
+            }
+
 
     override fun saveTokens(
         shouldSafeNewTokens: Boolean,
@@ -227,6 +239,8 @@ class TokenManagerImpl(
     }
 
     override fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>> = tokenDao.getTaggedTokensFlowable()
+    override fun getTaggedTokensSingle(): Single<List<ERC20Token>> = tokenDao.getTaggedTokens()
+
     override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
 
     private fun getTokenIconsURL(): Single<Map<String, String>> =
