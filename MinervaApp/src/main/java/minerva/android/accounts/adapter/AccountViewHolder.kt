@@ -57,9 +57,7 @@ class AccountViewHolder(
     ) {
         view.apply {
             prepareView(account)
-
             prepareTokens(account, fiatSymbol, tokens)
-
             bindData(account, fiatSymbol)
             setOnMenuClickListener(rawPosition, account)
         }
@@ -133,25 +131,32 @@ class AccountViewHolder(
         }
     }
 
-    private fun View.setOnItemClickListener() =
-        setOnClickListener { if (isWidgetOpen) close() else open() }
-
     private fun View.prepareTokens(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) {
         binding.apply {
-            tokensAndCollectibles.prepareView(
-                viewGroup,
-                this@AccountViewHolder,
-                accountWidgetState.isWidgetOpen
-            )
-            tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens)
+            tokensAndCollectibles.prepareView(viewGroup, this@AccountViewHolder, accountWidgetState.isWidgetOpen)
+            tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens, accountWidgetState.isWidgetOpen)
             tokens.isNotEmpty().let { visible ->
-                if (visible) setOnItemClickListener()
+                if (visible) setOnItemClickListener(account, fiatSymbol, tokens)
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
                 prepareArrow(visible)
                 containerBackground.visibleOrGone(visible)
             }
         }
+    }
+
+    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) = setOnClickListener {
+        if (isWidgetOpen) {
+            close()
+        } else {
+            binding.tokensAndCollectibles.initTokensList(account, fiatSymbol, tokens, true)
+            open()
+        }
+    }
+
+    private fun open() {
+        TransitionManager.beginDelayedTransition(viewGroup)
+        setOpen(true)
     }
 
     private fun setOpen(isOpen: Boolean) {
@@ -170,11 +175,6 @@ class AccountViewHolder(
             visibleOrGone(isVisible)
             rotation = if (accountWidgetState.isWidgetOpen) ROTATE_180_ANGLE else ROTATE_0_ANGLE
         }
-    }
-
-    private fun open() {
-        TransitionManager.beginDelayedTransition(viewGroup)
-        setOpen(true)
     }
 
     private fun close() {
