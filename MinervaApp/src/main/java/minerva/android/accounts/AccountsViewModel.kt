@@ -59,7 +59,8 @@ class AccountsViewModel(
     var tokenVisibilitySettings: TokenVisibilitySettings = accountManager.getTokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
     val isProtectKeysEnabled: Boolean get() = accountManager.isProtectKeysEnabled
-    val arePendingAccountsEmpty: Boolean get() = transactionRepository.getPendingAccounts().isEmpty()
+    val arePendingAccountsEmpty: Boolean
+        get() = transactionRepository.getPendingAccounts().isEmpty() && rawAccounts.any { account -> account.isPending }
     val isSynced: Boolean get() = walletActionsRepository.isSynced
     val isRefreshDone: Boolean get() = coinBalancesRefreshed && tokenBalancesRefreshed
     private var coinBalancesRefreshed = false
@@ -539,9 +540,8 @@ class AccountsViewModel(
             .forEachIndexed { index, account ->
                 account.apply {
                     dappSessionCount = sessionsPerAccount
-                        .find { data ->
-                            data.address.equals(address, true) &&
-                                    data.chainId == chainId
+                        .find { dappSession ->
+                            dappSession.address.equals(address, true) && dappSession.chainId == chainId
                         }?.count ?: NO_DAPP_SESSION
                     passIndex(index)
                 }

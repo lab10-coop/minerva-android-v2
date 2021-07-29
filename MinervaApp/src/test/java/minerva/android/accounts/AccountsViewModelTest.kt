@@ -78,7 +78,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `are pending transactions empty`() {
         whenever(transactionRepository.getPendingAccounts()).thenReturn(emptyList())
         val result = viewModel.arePendingAccountsEmpty
-        assertEquals(true, result)
+        assertEquals(false, result)
     }
 
     @Test

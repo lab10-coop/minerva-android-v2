@@ -37,7 +37,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout), AccountsFragmentToAdapterListener {
     private val viewModel: AccountsViewModel by viewModel()
     private val appUIState: AppUIState by inject()
-    private val accountAdapter by lazy { AccountAdapter(this) }
+    private val accountAdapter = AccountAdapter(this)
     private lateinit var binding: RefreshableRecyclerViewLayoutBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,7 +55,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             viewModel.apply {
                 onResume()
                 refreshAddCryptoButton()
-                if (arePendingAccountsEmpty) accountAdapter.stopPendingTransactions()
+                if (arePendingAccountsEmpty) {
+                    accountAdapter.stopPendingTransactions()
+                }
             }
         }
     }
@@ -127,8 +129,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         if (viewModel.isProtectKeysEnabled) showBiometricPrompt({ showExportDialog(account) })
         else showExportDialog(account)
 
-    override fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) =
+    override fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState) {
         appUIState.updateAccountWidgetState(index, accountWidgetState)
+    }
 
     override fun getAccountWidgetState(index: Int): AccountWidgetState = appUIState.getAccountWidgetState(index)
     override fun getTokens(account: Account): List<ERC20Token> = viewModel.getTokens(account)
