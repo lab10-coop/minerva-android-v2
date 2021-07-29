@@ -47,7 +47,8 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         recalculateTxCost: (BigDecimal) -> WalletConnectTransaction,
         isBalanceTooLow: (balance: BigDecimal, cost: BigDecimal) -> Boolean
     ) = with(binding) {
-        setupHeader(session.name, session.networkName, session.iconUrl)
+        val networkName = account?.network?.name ?: session.networkName
+        setupHeader(session.name, networkName, session.iconUrl)
         prepareTransactions(transaction, account)
         senderAddress.text = transaction.from
         receiverAddress.text = transaction.to
