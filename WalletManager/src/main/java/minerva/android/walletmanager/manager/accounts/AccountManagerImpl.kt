@@ -319,25 +319,34 @@ class AccountManagerImpl(
     override fun hideAccount(account: Account): Completable =
         walletManager.getWalletConfig().run {
             val newAccounts: MutableList<Account> = accounts.toMutableList()
+            val accountsToChange: MutableMap<Int, Account> = mutableMapOf()
             accounts.forEachIndexed { index, item ->
                 if (item.id == account.id && item.network == account.network) {
-                    return handleHidingAccount(item, this, newAccounts, index)
+                    accountsToChange[index] = item
                 }
             }
-            Completable.error(MissingAccountThrowable())
+            if (accountsToChange.isNotEmpty()) {
+                handleHidingAccount(this, newAccounts, accountsToChange)
+            } else {
+                Completable.error(MissingAccountThrowable())
+            }
         }
 
     private fun handleHidingAccount(
-        account: Account, config: WalletConfig,
-        newAccounts: MutableList<Account>, index: Int
-    ): Completable =
-        when {
-            isNotSAMasterOwner(config.accounts, account) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
-            else -> {
-                newAccounts[index] = account.copy(isHide = true)
-                walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+        config: WalletConfig,
+        newAccounts: MutableList<Account>, accountsToChange: Map<Int, Account>
+    ): Completable {
+        accountsToChange.entries.forEach { item ->
+            when {
+                isNotSAMasterOwner(config.accounts, item.value) -> return Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+                else -> {
+                    newAccounts[item.key] = item.value.copy(isHide = true)
+
+                }
             }
         }
+        return walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+    }
 
     private fun handleNoFundsError(account: Account): Completable =
         if (account.isSafeAccount) {
