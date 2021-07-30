@@ -13,7 +13,6 @@ import minerva.android.extension.launchActivity
 import minerva.android.extension.replaceFragmentWithBackStack
 import minerva.android.kotlinUtils.Empty
 import minerva.android.main.MainActivity
-import minerva.android.onboarding.create.CreateWalletFragment
 import minerva.android.onboarding.restore.RestoreWalletFragment
 import minerva.android.onboarding.welcome.WelcomeFragment
 
@@ -27,25 +26,27 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
     }
 
     override fun onBackPressed() {
-        if (isRestoreOrCreateWalletFragment()) {
+        if (isRestoreOrWelcomeFragment()) {
             setToolbarBackButtonVisibility(false)
         }
         super.onBackPressed()
     }
 
-    private fun isRestoreOrCreateWalletFragment() =
-        getCurrentFragment() is RestoreWalletFragment || getCurrentFragment() is CreateWalletFragment
+    private fun isRestoreOrWelcomeFragment() =
+        getCurrentFragment() is RestoreWalletFragment || getCurrentFragment() is WelcomeFragment
 
     private fun setupActionBar() {
         supportActionBar?.apply {
             title = String.Empty
             setBackgroundDrawable(ColorDrawable(Color.WHITE))
+            hide()
         }
         window.statusBarColor = Color.WHITE
     }
 
     private fun setToolbarBackButtonVisibility(isVisible: Boolean) {
         supportActionBar?.apply {
+            if (isVisible) show() else hide()
             setDisplayHomeAsUpEnabled(isVisible)
             setDisplayShowHomeEnabled(isVisible)
         }
@@ -62,11 +63,6 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
 
     override fun showRestoreWalletFragment() {
         replaceFragmentWithBackStack(R.id.main_content, RestoreWalletFragment.newInstance())
-        setToolbarBackButtonVisibility(true)
-    }
-
-    override fun showCreateWalletFragment() {
-        replaceFragmentWithBackStack(R.id.main_content, CreateWalletFragment.newInstance())
         setToolbarBackButtonVisibility(true)
     }
 
