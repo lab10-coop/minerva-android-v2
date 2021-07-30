@@ -44,5 +44,5 @@ object RetrofitProvider {
             .build()
 
     fun provideMinervaApi(retrofit: Retrofit): MinervaApi = retrofit.create(MinervaApi::class.java)
-    private const val TIMEOUT_TIME: Long = 500
+    private const val TIMEOUT_TIME: Long = 10
 }
