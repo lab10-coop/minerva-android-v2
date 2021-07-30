@@ -2,6 +2,7 @@ package minerva.android.accounts.walletconnect
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
@@ -17,7 +18,7 @@ data class OnWalletConnectConnectionError(val error: Throwable, val sessionName:
 
 data class OnSessionRequest(
     val meta: WalletConnectPeerMeta,
-    val network: String,
+    val network: BaseNetworkData,
     val dialogType: WalletConnectAlertType
 ) : WalletConnectState()
 
@@ -35,3 +36,4 @@ data class OnEthSendTransactionRequest(
 
 object DefaultRequest : WalletConnectState()
 data class WrongTransactionValueState(val transaction: WalletConnectTransaction) : WalletConnectState()
+data class UpdateOnSessionRequest(val network: BaseNetworkData, val dialogType: WalletConnectAlertType) : WalletConnectState()

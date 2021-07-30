@@ -53,7 +53,7 @@ class RampViewModel(
 
     fun createNewAccount() {
         launchDisposable {
-            accountManager.createRegularAccount(NetworkManager.getNetwork(currentChainId))
+            accountManager.createOrUnhideAccount(NetworkManager.getNetwork(currentChainId))
                 .flatMapCompletable { walletActionsRepository.saveWalletActions(listOf(getWalletAction(it))) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

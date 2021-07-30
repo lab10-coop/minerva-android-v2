@@ -46,7 +46,10 @@ class AccountAdapter(
     }
 
     fun updateSessionCount(sessionPerAccount: List<DappSessionData>) {
-        listener.updateSessionCount(sessionPerAccount) { index -> notifyItemChanged(index) }
+        listener.updateSessionCount(sessionPerAccount) { index ->
+            //TODO Optimise in MNR-477 - update Account only when sessions count changes
+            notifyItemChanged(index)
+        }
     }
 
     fun setPending(index: Int, chainId: Int, isPending: Boolean, areMainNetsEnabled: Boolean) {

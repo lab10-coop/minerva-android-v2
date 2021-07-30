@@ -13,11 +13,12 @@
         style="@style/RoundedLabelStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xbig"
+        android:padding="@dimen/margin_xxsmall"
         android:text="@string/transaction_request"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/network" />
+        app:layout_constraintTop_toBottomOf="@+id/network_layout" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/transaction_type"
@@ -25,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="55dp"
+        android:layout_marginTop="@dimen/margin_xxlarge"
         android:text="@string/transfer"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/requestLabel" />

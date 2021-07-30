@@ -15,7 +15,7 @@ interface AccountsFragmentToAdapterListener {
     fun onWalletConnect(index: Int)
     fun onManageTokens(index: Int)
     fun onExportPrivateKey(account: Account)
-    fun updateAccountWidgetState(index: Int, isOpen: AccountWidgetState)
+    fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState)
     fun getAccountWidgetState(index: Int): AccountWidgetState
     fun getTokens(account: Account): List<ERC20Token>
     fun onEditName(account: Account)

@@ -10,11 +10,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 interface TokenManager {
     fun checkMissingTokensDetails(): Completable
     fun getActiveTokensPerAccount(account: Account): List<ERC20Token>
-    fun saveToken(chainId: Int, token: ERC20Token): Completable
-
-    /**
-     * return statement: Map<AccountPrivateKey, List<AccountToken>>
-     */
+    fun saveToken(accountAddress: String, chainId: Int, token: ERC20Token): Completable
     fun saveTokens(
         shouldSafeNewTokens: Boolean,
         newAndLocalTokensPerChainIdMap: Map<Int, List<ERC20Token>>
@@ -43,4 +39,5 @@ interface TokenManager {
     fun updateTokensRate(account: Account)
     fun getSingleTokenRate(tokenHash: String): Double
     fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>>
+    fun getTaggedTokensSingle(): Single<List<ERC20Token>>
 }

@@ -9,7 +9,9 @@ import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import minerva.android.R
 import minerva.android.databinding.SpinnerNetworkWalletConnectBinding
+import minerva.android.extension.dpToPx
 import minerva.android.kotlinUtils.EmptyResource
+import minerva.android.kotlinUtils.OneElement
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 
 class DappAccountsSpinnerAdapter(
@@ -39,6 +41,8 @@ class DappAccountsSpinnerAdapter(
                     setTextColor(ContextCompat.getColor(context, R.color.gray))
                     val arrowRes = if (isDropdown) {
                         selectedItemWidth?.let { selectedItemWidth -> width = selectedItemWidth }
+                        height = dpToPx(DROPDOWN_HEIGHT)
+                        maxLines = Int.OneElement
                         Int.EmptyResource
                     } else {
                         R.drawable.ic_dropdown_purple
@@ -47,4 +51,8 @@ class DappAccountsSpinnerAdapter(
                 }
             }
         }
+
+    companion object {
+        private const val DROPDOWN_HEIGHT = 40f
+    }
 }

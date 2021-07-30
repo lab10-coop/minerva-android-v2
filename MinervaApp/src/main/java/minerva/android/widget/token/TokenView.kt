@@ -27,7 +27,6 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
     ) {
         prepareView(token, account)
         prepareListeners(callback, account, token)
-
         getTokensValues(account, token).let { (crypto, fiat) ->
             with(binding.amountView) {
                 setCryptoBalance(getCryptoBalance(crypto))
@@ -57,16 +56,17 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) : Relative
 
     private fun prepareView(erc20token: ERC20Token?, account: Account) {
         binding.apply {
-            if (erc20token != null)
+            if (erc20token != null) {
                 with(erc20token) {
                     tokenLogo.initView(this)
                     tokenName.text = symbol
                 }
-            else
+            } else {
                 with(account.network) {
                     tokenLogo.initView(NativeToken(chainId, name, token, getMainTokenIconRes(chainId)))
                     tokenName.text = token
                 }
+            }
         }
     }
 

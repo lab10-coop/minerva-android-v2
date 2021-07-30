@@ -44,4 +44,5 @@ interface AccountManager : Manager {
     fun changeAccountName(existedAccount: Account, newName: String): Completable
     fun getFirstActiveAccountOrNull(chainId: Int): Account?
     fun getFirstActiveAccountForAllNetworks(): List<Account>
+    fun createOrUnhideAccount(network: Network): Single<String>
 }
