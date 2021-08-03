@@ -53,6 +53,7 @@ class TransactionRepositoryImpl(
     private val tokenManager: TokenManager
 ) : TransactionRepository {
     override val masterSeed: MasterSeed get() = walletConfigManager.masterSeed
+    override var newTaggedTokens: MutableList<ERC20Token> = mutableListOf()
     private val currentFiatCurrency: String get() = localStorage.loadCurrentFiat()
     private val ratesMap: HashMap<Int, Markets> = hashMapOf()
 
@@ -132,43 +133,53 @@ class TransactionRepositoryImpl(
         }
 
     private fun handleNewAddedTokens(assetBalance: AssetBalance, accounts: List<Account>): Flowable<AssetBalance> =
-        if (shouldSetAccountAddress(assetBalance)) {
-            updateCachedTokens(getTokensWithAccountAddress(accounts, assetBalance))
-                .toFlowable<AssetBalance>()
-                .onErrorReturnItem(assetBalance)
+        if (isAccountAddressMissing(assetBalance)) {
+            accounts.forEach { account ->
+                if (isTokenWithPositiveBalance(account, assetBalance)) {
+                    newTaggedTokens.add(
+                        assetBalance.accountToken.token.copy(
+                            accountAddress = account.address,
+                            tag = assetBalance.accountToken.token.tag
+                        )
+                    )
+                }
+            }
+            Flowable.just(assetBalance)
         } else {
             Flowable.just(assetBalance)
         }
 
-    internal fun getTokensWithAccountAddress(
-        accounts: List<Account>,
-        assetBalance: AssetBalance
-    ): Map<Int, List<ERC20Token>> {
-        val allTokens: MutableList<ERC20Token> = mutableListOf()
-        accounts.forEach { account ->
-            if (isTokenWithPositiveBalance(account, assetBalance)) {
-                allTokens.add(
-                    assetBalance.accountToken.token.copy(
-                        accountAddress = account.address,
-                        tag = assetBalance.accountToken.token.tag
-                    )
-                )
-            }
+    private fun isAccountAddressMissing(assetBalance: AssetBalance): Boolean =
+        assetBalance.accountToken.balance > BigDecimal.ZERO && assetBalance.accountToken.token.accountAddress.isBlank()
+
+    override fun updateCachedTokens(): Completable {
+        return if (newTaggedTokens.isNotEmpty()) {
+            val walletConfig = walletConfigManager.getWalletConfig()
+            return walletConfigManager.updateWalletConfig(
+                walletConfig.copy(version = walletConfig.updateVersion, erc20Tokens = getTokensWithAccountAddress())
+            ).doOnComplete { newTaggedTokens.clear() }
+        } else {
+            Completable.complete()
         }
-        return allTokens.groupBy { token -> token.chainId }
+    }
+
+    internal fun getTokensWithAccountAddress(): Map<Int, List<ERC20Token>> {
+        accountsForTokenBalanceRefresh.let { accounts ->
+            val allTokens: MutableList<ERC20Token> = mutableListOf()
+            accounts.forEach { account ->
+                newTaggedTokens.forEach { token ->
+                    if (account.address.equals(token.accountAddress, true) && account.chainId == token.chainId) {
+                        allTokens.add(token.copy(accountAddress = account.address, tag = token.tag))
+                    }
+                }
+            }
+            return allTokens.groupBy { token -> token.chainId }
+        }
     }
 
     private fun isTokenWithPositiveBalance(account: Account, assetBalance: AssetBalance): Boolean =
         account.privateKey.equals(assetBalance.privateKey, true) &&
                 account.chainId == assetBalance.chainId && assetBalance.accountToken.balance > BigDecimal.ZERO
-
-    private fun shouldSetAccountAddress(assetBalance: AssetBalance): Boolean =
-        assetBalance.accountToken.balance > BigDecimal.ZERO && assetBalance.accountToken.token.accountAddress.isBlank()
-
-    private fun updateCachedTokens(updatedTokens: Map<Int, List<ERC20Token>>): Completable =
-        with(walletConfigManager.getWalletConfig()) {
-            walletConfigManager.updateWalletConfig(copy(version = updateVersion, erc20Tokens = updatedTokens))
-        }
 
     private val accountsForTokenBalanceRefresh: List<Account>
         get() = if (shouldGetAllAccounts()) {

@@ -17,6 +17,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 interface TransactionRepository {
+    var newTaggedTokens: MutableList<ERC20Token>
     val masterSeed: MasterSeed
     fun getCoinBalance(): Flowable<Coin>
     fun getTokenBalance(): Flowable<Asset>
@@ -50,4 +51,5 @@ interface TransactionRepository {
     fun getFiatSymbol(): String
     fun isProtectTransactionEnabled(): Boolean
     fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>>
+    fun updateCachedTokens(): Completable
 }

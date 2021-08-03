@@ -56,6 +56,7 @@ class AccountsViewModel(
     val activeAccounts: List<Account> get() = accountManager.activeAccounts
     private val rawAccounts: List<Account> get() = accountManager.rawAccounts
     private val cachedTokens: Map<Int, List<ERC20Token>> get() = accountManager.cachedTokens
+    private var newTokens: MutableList<AccountToken> = mutableListOf()
     var tokenVisibilitySettings: TokenVisibilitySettings = accountManager.getTokenVisibilitySettings
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
     val isProtectKeysEnabled: Boolean get() = accountManager.isProtectKeysEnabled
@@ -215,11 +216,11 @@ class AccountsViewModel(
         (account.address.equals(coinBalance.address, true) && account.chainId == coinBalance.chainId)
 
     fun refreshTokensBalances() {
-        launchDisposable {
-            tokenBalancesRefreshed = false
-            transactionRepository.getTaggedTokensUpdate()
-                .filter { taggedTokens -> taggedTokens.isNotEmpty() }
-                .doOnNext {
+        tokenBalancesRefreshed = false
+        transactionRepository.getTaggedTokensUpdate()
+            .filter { taggedTokens -> taggedTokens.isNotEmpty() }
+            .doOnNext {
+                launchDisposable {
                     transactionRepository.getTokenBalance()
                         .map { asset ->
                             when (asset) {
@@ -229,6 +230,7 @@ class AccountsViewModel(
                             }
                         }
                         .filter { index -> index != Int.InvalidIndex }
+                        .doOnComplete { updateNewTaggedTokens() }
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeBy(
@@ -242,7 +244,15 @@ class AccountsViewModel(
                                 _errorLiveData.value = Event(RefreshBalanceError)
                             }
                         )
-                }.subscribe()
+                }
+            }.subscribe()
+    }
+
+    private fun updateNewTaggedTokens() {
+        launchDisposable {
+            transactionRepository.updateCachedTokens()
+                .subscribeOn(Schedulers.io())
+                .subscribeBy(onError = { error -> logger.logToFirebase("Saving tagged tokens error: ${error.message}") })
         }
     }
 
@@ -253,13 +263,27 @@ class AccountsViewModel(
             "$error"
         }
 
+    private fun updateNewTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
+        if (hasFunds(balance.accountToken.balance)) {
+            saveTokenVisible(account.address, balance.accountToken.token.address, true)
+            newTokens.add(balance.accountToken)
+            account.accountTokens =
+                newTokens
+                    .filter { accountToken ->
+                        accountToken.token.accountAddress.equals(account.address, true) &&
+                                accountToken.token.chainId == account.chainId
+                    }.toMutableList()
+            return index
+        }
+        return Int.InvalidIndex
+    }
+
     fun getTokens(account: Account): List<ERC20Token> =
         if (account.accountTokens.isNotEmpty()) {
             account.accountTokens
                 .filter { accountToken -> shouldShowAccountToken(account, accountToken) }
                 .sortedByDescending { accountToken -> accountToken.fiatBalance }
                 .map { accountToken -> accountToken.token }
-                .toList()
         } else {
             cachedTokens[account.chainId]
                 ?.filter { token -> shouldShowCachedToken(token, account) }
@@ -328,16 +352,6 @@ class AccountsViewModel(
 
     fun isTokenVisible(accountAddress: String, accountToken: AccountToken): Boolean? =
         tokenVisibilitySettings.getTokenVisibility(accountAddress, accountToken.token.address)
-
-    private fun updateNewTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
-        var accountIndex: Int = Int.InvalidIndex
-        if (hasFunds(balance.accountToken.balance)) {
-            saveTokenVisible(account.address, balance.accountToken.token.address, true)
-            account.accountTokens.add(balance.accountToken)
-            accountIndex = index
-        }
-        return accountIndex
-    }
 
     private fun updateNotVisibleTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
         var accountIndex: Int = Int.InvalidIndex
