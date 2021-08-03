@@ -345,6 +345,13 @@
     <string name="value">Value:</string>
     <string name="token_balance_unlcear_message">Token balance unclear - transaction could fail</string>
     <string name="add_account_label">+ Add account</string>
+    <string name="terms_of_service_info">By proceeding you agree to the <a href="https://docs.minerva.digital/legal/terms">Terms of Service</a></string>
+    <string name="import_with_recovery_phrase">Import with Recovery Phrase</string>
+    <string name="import_info">Import an existing wallet or create a new one</string>
+    <string name="your_identity_label">Your identity</string>
+    <string name="your_data_label">Your data</string>
+    <string name="your_money_label">Your money</string>
+    <string name="your_own_them_label">Own them</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
