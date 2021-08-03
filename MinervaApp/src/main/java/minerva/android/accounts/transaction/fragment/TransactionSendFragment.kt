@@ -26,6 +26,7 @@ import minerva.android.extension.validator.Validator
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.OneElement
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -211,13 +212,28 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                         errorView.visibleOrGone(false)
                     }
                 )
+
             amount.afterTextChanged { inputText ->
-                allPressed = inputText == viewModel.recalculateAmount.toString()
+                val inputAmount = inputText.removeMoreThanOneDots()
+                allPressed = inputAmount == viewModel.recalculateAmount.toString()
                 binding.fiatAmountValue.text =
                     BalanceUtils.getFiatBalance(viewModel.recalculateFiatAmount(getAmount()), viewModel.fiatSymbol)
             }
         }
     }
+
+    private fun String.isMoreThanOneDot(): Boolean = asIterable().count { it.toString() == DOT } > Int.OneElement
+
+    private fun String.removeMoreThanOneDots(): String =
+        if (isMoreThanOneDot()) {
+            val beforeDot = substringBefore(DOT)
+            val afterDot = substringAfter(DOT).replace(DOT, String.empty)
+            val newString = "$beforeDot$DOT$afterDot"
+            if (newString != this) {
+                binding.amount.setText(newString)
+                newString
+            } else this
+        } else this
 
     private fun getTransactionCostColor(isAvailable: Boolean) =
         (if (isAvailable) R.color.gray
@@ -447,6 +463,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
         @JvmStatic
         fun newInstance() = TransactionSendFragment()
 
+        private const val DOT = "."
         private const val EMPTY_VALUE = "-.--"
         private const val DROP_DOWN_VERTICAL_OFFSET = 8
         private const val MIN_SIGN_TO_FILTER = 3
