@@ -42,6 +42,7 @@ class AccountAdapter(
     }
 
     fun refreshList() {
+        //TODO Optimise in MNR-477 - update Accounts singly when changing fiat currency
         notifyDataSetChanged()
     }
 
