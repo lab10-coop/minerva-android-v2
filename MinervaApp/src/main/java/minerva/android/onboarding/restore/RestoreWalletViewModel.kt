@@ -8,60 +8,96 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.onboarding.restore.state.*
+import minerva.android.walletmanager.exception.WalletConfigNotFoundThrowable
+import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import timber.log.Timber
 import java.util.*
 
 class RestoreWalletViewModel(private val masterSeedRepository: MasterSeedRepository) : BaseViewModel() {
+    internal var masterSeed: MasterSeed? = null
+    val restoreWalletSuccess: LiveData<Event<WalletConfig>> get() = masterSeedRepository.walletConfigLiveData
+    private val _restoreWalletState = MutableLiveData<RestoreWalletState>()
+    val restoreWalletState: LiveData<RestoreWalletState> get() = _restoreWalletState
 
-    val restoreWalletLiveData: LiveData<Event<WalletConfig>> get() = masterSeedRepository.walletConfigLiveData
-
-    private val _invalidMnemonicLiveData = MutableLiveData<Event<List<String>>>()
-    val invalidMnemonicLiveData: LiveData<Event<List<String>>> get() = _invalidMnemonicLiveData
-
-    private val _loadingLiveData = MutableLiveData<Event<Boolean>>()
-    val loadingLiveData: LiveData<Event<Boolean>> get() = _loadingLiveData
-
-    private val _walletConfigNotFoundLiveData = MutableLiveData<Event<Unit>>()
-    val walletConfigNotFoundLiveData: LiveData<Event<Unit>> get() = _walletConfigNotFoundLiveData
-
-    internal fun isMnemonicLengthValid(content: CharSequence?) =
-        StringTokenizer(content.toString(), String.Space).countTokens() == WORDS_IN_MNEMONIC
-
-    internal fun validateMnemonic(mnemonic: String) {
-        _loadingLiveData.value = Event(true)
-        val invalidWords = masterSeedRepository.validateMnemonic(mnemonic)
-        if (invalidWords.isEmpty()) {
-            restoreWallet(mnemonic)
+    fun validateMnemonic(content: CharSequence?) {
+        val mnemonic: String = content.toString()
+        val mnemonicSize: Int = StringTokenizer(mnemonic, String.Space).countTokens()
+        val isMnemonicSizeValid: Boolean =
+            mnemonicSize.rem(DIVIDER) == 0 && (mnemonicSize in MIN_MNEMONIC_SIZE..MAX_MNEMONIC_SIZE)
+        if (isMnemonicSizeValid) {
+            checkMnemonicWords(mnemonic)
         } else {
-            _loadingLiveData.value = Event(false)
-            _invalidMnemonicLiveData.value = Event(invalidWords)
+            _restoreWalletState.value = InvalidMnemonicLength
         }
     }
 
-    private fun restoreWallet(mnemonic: String) {
+    private fun checkMnemonicWords(mnemonic: String) {
+        if (masterSeedRepository.areMnemonicWordsValid(mnemonic)) {
+            restoreSeedWithMasterKeys(mnemonic)
+        } else {
+            _restoreWalletState.value = InvalidMnemonicWords
+        }
+    }
+
+    private fun restoreSeedWithMasterKeys(mnemonic: String) {
+        when (val masterSeed = masterSeedRepository.restoreMasterSeed(mnemonic)) {
+            is MasterSeed -> {
+                this.masterSeed = masterSeed
+                _restoreWalletState.value = ValidMnemonic
+            }
+            else -> _restoreWalletState.value = InvalidMnemonicWords
+        }
+    }
+
+    fun restoreWallet() {
+        masterSeed?.let { seed ->
+            launchDisposable {
+                masterSeedRepository.restoreWalletConfig(seed)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSubscribe { _restoreWalletState.value = Loading(true) }
+                    .doOnEvent { _restoreWalletState.value = Loading(false) }
+                    .subscribeBy(
+                        onComplete = {
+                            masterSeedRepository.apply {
+                                initWalletConfig()
+                                saveIsMnemonicRemembered()
+                            }
+                        },
+                        onError = { error ->
+                            _restoreWalletState.value = getErrorState(error)
+                            Timber.e(error)
+                        }
+                    )
+            }
+        }
+    }
+
+    fun createWalletConfig() {
         launchDisposable {
-            masterSeedRepository.restoreMasterSeed(mnemonic)
+            masterSeedRepository.createWalletConfig(masterSeed)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnEvent { _loadingLiveData.value = Event(false) }
-                .subscribeBy(
-                    onComplete = {
-                        masterSeedRepository.apply {
-                            initWalletConfig()
-                            saveIsMnemonicRemembered()
-                        }
-                    },
-                    onError = {
-                        Timber.e(it)
-                        _walletConfigNotFoundLiveData.value = Event(Unit)
-                    }
-                )
+                .doOnSubscribe { _restoreWalletState.value = Loading(true) }
+                .doOnEvent { _restoreWalletState.value = Loading(false) }
+                .doOnTerminate { _restoreWalletState.value = WalletConfigCreated }
+                .subscribeBy(onError = { Timber.e("Create wallet error: $it") })
         }
     }
 
+    private fun getErrorState(error: Throwable): RestoreWalletState =
+        if (error is WalletConfigNotFoundThrowable) {
+            WalletConfigNotFound
+        } else {
+            GenericServerError
+        }
+
     companion object {
-        const val WORDS_IN_MNEMONIC = 12
+        private const val DIVIDER = 3
+        private const val MIN_MNEMONIC_SIZE = 12
+        private const val MAX_MNEMONIC_SIZE = 24
     }
 }

@@ -31,16 +31,6 @@ object AlertDialogHandler {
             .show()
     }
 
-    fun showHideAccountDialog(context: Context, title: String, message: String, positiveAction: () -> Unit) {
-        defaultDialog(context, title, message)
-            .setPositiveButton(R.string.hide_now) { dialog, _ ->
-                positiveAction()
-                dialog.dismiss()
-            }
-            .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
-            .show()
-    }
-
     private fun defaultDialog(context: Context, title: String, message: CharSequence): MaterialAlertDialogBuilder =
         MaterialAlertDialogBuilder(context, R.style.AlertDialogMaterialTheme)
             .setBackground(context.getDrawable(R.drawable.rounded_white_background))
