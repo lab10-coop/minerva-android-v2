@@ -3,9 +3,14 @@ package minerva.android.walletmanager.repository.seed
 import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.model.SeedError
+import minerva.android.cryptographyProvider.repository.model.SeedWithKeys
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.wallet.MasterKeys
 import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.MasterSeedError
 import minerva.android.walletmanager.model.wallet.WalletConfig
 
 class MasterSeedRepositoryImpl(
@@ -30,7 +35,7 @@ class MasterSeedRepositoryImpl(
     override fun getWalletConfig(): WalletConfig = walletConfigManager.getWalletConfig()
     override fun isMasterSeedAvailable(): Boolean = walletConfigManager.isMasterSeedSaved()
     override fun isMnemonicRemembered(): Boolean = walletConfigManager.isMnemonicRemembered()
-    override fun validateMnemonic(mnemonic: String): List<String> = cryptographyRepository.validateMnemonic(mnemonic)
+    override fun areMnemonicWordsValid(mnemonic: String): Boolean = cryptographyRepository.areMnemonicWordsValid(mnemonic)
 
     override fun getMnemonic(): String =
         cryptographyRepository.getMnemonicForMasterSeed(walletConfigManager.masterSeed.seed)
@@ -43,19 +48,26 @@ class MasterSeedRepositoryImpl(
         walletConfigManager.dispose()
     }
 
-    override fun restoreMasterSeed(mnemonic: String): Completable =
-        cryptographyRepository.restoreMasterSeed(mnemonic)
-            .flatMapCompletable { (seed, publicKey, privateKey) ->
-                walletConfigManager.restoreWalletConfig(MasterSeed(seed, publicKey, privateKey))
-            }
+    override fun restoreMasterSeed(mnemonic: String): MasterKeys =
+        when (val seedAndKeys = cryptographyRepository.restoreMasterSeed(mnemonic)) {
+            is SeedWithKeys -> MasterSeed(seedAndKeys.seed, seedAndKeys.publicKey, seedAndKeys.privateKey)
+            else -> MasterSeedError((seedAndKeys as SeedError).error)
+        }
+
+    override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
+        walletConfigManager.restoreWalletConfig(masterSeed)
 
     override fun saveIsMnemonicRemembered() {
         walletConfigManager.saveIsMnemonicRemembered()
     }
 
-    override fun createWalletConfig(): Completable =
-        cryptographyRepository.createMasterSeed()
-            .flatMapCompletable { (seed, publicKey, privateKey) ->
-                walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
-            }
+    override fun createWalletConfig(masterSeed: MasterSeed?): Completable =
+        masterSeed?.let { seed ->
+            walletConfigManager.createWalletConfig(seed)
+        }.orElse {
+            cryptographyRepository.createMasterSeed()
+                .flatMapCompletable { (seed, publicKey, privateKey) ->
+                    walletConfigManager.createWalletConfig(MasterSeed(seed, publicKey, privateKey))
+                }
+        }
 }

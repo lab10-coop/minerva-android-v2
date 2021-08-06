@@ -15,6 +15,7 @@ import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigVersion
 import minerva.android.configProvider.repository.HttpBadRequestException
+import minerva.android.configProvider.repository.HttpNotFoundException
 import minerva.android.configProvider.repository.MinervaApiRepositoryImpl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -66,6 +67,22 @@ class MinervaApiRepositoryTest {
         repository.getWalletConfig("publicKeys")
             .test()
             .assertError(error)
+    }
+
+    @Test
+    fun `get wallet config http not found error test`() {
+        val error = HttpException(
+            Response.error<Any>(
+                HttpURLConnection.HTTP_NOT_FOUND,
+                "Test Server Error".toResponseBody("text/plain".toMediaTypeOrNull())
+            )
+        )
+        every { api.getWalletConfig(any(), any()) } returns Single.error(error)
+        repository.getWalletConfig("publicKeys")
+            .test()
+            .assertError {
+                it is HttpNotFoundException
+            }
     }
 
     @Test

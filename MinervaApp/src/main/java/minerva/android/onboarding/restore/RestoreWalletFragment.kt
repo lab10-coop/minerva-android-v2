@@ -10,14 +10,15 @@ import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.extension.wrapper.TextWatcherWrapper
-import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.onboarding.base.BaseOnBoardingFragment
+import minerva.android.onboarding.restore.dialog.ImportWalletWithoutBackupDialog
+import minerva.android.onboarding.restore.state.*
+import minerva.android.utils.AlertDialogHandler
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class RestoreWalletFragment : BaseOnBoardingFragment(R.layout.fragment_restore_wallet) {
 
     private val viewModel: RestoreWalletViewModel by viewModel()
-    private lateinit var mnemonic: String
     private lateinit var binding: FragmentRestoreWalletBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -32,15 +33,38 @@ class RestoreWalletFragment : BaseOnBoardingFragment(R.layout.fragment_restore_w
         prepareMnemonicLengthValidator()
     }
 
+    private fun handleRestoreWalletButton() {
+        binding.restoreWalletButton.setOnClickListener {
+            viewModel.restoreWallet()
+        }
+    }
+
     private fun prepareObservers() {
         viewModel.apply {
-            invalidMnemonicLiveData.observe(this@RestoreWalletFragment, EventObserver { handleInvalidMnemonic(it) })
-            restoreWalletLiveData.observe(this@RestoreWalletFragment, Observer { listener.showMainActivity() })
-            loadingLiveData.observe(this@RestoreWalletFragment, EventObserver { if (it) showLoader() else hideLoader() })
-            walletConfigNotFoundLiveData.observe(
-                this@RestoreWalletFragment,
-                EventObserver { handleError(R.string.no_such_file_error_message) })
+            restoreWalletSuccess.observe(this@RestoreWalletFragment, Observer { listener.showMainActivity() })
+            restoreWalletState.observe(this@RestoreWalletFragment, Observer { state ->
+                when (state) {
+                    is ValidMnemonic -> enableImportButton(true)
+                    is InvalidMnemonicLength -> enableImportButton(false)
+                    is InvalidMnemonicWords -> handleInvalidMnemonic()
+                    is WalletConfigNotFound ->
+                        ImportWalletWithoutBackupDialog(requireContext()) { viewModel.createWalletConfig() }.show()
+                    is Loading -> if (state.isLoading) showLoader() else hideLoader()
+                    is GenericServerError ->
+                        AlertDialogHandler.showDialog(
+                            requireContext(),
+                            getString(R.string.error_title),
+                            getString(R.string.backup_server_error)
+                        )
+                    is WalletConfigCreated -> listener.showMainActivity()
+                }
+            })
         }
+    }
+
+    private fun enableImportButton(isEnabled: Boolean) = with(binding) {
+        errorMessage.invisible()
+        restoreWalletButton.isEnabled = isEnabled
     }
 
     private fun hideLoader() = with(binding) {
@@ -53,40 +77,19 @@ class RestoreWalletFragment : BaseOnBoardingFragment(R.layout.fragment_restore_w
         restoreWalletProgressBar.visible()
     }
 
-    private fun handleError(messageId: Int) = with(binding) {
-        errorMessage.visible()
-        errorMessage.text = getString(messageId)
-    }
-
     @SuppressLint("SetTextI18n")
-    private fun handleInvalidMnemonic(invalidMnemonicWords: List<String>) = with(binding) {
+    private fun handleInvalidMnemonic() = with(binding) {
         restoreWalletButton.isEnabled = false
         errorMessage.visible()
-        errorMessage.text = "${getString(R.string.check_incorrect_mnemonic_words)} $invalidMnemonicWords"
+        errorMessage.text = getString(R.string.unknown_words)
     }
 
     private fun prepareMnemonicLengthValidator() {
         binding.mnemonicEditText.addTextChangedListener(object : TextWatcherWrapper() {
             override fun onTextChanged(s: CharSequence?) {
-                handleMnemonicLengthValidation(s)
+                viewModel.validateMnemonic(s)
             }
         })
-    }
-
-    private fun handleMnemonicLengthValidation(content: CharSequence?) = with(binding) {
-        errorMessage.invisible()
-        restoreWalletButton.isEnabled = if (viewModel.isMnemonicLengthValid(content)) {
-            mnemonic = content.toString()
-            true
-        } else {
-            false
-        }
-    }
-
-    private fun handleRestoreWalletButton() {
-        binding.restoreWalletButton.setOnClickListener {
-            viewModel.validateMnemonic(mnemonic)
-        }
     }
 
     companion object {

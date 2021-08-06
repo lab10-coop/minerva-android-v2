@@ -16,30 +16,45 @@ class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiReposito
 
     override fun getWalletConfig(publicKey: String): Single<WalletConfigPayload> =
         api.getWalletConfig(publicKey = publicKey)
-            .map { Migration.migrateIfNeeded(it) }
+            .map { walletConfigJson -> Migration.migrateIfNeeded(walletConfigJson) }
+            .onErrorResumeNext { error -> Single.error(getThrowableWhenGettingWalletConfig(error)) }
+
+    private fun getThrowableWhenGettingWalletConfig(error: Throwable) =
+        if (error is HttpException && error.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+            HttpNotFoundException()
+        } else {
+            error
+        }
 
     override fun getWalletConfigVersion(publicKey: String): Single<Int> =
         api.getWalletConfigVersion(publicKey = publicKey)
             .map { it.version }
 
-    override fun saveWalletConfig(publicKey: String, walletConfigPayload: WalletConfigPayload): Single<WalletConfigPayload> {
+    override fun saveWalletConfig(
+        publicKey: String,
+        walletConfigPayload: WalletConfigPayload
+    ): Single<WalletConfigPayload> {
         return api.saveWalletConfig(publicKey = publicKey, walletConfigPayload = walletConfigPayload)
             .toSingleDefault(walletConfigPayload)
-            .onErrorResumeNext {
-                if (it is HttpException && it.code() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                    Single.error(HttpBadRequestException())
-                } else {
-                    Single.error(it)
-                }
-            }
+            .onErrorResumeNext { error -> Single.error(getThrowableWhenSavingWalletConfig(error)) }
             .subscribeOn(Schedulers.io())
     }
+
+    private fun getThrowableWhenSavingWalletConfig(error: Throwable) =
+        if (error is HttpException && error.code() == HttpURLConnection.HTTP_BAD_REQUEST) {
+            HttpBadRequestException()
+        } else {
+            error
+        }
 
     override fun getWalletActions(publicKey: String): Observable<WalletActionsResponse> =
         api.getWalletActions(publicKey = publicKey)
 
-    override fun saveWalletActions(publicKey: String, walletActionsConfigPayload: WalletActionsConfigPayload): Completable =
-        api.saveWalletActions(publicKey = publicKey, walletActionsConfigPayload = walletActionsConfigPayload)
+    override fun saveWalletActions(
+        publicKey: String,
+        walletActionsConfigPayload: WalletActionsConfigPayload
+    ): Completable = api.saveWalletActions(publicKey = publicKey, walletActionsConfigPayload = walletActionsConfigPayload)
 }
 
 class HttpBadRequestException : Throwable()
+class HttpNotFoundException : Throwable()

@@ -38,6 +38,7 @@ class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
 
     override fun onResume() {
         super.onResume()
+        listener.updateActionBar()
         binding.onboardingViewPager.registerOnPageChangeCallback(onPageChangeCallback)
         setupAutomaticCarousel()
     }
