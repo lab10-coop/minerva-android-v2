@@ -15,6 +15,9 @@ import me.uport.sdk.signer.KPSigner
 import me.uport.sdk.signer.getUncompressedPublicKeyWithPrefix
 import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.MASTER_KEYS_PATH
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.cryptographyProvider.repository.model.Seed
+import minerva.android.cryptographyProvider.repository.model.SeedError
+import minerva.android.cryptographyProvider.repository.model.SeedWithKeys
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
 import org.kethereum.bip39.entropyToMnemonic
 import org.kethereum.bip39.mnemonicToEntropy
@@ -41,7 +44,8 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         }
     }
 
-    override fun getMnemonicForMasterSeed(seed: String): String = entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
+    override fun getMnemonicForMasterSeed(seed: String): String =
+        entropyToMnemonic(seed.hexToByteArray(), WORDLIST_ENGLISH)
 
     override fun calculateDerivedKeysSingle(
         seed: String,
@@ -61,16 +65,15 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
         return DerivedKeys(index, keys.getPublicKey(), keys.getPrivateKey(), keys.getAddress(), isTestNet)
     }
 
-    override fun restoreMasterSeed(mnemonic: String): Single<Triple<String, String, String>> {
-        return try {
-            val seed = mnemonicToEntropy(mnemonic, WORDLIST_ENGLISH).toNoPrefixHexString()
-            val keys = MnemonicWords(mnemonic).toKey(MASTER_KEYS_PATH).keyPair
-            Single.just(Triple(seed, keys.getPublicKey(), keys.getPrivateKey()))
-        } catch (exception: IllegalArgumentException) {
+    override fun restoreMasterSeed(mnemonic: String): Seed =
+        try {
+            val seed: String = mnemonicToEntropy(mnemonic, WORDLIST_ENGLISH).toNoPrefixHexString()
+            val keys: ECKeyPair = MnemonicWords(mnemonic).toKey(MASTER_KEYS_PATH).keyPair
+            SeedWithKeys(seed, keys.getPublicKey(), keys.getPrivateKey())
+        } catch (exception: Exception) {
             Timber.e(exception)
-            Single.error(exception)
+            SeedError(exception)
         }
-    }
 
     private fun ECKeyPair.getPublicKey(): String = getUncompressedPublicKeyWithPrefix().toBase64().padBase64()
 
@@ -104,12 +107,8 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
 
     private fun getDIDKey(key: String) = "$DID_PREFIX${KPSigner(key).getAddress()}"
 
-    override fun validateMnemonic(mnemonic: String): List<String> {
-        mutableListOf<String>().apply {
-            collectInvalidWords(StringTokenizer(mnemonic), this)
-            return if (this.isEmpty()) emptyList() else this
-        }
-    }
+    override fun areMnemonicWordsValid(mnemonic: String): Boolean =
+        mutableListOf<String>().apply { collectInvalidWords(StringTokenizer(mnemonic), this) }.isEmpty()
 
     private fun collectInvalidWords(phase: StringTokenizer, list: MutableList<String>) {
         while (phase.hasMoreTokens()) {
@@ -121,7 +120,6 @@ class CryptographyRepositoryImpl(private val jwtTools: JWTTools) : CryptographyR
     }
 
     companion object {
-
         private const val ENTROPY_SIZE = 128 / 8
         private const val DID_PREFIX = "did:ethr:"
         private const val PRIVATE_KEY_FORMAT = "%064x"

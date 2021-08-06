@@ -167,8 +167,7 @@ class AccountManagerImpl(
     override fun changeAccountName(existedAccount: Account, newName: String): Completable {
         val accountName = CryptoUtils.prepareName(newName, existedAccount.id)
         walletManager.getWalletConfig().run {
-            val existedAccountIndex = accounts.indexOf(existedAccount)
-            accounts[existedAccountIndex].apply {
+            accounts.find { account -> account.id == existedAccount.id && account.chainId == existedAccount.chainId }?.apply {
                 name = accountName
             }
             return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts))

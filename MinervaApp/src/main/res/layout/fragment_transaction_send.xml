@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:digits="0123456789."
                 android:drawableEnd="@drawable/ic_all_icon"
-                android:inputType="numberDecimal" />
+                android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout

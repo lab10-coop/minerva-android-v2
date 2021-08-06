@@ -13,17 +13,17 @@
     <string name="create_new_wallet">Create new wallet</string>
     <string name="restore_old_wallet">Restore old wallet</string>
     <string name="enter_your_new_wallet">Enter your new wallet</string>
-    <string name="restore_wallet">Restore your wallet</string>
+    <string name="import_wallet">Import</string>
     <string name="instruction">What you can do with your new Minerva digital wallet:</string>
     <string name="identity_instruction">Create new identities and use them to log in to different services.</string>
     <string name="accounts_instruction">Own digital assets and use them for transactions and trading.</string>
     <string name="services_instruction">Have a control over all the services you are sharing your data with.</string>
-    <string name="enter_your_backup_words">Enter your backup words.</string>
+    <string name="enter_your_backup_words">Enter your Secret Recovery Phrase</string>
     <string name="edit">Edit</string>
     <string name="remove">Remove</string>
     <string name="no_data_available">No data available</string>
     <string name="field_cannot_be_empty">Field cannot be empty</string>
-    <string name="check_incorrect_mnemonic_words">Unknown words entered, please check:</string>
+    <string name="unknown_words">Unknown words entered. Please review them.</string>
     <string name="new_identity">New Identity</string>
     <string name="identity_label">Identity: %s</string>
     <string name="edit_identity_order">Rearrange Identities</string>
@@ -345,6 +345,19 @@
     <string name="value">Value:</string>
     <string name="token_balance_unlcear_message">Token balance unclear - transaction could fail</string>
     <string name="add_account_label">+ Add account</string>
+    <string name="restore_wallet_title">Import existing wallet</string>
+    <string name="type_here">Type here</string>
+    <string name="no_backup_data_found_for_the_secret_recovery_phrase_you_entered">No backup data found for the Secret Recovery Phrase you entered. \n\n Make sure your device \n is currently online.</string>
+    <string name="make_sure_your_device_is_currently_online">Make sure your device\n is currently online.</string>
+    <string name="no_backup_file_warning_message">This Secret Recovery Phrase seems to be from another wallet (e.g. Metamask or Trust Wallet) and not from a Minerva Wallet. After the import you will have direct access to the assets in your accounts you created in this wallet. \n\n If you have further questions please join our community on Telegram or Discord.</string>
+    <string name="terms_of_service_info">By proceeding you agree to the <a href="https://docs.minerva.digital/legal/terms">Terms of Service</a></string>
+    <string name="import_with_recovery_phrase">Import with Recovery Phrase</string>
+    <string name="import_info">Import an existing wallet or create a new one</string>
+    <string name="your_identity_label">Your identity</string>
+    <string name="your_data_label">Your data</string>
+    <string name="your_money_label">Your money</string>
+    <string name="your_own_them_label">Own them</string>
+    <string name="backup_server_error">Error when looking for backup data for the Secret Recovery Phrase you entered. Make sure your device is currently online and please try again</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

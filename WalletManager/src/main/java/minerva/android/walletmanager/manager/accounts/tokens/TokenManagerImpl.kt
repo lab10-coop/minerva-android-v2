@@ -231,7 +231,6 @@ class TokenManagerImpl(
                         with(activeToken) {
                             if (tag.isEmpty()) {
                                 tag = taggedToken.tag
-                                accountAddress = String.Empty
                             }
                         }
                     }
@@ -440,7 +439,6 @@ class TokenManagerImpl(
 
     private fun MutableList<ERC20Token>.isNewToken(newToken: ERC20Token) =
         find { localToken -> localToken.address.equals(newToken.address, true) } == null
-
 
     override fun updateTokenIcons(
         shouldBeUpdated: Boolean,

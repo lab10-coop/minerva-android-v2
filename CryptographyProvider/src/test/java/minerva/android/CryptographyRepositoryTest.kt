@@ -14,7 +14,10 @@ import me.uport.sdk.jwt.model.JwtHeader
 import me.uport.sdk.jwt.model.JwtPayload
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepositoryImpl
+import minerva.android.cryptographyProvider.repository.model.SeedError
+import minerva.android.cryptographyProvider.repository.model.SeedWithKeys
 import minerva.android.cryptographyProvider.repository.throwable.InvalidJwtThrowable
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -88,46 +91,55 @@ class CryptographyRepositoryTest {
 
     @Test
     fun `restore master seed test`() {
-        val test =
-            repository.restoreMasterSeed(
-                "hamster change resource act wife lamp tower quick dilemma clay receive attract")
-                .test()
-        test.assertValue { it.first == "68a4c6de013faef9b98d7d3e2546ce07" }
+        val result =
+            repository.restoreMasterSeed("hamster change resource act wife lamp tower quick dilemma clay receive attract")
+        (result as SeedWithKeys).apply {
+            seed shouldBeEqualTo "68a4c6de013faef9b98d7d3e2546ce07"
+        }
+    }
+
+    @Test
+    fun `restore master seed error test`() {
+        val result =
+            repository.restoreMasterSeed("dasdasd change resource act wife lamp tower quick dilemma clay receive attract")
+        (result as SeedError).apply {
+            error.message shouldBeEqualTo "word(dasdasd) not in known word list"
+        }
     }
 
     @Test
     fun `test mnemonic validator`() {
         val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture"
-        val validation = repository.validateMnemonic(mnemonic)
-        assertEquals(validation, emptyList())
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, true)
     }
 
     @Test
     fun `test mnemonic validator collecting invalid words`() {
         val mnemonic = "vessel *$ alter error federal HEHE chat ability sun Test valve picture"
-        val validation = repository.validateMnemonic(mnemonic)
-        assertEquals(validation, listOf("*$", "HEHE", "Test"))
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, false)
     }
 
     @Test
     fun `test mnemonic validator when mnemonic is empty`() {
         val mnemonic = ""
-        val validation = repository.validateMnemonic(mnemonic)
-        assertEquals(validation, emptyList())
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, true)
     }
 
     @Test
     fun `test mnemonic validator when mnemonic has blank spaces`() {
         val mnemonic = "     "
-        val validation = repository.validateMnemonic(mnemonic)
-        assertEquals(validation, emptyList())
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, true)
     }
 
     @Test
     fun `test mnemonic validator when mnemonic is too short and has invalid words`() {
         val mnemonic = "vessel error federal aaaaa sibling chat ability kkkkk sun glass valve picture"
-        val validation = repository.validateMnemonic(mnemonic)
-        assertEquals(validation, listOf("aaaaa", "kkkkk"))
+        val validation = repository.areMnemonicWordsValid(mnemonic)
+        assertEquals(validation, false)
     }
 
     @Test

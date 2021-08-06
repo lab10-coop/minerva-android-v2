@@ -779,15 +779,15 @@ class TransactionRepositoryTest : RxTest() {
         repository.getTokenBalance()
             .test()
             .await()
-            .assertComplete()
-            .assertValueCount(0)
+            .assertValue { asset ->
+                asset is AssetBalance &&
+                        asset.chainId == ChainId.ETH_RIN &&
+                        asset.accountToken.token.name == "one"
+            }
     }
 
     @Test
     fun `Checking refreshing token balances when new tokens are detected without account address`() {
-        val accounts = listOf(
-            Account(1, "publicKey", "privateKey", "address", chainId = ChainId.ETH_RIN, _isTestNetwork = true)
-        )
         val accountToken =
             AccountToken(
                 ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", accountAddress = ""),
@@ -803,7 +803,7 @@ class TransactionRepositoryTest : RxTest() {
             .test()
             .await()
             .assertComplete()
-            .assertValueCount(0)
+            .assertValueCount(7)
     }
 
     @Test
@@ -837,45 +837,45 @@ class TransactionRepositoryTest : RxTest() {
     }
 
 
-//    @Test
-//    fun `Check refreshing tokens list success`() {
-//        val tokensList = listOf(
-//            ERC20Token(3, "Token01", address = "0x0N3"),
-//            ERC20Token(3, "Token02", address = "0xTW0"),
-//            ERC20Token(3, "Token03", address = "0xTHR33")
-//        )
-//
-//        val tokensMap = mapOf(Pair(3, tokensList))
-//        val updatedTokensMap = Pair(true, tokensMap)
-//
-//        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.just(tokensList))
-//        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
-//        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
-//        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
-//            Single.just(updatedTokensMap),
-//            Single.error(Throwable("Stop thread"))
-//        )
-//        whenever(tokenManager.saveTokens(any(), any(), newTokens)).thenReturn(
-//            Single.just(true),
-//            Single.error(Throwable("Stop thread"))
-//        )
-//
-//        repository.discoverNewTokens().test().assertComplete().assertValue { it }
-//        repository.discoverNewTokens().test().assertComplete().assertValue { !it }
-//    }
-//
-//    @Test
-//    fun `Check refreshing tokens list fail`() {
-//        val error = Throwable("error")
-//        val tokensMap = mapOf(Pair(3, listOf<ERC20Token>()))
-//        val updatedTokensMap = Pair(true, tokensMap)
-//        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.error(error))
-//        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
-//        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
-//        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
-//
-//        repository.discoverNewTokens().test().assertError(error)
-//    }
+    @Test
+    fun `Check refreshing tokens list success`() {
+        val tokensList = listOf(
+            ERC20Token(3, "Token01", address = "0x0N3"),
+            ERC20Token(3, "Token02", address = "0xTW0"),
+            ERC20Token(3, "Token03", address = "0xTHR33")
+        )
+
+        val tokensMap = mapOf(Pair(3, tokensList))
+        val updatedTokensMap = Pair(true, tokensMap)
+
+        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.just(tokensList))
+        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
+        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
+        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
+            Single.just(updatedTokensMap),
+            Single.error(Throwable("Stop thread"))
+        )
+        whenever(tokenManager.saveTokens(any(), any())).thenReturn(
+            Single.just(true),
+            Single.error(Throwable("Stop thread"))
+        )
+
+        repository.discoverNewTokens().test().assertComplete().assertValue { it }
+        repository.discoverNewTokens().test().assertComplete().assertValue { !it }
+    }
+
+    @Test
+    fun `Check refreshing tokens list fail`() {
+        val error = Throwable("error")
+        val tokensMap = mapOf(Pair(3, listOf<ERC20Token>()))
+        val updatedTokensMap = Pair(true, tokensMap)
+        whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.error(error))
+        whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
+        whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
+        whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
+
+        repository.discoverNewTokens().test().assertError(error)
+    }
 
     @Test
     fun `Check getting current tokens rate`() {
@@ -889,25 +889,37 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `fill missing account address test`() {
-        val accounts =
-            listOf(
-                Account(1, chainId = 1, address = "address1", privateKey = "priv1"),
-                Account(1, chainId = 2, address = "address2", privateKey = "priv2")
-            )
+        repository.newTaggedTokens = mutableListOf(ERC20Token(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1"))
 
-        val assetBalance =
-            AssetBalance(
-                1, "priv1",
-                AccountToken(
-                    ERC20Token(1, "one", address = "0x01", decimals = "10", accountAddress = ""),
-                    rawBalance = BigDecimal.TEN
-                )
-            )
-
-        val result = repository.getTokensWithAccountAddress(accounts, assetBalance)
+        val result = repository.getTokensWithAccountAddress()
         result.size shouldBeEqualTo 1
 
-        result[1]!![0].accountAddress shouldBeEqualTo "address1"
-        result[1]!![0].tag shouldBeEqualTo ""
+        result[4]!![0].accountAddress shouldBeEqualTo "address1"
+        result[4]!![0].tag shouldBeEqualTo "tag1"
+    }
+
+    @Test
+    fun `update tokens with tagged tokens test`() {
+        repository.newTaggedTokens = mutableListOf(
+            ERC20Token(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1"),
+            ERC20Token(ChainId.ETH_RIN, tag = "tag2", accountAddress = "address2")
+        )
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
+        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
+        repository.updateCachedTokens()
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+        assertEquals(repository.newTaggedTokens.isEmpty(), true)
+    }
+
+    @Test
+    fun `do not update tokens with tagged tokens test`() {
+        repository.newTaggedTokens = mutableListOf()
+        repository.updateCachedTokens()
+            .test()
+            .assertComplete()
+            .assertNoErrors()
+        assertEquals(repository.newTaggedTokens.isEmpty(), true)
     }
 }

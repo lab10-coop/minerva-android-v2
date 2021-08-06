@@ -4,57 +4,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/safeAccountBackground"
     tools:context=".onboarding.restore.RestoreWalletFragment">
 
-    <TextView
-        android:id="@+id/backupWords"
+    <LinearLayout
+        android:id="@+id/recovery_phase_view"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginTop="40dp"
-        android:layout_marginRight="@dimen/margin_normal"
-        android:fontFamily="@font/rubik_regular"
-        android:gravity="center"
-        android:text="@string/enter_your_backup_words"
-        android:textColor="@color/gray"
-        android:textSize="@dimen/text_normal"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:background="@drawable/rounded_white_background"
+        android:elevation="@dimen/cardview_default_elevation"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/restoreWalletButton"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/mnemonicEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_large"
-        android:layout_marginRight="@dimen/margin_normal"
-        android:background="@drawable/rounded_white_button"
-        android:gravity="top"
-        android:inputType="textMultiLine|textNoSuggestions"
-        android:lines="6"
-        android:maxLines="6"
-        android:minLines="6"
-        android:padding="@dimen/margin_normal"
-        android:textAllCaps="false"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/backupWords" />
+        <TextView
+            android:id="@+id/backupWords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_big"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_regular"
+            android:gravity="center"
+            android:text="@string/enter_your_backup_words"
+            android:textColor="@color/lightGray90"
+            android:textSize="@dimen/text_normal" />
 
-    <TextView
-        android:id="@+id/errorMessage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_xsmall"
-        android:layout_marginRight="@dimen/margin_normal"
-        android:textColor="@color/colorSetOne"
-        android:visibility="invisible"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mnemonicEditText"
-        tools:text="@string/check_incorrect_mnemonic_words" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/mnemonicEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:background="@drawable/rounded_white_button"
+            android:gravity="top"
+            android:hint="@string/type_here"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:lines="6"
+            android:maxLines="6"
+            android:minLines="6"
+            android:padding="@dimen/margin_normal"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:id="@+id/errorMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:textColor="@color/colorSetOne"
+            android:visibility="invisible"
+            tools:text="@string/unknown_words" />
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/restoreWalletButton"
@@ -62,7 +71,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:enabled="false"
-        android:text="@string/restore_wallet"
+        android:text="@string/import_wallet"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

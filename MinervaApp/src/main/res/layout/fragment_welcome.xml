@@ -7,29 +7,24 @@
     android:background="@android:color/white"
     tools:context=".onboarding.welcome.WelcomeFragment">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/topGuideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.2" />
-
     <ImageView
-        android:id="@+id/minervaLogo"
+        android:id="@+id/minerva_logo"
         android:layout_width="@dimen/logo_size"
         android:layout_height="@dimen/logo_size"
+        android:layout_marginTop="@dimen/margin_large"
         android:src="@drawable/ic_minerva_icon"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/topGuideline"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/welcome_title"
         tools:ignore="ContentDescription" />
 
     <TextView
-        android:id="@+id/welcomeTitle"
+        android:id="@+id/welcome_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="@dimen/margin_xbig"
         android:layout_marginEnd="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
         android:gravity="center"
@@ -38,29 +33,60 @@
         android:textSize="@dimen/text_big"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/minervaLogo" />
+        app:layout_constraintTop_toBottomOf="@+id/minerva_logo"
+        app:layout_constraintBottom_toTopOf="@id/onboarding_view_pager" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/onboarding_view_pager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_big"
+        android:layout_marginEnd="@dimen/margin_normal"
+        app:layout_constraintBottom_toTopOf="@+id/tabs"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/welcome_title" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margin_normal"
+        app:layout_constraintBottom_toTopOf="@+id/import_info"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/onboarding_view_pager"
+        app:tabBackground="@drawable/on_boarding_tab_selector"
+        app:tabGravity="center"
+        app:tabIndicatorHeight="0dp"
+        app:tabMaxWidth="18dp" />
 
     <TextView
+        android:id="@+id/import_info"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_big"
         android:fontFamily="@font/rubik_regular"
         android:gravity="center"
-        android:text="@string/welcome_message"
+        android:text="@string/import_info"
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal"
+        app:layout_constraintTop_toBottomOf="@id/tabs"
+        app:layout_constraintBottom_toTopOf="@id/restoreWalletButton"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/welcomeTitle" />
+        app:layout_constraintRight_toRightOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/restoreWalletButton"
         style="@style/OutlinedButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/restore_old_wallet"
+        android:text="@string/import_with_recovery_phrase"
+        android:layout_marginBottom="@dimen/margin_xxsmall"
+        app:layout_constraintTop_toBottomOf="@id/import_info"
         app:layout_constraintBottom_toTopOf="@+id/createWalletButton"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
@@ -71,6 +97,34 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/create_new_wallet"
+        app:layout_constraintTop_toBottomOf="@id/restoreWalletButton"
+        app:layout_constraintBottom_toTopOf="@+id/terms_of_service"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/createWalletProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margin_normal"
+        app:layout_constraintBottom_toTopOf="@+id/terms_of_service"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/terms_of_service"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center"
+        android:text="@string/terms_of_service_info"
+        android:textColor="@color/titleColor"
+        android:textColorLink="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@id/createWalletButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

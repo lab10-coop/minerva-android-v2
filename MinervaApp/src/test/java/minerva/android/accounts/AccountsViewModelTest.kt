@@ -153,6 +153,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             .thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERC20Token(1, "name")))))
+        whenever(transactionRepository.updateCachedTokens()).thenReturn(Completable.complete())
         viewModel.refreshTokensBalances()
         viewModel.balanceStateLiveData.observeForever(balanceObserver)
         balanceCaptor.run {
@@ -180,6 +181,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             )
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERC20Token(1, "name")))))
+        whenever(transactionRepository.updateCachedTokens()).thenReturn(Completable.complete())
 
         whenever(accountManager.activeAccounts).thenReturn(
             listOf(

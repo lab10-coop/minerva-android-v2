@@ -16,6 +16,7 @@ import minerva.android.blockchainprovider.utils.CryptoUtils.encodePublicKey
 import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
 import minerva.android.configProvider.model.walletConfig.AccountPayload
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
+import minerva.android.configProvider.repository.HttpNotFoundException
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath.Companion.DID_PATH
@@ -31,6 +32,7 @@ import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.mapper.BitmapMapper
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
+import minerva.android.walletmanager.exception.WalletConfigNotFoundThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.Identity
@@ -98,7 +100,7 @@ class WalletConfigManagerImpl(
                 this.masterSeed = masterSeed
                 keystoreRepository.encryptMasterSeed(masterSeed)
                 localWalletProvider.saveWalletConfig(DefaultWalletConfig.create)
-                completeKeys(masterSeed, DefaultWalletConfig.create)
+                disposable = completeKeys(masterSeed, DefaultWalletConfig.create)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
                         onNext = { walletConfig ->
@@ -113,7 +115,16 @@ class WalletConfigManagerImpl(
             .map { walletConfigPayload ->
                 keystoreRepository.encryptMasterSeed(masterSeed)
                 localWalletProvider.saveWalletConfig(walletConfigPayload)
-            }.ignoreElement()
+            }
+            .ignoreElement()
+            .onErrorResumeNext { error -> Completable.error(getThrowableWhenRestoringWalletConfig(error)) }
+
+    private fun getThrowableWhenRestoringWalletConfig(error: Throwable) =
+        if (error is HttpNotFoundException) {
+            WalletConfigNotFoundThrowable()
+        } else {
+            error
+        }
 
     override fun initWalletConfig() {
         keystoreRepository.decryptMasterSeed()?.let { seed ->

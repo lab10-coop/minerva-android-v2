@@ -12,12 +12,14 @@ import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.configProvider.repository.HttpBadRequestException
+import minerva.android.configProvider.repository.HttpNotFoundException
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
+import minerva.android.walletmanager.exception.WalletConfigNotFoundThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
@@ -166,6 +168,20 @@ class WalletConfigManagerTest {
         walletManager.restoreWalletConfig(MasterSeed("123", "567"))
             .test()
             .assertError(error)
+    }
+
+    @Test
+    fun `restore wallet config http not found error test`() {
+        val error = HttpNotFoundException()
+        doNothing().whenever(keyStoreRepository).encryptMasterSeed(any())
+        whenever(localWalletConfigProvider.saveWalletConfig(any())).thenReturn(Single.just(WalletConfigPayload()))
+        whenever(keyStoreRepository.decryptMasterSeed()).thenReturn(MasterSeed())
+        whenever(minervaApi.getWalletConfig(any())).thenReturn(Single.error(error))
+        walletManager.restoreWalletConfig(MasterSeed("123", "567"))
+            .test()
+            .assertError {
+                it is WalletConfigNotFoundThrowable
+            }
     }
 
     @Test

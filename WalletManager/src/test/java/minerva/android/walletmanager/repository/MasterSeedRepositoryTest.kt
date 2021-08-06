@@ -4,8 +4,11 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
+import minerva.android.cryptographyProvider.repository.model.SeedError
+import minerva.android.cryptographyProvider.repository.model.SeedWithKeys
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.MasterSeedError
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.shouldBeEqualTo
@@ -41,28 +44,30 @@ class MasterSeedRepositoryTest : RxTest() {
 
     @Test
     fun `validate mnemonic test`() {
-        whenever(cryptographyRepository.validateMnemonic(any())) doReturn listOf("word")
-        val result = repository.validateMnemonic("mnemonic")
-        assertEquals(result, listOf("word"))
+        whenever(cryptographyRepository.areMnemonicWordsValid(any())) doReturn true
+        val result = repository.areMnemonicWordsValid("mnemonic")
+        assertEquals(result, true)
     }
 
     @Test
     fun `restore master seed test`() {
-        whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn Single.just(Triple("key1", "key2", "key3"))
-        whenever(walletConfigManager.restoreWalletConfig(any())) doReturn Completable.complete()
-        repository.restoreMasterSeed("mnemonic")
-            .test()
-            .assertNoErrors()
-            .assertComplete()
+        whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn SeedWithKeys("seed", "key2", "key3")
+        val result = repository.restoreMasterSeed("mnemonic")
+        (result as MasterSeed).apply {
+            seed == "seed" &&
+                    publicKey == "key2" &&
+                    privateKey == "key3"
+        }
     }
 
     @Test
     fun `restore master seed error test`() {
-        val error = Throwable()
-        whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn Single.error(error)
-        repository.restoreMasterSeed("mnemonic")
-            .test()
-            .assertError(error)
+        val error = Throwable("Restore seed error")
+        whenever(cryptographyRepository.restoreMasterSeed(any())) doReturn SeedError(error)
+        val result = repository.restoreMasterSeed("mnemonic")
+        (result as MasterSeedError).apply {
+            error.message shouldBeEqualTo "Restore seed error"
+        }
     }
 
     @Test
@@ -88,6 +93,16 @@ class MasterSeedRepositoryTest : RxTest() {
         repository.createWalletConfig()
             .test()
             .assertError(error)
+    }
+
+    @Test
+    fun `create existed master seed test`() {
+        val masterSeed = MasterSeed("seed", "k1", "k2")
+        whenever(walletConfigManager.createWalletConfig(any())) doReturn Completable.complete()
+        repository.createWalletConfig(masterSeed)
+            .test()
+            .assertNoErrors()
+            .assertComplete()
     }
 
     @Test
