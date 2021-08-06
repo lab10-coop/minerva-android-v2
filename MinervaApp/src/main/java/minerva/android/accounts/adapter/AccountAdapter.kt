@@ -29,6 +29,13 @@ class AccountAdapter(
         }
     }
 
+    override fun submitList(newList: List<Account>?) {
+        val list = mutableListOf<Account>().apply {
+            newList?.forEach { account -> add(account.copy()) }
+        }
+        super.submitList(list)
+    }
+
     fun setFiat(fiatSymbol: String) {
         this.fiatSymbol = fiatSymbol
     }
