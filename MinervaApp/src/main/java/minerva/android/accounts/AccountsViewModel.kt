@@ -136,7 +136,12 @@ class AccountsViewModel(
         launchDisposable {
             accountManager.hideAccount(account)
                 .observeOn(Schedulers.io())
-                .andThen(walletConnectRepository.killAllAccountSessions(accountManager.toChecksumAddress(account.address)))
+                .andThen(
+                    walletConnectRepository.killAllAccountSessions(
+                        accountManager.toChecksumAddress(account.address),
+                        account.chainId
+                    )
+                )
                 .andThen(walletActionsRepository.saveWalletActions(listOf(getHideAccountAction(account))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

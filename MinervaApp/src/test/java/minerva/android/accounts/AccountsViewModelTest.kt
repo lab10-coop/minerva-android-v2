@@ -251,7 +251,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(
             Completable.error(error)
         )
-        whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
+        whenever(walletConnectRepository.killAllAccountSessions(any(), any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.errorLiveData.observeForever(errorObserver)
@@ -265,7 +265,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `Remove value success`() {
         whenever(accountManager.hideAccount(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(walletConnectRepository.killAllAccountSessions(any())).thenReturn(Completable.complete())
+        whenever(walletConnectRepository.killAllAccountSessions(any(), any())).thenReturn(Completable.complete())
         whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
         whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.accountHideLiveData.observeForever(accountRemoveObserver)
