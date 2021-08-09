@@ -18,6 +18,7 @@ import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.services.ServicesViewModel
+import minerva.android.services.login.ServicesScannerViewModel
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
@@ -82,6 +83,7 @@ private val appModules = module {
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
     viewModel { WalletConnectViewModel(get(), get(), get(), get()) }
+    viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }

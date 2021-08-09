@@ -6,7 +6,7 @@ import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.ServiceQrCode
 
-interface LoginScannerListener : BaseScannerListener {
+interface ServicesScannerListener : BaseScannerListener {
     fun onPainlessLoginResult(isLoginSucceed: Boolean, payload: LoginPayload? = null)
     fun showChooseIdentityFragment(qrCode: ServiceQrCode)
     fun updateBindedCredential(qrCode: CredentialQrCode)

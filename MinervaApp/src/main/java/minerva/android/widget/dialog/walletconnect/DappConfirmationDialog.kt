@@ -14,6 +14,7 @@ import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
 import minerva.android.kotlinUtils.FirstIndex
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.OneElement
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -67,7 +68,10 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
                     accountAdapter.selectedItemWidth = networkHeader.accountSpinner.width
                 }
                 adapter = accountAdapter
-                val defaultPosition = availableAccounts.indexOfFirst { account -> account.id == selectedAccountId }
+                val defaultPosition =
+                    if (selectedAccountId != Int.InvalidId) {
+                        availableAccounts.indexOfFirst { account -> account.id == selectedAccountId }
+                    } else Int.FirstIndex
                 prepareSpinner(R.drawable.rounded_background_purple_frame, defaultPosition) { position, view ->
                     onAccountSelected(accountAdapter.getItem(position))
                     accountAdapter.selectedItemWidth = view?.width

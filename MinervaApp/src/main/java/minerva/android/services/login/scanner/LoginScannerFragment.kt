@@ -6,7 +6,7 @@ import android.os.Handler
 import android.view.View
 import minerva.android.R
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.services.login.LoginScannerListener
+import minerva.android.services.login.ServicesScannerListener
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
@@ -16,7 +16,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class LoginScannerFragment : BaseScannerFragment() {
 
     private val viewModel: LoginScannerViewModel by viewModel()
-    lateinit var listener: LoginScannerListener
+    lateinit var listener: ServicesScannerListener
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -25,7 +25,7 @@ class LoginScannerFragment : BaseScannerFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as LoginScannerListener
+        listener = context as ServicesScannerListener
     }
 
     override fun onCallbackAction(result: String) {
