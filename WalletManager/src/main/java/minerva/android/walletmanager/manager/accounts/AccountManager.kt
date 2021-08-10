@@ -21,7 +21,6 @@ interface AccountManager : Manager {
     val getTokenVisibilitySettings: TokenVisibilitySettings
     fun areAllEmptyMainNetworkAccounts(): Boolean
     fun loadAccount(index: Int): Account
-    fun createRegularAccount(network: Network): Single<String>
     fun createEmptyAccounts(numberOfAccounts: Int): Completable
     fun createSafeAccount(account: Account, contract: String): Completable
     fun removeAccount(account: Account): Completable

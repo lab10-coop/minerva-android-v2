@@ -509,7 +509,7 @@ class AccountsViewModel(
 
     fun createNewAccount(chainId: Int) {
         launchDisposable {
-            accountManager.createRegularAccount(NetworkManager.getNetwork(chainId))
+            accountManager.createOrUnhideAccount(NetworkManager.getNetwork(chainId))
                 .flatMapCompletable {
                     walletActionsRepository.saveWalletActions(listOf(getWalletAction(WalletActionStatus.ADDED, it)))
                 }

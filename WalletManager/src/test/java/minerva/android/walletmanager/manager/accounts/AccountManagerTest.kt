@@ -6,7 +6,6 @@ import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
-import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -51,50 +50,6 @@ class AccountManagerTest : RxTest() {
         super.setupRxSchedulers()
         whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
         whenever(walletConfigManager.masterSeed).thenReturn(MasterSeed(_seed = "seed"))
-    }
-
-    @Test
-    fun `Check that wallet manager creates new regular account`() {
-        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
-        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
-            .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1")))
-
-        val test = manager.createRegularAccount(Network()).test()
-        test.assertNoErrors()
-        manager.loadAccount(1).apply {
-            id shouldBeEqualTo 2
-            publicKey shouldBeEqualTo "publicKey2"
-            privateKey shouldBeEqualTo "privateKey2"
-            address shouldBeEqualTo "address1"
-        }
-    }
-
-    @Test
-    fun `Check that wallet manager don't save new regular account`() {
-        val error = Throwable()
-        val network = Network(chainId = 4, httpRpc = "some")
-        NetworkManager.initialize(MockDataProvider.networks)
-        whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn(String.Empty)
-        whenever(
-            cryptographyRepository.calculateDerivedKeysSingle(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(
-            Single.just(DerivedKeys(0, "publicKey", "privateKey", "address"))
-        )
-        val test = manager.createRegularAccount(network).test()
-        test.assertError(error)
-        manager.loadAccount(10).apply {
-            id shouldBeEqualTo -1
-            privateKey shouldBeEqualTo String.Empty
-            publicKey shouldBeEqualTo String.Empty
-            address shouldBeEqualTo String.Empty
-        }
     }
 
     @Test
