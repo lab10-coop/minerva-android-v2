@@ -65,12 +65,6 @@ class AccountManagerImpl(
     override fun areAllEmptyMainNetworkAccounts(): Boolean =
         walletManager.getWalletConfig().accounts.find { account -> !account.isEmptyAccount && !account.isTestNetwork } == null
 
-    override fun createRegularAccount(network: Network): Single<String> =
-        walletManager.getWalletConfig().run {
-            val index = getNextAvailableIndexForNetwork(network)
-            createRegularAccountWithGivenIndex(index, network)
-        }
-
     private fun getNextAvailableIndexForNetwork(network: Network): Int {
         val usedIds = getAllActiveAccounts(network.chainId).map { account -> account.id }
         return getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted && !usedIds.contains(account.id) }
@@ -153,16 +147,25 @@ class AccountManagerImpl(
                 existedAccount.id
             ) else existedAccount.name
         walletManager.getWalletConfig().run {
-            val existAccountIndex = accounts.indexOf(existedAccount)
-            accounts[existAccountIndex].apply {
+            val newAccountsList = if (existedAccount.chainId == Int.InvalidValue) {
+                changeAccountIndexToLast(accounts.toMutableList(), existedAccount)
+            } else accounts
+            val existAccountIndex = newAccountsList.indexOf(existedAccount)
+            newAccountsList[existAccountIndex].apply {
                 name = accountName
                 chainId = network.chainId
                 isHide = false
             }
-            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts))
+            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = newAccountsList))
                 .toSingleDefault(accountName)
         }
     }
+
+    private fun changeAccountIndexToLast(accountsList: MutableList<Account>, account: Account): List<Account> =
+        accountsList.toMutableList().apply {
+            remove(account)
+            add(account)
+        }
 
     override fun changeAccountName(existedAccount: Account, newName: String): Completable {
         val accountName = CryptoUtils.prepareName(newName, existedAccount.id)
