@@ -58,6 +58,20 @@ fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
     })
 }
 
+fun EditText.onTextChanged(onTextChanged: (String, Int, Int) -> Unit) {
+    this.addTextChangedListener(object : TextWatcher {
+        override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) {
+        }
+
+        override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
+            onTextChanged.invoke(text.toString(), start, count)
+        }
+
+        override fun afterTextChanged(editable: Editable?) {
+        }
+    })
+}
+
 @SuppressLint("ClickableViewAccessibility")
 fun EditText.onRightDrawableClicked(onClicked: (view: EditText) -> Unit) {
     this.setOnTouchListener { view, event ->
