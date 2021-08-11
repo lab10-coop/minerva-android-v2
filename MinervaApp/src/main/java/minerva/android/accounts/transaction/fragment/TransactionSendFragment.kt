@@ -200,10 +200,10 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                     )
                 }
                 .subscribeBy(
-                    onNext = {
-                        viewModel.isTransactionAvailable(it).let { isAvailable ->
+                    onNext = { isFormFilled ->
+                        viewModel.isTransactionAvailable(isFormFilled).let { isAvailable ->
                             sendButton.isEnabled = isAvailable
-                            errorView.visibleOrGone(!isAvailable)
+                            errorView.visibleOrGone(!isAvailable && isFormFilled)
                             transactionCostAmount.setTextColor(getTransactionCostColor(isAvailable))
                         }
                     },
@@ -213,8 +213,15 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                     }
                 )
 
-            amount.afterTextChanged { inputText ->
-                val inputAmount = inputText.removeMoreThanOneDots()
+            amount.onTextChanged() { inputText, start, count ->
+                var inputAmount = inputText
+                if (inputText.isMoreThanOneDot()) {
+                    inputAmount = inputText.removeRange(start, start + count)
+                    amount.apply {
+                        setText(inputAmount)
+                        setSelection(inputAmount.length)
+                    }
+                }
                 allPressed = inputAmount == viewModel.recalculateAmount.toString()
                 binding.fiatAmountValue.text =
                     BalanceUtils.getFiatBalance(viewModel.recalculateFiatAmount(getAmount()), viewModel.fiatSymbol)
@@ -223,17 +230,6 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     }
 
     private fun String.isMoreThanOneDot(): Boolean = asIterable().count { it.toString() == DOT } > Int.OneElement
-
-    private fun String.removeMoreThanOneDots(): String =
-        if (isMoreThanOneDot()) {
-            val beforeDot = substringBefore(DOT)
-            val afterDot = substringAfter(DOT).replace(DOT, String.empty)
-            val newString = "$beforeDot$DOT$afterDot"
-            if (newString != this) {
-                binding.amount.setText(newString)
-                newString
-            } else this
-        } else this
 
     private fun getTransactionCostColor(isAvailable: Boolean) =
         (if (isAvailable) R.color.gray

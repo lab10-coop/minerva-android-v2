@@ -26,13 +26,17 @@ object MarketUtils {
         markets: Markets,
         currentFiat: String
     ): CoinBalance = with(cryptoBalance) {
-        val rate = getRate(chainId, markets, currentFiat)
-        CoinBalance(
-            chainId,
-            address,
-            Balance(balance, fiatBalance = calculateFiatBalance(balance, rate)),
-            rate = rate
-        )
+        return if (balance == BigDecimal.ZERO) {
+            CoinBalance(chainId, address, Balance(cryptoBalance = balance, fiatBalance = BigDecimal.ZERO), null)
+        } else {
+            val rate = getRate(chainId, markets, currentFiat)
+            CoinBalance(
+                chainId,
+                address,
+                Balance(cryptoBalance = balance, fiatBalance = calculateFiatBalance(balance, rate)),
+                rate = rate
+            )
+        }
     }
 
     fun calculateFiatBalance(value: BigDecimal, rate: Double?): BigDecimal =

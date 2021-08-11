@@ -280,7 +280,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("error")
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
-        whenever(accountManager.createRegularAccount(any())).thenReturn(Single.error(error))
+        whenever(accountManager.createOrUnhideAccount(any())).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE))
         errorCaptor.run {
@@ -506,7 +506,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `check creating new account flow`() {
         val error = Throwable("error")
         NetworkManager.initialize(listOf(Network(chainId = 3, httpRpc = "some_rpc")))
-        whenever(accountManager.createRegularAccount(any())).thenReturn(
+        whenever(accountManager.createOrUnhideAccount(any())).thenReturn(
             Single.just("Cookie Account"),
             Single.error(error)
         )

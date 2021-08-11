@@ -51,5 +51,4 @@ data class Account(
         accountTokens.find { it.token.address == tokenAddress } ?: AccountToken(ERC20Token(Int.InvalidIndex))
 
     fun getTokenIndex(tokenAddress: String) = accountTokens.indexOf(getToken(tokenAddress))
-
 }

@@ -84,6 +84,9 @@ class TransactionRepositoryImpl(
         }
     }
 
+    private fun calculateFiat(cryptoCoinBalance: CoinCryptoBalance, market: Markets = Markets()): CoinBalance =
+        MarketUtils.calculateFiatBalance(cryptoCoinBalance, market, currentFiatCurrency)
+
     private fun getStoredRate(
         markets: Markets,
         cryptoBalance: CoinCryptoBalance,
@@ -106,9 +109,6 @@ class TransactionRepositoryImpl(
                 ratesMap[cryptoBalance.chainId] = market
                 calculateFiat(cryptoBalance, market)
             }
-
-    private fun calculateFiat(cryptoCoinBalance: CoinCryptoBalance, market: Markets = Markets()): CoinBalance =
-        MarketUtils.calculateFiatBalance(cryptoCoinBalance, market, currentFiatCurrency)
 
     private fun fetchCoinRate(id: String): Single<Markets> =
         cryptoApi.getMarkets(id, currentFiatCurrency.toLowerCase(Locale.ROOT))
