@@ -171,14 +171,14 @@ class AccountsViewModel(
                     },
                     onNext = { index -> _balanceStateLiveData.value = CoinBalanceUpdate(index) },
                     onError = { error ->
-                        logError("Refresh balance error: ${getError(error)}")
+                        logError("Refresh coin balance error: ${getError(error)}")
                         _errorLiveData.value = Event(RefreshBalanceError)
                     }
                 )
         }
 
     private fun getAccountIndexWithError(coin: CoinError): Int {
-        logError("Refresh balance error: ${coin.error}")
+        logError("Refresh coin balance error: ${coin.error}")
         activeAccounts
             .filter { account -> !account.isPending }
             .forEachIndexed { index, account ->
@@ -420,7 +420,7 @@ class AccountsViewModel(
 
     private fun logError(message: String) {
         logger.logToFirebase(message)
-        Timber.d(message)
+        Timber.e(message)
     }
 
     private fun handleHideAccountErrors(error: Throwable) {
