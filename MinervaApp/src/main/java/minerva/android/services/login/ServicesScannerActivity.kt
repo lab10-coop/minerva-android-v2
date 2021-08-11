@@ -14,20 +14,19 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.main.handler.isIdentityPrepared
 import minerva.android.services.login.identity.ChooseIdentityFragment
-import minerva.android.services.login.scanner.LoginScannerFragment
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import minerva.android.wrapped.WrappedActivity.Companion.SERVICE_QR_CODE
 
-class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
+class ServicesScannerActivity : AppCompatActivity(), ServicesScannerListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_painless_login)
         hideToolbar()
-        addFragment(R.id.container, LoginScannerFragment.newInstance())
+        addFragment(R.id.container, ServicesScannerFragment.newInstance())
         window.statusBarColor = getColor(R.color.lightGray)
     }
 

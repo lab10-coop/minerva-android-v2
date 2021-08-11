@@ -7,24 +7,15 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
-import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
-import minerva.android.base.BaseViewModel
 import minerva.android.extension.empty
-import minerva.android.kotlinUtils.*
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.ChainId
-import minerva.android.walletmanager.model.defs.WalletActionFields
-import minerva.android.walletmanager.model.defs.WalletActionStatus
-import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.model.walletconnect.*
-import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
-import minerva.android.walletmanager.repository.walletconnect.OnFailure
+import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
@@ -34,15 +25,9 @@ import timber.log.Timber
 class WalletConnectViewModel(
     private val accountManager: AccountManager,
     private val repository: WalletConnectRepository,
-    private val logger: Logger,
-    private val walletActionsRepository: WalletActionsRepository
-) : BaseViewModel() {
-
-    internal lateinit var account: Account
-    var requestedNetwork: BaseNetworkData = BaseNetworkData(Int.InvalidId, String.Empty)
-    internal lateinit var topic: Topic
-    private var handshakeId: Long = 0L
-    internal lateinit var currentSession: WalletConnectSession
+    logger: Logger,
+    walletActionsRepository: WalletActionsRepository
+) : BaseWalletConnectScannerViewModel(accountManager, repository, logger, walletActionsRepository) {
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectState>()
     val stateLiveData: LiveData<WalletConnectState> get() = _viewStateLiveData
@@ -50,53 +35,54 @@ class WalletConnectViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
-    val availableNetworks: List<NetworkDataSpinnerItem> get() = prepareAvailableNetworks()
+    override lateinit var account: Account
+    override val selectedChainId: Int
+        get() = account.chainId
 
-    val availableAccounts: List<Account> get() = accountManager.getAllActiveAccounts(account.chainId)
+    override fun hideProgress() {
+        _viewStateLiveData.value = ProgressBarState(false)
+    }
 
-    private val baseNetwork get() = if (accountManager.areMainNetworksEnabled) ChainId.ETH_MAIN else ChainId.ETH_GOR
+    override fun setLiveDataOnDisconnected(sessionName: String) {
+        _viewStateLiveData.value = OnDisconnected(sessionName)
+    }
 
-    private fun prepareAvailableNetworks(): List<NetworkDataSpinnerItem> =
-        mutableListOf<NetworkDataSpinnerItem>().apply {
-            val availableAccountList = accountManager.getFirstActiveAccountForAllNetworks()
-            add(
-                Int.FirstIndex,
-                NetworkDataSpinnerItem(
-                    getNetworkName(baseNetwork),
-                    baseNetwork,
-                    availableAccountList.find { account -> account.chainId == baseNetwork } != null))
-            addAll(availableAccountList.filter { account -> account.chainId != baseNetwork }
-                .map { account -> NetworkDataSpinnerItem(account.network.name, account.chainId) }
-            )
-        }
+    override fun setLiveDataOnConnectionError(error: Throwable, sessionName: String) {
+        _viewStateLiveData.value = OnWalletConnectConnectionError(error, sessionName)
+    }
 
-    fun subscribeToConnectionStatusFlowable() {
-        launchDisposable {
-            repository.connectionStatusFlowable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { _viewStateLiveData.value = ProgressBarState(false) }
-                .subscribeBy(
-                    onNext = { status ->
-                        _viewStateLiveData.value = when (status) {
-                            is OnSessionRequest -> {
-                                topic = status.topic
-                                handshakeId = status.handshakeId
-                                handleSessionRequest(status)
-                            }
-                            is OnDisconnect -> OnDisconnected(status.sessionName)
-                            is OnFailure -> {
-                                logger.logToFirebase("OnWalletConnectConnectionError: ${status.error}")
-                                OnWalletConnectConnectionError(status.error, status.sessionName)
-                            }
-                            else -> DefaultRequest
-                        }
-                    },
-                    onError = {
-                        logger.logToFirebase("WalletConnect statuses error: $it")
-                        _errorLiveData.value = Event(it)
-                    }
+    override fun setLiveDataError(error: Throwable) {
+        _errorLiveData.value = Event(error)
+    }
+
+    override fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
+        _viewStateLiveData.postValue(UpdateOnSessionRequest(requestedNetwork, dialogType))
+    }
+
+    override fun closeScanner() {
+        _viewStateLiveData.value = CloseScannerState
+    }
+
+    override fun handleSessionRequest(sessionRequest: OnSessionRequest) {
+        val id = sessionRequest.chainId
+        _viewStateLiveData.value = when {
+            id == null -> {
+                accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
+                OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
+            }
+            isNetworkNotSupported(chainId = id) -> {
+                requestedNetwork = BaseNetworkData(id, String.empty)
+                OnSessionRequest(
+                    sessionRequest.meta,
+                    requestedNetwork,
+                    WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
                 )
+            }
+            account.chainId != id -> getWalletConnectStateForNotEqualNetworks(sessionRequest, id)
+            else -> {
+                requestedNetwork = BaseNetworkData(id, getNetworkName(id))
+                OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.NO_ALERT)
+            }
         }
     }
 
@@ -128,15 +114,7 @@ class WalletConnectViewModel(
 
     fun removeDeadSession() {
         repository.removeDeadSessions()
-        _viewStateLiveData.value = ProgressBarState(false)
-    }
-
-    fun closeScanner() {
-        _viewStateLiveData.value = CloseScannerState
-    }
-
-    fun rejectSession() {
-        repository.rejectSession(topic.peerId)
+        hideProgress()
     }
 
     fun killSession(peerId: String) {
@@ -160,62 +138,6 @@ class WalletConnectViewModel(
         }
     }
 
-    fun approveSession(meta: WalletConnectPeerMeta) {
-        launchDisposable {
-            val chainId = account.network.chainId
-            repository.approveSession(listOf(account.address), chainId, topic.peerId, getDapp(meta, chainId))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onComplete = { closeScanner() },
-                    onError = { error -> _errorLiveData.value = Event(error) })
-        }
-    }
-
-    private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int) = DappSession(
-        account.address,
-        currentSession.topic,
-        currentSession.version,
-        currentSession.bridge,
-        currentSession.key,
-        meta.name,
-        getIcon(meta.icons),
-        topic.peerId,
-        topic.remotePeerId,
-        requestedNetwork.name,
-        account.name,
-        chainId,
-        handshakeId
-    )
-
-    private fun getIcon(icons: List<String>) =
-        if (icons.isEmpty()) String.Empty
-        else icons[FIRST_ICON]
-
-    private fun handleSessionRequest(sessionRequest: OnSessionRequest): WalletConnectState {
-        val id = sessionRequest.chainId
-        return when {
-            id == null -> {
-                accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
-                OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
-            }
-            isNetworkNotSupported(chainId = id) -> {
-                requestedNetwork = BaseNetworkData(id, String.empty)
-                OnSessionRequest(
-                    sessionRequest.meta,
-                    requestedNetwork,
-                    WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
-                )
-            }
-            account.chainId != id -> getWalletConnectStateForNotEqualNetworks(sessionRequest, id)
-            else -> {
-                requestedNetwork = BaseNetworkData(id, getNetworkName(id))
-                OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.NO_ALERT)
-            }
-        }
-
-    }
-
     private fun getWalletConnectStateForNotEqualNetworks(sessionRequest: OnSessionRequest, chainId: Int): WalletConnectState {
         requestedNetwork = BaseNetworkData(chainId, getNetworkName(chainId))
         return accountManager.getFirstActiveAccountOrNull(chainId)?.let { newAccount ->
@@ -225,50 +147,4 @@ class WalletConnectViewModel(
             OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR)
         }
     }
-
-    private fun getNetworkName(chainId: Int): String =
-        NetworkManager.networks.find { network -> network.chainId == chainId }?.name.orElse { String.Empty }
-
-    private fun isNetworkNotSupported(chainId: Int): Boolean =
-        NetworkManager.networks.find { network -> network.chainId == chainId } == null
-
-    fun setAccountForSelectedNetwork(chainId: Int) {
-        accountManager.getFirstActiveAccountOrNull(chainId)?.let { newAccount ->
-            account = newAccount
-        }
-    }
-
-    fun setNewAccount(newAccount: Account) {
-        account = newAccount
-    }
-
-    fun addAccount(chainId: Int, dialogType: WalletConnectAlertType) {
-        launchDisposable {
-            accountManager.createOrUnhideAccount(NetworkManager.getNetwork(chainId))
-                .flatMapCompletable { name ->
-                    setAccountForSelectedNetwork(chainId)
-                    val newDialogType = if (dialogType == WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR) {
-                        WalletConnectAlertType.NO_ALERT
-                    } else dialogType
-                    _viewStateLiveData.postValue(UpdateOnSessionRequest(requestedNetwork, newDialogType))
-                    walletActionsRepository.saveWalletActions(listOf(getWalletAddAction(name)))
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                    onError = {
-                        Timber.e(it)
-                        _errorLiveData.value = Event(it)
-                    }
-                )
-        }
-    }
-
-    private fun getWalletAddAction(name: String) =
-        WalletAction(
-            WalletActionType.ACCOUNT,
-            WalletActionStatus.ADDED,
-            DateUtils.timestamp,
-            hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
-        )
 }
