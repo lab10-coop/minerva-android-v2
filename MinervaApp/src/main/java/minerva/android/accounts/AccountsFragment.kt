@@ -37,7 +37,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout), AccountsFragmentToAdapterListener {
     private val viewModel: AccountsViewModel by viewModel()
     private val appUIState: AppUIState by inject()
-    private val accountAdapter = AccountAdapter(this)
+    private val accountAdapter: AccountAdapter by lazy { AccountAdapter(this) }
     private lateinit var binding: RefreshableRecyclerViewLayoutBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -201,7 +201,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             binding.apply {
                 accountsLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { _ ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)
-                    accountAdapter.submitList(activeAccounts)
+                    accountAdapter.updateList(activeAccounts)
                     accountAdapter.setFiat(fiatSymbol)
                     setTatsButtonListener()
                 })
