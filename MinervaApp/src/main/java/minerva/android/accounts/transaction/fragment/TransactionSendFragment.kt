@@ -200,10 +200,10 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                     )
                 }
                 .subscribeBy(
-                    onNext = {
-                        viewModel.isTransactionAvailable(it).let { isAvailable ->
+                    onNext = { isFormFilled ->
+                        viewModel.isTransactionAvailable(isFormFilled).let { isAvailable ->
                             sendButton.isEnabled = isAvailable
-                            errorView.visibleOrGone(!isAvailable)
+                            errorView.visibleOrGone(!isAvailable && isFormFilled)
                             transactionCostAmount.setTextColor(getTransactionCostColor(isAvailable))
                         }
                     },
