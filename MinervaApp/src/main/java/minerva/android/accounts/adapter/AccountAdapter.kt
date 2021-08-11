@@ -2,7 +2,8 @@ package minerva.android.accounts.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.accounts.listener.AccountsAdapterListener
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
@@ -14,14 +15,16 @@ import minerva.android.widget.state.AccountWidgetState
 
 class AccountAdapter(
     private val listener: AccountsFragmentToAdapterListener
-) : ListAdapter<Account, AccountViewHolder>(AccountDiffCallback()), AccountsAdapterListener {
+) : RecyclerView.Adapter<AccountViewHolder>(), AccountsAdapterListener {
+
+    private val differ: AsyncListDiffer<Account> = AsyncListDiffer(this, AccountDiffCallback())
     private var fiatSymbol: String = String.Empty
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
         AccountViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false), parent)
 
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
-        val account = getItem(position)
+        val account = differ.currentList[position]
         with(holder) {
             setupListener(this@AccountAdapter)
             setupAccountIndex(listener.indexOf(account))
@@ -29,11 +32,11 @@ class AccountAdapter(
         }
     }
 
-    override fun submitList(newList: List<Account>?) {
-        val list = mutableListOf<Account>().apply {
-            newList?.forEach { account -> add(account.copy()) }
-        }
-        super.submitList(list)
+    override fun getItemCount(): Int = differ.currentList.size
+
+    fun updateList(accounts: List<Account>) {
+        differ.submitList(accounts)
+        notifyDataSetChanged()
     }
 
     fun setFiat(fiatSymbol: String) {
