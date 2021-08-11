@@ -2,40 +2,30 @@ package minerva.android.accounts.walletconnect
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.hitanshudhawan.spannablestringparser.spannify
 import minerva.android.R
 import minerva.android.extension.gone
 import minerva.android.extension.margin
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.services.login.scanner.BaseScannerFragment
-import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.InvalidAccountThrowable
-import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
-import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
-import minerva.android.widget.dialog.walletconnect.DappConfirmationDialog
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-open class WalletConnectScannerFragment : BaseScannerFragment() {
+open class WalletConnectScannerFragment : BaseWalletConnectScannerFragment() {
 
-    internal val viewModel: WalletConnectViewModel by sharedViewModel()
+    override val viewModel: WalletConnectViewModel by sharedViewModel()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private val dappsAdapter: DappsAdapter by lazy {
         DappsAdapter { peerId -> viewModel.killSession(peerId) }
     }
-    private var confirmationDialogDialog: DappConfirmationDialog? = null
-    private var errorDialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.subscribeToConnectionStatusFlowable()
+        viewModel.subscribeToWCConnectionStatusFlowable()
         observeViewState()
         showWalletConnectViews()
         setupBottomSheet()
@@ -47,13 +37,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
             when (state) {
                 is WrongQrCodeState -> handleWrongQrCode()
                 is CorrectQrCodeState -> shouldScan = false
-                is OnDisconnected -> {
-                    if (state.sessionName.isNotEmpty()) {
-                        showToast(getString(R.string.dapp_disconnected, state.sessionName))
-                    } else {
-                        showAlertDialog(getString(R.string.session_connection_error))
-                    }
-                }
+                is OnDisconnected -> handleWalletConnectDisconnectState(state.sessionName)
                 is ProgressBarState -> binding.walletConnectProgress.root.visibleOrInvisible(state.show)
                 is OnSessionRequest -> showConnectionDialog(state.meta, state.network, state.dialogType)
                 is UpdateDappsState -> dappsAdapter.updateDapps(state.dapps)
@@ -65,55 +49,19 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
                 }
                 is OnSessionDeleted -> showToast(getString(R.string.dapp_deleted))
                 is OnGeneralError -> handleError(state.error)
-                is OnWalletConnectConnectionError -> handleWalletConnectError(state)
+                is OnWalletConnectConnectionError -> handleWalletConnectError(state.sessionName)
                 is UpdateOnSessionRequest -> updateConnectionDialog(state.network, state.dialogType)
             }
         })
         viewModel.errorLiveData.observe(viewLifecycleOwner, EventObserver { error -> handleError(error) })
     }
 
-    private fun handleWalletConnectError(it: OnWalletConnectConnectionError) {
-        confirmationDialogDialog?.dismiss()
-        val errorMessage = if (it.sessionName.isEmpty()) {
-            getString(R.string.session_connection_error)
-        } else {
-            getString(
-                R.string.active_session_connection_error,
-                formatString(it.sessionName)
-            ).spannify()
-        }
-        showAlertDialog(errorMessage)
-    }
-
-    private fun formatString(text: String) = "{`$text` < text-style:bold />}"
-
-    private fun showAlertDialog(errorMessage: CharSequence) {
-        AlertDialogHandler.showDialog(
-            requireContext(),
-            getString(R.string.try_again),
-            errorMessage
-        ) {
-            errorDialog?.dismiss()
-            shouldScan = true
-        }
-    }
-
-    private fun handleError(error: Throwable) {
-        confirmationDialogDialog?.dismiss()
-        shouldScan = true
-        showToast(getErrorMessage(error))
-    }
-
-    private fun getErrorMessage(error: Throwable) =
+    override fun getErrorMessage(error: Throwable) =
         if (error is InvalidAccountThrowable) {
             getString(R.string.invalid_account_message)
         } else {
             error.message ?: getString(R.string.unexpected_error)
         }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-    }
 
     private fun handleWrongQrCode() {
         showToast(getString(R.string.scan_wc_qr))
@@ -139,61 +87,14 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
         dappsBottomSheet.dapps.visible()
     }
 
-    override fun onCallbackAction(qrCode: String) {
-        viewModel.handleQrCode(qrCode)
+    override fun onCallbackAction(result: String) {
+        viewModel.handleQrCode(result)
     }
 
     override fun showProgress() {
         binding.walletConnectProgress.root.visible()
     }
 
-    private fun updateConnectionDialog(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
-        confirmationDialogDialog?.apply {
-            updateAccountSpinner()
-            handleNetwork(network, dialogType)
-        }
-    }
-
-    private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {
-        confirmationDialogDialog = DappConfirmationDialog(requireContext(),
-            {
-                viewModel.approveSession(meta)
-                binding.dappsBottomSheet.dapps.visible()
-                binding.closeButton.margin(bottom = INCREASED_MARGIN)
-            },
-            {
-                viewModel.rejectSession()
-                shouldScan = true
-            },
-            { chainId ->
-                viewModel.addAccount(chainId, dialogType)
-            }).apply {
-            setOnDismissListener { shouldScan = true }
-            setView(meta, network.name)
-            handleNetwork(network, dialogType)
-            updateAccountSpinner()
-            show()
-        }
-    }
-
-    private fun DappConfirmationDialog.updateAccountSpinner() {
-        setupAccountSpinner(viewModel.account.id, viewModel.availableAccounts) { account ->
-            viewModel.setNewAccount(account)
-        }
-    }
-
-    private fun DappConfirmationDialog.handleNetwork(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
-        when (dialogType) {
-            WalletConnectAlertType.NO_ALERT -> setNoAlert()
-            WalletConnectAlertType.UNDEFINED_NETWORK_WARNING -> setNotDefinedNetworkWarning(viewModel.availableNetworks) { chainId ->
-                viewModel.setAccountForSelectedNetwork(chainId)
-                updateAccountSpinner()
-            }
-            WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
-            WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)
-            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network.chainId.toString())
-        }
-    }
 
     override fun onCloseButtonAction() {
         closeScanner()
@@ -205,7 +106,7 @@ open class WalletConnectScannerFragment : BaseScannerFragment() {
 
     private fun closeScanner() {
         viewModel.closeScanner()
-        confirmationDialogDialog = null
+        clearDialog()
     }
 
     companion object {

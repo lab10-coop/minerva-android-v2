@@ -80,13 +80,13 @@ class WalletActionsRepositoryImpl(
         }
     }
 
-    private fun updateWalletActionsConfig(walletActionsConfig: WalletActionsConfigPayload, masterSeed: MasterSeed): Completable =
-        minervaApi.saveWalletActions(
+    private fun updateWalletActionsConfig(walletActionsConfig: WalletActionsConfigPayload, masterSeed: MasterSeed): Completable {
+        localWalletActionsConfigProvider.saveWalletActionsConfig(walletActionsConfig)
+        return minervaApi.saveWalletActions(
             walletActionsConfigPayload = walletActionsConfig,
             publicKey = encodePublicKey(masterSeed.publicKey)
-        )
-            .doOnTerminate { localWalletActionsConfigProvider.saveWalletActionsConfig(walletActionsConfig) }
-            .onErrorComplete()
+        ).onErrorComplete()
+    }
 
     override val isSynced: Boolean
         get() = walletConfigManager.isSynced

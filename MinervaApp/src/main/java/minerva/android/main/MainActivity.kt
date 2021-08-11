@@ -33,7 +33,7 @@ import minerva.android.main.error.*
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
-import minerva.android.services.login.LoginScannerActivity
+import minerva.android.services.login.ServicesScannerActivity
 import minerva.android.splash.SplashScreenActivity
 import minerva.android.utils.AlertDialogHandler
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
@@ -385,7 +385,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             R.id.editCredentialsOrder -> startEditCredentialOrderWrappedActivity(this)
             R.id.addAccount -> startNewAccountActivity()
             R.id.editServiceOrder -> startEditServiceOrderWrappedActivity(this)
-            R.id.qrCodeScanner -> launchActivityForResult<LoginScannerActivity>(LOGIN_SCANNER_RESULT_REQUEST_CODE)
+            R.id.qrCodeScanner -> launchActivityForResult<ServicesScannerActivity>(SERVICES_SCANNER_RESULT_REQUEST_CODE)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -499,7 +499,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
     }
 
     companion object {
-        const val LOGIN_SCANNER_RESULT_REQUEST_CODE = 3
+        const val SERVICES_SCANNER_RESULT_REQUEST_CODE = 3
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
         const val JWT = "jwt"
