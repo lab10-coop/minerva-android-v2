@@ -18,7 +18,7 @@ data class AccountToken(
             .orElse { false }
 
     override val balance: BigDecimal
-        get() = if (rawBalance == Double.InvalidValue.toBigDecimal()) BigDecimal.ZERO
+        get() = if (rawBalance == Double.InvalidValue.toBigDecimal()) rawBalance
         else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
 
     override val fiatBalance: BigDecimal

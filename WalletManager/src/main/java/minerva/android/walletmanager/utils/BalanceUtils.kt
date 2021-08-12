@@ -13,7 +13,7 @@ object BalanceUtils {
 
     fun getCryptoBalance(cryptoBalance: BigDecimal): String =
         when {
-            cryptoBalance == Double.InvalidValue.toBigDecimal() -> String.EmptyBalance
+            cryptoBalance == Double.InvalidValue.toBigDecimal() -> NO_VALUE
             cryptoBalance < MINIMAL_VALUE && cryptoBalance > BigDecimal.ZERO -> BELOW_MINIMAL_VALUE
             cryptoBalance == BigDecimal.ZERO -> String.EmptyBalance
             else -> cryptoBalance.setScale(CRYPTO_SCALE, RoundingMode.HALF_UP).let { scaled ->
@@ -23,6 +23,7 @@ object BalanceUtils {
 
     fun getFiatBalance(fiatBalance: BigDecimal, fiatSymbol: String): String =
         when {
+            fiatBalance < BigDecimal.ZERO -> String.format(Locale.ROOT, NO_FIAT_VALUE, fiatSymbol)
             fiatBalance != Double.InvalidValue.toBigDecimal() ->
                 String.format(Locale.ROOT, CURRENCY_FORMAT, fiatSymbol, fiatBalance)
             fiatBalance == BigDecimal.ZERO -> ZERO
@@ -34,6 +35,7 @@ object BalanceUtils {
 
     private const val CURRENCY_FORMAT = "%s %.2f"
     private const val NO_FIAT_VALUE = "%s -.--"
+    private const val NO_VALUE = "-.--"
     private const val ZERO = "0"
     private const val TEN = 10.0
     private const val CRYPTO_SCALE = 10
