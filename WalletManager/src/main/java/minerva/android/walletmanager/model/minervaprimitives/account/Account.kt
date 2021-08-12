@@ -18,7 +18,7 @@ data class Account(
     override var name: String = String.Empty,
     var chainId: Int = Int.InvalidValue,
     override var isDeleted: Boolean = false,
-    var cryptoBalance: BigDecimal = BigDecimal.ZERO,
+    var cryptoBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var accountTokens: MutableList<AccountToken> = mutableListOf(),
     var coinRate: Double = Double.InvalidValue,
     var fiatBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),

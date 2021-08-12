@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.method.LinkMovementMethod
 import android.view.View
-import androidx.viewpager2.widget.ViewPager2
-import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING
 import com.google.android.material.tabs.TabLayoutMediator
 import minerva.android.R
 import minerva.android.databinding.FragmentWelcomeBinding
@@ -22,30 +20,29 @@ class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
     private lateinit var binding: FragmentWelcomeBinding
     private val viewModel: CreateWalletViewModel by viewModel()
 
-    private val onPageChangeCallback = createOnPageChangeCallBack()
     private var currentPage: Int = MIN_POSITION
     private lateinit var carouselTimer: Timer
     private val carouselHandler = Handler()
-    private val carouselUpdate = Runnable {
-        var smoothScroll = true
+    private val carouselUpdate by lazy {
+        Runnable {
+            var smoothScroll = true
 
-        if (currentPage == ITEM_COUNT) {
-            currentPage = MIN_POSITION
-            smoothScroll = false
+            if (currentPage == ITEM_COUNT) {
+                currentPage = MIN_POSITION
+                smoothScroll = false
+            }
+            binding.onboardingViewPager.setCurrentItem(currentPage++, smoothScroll)
         }
-        binding.onboardingViewPager.setCurrentItem(currentPage++, smoothScroll)
     }
 
     override fun onResume() {
         super.onResume()
         listener.updateActionBar()
-        binding.onboardingViewPager.registerOnPageChangeCallback(onPageChangeCallback)
         setupAutomaticCarousel()
     }
 
     override fun onPause() {
         super.onPause()
-        binding.onboardingViewPager.unregisterOnPageChangeCallback(onPageChangeCallback)
         carouselHandler.removeCallbacks(carouselUpdate)
         carouselTimer.cancel()
     }
@@ -96,8 +93,11 @@ class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
     }
 
     private fun setupViewPager() = with(binding) {
-        onboardingViewPager.adapter = OnBoardingAdapter()
-        TabLayoutMediator(tabs, onboardingViewPager) { _, _ -> }.attach()
+        onboardingViewPager.apply {
+            adapter = OnBoardingAdapter()
+            isUserInputEnabled = false
+            TabLayoutMediator(tabs, this) { _, _ -> }.attach()
+        }
     }
 
     private fun setupAutomaticCarousel() {
@@ -109,49 +109,13 @@ class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
         }, DELAY, CAROUSEL_PERIOD)
     }
 
-    private fun createOnPageChangeCallBack(): ViewPager2.OnPageChangeCallback {
-        return object : ViewPager2.OnPageChangeCallback() {
-            var state = ViewPager2.SCROLL_STATE_IDLE
-
-            override fun onPageScrollStateChanged(state: Int) {
-                super.onPageScrollStateChanged(state)
-                this.state = state
-            }
-
-            override fun onPageScrolled(position: Int, offset: Float, offsetPixels: Int) = with(binding.onboardingViewPager) {
-                super.onPageScrolled(position, offset, offsetPixels)
-                if (isDraggingStateWithNoOffset(state, offset, offsetPixels)) {
-                    getCurrentPositionForMarginalItems(position)?.let { newPosition ->
-                        setCurrentItem(newPosition, false)
-                        currentPage = newPosition
-                    } ?: Unit
-                } else {
-                    currentPage = position
-                }
-            }
-        }
-    }
-
-    private fun getCurrentPositionForMarginalItems(position: Int): Int? =
-        when (position) {
-            MAX_POSITION -> MIN_POSITION
-            MIN_POSITION -> MAX_POSITION
-            else -> null
-        }
-
-    private fun isDraggingStateWithNoOffset(state: Int, offset: Float, offsetPixels: Int) =
-        state == SCROLL_STATE_DRAGGING && offset == ZERO_OFFSET && offsetPixels == ZERO_PIXELS_OFFSET
-
     companion object {
         @JvmStatic
         fun newInstance() = WelcomeFragment()
 
         private const val DELAY = 0L
-        private const val CAROUSEL_PERIOD = 1000L
+        private const val CAROUSEL_PERIOD = 2000L
         private const val ITEM_COUNT = 4
-        private const val MAX_POSITION = 3
         private const val MIN_POSITION = 0
-        private const val ZERO_OFFSET = 0F
-        private const val ZERO_PIXELS_OFFSET = 0
     }
 }
