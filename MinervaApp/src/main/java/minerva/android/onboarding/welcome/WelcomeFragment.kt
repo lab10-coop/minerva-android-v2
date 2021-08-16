@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.method.LinkMovementMethod
 import android.view.View
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import minerva.android.R
 import minerva.android.databinding.FragmentWelcomeBinding
@@ -96,7 +97,18 @@ class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
         onboardingViewPager.apply {
             adapter = OnBoardingAdapter()
             isUserInputEnabled = false
+            setFadingAnimation()
             TabLayoutMediator(tabs, this) { _, _ -> }.attach()
+        }
+    }
+
+    private fun ViewPager2.setFadingAnimation() {
+        setPageTransformer() { page, _ ->
+            page.apply {
+                alpha = FADING_ALPHA_START
+                visible()
+                animate().alpha(FADING_ALPHA_END).duration = FADING_DURATION
+            }
         }
     }
 
@@ -114,7 +126,10 @@ class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
         fun newInstance() = WelcomeFragment()
 
         private const val DELAY = 0L
-        private const val CAROUSEL_PERIOD = 2000L
+        private const val CAROUSEL_PERIOD = 3000L
+        private const val FADING_DURATION = 2000L
+        private const val FADING_ALPHA_START = 0F
+        private const val FADING_ALPHA_END = 1F
         private const val ITEM_COUNT = 4
         private const val MIN_POSITION = 0
     }
