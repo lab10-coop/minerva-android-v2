@@ -9,8 +9,8 @@ import minerva.android.walletmanager.model.walletconnect.WalletConnectTransactio
 
 sealed class WalletConnectState
 object CloseScannerState : WalletConnectState()
-object WrongQrCodeState : WalletConnectState()
-object CorrectQrCodeState : WalletConnectState()
+object WrongWalletConnectCodeState : WalletConnectState()
+object CorrectWalletConnectCodeState : WalletConnectState()
 data class OnGeneralError(val error: Throwable, val sessionName: String = String.Empty) : WalletConnectState()
 data class OnWalletConnectTransactionError(val error: Throwable) : WalletConnectState()
 data class OnWalletConnectConnectionError(val error: Throwable, val sessionName: String = String.Empty) :

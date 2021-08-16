@@ -15,4 +15,8 @@ class MinervaLoadingDialog(context: Context) : Dialog(context) {
         setContentView(binding.root)
     }
 
+    fun setMessage(resInfo: Int) {
+        binding.message.setText(resInfo)
+    }
+
 }

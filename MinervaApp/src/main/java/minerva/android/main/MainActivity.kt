@@ -6,10 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.R
 import minerva.android.accounts.AccountsFragment
 import minerva.android.accounts.transaction.activity.TransactionActivity
@@ -21,7 +18,6 @@ import minerva.android.accounts.transaction.activity.TransactionActivity.Compani
 import minerva.android.accounts.walletconnect.*
 import minerva.android.databinding.ActivityMainBinding
 import minerva.android.extension.*
-import minerva.android.extensions.showBiometricPrompt
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.identities.credentials.CredentialsFragment
 import minerva.android.identities.myIdentities.MyIdentitiesFragment
@@ -32,32 +28,22 @@ import minerva.android.main.base.BaseFragment
 import minerva.android.main.error.*
 import minerva.android.main.handler.*
 import minerva.android.main.listener.FragmentInteractorListener
-import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.services.login.ServicesScannerActivity
 import minerva.android.splash.SplashScreenActivity
 import minerva.android.utils.AlertDialogHandler
+import minerva.android.walletConnect.BaseWalletConnectInteractionsActivity
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager.getNetwork
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
-import minerva.android.widget.MinervaFlashbar
-import minerva.android.widget.dialog.MinervaLoadingDialog
-import minerva.android.widget.dialog.walletconnect.DappDialog
-import minerva.android.widget.dialog.walletconnect.DappSendTransactionDialog
-import minerva.android.widget.dialog.walletconnect.DappSignMessageDialog
-import minerva.android.widget.dialog.walletconnect.GasPriceDialog
 import minerva.android.wrapped.*
 import org.koin.android.ext.android.inject
-import java.math.BigDecimal
 
-class MainActivity : AppCompatActivity(), FragmentInteractorListener {
+class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractorListener {
 
     internal val viewModel: MainViewModel by inject()
-    private val walletConnectViewModel: WalletConnectInteractionsViewModel by inject()
     private var shouldDisableAddButton = false
     internal lateinit var binding: ActivityMainBinding
-    private var dappDialog: DappDialog? = null
-    private var loadingDialog: MinervaLoadingDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +56,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
             prepareSettingsIcon()
             prepareObservers()
             handleOutdatedWalletErrorDialog()
-            //todo move to viewModel init ??
             with(viewModel) {
                 restorePendingTransactions()
                 checkMissingTokensDetails()
@@ -123,38 +108,15 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        rejectRequest()
-    }
-
-    private fun rejectRequest() {
-        dappDialog?.let {
-            it.dismiss()
-            walletConnectViewModel.rejectRequest()
-        }
-    }
+    override fun isProtectTransactionEnabled(): Boolean = viewModel.isProtectTransactionEnabled()
 
     override fun onDestroy() {
         super.onDestroy()
         viewModel.dispose()
-        walletConnectViewModel.dispose()
     }
 
     private fun prepareObservers() {
-        walletConnectViewModel.walletConnectStatus.observe(this@MainActivity, Observer { state ->
-            dappDialog?.dismiss()
-            when (state) {
-                is OnEthSignRequest -> dappDialog = getDappSignDialog(state)
-                is OnEthSendTransactionRequest -> dappDialog = getSendTransactionDialog(state)
-                is ProgressBarState -> handleLoadingDialog(state)
-                is OnGeneralError -> handleWalletConnectError()
-                is OnWalletConnectTransactionError -> handleWalletConnectTransactionError(state)
-                is WrongTransactionValueState -> handleWrongTransactionValueState(state)
-                else -> dappDialog = null
-            }
-        })
-        walletConnectViewModel.errorLiveData.observe(this, EventObserver { handleWalletConnectError() })
+        prepareWalletConnect()
         viewModel.apply {
             errorLiveData.observe(this@MainActivity, EventObserver { errorStatus ->
                 when (errorStatus) {
@@ -190,24 +152,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         })
     }
 
-    private fun handleWalletConnectTransactionError(state: OnWalletConnectTransactionError) {
-        dappDialog?.dismiss()
-        showFlashbar(
-            getString(R.string.transactions_error_title),
-            state.error.message ?: getString(R.string.transactions_error_message)
-        )
-    }
-
-    private fun handleWrongTransactionValueState(state: WrongTransactionValueState) {
-        val firebaseID: String = FirebaseInstanceId.getInstance().id
-        walletConnectViewModel.logToFirebase("Transaction with invalid value: ${state.transaction}, firebaseId: $firebaseID")
-        AlertDialogHandler.showDialog(
-            this,
-            getString(R.string.error_header),
-            getString(R.string.wrong_tx_value_error, firebaseID)
-        )
-    }
-
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
@@ -228,69 +172,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
         stopPendingAccounts()
         viewModel.clearPendingAccounts()
     }
-
-    private fun handleWalletConnectError() {
-        dappDialog?.dismiss()
-        showFlashbar(getString(R.string.wallet_connect_title), getString(R.string.wc_connection_error_message))
-    }
-
-    private fun handleLoadingDialog(state: ProgressBarState) {
-        if (state.show) {
-            loadingDialog = MinervaLoadingDialog(this).apply { show() }
-        } else {
-            loadingDialog?.dismiss()
-        }
-    }
-
-    private fun getSendTransactionDialog(txRequest: OnEthSendTransactionRequest) =
-        with(walletConnectViewModel) {
-            DappSendTransactionDialog(
-                this@MainActivity,
-                {
-                    if (viewModel.isProtectTransactionEnabled()) getCurrentFragment()?.showBiometricPrompt(
-                        ::sendTransaction,
-                        ::rejectRequest
-                    )
-                    else sendTransaction()
-                    dappDialog = null
-                },
-                {
-                    rejectRequest()
-                    dappDialog = null
-                }).apply {
-                setContent(
-                    txRequest.transaction, txRequest.session, txRequest.account,
-                    { showGasPriceDialog(txRequest) },
-                    { gasPrice -> recalculateTxCost(gasPrice, txRequest.transaction) },
-                    { balance, cost -> isBalanceTooLow(balance, cost) }
-
-                )
-                show()
-            }
-        }
-
-    private fun DappSendTransactionDialog.showGasPriceDialog(it: OnEthSendTransactionRequest) {
-        GasPriceDialog(context) { gasPrice ->
-            setCustomGasPrice(
-                walletConnectViewModel.recalculateTxCost(BigDecimal(gasPrice), it.transaction),
-                it.account
-            ) { balance, cost -> walletConnectViewModel.isBalanceTooLow(balance, cost) }
-        }.show()
-    }
-
-    private fun getDappSignDialog(it: OnEthSignRequest) =
-        DappSignMessageDialog(this@MainActivity, {
-            walletConnectViewModel.acceptRequest()
-            dappDialog = null
-        },
-            {
-                walletConnectViewModel.rejectRequest()
-                dappDialog = null
-            }
-        ).apply {
-            setContent(it.message, it.session)
-            show()
-        }
 
     private fun updatePendingAccount(account: PendingAccount) {
         showFlashbar(
@@ -327,10 +208,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractorListener {
                 )
             )
         }
-    }
-
-    private fun showFlashbar(title: String, message: String) {
-        MinervaFlashbar.show(this@MainActivity, title, message)
     }
 
     private fun AccountsFragment.updateAccountFragment(updatePending: () -> Unit) {

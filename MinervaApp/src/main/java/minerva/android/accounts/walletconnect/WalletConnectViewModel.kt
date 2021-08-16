@@ -130,9 +130,9 @@ class WalletConnectViewModel(
 
     fun handleQrCode(qrCode: String) {
         if (AddressParser.parse(qrCode) != WALLET_CONNECT) {
-            _viewStateLiveData.value = WrongQrCodeState
+            _viewStateLiveData.value = WrongWalletConnectCodeState
         } else {
-            _viewStateLiveData.value = CorrectQrCodeState
+            _viewStateLiveData.value = CorrectWalletConnectCodeState
             currentSession = repository.getWCSessionFromQr(qrCode)
             repository.connect(currentSession)
         }
