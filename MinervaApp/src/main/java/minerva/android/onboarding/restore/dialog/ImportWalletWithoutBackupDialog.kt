@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.Window
 import minerva.android.R
@@ -20,6 +21,7 @@ class ImportWalletWithoutBackupDialog(context: Context, private val onImport: ()
         setContentView(binding.root)
         setCancelable(true)
         setupListeners()
+        binding.warningMessage.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun setupListeners() = with(binding) {
