@@ -7,6 +7,7 @@ import android.view.View
 import androidx.lifecycle.Observer
 import minerva.android.R
 import minerva.android.accounts.walletconnect.BaseWalletConnectScannerFragment
+import minerva.android.extension.empty
 import minerva.android.extension.visibleOrInvisible
 import minerva.android.walletmanager.model.ServiceQrCode
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -53,7 +54,7 @@ class ServicesScannerFragment : BaseWalletConnectScannerFragment() {
                     }
                     CloseScannerState -> {
                         clearDialog()
-                        listener.onScannerResult(true)
+                        listener.onScannerResult(true, String.empty, true)
                     }
                     is UpdateCredentialsLoginResult -> {
                         clearDialog()

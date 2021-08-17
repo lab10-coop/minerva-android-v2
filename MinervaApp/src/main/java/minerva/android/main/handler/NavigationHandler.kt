@@ -14,6 +14,10 @@ internal fun MainActivity.shouldShowAddIdentityIcon() = isIdentitiesTabSelected(
 
 internal fun MainActivity.shouldShowAddValueIcon() = isValuesTabSelected()
 
+internal fun MainActivity.goToValuesTab() {
+    binding.bottomNavigation.selectedItemId = R.id.values
+}
+
 internal fun MainActivity.isServicesTabSelected() = binding.bottomNavigation.selectedItemId == R.id.services
 
 internal fun MainActivity.isValuesTabSelected() = binding.bottomNavigation.selectedItemId == R.id.values
