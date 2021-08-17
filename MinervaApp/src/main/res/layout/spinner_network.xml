@@ -8,8 +8,12 @@
     android:fontFamily="@font/rubik_regular"
     android:gravity="center_vertical"
     android:textSize="@dimen/text_normal"
-    android:padding="@dimen/margin_small"
+    android:paddingStart="@dimen/margin_small"
+    android:paddingTop="@dimen/margin_small"
+    android:paddingBottom="@dimen/margin_small"
+    android:paddingEnd="@dimen/margin_big"
     android:layout_marginStart="@dimen/margin_xxsmall"
     android:textColor="@color/darkGray"
     tools:drawableLeft="@drawable/ic_ethereum"
+    tools:drawableRight="@drawable/ic_dropdown_black"
     tools:text="#1 Ethereum" />
