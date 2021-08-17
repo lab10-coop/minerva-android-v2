@@ -25,7 +25,7 @@ internal fun MainActivity.handleLoginScannerResult(data: Intent?) {
         (intent.getParcelableExtra(ServicesScannerActivity.LOGIN_PAYLOAD) as? LoginPayload)?.let {
             handleServiceLogin(it, intent)
         }.orElse {
-            handleCredentialLogin(intent)
+            handleServiceScannerResult(intent)
         }
     }
 }
@@ -40,24 +40,32 @@ private fun MainActivity.handleServiceLogin(loginPayload: LoginPayload, intent: 
     else handleLoginStatuses(loginPayload.loginStatus)
 }
 
-private fun MainActivity.handleCredentialLogin(intent: Intent) {
-    (intent.getParcelableExtra(ServicesScannerActivity.CREDENTIAL_QR_CODE) as? CredentialQrCode)?.let {
-        viewModel.qrCode = it
-        MinervaFlashBarWithThreeButtons.show(
-            this,
-            getString(R.string.update_credential_message),
-            viewModel.getReplaceLabelRes(it),
-            R.string.add_as_new,
-            R.string.cancel,
-            { viewModel.updateBindedCredentials(true) },
-            { viewModel.updateBindedCredentials(false) }
-        )
-    }.orElse {
-        showBindCredentialFlashbar(
-            intent.getBooleanExtra(ServicesScannerActivity.IS_RESULT_SUCCEED, false),
-            intent.getStringExtra(ServicesScannerActivity.RESULT_MESSAGE)
-        )
+private fun MainActivity.handleServiceScannerResult(intent: Intent) {
+    val qrCode = intent.getParcelableExtra<CredentialQrCode>(ServicesScannerActivity.CREDENTIAL_QR_CODE)
+    val isWalletConnectResult = intent.getBooleanExtra(ServicesScannerActivity.IS_WALLET_CONNECT_RESULT, false)
+    when {
+        qrCode != null -> handleCredentialQrCode(qrCode)
+        isWalletConnectResult -> goToValuesTab()
+        else -> {
+            showBindCredentialFlashbar(
+                intent.getBooleanExtra(ServicesScannerActivity.IS_RESULT_SUCCEED, false),
+                intent.getStringExtra(ServicesScannerActivity.RESULT_MESSAGE)
+            )
+        }
     }
+}
+
+fun MainActivity.handleCredentialQrCode(qrCode: CredentialQrCode) {
+    viewModel.qrCode = qrCode
+    MinervaFlashBarWithThreeButtons.show(
+        this,
+        getString(R.string.update_credential_message),
+        viewModel.getReplaceLabelRes(qrCode),
+        R.string.add_as_new,
+        R.string.cancel,
+        { viewModel.updateBindedCredentials(true) },
+        { viewModel.updateBindedCredentials(false) }
+    )
 }
 
 fun MainActivity.showBindCredentialFlashbar(isLoginSuccess: Boolean, message: String?) {

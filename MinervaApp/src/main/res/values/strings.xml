@@ -341,7 +341,7 @@
     <string name="skip">Skip</string>
     <string name="edit_name">Edit Name</string>
     <string name="account_name_label">Account name</string>
-    <string name="change_account_warning">This DApp requests a connection to %s and therefore it has been adjusted.</string>
+    <string name="change_account_warning">This DApp requests a connection to %s and therefore a corresponding network and account have been selected.</string>
     <string name="value">Value:</string>
     <string name="token_balance_unlcear_message">Token balance unclear - transaction could fail</string>
     <string name="add_account_label">+ Add account</string>
