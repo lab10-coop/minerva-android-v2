@@ -411,6 +411,14 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.5.0</item>
+        <item>* Wallet restore from the most popular 3rd party wallets</item>
+        <item>* Use a scanner to connect to any DApp on any network</item>
+        <item>* Now you can add and change accounts on-the-flight of the DApp connection</item>
+        <item>* Improved welcome screens</item>
+        <item>* Automatic network change to the one required by DApp</item>
+        <item>* Account name made editable</item>
+        <item>* Various UI improvements</item>
         <item>1.4.1</item>
         <item>* Account name change enabled</item>
         <item>* WalletConnect connection issues fixed</item>
