@@ -349,7 +349,7 @@
     <string name="type_here">Type here</string>
     <string name="no_backup_data_found_for_the_secret_recovery_phrase_you_entered">No backup data found for the Secret Recovery Phrase you entered. \n\n Make sure your device \n is currently online.</string>
     <string name="make_sure_your_device_is_currently_online">Make sure your device\n is currently online.</string>
-    <string name="no_backup_file_warning_message">This Secret Recovery Phrase seems to be from another wallet (e.g. Metamask or Trust Wallet) and not from a Minerva Wallet. After the import you will have direct access to the assets in your accounts you created in this wallet. \n\n If you have further questions please join our community on Telegram or Discord.</string>
+    <string name="no_backup_file_warning_message">This Secret Recovery Phrase seems to be from another wallet (e.g. Metamask or Trust Wallet) and not from a Minerva Wallet. After the import you will have direct access to the assets in your accounts you created in this wallet. \n\n If you have further questions please join our community on <a href="https://t.me/MinervaWallet">Telegram</a> or <a href="https://minerva.digital/discord ">Discord</a>.</string>
     <string name="terms_of_service_info">By proceeding you agree to the <a href="https://docs.minerva.digital/legal/terms">Terms of Service</a></string>
     <string name="import_with_recovery_phrase">Import with Recovery Phrase</string>
     <string name="import_info">Import an existing wallet or create a new one</string>
