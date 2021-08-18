@@ -24,24 +24,22 @@ abstract class DappDialog(context: Context, val approve: () -> Unit = {}, val de
         setupDialog()
     }
 
-    fun initButtons(confirmationButtons: DappDialogButtonsBinding) {
-        with(confirmationButtons) {
-            cancel.setOnClickListener {
+    fun initButtons(confirmationButtons: DappDialogButtonsBinding) = with(confirmationButtons) {
+        cancel.setOnClickListener {
+            deny()
+            dismiss()
+        }
+        confirm.setOnClickListener {
+            approve()
+            dismiss()
+        }
+
+        setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
                 deny()
                 dismiss()
             }
-            confirm.setOnClickListener {
-                approve()
-                dismiss()
-            }
-
-            setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    deny()
-                    dismiss()
-                }
-                true
-            }
+            true
         }
     }
 

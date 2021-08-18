@@ -7,24 +7,22 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.observeLiveDataEvent
+import minerva.android.onboarding.restore.state.*
+import minerva.android.walletmanager.exception.WalletConfigNotFoundThrowable
+import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.model.wallet.MasterSeedError
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import org.junit.Before
 import org.junit.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class RestoreWalletViewModelTest : BaseViewModelTest() {
 
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val viewModel = RestoreWalletViewModel(masterSeedRepository)
 
-    private val invalidMnemonicObserver: Observer<Event<List<String>>> = mock()
-    private val invalidMnemonicCaptor: KArgumentCaptor<Event<List<String>>> = argumentCaptor()
-
-    private val walletConfigNotFoundObserver: Observer<Event<Unit>> = mock()
-    private val walletConfigNotFoundCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
+    private val restoreWalletObserver: Observer<RestoreWalletState> = mock()
+    private val restoreWalletStateCaptor: KArgumentCaptor<RestoreWalletState> = argumentCaptor()
 
     @Before
     fun setup() {
@@ -33,60 +31,127 @@ class RestoreWalletViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `check mnemonic length validation`() {
-        assertTrue { viewModel.isMnemonicLengthValid("sfds fd fds d ds asd asd das das sda asd da") }
-        assertTrue { viewModel.isMnemonicLengthValid("sfds % fds d ds &asd        das das , asd da *") }
-        assertFalse { viewModel.isMnemonicLengthValid("sfds fd fds d ds asd asd") }
-        assertFalse { viewModel.isMnemonicLengthValid("sfds fd fds d ds asd asd             ") }
-        assertFalse { viewModel.isMnemonicLengthValid("") }
-        assertFalse { viewModel.isMnemonicLengthValid(" ") }
-        assertTrue { viewModel.isMnemonicLengthValid("4 3 6 434 7 8 65 # $ % o o") }
-    }
-
-    @Test
-    fun `test restore wallet from mnemonic file not found error`() {
-        val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture"
-        val error = Throwable()
-        whenever(masterSeedRepository.restoreMasterSeed(any())).doReturn(Completable.error(error))
-        whenever(masterSeedRepository.validateMnemonic(mnemonic)).thenReturn(emptyList())
-        viewModel.walletConfigNotFoundLiveData.observeForever(walletConfigNotFoundObserver)
+    fun `mnemonic should have min 12 words test`() {
+        val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve" //11 words
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
         viewModel.validateMnemonic(mnemonic)
-        walletConfigNotFoundCaptor.run {
-            verify(walletConfigNotFoundObserver).onChanged(capture())
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver).onChanged(capture())
+            firstValue == InvalidMnemonicLength
         }
     }
 
     @Test
-    fun `test restore wallet from mnemonic error`() {
-        val error = Throwable()
-        val mnemonic = "vessel ladder alter error federal sibling chat ability sun glass valve picture"
-        whenever(masterSeedRepository.restoreMasterSeed(any())).doReturn(Completable.error(error))
+    fun `mnemonic should have max 24 words test`() {
+        val mnemonic =
+            "vessel ladder alter error federal sibling chat ability sun glass valve cat vessel ladder alter error federal sibling chat ability sun glass valve cat dog" //25 words
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
         viewModel.validateMnemonic(mnemonic)
-        viewModel.walletConfigNotFoundLiveData.observeLiveDataEvent(Event(Unit))
-    }
-
-    @Test
-    fun `test restore wallet from invalid mnemonic `() {
-        val mnemonic = "vessel ladder alter error federal hoho chat ability sun glass valve hehe"
-        whenever(masterSeedRepository.validateMnemonic(any())).thenReturn(listOf("hoho, hehe"))
-        viewModel.invalidMnemonicLiveData.observeForever(invalidMnemonicObserver)
-        viewModel.validateMnemonic(mnemonic)
-        invalidMnemonicCaptor.run {
-            verify(invalidMnemonicObserver).onChanged(capture())
-            firstValue.peekContent().isNotEmpty() &&
-                    firstValue.peekContent() == listOf("hoho, hehe")
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver).onChanged(capture())
+            firstValue == InvalidMnemonicLength
         }
     }
 
     @Test
-    fun `test restore wallet from empty mnemonic `() {
-        val mnemonic = ""
-        whenever(masterSeedRepository.validateMnemonic(any())).thenReturn(listOf("hoho, hehe"))
-        viewModel.invalidMnemonicLiveData.observeForever(invalidMnemonicObserver)
+    fun `mnemonic is not divisible by 3 test`() {
+        val mnemonic =
+            "vessel ladder alter error federal sibling chat ability sun glass valve hot wear false dog cat" //16 words
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
         viewModel.validateMnemonic(mnemonic)
-        invalidMnemonicCaptor.run {
-            verify(invalidMnemonicObserver).onChanged(capture())
-            firstValue.peekContent().isEmpty()
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver).onChanged(capture())
+            firstValue == InvalidMnemonicLength
+        }
+    }
+
+    @Test
+    fun `mnemonic is divisible by 3 and have correct length but incorrect words test`() {
+        val mnemonic =
+            "vessel ladder alter error federal sibling chat ability sun glass valve hot wear false guedsad" //15 words
+        whenever(masterSeedRepository.areMnemonicWordsValid(any())).thenReturn(false)
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
+        viewModel.validateMnemonic(mnemonic)
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver).onChanged(capture())
+            firstValue == InvalidMnemonicWords
+        }
+    }
+
+    @Test
+    fun `mnemonic is divisible by 3, have correct length and correct words but cannot create seed test`() {
+        val mnemonic =
+            "vessel ladder alter error federal sibling chat ability sun glass valve hot wear false cat" //15 words
+        val error = Throwable("Cannot create seed")
+        whenever(masterSeedRepository.areMnemonicWordsValid(any())).thenReturn(true)
+        whenever(masterSeedRepository.restoreMasterSeed(any())).thenReturn(MasterSeedError(error))
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
+        viewModel.validateMnemonic(mnemonic)
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver).onChanged(capture())
+            firstValue == InvalidMnemonicWords
+        }
+    }
+
+    @Test
+    fun `mnemonic is divisible by 3, have correct length, correct words and can create seed test`() {
+        val mnemonic =
+            "vessel ladder alter error federal sibling chat ability sun glass valve hot wear false cat" //15 words
+        val masterSeed = MasterSeed("seed", "publicK", "privateK")
+        whenever(masterSeedRepository.areMnemonicWordsValid(any())).thenReturn(true)
+        whenever(masterSeedRepository.restoreMasterSeed(any())).thenReturn(masterSeed)
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
+        viewModel.validateMnemonic(mnemonic)
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver).onChanged(capture())
+            firstValue == ValidMnemonic
+        }
+    }
+
+    @Test
+    fun `test restore wallet success`() {
+        whenever(masterSeedRepository.restoreWalletConfig(any())).doReturn(Completable.complete())
+        viewModel.masterSeed = MasterSeed("seed", "publicK", "privateK")
+        viewModel.restoreWallet()
+        verify(masterSeedRepository).initWalletConfig()
+        verify(masterSeedRepository).saveIsMnemonicRemembered()
+    }
+
+    @Test
+    fun `restore wallet and backup file is not found test`() {
+        val error = WalletConfigNotFoundThrowable()
+        whenever(masterSeedRepository.restoreWalletConfig(any())).doReturn(Completable.error(error))
+        viewModel.masterSeed = MasterSeed("seed", "publicK", "privateK")
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
+        viewModel.restoreWallet()
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver, times(3)).onChanged(capture())
+            firstValue == WalletConfigNotFound
+        }
+    }
+
+    @Test
+    fun `restore wallet and server error occurs test`() {
+        val error = Throwable()
+        whenever(masterSeedRepository.restoreWalletConfig(any())).doReturn(Completable.error(error))
+        viewModel.masterSeed = MasterSeed("seed", "publicK", "privateK")
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
+        viewModel.restoreWallet()
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver, times(3)).onChanged(capture())
+            firstValue == GenericServerError
+        }
+    }
+
+    @Test
+    fun `create wallet new backup file`() {
+        whenever(masterSeedRepository.createWalletConfig(any())).doReturn(Completable.complete())
+        viewModel.restoreWalletState.observeForever(restoreWalletObserver)
+        viewModel.masterSeed = MasterSeed("seed", "publicK", "privateK")
+        viewModel.createWalletConfig()
+        restoreWalletStateCaptor.run {
+            verify(restoreWalletObserver, times(3)).onChanged(capture())
+            firstValue == WalletConfigCreated
         }
     }
 }

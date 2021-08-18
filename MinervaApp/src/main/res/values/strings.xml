@@ -13,17 +13,17 @@
     <string name="create_new_wallet">Create new wallet</string>
     <string name="restore_old_wallet">Restore old wallet</string>
     <string name="enter_your_new_wallet">Enter your new wallet</string>
-    <string name="restore_wallet">Restore your wallet</string>
+    <string name="import_wallet">Import</string>
     <string name="instruction">What you can do with your new Minerva digital wallet:</string>
     <string name="identity_instruction">Create new identities and use them to log in to different services.</string>
     <string name="accounts_instruction">Own digital assets and use them for transactions and trading.</string>
     <string name="services_instruction">Have a control over all the services you are sharing your data with.</string>
-    <string name="enter_your_backup_words">Enter your backup words.</string>
+    <string name="enter_your_backup_words">Enter your Secret Recovery Phrase</string>
     <string name="edit">Edit</string>
     <string name="remove">Remove</string>
     <string name="no_data_available">No data available</string>
     <string name="field_cannot_be_empty">Field cannot be empty</string>
-    <string name="check_incorrect_mnemonic_words">Unknown words entered, please check:</string>
+    <string name="unknown_words">Unknown words entered. Please review them.</string>
     <string name="new_identity">New Identity</string>
     <string name="identity_label">Identity: %s</string>
     <string name="edit_identity_order">Rearrange Identities</string>
@@ -263,7 +263,12 @@
     <string name="scan_wc_qr">Please scan WalletConnect qr code</string>
     <string name="dapp_connection_warning">This WalletConnect Session provides no information on the needed network. Please make sure you selected the correct account/network.</string>
     <string name="wrong_network_message">You need to initiate this WalletConnect session from an account on the %s for this website</string>
+    <string name="unsupported_network_message">This website requests a connection to Chain id: %s, which is not yet supported by Minerva Wallet.</string>
+    <string name="chain_id">Chain id: %s</string>
+    <string name="missing_account_message">You don\'t have an account on %s yet. Please click \'Add account\' button above.</string>
     <string name="wrong_network_warning_message">This website requests a connection to %s, which is often wrong for applications on other blockchains. Please proceed with ‘Connect’ if you are sure with your blockchain network selection.</string>
+    <string name="not_defined_warning_ethereum_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.\n\nYou don\'t have an account on Ethereum yet. Please click \'Add account\' button above.</string>
+    <string name="not_defined_warning_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.</string>
     <string name="dapp_disconnected">%s session disconnected</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
@@ -336,6 +341,23 @@
     <string name="skip">Skip</string>
     <string name="edit_name">Edit Name</string>
     <string name="account_name_label">Account name</string>
+    <string name="change_account_warning">This DApp requests a connection to %s and therefore a corresponding network and account have been selected.</string>
+    <string name="value">Value:</string>
+    <string name="token_balance_unlcear_message">Token balance unclear - transaction could fail</string>
+    <string name="add_account_label">+ Add account</string>
+    <string name="restore_wallet_title">Import existing wallet</string>
+    <string name="type_here">Type here</string>
+    <string name="no_backup_data_found_for_the_secret_recovery_phrase_you_entered">No backup data found for the Secret Recovery Phrase you entered. \n\n Make sure your device \n is currently online.</string>
+    <string name="make_sure_your_device_is_currently_online">Make sure your device\n is currently online.</string>
+    <string name="no_backup_file_warning_message">This Secret Recovery Phrase seems to be from another wallet (e.g. Metamask or Trust Wallet) and not from a Minerva Wallet. After the import you will have direct access to the assets in your accounts you created in this wallet. \n\n If you have further questions please join our community on <a href="https://t.me/MinervaWallet">Telegram</a> or <a href="https://minerva.digital/discord ">Discord</a>.</string>
+    <string name="terms_of_service_info">By proceeding you agree to the <a href="https://docs.minerva.digital/legal/terms">Terms of Service</a></string>
+    <string name="import_with_recovery_phrase">Import with Recovery Phrase</string>
+    <string name="import_info">Import an existing wallet or create a new one</string>
+    <string name="your_identity_label">Your identity</string>
+    <string name="your_data_label">Your data</string>
+    <string name="your_money_label">Your money</string>
+    <string name="your_own_them_label">Own them</string>
+    <string name="backup_server_error">Error when looking for backup data for the Secret Recovery Phrase you entered. Make sure your device is currently online and please try again</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
@@ -389,6 +411,19 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.5.0</item>
+        <item>* Wallet restore from the most popular 3rd party wallets</item>
+        <item>* Use a scanner to connect to any DApp on any network</item>
+        <item>* Now you can add and change accounts on-the-flight of the DApp connection</item>
+        <item>* Improved welcome screens</item>
+        <item>* Automatic network change to the one required by DApp</item>
+        <item>* Account name made editable</item>
+        <item>* Various UI improvements</item>
+        <item>1.4.1</item>
+        <item>* Account name change enabled</item>
+        <item>* WalletConnect connection issues fixed</item>
+        <item>* Stability issues fixed</item>
+        <item>* Several format and naming issues fixed</item>
         <item>1.4.0</item>
         <item>* Full Polygon PoS chain and Mumbai testnet integration</item>
         <item>* Buy crypto on Polygon via Ramp.Network</item>

@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.mappers
+package minerva.android.walletmanager.model.token
 
 import minerva.android.configProvider.model.walletActions.WalletActionPayload
 import minerva.android.walletmanager.model.mappers.WalletActionMapper

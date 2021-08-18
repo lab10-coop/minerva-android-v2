@@ -2,6 +2,7 @@ package minerva.android.cryptographyProvider.repository
 
 import io.reactivex.Single
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
+import minerva.android.cryptographyProvider.repository.model.Seed
 
 interface CryptographyRepository {
     /*seed, publicKey, privateKey*/
@@ -13,6 +14,7 @@ interface CryptographyRepository {
         derivationPathPrefix: String,
         isTestNet: Boolean = true
     ): Single<DerivedKeys>
+
     fun calculateDerivedKeys(
         seed: String,
         index: Int,
@@ -20,9 +22,8 @@ interface CryptographyRepository {
         isTestNet: Boolean = true
     ): DerivedKeys
 
-    /*seed, publicKey, privateKey*/
-    fun restoreMasterSeed(mnemonic: String): Single<Triple<String, String, String>>
-    fun validateMnemonic(mnemonic: String): List<String>
+    fun restoreMasterSeed(mnemonic: String): Seed
+    fun areMnemonicWordsValid(mnemonic: String): Boolean
     fun decodeJwtToken(jwtToken: String): Single<Map<String, Any?>>
     fun createJwtToken(payload: Map<String, Any?>, privateKey: String): Single<String>
 }

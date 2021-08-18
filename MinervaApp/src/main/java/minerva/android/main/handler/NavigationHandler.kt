@@ -3,7 +3,7 @@ package minerva.android.main.handler
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import minerva.android.R
-import minerva.android.accounts.transaction.fragment.AccountsFragment
+import minerva.android.accounts.AccountsFragment
 import minerva.android.identities.IdentitiesFragment
 import minerva.android.main.MainActivity
 import minerva.android.services.ServicesFragment
@@ -13,6 +13,10 @@ import minerva.android.walletActions.WalletActionsFragment
 internal fun MainActivity.shouldShowAddIdentityIcon() = isIdentitiesTabSelected()
 
 internal fun MainActivity.shouldShowAddValueIcon() = isValuesTabSelected()
+
+internal fun MainActivity.goToValuesTab() {
+    binding.bottomNavigation.selectedItemId = R.id.values
+}
 
 internal fun MainActivity.isServicesTabSelected() = binding.bottomNavigation.selectedItemId == R.id.services
 

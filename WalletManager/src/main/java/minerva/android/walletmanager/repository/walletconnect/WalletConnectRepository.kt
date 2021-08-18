@@ -24,11 +24,11 @@ interface WalletConnectRepository {
     fun saveDappSession(dappSession: DappSession): Completable
     fun deleteDappSession(peerId: String): Completable
     fun getSessions(): Single<List<DappSession>>
-    fun killAllAccountSessions(address: String): Completable
     fun dispose()
     fun getDappSessionById(peerId: String): Single<DappSession>
     fun approveRequest(peerId: String, privateKey: String)
     fun rejectRequest(peerId: String)
     fun approveTransactionRequest(peerId: String, message: String)
     fun removeDeadSessions()
+    fun killAllAccountSessions(address: String, chainId: Int): Completable
 }

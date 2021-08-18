@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.reactivex.Flowable
 import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.defs.Operation
+import minerva.android.blockchainprovider.model.TokenWithBalance
+import minerva.android.blockchainprovider.model.TokenWithError
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.model.TxCostData
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
@@ -40,28 +42,31 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         val ethBalance = EthGetBalance()
         ethBalance.result = "0x1"
         every { web3J.ethGetBalance(any(), any()).flowable() } returns Flowable.just(ethBalance)
-        repository.refreshBalances(
+        repository.getCoinBalances(
             listOf(Pair(ETH, "0x9866208bea68b10f04697c00b891541a305df851"))
         )
             .test()
             .await()
-            .assertValue {
-                it[0].second == "0x9866208bea68b10f04697c00b891541a305df851"
+            .assertValue { token ->
+                token is TokenWithBalance
+                token.address == "0x9866208bea68b10f04697c00b891541a305df851"
             }
     }
 
     @Test
     fun `refresh balance error`() {
-        val error = Throwable()
+        val error = Throwable("Balance Error")
         val ethBalance = EthGetBalance()
         ethBalance.result = "0x1"
         every { web3J.ethGetBalance(any(), any()).flowable() } returns Flowable.error(error)
-        repository.refreshBalances(
-            listOf(Pair(ETH, "0x9866208bea68b10f04697c00b891541a305df851"))
-        )
+        repository.getCoinBalances(listOf(Pair(ETH, "0x9866208bea68b10f04697c00b891541a305df851")))
             .test()
             .await()
-            .assertError(error)
+            .assertNoErrors()
+            .assertValue{ token ->
+                token as TokenWithError
+                token.error.message == "Balance Error"
+            }
     }
 
     @Test

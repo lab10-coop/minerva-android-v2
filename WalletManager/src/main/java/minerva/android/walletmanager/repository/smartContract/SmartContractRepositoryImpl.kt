@@ -7,13 +7,12 @@ import io.reactivex.functions.Function3
 import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
 import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.mappers.TransactionMapper
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
-import minerva.android.walletmanager.model.mappers.TransactionMapper
-import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.storage.LocalStorage
 import java.math.BigDecimal
 import java.math.BigInteger

@@ -7,20 +7,21 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 data class AccountToken(
-    var token: ERC20Token,
+    override var token: ERC20Token,
     var rawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var tokenPrice: Double? = Double.InvalidValue
-) {
+) : TokenWithBalances {
+
     override fun equals(other: Any?): Boolean =
         (other as? AccountToken)
             ?.let { accountToken -> token.address.equals(accountToken.token.address, true) }
             .orElse { false }
 
-    val balance: BigDecimal
-        get() = if (rawBalance ==  Double.InvalidValue.toBigDecimal()) BigDecimal.ZERO
+    override val balance: BigDecimal
+        get() = if (rawBalance == Double.InvalidValue.toBigDecimal()) rawBalance
         else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
 
-    val fiatBalance: BigDecimal
+    override val fiatBalance: BigDecimal
         get() =
             tokenPrice?.let { price ->
                 when (price) {

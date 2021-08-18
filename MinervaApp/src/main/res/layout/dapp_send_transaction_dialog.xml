@@ -13,11 +13,12 @@
         style="@style/RoundedLabelStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xbig"
+        android:padding="@dimen/margin_xxsmall"
         android:text="@string/transaction_request"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/network" />
+        app:layout_constraintTop_toBottomOf="@+id/network_layout" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/transaction_type"
@@ -25,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="55dp"
+        android:layout_marginTop="@dimen/margin_xxlarge"
         android:text="@string/transfer"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/requestLabel" />
@@ -280,7 +281,7 @@
         android:layout_marginTop="@dimen/margin_small"
         android:layout_marginEnd="@dimen/margin_small"
         android:layout_marginBottom="@dimen/margin_small"
-        app:layout_constraintBottom_toTopOf="@+id/balance_to_low_error"
+        app:layout_constraintBottom_toTopOf="@+id/error_view"
         app:layout_constraintLeft_toRightOf="@+id/transaction_cost"
         app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
         app:layout_constraintTop_toBottomOf="@+id/sender_separator" />
@@ -339,7 +340,7 @@
         tools:ignore="ContentDescription" />
 
     <TextView
-        android:id="@+id/balance_to_low_error"
+        android:id="@+id/error_view"
         style="@style/RoundedRedLabelStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -361,6 +362,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_normal"
-        app:layout_constraintTop_toBottomOf="@+id/balance_to_low_error" />
+        app:layout_constraintTop_toBottomOf="@+id/error_view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

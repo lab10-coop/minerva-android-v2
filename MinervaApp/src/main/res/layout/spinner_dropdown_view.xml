@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="@dimen/margin_normal">
+
+    <minerva.android.widget.blockies.BlockiesImageView
+        android:id="@+id/token_logo"
+        android:layout_width="@dimen/small_logo_size"
+        android:layout_height="@dimen/small_logo_size"
+        android:padding="@dimen/margin_xxxsmall"
+        android:src="@drawable/ic_default_token"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/network_logo"
+        android:layout_width="@dimen/xxsmall_logo_size"
+        android:layout_height="@dimen/xxsmall_logo_size"
+        app:layout_constraintBottom_toBottomOf="@id/token_logo"
+        app:layout_constraintStart_toStartOf="@id/token_logo"
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/ic_main_networks" />
+
+    <TextView
+        android:id="@+id/token_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="@dimen/margin_small"
+        android:fontFamily="@font/rubik_medium"
+        android:textColor="@color/gray"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/token_logo"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="SOME SOME" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

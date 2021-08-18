@@ -2,10 +2,10 @@ package minerva.android.di
 
 import android.content.Context
 import minerva.android.BuildConfig
+import minerva.android.accounts.AccountsViewModel
 import minerva.android.accounts.address.AddressViewModel
 import minerva.android.accounts.akm.SafeAccountSettingsViewModel
 import minerva.android.accounts.create.NewAccountViewModel
-import minerva.android.accounts.transaction.fragment.AccountsViewModel
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.accounts.walletconnect.WalletConnectViewModel
 import minerva.android.app.AppViewModel
@@ -18,6 +18,7 @@ import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.services.ServicesViewModel
+import minerva.android.services.login.ServicesScannerViewModel
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
@@ -58,7 +59,7 @@ private val appModules = module {
     single<AppUIState> { AppUIStateImpl() }
     factory { androidContext().getSharedPreferences(MinervaCache, Context.MODE_PRIVATE) }
     factory<CacheStorage> { CacheStorageImpl(get()) }
-    single<Logger> { LoggerImpl() }
+    single<Logger> { LoggerImpl(get()) }
     viewModel { AppViewModel(get(), get()) }
     viewModel { ClubCardViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
@@ -81,7 +82,8 @@ private val appModules = module {
     viewModel { WalletActionsViewModel(get()) }
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
-    viewModel { WalletConnectViewModel(get(), get(), get()) }
+    viewModel { WalletConnectViewModel(get(), get(), get(), get()) }
+    viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }

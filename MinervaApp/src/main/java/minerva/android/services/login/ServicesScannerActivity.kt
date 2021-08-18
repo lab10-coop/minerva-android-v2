@@ -14,20 +14,19 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.main.handler.isIdentityPrepared
 import minerva.android.services.login.identity.ChooseIdentityFragment
-import minerva.android.services.login.scanner.LoginScannerFragment
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.walletmanager.model.CredentialQrCode
 import minerva.android.walletmanager.model.ServiceQrCode
 import minerva.android.wrapped.WrappedActivity.Companion.INDEX
 import minerva.android.wrapped.WrappedActivity.Companion.SERVICE_QR_CODE
 
-class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
+class ServicesScannerActivity : AppCompatActivity(), ServicesScannerListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_painless_login)
         hideToolbar()
-        addFragment(R.id.container, LoginScannerFragment.newInstance())
+        addFragment(R.id.container, ServicesScannerFragment.newInstance())
         window.statusBarColor = getColor(R.color.lightGray)
     }
 
@@ -40,10 +39,11 @@ class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
         supportActionBar?.hide()
     }
 
-    override fun onScannerResult(isResultSucceed: Boolean, message: String?) {
+    override fun onScannerResult(isResultSucceed: Boolean, message: String?, isWalletConnectResult: Boolean) {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(IS_RESULT_SUCCEED, isResultSucceed)
             putExtra(RESULT_MESSAGE, message)
+            putExtra(IS_WALLET_CONNECT_RESULT, isWalletConnectResult)
         })
         finish()
     }
@@ -110,5 +110,6 @@ class LoginScannerActivity : AppCompatActivity(), LoginScannerListener {
         const val LOGIN_PAYLOAD = "login_payload"
         const val RESULT_MESSAGE = "result_message"
         const val CREDENTIAL_QR_CODE = "credential_qr_code"
+        const val IS_WALLET_CONNECT_RESULT = "is_wallet_connect_result"
     }
 }

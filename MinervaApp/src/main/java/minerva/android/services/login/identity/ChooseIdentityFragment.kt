@@ -13,7 +13,7 @@ import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.services.login.LoginScannerListener
+import minerva.android.services.login.ServicesScannerListener
 import minerva.android.services.login.uitls.LoginPayload
 import minerva.android.services.login.uitls.LoginStatus.Companion.BACKUP_FAILURE
 import minerva.android.services.login.uitls.LoginStatus.Companion.DEFAULT_STATUS
@@ -29,7 +29,7 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
     private val viewModel: ChooseIdentityViewModel by viewModel()
     private val identitiesAdapter = IdentitiesAdapter()
     private lateinit var serviceQrCode: ServiceQrCode
-    private lateinit var listener: LoginScannerListener
+    private lateinit var listener: ServicesScannerListener
     private lateinit var binding: FragmentChooseIdentityBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +49,7 @@ class ChooseIdentityFragment : Fragment(R.layout.fragment_choose_identity) {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as LoginScannerListener
+        listener = context as ServicesScannerListener
     }
 
     override fun onResume() {

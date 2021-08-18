@@ -199,7 +199,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 cryptoBalance = BigDecimal.TEN,
                 fiatBalance = BigDecimal(13),
                 chainId = ETH_MAIN,
-                accountTokens = listOf(
+                accountTokens = mutableListOf(
                     AccountToken(
                         ERC20Token(1, symbol = "WTF")
                     )

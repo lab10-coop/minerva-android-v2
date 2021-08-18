@@ -45,9 +45,9 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         visibleOrGone(isOpen)
     }
 
-    fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) {
+    fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: List<ERC20Token>, widgetOpen: Boolean) {
         initMainToken(account, fiatSymbol, callback)
-        initTokensList(account, fiatSymbol, tokens)
+        initTokensList(account, fiatSymbol, tokens, widgetOpen)
     }
 
     private fun initView() {
@@ -62,18 +62,22 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         isFocusable = true
     }
 
-    private fun initTokensList(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) {
+
+    fun initTokensList(account: Account, fiatSymbol: String, tokens: List<ERC20Token>, isWidgetOpen: Boolean) {
         binding.apply {
-            tokensContainer.removeAllViews()
-            tokens.isNotEmpty().let { areTokensVisible ->
-                tokensHeader.visibleOrGone(areTokensVisible)
-                tokensContainer.visibleOrGone(areTokensVisible)
-                tokens.forEach { token ->
-                    tokensContainer.addView(TokenView(context).apply {
-                        initView(account, callback, fiatSymbol, token)
-                        resources.getDimensionPixelOffset(R.dimen.margin_xxsmall)
-                            .let { padding -> updatePadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding) }
-                    })
+            if (isWidgetOpen) {
+                tokensContainer.removeAllViews()
+                tokens.isNotEmpty().let { areTokensVisible ->
+                    tokensHeader.visibleOrGone(areTokensVisible)
+                    tokensContainer.visibleOrGone(areTokensVisible)
+                    tokens.forEach { token ->
+                        tokensContainer.addView(TokenView(context).apply {
+                            initView(account, callback, fiatSymbol, token)
+                            resources.getDimensionPixelOffset(R.dimen.margin_xxsmall)
+                                .let { padding -> updatePadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding) }
+                        })
+                    }
+
                 }
             }
         }
