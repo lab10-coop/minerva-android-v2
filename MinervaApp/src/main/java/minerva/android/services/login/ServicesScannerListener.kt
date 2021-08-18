@@ -10,5 +10,5 @@ interface ServicesScannerListener : BaseScannerListener {
     fun onPainlessLoginResult(isLoginSucceed: Boolean, payload: LoginPayload? = null)
     fun showChooseIdentityFragment(qrCode: ServiceQrCode)
     fun updateBindedCredential(qrCode: CredentialQrCode)
-    fun onScannerResult(isResultSucceed: Boolean, message: String? = String.Empty)
+    fun onScannerResult(isResultSucceed: Boolean, message: String? = String.Empty, isWalletConnectResult: Boolean = false)
 }

@@ -39,10 +39,11 @@ class ServicesScannerActivity : AppCompatActivity(), ServicesScannerListener {
         supportActionBar?.hide()
     }
 
-    override fun onScannerResult(isResultSucceed: Boolean, message: String?) {
+    override fun onScannerResult(isResultSucceed: Boolean, message: String?, isWalletConnectResult: Boolean) {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(IS_RESULT_SUCCEED, isResultSucceed)
             putExtra(RESULT_MESSAGE, message)
+            putExtra(IS_WALLET_CONNECT_RESULT, isWalletConnectResult)
         })
         finish()
     }
@@ -109,5 +110,6 @@ class ServicesScannerActivity : AppCompatActivity(), ServicesScannerListener {
         const val LOGIN_PAYLOAD = "login_payload"
         const val RESULT_MESSAGE = "result_message"
         const val CREDENTIAL_QR_CODE = "credential_qr_code"
+        const val IS_WALLET_CONNECT_RESULT = "is_wallet_connect_result"
     }
 }
