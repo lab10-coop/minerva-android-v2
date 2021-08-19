@@ -1,17 +1,28 @@
 package minerva.android.widget.dialog.walletconnect
 
 import android.content.Context
+import android.view.View
+import android.widget.AdapterView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import minerva.android.R
+import minerva.android.accounts.walletconnect.DappAccountsSpinnerAdapter
+import minerva.android.accounts.walletconnect.DappNetworksSpinnerAdapter
+import minerva.android.accounts.walletconnect.NetworkDataSpinnerItem
 import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Companion.FIRST_ICON
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
-import minerva.android.extension.invisible
-import minerva.android.extension.setTextWithArgs
-import minerva.android.extension.visible
+import minerva.android.extension.*
+import minerva.android.kotlinUtils.FirstIndex
+import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.OneElement
+import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.widget.DynamicWidthSpinner
 
-class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit) :
+class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> Unit, private val onAddAccountClick: (Int) -> Unit) :
     DappDialog(context, { approve() }, { deny() }) {
 
     private val binding: DappConfirmationDialogBinding = DappConfirmationDialogBinding.inflate(layoutInflater)
@@ -37,34 +48,146 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
             meta.icons[FIRST_ICON]
         }
 
-    private fun setNetworkHeader(backgroundResId: Int) {
+    private fun setNetworkHeader() {
         with(networkHeader.network) {
-            background = context.getDrawable(backgroundResId)
+            background = ContextCompat.getDrawable(context, R.drawable.network_not_defined_background)
             setTextColor(ContextCompat.getColor(context, R.color.white))
         }
     }
 
-    fun setNotDefinedNetworkWarning() = with(binding) {
-        setNetworkHeader(R.drawable.network_not_defined_background)
-        showWaring()
-    }
-
-    fun setWrongNetworkWarning(networkName: String) = with(binding) {
-        with(networkHeader.network) {
-            background = context.getDrawable(R.drawable.warning_background)
-            setTextColor(ContextCompat.getColor(context, R.color.warningOrange))
+    fun setupAccountSpinner(selectedAccountId: Int, availableAccounts: List<Account>, onAccountSelected: (Account) -> Unit) =
+        with(binding) {
+            val accountAdapter = DappAccountsSpinnerAdapter(
+                context,
+                R.layout.spinner_network_wallet_connect,
+                availableAccounts
+            ).apply { setDropDownViewResource(R.layout.spinner_network_wallet_connect) }
+            networkHeader.accountSpinner.apply {
+                visibleOrGone(isAccountSpinnerVisible(availableAccounts.size))
+                addOnGlobalLayoutListener {
+                    accountAdapter.selectedItemWidth = networkHeader.accountSpinner.width
+                }
+                adapter = accountAdapter
+                val defaultPosition =
+                    if (selectedAccountId != Int.InvalidId) {
+                        availableAccounts.indexOfFirst { account -> account.id == selectedAccountId }
+                    } else Int.FirstIndex
+                prepareSpinner(R.drawable.rounded_background_purple_frame, defaultPosition) { position, view ->
+                    onAccountSelected(accountAdapter.getItem(position))
+                    accountAdapter.selectedItemWidth = view?.width
+                }
+            }
         }
-        warringIcon.setImageResource(R.drawable.ic_warning)
-        warning.setTextWithArgs(R.string.wrong_network_warning_message, networkName)
-        warning.setTextColor(ContextCompat.getColor(context, R.color.warningMessageOrange))
+
+    private fun isAccountSpinnerVisible(listSize: Int): Boolean = listSize > Int.OneElement && networkHeader.addAccount.isGone
+
+    fun setNotDefinedNetworkWarning(availableNetworks: List<NetworkDataSpinnerItem>, onNetworkSelected: (Int) -> Unit) =
+        with(binding) {
+            setNetworkHeader()
+            showWaring()
+            networkHeader.network.gone()
+            val networkAdapter = DappNetworksSpinnerAdapter(
+                context,
+                R.layout.spinner_network_wallet_connect,
+                availableNetworks
+            ).apply { setDropDownViewResource(R.layout.spinner_network_wallet_connect) }
+            updateNotDefinedNetworkWarning(networkAdapter.getItem(Int.FirstIndex))
+            networkHeader.networkSpinner.apply {
+                visible()
+                addOnGlobalLayoutListener() {
+                    networkAdapter.selectedItemWidth = networkHeader.accountSpinner.width
+                }
+                adapter = networkAdapter
+                prepareSpinner(R.drawable.warning_background, Int.FirstIndex) { position, view ->
+                    val selectedItem = networkAdapter.getItem(position)
+                    networkAdapter.selectedItemWidth = view?.width
+                    updateNotDefinedNetworkWarning(selectedItem)
+                    if (selectedItem.isAccountAvailable) {
+                        onNetworkSelected(selectedItem.chainId)
+                    }
+                }
+            }
+        }
+
+    private fun DynamicWidthSpinner.prepareSpinner(backgroundResId: Int, selectionIndex: Int, onClick: (Int, View?) -> Unit) {
+        setBackgroundResource(backgroundResId)
+        setPopupBackgroundResource(R.drawable.rounded_small_white_background)
+        setSelection(selectionIndex, false)
+        onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                adapterView: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                onClick(position, view)
+            }
+
+            override fun onNothingSelected(adapterView: AdapterView<*>?) {}
+        }
+    }
+
+    private fun updateNotDefinedNetworkWarning(item: NetworkDataSpinnerItem) = with(networkHeader) {
+        val warningRes =
+            if (item.isAccountAvailable) R.string.not_defined_warning_message else R.string.not_defined_warning_ethereum_message
+        accountSpinner.visibleOrGone(item.isAccountAvailable)
+        addAccount.apply {
+            visibleOrGone(!item.isAccountAvailable)
+            setupAddAccountListener(item.chainId)
+        }
+        setupWarning(warningRes)
+        binding.confirmationButtons.confirm.isEnabled = item.isAccountAvailable
+    }
+
+    private fun setupAddAccountListener(chainId: Int) = with(networkHeader.addAccount) {
+        setOnClickListener {
+            onAddAccountClick(chainId)
+            gone()
+        }
+    }
+
+    fun setUnsupportedNetworkMessage(networkId: String) = with(binding) {
+        networkHeader.network.apply {
+            setTextWithArgs(R.string.chain_id, networkId)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_alert_small, NO_ICON, NO_ICON, NO_ICON)
+            setBackgroundResource(R.drawable.error_background)
+            setTextColor(ContextCompat.getColor(context, R.color.alertRed))
+        }
+        warning.setTextWithArgs(R.string.unsupported_network_message, networkId)
+        confirmationButtons.confirm.isEnabled = false
         showWaring()
     }
 
-    fun setWrongNetworkMessage(networkName: String) = with(binding) {
-        setNetworkHeader(R.drawable.wrong_network_background)
-        warning.setTextWithArgs(R.string.wrong_network_message, networkName)
-        binding.confirmationButtons.confirm.isEnabled = false
+    fun setNoAvailableAccountMessage(network: BaseNetworkData) = with(binding) {
+        setupWarning(R.string.missing_account_message, network.name)
+        confirmationButtons.confirm.isEnabled = false
+        networkHeader.addAccount.visible()
+        networkHeader.accountSpinner.gone()
+        setupAddAccountListener(network.chainId)
         showWaring()
+    }
+
+    fun setChangeAccountMessage(networkName: String) = with(binding) {
+        setupWarning(R.string.change_account_warning, networkName)
+        showWaring()
+    }
+
+    fun setNoAlert() = with(binding) {
+        warringIcon.gone()
+        warning.gone()
+        manual.visible()
+        confirmationButtons.confirm.isEnabled = true
+        networkHeader.apply {
+            addAccount.gone()
+            accountSpinner.gone()
+            networkSpinner.gone()
+        }
+    }
+
+    private fun setupWarning(warningRes: Int, networkName: String? = null) = with(binding) {
+        warringIcon.setImageResource(R.drawable.ic_warning)
+        networkName?.let { warning.setTextWithArgs(warningRes, networkName) }.orElse { warning.setText(warningRes) }
+        warning.setTextColor(ContextCompat.getColor(context, R.color.warningMessageOrange))
     }
 
     private fun showWaring() = with(binding) {

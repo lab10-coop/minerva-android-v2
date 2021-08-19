@@ -18,32 +18,95 @@
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_xsmall"
         android:layout_marginTop="@dimen/margin_xsmall"
+        android:layout_marginEnd="@dimen/margin_xsmall"
         android:drawableStart="@drawable/ic_connection_safe"
         android:drawablePadding="@dimen/margin_xsmall"
+        android:ellipsize="end"
         android:fontFamily="@font/rubik_medium"
+        android:lines="1"
         android:textColor="@color/networksTypeHeader"
         android:textSize="@dimen/text_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/icon"
-        tools:text="Kleros • Curate" />
+        tools:text="Kleros • Curate super looooooooooooooooooooooooooongg title" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/network"
-        android:layout_width="wrap_content"
+    <org.apmem.tools.layouts.FlowLayout
+        android:id="@+id/network_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_xsmall"
-        android:background="@drawable/network_border"
-        android:fontFamily="@font/rubik_medium"
+        android:layout_marginBottom="@dimen/margin_xsmall"
         android:gravity="center"
-        android:paddingStart="@dimen/margin_normal"
-        android:paddingTop="@dimen/margin_xxsmall"
-        android:paddingEnd="@dimen/margin_normal"
-        android:paddingBottom="@dimen/margin_xxsmall"
-        android:textColor="@color/dappStatusColorGray"
+        android:orientation="horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name"
-        tools:text="ARTIS  (τ1)" />
+        app:layout_constraintTop_toBottomOf="@+id/name">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/network"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_xsmall"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginEnd="@dimen/margin_xsmall"
+            android:background="@drawable/network_border"
+            android:drawablePadding="@dimen/margin_xsmall"
+            android:ellipsize="end"
+            android:fontFamily="@font/rubik_medium"
+            android:gravity="center"
+            android:lines="1"
+            android:paddingStart="@dimen/margin_normal"
+            android:paddingTop="@dimen/margin_xxsmall"
+            android:paddingEnd="@dimen/margin_normal"
+            android:paddingBottom="@dimen/margin_xxsmall"
+            android:textColor="@color/dappStatusColorGray"
+            tools:text="name" />
+
+        <minerva.android.widget.DynamicWidthSpinner
+            android:id="@+id/network_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_xsmall"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginEnd="@dimen/margin_xsmall"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:gravity="center"
+            android:spinnerMode="dropdown"
+            android:textAlignment="center"
+            android:visibility="gone"
+            tools:listitem="@layout/spinner_network_wallet_connect" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/add_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_xsmall"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:layout_marginEnd="@dimen/margin_xsmall"
+            android:background="@drawable/rounded_background_purple_frame"
+            android:drawablePadding="@dimen/margin_xsmall"
+            android:fontFamily="@font/rubik_medium"
+            android:gravity="center"
+            android:lines="1"
+            android:paddingStart="@dimen/margin_normal"
+            android:paddingTop="@dimen/margin_xxsmall"
+            android:paddingEnd="@dimen/margin_normal"
+            android:paddingBottom="@dimen/margin_xxsmall"
+            android:text="@string/add_account_label"
+            android:textColor="@color/colorPrimary"
+            android:visibility="gone" />
+
+        <minerva.android.widget.DynamicWidthSpinner
+            android:id="@+id/account_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_xsmall"
+            android:gravity="center"
+            android:spinnerMode="dropdown"
+            android:visibility="gone"
+            tools:listitem="@layout/spinner_network_wallet_connect" />
+    </org.apmem.tools.layouts.FlowLayout>
+
 </merge>

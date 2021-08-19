@@ -16,11 +16,11 @@ interface AccountManager : Manager {
     val isProtectTransactionsEnabled: Boolean
     var hasAvailableAccounts: Boolean
     var activeAccounts: List<Account>
+    var rawAccounts: List<Account>
     var cachedTokens: Map<Int, List<ERC20Token>>
     val getTokenVisibilitySettings: TokenVisibilitySettings
     fun areAllEmptyMainNetworkAccounts(): Boolean
     fun loadAccount(index: Int): Account
-    fun createRegularAccount(network: Network): Single<String>
     fun createEmptyAccounts(numberOfAccounts: Int): Completable
     fun createSafeAccount(account: Account, contract: String): Completable
     fun removeAccount(account: Account): Completable
@@ -41,4 +41,7 @@ interface AccountManager : Manager {
     fun clearFiat()
     fun connectAccountToNetwork(index: Int, network: Network): Single<String>
     fun changeAccountName(existedAccount: Account, newName: String): Completable
+    fun getFirstActiveAccountOrNull(chainId: Int): Account?
+    fun getFirstActiveAccountForAllNetworks(): List<Account>
+    fun createOrUnhideAccount(network: Network): Single<String>
 }

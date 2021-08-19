@@ -83,6 +83,8 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
                 symbol.setDataOrHide(getString(R.string.symbol), token.symbol)
                 decimals.setDataOrHide(getString(R.string.decimals), token.decimals)
                 addTokenButton.setOnClickListener {
+                    addTokenButton.invisible()
+                    addTokenLoader.visible()
                     viewModel.addToken(token)
                 }
             }
@@ -123,6 +125,8 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
     private fun onError() {
         binding.apply {
             tokenImage.clear()
+            addTokenLoader.gone()
+            addTokenButton.visible()
             addTokenButton.isEnabled = false
             tokenAddressLayout.error = getString(R.string.invalid_token_address)
             tokenAddressLayout.setErrorIconDrawable(NO_ICON)

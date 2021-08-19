@@ -18,6 +18,7 @@ import minerva.android.extension.getCurrentFragment
 import minerva.android.extension.onTabSelected
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.main.MainActivity.Companion.ACCOUNT_CHAIN_ID
 import minerva.android.main.MainActivity.Companion.ACCOUNT_INDEX
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.widget.MinervaFlashbar
@@ -36,13 +37,11 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         viewModel.apply {
             accountIndex = intent.getIntExtra(ACCOUNT_INDEX, Int.InvalidIndex)
             getAccount(accountIndex, intent.getStringExtra(TOKEN_ADDRESS) ?: String.Empty)
+            isCoinBalanceError = intent.getBooleanExtra(COIN_BALANCE_ERROR, false)
+            isTokenBalanceError = intent.getBooleanExtra(TOKEN_BALANCE_ERROR, false)
         }
-        initView(intent.getIntExtra(TRANSACTION_SCREEN, SEND_TRANSACTION_INDEX))
-    }
-
-    private fun initView(initPageIndex: Int) {
         prepareActionBar()
-        setupViewPager(initPageIndex)
+        setupViewPager(intent.getIntExtra(TRANSACTION_SCREEN, SEND_TRANSACTION_INDEX))
     }
 
     override fun onBackPressed() {
@@ -96,6 +95,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
     override fun onTransactionAccepted(message: String?) {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(ACCOUNT_INDEX, prepareAccountIndexForWebSocket())
+            putExtra(ACCOUNT_CHAIN_ID, viewModel.account.chainId)
             putExtra(IS_TRANSACTION_SUCCESS, true)
             putExtra(TRANSACTION_MESSAGE, message)
         })
@@ -148,5 +148,7 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         const val TRANSACTION_MESSAGE = "transaction_message"
         const val TOKEN_ADDRESS = "token_address"
         const val TRANSACTION_SCREEN = "transaction_screen"
+        const val COIN_BALANCE_ERROR = "coin_balance_error"
+        const val TOKEN_BALANCE_ERROR = "token_balance_error"
     }
 }

@@ -40,6 +40,7 @@ class AccountManagerImpl(
 ) : AccountManager {
     override var hasAvailableAccounts: Boolean = false
     override var activeAccounts: List<Account> = emptyList()
+    override var rawAccounts: List<Account> = emptyList()
     override var cachedTokens: Map<Int, List<ERC20Token>> = mapOf()
     override val areMainNetworksEnabled: Boolean get() = walletManager.areMainNetworksEnabled
     override val isProtectKeysEnabled: Boolean get() = localStorage.isProtectKeysEnabled
@@ -53,6 +54,7 @@ class AccountManagerImpl(
                 hasAvailableAccounts = hasActiveAccount
                 activeAccounts = getActiveAccounts(this)
                 cachedTokens = filterCachedTokens(erc20Tokens)
+                rawAccounts = accounts
             }
             walletConfigEvent
         }
@@ -62,12 +64,6 @@ class AccountManagerImpl(
 
     override fun areAllEmptyMainNetworkAccounts(): Boolean =
         walletManager.getWalletConfig().accounts.find { account -> !account.isEmptyAccount && !account.isTestNetwork } == null
-
-    override fun createRegularAccount(network: Network): Single<String> =
-        walletManager.getWalletConfig().run {
-            val index = getNextAvailableIndexForNetwork(network)
-            createRegularAccountWithGivenIndex(index, network)
-        }
 
     private fun getNextAvailableIndexForNetwork(network: Network): Int {
         val usedIds = getAllActiveAccounts(network.chainId).map { account -> account.id }
@@ -139,26 +135,42 @@ class AccountManagerImpl(
         }
     }
 
+    override fun createOrUnhideAccount(network: Network): Single<String> {
+        val index = getNextAvailableIndexForNetwork(network)
+        return connectAccountToNetwork(index, network)
+    }
+
     private fun updateAccount(existedAccount: Account, network: Network): Single<String> {
         val accountName =
-            if (existedAccount.name.isBlank()) CryptoUtils.prepareName(network.name, existedAccount.id) else existedAccount.name
+            if (existedAccount.name.isBlank()) CryptoUtils.prepareName(
+                network.name,
+                existedAccount.id
+            ) else existedAccount.name
         walletManager.getWalletConfig().run {
-            val existAccountIndex = accounts.indexOf(existedAccount)
-            accounts[existAccountIndex].apply {
+            val newAccountsList = if (existedAccount.chainId == Int.InvalidValue) {
+                changeAccountIndexToLast(accounts.toMutableList(), existedAccount)
+            } else accounts
+            val existAccountIndex = newAccountsList.indexOf(existedAccount)
+            newAccountsList[existAccountIndex].apply {
                 name = accountName
                 chainId = network.chainId
                 isHide = false
             }
-            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts))
+            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = newAccountsList))
                 .toSingleDefault(accountName)
         }
     }
 
+    private fun changeAccountIndexToLast(accountsList: MutableList<Account>, account: Account): List<Account> =
+        accountsList.toMutableList().apply {
+            remove(account)
+            add(account)
+        }
+
     override fun changeAccountName(existedAccount: Account, newName: String): Completable {
         val accountName = CryptoUtils.prepareName(newName, existedAccount.id)
         walletManager.getWalletConfig().run {
-            val existedAccountIndex = accounts.indexOf(existedAccount)
-            accounts[existedAccountIndex].apply {
+            accounts.find { account -> account.id == existedAccount.id && account.chainId == existedAccount.chainId }?.apply {
                 name = accountName
             }
             return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts))
@@ -255,6 +267,13 @@ class AccountManagerImpl(
     override fun getAllActiveAccounts(chainId: Int): List<Account> =
         getAllAccounts().filter { account -> !account.isHide && !account.isDeleted && account.chainId == chainId }
 
+    override fun getFirstActiveAccountForAllNetworks(): List<Account> =
+        getAllAccountsForSelectedNetworksType().filter { account -> account.shouldShow }
+            .distinctBy { account -> account.chainId }
+
+    override fun getFirstActiveAccountOrNull(chainId: Int): Account? =
+        getAllActiveAccounts(chainId).firstOrNull()
+
     override fun toChecksumAddress(address: String): String = blockchainRepository.toChecksumAddress(address)
 
     override fun getAllAccountsForSelectedNetworksType(): List<Account> =
@@ -267,8 +286,9 @@ class AccountManagerImpl(
             .sortedBy { account -> account.first }
     }
 
-    override fun getNumberOfAccountsToUse() = getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted }
-        .distinctBy { account -> account.id }.size
+    override fun getNumberOfAccountsToUse() =
+        getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted }
+            .distinctBy { account -> account.id }.size
 
     override fun clearFiat() =
         walletManager.getWalletConfig().accounts.forEach { account ->
@@ -301,25 +321,34 @@ class AccountManagerImpl(
     override fun hideAccount(account: Account): Completable =
         walletManager.getWalletConfig().run {
             val newAccounts: MutableList<Account> = accounts.toMutableList()
+            val accountsToChange: MutableMap<Int, Account> = mutableMapOf()
             accounts.forEachIndexed { index, item ->
                 if (item.id == account.id && item.network == account.network) {
-                    return handleHidingAccount(item, this, newAccounts, index)
+                    accountsToChange[index] = item
                 }
             }
-            Completable.error(MissingAccountThrowable())
+            if (accountsToChange.isNotEmpty()) {
+                handleHidingAccount(this, newAccounts, accountsToChange)
+            } else {
+                Completable.error(MissingAccountThrowable())
+            }
         }
 
     private fun handleHidingAccount(
-        account: Account, config: WalletConfig,
-        newAccounts: MutableList<Account>, index: Int
-    ): Completable =
-        when {
-            isNotSAMasterOwner(config.accounts, account) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
-            else -> {
-                newAccounts[index] = account.copy(isHide = true)
-                walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+        config: WalletConfig,
+        newAccounts: MutableList<Account>, accountsToChange: Map<Int, Account>
+    ): Completable {
+        accountsToChange.entries.forEach { item ->
+            when {
+                isNotSAMasterOwner(config.accounts, item.value) -> return Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+                else -> {
+                    newAccounts[item.key] = item.value.copy(isHide = true)
+
+                }
             }
         }
+        return walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+    }
 
     private fun handleNoFundsError(account: Account): Completable =
         if (account.isSafeAccount) {

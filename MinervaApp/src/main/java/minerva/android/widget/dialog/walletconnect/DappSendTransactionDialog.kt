@@ -47,7 +47,8 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
         recalculateTxCost: (BigDecimal) -> WalletConnectTransaction,
         isBalanceTooLow: (balance: BigDecimal, cost: BigDecimal) -> Boolean
     ) = with(binding) {
-        setupHeader(session.name, session.networkName, session.iconUrl)
+        val networkName = account?.network?.name ?: session.networkName
+        setupHeader(session.name, networkName, session.iconUrl)
         prepareTransactions(transaction, account)
         senderAddress.text = transaction.from
         receiverAddress.text = transaction.to
@@ -57,7 +58,7 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
             "${BalanceUtils.getCryptoBalance(it.cryptoBalance)} ${it.network.token}".also { text -> balance.text = text }
 
             if (isBalanceTooLow(it.cryptoBalance, transaction.txCost.cost)) {
-                balanceToLowError.visible()
+                errorView.visible()
                 balance.setTextColor(context.getColor(R.color.errorRed))
             }
         }
@@ -137,10 +138,10 @@ class DappSendTransactionDialog(context: Context, approve: () -> Unit, deny: () 
     ) = with(binding) {
         account?.let {
             if (isBalanceTooLow(it.cryptoBalance, transaction.txCost.cost)) {
-                balanceToLowError.visible()
+                errorView.visible()
                 balance.setTextColor(context.getColor(R.color.errorRed))
             } else {
-                balanceToLowError.invisible()
+                errorView.invisible()
                 balance.setTextColor(context.getColor(R.color.dappLabelColorGray))
             }
         }

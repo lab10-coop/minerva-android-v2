@@ -42,15 +42,19 @@ class MainViewModel(
     private val transactionRepository: TransactionRepository,
     private val appUIState: AppUIState
 ) : BaseViewModel() {
+    lateinit var loginPayload: LoginPayload
+    lateinit var qrCode: CredentialQrCode
+    private var webSocketSubscriptions = CompositeDisposable()
+    val executedAccounts = mutableListOf<PendingAccount>()
+    val isBackupAllowed: Boolean get() = masterSeedRepository.isBackupAllowed
+    fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
+    fun isProtectTransactionEnabled() = transactionRepository.isProtectTransactionEnabled()
 
     private val _errorLiveData = MutableLiveData<Event<MainErrorState>>()
     val errorLiveData: LiveData<Event<MainErrorState>> get() = _errorLiveData
 
     private val _handleTimeoutOnPendingTransactionsLiveData = MutableLiveData<Event<List<PendingAccount>>>()
     val handleTimeoutOnPendingTransactionsLiveData: LiveData<Event<List<PendingAccount>>> get() = _handleTimeoutOnPendingTransactionsLiveData
-
-    private val _loadingLiveData = MutableLiveData<Event<Pair<Int, Boolean>>>()
-    val loadingLiveData: LiveData<Event<Pair<Int, Boolean>>> get() = _loadingLiveData
 
     private val _updateCredentialSuccessLiveData = MutableLiveData<Event<String>>()
     val updateCredentialSuccessLiveData: LiveData<Event<String>> get() = _updateCredentialSuccessLiveData
@@ -63,14 +67,6 @@ class MainViewModel(
 
     private val _redirectToSplashScreenLiveData = MutableLiveData<Event<Unit>>()
     val redirectToSplashScreenLiveData: LiveData<Event<Unit>> get() = _redirectToSplashScreenLiveData
-
-    lateinit var loginPayload: LoginPayload
-    lateinit var qrCode: CredentialQrCode
-    private var webSocketSubscriptions = CompositeDisposable()
-    val executedAccounts = mutableListOf<PendingAccount>()
-    val isBackupAllowed: Boolean get() = masterSeedRepository.isBackupAllowed
-    fun isMnemonicRemembered(): Boolean = masterSeedRepository.isMnemonicRemembered()
-    fun isProtectTransactionEnabled() = transactionRepository.isProtectTransactionEnabled()
 
     init {
         if (shouldShowSplashScreen()) {

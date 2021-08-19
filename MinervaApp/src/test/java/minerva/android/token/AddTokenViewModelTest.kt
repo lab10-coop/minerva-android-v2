@@ -32,10 +32,17 @@ class AddTokenViewModelTest : BaseViewModelTest() {
     )
 
     @Test
-    fun `Check getting Token details` () {
+    fun `Check getting Token details`() {
         NetworkManager.initialize(networks)
 
-        whenever(smartContractRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(Single.just(ERC20Token(1, name = "Some Token")))
+        whenever(smartContractRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(
+            Single.just(
+                ERC20Token(
+                    1,
+                    name = "Some Token"
+                )
+            )
+        )
         whenever(tokenManager.getTokenIconURL(any(), any())).thenReturn(Single.just("Cookie URL"))
         viewModel.run {
             addressDetailsLiveData.observeForever(tokenObserver)
@@ -43,14 +50,17 @@ class AddTokenViewModelTest : BaseViewModelTest() {
         }
         tokenCaptor.run {
             verify(tokenObserver).onChanged(capture())
-            firstValue.name shouldBeEqualTo  "Some Token"
+            firstValue.name shouldBeEqualTo "Some Token"
             firstValue.logoURI shouldBeEqualTo "Cookie URL"
         }
     }
 
     @Test
-    fun `Check adding Token` () {
-        whenever(tokenManager.saveToken(any(), any())).thenReturn(Completable.complete(), Completable.error(Throwable("Some error here!")))
+    fun `Check adding Token`() {
+        whenever(tokenManager.saveToken(any(), any(), any())).thenReturn(
+            Completable.complete(),
+            Completable.error(Throwable("Some error here!"))
+        )
         viewModel.run {
             tokenAddedLiveData.observeForever(addTokenObserver)
             addToken(ERC20Token(1))
@@ -59,7 +69,4 @@ class AddTokenViewModelTest : BaseViewModelTest() {
             verify(addTokenObserver).onChanged(capture())
         }
     }
-
-
-
 }

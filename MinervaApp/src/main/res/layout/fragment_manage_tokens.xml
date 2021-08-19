@@ -21,22 +21,9 @@
             android:padding="@dimen/margin_normal">
 
             <TextView
-                android:id="@+id/rearrange_tokens"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_edit_order_circle"
-                android:drawableRight="@drawable/ic_arrow_right"
-                android:drawablePadding="@dimen/margin_xsmall"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:gravity="center_vertical"
-                android:text="@string/rearrange_assets"
-                android:textColor="@color/gray" />
-
-            <TextView
                 android:id="@+id/add_token"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_normal"
                 android:drawableLeft="@drawable/ic_add_asset_circle"
                 android:drawableRight="@drawable/ic_arrow_right"
                 android:drawablePadding="@dimen/margin_xsmall"

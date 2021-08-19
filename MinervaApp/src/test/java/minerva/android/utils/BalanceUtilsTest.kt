@@ -63,7 +63,7 @@ class BalanceUtilsTest {
     @Test
     fun `get crypto balance error test`() {
         val result = BalanceUtils.getCryptoBalance(Double.InvalidValue.toBigDecimal())
-        assertEquals(result, "0")
+        assertEquals(result, "-.--")
     }
 
     @Test

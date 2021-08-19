@@ -276,15 +276,16 @@ class WalletConnectRepositoryImpl(
         clientMap[peerId]?.rejectRequest(currentRequestId)
     }
 
-    override fun killAllAccountSessions(address: String): Completable =
+    override fun killAllAccountSessions(address: String, chainId: Int): Completable =
         getSessions()
             .map { sessions ->
-                sessions.filter { it.address.equals(address, true) }.forEach { session ->
-                    with(clientMap) {
-                        this[session.peerId]?.killSession()
-                        remove(session.peerId)
+                sessions.filter { session -> session.chainId == chainId && session.address.equals(address, true) }
+                    .forEach { session ->
+                        with(clientMap) {
+                            this[session.peerId]?.killSession()
+                            remove(session.peerId)
+                        }
                     }
-                }
             }.flatMapCompletable {
                 dappDao.deleteAllDappsForAccount(address)
             }

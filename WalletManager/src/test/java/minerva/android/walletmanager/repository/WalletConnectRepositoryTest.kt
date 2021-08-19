@@ -177,7 +177,7 @@ class WalletConnectRepositoryTest {
     fun `kill all account sessions test`() {
         whenever(dappSessionDao.getAll()).thenReturn(Flowable.just(dapps))
         whenever(dappSessionDao.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
-        repository.killAllAccountSessions("address1")
+        repository.killAllAccountSessions("address1", 1)
             .test()
             .assertComplete()
             .assertNoErrors()
@@ -188,7 +188,7 @@ class WalletConnectRepositoryTest {
         val error = Throwable()
         whenever(dappSessionDao.getAll()).thenReturn(Flowable.error(error))
         whenever(dappSessionDao.deleteAllDappsForAccount(any())).thenReturn(Completable.complete())
-        repository.killAllAccountSessions("address1")
+        repository.killAllAccountSessions("address1", 1)
             .test()
             .assertError(error)
     }

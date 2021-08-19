@@ -3,6 +3,7 @@ package minerva.android.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.crypto_amount_layout.view.*
 import minerva.android.R
 
@@ -13,11 +14,16 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) : LinearLay
         orientation = VERTICAL
     }
 
-    fun setCrypto(crypto: String) {
-        cryptoAmount.text = crypto
+    fun setCryptoBalance(cryptoBalance: String) = with(cryptoAmount) {
+        text = cryptoBalance
+        setTextColor(ContextCompat.getColor(context, R.color.bodyColor))
     }
 
-    fun setFiat(currency: String) {
-        currencyAmount.text = currency
+    fun setErrorColor() {
+        cryptoAmount.setTextColor(ContextCompat.getColor(context, R.color.titleColor))
+    }
+
+    fun setFiat(fiatBalance: String) {
+        currencyAmount.text = fiatBalance
     }
 }

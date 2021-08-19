@@ -12,6 +12,7 @@ import com.budiyev.android.codescanner.*
 import com.google.zxing.BarcodeFormat
 import minerva.android.R
 import minerva.android.databinding.FragmentScannerBinding
+import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.kotlinUtils.function.orElse
 
@@ -23,7 +24,7 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
     lateinit var codeScanner: CodeScanner
     abstract fun onCloseButtonAction()
     abstract fun onPermissionNotGranted()
-    abstract fun onCallbackAction(address: String)
+    abstract fun onCallbackAction(result: String)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -61,6 +62,10 @@ abstract class BaseScannerFragment : Fragment(R.layout.fragment_scanner) {
 
     protected open fun showProgress() {
         binding.scannerProgressBar.visible()
+    }
+
+    protected open fun hideProgress() {
+        binding.scannerProgressBar.invisible()
     }
 
     private fun setOnCloseButtonAction() {

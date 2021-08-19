@@ -21,7 +21,8 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SEN
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.NativeToken
-import minerva.android.walletmanager.model.token.Token
+import minerva.android.walletmanager.model.token.NativeTokenWithBalances
+import minerva.android.walletmanager.model.token.TokenWithBalances
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
@@ -30,6 +31,7 @@ import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.utils.BalanceUtils
+import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import minerva.android.widget.repository.getMainTokenIconRes
 import timber.log.Timber
@@ -41,15 +43,25 @@ class TransactionViewModel(
     private val smartContractRepository: SmartContractRepository,
     private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
-
     lateinit var transaction: Transaction
-
+    val wssUri get() = account.network.wsRpc
+    val network get() = account.network
+    val token get() = network.token
+    val spinnerPosition get() = account.getTokenIndex(tokenAddress) + ONE_ELEMENT
     var accountIndex = Int.InvalidIndex
     var tokenAddress: String = String.Empty
     var account: Account = Account(Int.InvalidIndex)
-
     var transactionCost: BigDecimal = BigDecimal.ZERO
     lateinit var recipients: List<Recipient>
+    val fiatSymbol: String = transactionRepository.getFiatSymbol()
+    val isTokenTransaction get() = tokenAddress != String.Empty && !account.isSafeAccount
+    val isSafeAccountTokenTransaction get() = tokenAddress != String.Empty && account.isSafeAccount
+    var isCoinBalanceError: Boolean = false
+    var isTokenBalanceError: Boolean = false
+    private var fiatRate: Double = Double.InvalidValue
+    private var coinFiatRate: Double = Double.InvalidValue
+    private val isMainTransaction get() = tokenAddress == String.Empty && !account.isSafeAccount
+    private val isSafeAccountMainTransaction get() = tokenAddress == String.Empty && account.isSafeAccount
 
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
@@ -75,37 +87,19 @@ class TransactionViewModel(
     private val _transactionCostLiveData = MutableLiveData<Event<TransactionCost>>()
     val transactionCostLiveData: LiveData<Event<TransactionCost>> get() = _transactionCostLiveData
 
-    val wssUri
-        get() = account.network.wsRpc
-
-    val network
-        get() = account.network
-
-    val token
-        get() = network.token
-
-    val spinnerPosition
-        get() = account.getTokenIndex(tokenAddress) + ONE_ELEMENT
-
-    val tokensList: List<Token>
-        get() = mutableListOf<Token>().apply {
+    val tokensList: List<TokenWithBalances>
+        get() = mutableListOf<TokenWithBalances>().apply {
             with(account.network) {
-                add(NativeToken(chainId, account.name, token, getMainTokenIconRes(chainId)))
-                account.accountTokens.forEach { add(it.token) }
+                add(
+                    NativeTokenWithBalances(
+                        NativeToken(chainId, account.name, token, getMainTokenIconRes(chainId)),
+                        account.cryptoBalance,
+                        account.fiatBalance
+                    )
+                )
+                account.accountTokens.forEach { add(it) }
             }
         }
-
-    private val isMainTransaction
-        get() = tokenAddress == String.Empty && !account.isSafeAccount
-
-    private val isSafeAccountMainTransaction
-        get() = tokenAddress == String.Empty && account.isSafeAccount
-
-    val isTokenTransaction
-        get() = tokenAddress != String.Empty && !account.isSafeAccount
-
-    val isSafeAccountTokenTransaction
-        get() = tokenAddress != String.Empty && account.isSafeAccount
 
     private val tokenDecimals: Int
         get() = when (tokenAddress) {
@@ -120,6 +114,7 @@ class TransactionViewModel(
         transactionRepository.getAccount(accountIndex)?.let {
             account = it
             this.tokenAddress = tokenAddress
+            coinFiatRate = account.coinRate
         }
     }
 
@@ -419,6 +414,21 @@ class TransactionViewModel(
             contractAddress,
             tokenDecimals = tokenDecimals
         )
+
+    fun recalculateFiatAmount(amount: BigDecimal): BigDecimal =
+        when (fiatRate) {
+            Double.InvalidValue -> Double.InvalidValue.toBigDecimal()
+            else -> MarketUtils.calculateFiatBalance(amount, fiatRate)
+        }
+
+
+    fun updateFiatRate() {
+        fiatRate = if (tokenAddress != String.Empty) {
+            account.getToken(tokenAddress).tokenPrice ?: Double.InvalidValue
+        } else {
+            coinFiatRate
+        }
+    }
 
     companion object {
         const val ONE_ELEMENT = 1

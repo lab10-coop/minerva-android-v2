@@ -4,9 +4,9 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.Asset
+import minerva.android.walletmanager.model.minervaprimitives.account.Coin
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
-import minerva.android.walletmanager.model.minervaprimitives.account.TokenBalance
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
@@ -17,13 +17,10 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 interface TransactionRepository {
+    var newTaggedTokens: MutableList<ERC20Token>
     val masterSeed: MasterSeed
-    fun refreshCoinBalances(): Single<List<CoinBalance>>
-
-    /**
-     * return statement: Map<AccountPrivateKey, List<AccountToken>>
-     */
-    fun refreshTokensBalances(): Single<List<TokenBalance>>
+    fun getCoinBalance(): Flowable<Coin>
+    fun getTokenBalance(): Flowable<Asset>
     fun discoverNewTokens(): Single<Boolean>
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable
@@ -54,4 +51,5 @@ interface TransactionRepository {
     fun getFiatSymbol(): String
     fun isProtectTransactionEnabled(): Boolean
     fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>>
+    fun updateCachedTokens(): Completable
 }

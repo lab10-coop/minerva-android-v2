@@ -75,7 +75,7 @@ class AddTokenViewModel(
 
     fun addToken(token: ERC20Token) =
         launchDisposable {
-            tokenManager.saveToken(chainId, token.copy(accountAddress = accountAddress))
+            tokenManager.saveToken(accountAddress, chainId, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(

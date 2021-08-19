@@ -12,7 +12,6 @@ import minerva.android.kotlinUtils.DateUtils
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.EncodingJwtFailedThrowable
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import minerva.android.walletmanager.exception.ServiceNotFoundThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.CredentialQrCode

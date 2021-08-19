@@ -10,6 +10,7 @@ ext {
     materialDesignVersion = '1.2.0-alpha05'
     swipeRefreshVersion = '1.0.0'
     recyclerVersion = '1.2.0-alpha04'
+    flowLayoutVersion = '1.10'
 
     rxAndroidVersion = '2.1.1'
     rxJavaVersion = '2.2.19'
@@ -146,7 +147,8 @@ ext {
             waitingDots    : "com.github.tajchert:WaitingDots:$waitingDotsVersion",
             glidetoVector  : "com.github.corouteam:GlideToVectorYou:$glideToVector",
             flexbox        : "com.google.android:flexbox:$flexboxVersion",
-            recyclerView   : "androidx.recyclerview:recyclerview:$recyclerVersion"
+            recyclerView   : "androidx.recyclerview:recyclerview:$recyclerVersion",
+            flowLayout     : "org.apmem.tools:layouts:$flowLayoutVersion"
     ]
 
     blockChainDependencies = [

@@ -18,7 +18,7 @@
         android:elevation="@dimen/cardview_default_elevation"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/network" />
+        app:layout_constraintTop_toBottomOf="@+id/network_layout" />
 
     <TextView
         style="@style/RoundedLabelStyle"
@@ -27,10 +27,12 @@
         android:layout_marginStart="@dimen/margin_large"
         android:layout_marginTop="@dimen/margin_large"
         android:elevation="@dimen/cardview_default_elevation"
+        android:gravity="center"
+        android:padding="@dimen/margin_xsmall"
         android:text="@string/connect_to_website"
         app:layout_constraintBottom_toTopOf="@+id/confirmation_view"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/network" />
+        app:layout_constraintTop_toBottomOf="@+id/network_layout" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manual"
@@ -66,6 +68,7 @@
         android:layout_marginLeft="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_small"
         android:layout_marginRight="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_small"
         android:gravity="center"
         android:text="@string/dapp_connection_warning"
         android:textColor="@color/warningRed"
@@ -74,15 +77,22 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/warring_icon" />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="warning,manual" />
+
     <include
         android:id="@+id/confirmation_buttons"
         layout="@layout/dapp_dialog_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_xxxlarge"
+        android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginEnd="@dimen/margin_normal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/manual" />
+        app:layout_constraintTop_toBottomOf="@+id/barrier" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

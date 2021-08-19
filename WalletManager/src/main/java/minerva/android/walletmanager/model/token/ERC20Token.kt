@@ -16,7 +16,8 @@ data class ERC20Token(
     val decimals: String = String.Empty,
     var accountAddress: String = String.Empty,
     var logoURI: String? = null,
-    var tag: String = String.Empty
+    var tag: String = String.Empty,
+    var isError: Boolean = false
 ) : Token {
 
     override fun equals(other: Any?): Boolean =

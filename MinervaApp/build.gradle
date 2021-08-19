@@ -57,8 +57,8 @@ android {
         flavorDimensions 'enviroment'
         staging {
             applicationId "minerva.android.staging"
-            versionCode 56
-            versionName "1.4.4"
+            versionCode 69
+            versionName "1.5.0"
             dimension 'enviroment'
             versionNameSuffix '-staging'
             matchingFallbacks = ["staging"]
@@ -72,8 +72,8 @@ android {
 
         production {
             applicationId "digital.minerva"
-            versionCode 6
-            versionName "1.4.1"
+            versionCode 7
+            versionName "1.5.0"
             dimension 'enviroment'
             versionNameSuffix '-release'
             matchingFallbacks = ["production"]
@@ -116,7 +116,6 @@ dependencies {
     implementation project(':WalletManager')
     implementation project(':KotlinUtils')
     implementation project(':UiExtension')
-
     implementation('com.github.CookieStudio:abidecoder:1.0.4') {
         exclude group: 'org.iq80.leveldb', module: 'leveldb-api'
     }

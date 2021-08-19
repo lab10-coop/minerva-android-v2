@@ -2,7 +2,6 @@ package minerva.android.token
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import minerva.android.R
 import minerva.android.accounts.listener.ShowFragmentListener
 import minerva.android.databinding.FragmentManageTokensBinding
@@ -37,15 +36,6 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
 
     private fun prepareListeners() {
         binding.apply {
-            rearrangeTokens.setOnClickListener {
-                //TODO implement this element
-                Toast.makeText(
-                    it.context,
-                    getString(R.string.feature_enabled_soon),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
             addToken.setOnClickListener {
                 viewModel.account.let { account ->
                     showFragmentListener.showFragment(
