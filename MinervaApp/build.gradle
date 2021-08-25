@@ -75,7 +75,6 @@ android {
             versionCode 7
             versionName "1.5.0"
             dimension 'enviroment'
-            versionNameSuffix '-release'
             matchingFallbacks = ["production"]
 
             buildConfigField "String", "REST_API_URL", '"https://api.minerva.digital"'
