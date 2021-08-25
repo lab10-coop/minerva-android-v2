@@ -72,7 +72,7 @@ android {
 
         production {
             applicationId "digital.minerva"
-            versionCode 7
+            versionCode 8
             versionName "1.5.0"
             dimension 'enviroment'
             matchingFallbacks = ["production"]
