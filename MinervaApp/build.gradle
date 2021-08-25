@@ -57,7 +57,7 @@ android {
         flavorDimensions 'enviroment'
         staging {
             applicationId "minerva.android.staging"
-            versionCode 69
+            versionCode 70
             versionName "1.5.0"
             dimension 'enviroment'
             versionNameSuffix '-staging'
@@ -72,10 +72,9 @@ android {
 
         production {
             applicationId "digital.minerva"
-            versionCode 7
+            versionCode 8
             versionName "1.5.0"
             dimension 'enviroment'
-            versionNameSuffix '-release'
             matchingFallbacks = ["production"]
 
             buildConfigField "String", "REST_API_URL", '"https://api.minerva.digital"'
