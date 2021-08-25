@@ -57,7 +57,7 @@ android {
         flavorDimensions 'enviroment'
         staging {
             applicationId "minerva.android.staging"
-            versionCode 69
+            versionCode 70
             versionName "1.5.0"
             dimension 'enviroment'
             versionNameSuffix '-staging'
