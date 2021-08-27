@@ -11,7 +11,6 @@ import minerva.android.accounts.walletconnect.BaseWalletConnectScannerViewModel
 import minerva.android.accounts.walletconnect.WalletConnectAlertType
 import minerva.android.extension.empty
 import minerva.android.kotlinUtils.InvalidId
-import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
@@ -47,13 +46,6 @@ class ServicesScannerViewModel(
     val viewStateLiveData: LiveData<ServicesScannerViewState> get() = _viewStateLiveData
 
     override var account: Account = Account(Int.InvalidId)
-
-    override val selectedChainId
-        get() = when {
-            requestedNetwork.chainId != Int.InvalidId -> requestedNetwork.chainId
-            account.chainId != Int.InvalidValue -> account.chainId
-            else -> baseNetwork
-        }
 
     override fun hideProgress() {
         _viewStateLiveData.value = ProgressBarState(false)
