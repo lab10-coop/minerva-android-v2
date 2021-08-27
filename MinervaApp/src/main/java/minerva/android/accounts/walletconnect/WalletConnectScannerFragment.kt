@@ -35,8 +35,8 @@ open class WalletConnectScannerFragment : BaseWalletConnectScannerFragment() {
     private fun observeViewState() {
         viewModel.stateLiveData.observe(viewLifecycleOwner, Observer { state ->
             when (state) {
-                is WrongQrCodeState -> handleWrongQrCode()
-                is CorrectQrCodeState -> shouldScan = false
+                is WrongWalletConnectCodeState -> handleWrongQrCode()
+                is CorrectWalletConnectCodeState -> shouldScan = false
                 is OnDisconnected -> handleWalletConnectDisconnectState(state.sessionName)
                 is ProgressBarState -> binding.walletConnectProgress.root.visibleOrInvisible(state.show)
                 is OnSessionRequest -> showConnectionDialog(state.meta, state.network, state.dialogType)

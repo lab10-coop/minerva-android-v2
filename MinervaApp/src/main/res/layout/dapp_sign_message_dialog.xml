@@ -17,7 +17,7 @@
         android:text="@string/message_signing_request"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/network" />
+        app:layout_constraintTop_toBottomOf="@+id/network_layout" />
 
     <minerva.android.widget.LabeledTextView
         android:id="@+id/message"

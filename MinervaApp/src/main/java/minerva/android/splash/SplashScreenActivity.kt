@@ -12,6 +12,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.MainActivity
 import minerva.android.onboarding.OnBoardingActivity
+import minerva.android.walletConnect.BaseWalletConnectInteractionsActivity.Companion.MOBILE_WALLET_CONNECT_DATA
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -55,6 +56,7 @@ class SplashScreenActivity : AppCompatActivity(), PassiveVideoToActivityInteract
 
     private fun showMainActivity() {
         launchActivity<MainActivity> {
+            putExtra(MOBILE_WALLET_CONNECT_DATA, intent?.data)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
     }

@@ -4,10 +4,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
-import minerva.android.kotlinUtils.DateUtils
-import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.FirstIndex
-import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.*
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -34,7 +31,6 @@ abstract class BaseWalletConnectScannerViewModel(
 ) : BaseViewModel() {
 
     abstract var account: Account
-    abstract val selectedChainId: Int
 
     abstract fun hideProgress()
     abstract fun setLiveDataOnDisconnected(sessionName: String)
@@ -44,12 +40,19 @@ abstract class BaseWalletConnectScannerViewModel(
     abstract fun closeScanner()
     abstract fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType)
 
+    protected open val selectedChainId
+        get() = when {
+            requestedNetwork.chainId != Int.InvalidId -> requestedNetwork.chainId
+            account.chainId != Int.InvalidValue -> account.chainId
+            else -> baseNetwork
+        }
+
     var requestedNetwork: BaseNetworkData = BaseNetworkData(Int.InvalidId, String.Empty)
     internal lateinit var topic: Topic
-    protected var handshakeId: Long = 0L
+    private var handshakeId: Long = 0L
     internal lateinit var currentSession: WalletConnectSession
 
-    protected val baseNetwork get() = if (accountManager.areMainNetworksEnabled) ChainId.ETH_MAIN else ChainId.ETH_GOR
+    private val baseNetwork get() = if (accountManager.areMainNetworksEnabled) ChainId.ETH_MAIN else ChainId.ETH_GOR
 
     val availableNetworks: List<NetworkDataSpinnerItem> get() = prepareAvailableNetworks()
 
@@ -149,7 +152,7 @@ abstract class BaseWalletConnectScannerViewModel(
         else icons[Int.FirstIndex]
 
 
-    fun rejectSession() {
+    open fun rejectSession() {
         walletConnectRepository.rejectSession(topic.peerId)
     }
 

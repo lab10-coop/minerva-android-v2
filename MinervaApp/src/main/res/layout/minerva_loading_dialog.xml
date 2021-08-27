@@ -39,10 +39,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:gravity="center"
         android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
-        android:text="@string/sending"
+        android:text="@string/info_dapp_awaiting"
         android:textColor="@color/networksTypeHeader"
         android:textSize="@dimen/text_normal" />
 </LinearLayout>

@@ -7,10 +7,12 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.*
-import minerva.android.base.BaseViewModel
+import minerva.android.extension.empty
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidBigDecimal
+import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.HEX_PREFIX
 import minerva.android.kotlinUtils.crypto.containsHexPrefix
@@ -18,33 +20,37 @@ import minerva.android.kotlinUtils.crypto.hexToBigInteger
 import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.model.contract.ContractTransactions
 import minerva.android.walletmanager.model.contract.TokenStandardJson
+import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxCostPayload
-import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.walletconnect.TokenTransaction
-import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
-import minerva.android.walletmanager.model.walletconnect.WalletConnectTransaction
+import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import minerva.android.walletmanager.utils.logger.Logger
+import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
+import minerva.android.accounts.walletconnect.OnSessionRequest as OnSessionRequestResult
+import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest as OnSessionRequestData
 
 class WalletConnectInteractionsViewModel(
     private val transactionRepository: TransactionRepository,
     private val walletConnectRepository: WalletConnectRepository,
     private val logger: Logger,
-    private val tokenManager: TokenManager
-) : BaseViewModel() {
+    private val tokenManager: TokenManager,
+    private val accountManager: AccountManager,
+    walletActionsRepository: WalletActionsRepository
+) : BaseWalletConnectScannerViewModel(accountManager, walletConnectRepository, logger, walletActionsRepository) {
     internal var currentDappSession: DappSession? = null
     private var currentRate: BigDecimal = Double.InvalidBigDecimal
     private lateinit var currentTransaction: WalletConnectTransaction
@@ -63,7 +69,7 @@ class WalletConnectInteractionsViewModel(
         onCleared()
     }
 
-    init {
+    fun getWalletConnectSessions() {
         launchDisposable {
             walletConnectRepository.getSessions()
                 .map { dappSessions -> reconnect(dappSessions) }
@@ -317,7 +323,7 @@ class WalletConnectInteractionsViewModel(
                 }
                 .doAfterTerminate { weiCoinTransactionValue = NO_COIN_TX_VALUE }
                 .subscribeBy(
-                    onSuccess = { _walletConnectStatus.value = ProgressBarState(false) },
+                    onSuccess = { _walletConnectStatus.value = CloseScannerState },
                     onError = { error ->
                         logToFirebase("WalletConnect transaction error: $error; $currentTransaction")
                         Timber.e(error)
@@ -352,6 +358,7 @@ class WalletConnectInteractionsViewModel(
         currentDappSession?.let { session ->
             transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
                 walletConnectRepository.approveRequest(session.peerId, it.privateKey)
+                _walletConnectStatus.value = CloseScannerState
             }
         }
     }
@@ -360,6 +367,7 @@ class WalletConnectInteractionsViewModel(
         weiCoinTransactionValue = NO_COIN_TX_VALUE
         currentDappSession?.let { session ->
             walletConnectRepository.rejectRequest(session.peerId)
+            _walletConnectStatus.value = CloseScannerState
         }
     }
 
@@ -376,5 +384,88 @@ class WalletConnectInteractionsViewModel(
         private const val DEFAULT_TOKEN_DECIMALS = 0
         private val WRONG_TX_VALUE = BigDecimal(-1)
         private val NO_COIN_TX_VALUE = BigDecimal.ZERO
+    }
+
+    override var account: Account = Account(Int.InvalidId)
+
+    override fun hideProgress() {}
+
+    override fun setLiveDataOnDisconnected(sessionName: String) {
+        _walletConnectStatus.value = OnDisconnected(sessionName)
+    }
+
+    override fun setLiveDataOnConnectionError(error: Throwable, sessionName: String) {
+        _walletConnectStatus.value = OnWalletConnectConnectionError(error, sessionName)
+    }
+
+    override fun setLiveDataError(error: Throwable) {
+        _errorLiveData.value = Event(error)
+    }
+
+    override fun handleSessionRequest(sessionRequest: OnSessionRequestData) {
+        val id = sessionRequest.chainId
+        _walletConnectStatus.value = when {
+            id == null -> {
+                accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
+                OnSessionRequestResult(
+                    sessionRequest.meta,
+                    requestedNetwork,
+                    WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
+                )
+            }
+            isNetworkNotSupported(chainId = id) -> {
+                requestedNetwork = BaseNetworkData(id, String.empty)
+                OnSessionRequestResult(
+                    sessionRequest.meta,
+                    requestedNetwork,
+                    WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
+                )
+            }
+            else -> getWalletConnectStateForRequestedNetwork(sessionRequest, id)
+        }
+    }
+
+    private fun getWalletConnectStateForRequestedNetwork(
+        sessionRequest: OnSessionRequestData,
+        chainId: Int
+    ): OnSessionRequestResult {
+        requestedNetwork = BaseNetworkData(chainId, getNetworkName(chainId))
+        return accountManager.getFirstActiveAccountOrNull(chainId)?.let { newAccount ->
+            account = newAccount
+            OnSessionRequestResult(
+                sessionRequest.meta,
+                requestedNetwork,
+                WalletConnectAlertType.CHANGE_ACCOUNT_WARNING
+            )
+        }.orElse {
+            OnSessionRequestResult(
+                sessionRequest.meta,
+                requestedNetwork,
+                WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR
+            )
+        }
+    }
+
+    override fun closeScanner() {
+        _walletConnectStatus.value = CloseScannerState
+    }
+
+    override fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
+        _walletConnectStatus.postValue(UpdateOnSessionRequest(requestedNetwork, dialogType))
+    }
+
+    fun handleDeepLink(deepLink: String) {
+        if (AddressParser.parse(deepLink) != AddressParser.WALLET_CONNECT || !AddressParser.containsKeyAndBridge(deepLink)) {
+            _walletConnectStatus.value = WrongWalletConnectCodeState
+        } else {
+            _walletConnectStatus.value = CorrectWalletConnectCodeState
+            currentSession = walletConnectRepository.getWCSessionFromQr(deepLink)
+            walletConnectRepository.connect(currentSession)
+        }
+    }
+
+    override fun rejectSession() {
+        walletConnectRepository.rejectSession(topic.peerId)
+        closeScanner()
     }
 }
