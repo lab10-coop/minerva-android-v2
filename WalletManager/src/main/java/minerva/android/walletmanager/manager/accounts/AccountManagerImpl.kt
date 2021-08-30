@@ -4,7 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.blockchainprovider.repository.ens.ENSRepository
+import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath
@@ -19,8 +20,8 @@ import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
@@ -34,8 +35,9 @@ import java.math.BigInteger
 class AccountManagerImpl(
     private val walletManager: WalletConfigManager,
     private val cryptographyRepository: CryptographyRepository,
-    private val blockchainRepository: BlockchainRegularAccountRepository,
     private val localStorage: LocalStorage,
+    private val unitConverter: UnitConverter,
+    private val ensRepository: ENSRepository,
     private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
 ) : AccountManager {
     override var hasAvailableAccounts: Boolean = false
@@ -170,9 +172,10 @@ class AccountManagerImpl(
     override fun changeAccountName(existedAccount: Account, newName: String): Completable {
         val accountName = CryptoUtils.prepareName(newName, existedAccount.id)
         walletManager.getWalletConfig().run {
-            accounts.find { account -> account.id == existedAccount.id && account.chainId == existedAccount.chainId }?.apply {
-                name = accountName
-            }
+            accounts.find { account -> account.id == existedAccount.id && account.chainId == existedAccount.chainId }
+                ?.apply {
+                    name = accountName
+                }
             return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts))
         }
     }
@@ -249,7 +252,7 @@ class AccountManagerImpl(
     override fun getSafeAccountName(account: Account): String =
         account.name.replaceFirst(String.Space, " | ${getSafeAccountCount(account.address)} ")
 
-    override fun isAddressValid(address: String): Boolean = blockchainRepository.isAddressValid(address)
+    override fun isAddressValid(address: String): Boolean = ensRepository.isAddressValid(address)
 
     override fun saveFreeATSTimestamp() {
         localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills())
@@ -274,7 +277,7 @@ class AccountManagerImpl(
     override fun getFirstActiveAccountOrNull(chainId: Int): Account? =
         getAllActiveAccounts(chainId).firstOrNull()
 
-    override fun toChecksumAddress(address: String): String = blockchainRepository.toChecksumAddress(address)
+    override fun toChecksumAddress(address: String): String = ensRepository.toChecksumAddress(address)
 
     override fun getAllAccountsForSelectedNetworksType(): List<Account> =
         getAllAccounts().filter { account -> account.isTestNetwork == !areMainNetworksEnabled }
@@ -340,7 +343,9 @@ class AccountManagerImpl(
     ): Completable {
         accountsToChange.entries.forEach { item ->
             when {
-                isNotSAMasterOwner(config.accounts, item.value) -> return Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+                isNotSAMasterOwner(config.accounts, item.value) -> return Completable.error(
+                    IsNotSafeAccountMasterOwnerThrowable()
+                )
                 else -> {
                     newAccounts[item.key] = item.value.copy(isHide = true)
 
@@ -369,7 +374,7 @@ class AccountManagerImpl(
         accountTokens.forEach { accountToken ->
             if (accountToken.rawBalance.toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE) return true
         }
-        return blockchainRepository.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
+        return unitConverter.toGwei(balance).toBigInteger() >= MAX_GWEI_TO_REMOVE_VALUE
     }
 
     override fun getSafeAccountCount(ownerAddress: String): Int =
@@ -379,7 +384,7 @@ class AccountManagerImpl(
     override fun loadAccount(index: Int): Account = walletManager.getWalletConfig().accounts.run {
         if (inBounds(index)) {
             val account = this[index]
-            account.copy(address = blockchainRepository.toChecksumAddress(account.address))
+            account.copy(address = ensRepository.toChecksumAddress(account.address))
         } else Account(Int.InvalidIndex)
     }
 

@@ -15,18 +15,30 @@ class WebSocketRepositoryImpl(
 ) : WebSocketRepository {
 
     private var wssClient: WebSocketClient? = null
-    private lateinit var wssService: WebSocketService
-    lateinit var web3j: Web3j
+    private var wssService: WebSocketService? = null
+    private var web3j: Web3j? = null
 
     override fun subscribeToExecutedTransactions(chainId: Int, blockNumber: BigInteger): Flowable<ExecutedTransaction> {
         openConnection(chainId)
-        return provider.subscribeToExecutedTransactions(web3j, blockNumber)
+        return provider.subscribeToExecutedTransactions(web3j!!, blockNumber)
+    }
+
+    override fun subscribeToBlockCreation(chainId: Int): Flowable<Unit> {
+        openConnection(chainId)
+        return provider.subscribeToBlockCreation(web3j!!)
     }
 
     private fun openConnection(chainId: Int) {
         wssClient = WebSocketClient(URI(wssUrls.value(chainId)))
         wssService = WebSocketService(wssClient, false)
-        wssService.connect()
+        wssService?.connect()
         web3j = Web3j.build(wssService)
+    }
+
+    override fun disconnect() {
+        wssService?.close()
+        wssService = null
+        wssClient = null
+        web3j?.shutdown()
     }
 }

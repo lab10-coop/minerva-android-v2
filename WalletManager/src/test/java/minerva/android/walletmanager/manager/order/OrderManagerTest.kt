@@ -8,11 +8,11 @@ import io.reactivex.Completable
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.utils.RxTest
 import org.amshove.kluent.shouldBeEqualTo

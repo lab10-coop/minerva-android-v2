@@ -62,6 +62,11 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        viewModel.stopStreaming()
+    }
+
     fun stopPendingTransactions() = accountAdapter.stopPendingTransactions()
 
     override fun onSendTransaction(account: Account) =
@@ -177,6 +182,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 )
                 setOnRefreshListener {
                     with(viewModel) {
+                        viewModel.stopStreaming()
                         refreshCoinBalances()
                         refreshTokensBalances()
                         discoverNewTokens()

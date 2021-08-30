@@ -4,8 +4,9 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.Function3
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
-import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
+import minerva.android.blockchainprovider.repository.ens.ENSRepository
+import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
+import minerva.android.blockchainprovider.repository.safeAccount.BlockchainSafeAccountRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.mappers.TransactionMapper
@@ -17,12 +18,13 @@ import minerva.android.walletmanager.storage.LocalStorage
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class SmartContractRepositoryImpl(
+class SafeAccountRepositoryImpl(
     private val blockchainSafeAccountRepository: BlockchainSafeAccountRepository,
-    private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository,
+    private val erC20TokenRepository: ERC20TokenRepository,
+    private val ensRepository: ENSRepository,
     private val localStorage: LocalStorage,
     private val walletConfigManager: WalletConfigManager
-) : SmartContractRepository {
+) : SafeAccountRepository {
 
     override fun createSafeAccount(account: Account) =
         blockchainSafeAccountRepository.deployGnosisSafeContract(
@@ -59,13 +61,13 @@ class SmartContractRepositoryImpl(
 
     override fun transferNativeCoin(chainId: Int, transaction: Transaction): Completable =
         blockchainSafeAccountRepository.transferNativeCoin(chainId, TransactionMapper.map(transaction))
-            .andThen(blockchainRegularAccountRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
+            .andThen(ensRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
 
     override fun transferERC20Token(chainId: Int, transaction: Transaction, erc20Address: String): Completable =
         blockchainSafeAccountRepository.transferERC20Token(chainId, TransactionMapper.map(transaction), erc20Address)
-            .andThen(blockchainRegularAccountRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
+            .andThen(ensRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
 
@@ -79,7 +81,7 @@ class SmartContractRepositoryImpl(
         walletConfigManager.getSafeAccountMasterOwnerBalance(address)
 
     override fun getERC20TokenDetails(privateKey: String, chainId: Int, tokenAddress: String): Single<ERC20Token> =
-        (blockchainRegularAccountRepository).run {
+        (erC20TokenRepository).run {
             Observable.zip(
                 getERC20TokenName(privateKey, chainId, tokenAddress),
                 getERC20TokenSymbol(privateKey, chainId, tokenAddress),

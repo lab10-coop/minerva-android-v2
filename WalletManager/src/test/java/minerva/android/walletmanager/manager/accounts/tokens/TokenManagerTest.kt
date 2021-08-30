@@ -11,7 +11,9 @@ import minerva.android.apiProvider.model.Committer
 import minerva.android.apiProvider.model.TokenDetails
 import minerva.android.blockchainprovider.model.Token
 import minerva.android.blockchainprovider.model.TokenWithBalance
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.blockchainprovider.model.TokenWithError
+import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
+import minerva.android.blockchainprovider.repository.superToken.SuperTokenRepository
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
@@ -27,7 +29,9 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.AssetError
 import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenTag
 import minerva.android.walletmanager.model.wallet.WalletConfig
@@ -47,11 +51,27 @@ class TokenManagerTest : RxTest() {
     private val walletManager: WalletConfigManager = mock()
     private val cryptoApi: CryptoApi = mock()
     private val localStorage: LocalStorage = mock()
-    private val blockchainRepository: BlockchainRegularAccountRepository = mock()
+    private val superTokenRepository: SuperTokenRepository = mock()
+    private val erC20TokenRepository: ERC20TokenRepository = mock()
     private val rateStorage: RateStorage = mock()
     private val tokenDao: TokenDao = mock()
     private lateinit var database: MinervaDatabase
     private lateinit var tokenManager: TokenManagerImpl
+
+    private val commitData: List<CommitElement>
+        get() = listOf(CommitElement(Commit(Committer("2021-01-29T19:56:02Z")))) //1611950162000 in mills
+
+    private val firstToken = ERC20Token(ATS_TAU, "CookieToken", "COOKiE", "0xC00k1e", "1")
+    private val secondToken = ERC20Token(ATS_TAU, "CookieTokenII", "COOKiE", "0xC00k1eII", "2")
+    private val map = mapOf(Pair(1, listOf(firstToken, secondToken)))
+
+    private val firstTokenII = ERC20Token(ETH_RIN, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
+    private val secondTokenII = ERC20Token(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
+
+    private val tokenRawData = listOf(
+        TokenDetails(ATS_TAU, "0xC00k1e", "someIconAddress"),
+        TokenDetails(ATS_TAU, "0xC00k1eII", "someIconAddressII")
+    )
 
     @Before
     fun initializeMocks() {
@@ -59,7 +79,15 @@ class TokenManagerTest : RxTest() {
         whenever(walletManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         database = mock { whenever(mock.tokenDao()).thenReturn(tokenDao) }
         tokenManager =
-            TokenManagerImpl(walletManager, cryptoApi, localStorage, blockchainRepository, rateStorage, database)
+            TokenManagerImpl(
+                walletManager,
+                cryptoApi,
+                localStorage,
+                superTokenRepository,
+                erC20TokenRepository,
+                rateStorage,
+                database
+            )
     }
 
     @Test
@@ -164,7 +192,6 @@ class TokenManagerTest : RxTest() {
             updatedTokens[ATS]?.get(2)?.name shouldBeEqualTo "OtherTokenATS"
             updatedTokens[ATS]?.get(3)?.name shouldBeEqualTo "TokenTest1"
             updatedTokens[ATS]?.get(4)?.name shouldBeEqualTo "SomeToken"
-            updatedTokens[ATS]?.get(4)?.accountAddress shouldBeEqualTo "address1"
 
             val secondNewToken = ERC20Token(1, "CookieCoin", "CC", "0xC00k1e", "32")
             val secondUpdatedToken =
@@ -517,7 +544,7 @@ class TokenManagerTest : RxTest() {
 
         NetworkManager.initialize(MockDataProvider.networks)
         whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
-        whenever(blockchainRepository.getTokenBalance(any(), any(), any(), any()))
+        whenever(erC20TokenRepository.getTokenBalance(any(), any(), any(), any()))
             .thenReturn(
                 tauTokenResponse01, tauTokenResponse02, tauTokenResponse03, tauTokenResponse04,
                 sigmaTokenResponse01, sigmaTokenResponse02, sigmaTokenResponse03
@@ -653,19 +680,58 @@ class TokenManagerTest : RxTest() {
         account.accountTokens[1].tokenPrice shouldBeEqualTo 0.3
     }
 
-    private val commitData: List<CommitElement>
-        get() = listOf(CommitElement(Commit(Committer("2021-01-29T19:56:02Z")))) //1611950162000 in mills
+    @Test
+    fun `get super token balance success test`() {
+        val taggedTokens = listOf(
+            ERC20Token(ATS_TAU, "name1", address = "address1", tag = "SuperToken", accountAddress = "address4455"),
+            ERC20Token(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test")
+        )
+        val account = Account(1, chainId = ATS_TAU, address = "address4455")
+        whenever(tokenDao.getTaggedTokens()).thenReturn(Single.just(taggedTokens))
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
+        whenever(erC20TokenRepository.getTokenBalance(any(), any(), any(), any())).thenReturn(
+            Flowable.just(TokenWithBalance(1, "address1", BigDecimal.TEN))
+        )
+        tokenManager.activeSuperTokenStreams = mutableListOf(ActiveSuperToken("address1", "address4455", ATS_TAU))
+        whenever(rateStorage.getRate(any())).thenReturn(3.3)
 
+        tokenManager.getSuperTokenBalance(account)
+            .test()
+            .await()
+            .assertNoErrors()
+            .assertValueCount(1)
+            .assertValue { asset ->
+                asset is AssetBalance &&
+                asset.chainId == ATS_TAU &&
+                asset.accountToken.tokenPrice == 3.3 &&
+                asset.accountToken.rawBalance == BigDecimal.TEN
+            }
+    }
 
-    private val firstToken = ERC20Token(ATS_TAU, "CookieToken", "COOKiE", "0xC00k1e", "1")
-    private val secondToken = ERC20Token(ATS_TAU, "CookieTokenII", "COOKiE", "0xC00k1eII", "2")
-    private val map = mapOf(Pair(1, listOf(firstToken, secondToken)))
+    @Test
+    fun `get super token balance failure test`() {
+        val error = Throwable("Get super token flowable")
+        val taggedTokens = listOf(
+            ERC20Token(ATS_TAU, "name1", address = "address1", tag = "SuperToken", accountAddress = "address4455"),
+            ERC20Token(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test")
+        )
+        val account = Account(1, chainId = ATS_TAU, address = "address4455")
+        whenever(tokenDao.getTaggedTokens()).thenReturn(Single.just(taggedTokens))
+        NetworkManager.initialize(MockDataProvider.networks)
+        whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
+        whenever(erC20TokenRepository.getTokenBalance(any(), any(), any(), any())).thenReturn(
+            Flowable.just(TokenWithError(1, "address1", error))
+        )
+        tokenManager.activeSuperTokenStreams = mutableListOf(ActiveSuperToken("address1", "address4455", ATS_TAU))
+        whenever(rateStorage.getRate(any())).thenReturn(3.3)
 
-    private val firstTokenII = ERC20Token(ETH_RIN, "CookieTokenRIN", "COOKiERIN", "0x0th3r", "1")
-    private val secondTokenII = ERC20Token(ETH_RIN, "CookieTokenRINII", "COOKiERINII", "0xC00k1e", "2")
-
-    private val tokenRawData = listOf(
-        TokenDetails(ATS_TAU, "0xC00k1e", "someIconAddress"),
-        TokenDetails(ATS_TAU, "0xC00k1eII", "someIconAddressII")
-    )
+        tokenManager.getSuperTokenBalance(account)
+            .test()
+            .await()
+            .assertValue { asset ->
+                asset is AssetError &&
+                asset.error.message == "Get super token flowable"
+            }
+    }
 }

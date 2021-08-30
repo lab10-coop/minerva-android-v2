@@ -9,7 +9,7 @@ import androidx.annotation.LayoutRes
 import androidx.core.content.res.ResourcesCompat
 import minerva.android.R
 import minerva.android.databinding.SpinnerNetworkBinding
-import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.widget.repository.getNetworkIcon
 
 class NetworkSpinnerAdapter(context: Context, @LayoutRes private val layoutResource: Int, private val networks: List<Network>) :

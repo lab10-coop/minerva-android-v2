@@ -1,10 +1,9 @@
-package minerva.android.blockchainprovider.repository.smartContract
+package minerva.android.blockchainprovider.repository.safeAccount
 
 // don't remove this commented import, please
 //import kotlin.Pair
 import kotlin.Pair
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toFlowable
 import io.reactivex.rxkotlin.zipWith
@@ -14,15 +13,15 @@ import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.
 import minerva.android.blockchainprovider.defs.SmartContractConstants.Companion.PROXY_ADDRESS
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.baseGas
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.data
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.gasToken
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.noFunds
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.noGasPrice
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.operation
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.refund
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.safeSentinelAddress
-import minerva.android.blockchainprovider.repository.smartContract.GnosisSafeHelper.safeTxGas
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.baseGas
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.data
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.gasToken
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.noFunds
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.noGasPrice
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.operation
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.refund
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.safeSentinelAddress
+import minerva.android.blockchainprovider.repository.safeAccount.GnosisSafeHelper.safeTxGas
 import minerva.android.blockchainprovider.smartContracts.ERC20
 import minerva.android.blockchainprovider.smartContracts.GnosisSafe
 import minerva.android.blockchainprovider.smartContracts.ProxyFactory
@@ -38,12 +37,9 @@ import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.RemoteCall
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
-import org.web3j.protocol.core.methods.response.NetVersion
 import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
-import java.util.*
-
 
 class BlockchainSafeAccountRepositoryImpl(
     private val web3j: Map<Int, Web3j>,

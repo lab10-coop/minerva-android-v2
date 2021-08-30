@@ -3,8 +3,8 @@ package minerva.android.walletmanager.manager.accounts
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.walletmanager.manager.Manager
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.wallet.MasterSeed
