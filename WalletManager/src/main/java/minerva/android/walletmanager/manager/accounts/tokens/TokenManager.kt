@@ -5,6 +5,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.Asset
+import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERC20Token
 
 interface TokenManager {
@@ -40,4 +41,6 @@ interface TokenManager {
     fun getSingleTokenRate(tokenHash: String): Double
     fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>>
     fun getTaggedTokensSingle(): Single<List<ERC20Token>>
+    fun getSuperTokenBalance(account: Account): Flowable<Asset>
+    var activeSuperTokenStreams: MutableList<ActiveSuperToken>
 }

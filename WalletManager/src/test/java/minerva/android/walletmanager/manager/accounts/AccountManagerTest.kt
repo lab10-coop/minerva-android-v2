@@ -3,16 +3,17 @@ package minerva.android.walletmanager.manager.accounts
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.blockchainprovider.repository.ens.ENSRepository
+import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
@@ -36,12 +37,14 @@ class AccountManagerTest : RxTest() {
     private val cryptographyRepository: CryptographyRepository = mock()
     private val localStorage: LocalStorage = mock()
     private val timeProvider: CurrentTimeProvider = mock()
-    private val blockchainRegularAccountRepository: BlockchainRegularAccountRepository = mock()
+    private val ensRepository: ENSRepository = mock()
+    private val unitConverter: UnitConverter = mock()
     private val manager = AccountManagerImpl(
         walletConfigManager,
         cryptographyRepository,
-        blockchainRegularAccountRepository,
         localStorage,
+        unitConverter,
+        ensRepository,
         timeProvider
     )
 
@@ -56,7 +59,7 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager creates empty account`() {
         NetworkManager.initialize(MockDataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(DerivedKeys(0, "publicKey", "privateKey", "address1"))
 
@@ -93,15 +96,21 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
 
         manager.connectAccountToNetwork(1, Network(chainId = 4, name = "Ethereum"))
         verify(walletConfigManager).updateWalletConfig(
             WalletConfig(
                 2, accounts = listOf(
                     Account(
-                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
-                        chainId = 4, isHide = false, _isTestNetwork = true
+                        id = 1,
+                        publicKey = "publicKey",
+                        privateKey = "privateKey",
+                        address = "address1",
+                        name = "#2 Ethereum",
+                        chainId = 4,
+                        isHide = false,
+                        _isTestNetwork = true
                     )
                 )
             )
@@ -125,15 +134,21 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
 
         manager.createOrUnhideAccount(Network(chainId = 4, name = "Ethereum"))
         verify(walletConfigManager).updateWalletConfig(
             WalletConfig(
                 2, accounts = listOf(
                     Account(
-                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
-                        chainId = 4, isHide = false, _isTestNetwork = true
+                        id = 1,
+                        publicKey = "publicKey",
+                        privateKey = "privateKey",
+                        address = "address1",
+                        name = "#2 Ethereum",
+                        chainId = 4,
+                        isHide = false,
+                        _isTestNetwork = true
                     )
                 )
             )
@@ -146,22 +161,34 @@ class AccountManagerTest : RxTest() {
         val walletConfig = WalletConfig(
             1, accounts = listOf(
                 Account(
-                    id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
-                    chainId = 4, isHide = true, _isTestNetwork = true
+                    id = 1,
+                    publicKey = "publicKey",
+                    privateKey = "privateKey",
+                    address = "address1",
+                    name = "#2 Ethereum",
+                    chainId = 4,
+                    isHide = true,
+                    _isTestNetwork = true
                 )
             )
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
 
         manager.createOrUnhideAccount(Network(chainId = 4, name = "Ethereum"))
         verify(walletConfigManager).updateWalletConfig(
             WalletConfig(
                 2, accounts = listOf(
                     Account(
-                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
-                        chainId = 4, isHide = false, _isTestNetwork = true
+                        id = 1,
+                        publicKey = "publicKey",
+                        privateKey = "privateKey",
+                        address = "address1",
+                        name = "#2 Ethereum",
+                        chainId = 4,
+                        isHide = false,
+                        _isTestNetwork = true
                     )
                 )
             )
@@ -181,15 +208,21 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
 
         manager.connectAccountToNetwork(1, Network(chainId = 4, name = "Ethereum"))
         verify(walletConfigManager).updateWalletConfig(
             WalletConfig(
                 2, accounts = listOf(
                     Account(
-                        id = 1, publicKey = "publicKey", privateKey = "privateKey", address = "address1", name = "#2 Ethereum",
-                        chainId = 4, isHide = false, _isTestNetwork = true
+                        id = 1,
+                        publicKey = "publicKey",
+                        privateKey = "privateKey",
+                        address = "address1",
+                        name = "#2 Ethereum",
+                        chainId = 4,
+                        isHide = false,
+                        _isTestNetwork = true
                     )
                 )
             )
@@ -203,8 +236,8 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any())).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
         )
-        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
         manager.removeAccount(account).test()
         val removedValue = manager.loadAccount(0)
         val notRemovedValue = manager.loadAccount(1)
@@ -221,8 +254,8 @@ class AccountManagerTest : RxTest() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey1", "privateKey1", "address1")))
-        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
         doNothing().whenever(walletConfigManager).initWalletConfig()
 
         manager.removeAccount(account).test()
@@ -249,8 +282,8 @@ class AccountManagerTest : RxTest() {
         ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
         )
-        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
         manager.removeAccount(account).test()
         manager.removeAccount(account2).test()
         manager.loadAccount(2).apply {
@@ -272,8 +305,8 @@ class AccountManagerTest : RxTest() {
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1")))
-        whenever(blockchainRegularAccountRepository.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
+        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
         doNothing().whenever(walletConfigManager).initWalletConfig()
 
         manager.removeAccount(account).test()
@@ -327,7 +360,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
+        whenever(ensRepository.toChecksumAddress(any())).thenReturn("address")
         manager.createSafeAccount(Account(1, chainId = 4), "contract")
             .test()
             .assertComplete()
@@ -339,7 +372,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("address")
+        whenever(ensRepository.toChecksumAddress(any())).thenReturn("address")
         manager.createSafeAccount(Account(1, chainId = 4), "contract")
             .test()
             .assertError(error)
@@ -354,14 +387,14 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `is address valid success`() {
-        whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(true)
+        whenever(ensRepository.isAddressValid(any())).thenReturn(true)
         val result = manager.isAddressValid("0x12345")
         assertEquals(true, result)
     }
 
     @Test
     fun `is address valid false`() {
-        whenever(blockchainRegularAccountRepository.isAddressValid(any())).thenReturn(false)
+        whenever(ensRepository.isAddressValid(any())).thenReturn(false)
         val result = manager.isAddressValid("2342343")
         assertEquals(false, result)
     }
@@ -438,7 +471,7 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `to checksum address test`() {
-        whenever(blockchainRegularAccountRepository.toChecksumAddress(any())).thenReturn("checksum")
+        whenever(ensRepository.toChecksumAddress(any())).thenReturn("checksum")
         val result = manager.toChecksumAddress("address")
         assertEquals(result, "checksum")
     }

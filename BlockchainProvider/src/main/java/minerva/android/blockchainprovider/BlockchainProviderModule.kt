@@ -1,14 +1,22 @@
 package minerva.android.blockchainprovider
 
 import minerva.android.blockchainprovider.provider.Web3jProvider
+import minerva.android.blockchainprovider.repository.ens.ENSRepository
+import minerva.android.blockchainprovider.repository.ens.ENSRepositoryImpl
+import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
+import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepositoryImpl
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepositoryImpl
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
+import minerva.android.blockchainprovider.repository.safeAccount.BlockchainSafeAccountRepository
+import minerva.android.blockchainprovider.repository.safeAccount.BlockchainSafeAccountRepositoryImpl
 import minerva.android.blockchainprovider.repository.signature.SignatureRepository
 import minerva.android.blockchainprovider.repository.signature.SignatureRepositoryImpl
-import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepository
-import minerva.android.blockchainprovider.repository.smartContract.BlockchainSafeAccountRepositoryImpl
+import minerva.android.blockchainprovider.repository.superToken.SuperTokenRepository
+import minerva.android.blockchainprovider.repository.superToken.SuperTokenRepositoryImpl
+import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepository
+import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepositoryImpl
+import minerva.android.blockchainprovider.repository.units.UnitConverter
+import minerva.android.blockchainprovider.repository.units.UnitConverterImpl
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
 import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProvider
@@ -23,10 +31,14 @@ fun createBlockchainProviderModule(
 ) = module {
     factory { Web3jProvider.provideWeb3j(httpUrls.toMutableMap(), get()) }
     factory { Web3jProvider.provideEnsResolver(get()) }
-    factory<BlockchainRegularAccountRepository> { BlockchainRegularAccountRepositoryImpl(get(), gasPrice, get(), get()) }
     factory<BlockchainSafeAccountRepository> { BlockchainSafeAccountRepositoryImpl(get(), gasPrice) }
     factory<WebSocketServiceProvider> { WebSocketServiceProviderImpl() }
     factory<WebSocketRepository> { WebSocketRepositoryImpl(get(), wssUrls) }
-    factory<FreeTokenRepository> { FreeTokenRepositoryImpl() }
     factory<SignatureRepository> { SignatureRepositoryImpl() }
+    factory<SuperTokenRepository> { SuperTokenRepositoryImpl(get(), gasPrice) }
+    factory<BlockchainTransactionRepository> { BlockchainTransactionRepositoryImpl(get(), gasPrice, get(), get(), get()) }
+    factory<ENSRepository> { ENSRepositoryImpl(get()) }
+    factory<ERC20TokenRepository> { ERC20TokenRepositoryImpl(get(), gasPrice) }
+    factory<UnitConverter> { UnitConverterImpl() }
+    factory<FreeTokenRepository> { FreeTokenRepositoryImpl() }
 }

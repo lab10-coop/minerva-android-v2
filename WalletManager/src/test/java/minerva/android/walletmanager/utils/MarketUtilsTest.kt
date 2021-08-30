@@ -4,11 +4,11 @@ import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.apiProvider.model.Markets
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinCryptoBalance
+import minerva.android.walletmanager.model.network.Network
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigDecimal

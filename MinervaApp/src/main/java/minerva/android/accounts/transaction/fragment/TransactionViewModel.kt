@@ -28,7 +28,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.walletmanager.utils.MarketUtils
@@ -40,7 +40,7 @@ import java.math.BigInteger
 
 class TransactionViewModel(
     private val walletActionsRepository: WalletActionsRepository,
-    private val smartContractRepository: SmartContractRepository,
+    private val safeAccountRepository: SafeAccountRepository,
     private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
     lateinit var transaction: Transaction
@@ -187,7 +187,7 @@ class TransactionViewModel(
     fun isTransactionAvailable(isValidated: Boolean) =
         when {
             isMainTransaction || isTokenTransaction -> isValidated && transactionCost < account.cryptoBalance
-            else -> isValidated && transactionCost < smartContractRepository.getSafeAccountMasterOwnerBalance(account.masterOwnerAddress)
+            else -> isValidated && transactionCost < safeAccountRepository.getSafeAccountMasterOwnerBalance(account.masterOwnerAddress)
         }
 
     private fun sendSafeAccountTokenTransaction(
@@ -198,13 +198,13 @@ class TransactionViewModel(
     ) {
         launchDisposable {
             val ownerPrivateKey =
-                account.masterOwnerAddress.let { smartContractRepository.getSafeAccountMasterOwnerPrivateKey(it) }
+                account.masterOwnerAddress.let { safeAccountRepository.getSafeAccountMasterOwnerPrivateKey(it) }
             transactionRepository.resolveENS(receiverKey)
                 .flatMap { resolvedENS ->
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferERC20Token(
+                            safeAccountRepository.transferERC20Token(
                                 network.chainId,
                                 it,
                                 tokenAddress
@@ -241,14 +241,14 @@ class TransactionViewModel(
         launchDisposable {
             val ownerPrivateKey =
                 account.masterOwnerAddress.let {
-                    smartContractRepository.getSafeAccountMasterOwnerPrivateKey(it)
+                    safeAccountRepository.getSafeAccountMasterOwnerPrivateKey(it)
                 }
             transactionRepository.resolveENS(receiverKey)
                 .flatMap { resolvedENS ->
                     getTransactionForSafeAccount(ownerPrivateKey, resolvedENS, amount, gasPrice, gasLimit)
                         .flatMap {
                             transaction = it
-                            smartContractRepository.transferNativeCoin(network.chainId, it).toSingleDefault(it)
+                            safeAccountRepository.transferNativeCoin(network.chainId, it).toSingleDefault(it)
                         }
                 }
                 .onErrorResumeNext { error -> SingleSource { saveTransferFailedWalletAction(error.message) } }

@@ -1,41 +1,42 @@
-package minerva.android
+package minerva.android.transaction
 
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Flowable
+import io.reactivex.Single
 import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
 import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.model.TxCostData
+import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepositoryImpl
+import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepositoryImpl
+import minerva.android.blockchainprovider.repository.units.UnitConverter
 import org.junit.Test
-import org.web3j.ens.EnsResolver
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.methods.response.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.test.assertEquals
 
-
-class BlockchainRegularAccountRepositoryImplTest : RxTest() {
+class BlockchainTransactionRepositoryTest {
 
     private val AtsGasPrice = BigInteger.valueOf(100_000_000_000)
     private val EthGasPrice = BigInteger.valueOf(20_000_000_000)
-
     private val ETH = 2
     private val ATS = 1
     private val web3J = mockk<Web3j>()
-    private val ensResolver = mockk<EnsResolver>()
-    private val freeTokenRepository = mockk<FreeTokenRepository>()
     private val web3Js: Map<Int, Web3j> = mapOf(Pair(ETH, web3J))
     private val gasPrice: Map<Int, BigInteger> =
         mapOf(Pair(ETH, EthGasPrice), Pair(ATS, AtsGasPrice))
+    private val ensRepository = mockk<ENSRepository>()
+    private val unitConverter = mockk<UnitConverter>()
+    private val freeTokenRepository = mockk<FreeTokenRepository>()
+    private val repository =
+        BlockchainTransactionRepositoryImpl(web3Js, gasPrice, unitConverter, ensRepository, freeTokenRepository)
 
-    private val repository: BlockchainRegularAccountRepositoryImpl =
-        BlockchainRegularAccountRepositoryImpl(web3Js, gasPrice, ensResolver, freeTokenRepository)
 
     @Test
     fun `refresh balance success`() {
@@ -63,7 +64,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
             .test()
             .await()
             .assertNoErrors()
-            .assertValue{ token ->
+            .assertValue { token ->
                 token as TokenWithError
                 token.error.message == "Balance Error"
             }
@@ -80,9 +81,16 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethEstimateGas(any()).flowable() } returns Flowable.just(ethEstimateGas)
         every { web3J.ethCall(any(), any()).flowable() } returns Flowable.just(ethCall)
+        every { ensRepository.resolveENS(any()) } returns Single.just("test")
+        every { unitConverter.toEther(any()) } returns BigDecimal.TEN
         val ethCostPayload =
             repository.getTransactionCosts(
-                TxCostData(BlockchainTransactionType.COIN_TRANSFER, from = "from", amount = BigDecimal.TEN, chainId = ETH),
+                TxCostData(
+                    BlockchainTransactionType.COIN_TRANSFER,
+                    from = "from",
+                    amount = BigDecimal.TEN,
+                    chainId = ETH
+                ),
                 BigDecimal.TEN
             )
         ethCostPayload.test()
@@ -103,6 +111,8 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
         every { web3J.ethGetTransactionCount(any(), any()).flowable() } returns Flowable.just(transactionCount)
         every { web3J.ethEstimateGas(any()).flowable() } returns Flowable.just(ethEstimateGas)
         every { web3J.ethCall(any(), any()).flowable() } returns Flowable.just(ethCall)
+        every { ensRepository.resolveENS(any()) } returns Single.just("0x12")
+        every { unitConverter.toEther(any()) } returns BigDecimal.TEN
         val ethCostPayload =
             repository.getTransactionCosts(
                 TxCostData(
@@ -123,6 +133,7 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
 
     @Test
     fun `get transaction costs for safe accounts tx success test`() {
+        every { unitConverter.toEther(any()) } returns BigDecimal.TEN
         val ethCostPayload =
             repository.getTransactionCosts(
                 TxCostData(
@@ -180,74 +191,10 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     }
 
     @Test
-    fun `resolve normal name test`() {
-        repository.resolveENS("tom")
-            .test()
-            .await()
-            .assertComplete()
-            .assertValue {
-                it == "tom"
-            }
-    }
-
-    @Test
-    fun `resolve ens name test`() {
-        every { ensResolver.resolve(any()) } returns "tom"
-        repository.resolveENS("tom.eth")
-            .test()
-            .await()
-            .assertComplete()
-            .assertValue {
-                it == "tom"
-            }
-    }
-
-    @Test
-    fun `reverse resolver ens`() {
-        every { ensResolver.reverseResolve(any()) } returns "tom.eth"
-        repository.reverseResolveENS("0x12332423")
-            .test()
-            .await()
-            .assertComplete()
-            .assertValue {
-                it == "tom.eth"
-            }
-    }
-
-    @Test
-    fun `to gwei conversion test`() {
-        val result = repository.toGwei(BigDecimal.ONE)
-        assertEquals(result, BigDecimal.valueOf(1000000000))
-    }
-
-    @Test
     fun `get transaction cost in ether`() {
+        every { unitConverter.toEther(any()) } returns BigDecimal.TEN
         val result = repository.getTransactionCostInEth(BigDecimal.ONE, BigDecimal.TEN).toDouble()
-        assertEquals(0.0, result)
-    }
-
-    @Test
-    fun `is address with checksum valid success test`() {
-        val result = repository.isAddressValid("0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359")
-        assertEquals(true, result)
-    }
-
-    @Test
-    fun `is address with no checksum and with random big letters invalid success test`() {
-        val result = repository.isAddressValid("0x9866208bea68B10f04697c00b891541a305Df851")
-        assertEquals(false, result)
-    }
-
-    @Test
-    fun `is address with no checksum but with all small letters success test`() {
-        val result = repository.isAddressValid("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359")
-        assertEquals(true, result)
-    }
-
-    @Test
-    fun `is address valid fail test`() {
-        val result = repository.isAddressValid("address")
-        assertEquals(false, result)
+        assertEquals(10.0, result)
     }
 
     @Test
@@ -275,34 +222,8 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
     }
 
     @Test
-    fun `get block number success`() {
-        val ethBlockNumber = EthBlockNumber()
-        ethBlockNumber.result = "0x1"
-        every { web3J.ethBlockNumber().flowable() } returns Flowable.just(ethBlockNumber)
-        repository.getCurrentBlockNumber(ETH)
-            .test()
-            .assertComplete()
-            .assertNoErrors()
-    }
-
-    @Test
-    fun `get block number error`() {
-        val error = Throwable()
-        every { web3J.ethBlockNumber().flowable() } returns Flowable.error(error)
-        repository.getCurrentBlockNumber(ETH)
-            .test()
-            .assertError(error)
-    }
-
-    @Test
-    fun `to address checksum test`() {
-        val result = repository.toChecksumAddress("0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359")
-        assertEquals("0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359", result)
-    }
-
-    @Test
     fun `Getting Free ATS request`() {
-        every { freeTokenRepository.getFreeATS("some address") } returns "txHash: 0xCookie"
+        every { freeTokenRepository.getFreeATS("some address") } returns "txHash"
         repository.getFreeATS("some address")
             .test()
             .assertComplete()
@@ -357,12 +278,4 @@ class BlockchainRegularAccountRepositoryImplTest : RxTest() {
             .assertError(error)
     }
 
-    @Test
-    fun `to ether conversion test`() {
-        val result = repository.toEther(BigDecimal.valueOf(1000000000000000000))
-        assertEquals(result, BigDecimal.ONE)
-
-        val result2 = repository.toEther(BigDecimal("1"))
-        assertEquals(result2, BigDecimal("1E-18"))
-    }
 }

@@ -9,15 +9,15 @@ import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.Network
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.model.network.Network
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
 
     private val accountManager: AccountManager = mock()
-    private val smartContractRepository: SmartContractRepository = mock()
+    private val safeAccountRepository: SafeAccountRepository = mock()
 
     private val ownersObserver: Observer<List<String>> = mock()
     private val kArgumentCaptor: KArgumentCaptor<List<String>> = argumentCaptor()
@@ -28,7 +28,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     private val addOwnerObserver: Observer<List<String>> = mock()
 
     private val viewModel: SafeAccountSettingsViewModel =
-        SafeAccountSettingsViewModel(accountManager, smartContractRepository)
+        SafeAccountSettingsViewModel(accountManager, safeAccountRepository)
 
     private val mockValue = Account(0, chainId = 3).apply {
         contractAddress = "0x123"
@@ -46,7 +46,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     fun `load updated owner list`() {
         NetworkManager.initialize(networks)
         whenever(accountManager.loadAccount(any())).thenReturn(mockValue)
-        whenever(smartContractRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(
+        whenever(safeAccountRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(
             Single.just(
                 listOf(
                     "0x456",
@@ -65,7 +65,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `getting current owners`() {
         whenever(accountManager.loadAccount(any())).thenReturn(mockValue)
-        whenever(smartContractRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(
+        whenever(safeAccountRepository.getSafeAccountOwners(any(), any(), any(), any())).thenReturn(
             Single.just(
                 listOf(
                     "0x456",
@@ -98,7 +98,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `add owner success test`() {
         whenever(
-            smartContractRepository.addSafeAccountOwner(
+            safeAccountRepository.addSafeAccountOwner(
                 any(),
                 any(),
                 any(),
@@ -119,7 +119,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `add owner error test`() {
         val error = Throwable()
-        whenever(smartContractRepository.addSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.error(error)
+        whenever(safeAccountRepository.addSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.error(error)
         viewModel.run {
             errorLiveData.observeForever(errorObserver)
             account = mockValue
@@ -155,7 +155,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     @Test
     fun `remove owner success test`() {
         whenever(
-            smartContractRepository.removeSafeAccountOwner(
+            safeAccountRepository.removeSafeAccountOwner(
                 any(),
                 any(),
                 any(),
@@ -177,7 +177,7 @@ class SafeAccountSettingsViewModelTest : BaseViewModelTest() {
     fun `remove owner success error`() {
         val error = Throwable()
         NetworkManager.initialize(networks)
-        whenever(smartContractRepository.removeSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.error(error)
+        whenever(safeAccountRepository.removeSafeAccountOwner(any(), any(), any(), any(), any())) doReturn Single.error(error)
         viewModel.run {
             errorLiveData.observeForever(errorObserver)
             account = Account(id = 0, owners = listOf("tom", "beata"), chainId = 3)
