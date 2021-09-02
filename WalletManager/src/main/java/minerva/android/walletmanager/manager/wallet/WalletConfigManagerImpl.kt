@@ -333,9 +333,7 @@ class WalletConfigManagerImpl(
                         CredentialsPayloadToCredentials.map(payload.credentialResponse),
                         payload.erc20TokenResponse.map { (chainId, tokens) ->
                             chainId to tokens
-                                /*Needed to remove NFT from wallet config, where we store only ERC-20 tokens, comment can be removed when compatibility with NFT is implemented*/
-                                .filter { erC20TokenPayload -> erC20TokenPayload.decimals.isNotEmpty() }
-                                .map { erC20TokenPayload -> ERC20TokenPayloadToERC20TokenMapper.map(erC20TokenPayload) }
+                                .map { erC20TokenPayload -> ERC20TokenPayloadToERCTokenMapper.map(erC20TokenPayload) }
                         }.toMap()
                     )
                 }

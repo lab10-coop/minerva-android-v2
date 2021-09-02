@@ -15,9 +15,8 @@ object WalletConfigToWalletPayloadMapper : Mapper<WalletConfig, WalletConfigPayl
             _servicesPayloads = input.services.map { service -> ServiceToServicePayloadMapper.map(service) },
             _credentialPayloads = input.credentials.map { credential -> CredentialToCredentialPayloadMapper.map(credential) },
             _erc20Tokens = input.erc20Tokens.map { (key, value) ->
-                /*Needed to remove NFT from wallet config, where we store only ERC-20 tokens, comment can be removed when compatibility with NFT is implemented*/
-                key to value.filter { erC20Token -> erC20Token.decimals.isNotEmpty() }
-                    .map { erC20Token -> ERC20TokenToERC20TokenPayloadMapper.map(erC20Token) }
+                key to value
+                    .map { erC20Token -> ERCTokenToERC20TokenPayloadMapper.map(erC20Token) }
             }.toMap()
         )
 }

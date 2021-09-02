@@ -19,7 +19,8 @@ import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
@@ -536,11 +537,11 @@ class AccountManagerTest : RxTest() {
                     fiatBalance = 13f.toBigDecimal(),
                     accountTokens = mutableListOf(
                         AccountToken(
-                            ERC20Token(1, "CookieToken", address = "0x0"),
+                            ERCToken(1, "CookieToken", address = "0x0", type = TokenType.ERC20),
                             tokenPrice = 13.3
                         ),
                         AccountToken(
-                            ERC20Token(2, "AnotherToken", address = "0x1"),
+                            ERCToken(2, "AnotherToken", address = "0x1", type = TokenType.ERC20),
                             tokenPrice = 23.3
                         )
                     )
@@ -553,11 +554,11 @@ class AccountManagerTest : RxTest() {
                     fiatBalance = 3f.toBigDecimal(),
                     accountTokens = mutableListOf(
                         AccountToken(
-                            ERC20Token(3, "CookieToken", address = "0x0"),
+                            ERCToken(3, "CookieToken", address = "0x0", type = TokenType.ERC20),
                             tokenPrice = 33.3
                         ),
                         AccountToken(
-                            ERC20Token(4, "CookieToken", address = "0x0"),
+                            ERCToken(4, "CookieToken", address = "0x0", type = TokenType.ERC20),
                             tokenPrice = 43.3
                         )
                     )
@@ -592,19 +593,18 @@ class AccountManagerTest : RxTest() {
             whenever(getTokenVisibility("account2", "tokenAddress2")).thenReturn(false)
             whenever(getTokenVisibility("account2", "tokenAddress5")).thenReturn(true)
         }
-        val result: Map<Int, List<ERC20Token>> = manager.filterCachedTokens(tokenMap)
+        val result: Map<Int, List<ERCToken>> = manager.filterCachedTokens(tokenMap)
         result[1]?.size shouldBeEqualTo 4
     }
 
     private val tokenMap = mapOf(
         1 to mutableListOf(
-            ERC20Token(1, "token1", address = "tokenAddress1", accountAddress = "account1"),
-            ERC20Token(1, "token2", address = "tokenAddress2", accountAddress = "account1"),
-            ERC20Token(1, "token3", address = "tokenAddress3", accountAddress = "account1"),
-            ERC20Token(1, "token4", address = "tokenAddress4", accountAddress = "account1"),
-
-            ERC20Token(1, "token5", address = "tokenAddress2", accountAddress = "account2"),
-            ERC20Token(1, "token6", address = "tokenAddress5", accountAddress = "account2")
+            ERCToken(1, "token1", address = "tokenAddress1", accountAddress = "account1", type = TokenType.ERC20),
+            ERCToken(1, "token2", address = "tokenAddress2", accountAddress = "account1", type = TokenType.ERC20),
+            ERCToken(1, "token3", address = "tokenAddress3", accountAddress = "account1", type = TokenType.ERC20),
+            ERCToken(1, "token4", address = "tokenAddress4", accountAddress = "account1", type = TokenType.ERC20),
+            ERCToken(1, "token5", address = "tokenAddress2", accountAddress = "account2", type = TokenType.ERC20),
+            ERCToken(1, "token6", address = "tokenAddress5", accountAddress = "account2", type = TokenType.ERC20)
         )
     )
 

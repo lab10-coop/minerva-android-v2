@@ -34,7 +34,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ActiveSuperToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.wallet.WalletAction
@@ -59,7 +59,7 @@ class AccountsViewModel(
     val hasAvailableAccounts: Boolean get() = accountManager.hasAvailableAccounts
     val activeAccounts: List<Account> get() = accountManager.activeAccounts
     private val rawAccounts: List<Account> get() = accountManager.rawAccounts
-    private val cachedTokens: Map<Int, List<ERC20Token>> get() = accountManager.cachedTokens
+    private val cachedTokens: Map<Int, List<ERCToken>> get() = accountManager.cachedTokens
     private var cachedAccountTokens: MutableList<AccountToken> = mutableListOf()
     private var newTokens: MutableList<AccountToken> = mutableListOf()
     private var newCachedTokens: MutableList<AccountToken> = mutableListOf()

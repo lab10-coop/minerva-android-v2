@@ -9,7 +9,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import minerva.android.R
 import minerva.android.kotlinUtils.function.orElse
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.model.token.Token
 
@@ -21,7 +21,7 @@ open class BlockiesImageView(context: Context, attributeSet: AttributeSet?) : Ap
     fun initView(token: Token) {
         when (token) {
             is NativeToken -> prepareNativeTokenIcon(token)
-            is ERC20Token -> prepareERC20TokenIcon(token)
+            is ERCToken -> prepareERCTokenIcon(token)
         }
     }
 
@@ -49,11 +49,15 @@ open class BlockiesImageView(context: Context, attributeSet: AttributeSet?) : Ap
         invalidate()
     }
 
-    private fun prepareERC20TokenIcon(token: ERC20Token) {
+    private fun prepareERCTokenIcon(token: ERCToken) {
         token.logoURI?.let { uri ->
             val icon = when {
-                uri.isEmpty() && token.symbol == USDT_SYMBOL -> { R.drawable.ic_coin_usdt }
-                uri.isEmpty() && token.symbol == DAI_SYMBOL -> { R.drawable.ic_coin_dai }
+                uri.isEmpty() && token.symbol == USDT_SYMBOL -> {
+                    R.drawable.ic_coin_usdt
+                }
+                uri.isEmpty() && token.symbol == DAI_SYMBOL -> {
+                    R.drawable.ic_coin_dai
+                }
                 else -> uri
             }
             Glide.with(this).load(icon).apply(RequestOptions.circleCropTransform()).into(this)

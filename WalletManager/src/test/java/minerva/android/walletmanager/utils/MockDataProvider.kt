@@ -13,7 +13,8 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.network.SuperFluid
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityResponse
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.onlineIdentityResponse
@@ -37,18 +38,18 @@ object MockDataProvider {
         Network(
             chainId = ATS_TAU, httpRpc = "address", testNet = true,
             tokens = listOf(
-                ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
-                ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32"),
-                ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
-                ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
+                ERCToken(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13", type = TokenType.ERC20),
+                ERCToken(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32", type = TokenType.ERC20),
+                ERCToken(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13", type = TokenType.ERC20),
+                ERCToken(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32", type = TokenType.ERC20)
             ),
             superfluid = SuperFluid("host", "netFlow")
         ),
         Network(
             chainId = ETH_RIN, httpRpc = "address", testNet = true,
             tokens = listOf(
-                ERC20Token(ETH_RIN, "CookieTokenDETH", "Cookie", "0xC00k1e", "13"),
-                ERC20Token(ETH_RIN, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13")
+                ERCToken(ETH_RIN, "CookieTokenDETH", "Cookie", "0xC00k1e", "13", type = TokenType.ERC20),
+                ERCToken(ETH_RIN, "OtherTokenDETH", "Cookie", "0x0th3rDD", "13", type = TokenType.ERC20)
             )
         ),
         Network(chainId = ATS_SIGMA, httpRpc = "address", testNet = true),
@@ -56,8 +57,8 @@ object MockDataProvider {
         Network(
             chainId = ETH_MAIN, httpRpc = "address", testNet = false,
             tokens = listOf(
-                ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
-                ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
+                ERCToken(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13", type = TokenType.ERC20),
+                ERCToken(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32", type = TokenType.ERC20)
             )
         )
     )
@@ -97,47 +98,74 @@ object MockDataProvider {
         mapOf(
             Pair(
                 ATS_TAU, listOf(
-                    ERC20Token(ATS_TAU, "CookieTokenATS", "Cookie", "0xC00k1eN", "13", accountAddress = "address4455"),
-                    ERC20Token(
+                    ERCToken(
+                        ATS_TAU,
+                        "CookieTokenATS",
+                        "Cookie",
+                        "0xC00k1eN",
+                        "13",
+                        accountAddress = "address4455",
+                        type = TokenType.ERC20
+                    ),
+                    ERCToken(
                         ATS_TAU,
                         "OtherTokenATS1",
                         "OtherC",
                         "0xS0m3T0k3N",
                         "32",
-                        accountAddress = "address4455"
+                        accountAddress = "address4455",
+                        type = TokenType.ERC20
                     ),
-                    ERC20Token(ATS_TAU, "OtherTokenATS", "OtherC", "0xC00k1e", "32", accountAddress = "address4455"),
-                    ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "0x0th3r", "32", accountAddress = "address4455")
+                    ERCToken(
+                        ATS_TAU,
+                        "OtherTokenATS",
+                        "OtherC",
+                        "0xC00k1e",
+                        "32",
+                        accountAddress = "address4455",
+                        type = TokenType.ERC20
+                    ),
+                    ERCToken(
+                        ATS_TAU,
+                        "TokenTest1",
+                        "OtherC",
+                        "0x0th3r",
+                        "32",
+                        accountAddress = "address4455",
+                        type = TokenType.ERC20
+                    )
 //                    ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "address1", "32", accountAddress = "address4455")
                 )
             ),
             Pair(
                 ETH_RIN, listOf(
-                    ERC20Token(
+                    ERCToken(
                         ETH_RIN,
                         "OtherTokenETH",
                         "OtherC",
                         "0x0th3r",
                         "32",
                         logoURI = "someLogoURI",
-                        accountAddress = "address123"
+                        accountAddress = "address123",
+                        type = TokenType.ERC20
                     ),
-                    ERC20Token(
+                    ERCToken(
                         ETH_RIN,
                         "CookieTokenETH",
                         "Cookie",
                         "0xC00k1e",
                         "13",
                         logoURI = "someLogoURI_II",
-                        accountAddress = "address123"
+                        accountAddress = "address123",
+                        type = TokenType.ERC20
                     )
                 )
             ),
             Pair(
                 ATS_SIGMA, listOf(
-                    ERC20Token(ATS_SIGMA, "CookieTokenATS", "Cookie", "0xC00k1e", "13", "0xADDRESSxTWO"),
-                    ERC20Token(ATS_SIGMA, "SecondOtherATS", "Other22", "0x0th3r22", "22", "0xADDRESSxTWO"),
-                    ERC20Token(ATS_SIGMA, "OtherTokenATS", "OtherC", "0x0th3r", "32", "0xADDRESSxTWO")
+                    ERCToken(ATS_SIGMA, "CookieTokenATS", "Cookie", "0xC00k1e", "13", "0xADDRESSxTWO", type = TokenType.ERC20),
+                    ERCToken(ATS_SIGMA, "SecondOtherATS", "Other22", "0x0th3r22", "22", "0xADDRESSxTWO", type = TokenType.ERC20),
+                    ERCToken(ATS_SIGMA, "OtherTokenATS", "OtherC", "0x0th3r", "32", "0xADDRESSxTWO", type = TokenType.ERC20)
                 )
             )
         )

@@ -22,9 +22,7 @@ import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.network.Network
-import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ActiveSuperToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.*
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TxCostPayload
@@ -836,7 +834,7 @@ class TransactionRepositoryTest : RxTest() {
         )
         val accountToken =
             AccountToken(
-                ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10"),
+                ERCToken(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", type = TokenType.ERC20),
                 currentRawBalance = BigDecimal.TEN
             )
 
@@ -861,7 +859,7 @@ class TransactionRepositoryTest : RxTest() {
     fun `Checking refreshing token balances when new tokens are detected without account address`() {
         val accountToken =
             AccountToken(
-                ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", accountAddress = ""),
+                ERCToken(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", accountAddress = "", type = TokenType.ERC20),
                 currentRawBalance = BigDecimal.TEN
             )
         whenever(tokenManager.getTokenBalance(any())).thenReturn(
@@ -911,18 +909,22 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `Check refreshing tokens list success`() {
         val tokensList = listOf(
-            ERC20Token(3, "Token01", address = "0x0N3"),
-            ERC20Token(3, "Token02", address = "0xTW0"),
-            ERC20Token(3, "Token03", address = "0xTHR33")
+            ERCToken(3, "Token01", address = "0x0N3", type = TokenType.ERC20),
+            ERCToken(3, "Token02", address = "0xTW0", type = TokenType.ERC20),
+            ERCToken(3, "Token03", address = "0xTHR33", type = TokenType.ERC20)
         )
 
         val tokensMap = mapOf(Pair(3, tokensList))
-        val updatedTokensMap = Pair(true, tokensMap)
+        val updatedTokensMap = UpdateTokensResult(true, tokensMap)
 
         whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.just(tokensList))
         whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
         whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
         whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(
+            Single.just(updatedTokensMap),
+            Single.error(Throwable("Stop thread"))
+        )
+        whenever(tokenManager.updateMissingNFTTokensDetails(any(), any(), any())).thenReturn(
             Single.just(updatedTokensMap),
             Single.error(Throwable("Stop thread"))
         )
@@ -938,8 +940,8 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `Check refreshing tokens list fail`() {
         val error = Throwable("error")
-        val tokensMap = mapOf(Pair(3, listOf<ERC20Token>()))
-        val updatedTokensMap = Pair(true, tokensMap)
+        val tokensMap = mapOf(Pair(3, listOf<ERCToken>()))
+        val updatedTokensMap = UpdateTokensResult(true, tokensMap)
         whenever(tokenManager.downloadTokensList(any())).thenReturn(Single.error(error))
         whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
         whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
@@ -961,9 +963,9 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `fill missing account address test`() {
         repository.newTaggedTokens = mutableListOf(
-            ERC20Token(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1", address = "token1"),
-            ERC20Token(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address2", address = "token2"),
-            ERC20Token(88, tag = "tag1", accountAddress = "address2", address = "token2")
+            ERCToken(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1", address = "token1", type = TokenType.ERC20),
+            ERCToken(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address2", address = "token2", type = TokenType.ERC20),
+            ERCToken(88, tag = "tag1", accountAddress = "address2", address = "token2", type = TokenType.ERC20)
         )
 
         val result = repository.getTokensWithAccountAddress(walletConfig.erc20Tokens)
@@ -980,8 +982,8 @@ class TransactionRepositoryTest : RxTest() {
     @Test
     fun `update tokens with tagged tokens test`() {
         repository.newTaggedTokens = mutableListOf(
-            ERC20Token(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1"),
-            ERC20Token(ChainId.ETH_RIN, tag = "tag2", accountAddress = "address2")
+            ERCToken(ChainId.ETH_RIN, tag = "tag1", accountAddress = "address1", type = TokenType.ERC20),
+            ERCToken(ChainId.ETH_RIN, tag = "tag2", accountAddress = "address2", type = TokenType.ERC20)
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
@@ -1009,13 +1011,14 @@ class TransactionRepositoryTest : RxTest() {
         )
         val accountToken =
             AccountToken(
-                ERC20Token(
+                ERCToken(
                     ChainId.ETH_RIN,
                     "one",
                     address = "address",
                     decimals = "10",
                     accountAddress = "address",
-                    isStreamActive = true
+                    isStreamActive = true,
+                    type = TokenType.ERC20
                 ),
                 currentRawBalance = BigDecimal.TEN
             )
@@ -1092,13 +1095,14 @@ class TransactionRepositoryTest : RxTest() {
         )
         val accountToken =
             AccountToken(
-                ERC20Token(
+                ERCToken(
                     ChainId.ETH_RIN,
                     "one",
                     address = "address",
                     decimals = "10",
                     accountAddress = "address",
-                    isStreamActive = true
+                    isStreamActive = true,
+                    type = TokenType.ERC20
                 ),
                 currentRawBalance = BigDecimal.TEN
             )
@@ -1138,13 +1142,14 @@ class TransactionRepositoryTest : RxTest() {
         )
         val accountToken =
             AccountToken(
-                ERC20Token(
+                ERCToken(
                     ChainId.ETH_RIN,
                     "one",
                     address = "address",
                     decimals = "10",
                     accountAddress = "address",
-                    isStreamActive = true
+                    isStreamActive = true,
+                    type = TokenType.ERC20
                 ),
                 currentRawBalance = BigDecimal.TEN
             )

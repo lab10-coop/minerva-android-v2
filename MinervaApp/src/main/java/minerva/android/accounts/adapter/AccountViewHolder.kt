@@ -19,8 +19,8 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.token.TokenView

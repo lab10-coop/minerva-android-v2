@@ -17,12 +17,9 @@ import minerva.android.extension.toggleVisibleOrGone
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_PADDING
-import minerva.android.walletmanager.model.Collectible
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.token.TokenView
-import timber.log.Timber
 
 class TokensAndCollectiblesView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null

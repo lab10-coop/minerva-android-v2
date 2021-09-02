@@ -3,7 +3,8 @@ package minerva.android.walletmanager.manager.networks
 
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
 import minerva.android.walletmanager.model.network.Network
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 import java.math.BigInteger
@@ -91,15 +92,15 @@ class NetworkManagerTest {
     }
 
     private val tokenSet1 = listOf(
-        ERC20Token(2, "token1", "ass1", "address1"),
-        ERC20Token(2, "token2", "ass2", "address2"),
-        ERC20Token(2, "token3", "ass3", "address3")
+        ERCToken(2, "token1", "ass1", "address1", type = TokenType.ERC20),
+        ERCToken(2, "token2", "ass2", "address2", type = TokenType.ERC20),
+        ERCToken(2, "token3", "ass3", "address3", type = TokenType.ERC20)
     )
 
     private val tokenSet2 = listOf(
-        ERC20Token(3, "token4", "ass4", "address4"),
-        ERC20Token(3, "token5", "ass5", "address5"),
-        ERC20Token(3, "token6", "ass6", "address6")
+        ERCToken(3, "token4", "ass4", "address4", type = TokenType.ERC20),
+        ERCToken(3, "token5", "ass5", "address5", type = TokenType.ERC20),
+        ERCToken(3, "token6", "ass6", "address6", type = TokenType.ERC20)
     )
 
     private val testNetworks1 = listOf(

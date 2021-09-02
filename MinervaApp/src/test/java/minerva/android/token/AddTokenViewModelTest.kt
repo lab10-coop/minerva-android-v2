@@ -9,7 +9,8 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.network.Network
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
@@ -21,8 +22,8 @@ class AddTokenViewModelTest : BaseViewModelTest() {
 
     private val viewModel = AddTokenViewModel(mock(), safeAccountRepository, tokenManager)
 
-    private val tokenObserver: Observer<ERC20Token> = mock()
-    private val tokenCaptor: KArgumentCaptor<ERC20Token> = argumentCaptor()
+    private val tokenObserver: Observer<ERCToken> = mock()
+    private val tokenCaptor: KArgumentCaptor<ERCToken> = argumentCaptor()
 
     private val addTokenObserver: Observer<Event<Unit>> = mock()
     private val addTokenCaptor: KArgumentCaptor<Event<Unit>> = argumentCaptor()
@@ -37,10 +38,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
 
         whenever(safeAccountRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(
             Single.just(
-                ERC20Token(
-                    1,
-                    name = "Some Token"
-                )
+                ERCToken(1, name = "Some Token", type = TokenType.ERC20)
             )
         )
         whenever(tokenManager.getTokenIconURL(any(), any())).thenReturn(Single.just("Cookie URL"))
@@ -63,7 +61,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
         )
         viewModel.run {
             tokenAddedLiveData.observeForever(addTokenObserver)
-            addToken(ERC20Token(1))
+            addToken(ERCToken(1, type = TokenType.ERC20))
         }
         addTokenCaptor.run {
             verify(addTokenObserver).onChanged(capture())
