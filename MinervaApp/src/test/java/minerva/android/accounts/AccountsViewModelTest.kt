@@ -469,7 +469,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             chainId = 1,
             accountTokens = mutableListOf(
                 AccountToken(
-                    rawBalance = BigDecimal.TEN,
+                    currentRawBalance = BigDecimal.TEN,
                     tokenPrice = 2.0,
                     token = ERC20Token(
                         1,
@@ -481,7 +481,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 ),
                 AccountToken(
                     tokenPrice = 3.0,
-                    rawBalance = BigDecimal.TEN,
+                    currentRawBalance = BigDecimal.TEN,
                     token = ERC20Token(
                         1,
                         name = "cachedToken2",

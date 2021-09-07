@@ -64,7 +64,8 @@ class AccountsViewModel(
     val areMainNetsEnabled: Boolean get() = accountManager.areMainNetworksEnabled
     val isProtectKeysEnabled: Boolean get() = accountManager.isProtectKeysEnabled
     val arePendingAccountsEmpty: Boolean
-        get() = transactionRepository.getPendingAccounts().isEmpty() && rawAccounts.any { account -> account.isPending }
+        get() = transactionRepository.getPendingAccounts()
+            .isEmpty() && rawAccounts.any { account -> account.isPending }
     val isSynced: Boolean get() = walletActionsRepository.isSynced
     val isRefreshDone: Boolean get() = coinBalancesRefreshed && tokenBalancesRefreshed
     private var coinBalancesRefreshed = false
@@ -115,14 +116,20 @@ class AccountsViewModel(
         }
     }
 
-    private fun updateSessions(sessions: List<DappSession>, accounts: List<Account>): List<DappSessionData> =
+    private fun updateSessions(
+        sessions: List<DappSession>,
+        accounts: List<Account>
+    ): List<DappSessionData> =
         if (sessions.isNotEmpty()) {
             mutableListOf<DappSessionData>().apply {
                 accounts.forEach { account ->
                     if (isCurrentSession(sessions, account)) {
                         val count =
                             sessions.count { session ->
-                                session.address.equals(account.address, true) && session.chainId == account.chainId
+                                session.address.equals(
+                                    account.address,
+                                    true
+                                ) && session.chainId == account.chainId
                             }
                         add(DappSessionData(account.address, account.chainId, count))
                     }
@@ -146,7 +153,15 @@ class AccountsViewModel(
                         account.chainId
                     )
                 )
-                .andThen(walletActionsRepository.saveWalletActions(listOf(getHideAccountAction(account))))
+                .andThen(
+                    walletActionsRepository.saveWalletActions(
+                        listOf(
+                            getHideAccountAction(
+                                account
+                            )
+                        )
+                    )
+                )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -222,7 +237,10 @@ class AccountsViewModel(
                 (account.cryptoBalance != coinBalance.balance.cryptoBalance || account.fiatBalance != coinBalance.balance.fiatBalance)
 
     private fun isAccountToUpdate(account: Account, coinBalance: Coin): Boolean =
-        (account.address.equals(coinBalance.address, true) && account.chainId == coinBalance.chainId)
+        (account.address.equals(
+            coinBalance.address,
+            true
+        ) && account.chainId == coinBalance.chainId)
 
     fun refreshTokensBalances(isAutoDiscoveryRefresh: Boolean = false) {
         streamingDisposable = CompositeDisposable()
@@ -242,7 +260,9 @@ class AccountsViewModel(
                                 tokenBalancesRefreshed = true
                                 _balanceStateLiveData.value = TokenBalanceCompleted
                             },
-                            onNext = { index -> _balanceStateLiveData.value = TokenBalanceUpdate(index) },
+                            onNext = { index ->
+                                _balanceStateLiveData.value = TokenBalanceUpdate(index)
+                            },
                             onError = { error ->
                                 logError("Refresh tokens error: ${getError(error)}")
                                 _errorLiveData.value = Event(RefreshBalanceError)
@@ -266,7 +286,8 @@ class AccountsViewModel(
                     if (!isAutoDiscoveryRefresh) {
                         getSuperTokenStreamInitBalance()
                     }
-                }.subscribeBy(onError = { error -> logger.logToFirebase("Saving tagged tokens error: ${error.message}") })
+                }
+                .subscribeBy(onError = { error -> logger.logToFirebase("Saving tagged tokens error: ${error.message}") })
         }
     }
 
@@ -284,7 +305,9 @@ class AccountsViewModel(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onNext = { index -> _balanceStateLiveData.value = TokenBalanceUpdate(index) },
+                        onNext = { index ->
+                            _balanceStateLiveData.value = TokenBalanceUpdate(index)
+                        },
                         onError = { error -> logger.logToFirebase("SuperToken init balance error: $error") },
                         onComplete = { handleSuperTokenStreams() }
                     )
@@ -293,7 +316,8 @@ class AccountsViewModel(
     }
 
     private fun handleSuperTokenStreams() {
-        val activeSuperTokenStreams: MutableList<ActiveSuperToken> = transactionRepository.activeSuperTokenStreams
+        val activeSuperTokenStreams: MutableList<ActiveSuperToken> =
+            transactionRepository.activeSuperTokenStreams
         val isActiveSuperTokenVisible: Boolean =
             activeSuperTokenStreams.any { activeSuperToken ->
                 tokenVisibilitySettings.getTokenVisibility(
@@ -328,8 +352,12 @@ class AccountsViewModel(
             "$error"
         }
 
-    private fun updateNewTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
-        if (hasFunds(balance.accountToken.balance)) {
+    private fun updateNewTokenAndReturnIndex(
+        account: Account,
+        balance: AssetBalance,
+        index: Int
+    ): Int {
+        if (hasFunds(balance.accountToken.currentBalance)) {
             saveTokenVisible(account.address, balance.accountToken.token.address, true)
             newTokens.add(balance.accountToken)
             account.accountTokens =
@@ -365,8 +393,11 @@ class AccountsViewModel(
                 tokenVisibilitySettings.getTokenVisibility(account.address, token.address) == true
 
     private fun shouldShowAccountToken(account: Account, accountToken: AccountToken): Boolean =
-        tokenVisibilitySettings.getTokenVisibility(account.address, accountToken.token.address) == true &&
-                (hasFunds(accountToken.balance) || accountToken.token.isError)
+        tokenVisibilitySettings.getTokenVisibility(
+            account.address,
+            accountToken.token.address
+        ) == true &&
+                (hasFunds(accountToken.currentBalance) || accountToken.token.isError)
 
     private fun updateTokenErrorAndReturnIndex(balance: AssetError): Int {
         var accountIndex: Int = Int.InvalidIndex
@@ -377,7 +408,12 @@ class AccountsViewModel(
                     val tokenAddress = balance.tokenAddress
                     val accountAddress = balance.accountAddress
                     account.accountTokens.forEach { accountToken ->
-                        if (isTheSameToken(accountToken, tokenAddress, accountAddress) && !accountToken.token.isError) {
+                        if (isTheSameToken(
+                                accountToken,
+                                tokenAddress,
+                                accountAddress
+                            ) && !accountToken.token.isError
+                        ) {
                             accountToken.token.isError = true
                             accountIndex = index
                         }
@@ -401,7 +437,11 @@ class AccountsViewModel(
     private fun isTokenInAccount(balance: Asset, account: Account): Boolean =
         balance.chainId == account.chainId && balance.privateKey.equals(account.privateKey, true)
 
-    private fun updateTokenVisibilityAndReturnIndex(account: Account, asset: AssetBalance, index: Int): Int {
+    private fun updateTokenVisibilityAndReturnIndex(
+        account: Account,
+        asset: AssetBalance,
+        index: Int
+    ): Int {
         var accountIndex: Int = Int.InvalidIndex
         isTokenVisible(account.address, asset.accountToken)?.let { isVisible ->
             accountIndex = if (isVisible) {
@@ -418,7 +458,11 @@ class AccountsViewModel(
     fun isTokenVisible(accountAddress: String, accountToken: AccountToken): Boolean? =
         tokenVisibilitySettings.getTokenVisibility(accountAddress, accountToken.token.address)
 
-    private fun updateNotVisibleTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
+    private fun updateNotVisibleTokenAndReturnIndex(
+        account: Account,
+        balance: AssetBalance,
+        index: Int
+    ): Int {
         var accountIndex: Int = Int.InvalidIndex
         if (isTokenShown(account, balance.accountToken.token)) {
             account.accountTokens.remove(balance.accountToken)
@@ -427,18 +471,26 @@ class AccountsViewModel(
         return accountIndex
     }
 
-    private fun updateVisibleTokenAndReturnIndex(account: Account, balance: AssetBalance, index: Int): Int {
+    private fun updateVisibleTokenAndReturnIndex(
+        account: Account,
+        balance: AssetBalance,
+        index: Int
+    ): Int {
         var accountIndex: Int = Int.InvalidIndex
         if (isTokenShown(account, balance.accountToken.token)) {
             val tokenAddress = balance.accountToken.token.address
             val accountAddress = balance.accountToken.token.accountAddress
-            account.accountTokens.find { token -> isTheSameToken(token, tokenAddress, accountAddress) }
+            account.accountTokens.find { token ->
+                isTheSameToken(
+                    token,
+                    tokenAddress,
+                    accountAddress
+                )
+            }
                 ?.let { accountToken ->
                     if (shouldUpdateBalance(accountToken, balance)) {
-                        accountToken.rawBalance = balance.accountToken.rawBalance
-                        accountToken.tokenPrice = balance.accountToken.tokenPrice
-                        accountToken.token.isError = false
-                        accountIndex = index
+                        accountIndex =
+                            updateTokenBalanceAndReturnIndex(balance, accountToken, index)
                     } else if (accountToken.token.isError) {
                         accountToken.token.isError = false
                         accountIndex = index
@@ -451,8 +503,63 @@ class AccountsViewModel(
         return accountIndex
     }
 
+    private fun updateTokenBalanceAndReturnIndex(
+        balance: AssetBalance,
+        accountToken: AccountToken,
+        index: Int
+    ): Int =
+        if (balance.accountToken.token.isStreamActive) {
+            updateSuperTokenStreamAndReturnIndex(accountToken, balance, index)
+        } else {
+            with(accountToken) {
+                currentRawBalance = balance.accountToken.currentRawBalance
+                tokenPrice = balance.accountToken.tokenPrice
+                token.isError = false
+            }
+            index
+        }
+
+    private fun updateSuperTokenStreamAndReturnIndex(
+        accountToken: AccountToken,
+        balance: AssetBalance,
+        index: Int
+    ): Int = with(accountToken) {
+        when {
+            nextBalance == Double.InvalidValue.toBigDecimal() -> {
+                updateInitSuperTokenStreamBalance(balance, accountToken)
+                index
+            }
+            nextBalance != balance.accountToken.nextBalance -> {
+                updateNextSuperTokenStreamBalance(balance, accountToken)
+                index
+            }
+            else -> Int.InvalidIndex
+        }
+    }
+
+    private fun updateNextSuperTokenStreamBalance(
+        balance: AssetBalance,
+        accountToken: AccountToken
+    ) = with(accountToken) {
+        currentRawBalance = nextRawBalance
+        nextRawBalance = balance.accountToken.nextRawBalance
+        token.isStreamActive = balance.accountToken.token.isStreamActive
+        isInitStream = false
+        token.consNetFlow = balance.accountToken.token.consNetFlow
+    }
+
+    private fun updateInitSuperTokenStreamBalance(
+        balance: AssetBalance,
+        accountToken: AccountToken
+    ) = with(accountToken) {
+        currentRawBalance = balance.accountToken.currentRawBalance
+        nextRawBalance = balance.accountToken.nextRawBalance
+        isInitStream = true
+        token.consNetFlow = balance.accountToken.token.consNetFlow
+    }
+
     private fun shouldUpdateBalance(accountToken: AccountToken?, balance: AssetBalance) =
-        accountToken?.rawBalance != balance.accountToken.rawBalance ||
+        accountToken?.currentRawBalance != balance.accountToken.currentRawBalance ||
                 accountToken.tokenPrice != balance.accountToken.tokenPrice
 
     private fun isTokenShown(account: Account, token: ERC20Token) =
@@ -460,7 +567,11 @@ class AccountsViewModel(
             isTheSameToken(accountToken, token.address, token.accountAddress)
         } != null
 
-    private fun isTheSameToken(accountToken: AccountToken, tokenAddress: String, accountAddress: String): Boolean =
+    private fun isTheSameToken(
+        accountToken: AccountToken,
+        tokenAddress: String,
+        accountAddress: String
+    ): Boolean =
         accountToken.token.address.equals(tokenAddress, true) &&
                 accountToken.token.accountAddress.equals(accountAddress, true)
 
@@ -492,7 +603,9 @@ class AccountsViewModel(
         logError("Error while hiding account: $error")
         _errorLiveData.value = when (error) {
             is BalanceIsNotEmptyThrowable -> Event(BalanceIsNotEmptyError)
-            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> Event(BalanceIsNotEmptyAndHasMoreOwnersError)
+            is BalanceIsNotEmptyAndHasMoreOwnersThrowable -> Event(
+                BalanceIsNotEmptyAndHasMoreOwnersError
+            )
             is IsNotSafeAccountMasterOwnerThrowable -> Event(IsNotSafeAccountMasterOwnerError)
             is AutomaticBackupFailedThrowable -> Event(AutomaticBackupError(error))
             else -> Event(BaseError)
@@ -514,7 +627,13 @@ class AccountsViewModel(
                         accountManager.createSafeAccount(account, smartContractAddress)
                     }
                     .observeOn(Schedulers.io())
-                    .andThen(walletActionsRepository.saveWalletActions(getSafeAccountWalletAction(account)))
+                    .andThen(
+                        walletActionsRepository.saveWalletActions(
+                            getSafeAccountWalletAction(
+                                account
+                            )
+                        )
+                    )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe { _loadingLiveData.value = Event(true) }
@@ -566,7 +685,11 @@ class AccountsViewModel(
             account.network.chainId == NetworkManager.networks[FIRST_DEFAULT_TEST_NETWORK_INDEX].chainId
         } ?: Account(Int.InvalidId)
 
-    private fun saveTokenVisible(networkAddress: String, tokenAddress: String, visibility: Boolean) {
+    private fun saveTokenVisible(
+        networkAddress: String,
+        tokenAddress: String,
+        visibility: Boolean
+    ) {
         tokenVisibilitySettings = accountManager.saveTokenVisibilitySettings(
             tokenVisibilitySettings.updateTokenVisibility(networkAddress, tokenAddress, visibility)
         )
@@ -576,7 +699,14 @@ class AccountsViewModel(
         launchDisposable {
             accountManager.createOrUnhideAccount(NetworkManager.getNetwork(chainId))
                 .flatMapCompletable {
-                    walletActionsRepository.saveWalletActions(listOf(getWalletAction(WalletActionStatus.ADDED, it)))
+                    walletActionsRepository.saveWalletActions(
+                        listOf(
+                            getWalletAction(
+                                WalletActionStatus.ADDED,
+                                it
+                            )
+                        )
+                    )
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -613,14 +743,20 @@ class AccountsViewModel(
         }
     }
 
-    fun updateSessionCount(sessionsPerAccount: List<DappSessionData>, passIndex: (index: Int) -> Unit) {
+    fun updateSessionCount(
+        sessionsPerAccount: List<DappSessionData>,
+        passIndex: (index: Int) -> Unit
+    ) {
         activeAccounts
             .filter { account -> !account.isPending }
             .forEachIndexed { index, account ->
                 account.apply {
                     dappSessionCount = sessionsPerAccount
                         .find { dappSession ->
-                            dappSession.address.equals(address, true) && dappSession.chainId == chainId
+                            dappSession.address.equals(
+                                address,
+                                true
+                            ) && dappSession.chainId == chainId
                         }?.count ?: NO_DAPP_SESSION
                     passIndex(index)
                 }
@@ -647,7 +783,12 @@ class AccountsViewModel(
         rawAccounts.forEach { account -> account.isPending = false }
     }
 
-    private fun shouldShowPending(account: Account, index: Int, chainId: Int, areMainNetsEnabled: Boolean): Boolean =
+    private fun shouldShowPending(
+        account: Account,
+        index: Int,
+        chainId: Int,
+        areMainNetsEnabled: Boolean
+    ): Boolean =
         account.id == index && account.chainId == chainId && account.network.testNet != areMainNetsEnabled
 
     companion object {

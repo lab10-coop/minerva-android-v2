@@ -136,7 +136,6 @@ class TransactionRepositoryImpl(
                 getAccountsWithActiveStreams(accounts, tokenManager.activeSuperTokenStreams)
                     .filter { account -> account.chainId == chainId }
             return webSocketRepository.subscribeToBlockCreation(chainId)
-                //TODO Will be change to getting SuperToken constFlow for animation: MNR-477
                 .flatMap { Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams)) }
                 .flatMap { asset -> handleSuperTokens(asset) }
         }
@@ -205,7 +204,7 @@ class TransactionRepositoryImpl(
         }
 
     private fun isAccountAddressMissing(assetBalance: AssetBalance): Boolean =
-        assetBalance.accountToken.balance > BigDecimal.ZERO && assetBalance.accountToken.token.accountAddress.isBlank()
+        assetBalance.accountToken.currentBalance > BigDecimal.ZERO && assetBalance.accountToken.token.accountAddress.isBlank()
 
     //test
     override fun updateTaggedTokens(): Completable {
@@ -243,7 +242,7 @@ class TransactionRepositoryImpl(
 
     private fun isTokenWithPositiveBalance(account: Account, assetBalance: AssetBalance): Boolean =
         account.privateKey.equals(assetBalance.privateKey, true) &&
-                account.chainId == assetBalance.chainId && assetBalance.accountToken.balance > BigDecimal.ZERO
+                account.chainId == assetBalance.chainId && assetBalance.accountToken.currentBalance > BigDecimal.ZERO
 
     private val accountsForTokenBalanceRefresh: List<Account>
         get() = if (shouldGetAllAccounts()) {

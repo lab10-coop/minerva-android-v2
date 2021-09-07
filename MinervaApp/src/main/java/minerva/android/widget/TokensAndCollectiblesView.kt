@@ -7,6 +7,8 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.children
+import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import minerva.android.R
@@ -19,13 +21,14 @@ import minerva.android.walletmanager.model.Collectible
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.token.TokenView
+import timber.log.Timber
 
 class TokensAndCollectiblesView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null
+        context: Context, attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 
     private var binding =
-        TokensAndCollectiblesLayoutBinding.bind(inflate(context, R.layout.tokens_and_collectibles_layout, this))
+            TokensAndCollectiblesLayoutBinding.bind(inflate(context, R.layout.tokens_and_collectibles_layout, this))
     private lateinit var callback: TokenView.TokenViewCallback
     private lateinit var parent: ViewGroup
     private var showMainToken = false
@@ -36,9 +39,9 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     }
 
     fun prepareView(
-        viewGroup: ViewGroup,
-        callback: TokenView.TokenViewCallback,
-        isOpen: Boolean
+            viewGroup: ViewGroup,
+            callback: TokenView.TokenViewCallback,
+            isOpen: Boolean
     ) {
         parent = viewGroup
         this.callback = callback
@@ -52,10 +55,10 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     private fun initView() {
         setPadding(
-            Int.NO_PADDING,
-            resources.getDimension(R.dimen.margin_xxsmall).toInt(),
-            resources.getDimension(R.dimen.margin_normal).toInt(),
-            resources.getDimension(R.dimen.margin_xxsmall).toInt()
+                Int.NO_PADDING,
+                resources.getDimension(R.dimen.margin_xxsmall).toInt(),
+                resources.getDimension(R.dimen.margin_normal).toInt(),
+                resources.getDimension(R.dimen.margin_xxsmall).toInt()
         )
         orientation = VERTICAL
         isClickable = true
@@ -66,6 +69,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     fun initTokensList(account: Account, fiatSymbol: String, tokens: List<ERC20Token>, isWidgetOpen: Boolean) {
         binding.apply {
             if (isWidgetOpen) {
+                tokensContainer.children.forEach { view -> (view as TokenView).endStreamAnimation() }
                 tokensContainer.removeAllViews()
                 tokens.isNotEmpty().let { areTokensVisible ->
                     tokensHeader.visibleOrGone(areTokensVisible)
@@ -73,13 +77,17 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                     tokens.forEach { token ->
                         tokensContainer.addView(TokenView(context).apply {
                             initView(account, callback, fiatSymbol, token)
-                            resources.getDimensionPixelOffset(R.dimen.margin_xxsmall)
-                                .let { padding -> updatePadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding) }
+                            resources.getDimensionPixelOffset(R.dimen.margin_xxsmall).let { padding -> updatePadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding) }
                         })
                     }
-
                 }
             }
+        }
+    }
+
+    fun endStreamAnimations() {
+        binding.tokensContainer.children.forEach { view ->
+            (view as TokenView).endStreamAnimation()
         }
     }
 
@@ -102,8 +110,8 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     }
 
     private fun getAnimationLevels(isContainerVisible: Boolean) =
-        if (isContainerVisible) Pair(START_ROTATION_LEVEL, STOP_ROTATION_LEVEL)
-        else Pair(STOP_ROTATION_LEVEL, START_ROTATION_LEVEL)
+            if (isContainerVisible) Pair(START_ROTATION_LEVEL, STOP_ROTATION_LEVEL)
+            else Pair(STOP_ROTATION_LEVEL, START_ROTATION_LEVEL)
 
     companion object {
         private const val LEVEL = "level"

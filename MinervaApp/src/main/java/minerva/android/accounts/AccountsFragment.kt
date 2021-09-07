@@ -11,12 +11,14 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.button.MaterialButton
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
+import minerva.android.accounts.adapter.AccountViewHolder
 import minerva.android.accounts.listener.AccountsFragmentToAdapterListener
 import minerva.android.accounts.state.*
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.databinding.RefreshableRecyclerViewLayoutBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.showBiometricPrompt
+import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -33,8 +35,10 @@ import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
-class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout), AccountsFragmentToAdapterListener {
+class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
+    AccountsFragmentToAdapterListener {
     private val viewModel: AccountsViewModel by viewModel()
     private val appUIState: AppUIState by inject()
     private val accountAdapter: AccountAdapter by lazy { AccountAdapter(this) }
@@ -65,14 +69,28 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun onPause() {
         super.onPause()
         viewModel.stopStreaming()
+        endSuperTokenStreamAnimation()
+    }
+
+    private fun endSuperTokenStreamAnimation() {
+        for (i in Int.FirstIndex..accountAdapter.itemCount) {
+            (binding.recyclerView.findViewHolderForAdapterPosition(i) as? AccountViewHolder)?.endStreamAnimation()
+        }
     }
 
     fun stopPendingTransactions() = accountAdapter.stopPendingTransactions()
 
     override fun onSendTransaction(account: Account) =
-        interactor.showTransactionScreen(viewModel.indexOfRawAccounts(account), isCoinBalanceError = account.isError)
+        interactor.showTransactionScreen(
+            viewModel.indexOfRawAccounts(account),
+            isCoinBalanceError = account.isError
+        )
 
-    override fun onSendTokenTransaction(account: Account, tokenAddress: String, isTokenError: Boolean) {
+    override fun onSendTokenTransaction(
+        account: Account,
+        tokenAddress: String,
+        isTokenError: Boolean
+    ) {
         interactor.showTransactionScreen(
             viewModel.indexOfRawAccounts(account),
             tokenAddress,
@@ -117,7 +135,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     override fun onShowAddress(account: Account) =
-        interactor.showTransactionScreen(viewModel.indexOfRawAccounts(account), screenIndex = RECEIVE_TRANSACTION_INDEX)
+        interactor.showTransactionScreen(
+            viewModel.indexOfRawAccounts(account),
+            screenIndex = RECEIVE_TRANSACTION_INDEX
+        )
 
     override fun onShowSafeAccountSettings(account: Account, position: Int) =
         startSafeAccountWrappedActivity(
@@ -129,7 +150,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         )
 
     override fun onWalletConnect(index: Int) = interactor.showWalletConnectScanner(index)
-    override fun onManageTokens(index: Int) = startManageTokensWrappedActivity(requireContext(), index)
+    override fun onManageTokens(index: Int) =
+        startManageTokensWrappedActivity(requireContext(), index)
+
     override fun onExportPrivateKey(account: Account) =
         if (viewModel.isProtectKeysEnabled) showBiometricPrompt({ showExportDialog(account) })
         else showExportDialog(account)
@@ -138,7 +161,9 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         appUIState.updateAccountWidgetState(index, accountWidgetState)
     }
 
-    override fun getAccountWidgetState(index: Int): AccountWidgetState = appUIState.getAccountWidgetState(index)
+    override fun getAccountWidgetState(index: Int): AccountWidgetState =
+        appUIState.getAccountWidgetState(index)
+
     override fun getTokens(account: Account): List<ERC20Token> = viewModel.getTokens(account)
     fun updateTokensRate() = viewModel.updateTokensRate()
     fun refreshBalances() = viewModel.refreshCoinBalances()
@@ -146,7 +171,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         accountAdapter.setPending(index, chainId, pending, viewModel.areMainNetsEnabled)
     }
 
-    private fun showExportDialog(account: Account) = ExportPrivateKeyDialog(requireContext(), account).show()
+    private fun showExportDialog(account: Account) =
+        ExportPrivateKeyDialog(requireContext(), account).show()
 
 
     private fun initFragment() {
@@ -156,7 +182,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 networksHeader.text = getHeader(areMainNetsEnabled)
                 addCryptoButton.apply { text = getBuyCryptoButtonText(this) }
                 if (!appUIState.shouldShowSplashScreen && isFirstLaunch) {
-                    SelectPredefinedAccountDialog(requireContext(), ::createAccountForSelectedNetwork).show()
+                    SelectPredefinedAccountDialog(
+                        requireContext(),
+                        ::createAccountForSelectedNetwork
+                    ).show()
                 }
             }
         }
@@ -164,10 +193,20 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
 
     private fun getBuyCryptoButtonText(materialButton: MaterialButton): String =
         if (viewModel.areMainNetsEnabled) {
-            materialButton.setBackgroundColor(ContextCompat.getColor(materialButton.context, R.color.colorPrimary))
+            materialButton.setBackgroundColor(
+                ContextCompat.getColor(
+                    materialButton.context,
+                    R.color.colorPrimary
+                )
+            )
             getString(R.string.buy_crypto)
         } else {
-            materialButton.setBackgroundColor(ContextCompat.getColor(materialButton.context, R.color.artis))
+            materialButton.setBackgroundColor(
+                ContextCompat.getColor(
+                    materialButton.context,
+                    R.color.artis
+                )
+            )
             getString(R.string.add_tats)
         }
 
@@ -212,9 +251,11 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     setTatsButtonListener()
                 })
 
-                dappSessions.observe(viewLifecycleOwner, ObserverWithSyncChecking { sessionsPerAccount ->
-                    accountAdapter.updateSessionCount(sessionsPerAccount)
-                })
+                dappSessions.observe(
+                    viewLifecycleOwner,
+                    ObserverWithSyncChecking { sessionsPerAccount ->
+                        accountAdapter.updateSessionCount(sessionsPerAccount)
+                    })
 
                 balanceStateLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { state ->
                     when (state) {
@@ -237,7 +278,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                             R.string.cannot_remove_safe_account_message
                         )
                     BalanceIsNotEmptyError ->
-                        showErrorFlashbar(R.string.cannot_remove_account_title, R.string.cannot_remove_account_message)
+                        showErrorFlashbar(
+                            R.string.cannot_remove_account_title,
+                            R.string.cannot_remove_account_message
+                        )
                     IsNotSafeAccountMasterOwnerError -> showErrorFlashbar(
                         R.string.error_header,
                         R.string.safe_account_removal_error
@@ -261,12 +305,13 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 refreshAddCryptoButton()
             })
 
-            addFreeAtsLiveData.observe(viewLifecycleOwner, EventObserverWithSyncChecking { success ->
-                (if (success) R.string.refresh_balance_to_check_transaction_status
-                else R.string.free_ats_warning).apply {
-                    Toast.makeText(context, this, Toast.LENGTH_SHORT).show()
-                }
-            })
+            addFreeAtsLiveData.observe(
+                viewLifecycleOwner,
+                EventObserverWithSyncChecking { success ->
+                    val message = if (success) R.string.refresh_balance_to_check_transaction_status
+                    else R.string.free_ats_warning
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                })
         }
     }
 
@@ -302,7 +347,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
             viewModel.apply {
                 if (areMainNetsEnabled) startRampWrappedActivity(requireContext())
                 else {
-                    view.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.inactiveButtonColor))
+                    view.setBackgroundColor(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            R.color.inactiveButtonColor
+                        )
+                    )
                     addAtsToken()
                 }
             }
@@ -325,7 +375,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         }
     }
 
-    private inner class ObserverWithSyncChecking<T>(private val onValueChanged: (T) -> Unit) : Observer<T> {
+    private inner class ObserverWithSyncChecking<T>(private val onValueChanged: (T) -> Unit) :
+        Observer<T> {
         override fun onChanged(value: T) {
             binding.syncError.isGone = viewModel.isSynced
             onValueChanged(value)
