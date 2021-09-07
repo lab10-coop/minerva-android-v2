@@ -1,5 +1,6 @@
 package minerva.android.walletConnect
 
+import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -43,7 +44,11 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         rejectRequest()
-        walletConnectViewModel.dispose()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        handleDeepLink(intent)
+        super.onNewIntent(intent)
     }
 
     override fun onDestroy() {
@@ -55,6 +60,11 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     protected fun prepareWalletConnect() {
         prepareWalletConnectInteractionObservers()
         walletConnectViewModel.getWalletConnectSessions()
+        walletConnectViewModel.subscribeToWCConnectionStatusFlowable()
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
         intent?.getParcelableExtra<Uri>(MOBILE_WALLET_CONNECT_DATA)?.let {
             handleWCConnectionDeepLink(it.toString())
         }
@@ -257,7 +267,6 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     }
 
     private fun handleWCConnectionDeepLink(deepLink: String) {
-        walletConnectViewModel.subscribeToWCConnectionStatusFlowable()
         walletConnectViewModel.handleDeepLink(deepLink)
     }
 

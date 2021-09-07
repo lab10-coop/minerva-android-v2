@@ -24,6 +24,6 @@ interface DappSessionDao {
     @Query("SELECT * FROM dapp_sessions")
     fun getAll(): Flowable<List<DappSessionEntity>>
 
-    @Query("SELECT *FROM dapp_sessions WHERE peer_id = :peerId")
-    fun getDapSessionById(peerId: String): Single<DappSessionEntity>
+    @Query("SELECT * FROM dapp_sessions WHERE peer_id = :itemId")
+    fun getDappSessionById(itemId: String): Single<DappSessionEntity>
 }

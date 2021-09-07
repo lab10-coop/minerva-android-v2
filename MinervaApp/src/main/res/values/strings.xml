@@ -359,6 +359,7 @@
     <string name="your_money_label">Your money</string>
     <string name="your_own_them_label">Own them</string>
     <string name="backup_server_error">Error when looking for backup data for the Secret Recovery Phrase you entered. Make sure your device is currently online and please try again</string>
+    <string name="empty" />
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
