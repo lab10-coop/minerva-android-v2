@@ -26,7 +26,7 @@ val networks = listOf(
 
 val accountTokensForPrivateKey1 = listOf(
     AccountToken(
-        rawBalance = BigDecimal.TEN,
+        currentRawBalance = BigDecimal.TEN,
         token = ERC20Token(
             1,
             "name",
@@ -36,7 +36,7 @@ val accountTokensForPrivateKey1 = listOf(
         )
     ),
     AccountToken(
-        rawBalance = BigDecimal.TEN,
+        currentRawBalance = BigDecimal.TEN,
         token = ERC20Token(
             1,
             "name",
@@ -49,7 +49,7 @@ val accountTokensForPrivateKey1 = listOf(
 
 val accountTokensForPrivateKey2 = listOf(
     AccountToken(
-        rawBalance = BigDecimal.TEN,
+        currentRawBalance = BigDecimal.TEN,
         token = ERC20Token(
             2,
             "name",
@@ -59,7 +59,7 @@ val accountTokensForPrivateKey2 = listOf(
         )
     ),
     AccountToken(
-        rawBalance = BigDecimal.TEN,
+        currentRawBalance = BigDecimal.TEN,
         token = ERC20Token(
             2,
             "name",
