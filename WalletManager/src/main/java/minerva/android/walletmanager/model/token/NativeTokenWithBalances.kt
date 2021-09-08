@@ -4,6 +4,6 @@ import java.math.BigDecimal
 
 data class NativeTokenWithBalances(
     override var token: NativeToken,
-    override var balance: BigDecimal,
+    override var currentBalance: BigDecimal,
     override val fiatBalance: BigDecimal
 ) : TokenWithBalances

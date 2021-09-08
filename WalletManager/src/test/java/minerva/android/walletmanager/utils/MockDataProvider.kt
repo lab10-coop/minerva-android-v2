@@ -12,6 +12,7 @@ import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
 import minerva.android.walletmanager.model.network.Network
+import minerva.android.walletmanager.model.network.SuperFluid
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityResponse
@@ -40,7 +41,8 @@ object MockDataProvider {
                 ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32"),
                 ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
                 ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
-            )
+            ),
+            superfluid = SuperFluid("host", "netFlow")
         ),
         Network(
             chainId = ETH_RIN, httpRpc = "address", testNet = true,

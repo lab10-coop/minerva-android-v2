@@ -777,7 +777,7 @@ class TransactionRepositoryTest : RxTest() {
         val accountToken =
             AccountToken(
                 ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10"),
-                rawBalance = BigDecimal.TEN
+                currentRawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
@@ -802,7 +802,7 @@ class TransactionRepositoryTest : RxTest() {
         val accountToken =
             AccountToken(
                 ERC20Token(ChainId.ETH_RIN, "one", address = "0x01", decimals = "10", accountAddress = ""),
-                rawBalance = BigDecimal.TEN
+                currentRawBalance = BigDecimal.TEN
             )
         whenever(tokenManager.getTokenBalance(any())).thenReturn(
             Flowable.just(AssetBalance(ChainId.ETH_RIN, "privateKey", accountToken))
@@ -957,7 +957,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     isStreamActive = true
                 ),
-                rawBalance = BigDecimal.TEN
+                currentRawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
@@ -1040,7 +1040,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     isStreamActive = true
                 ),
-                rawBalance = BigDecimal.TEN
+                currentRawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))
@@ -1086,7 +1086,7 @@ class TransactionRepositoryTest : RxTest() {
                     accountAddress = "address",
                     isStreamActive = true
                 ),
-                rawBalance = BigDecimal.TEN
+                currentRawBalance = BigDecimal.TEN
             )
 
         whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, emptyList(), accounts))

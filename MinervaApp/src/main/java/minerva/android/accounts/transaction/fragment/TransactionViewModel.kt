@@ -108,7 +108,7 @@ class TransactionViewModel(
         }
 
     val cryptoBalance: BigDecimal
-        get() = if (tokenAddress == String.Empty) account.cryptoBalance else account.getToken(tokenAddress).balance
+        get() = if (tokenAddress == String.Empty) account.cryptoBalance else account.getToken(tokenAddress).currentBalance
 
     fun getAccount(accountIndex: Int, tokenAddress: String) {
         transactionRepository.getAccount(accountIndex)?.let {

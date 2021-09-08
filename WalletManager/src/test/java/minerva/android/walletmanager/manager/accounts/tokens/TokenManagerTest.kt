@@ -44,6 +44,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
+import java.math.BigInteger
 import kotlin.test.assertFailsWith
 
 class TokenManagerTest : RxTest() {
@@ -604,7 +605,7 @@ class TokenManagerTest : RxTest() {
                             logoURI = null,
                             tag = "super2",
                             isError = false
-                        ), rawBalance = BigDecimal(10000), tokenPrice = 2.0
+                        ), currentRawBalance = BigDecimal(10000), tokenPrice = 2.0
                     )
                 )
             )
@@ -630,7 +631,7 @@ class TokenManagerTest : RxTest() {
                             logoURI = null,
                             tag = "",
                             isError = false
-                        ), rawBalance = BigDecimal(10000), tokenPrice = 2.0
+                        ), currentRawBalance = BigDecimal(10000), tokenPrice = 2.0
                     )
                 )
             )
@@ -695,6 +696,7 @@ class TokenManagerTest : RxTest() {
         )
         tokenManager.activeSuperTokenStreams = mutableListOf(ActiveSuperToken("address1", "address4455", ATS_TAU))
         whenever(rateStorage.getRate(any())).thenReturn(3.3)
+        whenever(superTokenRepository.getNetFlow(any(), any(), any(), any(), any())).thenReturn(Flowable.just(BigInteger.TEN))
 
         tokenManager.getSuperTokenBalance(account)
             .test()
@@ -705,7 +707,7 @@ class TokenManagerTest : RxTest() {
                 asset is AssetBalance &&
                 asset.chainId == ATS_TAU &&
                 asset.accountToken.tokenPrice == 3.3 &&
-                asset.accountToken.rawBalance == BigDecimal.TEN
+                asset.accountToken.currentRawBalance == BigDecimal.TEN
             }
     }
 
@@ -725,6 +727,7 @@ class TokenManagerTest : RxTest() {
         )
         tokenManager.activeSuperTokenStreams = mutableListOf(ActiveSuperToken("address1", "address4455", ATS_TAU))
         whenever(rateStorage.getRate(any())).thenReturn(3.3)
+        whenever(superTokenRepository.getNetFlow(any(), any(), any(), any(), any())).thenReturn(Flowable.just(BigInteger.TEN))
 
         tokenManager.getSuperTokenBalance(account)
             .test()

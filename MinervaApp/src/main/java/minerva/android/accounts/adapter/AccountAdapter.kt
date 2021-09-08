@@ -21,7 +21,10 @@ class AccountAdapter(
     private var fiatSymbol: String = String.Empty
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder =
-        AccountViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false), parent)
+        AccountViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.account_list_row, parent, false),
+            parent
+        )
 
     override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
         val account = differ.currentList[position]
