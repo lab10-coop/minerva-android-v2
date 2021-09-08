@@ -2,7 +2,7 @@ package minerva.android.walletmanager.manager.networks
 
 
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
-import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.ERC20Token
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test

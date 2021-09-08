@@ -3,11 +3,11 @@ package minerva.android.walletmanager.repository.smartContract
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.transactions.Transaction
 import java.math.BigDecimal
 
-interface SmartContractRepository {
+interface SafeAccountRepository {
     fun createSafeAccount(account: Account): Single<String>
     fun getSafeAccountOwners(contractAddress: String, chainId: Int, privateKey: String, account: Account): Single<List<String>>
     fun addSafeAccountOwner(

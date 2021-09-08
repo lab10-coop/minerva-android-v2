@@ -64,7 +64,7 @@ class WCClient(
     var chainId: Int? = null
 
     var onFailure: (error: Throwable, peerId: String, isForceTermination: Boolean) -> Unit = { _, _, _ -> }
-    var onDisconnect: (code: Int, peerId: String?) -> Unit = { _, _ -> }
+    var onDisconnect: (code: Int, peerId: String?, isExternal: Boolean) -> Unit = { _, _, _ -> }
     var onSessionRequest: (remotePeerId: String?, peer: WCPeerMeta, chainId: Int?, peerId: String, handshakeId: Long) -> Unit =
         { _, _, _, _, _ -> }
     var onEthSign: (id: Long, message: WCEthereumSignMessage, peerId: String) -> Unit = { _, _, _ -> }
@@ -129,7 +129,7 @@ class WCClient(
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        onDisconnect(code, peerId)
+        onDisconnect(code, peerId, reason == EXTERNAL_DISCONNECT)
         resetState()
         peerId = String.Empty
         listeners.forEach { it.onClosing(webSocket, code, reason) }
@@ -216,9 +216,9 @@ class WCClient(
         return encryptAndSend(gson.toJson(response))
     }
 
-    fun killSession(): Boolean {
+    fun killSession(reason: String? = null): Boolean {
         updateSession(approved = false)
-        return disconnect()
+        return disconnect(reason)
     }
 
     fun <T> approveRequest(id: Long, result: T): Boolean {
@@ -286,7 +286,7 @@ class WCClient(
                 val param = gson.fromJson<List<WCSessionUpdate>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 if (!param.approved) {
-                    killSession()
+                    killSession(EXTERNAL_DISCONNECT)
                 }
             }
             WCMethod.ETH_SIGN -> {
@@ -376,8 +376,8 @@ class WCClient(
         return socket?.send(json) ?: false
     }
 
-    fun disconnect(): Boolean {
-        return socket?.close(1000, null) ?: false
+    fun disconnect(reason: String? = null): Boolean {
+        return socket?.close(1000, reason) ?: false
     }
 
     fun addSocketListener(listener: WebSocketListener) {
@@ -394,5 +394,9 @@ class WCClient(
         session = null
         remotePeerId = null
         peerMeta = null
+    }
+
+    companion object {
+        private const val EXTERNAL_DISCONNECT = "external_disconnect"
     }
 }

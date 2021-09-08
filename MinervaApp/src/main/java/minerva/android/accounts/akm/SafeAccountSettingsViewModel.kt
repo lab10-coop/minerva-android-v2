@@ -14,12 +14,12 @@ import minerva.android.walletmanager.exception.CannotRemoveMasterOwnerAddressThr
 import minerva.android.walletmanager.exception.OwnerAlreadyAddedThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import timber.log.Timber
 
 class SafeAccountSettingsViewModel(
     private val accountManager: AccountManager,
-    private val smartContractRepository: SmartContractRepository
+    private val safeAccountRepository: SafeAccountRepository
 ) : BaseViewModel() {
 
     internal lateinit var account: Account
@@ -40,7 +40,7 @@ class SafeAccountSettingsViewModel(
         getOwners(account.address, account.network.chainId, account.privateKey)
 
         val masterOwnerAddress = account.masterOwnerAddress
-        smartContractRepository.getSafeAccountMasterOwnerPrivateKey(masterOwnerAddress).apply {
+        safeAccountRepository.getSafeAccountMasterOwnerPrivateKey(masterOwnerAddress).apply {
             masterOwnerPrivateKey = this
         }
     }
@@ -51,7 +51,7 @@ class SafeAccountSettingsViewModel(
             return
         }
         launchDisposable {
-            smartContractRepository.addSafeAccountOwner(
+            safeAccountRepository.addSafeAccountOwner(
                 owner,
                 account.address,
                 account.network.chainId,
@@ -81,7 +81,7 @@ class SafeAccountSettingsViewModel(
         }
 
         launchDisposable {
-            smartContractRepository.removeSafeAccountOwner(
+            safeAccountRepository.removeSafeAccountOwner(
                 removeAddress,
                 account.address,
                 account.network.chainId,
@@ -112,7 +112,7 @@ class SafeAccountSettingsViewModel(
     @VisibleForTesting
     fun getOwners(contractAddress: String, chainId: Int, privateKey: String) {
         launchDisposable {
-            smartContractRepository.getSafeAccountOwners(
+            safeAccountRepository.getSafeAccountOwners(
                 contractAddress,
                 chainId,
                 privateKey,

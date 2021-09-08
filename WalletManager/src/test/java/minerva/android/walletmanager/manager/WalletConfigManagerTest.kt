@@ -23,8 +23,8 @@ import minerva.android.walletmanager.exception.WalletConfigNotFoundThrowable
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage

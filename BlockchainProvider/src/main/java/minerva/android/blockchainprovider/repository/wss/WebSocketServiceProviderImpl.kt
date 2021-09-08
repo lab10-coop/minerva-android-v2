@@ -13,6 +13,10 @@ class WebSocketServiceProviderImpl : WebSocketServiceProvider {
         web3j.replayPastAndFutureTransactionsFlowable(DefaultBlockParameter.valueOf(blockNumber))
             .take(TIMEOUT, TimeUnit.SECONDS)
             .map { ExecutedTransaction(it.hash, it.from) }
+
+    override fun subscribeToBlockCreation(web3j: Web3j): Flowable<Unit> =
+        web3j.blockFlowable(false)
+            .map { Unit }
 }
 
 private const val TIMEOUT = 240L

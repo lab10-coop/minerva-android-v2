@@ -1,4 +1,4 @@
-package minerva.android.blockchainprovider.repository.smartContract
+package minerva.android.blockchainprovider.repository.safeAccount
 
 import java.math.BigInteger
 

@@ -1,4 +1,4 @@
-package minerva.android.walletmanager.model
+package minerva.android.walletmanager.model.network
 
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
@@ -16,7 +16,8 @@ data class Network(
     val tokens: List<ERC20Token> = emptyList(),
     val color: String = String.Empty,
     val testNet: Boolean = true,
-    val chainId: Int = Int.InvalidValue
+    val chainId: Int = Int.InvalidValue,
+    val superfluid: SuperFluid? = null
 ) {
     fun isAvailable(): Boolean = httpRpc != String.Empty
 }

@@ -1,7 +1,6 @@
 package minerva.android.walletmanager.utils
 
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
@@ -12,6 +11,8 @@ import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.credential.Credential
+import minerva.android.walletmanager.model.network.Network
+import minerva.android.walletmanager.model.network.SuperFluid
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.accountsResponse
 import minerva.android.walletmanager.model.token.WalletConfigTestValues.identityResponse
@@ -40,7 +41,8 @@ object MockDataProvider {
                 ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32"),
                 ERC20Token(ATS_TAU, "CookieTokenDATS", "Cookie", "0xC00k1eN", "13"),
                 ERC20Token(ATS_TAU, "SomeSomeTokenDATS", "SST", "0xS0m3T0k3N", "32")
-            )
+            ),
+            superfluid = SuperFluid("host", "netFlow")
         ),
         Network(
             chainId = ETH_RIN, httpRpc = "address", testNet = true,
@@ -106,6 +108,7 @@ object MockDataProvider {
                     ),
                     ERC20Token(ATS_TAU, "OtherTokenATS", "OtherC", "0xC00k1e", "32", accountAddress = "address4455"),
                     ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "0x0th3r", "32", accountAddress = "address4455")
+//                    ERC20Token(ATS_TAU, "TokenTest1", "OtherC", "address1", "32", accountAddress = "address4455")
                 )
             ),
             Pair(

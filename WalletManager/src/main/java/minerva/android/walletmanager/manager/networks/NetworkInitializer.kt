@@ -5,7 +5,7 @@ import androidx.startup.Initializer
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import minerva.android.kotlinUtils.Empty
-import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.network.Network
 import java.io.IOException
 
 class NetworkInitializer : Initializer<NetworkManager> {

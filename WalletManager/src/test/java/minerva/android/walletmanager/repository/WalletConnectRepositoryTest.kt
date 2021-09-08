@@ -195,7 +195,7 @@ class WalletConnectRepositoryTest {
 
     @Test
     fun `get session by id test`() {
-        whenever(dappSessionDao.getDapSessionById(any())).thenReturn(Single.just(DappSessionEntity(address = "address1")))
+        whenever(dappSessionDao.getDappSessionById(any())).thenReturn(Single.just(DappSessionEntity(address = "address1")))
         repository.getDappSessionById("peerId")
             .test()
             .assertNoErrors()
@@ -208,7 +208,7 @@ class WalletConnectRepositoryTest {
     @Test
     fun `get session by id error test`() {
         val error = Throwable()
-        whenever(dappSessionDao.getDapSessionById(any())).thenReturn(Single.error(error))
+        whenever(dappSessionDao.getDappSessionById(any())).thenReturn(Single.error(error))
         repository.getDappSessionById("peerId")
             .test()
             .assertError(error)

@@ -23,7 +23,11 @@
     "tokens": [],
     "color": "#FF6535c9",
     "testNet": true,
-    "chainId": 4
+    "chainId": 4,
+    "superfluid": {
+      "host": "0xeD5B5b32110c3Ded02a07c8b8e97513FAfb883B6",
+      "cfav1": "0xF4C5310E51F6079F601a5fb7120bC72a70b96e2A"
+    }
   },
   {
     "name": "POA Sokol",
@@ -62,7 +66,11 @@
     "tokens": [],
     "color": "#FF6535c9",
     "testNet": true,
-    "chainId": 42
+    "chainId": 42,
+    "superfluid": {
+      "host": "0xF0d7d1D47109bA426B9D8A3Cde1941327af1eea3",
+      "cfav1": "0xECa8056809e7e8db04A8fF6e4E82cD889a46FE2F"
+    }
   },
   {
     "name": "Görli",
@@ -75,7 +83,11 @@
     "tokens": [],
     "color": "#FFBDAE9B",
     "testNet": true,
-    "chainId": 5
+    "chainId": 5,
+    "superfluid": {
+      "host": "0x22ff293e14F1EC3A09B137e9e06084AFd63adDF9",
+      "cfav1": "0xEd6BcbF6907D4feEEe8a8875543249bEa9D308E8"
+    }
   },
   {
     "name": "Ropsten",
@@ -88,7 +100,11 @@
     "tokens": [],
     "color": "#FF6535c9",
     "testNet": true,
-    "chainId": 3
+    "chainId": 3,
+    "superfluid": {
+      "host": "0xF2B4E81ba39F5215Db2e05B2F66f482BB8e87FD2",
+      "cfav1": "0xaD2F1f7cd663f6a15742675f975CcBD42bb23a88"
+    }
   },
   {
     "name": "Mumbai",
@@ -127,7 +143,11 @@
     "tokens": [],
     "color": "#48a9a6",
     "testNet": false,
-    "chainId": 100
+    "chainId": 100,
+    "superfluid": {
+      "host": "0x2dFe937cD98Ab92e59cF3139138f18c823a4efE7",
+      "cfav1": "0xEbdA4ceF883A7B12c4E669Ebc58927FBa8447C7D"
+    }
   },
   {
     "name": "Polygon (MATIC)",

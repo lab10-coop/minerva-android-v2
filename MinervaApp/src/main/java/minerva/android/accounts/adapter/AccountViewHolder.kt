@@ -42,6 +42,10 @@ class AccountViewHolder(
 
     override fun onSendCoinClicked(account: Account) = listener.onSendCoinClicked(account)
 
+    fun endStreamAnimation() {
+        binding.tokensAndCollectibles.endStreamAnimations()
+    }
+
     fun setupListener(listener: AccountsAdapterListener) {
         this.listener = listener
     }
@@ -145,14 +149,15 @@ class AccountViewHolder(
         }
     }
 
-    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) = setOnClickListener {
-        if (isWidgetOpen) {
-            close()
-        } else {
-            binding.tokensAndCollectibles.initTokensList(account, fiatSymbol, tokens, true)
-            open()
+    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) =
+        setOnClickListener {
+            if (isWidgetOpen) {
+                close()
+            } else {
+                binding.tokensAndCollectibles.initTokensList(account, fiatSymbol, tokens, true)
+                open()
+            }
         }
-    }
 
     private fun open() {
         TransitionManager.beginDelayedTransition(viewGroup)

@@ -6,6 +6,7 @@ import io.reactivex.Flowable
 import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProviderImpl
 import org.junit.Test
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.Transaction
 import java.math.BigInteger
 
@@ -13,7 +14,6 @@ class WebSocketServiceProviderTest : RxTest() {
 
     private val web3J = mockk<Web3j>()
     private val provider = WebSocketServiceProviderImpl()
-
 
     @Test
     fun `subscribe to executed transactions success test`() {
@@ -42,4 +42,25 @@ class WebSocketServiceProviderTest : RxTest() {
             .assertError(error)
     }
 
+    @Test
+    fun `subscribe to block creation success test`() {
+        val block = EthBlock()
+        block.id = 1L
+        every { web3J.blockFlowable(false) } returns Flowable.just(block)
+        provider.subscribeToBlockCreation(web3J)
+            .test()
+            .await()
+            .assertComplete()
+            .assertNoErrors()
+    }
+
+    @Test
+    fun `subscribe to block creation error test`() {
+        val error = Throwable("Block error")
+        every { web3J.blockFlowable(false) } returns Flowable.error(error)
+        provider.subscribeToBlockCreation(web3J)
+            .test()
+            .await()
+            .assertError(error)
+    }
 }

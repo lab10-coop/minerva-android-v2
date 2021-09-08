@@ -23,14 +23,10 @@
             android:name=".accounts.walletconnect.WalletConnectActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".splash.SplashScreenActivity"
-            android:launchMode="singleTop"
+            android:name=".walletConnect.HandlingWalletConnectDeepLinkActivity"
+            android:label="@string/empty"
+            android:theme="@style/Theme.Transparent"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <intent-filter android:label="@string/minerva">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -41,8 +37,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".main.MainActivity"
+            android:name=".splash.SplashScreenActivity"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".main.MainActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait">
 
         </activity>

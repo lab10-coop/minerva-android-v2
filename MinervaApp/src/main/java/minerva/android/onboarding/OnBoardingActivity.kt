@@ -68,7 +68,10 @@ class OnBoardingActivity : AppCompatActivity(), OnBoardingFragmentListener {
     }
 
     override fun showMainActivity() {
-        launchActivity<MainActivity> { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
+        launchActivity<MainActivity> {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            finish()
+        }
     }
 
     override fun updateActionBar() {

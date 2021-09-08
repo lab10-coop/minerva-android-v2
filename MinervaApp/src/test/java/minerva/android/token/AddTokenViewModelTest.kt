@@ -8,18 +8,18 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Network
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
 class AddTokenViewModelTest : BaseViewModelTest() {
 
-    private val smartContractRepository: SmartContractRepository = mock()
+    private val safeAccountRepository: SafeAccountRepository = mock()
     private val tokenManager: TokenManager = mock()
 
-    private val viewModel = AddTokenViewModel(mock(), smartContractRepository, tokenManager)
+    private val viewModel = AddTokenViewModel(mock(), safeAccountRepository, tokenManager)
 
     private val tokenObserver: Observer<ERC20Token> = mock()
     private val tokenCaptor: KArgumentCaptor<ERC20Token> = argumentCaptor()
@@ -35,7 +35,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
     fun `Check getting Token details`() {
         NetworkManager.initialize(networks)
 
-        whenever(smartContractRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(
+        whenever(safeAccountRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(
             Single.just(
                 ERC20Token(
                     1,
