@@ -7,7 +7,7 @@ import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.widget.state.AppUIState
 
-class SplashScreenViewModel(
+class LaunchApplicationViewModel(
     private val masterSeedRepository: MasterSeedRepository,
     appUIState: AppUIState
 ) : ViewModel() {
