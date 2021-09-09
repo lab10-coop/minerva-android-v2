@@ -40,14 +40,6 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
                     BalanceUtils.getSuperTokenFormatBalance(animation.animatedValue as BigDecimal)
             }
             interpolator = LinearInterpolator()
-            executeAnimation(speed)
-        }
-    }
-
-    private fun ValueAnimator.executeAnimation(speed: BigInteger) {
-        if (speed.signum() == NEGATIVE) {
-            reverse()
-        } else {
             start()
         }
     }
@@ -84,6 +76,6 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
     }
 
     companion object {
-        private const val NEGATIVE = -1
+        const val NEGATIVE = -1
     }
 }
