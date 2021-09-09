@@ -13,6 +13,7 @@ import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.utils.BalanceUtils.getCryptoBalance
 import minerva.android.walletmanager.utils.BalanceUtils.getFiatBalance
 import minerva.android.widget.CryptoAmountView
+import minerva.android.widget.CryptoAmountView.Companion.NEGATIVE
 import minerva.android.widget.repository.getMainTokenIconRes
 import timber.log.Timber
 import java.math.BigDecimal
@@ -57,13 +58,20 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
             isInitStream(account, token) ->
                 startStreamingAnimation(
                     currentBalance,
-                    nextBalance.plus(INIT_NEXT_CRYPTO_BALANCE),
-                    token.consNetFlow
+                    getInitStreamNextBalance(token.consNetFlow, currentBalance),
+                    INIT_NET_FLOW
                 )
             isStreamableToken(token) ->
                 startStreamingAnimation(currentBalance, nextBalance, token.consNetFlow)
         }
     }
+
+    private fun getInitStreamNextBalance(
+        netFlow: BigInteger,
+        currentBalance: BigDecimal
+    ): BigDecimal =
+        if (netFlow.signum() == NEGATIVE) currentBalance.minus(INIT_NEXT_CRYPTO_BALANCE)
+        else currentBalance.plus(INIT_NEXT_CRYPTO_BALANCE)
 
     private fun isStreamableToken(token: ERC20Token): Boolean =
         token.isStreamActive && token.consNetFlow != BigInteger.ZERO
@@ -140,5 +148,6 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
 
     companion object {
         private val INIT_NEXT_CRYPTO_BALANCE = BigDecimal(0.0000001)
+        private val INIT_NET_FLOW: BigInteger = BigInteger.valueOf(11574074074)
     }
 }
