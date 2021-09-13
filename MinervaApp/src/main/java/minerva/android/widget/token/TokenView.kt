@@ -55,23 +55,42 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
         nextBalance: BigDecimal
     ) {
         when {
-            isInitStream(account, token) ->
-                startStreamingAnimation(
-                    currentBalance,
-                    getInitStreamNextBalance(token.consNetFlow, currentBalance),
-                    INIT_NET_FLOW
-                )
+            isInitStream(account, token) -> initAnimation(token, currentBalance)
             isStreamableToken(token) ->
                 startStreamingAnimation(currentBalance, nextBalance, token.consNetFlow)
         }
     }
 
+    private fun CryptoAmountView.initAnimation(token: ERC20Token, currentBalance: BigDecimal) {
+        if (token.address == FRACTION_ADDRESS) {
+            startStreamingAnimation(
+                currentBalance,
+                getInitStreamNextBalance(
+                    token.consNetFlow,
+                    currentBalance,
+                    NEXT_FRACTION_CRYPTO_BALANCE
+                ),
+                INIT_NET_FLOW
+            )
+        } else {
+            startStreamingAnimation(
+                currentBalance,
+                getInitStreamNextBalance(
+                    token.consNetFlow, currentBalance,
+                    NEXT_CRYPTO_BALANCE
+                ),
+                INIT_NET_FLOW
+            )
+        }
+    }
+
     private fun getInitStreamNextBalance(
         netFlow: BigInteger,
-        currentBalance: BigDecimal
+        currentBalance: BigDecimal,
+        nextCryptoBalance: BigDecimal
     ): BigDecimal =
-        if (netFlow.signum() == NEGATIVE) currentBalance.minus(INIT_NEXT_CRYPTO_BALANCE)
-        else currentBalance.plus(INIT_NEXT_CRYPTO_BALANCE)
+        if (netFlow.signum() == NEGATIVE) currentBalance.minus(nextCryptoBalance)
+        else currentBalance.plus(nextCryptoBalance)
 
     private fun isStreamableToken(token: ERC20Token): Boolean =
         token.isStreamActive && token.consNetFlow != BigInteger.ZERO
@@ -147,7 +166,9 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
     }
 
     companion object {
-        private val INIT_NEXT_CRYPTO_BALANCE = BigDecimal(0.0000001)
+        private val NEXT_CRYPTO_BALANCE = BigDecimal(0.0000001)
+        private val NEXT_FRACTION_CRYPTO_BALANCE = BigDecimal(0.00000000000001)
         private val INIT_NET_FLOW: BigInteger = BigInteger.valueOf(11574074074)
+        private const val FRACTION_ADDRESS: String = "0x2bf2ba13735160624a0feae98f6ac8f70885ea61"
     }
 }
