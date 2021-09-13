@@ -291,11 +291,6 @@ class AccountsViewModel(
         }
     }
 
-    fun stopStreaming() {
-        transactionRepository.disconnectFromSuperTokenStreaming()
-        streamingDisposable.dispose()
-    }
-
     private fun getSuperTokenStreamInitBalance() {
         if (transactionRepository.isSuperTokenStreamAvailable) {
             launchDisposable {
@@ -518,6 +513,21 @@ class AccountsViewModel(
             }
             index
         }
+
+    fun stopStreaming() {
+        transactionRepository.disconnectFromSuperTokenStreaming()
+        streamingDisposable.dispose()
+        resetStreamingAnimation()
+    }
+
+    private fun resetStreamingAnimation() {
+        activeAccounts.forEach { account ->
+            account.accountTokens.forEach { accountToken ->
+                accountToken.nextRawBalance = Double.InvalidValue.toBigDecimal()
+                accountToken.isInitStream = true
+            }
+        }
+    }
 
     private fun updateSuperTokenStreamAndReturnIndex(
         accountToken: AccountToken,
