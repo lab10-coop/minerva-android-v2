@@ -127,7 +127,6 @@ dependencies {
     implementation qrDependency.values()
     implementation uiDependencies.values()
     implementation startupDependencies.values()
-
     implementation coreDependencies.values()
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()
