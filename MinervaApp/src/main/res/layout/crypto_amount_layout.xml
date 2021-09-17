@@ -9,17 +9,18 @@
         android:id="@+id/cryptoAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="end"
         android:textColor="@color/bodyColor"
         android:textSize="@dimen/text_normal"
-        android:gravity="end"
+        android:typeface="monospace"
         tools:text="51.351" />
 
     <TextView
         android:id="@+id/currencyAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="end"
         android:textColor="@color/titleColor"
         android:textSize="@dimen/text_xsmall"
-        android:gravity="end"
         tools:text="€ 3.14159" />
 </merge>
