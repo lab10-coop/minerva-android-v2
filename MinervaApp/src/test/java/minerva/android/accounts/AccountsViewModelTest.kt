@@ -14,17 +14,17 @@ import minerva.android.mock.accountsWithoutPrimaryAccount
 import minerva.android.mock.networks
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinError
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
@@ -40,7 +40,7 @@ import kotlin.test.assertFails
 class AccountsViewModelTest : BaseViewModelTest() {
 
     private val walletActionsRepository: WalletActionsRepository = mock()
-    private val smartContractRepository: SmartContractRepository = mock()
+    private val safeAccountRepository: SafeAccountRepository = mock()
     private val accountManager: AccountManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
@@ -67,7 +67,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         viewModel = AccountsViewModel(
             accountManager,
             walletActionsRepository,
-            smartContractRepository,
+            safeAccountRepository,
             transactionRepository,
             walletConnectRepository,
             logger
@@ -153,7 +153,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             .thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERC20Token(1, "name")))))
-        whenever(transactionRepository.updateCachedTokens()).thenReturn(Completable.complete())
+        whenever(transactionRepository.updateTaggedTokens()).thenReturn(Completable.complete())
         viewModel.refreshTokensBalances()
         viewModel.balanceStateLiveData.observeForever(balanceObserver)
         balanceCaptor.run {
@@ -181,7 +181,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             )
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERC20Token(1, "name")))))
-        whenever(transactionRepository.updateCachedTokens()).thenReturn(Completable.complete())
+        whenever(transactionRepository.updateTaggedTokens()).thenReturn(Completable.complete())
 
         whenever(accountManager.activeAccounts).thenReturn(
             listOf(
@@ -279,7 +279,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `create safe account error`() {
         val error = Throwable("error")
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.error(error))
+        whenever(safeAccountRepository.createSafeAccount(any())).thenReturn(Single.error(error))
         whenever(accountManager.createOrUnhideAccount(any())).thenReturn(Single.error(error))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ONE))
@@ -290,7 +290,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `create safe account when balance is 0`() {
-        whenever(smartContractRepository.createSafeAccount(any())).thenReturn(Single.just("address"))
+        whenever(safeAccountRepository.createSafeAccount(any())).thenReturn(Single.just("address"))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.createSafeAccount(Account(id = 1, cryptoBalance = BigDecimal.ZERO))
         errorCaptor.run {
@@ -469,7 +469,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             chainId = 1,
             accountTokens = mutableListOf(
                 AccountToken(
-                    rawBalance = BigDecimal.TEN,
+                    currentRawBalance = BigDecimal.TEN,
                     tokenPrice = 2.0,
                     token = ERC20Token(
                         1,
@@ -481,7 +481,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 ),
                 AccountToken(
                     tokenPrice = 3.0,
-                    rawBalance = BigDecimal.TEN,
+                    currentRawBalance = BigDecimal.TEN,
                     token = ERC20Token(
                         1,
                         name = "cachedToken2",

@@ -11,7 +11,11 @@ object AddressParser {
         }
     }
 
+    fun containsKeyAndBridge(address: String): Boolean = address.contains(BRIDGE) && address.contains(KEY)
+
     private const val META_ADDRESS_SEPARATOR = ":"
     private const val TWO_ELEMENT_SIZE = 2
+    private const val BRIDGE = "bridge"
+    private const val KEY = "key"
     const val WALLET_CONNECT = "wc"
 }

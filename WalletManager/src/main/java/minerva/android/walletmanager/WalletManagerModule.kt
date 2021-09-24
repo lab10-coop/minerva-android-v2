@@ -31,8 +31,8 @@ import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepositoryImpl
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepositoryImpl
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
@@ -68,13 +68,13 @@ fun createWalletModules() = module {
     factory<LocalWalletActionsConfigProvider> { LocalWalletActionsConfigProviderImpl(get(named(localSharedPrefs))) }
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
-    factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get()) }
-    factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get(), get(), get()) }
+    factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get(), get()) }
+    factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get(), get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
-    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get()) }
+    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
-    factory<SmartContractRepository> { SmartContractRepositoryImpl(get(), get(), get(), get()) }
+    factory<SafeAccountRepository> { SafeAccountRepositoryImpl(get(), get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
     factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
     single<WalletConnectRepository> { WalletConnectRepositoryImpl(get(), get(), get()) }

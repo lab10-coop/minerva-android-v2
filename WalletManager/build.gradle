@@ -71,6 +71,7 @@ dependencies {
     testImplementation testDependencies.values()
     implementation room.values()
     implementation okhttp.values()
+    kapt "org.xerial:sqlite-jdbc:3.36.0"
     kapt "androidx.room:room-compiler:2.2.6"
 }
 

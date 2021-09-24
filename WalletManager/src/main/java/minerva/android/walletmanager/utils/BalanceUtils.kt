@@ -33,6 +33,14 @@ object BalanceUtils {
     fun convertFromWei(balance: BigDecimal, decimals: Int): BigDecimal =
         balance.divide(TEN.pow(decimals).toBigDecimal()).stripTrailingZeros()
 
+    fun getSuperTokenFormatBalance(balance: BigDecimal): String =
+        when {
+            balance == Double.InvalidValue.toBigDecimal() -> NO_VALUE
+            balance < MINIMAL_VALUE && balance > BigDecimal.ZERO -> BELOW_MINIMAL_VALUE
+            balance == BigDecimal.ZERO -> String.EmptyBalance
+            else -> DecimalFormat(SUPER_TOKEN_CRYPTO_FORMAT, DecimalFormatSymbols(Locale.ROOT)).format(balance.setScale(SUPER_TOKEN_CRYPTO_SCALE, RoundingMode.HALF_UP))
+        }
+
     private const val CURRENCY_FORMAT = "%s %.2f"
     private const val NO_FIAT_VALUE = "%s -.--"
     private const val NO_VALUE = "-.--"
@@ -42,4 +50,7 @@ object BalanceUtils {
     private const val CRYPTO_FORMAT = "#.##########"
     private const val BELOW_MINIMAL_VALUE = "<0.0000000001"
     private val MINIMAL_VALUE = 0.0000000001.toBigDecimal()
+    private const val SUPER_TOKEN_CRYPTO_SCALE = 14
+    private const val SUPER_TOKEN_CRYPTO_FORMAT = "0.00000000000000"
+
 }

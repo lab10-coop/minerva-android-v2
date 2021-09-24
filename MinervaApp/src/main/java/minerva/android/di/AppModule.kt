@@ -25,7 +25,7 @@ import minerva.android.settings.SettingsViewModel
 import minerva.android.settings.authentication.AuthenticationViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.settings.fiat.FiatViewModel
-import minerva.android.splash.SplashScreenViewModel
+import minerva.android.splash.LaunchApplicationViewModel
 import minerva.android.token.AddTokenViewModel
 import minerva.android.token.ManageTokensViewModel
 import minerva.android.token.ramp.RampViewModel
@@ -63,8 +63,8 @@ private val appModules = module {
     viewModel { AppViewModel(get(), get()) }
     viewModel { ClubCardViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { WalletConnectInteractionsViewModel(get(), get(), get(), get()) }
-    viewModel { SplashScreenViewModel(get(), get()) }
+    viewModel { WalletConnectInteractionsViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { LaunchApplicationViewModel(get(), get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }

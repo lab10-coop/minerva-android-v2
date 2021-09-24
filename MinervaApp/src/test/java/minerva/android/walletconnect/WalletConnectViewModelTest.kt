@@ -12,8 +12,8 @@ import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.walletconnect.*
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
@@ -47,18 +47,6 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `on connection failure event test`() {
-        val error = Throwable("timeout")
-        whenever(repository.connectionStatusFlowable)
-            .thenReturn(Flowable.error(error))
-        viewModel.errorLiveData.observeForever(errorObserver)
-        viewModel.subscribeToWCConnectionStatusFlowable()
-        errorCaptor.run {
-            verify(errorObserver).onChanged(capture())
-        }
-    }
-
-    @Test
-    fun `on connection error event test`() {
         val error = Throwable("timeout")
         whenever(repository.connectionStatusFlowable)
             .thenReturn(Flowable.error(error))
@@ -248,7 +236,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.handleQrCode("wc:123456789")
         stateCaptor.run {
             verify(stateObserver).onChanged(capture())
-            firstValue shouldBe CorrectQrCodeState
+            firstValue shouldBe CorrectWalletConnectCodeState
         }
     }
 
@@ -258,7 +246,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.handleQrCode("qr:123456789")
         stateCaptor.run {
             verify(stateObserver).onChanged(capture())
-            firstValue shouldBe WrongQrCodeState
+            firstValue shouldBe WrongWalletConnectCodeState
         }
     }
 

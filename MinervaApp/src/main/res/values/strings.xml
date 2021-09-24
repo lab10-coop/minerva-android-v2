@@ -322,6 +322,7 @@
     <string name="session_connection_error">Check your internet connection and try to reconnect with a refreshed website.</string>
     <string name="version_history">Version history</string>
     <string name="info_dapp_awaiting">Awaiting connection feedback from the DApp</string>
+    <string name="info_awaiting">Awaiting connection</string>
     <string name="authentication">Authentication</string>
     <string name="authentication_alert_title">You should enable an authentication method for your Minerva Wallet.</string>
     <string name="authentication_alert_message">This helps protect your money and assets from others accessing your unlocked phone.</string>
@@ -358,6 +359,7 @@
     <string name="your_money_label">Your money</string>
     <string name="your_own_them_label">Own them</string>
     <string name="backup_server_error">Error when looking for backup data for the Secret Recovery Phrase you entered. Make sure your device is currently online and please try again</string>
+    <string name="empty" />
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

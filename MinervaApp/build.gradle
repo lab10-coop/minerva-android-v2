@@ -57,8 +57,8 @@ android {
         flavorDimensions 'enviroment'
         staging {
             applicationId "minerva.android.staging"
-            versionCode 70
-            versionName "1.5.0"
+            versionCode 75
+            versionName "1.5.5"
             dimension 'enviroment'
             versionNameSuffix '-staging'
             matchingFallbacks = ["staging"]
@@ -72,8 +72,8 @@ android {
 
         production {
             applicationId "digital.minerva"
-            versionCode 8
-            versionName "1.5.0"
+            versionCode 9
+            versionName "1.5.5"
             dimension 'enviroment'
             matchingFallbacks = ["production"]
 
@@ -127,7 +127,6 @@ dependencies {
     implementation qrDependency.values()
     implementation uiDependencies.values()
     implementation startupDependencies.values()
-
     implementation coreDependencies.values()
     implementation androidCoreDependencies.values()
     implementation koinDependencies.values()

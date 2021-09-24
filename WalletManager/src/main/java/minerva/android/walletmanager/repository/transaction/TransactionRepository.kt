@@ -7,6 +7,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.Asset
 import minerva.android.walletmanager.model.minervaprimitives.account.Coin
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
@@ -51,5 +52,11 @@ interface TransactionRepository {
     fun getFiatSymbol(): String
     fun isProtectTransactionEnabled(): Boolean
     fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>>
-    fun updateCachedTokens(): Completable
+    fun updateTaggedTokens(): Completable
+
+    var isSuperTokenStreamAvailable: Boolean
+    var activeSuperTokenStreams: MutableList<ActiveSuperToken>
+    fun getSuperTokenStreamInitBalance(): Flowable<Asset>
+    fun startSuperTokenStreaming(chainId: Int): Flowable<Asset>
+    fun disconnectFromSuperTokenStreaming()
 }

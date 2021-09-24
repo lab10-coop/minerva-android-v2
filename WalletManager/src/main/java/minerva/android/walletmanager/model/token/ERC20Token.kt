@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import minerva.android.apiProvider.model.TokenTx
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
+import java.math.BigInteger
 
 @Entity(tableName = "tokens")
 data class ERC20Token(
@@ -12,12 +13,13 @@ data class ERC20Token(
     override val name: String = String.Empty,
     override val symbol: String = String.Empty,
     @PrimaryKey val address: String = String.Empty,
-    //TODO change to int
     val decimals: String = String.Empty,
     var accountAddress: String = String.Empty,
     var logoURI: String? = null,
     var tag: String = String.Empty,
-    var isError: Boolean = false
+    var isError: Boolean = false,
+    var isStreamActive: Boolean = false,
+    var consNetFlow: BigInteger = BigInteger.ZERO
 ) : Token {
 
     override fun equals(other: Any?): Boolean =

@@ -10,12 +10,12 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.TransactionCost
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
 import org.amshove.kluent.shouldBeEqualTo
@@ -28,9 +28,9 @@ import kotlin.test.assertEquals
 class TransactionViewModelTest : BaseViewModelTest() {
 
     private val walletActionsRepository: WalletActionsRepository = mock()
-    private val smartContractRepository: SmartContractRepository = mock()
+    private val safeAccountRepository: SafeAccountRepository = mock()
     private val transactionRepository: TransactionRepository = mock()
-    private val viewModel = TransactionViewModel(walletActionsRepository, smartContractRepository, transactionRepository)
+    private val viewModel = TransactionViewModel(walletActionsRepository, safeAccountRepository, transactionRepository)
 
     private val sendTransactionObserver: Observer<Event<Pair<String, Int>>> = mock()
     private val sendTransactionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
@@ -130,7 +130,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(safeAccountRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
@@ -158,7 +158,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(safeAccountRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
 
         viewModel.run {
             sendTransactionLiveData.observeForever(sendTransactionObserver)
@@ -228,7 +228,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
-        whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(safeAccountRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)
         sendTransactionCaptor.run {
@@ -252,7 +252,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferERC20Token(any(), any())).thenReturn(Completable.error(error))
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("tom"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
-        whenever(smartContractRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
+        whenever(safeAccountRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
 
         viewModel.sendTransactionLiveData.observeForever(sendTransactionObserver)
         viewModel.sendTransaction("123", BigDecimal(12), BigDecimal(1), BigInteger.ONE)

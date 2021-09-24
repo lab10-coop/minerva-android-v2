@@ -3,13 +3,13 @@ package minerva.android.walletmanager.manager.networks
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.map.value
 import minerva.android.walletmanager.exception.NoActiveNetworkThrowable
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
+import minerva.android.walletmanager.model.network.Network
 import java.math.BigInteger
 
 object NetworkManager {

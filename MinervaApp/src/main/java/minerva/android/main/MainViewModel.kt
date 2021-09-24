@@ -107,7 +107,8 @@ class MainViewModel(
         }
     }
 
-    fun isOrderEditAvailable(type: Int): Boolean = if (!appUIState.shouldShowSplashScreen) orderManager.isOrderAvailable(type) else false
+    fun isOrderEditAvailable(type: Int): Boolean =
+        if (!appUIState.shouldShowSplashScreen) orderManager.isOrderAvailable(type) else false
 
     fun shouldShowSplashScreen() = appUIState.shouldShowSplashScreen
 

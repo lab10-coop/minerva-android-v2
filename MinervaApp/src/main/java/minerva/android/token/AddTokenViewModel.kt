@@ -13,13 +13,13 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.token.ERC20Token
-import minerva.android.walletmanager.repository.smartContract.SmartContractRepository
+import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import timber.log.Timber
 
 class AddTokenViewModel(
     private val transactionRepository: TransactionRepository,
-    private val smartContractRepository: SmartContractRepository,
+    private val safeAccountRepository: SafeAccountRepository,
     private val tokenManager: TokenManager
 ) : BaseViewModel() {
 
@@ -49,7 +49,7 @@ class AddTokenViewModel(
 
     fun getTokenDetails(address: String) =
         launchDisposable {
-            smartContractRepository.getERC20TokenDetails(privateKey, chainId, address)
+            safeAccountRepository.getERC20TokenDetails(privateKey, chainId, address)
                 .zipWith(tokenManager.getTokenIconURL(chainId, address),
                     BiFunction<ERC20Token, String, ERC20Token> { token, logoURI ->
                         token.apply {

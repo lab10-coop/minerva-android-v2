@@ -23,6 +23,20 @@
             android:name=".accounts.walletconnect.WalletConnectActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".walletConnect.HandlingWalletConnectDeepLinkActivity"
+            android:label="@string/empty"
+            android:theme="@style/Theme.Transparent"
+            android:screenOrientation="portrait">
+            <intent-filter android:label="@string/minerva">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="wc" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".splash.SplashScreenActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
@@ -34,8 +48,10 @@
         </activity>
         <activity
             android:name=".main.MainActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait">
+
+        </activity>
 
         <activity
             android:name=".integration.ThirdPartyIntegrationActivity"

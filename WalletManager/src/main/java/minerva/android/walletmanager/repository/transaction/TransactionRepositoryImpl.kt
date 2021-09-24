@@ -14,7 +14,10 @@ import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
-import minerva.android.blockchainprovider.repository.regularAccont.BlockchainRegularAccountRepository
+import minerva.android.blockchainprovider.repository.ens.ENSRepository
+import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
+import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepository
+import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
@@ -29,6 +32,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.account.*
+import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
@@ -45,8 +49,11 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class TransactionRepositoryImpl(
-    private val blockchainRepository: BlockchainRegularAccountRepository,
+    private val blockchainRepository: BlockchainTransactionRepository,
     private val walletConfigManager: WalletConfigManager,
+    private val erC20TokenRepository: ERC20TokenRepository,
+    private val unitConverter: UnitConverter,
+    private val ensRepository: ENSRepository,
     private val cryptoApi: CryptoApi,
     private val localStorage: LocalStorage,
     private val webSocketRepository: WebSocketRepository,
@@ -54,6 +61,8 @@ class TransactionRepositoryImpl(
 ) : TransactionRepository {
     override val masterSeed: MasterSeed get() = walletConfigManager.masterSeed
     override var newTaggedTokens: MutableList<ERC20Token> = mutableListOf()
+    override var isSuperTokenStreamAvailable: Boolean = tokenManager.activeSuperTokenStreams.isEmpty()
+    override var activeSuperTokenStreams: MutableList<ActiveSuperToken> = tokenManager.activeSuperTokenStreams
     private val currentFiatCurrency: String get() = localStorage.loadCurrentFiat()
     private val ratesMap: HashMap<Int, Markets> = hashMapOf()
 
@@ -87,11 +96,7 @@ class TransactionRepositoryImpl(
     private fun calculateFiat(cryptoCoinBalance: CoinCryptoBalance, market: Markets = Markets()): CoinBalance =
         MarketUtils.calculateFiatBalance(cryptoCoinBalance, market, currentFiatCurrency)
 
-    private fun getStoredRate(
-        markets: Markets,
-        cryptoBalance: CoinCryptoBalance,
-        marketId: String
-    ): Single<CoinBalance> =
+    private fun getStoredRate(markets: Markets, cryptoBalance: CoinCryptoBalance, marketId: String): Single<CoinBalance> =
         if (MarketUtils.getRate(cryptoBalance.chainId, markets, currentFiatCurrency) != Double.InvalidValue) {
             Single.just(calculateFiat(cryptoBalance, markets))
         } else {
@@ -116,23 +121,67 @@ class TransactionRepositoryImpl(
     private fun getAddresses(accounts: List<Account>): List<Pair<Int, String>> =
         accounts.map { account -> account.network.chainId to account.address }
 
+    override fun getSuperTokenStreamInitBalance(): Flowable<Asset> {
+        accountsForTokenBalanceRefresh.let { accounts ->
+            val accountsWithActiveStreams: List<Account> =
+                getAccountsWithActiveStreams(accounts, tokenManager.activeSuperTokenStreams)
+            return Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams))
+                .flatMap { asset -> handleSuperTokens(asset) }
+        }
+    }
+
+    override fun startSuperTokenStreaming(chainId: Int): Flowable<Asset> {
+        accountsForTokenBalanceRefresh.let { accounts ->
+            val accountsWithActiveStreams: List<Account> =
+                getAccountsWithActiveStreams(accounts, tokenManager.activeSuperTokenStreams)
+                    .filter { account -> account.chainId == chainId }
+            return webSocketRepository.subscribeToBlockCreation(chainId)
+                .flatMap { Flowable.mergeDelayError(getSuperTokenBalanceFlowables(accountsWithActiveStreams)) }
+                .flatMap { asset -> handleSuperTokens(asset) }
+        }
+    }
+
+    private fun getAccountsWithActiveStreams(
+        accounts: List<Account>,
+        activeStreamAccounts: MutableList<ActiveSuperToken>
+    ) = accounts.filter { account ->
+        activeStreamAccounts.find { activeSuperToken ->
+            activeSuperToken.accountAddress.equals(account.address, true) &&
+                    activeSuperToken.chainId == account.chainId
+        } != null
+    }
+
+    private fun handleSuperTokens(asset: Asset) =
+        when (asset) {
+            is AssetBalance -> Flowable.just(asset)
+                .filter { assetBalance -> assetBalance.accountToken.token.isStreamActive }
+            else -> Flowable.just(asset as AssetError)
+        }
+
+
+    private fun getSuperTokenBalanceFlowables(accounts: List<Account>): List<Flowable<Asset>> =
+        mutableListOf<Flowable<Asset>>().apply {
+            accounts.forEach { account -> add(tokenManager.getSuperTokenBalance(account).subscribeOn(Schedulers.io())) }
+        }
+
+    override fun disconnectFromSuperTokenStreaming() {
+        webSocketRepository.disconnect()
+        tokenManager.activeSuperTokenStreams.clear()
+    }
+
     override fun getTokenBalance(): Flowable<Asset> =
         accountsForTokenBalanceRefresh.let { accounts ->
             Flowable.mergeDelayError(getTokenBalanceFlowables(accounts))
                 .flatMap { asset ->
                     when (asset) {
-                        is AssetBalance -> handleNewAddedTokens(asset, accounts)
+                        is AssetBalance -> handleNewAddedTaggedTokens(asset, accounts)
+                            .filter { assetBalance -> !assetBalance.accountToken.token.isStreamActive }
                         else -> Flowable.just(asset as AssetError)
                     }
                 }
         }
 
-    private fun getTokenBalanceFlowables(accounts: List<Account>): List<Flowable<Asset>> =
-        mutableListOf<Flowable<Asset>>().apply {
-            accounts.forEach { account -> add(tokenManager.getTokenBalance(account).subscribeOn(Schedulers.io())) }
-        }
-
-    private fun handleNewAddedTokens(assetBalance: AssetBalance, accounts: List<Account>): Flowable<AssetBalance> =
+    private fun handleNewAddedTaggedTokens(assetBalance: AssetBalance, accounts: List<Account>): Flowable<AssetBalance> =
         if (isAccountAddressMissing(assetBalance)) {
             accounts.forEach { account ->
                 if (isTokenWithPositiveBalance(account, assetBalance)) {
@@ -149,37 +198,51 @@ class TransactionRepositoryImpl(
             Flowable.just(assetBalance)
         }
 
-    private fun isAccountAddressMissing(assetBalance: AssetBalance): Boolean =
-        assetBalance.accountToken.balance > BigDecimal.ZERO && assetBalance.accountToken.token.accountAddress.isBlank()
+    private fun getTokenBalanceFlowables(accounts: List<Account>): List<Flowable<Asset>> =
+        mutableListOf<Flowable<Asset>>().apply {
+            accounts.forEach { account -> add(tokenManager.getTokenBalance(account).subscribeOn(Schedulers.io())) }
+        }
 
-    override fun updateCachedTokens(): Completable {
+    private fun isAccountAddressMissing(assetBalance: AssetBalance): Boolean =
+        assetBalance.accountToken.currentBalance > BigDecimal.ZERO && assetBalance.accountToken.token.accountAddress.isBlank()
+
+    //test
+    override fun updateTaggedTokens(): Completable {
         return if (newTaggedTokens.isNotEmpty()) {
             val walletConfig = walletConfigManager.getWalletConfig()
             return walletConfigManager.updateWalletConfig(
-                walletConfig.copy(version = walletConfig.updateVersion, erc20Tokens = getTokensWithAccountAddress())
+                walletConfig.copy(
+                    version = walletConfig.updateVersion,
+                    erc20Tokens = getTokensWithAccountAddress(walletConfig.erc20Tokens)
+                )
+
             ).doOnComplete { newTaggedTokens.clear() }
         } else {
             Completable.complete()
         }
     }
 
-    internal fun getTokensWithAccountAddress(): Map<Int, List<ERC20Token>> {
-        accountsForTokenBalanceRefresh.let { accounts ->
-            val allTokens: MutableList<ERC20Token> = mutableListOf()
-            accounts.forEach { account ->
-                newTaggedTokens.forEach { token ->
-                    if (account.address.equals(token.accountAddress, true) && account.chainId == token.chainId) {
-                        allTokens.add(token.copy(accountAddress = account.address, tag = token.tag))
-                    }
-                }
-            }
-            return allTokens.groupBy { token -> token.chainId }
+    internal fun getTokensWithAccountAddress(erc20Tokens: Map<Int, List<ERC20Token>>): Map<Int, List<ERC20Token>> {
+        val allLocalTokensMap: MutableMap<Int, List<ERC20Token>> = erc20Tokens.toMutableMap()
+        val newTokensMap: Map<Int, List<ERC20Token>> = newTaggedTokens.groupBy { token -> token.chainId }
+
+        for ((chainId, newTokens) in newTokensMap) {
+            val localTokensPerChainId = allLocalTokensMap[chainId] ?: listOf()
+            val mergedTokens = mergeNewTokensWithLocal(localTokensPerChainId, newTokens)
+            allLocalTokensMap[chainId] = mergedTokens
         }
+        return allLocalTokensMap
     }
+
+    private fun mergeNewTokensWithLocal(localChainTokens: List<ERC20Token>, newTokens: List<ERC20Token>) =
+        mutableListOf<ERC20Token>().apply {
+            addAll(localChainTokens)
+            newTokens.forEach { newToken -> add(newToken) }
+        }
 
     private fun isTokenWithPositiveBalance(account: Account, assetBalance: AssetBalance): Boolean =
         account.privateKey.equals(assetBalance.privateKey, true) &&
-                account.chainId == assetBalance.chainId && assetBalance.accountToken.balance > BigDecimal.ZERO
+                account.chainId == assetBalance.chainId && assetBalance.accountToken.currentBalance > BigDecimal.ZERO
 
     private val accountsForTokenBalanceRefresh: List<Account>
         get() = if (shouldGetAllAccounts()) {
@@ -192,7 +255,7 @@ class TransactionRepositoryImpl(
         walletConfigManager.getWalletConfig().accounts
             .filter { account -> refreshBalanceFilter(account) && account.network.isAvailable() }
 
-    private fun shouldGetAllAccounts() =
+    private fun shouldGetAllAccounts(): Boolean =
         walletConfigManager.getWalletConfig().erc20Tokens.values
             .any { tokens -> tokens.find { token -> token.accountAddress.isBlank() } != null }
 
@@ -272,7 +335,7 @@ class TransactionRepositoryImpl(
             if (NetworkManager.getNetwork(pendingTx.chainId).wsRpc.isNotEmpty()) {
                 localStorage.savePendingAccount(PendingTransactionToPendingAccountMapper.map(pendingTx))
             }
-        }.flatMap { blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty } }
+        }.flatMap { ensRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty } }
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
 
@@ -294,10 +357,13 @@ class TransactionRepositoryImpl(
     override fun getTokenFiatRate(tokenHash: String): Single<Double> =
         Single.just(tokenManager.getSingleTokenRate(tokenHash))
 
-    override fun toUserReadableFormat(value: BigDecimal): BigDecimal = blockchainRepository.toEther(value)
+    override fun toUserReadableFormat(value: BigDecimal): BigDecimal = unitConverter.toEther(value)
 
     override fun sendTransaction(chainId: Int, transaction: Transaction): Single<String> =
-        blockchainRepository.sendWalletConnectTransaction(chainId, TransactionToTransactionPayloadMapper.map(transaction))
+        blockchainRepository.sendWalletConnectTransaction(
+            chainId,
+            TransactionToTransactionPayloadMapper.map(transaction)
+        )
 
     override fun getFiatSymbol(): String = Fiat.getFiatSymbol(currentFiatCurrency)
 
@@ -323,10 +389,10 @@ class TransactionRepositoryImpl(
         }
     }
 
-    override fun isAddressValid(address: String): Boolean = blockchainRepository.isAddressValid(address)
+    override fun isAddressValid(address: String): Boolean = ensRepository.isAddressValid(address)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
-        blockchainRepository.run { getTransactionCostInEth(toGwei(gasPrice), BigDecimal(gasLimit)) }
+        blockchainRepository.run { getTransactionCostInEth(unitConverter.toGwei(gasPrice), BigDecimal(gasLimit)) }
 
     override fun shouldOpenNewWssConnection(accountIndex: Int): Boolean {
         val chainId = getPendingAccount(accountIndex).chainId
@@ -349,21 +415,23 @@ class TransactionRepositoryImpl(
     }
 
     override fun getPendingAccount(accountIndex: Int): PendingAccount =
-        localStorage.getPendingAccounts().find { it.index == accountIndex }.orElse { PendingAccount(Int.InvalidIndex) }
+        localStorage.getPendingAccounts().find { it.index == accountIndex }
+            .orElse { PendingAccount(Int.InvalidIndex) }
 
     override fun clearPendingAccounts() {
         localStorage.clearPendingAccounts()
     }
 
     override fun getPendingAccounts(): List<PendingAccount> = localStorage.getPendingAccounts()
+
     override fun transferERC20Token(chainId: Int, transaction: Transaction): Completable =
-        blockchainRepository.transferERC20Token(chainId, TransactionToTransactionPayloadMapper.map(transaction))
-            .andThen(blockchainRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
+        erC20TokenRepository.transferERC20Token(chainId, TransactionToTransactionPayloadMapper.map(transaction))
+            .andThen(ensRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()
 
     override fun loadRecipients(): List<Recipient> = localStorage.getRecipients()
-    override fun resolveENS(ensName: String): Single<String> = blockchainRepository.resolveENS(ensName)
+    override fun resolveENS(ensName: String): Single<String> = ensRepository.resolveENS(ensName)
     override fun getAccount(accountIndex: Int): Account? = walletConfigManager.getAccount(accountIndex)
     override fun getAccountByAddressAndChainId(address: String, chainId: Int): Account? =
         walletConfigManager.getWalletConfig().accounts.find { account ->
@@ -373,7 +441,8 @@ class TransactionRepositoryImpl(
     override fun getFreeATS(address: String) = blockchainRepository.getFreeATS(address)
     override fun checkMissingTokensDetails(): Completable = tokenManager.checkMissingTokensDetails()
     override fun isProtectTransactionEnabled(): Boolean = localStorage.isProtectTransactionsEnabled
-    private fun shouldGetGasPriceFromApi(chainId: Int) = NetworkManager.getNetwork(chainId).gasPriceOracle.isNotEmpty()
+    private fun shouldGetGasPriceFromApi(chainId: Int) =
+        NetworkManager.getNetwork(chainId).gasPriceOracle.isNotEmpty()
 
     private fun isMaticNetwork(chainId: Int) = chainId == MATIC || chainId == MUMBAI
 
@@ -385,15 +454,15 @@ class TransactionRepositoryImpl(
         blockchainRepository.getTransactionCosts(TxCostPayloadToTxCostDataMapper.map(payload), defaultGasPrice)
             .map { txCost ->
                 TransactionCostPayloadToTransactionCost.map(txCost, speed, payload.chainId) {
-                    blockchainRepository.fromWei(it).setScale(0, RoundingMode.HALF_EVEN)
+                    unitConverter.fromWei(it).setScale(SCALE, RoundingMode.HALF_EVEN)
                 }
             }
 
     private fun GasPricesMatic.toTransactionSpeed() = TransactionSpeed(
-        rapid = blockchainRepository.toGwei(rapid),
-        fast = blockchainRepository.toGwei(fast),
-        standard = blockchainRepository.toGwei(standard),
-        slow = blockchainRepository.toGwei(slow)
+        rapid = unitConverter.toGwei(rapid),
+        fast = unitConverter.toGwei(fast),
+        standard = unitConverter.toGwei(standard),
+        slow = unitConverter.toGwei(slow)
     )
 
     private fun getPendingAccountsWithBlockHashes(pendingTxList: List<Pair<String, String?>>): MutableList<PendingAccount> {
@@ -428,7 +497,8 @@ class TransactionRepositoryImpl(
         localStorage.getPendingAccounts()
             .find { pendingAccount -> pendingAccount.txHash == transaction.txHash && pendingAccount.senderAddress == transaction.senderAddress }
 
-    private fun saveRecipient(ensName: String, address: String) = localStorage.saveRecipient(Recipient(ensName, address))
+    private fun saveRecipient(ensName: String, address: String) =
+        localStorage.saveRecipient(Recipient(ensName, address))
 
     companion object {
         private const val ONE_PENDING_ACCOUNT = 1
@@ -436,5 +506,6 @@ class TransactionRepositoryImpl(
         private const val ETHERSCAN_REQUEST_TIMESPAN = 1L
         private const val ETHERSCAN_REQUEST_PACKAGE = 5
         private const val ZERO_FIAT_VALUE = 0.0
+        private const val SCALE = 0
     }
 }

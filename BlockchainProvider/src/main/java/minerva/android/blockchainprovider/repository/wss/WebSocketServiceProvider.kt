@@ -7,4 +7,5 @@ import java.math.BigInteger
 
 interface WebSocketServiceProvider {
     fun subscribeToExecutedTransactions(web3j: Web3j, blockNumber: BigInteger): Flowable<ExecutedTransaction>
+    fun subscribeToBlockCreation(web3j: Web3j): Flowable<Unit>
 }

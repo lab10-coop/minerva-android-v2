@@ -1,7 +1,7 @@
 package minerva.android.mock
 
-import minerva.android.walletmanager.model.Network
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import java.math.BigDecimal
@@ -26,7 +26,7 @@ val networks = listOf(
 
 val accountTokensForPrivateKey1 = listOf(
     AccountToken(
-        rawBalance = BigDecimal.TEN,
+        currentRawBalance = BigDecimal.TEN,
         token = ERC20Token(
             1,
             "name",
@@ -36,7 +36,7 @@ val accountTokensForPrivateKey1 = listOf(
         )
     ),
     AccountToken(
-        rawBalance = BigDecimal.TEN,
+        currentRawBalance = BigDecimal.TEN,
         token = ERC20Token(
             1,
             "name",
@@ -49,7 +49,7 @@ val accountTokensForPrivateKey1 = listOf(
 
 val accountTokensForPrivateKey2 = listOf(
     AccountToken(
-        rawBalance = BigDecimal.TEN,
+        currentRawBalance = BigDecimal.TEN,
         token = ERC20Token(
             2,
             "name",
@@ -59,7 +59,7 @@ val accountTokensForPrivateKey2 = listOf(
         )
     ),
     AccountToken(
-        rawBalance = BigDecimal.TEN,
+        currentRawBalance = BigDecimal.TEN,
         token = ERC20Token(
             2,
             "name",

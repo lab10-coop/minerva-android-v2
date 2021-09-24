@@ -76,18 +76,22 @@ class WalletConnectRepositoryImpl(
                     reconnect(peerId, error, remotePeerId)
                 }
             }
-            onDisconnect = { _, peerId ->
+            onDisconnect = { _, peerId, isExternal ->
                 peerId?.let {
-                    if (reconnectionAttempts.containsKey(peerId)) reconnectionAttempts.remove(peerId)
-                    removeDappSession(it, onSuccess = { session ->
-                        removeWcClient(session.peerId)
-                        status.onNext(OnDisconnect(session.name))
-                    }, onError = {
-                        if (clientMap.containsKey(peerId)) {
-                            clientMap.remove(peerId)
-                            status.onNext(OnDisconnect())
-                        }
-                    })
+                    if (reconnectionAttempts.containsKey(peerId)) {
+                        reconnectionAttempts.remove(peerId)
+                    }
+                    if (isExternal) {
+                        removeDappSession(it, onSuccess = { session ->
+                            removeWcClient(session.peerId)
+                            status.onNext(OnDisconnect(session.name))
+                        }, onError = {
+                            if (clientMap.containsKey(peerId)) {
+                                clientMap.remove(peerId)
+                                status.onNext(OnDisconnect())
+                            }
+                        })
+                    }
                 }
             }
 
@@ -138,6 +142,7 @@ class WalletConnectRepositoryImpl(
     }
 
     private fun retryConnection(peerId: String, remotePeerId: String?) {
+        checkDisposable()
         Observable.timer(RETRY_DELAY, TimeUnit.SECONDS)
             .flatMapSingle { getDappSessionById(peerId) }
             .map { session ->
@@ -159,6 +164,7 @@ class WalletConnectRepositoryImpl(
     }
 
     private fun removeDappSession(peerId: String, onSuccess: (session: DappSession) -> Unit, onError: () -> Unit) {
+        checkDisposable()
         getDappSessionById(peerId)
             .flatMap { session -> deleteDappSession(session.peerId).toSingleDefault(session) }
             .map { session -> onSuccess(session) }
@@ -166,6 +172,12 @@ class WalletConnectRepositoryImpl(
             .subscribeOn(Schedulers.io())
             .subscribeBy(onError = { Timber.e(it) })
             .addTo(disposable)
+    }
+
+    private fun checkDisposable() {
+        if (disposable.isDisposed) {
+            disposable = CompositeDisposable()
+        }
     }
 
     override fun rejectSession(peerId: String) {
@@ -209,7 +221,7 @@ class WalletConnectRepositoryImpl(
         dappDao.getAll().map { sessionEntities -> EntitiesToDappSessionsMapper.map(sessionEntities) }
 
     override fun getDappSessionById(peerId: String): Single<DappSession> =
-        dappDao.getDapSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
+        dappDao.getDappSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
 
     private fun getUserReadableData(message: WCEthereumSignMessage) =
         when (message.type) {
