@@ -413,6 +413,10 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.5.5</item>
+        <item>* Integration with Mobile Walletconnect</item>
+        <item>* Automatic Supertoken Stream detection</item>
+        <item>* Improvements and optimisations</item>
         <item>1.5.0</item>
         <item>* Wallet restore from the most popular 3rd party wallets</item>
         <item>* Use a scanner to connect to any DApp on any network</item>
