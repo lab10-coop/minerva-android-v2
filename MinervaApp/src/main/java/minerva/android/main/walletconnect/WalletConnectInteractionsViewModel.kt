@@ -16,7 +16,7 @@ import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.crypto.HEX_PREFIX
 import minerva.android.kotlinUtils.crypto.containsHexPrefix
-import minerva.android.kotlinUtils.crypto.hexToBigInteger
+import minerva.android.kotlinUtils.crypto.hexToBigDecimal
 import minerva.android.kotlinUtils.crypto.toHexString
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
@@ -152,7 +152,7 @@ class WalletConnectInteractionsViewModel(
 
     private fun getTransactionValue(txValue: String?): BigDecimal =
         txValue?.let { txAmount ->
-            val parsedTxValue = hexToBigInteger(txAmount, WRONG_TX_VALUE)
+            val parsedTxValue = hexToBigDecimal(txAmount, WRONG_TX_VALUE)
             if (containsHexPrefix(txAmount) && parsedTxValue != WRONG_TX_VALUE) {
                 weiCoinTransactionValue = parsedTxValue
                 transactionRepository.toUserReadableFormat(parsedTxValue)
@@ -301,7 +301,7 @@ class WalletConnectInteractionsViewModel(
         else transaction.data
 
     private fun isContractDataEmpty(transaction: WalletConnectTransaction) =
-        hexToBigInteger(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO
+        hexToBigDecimal(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO
 
     fun sendTransaction() {
         launchDisposable {

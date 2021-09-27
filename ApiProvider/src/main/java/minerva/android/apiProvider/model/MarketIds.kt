@@ -8,5 +8,6 @@ annotation class MarketIds {
         const val XDAI = "xdai"
         const val MATIC = "matic-network"
         const val POLYGON = "polygon-pos"
+        const val BSC = "binancecoin"
     }
 }
