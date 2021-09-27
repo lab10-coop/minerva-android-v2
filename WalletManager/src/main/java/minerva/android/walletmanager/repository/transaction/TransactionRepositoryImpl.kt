@@ -350,7 +350,7 @@ class TransactionRepositoryImpl(
                 ChainId.POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { markets -> markets.poaFiatPrice?.getRate(currentFiat) }
                 ChainId.XDAI -> fetchCoinRate(MarketIds.XDAI).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
                 ChainId.MATIC -> fetchCoinRate(MarketIds.MATIC).map { markets -> markets.maticFiatPrice?.getRate(currentFiat) }
-                ChainId.BSC -> fetchCoinRate(MarketIds.BSC).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
+                ChainId.BSC -> fetchCoinRate(MarketIds.BSC_COIN).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
                 else -> Single.just(ZERO_FIAT_VALUE)
             }
         }

@@ -11,6 +11,6 @@ data class Markets(
     val poaFiatPrice: FiatPrice? = null,
     @SerializedName(MarketIds.MATIC)
     val maticFiatPrice: FiatPrice? = null,
-    @SerializedName(MarketIds.BSC)
+    @SerializedName(MarketIds.BSC_COIN)
     val bscFiatPrice: FiatPrice? = null
 )
