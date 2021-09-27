@@ -61,7 +61,7 @@ object MarketUtils {
             POA_CORE -> MarketIds.POA_NETWORK
             XDAI -> MarketIds.XDAI
             MATIC -> MarketIds.POLYGON
-            BSC -> MarketIds.BSC
+            BSC -> MarketIds.BSC_TOKEN
             else -> String.Empty
         }
 
@@ -71,7 +71,7 @@ object MarketUtils {
             POA_CORE -> MarketIds.POA_NETWORK
             XDAI -> MarketIds.XDAI
             MATIC -> MarketIds.MATIC
-            BSC -> MarketIds.BSC
+            BSC -> MarketIds.BSC_COIN
             else -> String.Empty
         }
 }
