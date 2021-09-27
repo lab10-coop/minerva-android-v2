@@ -21,19 +21,20 @@ val String.getFormattedMessage: String
         this
     }
 
-fun hexToBigInteger(input: String, def: BigDecimal): BigDecimal {
-    val value: BigDecimal? = hexToBigInteger(input.trim())
+fun hexToBigDecimal(input: String, def: BigDecimal): BigDecimal {
+    val value: BigDecimal? = hexToBigDecimal(input)
     return value ?: def
 }
 
-private fun hexToBigInteger(input: String): BigDecimal? {
-    var hex = input
+fun hexToBigDecimal(input: String): BigDecimal? {
+    val trimmedInput = input.trim()
+    var hex = trimmedInput
     return if (hex.isEmpty()) {
         null
     } else try {
         val isHex: Boolean = containsHexPrefix(hex)
         if (isHex) {
-            hex = cleanHexPrefix(input)
+            hex = cleanHexPrefix(trimmedInput)
         }
         BigInteger(hex, if (isHex) HEX else DEC).toBigDecimal()
     } catch (ex: NullPointerException) {

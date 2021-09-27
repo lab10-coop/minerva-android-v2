@@ -6,6 +6,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
@@ -50,6 +51,7 @@ object MarketUtils {
             ETH_MAIN -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
             XDAI -> markets.daiFiatPrice?.getRate(currentFiatCurrency)
             MATIC -> markets.maticFiatPrice?.getRate(currentFiatCurrency)
+            BSC -> markets.bscFiatPrice?.getRate(currentFiatCurrency)
             else -> null
         }
 
@@ -59,6 +61,7 @@ object MarketUtils {
             POA_CORE -> MarketIds.POA_NETWORK
             XDAI -> MarketIds.XDAI
             MATIC -> MarketIds.POLYGON
+            BSC -> MarketIds.BSC
             else -> String.Empty
         }
 
@@ -68,6 +71,7 @@ object MarketUtils {
             POA_CORE -> MarketIds.POA_NETWORK
             XDAI -> MarketIds.XDAI
             MATIC -> MarketIds.MATIC
+            BSC -> MarketIds.BSC
             else -> String.Empty
         }
 }

@@ -29,6 +29,13 @@ interface CryptoApi {
         @Url url: String
     ): Single<GasPricesMatic>
 
+    @POST
+    fun getGasPriceFromRpcOverHttp(
+        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
+        @Url url: String,
+        @Body rpcOverHttpPayload: RpcOverHttpPayload = RpcOverHttpPayload.GET_GAS_PRICE_PAYLOAD
+    ): Single<GasPricesFromRpcOverHttp>
+
     @GET
     fun getTokenDetails(@Url url: String): Single<List<TokenDetails>>
 
