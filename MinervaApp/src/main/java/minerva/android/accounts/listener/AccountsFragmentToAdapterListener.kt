@@ -2,6 +2,7 @@ package minerva.android.accounts.listener
 
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.state.AccountWidgetState
 
@@ -17,7 +18,7 @@ interface AccountsFragmentToAdapterListener {
     fun onExportPrivateKey(account: Account)
     fun updateAccountWidgetState(index: Int, accountWidgetState: AccountWidgetState)
     fun getAccountWidgetState(index: Int): AccountWidgetState
-    fun getTokens(account: Account): List<ERC20Token>
+    fun getTokens(account: Account): List<AccountToken>
     fun onEditName(account: Account)
     fun updateSessionCount(
         sessionsPerAccount: List<DappSessionData>,

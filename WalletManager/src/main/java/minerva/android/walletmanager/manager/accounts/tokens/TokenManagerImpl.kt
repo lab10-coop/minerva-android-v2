@@ -51,7 +51,6 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*

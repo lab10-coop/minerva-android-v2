@@ -4,6 +4,8 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
@@ -44,4 +46,8 @@ interface AccountManager : Manager {
     fun getFirstActiveAccountOrNull(chainId: Int): Account?
     fun getFirstActiveAccountForAllNetworks(): List<Account>
     fun createOrUnhideAccount(network: Network): Single<String>
+    fun insertCoinBalance(coinBalance: CoinBalance): Completable
+    fun insertTokenBalance(coinBalance: CoinBalance, accountAddress: String): Completable
+    fun getCachedCoinBalance(address: String, chainId: Int): Single<CoinBalance>
+    fun getCachedTokenBalance(address: String, accountAddress: String): Single<CoinBalance>
 }
