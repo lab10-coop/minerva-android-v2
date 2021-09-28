@@ -19,8 +19,8 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.AccountToken
+import minerva.android.walletmanager.model.token.ERCTokensList
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.token.TokenView
@@ -62,7 +62,7 @@ class AccountViewHolder(
     ) {
         view.apply {
             prepareView(account)
-            prepareTokens(account, fiatSymbol, tokens)
+            prepareTokens(account, fiatSymbol, ERCTokensList(tokens))
             bindData(account, fiatSymbol)
             setOnMenuClickListener(rawPosition, account)
         }
@@ -136,7 +136,7 @@ class AccountViewHolder(
         }
     }
 
-    private fun View.prepareTokens(account: Account, fiatSymbol: String, tokens: List<AccountToken>) {
+    private fun View.prepareTokens(account: Account, fiatSymbol: String, tokens: ERCTokensList) {
         binding.apply {
             tokensAndCollectibles.prepareView(viewGroup, this@AccountViewHolder, accountWidgetState.isWidgetOpen)
             tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens, accountWidgetState.isWidgetOpen)
@@ -150,12 +150,12 @@ class AccountViewHolder(
         }
     }
 
-    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: List<AccountToken>) =
+    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: ERCTokensList) =
         setOnClickListener {
             if (isWidgetOpen) {
                 close()
             } else {
-                binding.tokensAndCollectibles.initTokensList(account, fiatSymbol, tokens, true)
+                binding.tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens, true)
                 open()
             }
         }
