@@ -19,6 +19,7 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.NO_PADDING
 import minerva.android.walletmanager.model.Collectible
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.token.TokenView
 import timber.log.Timber
@@ -48,7 +49,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         visibleOrGone(isOpen)
     }
 
-    fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: List<ERC20Token>, widgetOpen: Boolean) {
+    fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: List<AccountToken>, widgetOpen: Boolean) {
         initMainToken(account, fiatSymbol, callback)
         initTokensList(account, fiatSymbol, tokens, widgetOpen)
     }
@@ -66,7 +67,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     }
 
 
-    fun initTokensList(account: Account, fiatSymbol: String, tokens: List<ERC20Token>, isWidgetOpen: Boolean) {
+    fun initTokensList(account: Account, fiatSymbol: String, tokens: List<AccountToken>, isWidgetOpen: Boolean) {
         binding.apply {
             if (isWidgetOpen) {
                 tokensContainer.children.forEach { view -> (view as TokenView).endStreamAnimation() }
@@ -74,9 +75,9 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                 tokens.isNotEmpty().let { areTokensVisible ->
                     tokensHeader.visibleOrGone(areTokensVisible)
                     tokensContainer.visibleOrGone(areTokensVisible)
-                    tokens.forEach { token ->
+                    tokens.forEach { accountToken ->
                         tokensContainer.addView(TokenView(context).apply {
-                            initView(account, callback, fiatSymbol, token)
+                            initView(account, callback, fiatSymbol, accountToken)
                             resources.getDimensionPixelOffset(R.dimen.margin_xxsmall).let { padding -> updatePadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding) }
                         })
                     }

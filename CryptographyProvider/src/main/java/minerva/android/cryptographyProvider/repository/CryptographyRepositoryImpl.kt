@@ -27,6 +27,7 @@ import org.kethereum.bip39.wordlists.WORDLIST_ENGLISH
 import org.kethereum.crypto.toAddress
 import org.kethereum.model.ECKeyPair
 import org.komputing.khex.extensions.toNoPrefixHexString
+import org.spongycastle.math.ec.custom.djb.Curve25519
 import timber.log.Timber
 import java.security.SecureRandom
 import java.util.*

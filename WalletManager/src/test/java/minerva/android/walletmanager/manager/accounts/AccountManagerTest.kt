@@ -8,6 +8,9 @@ import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.walletmanager.database.MinervaDatabase
+import minerva.android.walletmanager.database.dao.TokenBalanceDao
+import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
@@ -39,13 +42,17 @@ class AccountManagerTest : RxTest() {
     private val timeProvider: CurrentTimeProvider = mock()
     private val ensRepository: ENSRepository = mock()
     private val unitConverter: UnitConverter = mock()
+    private val tokenDao: TokenBalanceDao = mock()
+    private var database: MinervaDatabase = mock { whenever(mock.tokenBalanceDao()).thenReturn(tokenDao) }
+
     private val manager = AccountManagerImpl(
         walletConfigManager,
         cryptographyRepository,
         localStorage,
         unitConverter,
         ensRepository,
-        timeProvider
+        timeProvider,
+        database
     )
 
     @Before
@@ -201,8 +208,14 @@ class AccountManagerTest : RxTest() {
         val walletConfig = WalletConfig(
             1, accounts = listOf(
                 Account(
-                    1, chainId = 4, name = "#2 Ethereum", publicKey = "publicKey", privateKey = "privateKey",
-                    address = "address1", _isTestNetwork = true, isHide = true
+                    1,
+                    chainId = 4,
+                    name = "#2 Ethereum",
+                    publicKey = "publicKey",
+                    privateKey = "privateKey",
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = true
                 )
             )
         )
@@ -233,7 +246,14 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager removes correct empty value`() {
         val account = Account(2)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any())).thenReturn(
+        whenever(
+            cryptographyRepository.calculateDerivedKeysSingle(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
         )
         whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
@@ -445,7 +465,12 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `get all accounts test`() {
-        whenever(walletConfigManager.getWalletConfig()).thenReturn(WalletConfig(1, accounts = listOf(Account(1))))
+        whenever(walletConfigManager.getWalletConfig()).thenReturn(
+            WalletConfig(
+                1,
+                accounts = listOf(Account(1))
+            )
+        )
         val result = manager.getAllAccounts()
         assertEquals(result.get(0).id, 1)
     }
@@ -501,17 +526,37 @@ class AccountManagerTest : RxTest() {
         val walletConfig = WalletConfig(
             1, accounts = listOf(
                 Account(
-                    1, chainId = 1, name = "account01", isDeleted = false, fiatBalance = 13f.toBigDecimal(),
+                    1,
+                    chainId = 1,
+                    name = "account01",
+                    isDeleted = false,
+                    fiatBalance = 13f.toBigDecimal(),
                     accountTokens = mutableListOf(
-                        AccountToken(ERC20Token(1, "CookieToken", address = "0x0"), tokenPrice = 13.3),
-                        AccountToken(ERC20Token(2, "AnotherToken", address = "0x1"), tokenPrice = 23.3)
+                        AccountToken(
+                            ERC20Token(1, "CookieToken", address = "0x0"),
+                            tokenPrice = 13.3
+                        ),
+                        AccountToken(
+                            ERC20Token(2, "AnotherToken", address = "0x1"),
+                            tokenPrice = 23.3
+                        )
                     )
                 ),
                 Account(
-                    2, chainId = 1, name = "account02", isDeleted = false, fiatBalance = 3f.toBigDecimal(),
+                    2,
+                    chainId = 1,
+                    name = "account02",
+                    isDeleted = false,
+                    fiatBalance = 3f.toBigDecimal(),
                     accountTokens = mutableListOf(
-                        AccountToken(ERC20Token(3, "CookieToken", address = "0x0"), tokenPrice = 33.3),
-                        AccountToken(ERC20Token(4, "CookieToken", address = "0x0"), tokenPrice = 43.3)
+                        AccountToken(
+                            ERC20Token(3, "CookieToken", address = "0x0"),
+                            tokenPrice = 33.3
+                        ),
+                        AccountToken(
+                            ERC20Token(4, "CookieToken", address = "0x0"),
+                            tokenPrice = 43.3
+                        )
                     )
                 )
             )
@@ -583,11 +628,41 @@ class AccountManagerTest : RxTest() {
         NetworkManager.initialize(MockDataProvider.networks)
         val walletConfig = WalletConfig(
             1, accounts = listOf(
-                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false),
-                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = true),
-                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
-                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
-                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(
+                    0,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address0",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    1,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = true
+                ),
+                Account(
+                    2,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address2",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    3,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address3",
+                    _isTestNetwork = true,
+                    isHide = true
+                ),
+                Account(
+                    1,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
                 Account(
                     4,
                     chainId = ChainId.ATS_SIGMA,
@@ -596,9 +671,27 @@ class AccountManagerTest : RxTest() {
                     isHide = true,
                     isDeleted = true
                 ),
-                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
-                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
-                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+                Account(
+                    5,
+                    chainId = Int.InvalidValue,
+                    address = "address5",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    6,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address6",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    6,
+                    chainId = ChainId.ATS_SIGMA,
+                    address = "address6",
+                    _isTestNetwork = true,
+                    isHide = true
+                )
             )
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
@@ -618,11 +711,41 @@ class AccountManagerTest : RxTest() {
         NetworkManager.initialize(MockDataProvider.networks)
         val walletConfig = WalletConfig(
             1, accounts = listOf(
-                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false),
-                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = true),
-                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
-                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
-                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(
+                    0,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address0",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    1,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = true
+                ),
+                Account(
+                    2,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address2",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    3,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address3",
+                    _isTestNetwork = true,
+                    isHide = true
+                ),
+                Account(
+                    1,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
                 Account(
                     4,
                     chainId = ChainId.ATS_SIGMA,
@@ -631,9 +754,27 @@ class AccountManagerTest : RxTest() {
                     isHide = true,
                     isDeleted = true
                 ),
-                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
-                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
-                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+                Account(
+                    5,
+                    chainId = Int.InvalidValue,
+                    address = "address5",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    6,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address6",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    6,
+                    chainId = ChainId.ATS_SIGMA,
+                    address = "address6",
+                    _isTestNetwork = true,
+                    isHide = true
+                )
             )
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
@@ -700,11 +841,41 @@ class AccountManagerTest : RxTest() {
         NetworkManager.initialize(MockDataProvider.networks)
         val walletConfig = WalletConfig(
             1, accounts = listOf(
-                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = true),
-                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
-                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
-                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
-                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(
+                    0,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address0",
+                    _isTestNetwork = true,
+                    isHide = true
+                ),
+                Account(
+                    1,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    2,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address2",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    3,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address3",
+                    _isTestNetwork = true,
+                    isHide = true
+                ),
+                Account(
+                    1,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
                 Account(
                     4,
                     chainId = ChainId.ATS_SIGMA,
@@ -713,14 +884,38 @@ class AccountManagerTest : RxTest() {
                     isHide = true,
                     isDeleted = true
                 ),
-                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
-                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
-                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+                Account(
+                    5,
+                    chainId = Int.InvalidValue,
+                    address = "address5",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    6,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address6",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    6,
+                    chainId = ChainId.ATS_SIGMA,
+                    address = "address6",
+                    _isTestNetwork = true,
+                    isHide = true
+                )
             )
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         manager.getFirstActiveAccountOrNull(ChainId.ATS_TAU) shouldBeEqualTo
-                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false)
+                Account(
+                    1,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                )
         manager.getFirstActiveAccountOrNull(ChainId.ATS_SIGMA) shouldBeEqualTo null
     }
 
@@ -729,11 +924,41 @@ class AccountManagerTest : RxTest() {
         NetworkManager.initialize(MockDataProvider.networks)
         val walletConfig = WalletConfig(
             1, accounts = listOf(
-                Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = true),
-                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
-                Account(2, chainId = ChainId.ATS_TAU, address = "address2", _isTestNetwork = true, isHide = false),
-                Account(3, chainId = ChainId.ETH_RIN, address = "address3", _isTestNetwork = true, isHide = true),
-                Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false),
+                Account(
+                    0,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address0",
+                    _isTestNetwork = true,
+                    isHide = true
+                ),
+                Account(
+                    1,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    2,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address2",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    3,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address3",
+                    _isTestNetwork = true,
+                    isHide = true
+                ),
+                Account(
+                    1,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
                 Account(
                     4,
                     chainId = ChainId.ATS_SIGMA,
@@ -742,27 +967,75 @@ class AccountManagerTest : RxTest() {
                     isHide = true,
                     isDeleted = true
                 ),
-                Account(5, chainId = Int.InvalidValue, address = "address5", _isTestNetwork = true, isHide = false),
-                Account(6, chainId = ChainId.ETH_RIN, address = "address6", _isTestNetwork = true, isHide = false),
-                Account(6, chainId = ChainId.ATS_SIGMA, address = "address6", _isTestNetwork = true, isHide = true)
+                Account(
+                    5,
+                    chainId = Int.InvalidValue,
+                    address = "address5",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    6,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address6",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    6,
+                    chainId = ChainId.ATS_SIGMA,
+                    address = "address6",
+                    _isTestNetwork = true,
+                    isHide = true
+                )
             )
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         manager.getFirstActiveAccountForAllNetworks() shouldBeEqualTo listOf(
-            Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
-            Account(1, chainId = ChainId.ETH_RIN, address = "address1", _isTestNetwork = true, isHide = false)
+            Account(
+                1,
+                chainId = ChainId.ATS_TAU,
+                address = "address1",
+                _isTestNetwork = true,
+                isHide = false
+            ),
+            Account(
+                1,
+                chainId = ChainId.ETH_RIN,
+                address = "address1",
+                _isTestNetwork = true,
+                isHide = false
+            )
         )
     }
 
     @Test
     fun `succesfull hide accounts test`() {
         NetworkManager.initialize(MockDataProvider.networks)
-        val account = Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false)
+        val account = Account(
+            0,
+            chainId = ChainId.ATS_TAU,
+            address = "address0",
+            _isTestNetwork = true,
+            isHide = false
+        )
         val walletConfig = WalletConfig(
             1, accounts = listOf(
                 account,
-                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
-                Account(0, chainId = ChainId.ETH_RIN, address = "address2", _isTestNetwork = true, isHide = false)
+                Account(
+                    1,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    0,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address2",
+                    _isTestNetwork = true,
+                    isHide = false
+                )
             )
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
@@ -770,9 +1043,27 @@ class AccountManagerTest : RxTest() {
         verify(walletConfigManager).updateWalletConfig(
             WalletConfig(
                 2, accounts = listOf(
-                    Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = true),
-                    Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
-                    Account(0, chainId = ChainId.ETH_RIN, address = "address2", _isTestNetwork = true, isHide = false)
+                    Account(
+                        0,
+                        chainId = ChainId.ATS_TAU,
+                        address = "address0",
+                        _isTestNetwork = true,
+                        isHide = true
+                    ),
+                    Account(
+                        1,
+                        chainId = ChainId.ATS_TAU,
+                        address = "address1",
+                        _isTestNetwork = true,
+                        isHide = false
+                    ),
+                    Account(
+                        0,
+                        chainId = ChainId.ETH_RIN,
+                        address = "address2",
+                        _isTestNetwork = true,
+                        isHide = false
+                    )
                 )
             )
         )
@@ -781,11 +1072,29 @@ class AccountManagerTest : RxTest() {
     @Test
     fun `error hide accounts test`() {
         NetworkManager.initialize(MockDataProvider.networks)
-        val account = Account(0, chainId = ChainId.ATS_TAU, address = "address0", _isTestNetwork = true, isHide = false)
+        val account = Account(
+            0,
+            chainId = ChainId.ATS_TAU,
+            address = "address0",
+            _isTestNetwork = true,
+            isHide = false
+        )
         val walletConfig = WalletConfig(
             1, accounts = listOf(
-                Account(1, chainId = ChainId.ATS_TAU, address = "address1", _isTestNetwork = true, isHide = false),
-                Account(0, chainId = ChainId.ETH_RIN, address = "address2", _isTestNetwork = true, isHide = false)
+                Account(
+                    1,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address1",
+                    _isTestNetwork = true,
+                    isHide = false
+                ),
+                Account(
+                    0,
+                    chainId = ChainId.ETH_RIN,
+                    address = "address2",
+                    _isTestNetwork = true,
+                    isHide = false
+                )
             )
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)

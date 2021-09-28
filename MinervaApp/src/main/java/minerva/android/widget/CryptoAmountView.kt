@@ -4,6 +4,7 @@ import android.animation.TypeEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
@@ -30,6 +31,7 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
     }
 
     fun startStreamingAnimation(start: BigDecimal, end: BigDecimal, speed: BigInteger) {
+        cryptoAmount.setTextColor(ContextCompat.getColor(context, R.color.bodyColor))
         var netFlow = speed
         with(ValueAnimator.ofObject(BigDecimalEvaluator(), start, end)) {
             animator = this
