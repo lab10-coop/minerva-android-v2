@@ -624,6 +624,43 @@ class TransactionRepositoryTest : RxTest() {
             }
     }
 
+
+    @Test
+    fun `get transaction costs success when there is gas price from node available`() {
+        NetworkManager.initialize(
+            listOf(
+                Network(
+                    chainId = 56,
+                    httpRpc = "httpRpc",
+                    wsRpc = "wssuri",
+                    gasPriceOracle = "url"
+                )
+            )
+        )
+
+        val weiAmount = 10000000000
+        val result = "0x" + BigDecimal.valueOf(weiAmount).toBigInteger().toString(16)
+
+        whenever(cryptoApi.getGasPriceFromRpcOverHttp(any(), any(), any())).thenReturn(
+            Single.just(GasPricesFromRpcOverHttp("json", 1, result))
+        )
+
+        whenever(
+            blockchainTransactionRepository.getTransactionCosts(any(), any())
+        ).doReturn(Single.just(TransactionCostPayload(BigDecimal.TEN, BigInteger.ONE, BigDecimal.TEN)))
+
+        whenever(unitConverter.fromWei(BigDecimal.valueOf(10000000000))).thenReturn(BigDecimal.TEN)
+        whenever(unitConverter.fromWei(BigDecimal.ZERO)).thenReturn(BigDecimal.ZERO)
+
+        repository.getTransactionCosts(TxCostPayload(TransferType.COIN_TRANSFER, chainId = 56))
+            .test()
+            .assertComplete()
+            .assertValue {
+                it.gasPrice == BigDecimal.TEN
+            }
+    }
+
+
     @Test
     fun `get transaction costs error when there is no gas price from oracle`() {
         val error = Throwable()

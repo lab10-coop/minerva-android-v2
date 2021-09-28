@@ -7,10 +7,7 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPricesMatic
-import minerva.android.apiProvider.model.MarketIds
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.TransactionSpeed
+import minerva.android.apiProvider.model.*
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
@@ -22,12 +19,15 @@ import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.crypto.hexToBigDecimal
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.Fiat
 import minerva.android.walletmanager.model.defs.ChainId
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.mappers.*
@@ -346,10 +346,11 @@ class TransactionRepositoryImpl(
     override fun getCoinFiatRate(chainId: Int): Single<Double> =
         currentFiatCurrency.let { currentFiat ->
             when (chainId) {
-                ChainId.ETH_MAIN -> fetchCoinRate(MarketIds.ETHEREUM).map { it.ethFiatPrice?.getRate(currentFiat) }
-                ChainId.POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { it.poaFiatPrice?.getRate(currentFiat) }
-                ChainId.XDAI -> fetchCoinRate(MarketIds.XDAI).map { it.daiFiatPrice?.getRate(currentFiat) }
-                ChainId.MATIC -> fetchCoinRate(MarketIds.MATIC).map { it.maticFiatPrice?.getRate(currentFiat) }
+                ChainId.ETH_MAIN -> fetchCoinRate(MarketIds.ETHEREUM).map { markets -> markets.ethFiatPrice?.getRate(currentFiat) }
+                ChainId.POA_CORE -> fetchCoinRate(MarketIds.POA_NETWORK).map { markets -> markets.poaFiatPrice?.getRate(currentFiat) }
+                ChainId.XDAI -> fetchCoinRate(MarketIds.XDAI).map { markets -> markets.daiFiatPrice?.getRate(currentFiat) }
+                ChainId.MATIC -> fetchCoinRate(MarketIds.MATIC).map { markets -> markets.maticFiatPrice?.getRate(currentFiat) }
+                ChainId.BSC -> fetchCoinRate(MarketIds.BSC_COIN).map { markets -> markets.bscFiatPrice?.getRate(currentFiat) }
                 else -> Single.just(ZERO_FIAT_VALUE)
             }
         }
@@ -369,6 +370,13 @@ class TransactionRepositoryImpl(
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         when {
+            isBscNetwork(chainId) -> {
+                cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
+                    .flatMap { gasPrice ->
+                        getTxCosts(txCostPayload, null, gasPrice.result) }
+                    .onErrorResumeNext {
+                        getTxCosts(txCostPayload, null, null) }
+            }
             shouldGetGasPriceFromApi(chainId) && isMaticNetwork(chainId) -> {
                 cryptoApi.getGasPriceForMatic(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPricesMatic ->
@@ -445,6 +453,7 @@ class TransactionRepositoryImpl(
         NetworkManager.getNetwork(chainId).gasPriceOracle.isNotEmpty()
 
     private fun isMaticNetwork(chainId: Int) = chainId == MATIC || chainId == MUMBAI
+    private fun isBscNetwork(chainId: Int) = chainId == BSC || chainId == BSC_TESTNET
 
     private fun getTxCosts(
         payload: TxCostPayload,

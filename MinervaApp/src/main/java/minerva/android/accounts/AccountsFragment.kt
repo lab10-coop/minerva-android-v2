@@ -22,6 +22,7 @@ import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.EditAccountNameDialog
@@ -164,7 +165,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun getAccountWidgetState(index: Int): AccountWidgetState =
         appUIState.getAccountWidgetState(index)
 
-    override fun getTokens(account: Account): List<ERC20Token> = viewModel.getTokens(account)
+    override fun getTokens(account: Account): List<AccountToken> = viewModel.getTokens(account)
     fun updateTokensRate() = viewModel.updateTokensRate()
     fun refreshBalances() = viewModel.refreshCoinBalances()
     fun setPendingAccount(index: Int, chainId: Int, pending: Boolean) {

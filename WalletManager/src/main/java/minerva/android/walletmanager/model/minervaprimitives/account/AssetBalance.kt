@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model.minervaprimitives.account
 
 import minerva.android.walletmanager.model.token.AccountToken
+import java.math.BigDecimal
 
 interface Asset {
     val chainId: Int
@@ -11,7 +12,11 @@ data class AssetBalance(
     override val chainId: Int,
     override val privateKey: String,
     val accountToken: AccountToken
-) : Asset
+) : Asset {
+    val accountAddress: String get() = accountToken.token.accountAddress
+    val tokenAddress: String get() = accountToken.token.address
+    val currentBalance: BigDecimal get() = accountToken.currentBalance
+}
 
 data class AssetError(
     override val chainId: Int,

@@ -187,5 +187,31 @@
     "color": "#5c34a2",
     "testNet": false,
     "chainId": 99
+  },
+  {
+    "name": "Binance Smart Chain",
+    "token": "BNB",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://bsc-dataseed.binance.org/",
+    "wsRpc": "",
+    "gasPriceOracle": "https://bsc-dataseed.binance.org/",
+    "gasPrice": "10000000000",
+    "tokens": [],
+    "color": "#f3ba2f",
+    "testNet": false,
+    "chainId": 56
+  },
+  {
+    "name": "BSC Testnet",
+    "token": "tBNB",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    "wsRpc": "",
+    "gasPriceOracle": "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    "gasPrice": "10000000000",
+    "tokens": [],
+    "color": "#f3ba2f",
+    "testNet": true,
+    "chainId": 97
   }
 ]

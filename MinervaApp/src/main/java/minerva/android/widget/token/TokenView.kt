@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.widget.RelativeLayout
 import minerva.android.R
 import minerva.android.databinding.TokenViewBinding
-import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
@@ -29,17 +29,24 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
         account: Account,
         callback: TokenViewCallback,
         fiatSymbol: String,
-        token: ERC20Token? = null
+        accountToken: AccountToken? = null
     ) {
-        prepareView(token, account)
-        prepareListeners(callback, account, token)
-        getTokensValues(account, token).let { (currentBalance, fiatBalance, nextBalance) ->
+        prepareView(accountToken, account)
+        prepareListeners(callback, account, accountToken)
+        getTokensValues(account, accountToken).let { (currentBalance, fiatBalance, nextBalance) ->
             with(binding.amountView) {
                 setCryptoBalance(getCryptoBalance(currentBalance))
-                if (token != null) updateTokenBalance(account, token, currentBalance, nextBalance)
-                if (account.isError) setErrorColor()
-                token?.let {
+                if (accountToken != null) {
+                    updateTokenBalance(accountToken, currentBalance, nextBalance)
+                }
+
+                if (account.isError) {
+                    setErrorColor()
+                }
+
+                accountToken?.token?.let {
                     if (it.isError) {
+                        endStreamAnimation()
                         setErrorColor()
                     }
                 }
@@ -49,24 +56,27 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
     }
 
     private fun CryptoAmountView.updateTokenBalance(
-        account: Account,
-        token: ERC20Token,
+        accountToken: AccountToken,
         currentBalance: BigDecimal,
         nextBalance: BigDecimal
     ) {
         when {
-            isInitStream(account, token) -> initAnimation(token, currentBalance)
-            isStreamableToken(token) ->
-                startStreamingAnimation(currentBalance, nextBalance, token.consNetFlow)
+            isInitStream(accountToken) -> initAnimation(accountToken, currentBalance)
+            isStreamableToken(accountToken) ->
+                startStreamingAnimation(currentBalance, nextBalance, accountToken.token.consNetFlow)
         }
     }
 
-    private fun CryptoAmountView.initAnimation(token: ERC20Token, currentBalance: BigDecimal) {
-        if (token.address == FRACTION_ADDRESS) {
+    private fun CryptoAmountView.initAnimation(
+        accountToken: AccountToken,
+        currentBalance: BigDecimal
+    ) {
+        /*Distinguish between Fraction and other tokens is needed because of the extended number of digits for that token to show the animation*/
+        if (accountToken.token.address == FRACTION_ADDRESS) {
             startStreamingAnimation(
                 currentBalance,
                 getInitStreamNextBalance(
-                    token.consNetFlow,
+                    accountToken.token.consNetFlow,
                     currentBalance,
                     NEXT_FRACTION_CRYPTO_BALANCE
                 ),
@@ -76,7 +86,7 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
             startStreamingAnimation(
                 currentBalance,
                 getInitStreamNextBalance(
-                    token.consNetFlow, currentBalance,
+                    accountToken.token.consNetFlow, currentBalance,
                     NEXT_CRYPTO_BALANCE
                 ),
                 INIT_NET_FLOW
@@ -92,18 +102,18 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
         if (netFlow.signum() == NEGATIVE) currentBalance.minus(nextCryptoBalance)
         else currentBalance.plus(nextCryptoBalance)
 
-    private fun isStreamableToken(token: ERC20Token): Boolean =
-        token.isStreamActive && token.consNetFlow != BigInteger.ZERO
+    private fun isStreamableToken(accountToken: AccountToken): Boolean =
+        accountToken.token.isStreamActive && accountToken.token.consNetFlow != BigInteger.ZERO
 
-    private fun isInitStream(account: Account, token: ERC20Token): Boolean =
-        getAccountToken(account, token.address).isInitStream && token.consNetFlow != BigInteger.ZERO
+    private fun isInitStream(accountToken: AccountToken): Boolean =
+        accountToken.isInitStream && accountToken.token.consNetFlow != BigInteger.ZERO
 
     private fun getTokensValues(
         account: Account,
-        token: ERC20Token?
+        accountToken: AccountToken?
     ): Triple<BigDecimal, BigDecimal, BigDecimal> =
-        if (token != null) {
-            with(getAccountToken(account, token.address)) {
+        if (accountToken != null) {
+            with(accountToken) {
                 Triple(currentBalance, fiatBalance, nextBalance)
             }
         } else {
@@ -114,12 +124,12 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
         if (account.network.testNet) BigDecimal.ZERO
         else account.fiatBalance
 
-    private fun prepareView(erc20token: ERC20Token?, account: Account) {
+    private fun prepareView(accountToken: AccountToken?, account: Account) {
         binding.apply {
-            if (erc20token != null) {
-                with(erc20token) {
-                    tokenLogo.initView(this)
-                    tokenName.text = symbol
+            if (accountToken != null) {
+                with(accountToken) {
+                    tokenLogo.initView(this.token)
+                    tokenName.text = token.symbol
                 }
             } else {
                 with(account.network) {
@@ -140,21 +150,17 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
     private fun prepareListeners(
         callback: TokenViewCallback,
         account: Account,
-        token: ERC20Token?
+        accountToken: AccountToken?
     ) {
-        if (token != null) setOnClickListener {
+        if (accountToken != null) setOnClickListener {
             callback.onSendTokenClicked(
                 account,
-                token.address,
-                token.isError
+                accountToken.token.address,
+                accountToken.token.isError
             )
         }
         else setOnClickListener { callback.onSendCoinClicked(account) }
     }
-
-    private fun getAccountToken(account: Account, tokenAddress: String): AccountToken =
-        account.accountTokens.find { it.token.address == tokenAddress }
-            ?: AccountToken(ERC20Token(Int.InvalidValue))
 
     fun endStreamAnimation() {
         binding.amountView.endStreamAnimation()
