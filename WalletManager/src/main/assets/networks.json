@@ -150,7 +150,7 @@
     }
   },
   {
-    "name": "Polygon (MATIC)",
+    "name": "Polygon",
     "token": "MATIC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://matic-rpc.lab10.io",
