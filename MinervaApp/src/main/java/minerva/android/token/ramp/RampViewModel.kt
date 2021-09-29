@@ -91,17 +91,22 @@ class RampViewModel(
         private const val USDT_RAMP_SYMBOL = "USDT"
         private const val MATIC_USDC_RAMP_SYMBOL = "MATIC_USDC"
         private const val MATIC_DAI_RAMP_SYMBOL = "MATIC_DAI"
+        private const val BSC_RAMP_SYMBOL = "BSC_BNB"
         private fun getNetworkName(chainId: Int): String = NetworkManager.getNetwork(chainId).name
 
         val rampCrypto get() = listOf(
             RampCrypto(ChainId.ETH_MAIN, ETH_RAMP_SYMBOL, R.drawable.ic_ethereum_token, getNetworkName(ChainId.ETH_MAIN), isSelected = true),
-            RampCrypto(ChainId.ETH_MAIN, DAI_RAMP_SYMBOL, R.drawable.ic_dai_token, getNetworkName(ChainId.ETH_MAIN)),
-            RampCrypto(ChainId.XDAI, XDAI_RAMP_SYMBOL, R.drawable.ic_xdai_token, getNetworkName(ChainId.XDAI)),
-            RampCrypto(ChainId.ETH_MAIN, USDC_RAMP_SYMBOL, R.drawable.ic_usdc_token, getNetworkName(ChainId.ETH_MAIN)),
-            RampCrypto(ChainId.MATIC, MATIC_DAI_RAMP_SYMBOL, R.drawable.ic_dai_token, getNetworkName(ChainId.MATIC)),
-            RampCrypto(ChainId.MATIC, MATIC_USDC_RAMP_SYMBOL, R.drawable.ic_usdc_token, getNetworkName(ChainId.MATIC)),
             RampCrypto(ChainId.MATIC, MATIC_RAMP_SYMBOL, R.drawable.ic_polygon_matic_token, getNetworkName(ChainId.MATIC)),
-            RampCrypto(ChainId.ETH_MAIN, USDT_RAMP_SYMBOL, R.drawable.ic_usdt_token, getNetworkName(ChainId.ETH_MAIN))
+            RampCrypto(ChainId.XDAI, XDAI_RAMP_SYMBOL, R.drawable.ic_xdai_token, getNetworkName(ChainId.XDAI)),
+            RampCrypto(ChainId.BSC, BSC_RAMP_SYMBOL, R.drawable.ic_bsc_token, getNetworkName(ChainId.BSC)),
+
+            RampCrypto(ChainId.ETH_MAIN, DAI_RAMP_SYMBOL, R.drawable.ic_dai_token, getNetworkName(ChainId.ETH_MAIN)),
+            RampCrypto(ChainId.ETH_MAIN, USDC_RAMP_SYMBOL, R.drawable.ic_usdc_token, getNetworkName(ChainId.ETH_MAIN)),
+            RampCrypto(ChainId.ETH_MAIN, USDT_RAMP_SYMBOL, R.drawable.ic_usdt_token, getNetworkName(ChainId.ETH_MAIN)),
+            RampCrypto(ChainId.MATIC, ETH_RAMP_SYMBOL, R.drawable.ic_ethereum_token, getNetworkName(ChainId.MATIC)),
+
+            RampCrypto(ChainId.MATIC, MATIC_DAI_RAMP_SYMBOL, R.drawable.ic_dai_token, getNetworkName(ChainId.MATIC)),
+            RampCrypto(ChainId.MATIC, MATIC_USDC_RAMP_SYMBOL, R.drawable.ic_usdc_token, getNetworkName(ChainId.MATIC))
         )
     }
 }
