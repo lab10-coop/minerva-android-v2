@@ -48,6 +48,7 @@ ext {
     jodaVersion = '2.10.5'
     waitingDotsVersion = '0.6.1'
     glideToVector = 'v2.0.0'
+    lottieVersion = '4.1.0'
 
     w3jVersion = '4.6.0-android'
     rxbindingVersion = '3.1.0'
@@ -148,7 +149,8 @@ ext {
             glidetoVector  : "com.github.corouteam:GlideToVectorYou:$glideToVector",
             flexbox        : "com.google.android:flexbox:$flexboxVersion",
             recyclerView   : "androidx.recyclerview:recyclerview:$recyclerVersion",
-            flowLayout     : "org.apmem.tools:layouts:$flowLayoutVersion"
+            flowLayout     : "org.apmem.tools:layouts:$flowLayoutVersion",
+            lottie         : "com.airbnb.android:lottie:$lottieVersion"
     ]
 
     blockChainDependencies = [

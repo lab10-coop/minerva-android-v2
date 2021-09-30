@@ -69,4 +69,5 @@
     <color name="darkGray70">#B33A3944</color>
     <color name="darkGray80">#3f3f4b</color>
     <color name="lightGray90">#908f9d</color>
+    <color name="splashScreenPurple">#6442d1</color>
 </resources>

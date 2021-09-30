@@ -21,7 +21,7 @@ abstract class BaseLaunchAppActivity : AppCompatActivity() {
         }
     }
 
-    protected fun checkWalletConnect() {
+    protected fun checkWalletConfig() {
         try {
             viewModel.getWalletConfig()
             showMainActivity()

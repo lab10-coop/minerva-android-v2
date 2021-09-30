@@ -12,7 +12,7 @@ class HandlingWalletConnectDeepLinkActivity : BaseLaunchAppActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_empty)
-        checkWalletConnect()
+        checkWalletConfig()
     }
 
     override fun showMainActivity() {
