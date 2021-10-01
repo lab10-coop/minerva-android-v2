@@ -4,8 +4,8 @@ apply plugin: 'kotlin-android-extensions'
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion _compileSdkVersion
+    buildToolsVersion _buildToolsVersion
 
     compileOptions {
         sourceCompatibility 1.8
@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion _targetSdkVersion
         versionCode 1
         versionName "1.0"
 
