@@ -471,7 +471,7 @@ class TokenManagerImpl(
     override fun getTokensRates(tokens: Map<Int, List<ERC20Token>>): Completable =
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
             with(localStorage.loadCurrentFiat()) {
-                if (currentFiat != this) rateStorage.clearRates()
+                if (currentFiat != this && currentFiat != String.Empty) rateStorage.clearRates()
                 tokens.forEach { (chainId, tokens) ->
                     val marketId = MarketUtils.getTokenGeckoMarketId(chainId)
                     if (!rateStorage.areRatesSynced && marketId != String.Empty) {
