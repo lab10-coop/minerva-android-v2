@@ -6,8 +6,8 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion _compileSdkVersion
+    buildToolsVersion _buildToolsVersion
 
     compileOptions {
         sourceCompatibility 1.8
@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion _targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "MARKETS_API_URL", '"https://api.coingecko.com/api/v3/"'
         buildConfigField "String", "LICENCE_TYPE", '"GPLv3"'
