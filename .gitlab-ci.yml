@@ -45,7 +45,7 @@ distributeStagingBuild:
     - . /etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
     - fastlane firebaseStaging
-    - 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
+    - 'curl --silent --show-error --insecure --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
 
   artifacts:
     paths:
