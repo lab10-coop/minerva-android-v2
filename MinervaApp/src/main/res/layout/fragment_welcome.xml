@@ -34,33 +34,19 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/minerva_logo"
-        app:layout_constraintBottom_toTopOf="@id/onboarding_view_pager" />
+        app:layout_constraintBottom_toTopOf="@id/animation_view" />
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/onboarding_view_pager"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_big"
-        android:layout_marginEnd="@dimen/margin_normal"
-        app:layout_constraintBottom_toTopOf="@+id/tabs"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/welcome_title" />
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabs"
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/animation_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/margin_normal"
         app:layout_constraintBottom_toTopOf="@+id/import_info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/onboarding_view_pager"
-        app:tabBackground="@drawable/on_boarding_tab_selector"
-        app:tabGravity="center"
-        app:tabIndicatorHeight="0dp"
-        app:tabMaxWidth="18dp" />
+        app:layout_constraintTop_toBottomOf="@id/welcome_title"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_fileName="onboarding_animation.json" />
 
     <TextView
         android:id="@+id/import_info"
@@ -74,7 +60,7 @@
         android:text="@string/import_info"
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal"
-        app:layout_constraintTop_toBottomOf="@id/tabs"
+        app:layout_constraintTop_toBottomOf="@id/animation_view"
         app:layout_constraintBottom_toTopOf="@id/restoreWalletButton"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
