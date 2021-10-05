@@ -63,6 +63,7 @@ class SplashScreenActivity : BaseLaunchAppActivity(), PassiveVideoToActivityInte
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             finish()
         }
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
     companion object {

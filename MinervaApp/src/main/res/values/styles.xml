@@ -13,6 +13,7 @@
         <item name="android:windowDisablePreview">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@color/lightGray</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
     <style name="Theme.Transparent" parent="AppTheme">
