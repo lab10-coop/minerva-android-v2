@@ -1,52 +1,57 @@
 package minerva.android.splash
 
+import android.animation.Animator
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_splash_screen.*
+import android.os.Handler
+import android.view.WindowManager
+import com.airbnb.lottie.LottieAnimationView
 import minerva.android.R
 import minerva.android.extension.launchActivity
-import minerva.android.kotlinUtils.Empty
 import minerva.android.main.MainActivity
 
 class SplashScreenActivity : BaseLaunchAppActivity(), PassiveVideoToActivityInteractor {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
-        setupActionBar()
-        with(passiveVideoView) {
-            onCreate(this@SplashScreenActivity)
-            setupListener(this@SplashScreenActivity)
-        }
+        super.onCreate(savedInstanceState)
+        setupStatusBar()
     }
 
     override fun onResume() {
         super.onResume()
-        passiveVideoView.start()
+        Handler().postDelayed(Runnable {
+            findViewById<LottieAnimationView>(R.id.animation_view).playAnimation()
+        }, ANIMATION_DELAY)
+        setupAnimationListeners()
     }
 
-    override fun onPause() {
-        super.onPause()
-        passiveVideoView.pause()
+    private fun setupAnimationListeners() {
+        findViewById<LottieAnimationView>(R.id.animation_view).addAnimatorListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator?) {
+                initWalletConfig()
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                onAnimationEnd()
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+                // nothing to do
+            }
+
+            override fun onAnimationRepeat(animation: Animator?) {
+                // nothing to do
+            }
+        })
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        passiveVideoView.onDestroy()
-    }
-
-    private fun setupActionBar() {
-        supportActionBar?.apply {
-            title = String.Empty
-            setBackgroundDrawable(ColorDrawable(Color.WHITE))
-        }
-        window.statusBarColor = Color.WHITE
+    private fun setupStatusBar() {
+        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
     }
 
     override fun onAnimationEnd() {
-        checkWalletConnect()
+        checkWalletConfig()
     }
 
     override fun initWalletConfig() {
@@ -58,5 +63,10 @@ class SplashScreenActivity : BaseLaunchAppActivity(), PassiveVideoToActivityInte
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             finish()
         }
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
+    companion object {
+        private const val ANIMATION_DELAY = 500L
     }
 }

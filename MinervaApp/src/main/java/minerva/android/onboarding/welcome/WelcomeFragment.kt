@@ -1,11 +1,8 @@
 package minerva.android.onboarding.welcome
 
 import android.os.Bundle
-import android.os.Handler
 import android.text.method.LinkMovementMethod
 import android.view.View
-import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.tabs.TabLayoutMediator
 import minerva.android.R
 import minerva.android.databinding.FragmentWelcomeBinding
 import minerva.android.extension.invisible
@@ -14,38 +11,15 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.onboarding.base.BaseOnBoardingFragment
 import minerva.android.onboarding.create.CreateWalletViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.*
 
 class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
 
     private lateinit var binding: FragmentWelcomeBinding
     private val viewModel: CreateWalletViewModel by viewModel()
 
-    private var currentPage: Int = MIN_POSITION
-    private lateinit var carouselTimer: Timer
-    private val carouselHandler = Handler()
-    private val carouselUpdate by lazy {
-        Runnable {
-            var smoothScroll = true
-
-            if (currentPage == ITEM_COUNT) {
-                currentPage = MIN_POSITION
-                smoothScroll = false
-            }
-            binding.onboardingViewPager.setCurrentItem(currentPage++, smoothScroll)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         listener.updateActionBar()
-        setupAutomaticCarousel()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        carouselHandler.removeCallbacks(carouselUpdate)
-        carouselTimer.cancel()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -53,7 +27,6 @@ class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
         binding = FragmentWelcomeBinding.bind(view)
         handleCreateWalletButton()
         handleRestoreWalletButton()
-        setupViewPager()
         setupTermsLink()
         prepareObservers()
     }
@@ -93,44 +66,8 @@ class WelcomeFragment : BaseOnBoardingFragment(R.layout.fragment_welcome) {
         binding.termsOfService.movementMethod = LinkMovementMethod.getInstance()
     }
 
-    private fun setupViewPager() = with(binding) {
-        onboardingViewPager.apply {
-            adapter = OnBoardingAdapter()
-            isUserInputEnabled = false
-            setFadingAnimation()
-            TabLayoutMediator(tabs, this) { _, _ -> }.attach()
-        }
-    }
-
-    private fun ViewPager2.setFadingAnimation() {
-        setPageTransformer() { page, _ ->
-            page.apply {
-                alpha = FADING_ALPHA_START
-                visible()
-                animate().alpha(FADING_ALPHA_END).duration = FADING_DURATION
-            }
-        }
-    }
-
-    private fun setupAutomaticCarousel() {
-        carouselTimer = Timer()
-        carouselTimer.schedule(object : TimerTask() {
-            override fun run() {
-                carouselHandler.post(carouselUpdate)
-            }
-        }, DELAY, CAROUSEL_PERIOD)
-    }
-
     companion object {
         @JvmStatic
         fun newInstance() = WelcomeFragment()
-
-        private const val DELAY = 0L
-        private const val CAROUSEL_PERIOD = 3000L
-        private const val FADING_DURATION = 2000L
-        private const val FADING_ALPHA_START = 0F
-        private const val FADING_ALPHA_END = 1F
-        private const val ITEM_COUNT = 4
-        private const val MIN_POSITION = 0
     }
 }

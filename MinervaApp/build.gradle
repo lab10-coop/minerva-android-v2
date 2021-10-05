@@ -133,6 +133,5 @@ dependencies {
     implementation rxDependencies.values()
     implementation kotlinReflect.values()
     implementation jsoup.values()
-
     testImplementation testDependencies.values()
 }

@@ -19,9 +19,10 @@ abstract class BaseLaunchAppActivity : AppCompatActivity() {
         launchActivity<OnBoardingActivity> {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
-    protected fun checkWalletConnect() {
+    protected fun checkWalletConfig() {
         try {
             viewModel.getWalletConfig()
             showMainActivity()
