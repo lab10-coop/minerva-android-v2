@@ -25,8 +25,8 @@
         <activity
             android:name=".walletConnect.HandlingWalletConnectDeepLinkActivity"
             android:label="@string/empty"
-            android:theme="@style/Theme.Transparent"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Transparent">
             <intent-filter android:label="@string/minerva">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -39,7 +39,8 @@
         <activity
             android:name=".splash.SplashScreenActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -49,6 +50,7 @@
         <activity
             android:name=".main.MainActivity"
             android:launchMode="singleInstance"
+            android:theme="@style/AppTheme"
             android:screenOrientation="portrait">
 
         </activity>
