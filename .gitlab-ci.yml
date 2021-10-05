@@ -13,6 +13,7 @@ before_script:
 stages:
   - validation
   - distribution
+  - update-variable
   - deploy
 
 validateBranch:
@@ -45,11 +46,20 @@ distributeStagingBuild:
     - . /etc/profile.d/rvm.sh
     - ./BuildScripts/build_fastlane.sh
     - fastlane firebaseStaging
-    - 'curl --silent --show-error --insecure --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"'
 
   artifacts:
     paths:
       - ./MinervaApp/build/outputs/apk/staging
+
+updateProjectVariable:
+  stage: update-variable
+  image: curlimages/curl:latest
+  only:
+    refs:
+      - master
+  script:
+    - |
+      curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: $API_TOKEN" "https://code.lab10.io/api/v4/projects/166/variables/VERSION_CODE_STAGING" --form "value=$(($VERSION_CODE_STAGING + 1))"
 
 alphaGooglePlayStore:
   stage: deploy
