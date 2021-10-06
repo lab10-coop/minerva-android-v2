@@ -12,7 +12,7 @@ data class CoinBalance(
     override val chainId: Int,
     override val address: String,
     val balance: Balance,
-    val rate: Double?
+    val rate: Double? = null
 ) : Coin
 
 data class CoinError(

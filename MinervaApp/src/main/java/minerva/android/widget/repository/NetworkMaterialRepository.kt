@@ -9,6 +9,8 @@ import minerva.android.R
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
@@ -36,6 +38,7 @@ private fun getMainIcon(chainId: Int): Int =
         ETH_KOV, ETH_RIN, ETH_ROP -> R.drawable.ic_etherium_test
         ETH_GOR -> R.drawable.ic_gorli
         MATIC, MUMBAI -> R.drawable.ic_polygon_matic
+        BSC, BSC_TESTNET -> R.drawable.ic_bsc
         else -> Int.InvalidId
     }
 
@@ -50,6 +53,7 @@ fun getMainTokenIconRes(chainId: Int): Int =
         POA_SKL -> R.drawable.ic_skl_token
         LUKSO_14 -> R.drawable.ic_lukso
         MATIC, MUMBAI -> R.drawable.ic_polygon_matic_token
+        BSC, BSC_TESTNET -> R.drawable.ic_bsc_token
         else -> R.drawable.ic_default_token
     }
 

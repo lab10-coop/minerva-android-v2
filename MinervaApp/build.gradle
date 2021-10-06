@@ -6,8 +6,8 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion _compileSdkVersion
+    buildToolsVersion _buildToolsVersion
 
     compileOptions {
         sourceCompatibility 1.8
@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion _targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "MARKETS_API_URL", '"https://api.coingecko.com/api/v3/"'
         buildConfigField "String", "LICENCE_TYPE", '"GPLv3"'
@@ -57,8 +57,8 @@ android {
         flavorDimensions 'enviroment'
         staging {
             applicationId "minerva.android.staging"
-            versionCode 76
-            versionName "1.5.5"
+            versionCode 81
+            versionName "1.6.0"
             dimension 'enviroment'
             versionNameSuffix '-staging'
             matchingFallbacks = ["staging"]
@@ -72,8 +72,8 @@ android {
 
         production {
             applicationId "digital.minerva"
-            versionCode 10
-            versionName "1.5.5"
+            versionCode 11
+            versionName "1.6.0"
             dimension 'enviroment'
             matchingFallbacks = ["production"]
 
@@ -133,6 +133,5 @@ dependencies {
     implementation rxDependencies.values()
     implementation kotlinReflect.values()
     implementation jsoup.values()
-
     testImplementation testDependencies.values()
 }

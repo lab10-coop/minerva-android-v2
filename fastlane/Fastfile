@@ -34,6 +34,7 @@ platform :android do
              message: "Fresh and funky staging build is in da house!",
              channel: "#minerva_wallet_status",
              slack_url: "https://hooks.slack.com/services/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",
+             fail_on_error: false
                 )
   end
 
@@ -50,6 +51,7 @@ platform :android do
                message: "Fresh and funky production build is in da house!",
                channel: "#minerva_wallet_status",
                slack_url: "https://hooks.slack.com/services/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",
+               fail_on_error: false
                   )
     end
 
@@ -65,6 +67,7 @@ platform :android do
                message: "Fresh and funky production build is deployed to Alpha channel!",
                channel: "#minerva_wallet_status",
                slack_url: "https://hooks.slack.com/services/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",
+               fail_on_error: false
                   )
     end
 end

@@ -429,15 +429,17 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get cached tokens when no account tokens test`() {
+        val token = ERC20Token(
+            1,
+            address = "tokenAddress",
+            name = "cachedToken",
+            accountAddress = "address1",
+            decimals = "9"
+        )
         whenever(accountManager.cachedTokens).thenReturn(
             mapOf(
                 1 to listOf(
-                    ERC20Token(
-                        1,
-                        address = "tokenAddress",
-                        name = "cachedToken",
-                        accountAddress = "address1"
-                    )
+                   token
                 )
             )
         )
@@ -445,9 +447,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
         with(viewModel.tokenVisibilitySettings) {
             whenever(getTokenVisibility("address1", "tokenAddress")).thenReturn(true)
         }
-        val account = Account(1, address = "address1", chainId = 1)
+        val account = Account(1, address = "address1", chainId = 1, accountTokens = mutableListOf(AccountToken(currentRawBalance = BigDecimal.TEN,token = token)))
         val result = viewModel.getTokens(account)
-        result[0].name shouldBeEqualTo "cachedToken"
+        result[0].token.name shouldBeEqualTo "cachedToken"
     }
 
     @Test
@@ -498,8 +500,8 @@ class AccountsViewModelTest : BaseViewModelTest() {
             whenever(getTokenVisibility("address1", "heh2")).thenReturn(true)
         }
         val result = viewModel.getTokens(account)
-        result[0].name shouldBeEqualTo "cachedToken2"
-        result[1].name shouldBeEqualTo "cachedToken1"
+        result[0].token.name shouldBeEqualTo "cachedToken2"
+        result[1].token.name shouldBeEqualTo "cachedToken1"
     }
 
     @Test

@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk
+FROM openjdk:11-jdk
 USER root
 
 COPY . .
@@ -17,18 +17,10 @@ RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A
 RUN wget -qO /usr/local/bin/firebase https://firebase.tools/bin/linux/latest; \
     chmod +x /usr/local/bin/firebase;
 
-#Get gradle dist into container
-RUN GRADLE_FILE_NAME=gradle-5.4.1-all.zip; \
-    GRADLE_LINK="https://services.gradle.org/distributions/$GRADLE_FILE_NAME"; \
-    GRADLE_DIST_DIR="/gradleDist"; \
-    GRADLE_FILE_PATH="$GRADLE_DIST_DIR/$GRADLE_FILE_NAME"; \
-    mkdir -p $GRADLE_DIST_DIR; \
-    wget --quiet $GRADLE_LINK -O $GRADLE_FILE_PATH;
-
 #Get android SDK
-RUN ANDROID_COMPILE_SDK=28; \
-    ANDROID_BUILD_TOOLS=28.0.2; \
-    ANDROID_SDK_TOOLS=4333796; \
+RUN ANDROID_COMPILE_SDK=30; \
+    ANDROID_BUILD_TOOLS=30.0.3; \
+    ANDROID_SDK_TOOLS=7583922; \
     ANDROID_LINK="https://dl.google.com/android/repository/sdk-tools-linux-$ANDROID_SDK_TOOLS.zip"; \
     wget --quiet --output-document=android-sdk.zip $ANDROID_LINK; \
     unzip -d /android-sdk-linux android-sdk.zip; \

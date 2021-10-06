@@ -35,7 +35,8 @@ class WalletConnectRepositoryImpl(
     private val clientMap: ConcurrentHashMap<String, WCClient> = ConcurrentHashMap()
 ) : WalletConnectRepository {
     private var status: PublishSubject<WalletConnectStatus> = PublishSubject.create()
-    override var connectionStatusFlowable: Flowable<WalletConnectStatus> = status.toFlowable(BackpressureStrategy.DROP)
+    override var connectionStatusFlowable: Flowable<WalletConnectStatus> =
+        status.toFlowable(BackpressureStrategy.DROP)
     private var currentRequestId: Long = Long.InvalidValue
     internal lateinit var currentEthMessage: WCEthereumSignMessage
     private var disposable: CompositeDisposable = CompositeDisposable()
@@ -43,11 +44,17 @@ class WalletConnectRepositoryImpl(
     private val dappDao = minervaDatabase.dappDao()
     private var reconnectionAttempts: MutableMap<String, Int> = mutableMapOf()
 
-    override fun connect(session: WalletConnectSession, peerId: String, remotePeerId: String?, dapps: List<DappSession>) {
+    override fun connect(
+        session: WalletConnectSession,
+        peerId: String,
+        remotePeerId: String?,
+        dapps: List<DappSession>
+    ) {
         wcClient = WCClient()
         with(wcClient) {
 
             onWCOpen = { peerId ->
+                logger.logToFirebase("${LoggerMessages.ON_CONNECTION_OPEN}$peerId")
                 if (reconnectionAttempts.isNotEmpty()) {
                     reconnectionAttempts.clear()
                 }
@@ -58,6 +65,7 @@ class WalletConnectRepositoryImpl(
             }
 
             onSessionRequest = { remotePeerId, meta, chainId, peerId, handshakeId ->
+                logger.logToFirebase("${LoggerMessages.ON_SESSION_REQUEST}$peerId")
                 status.onNext(
                     OnSessionRequest(
                         WCPeerToWalletConnectPeerMetaMapper.map(meta),
@@ -69,15 +77,17 @@ class WalletConnectRepositoryImpl(
             }
 
             onFailure = { error, peerId, isForceTermination ->
-                logger.logToFirebase("WalletConnect onFailure: $error, peerId: $peerId")
                 if (isForceTermination) {
+                    logger.logToFirebase("${LoggerMessages.CONNECTION_TERMINATION} $error, peerId: $peerId")
                     terminateConnection(peerId, error)
                 } else {
+                    logger.logToFirebase("${LoggerMessages.RECONNECTING_CONNECTION} $error, peerId: $peerId")
                     reconnect(peerId, error, remotePeerId)
                 }
             }
             onDisconnect = { _, peerId, isExternal ->
                 peerId?.let {
+                    logger.logToFirebase("${LoggerMessages.ON_DISCONNECTING} $peerId")
                     if (reconnectionAttempts.containsKey(peerId)) {
                         reconnectionAttempts.remove(peerId)
                     }
@@ -96,13 +106,14 @@ class WalletConnectRepositoryImpl(
             }
 
             onEthSign = { id, message, peerId ->
+                logger.logToFirebase("${LoggerMessages.ON_ETH_SIGN} $peerId")
                 currentRequestId = id
                 currentEthMessage = message
                 status.onNext(OnEthSign(getUserReadableData(message), peerId))
             }
 
             onEthSendTransaction = { id, transaction, peerId ->
-                logger.logToFirebase("WalletConnect transaction: peerId: $peerId; transaction: $transaction")
+                logger.logToFirebase("${LoggerMessages.ON_ETH_SEND_TX} peerId: $peerId; transaction: $transaction")
                 currentRequestId = id
                 status.onNext(
                     OnEthSendTransaction(
@@ -151,7 +162,14 @@ class WalletConnectRepositoryImpl(
                 reconnectionAttempts[peerId] = attempt
                 with(session) {
                     clientMap[peerId]!!.connect(
-                        WalletConnectSessionMapper.map(WalletConnectSession(topic, version, bridge, key)),
+                        WalletConnectSessionMapper.map(
+                            WalletConnectSession(
+                                topic,
+                                version,
+                                bridge,
+                                key
+                            )
+                        ),
                         peerMeta = WCPeerMeta(),
                         peerId = peerId,
                         remotePeerId = remotePeerId
@@ -163,7 +181,11 @@ class WalletConnectRepositoryImpl(
             .addTo(disposable)
     }
 
-    private fun removeDappSession(peerId: String, onSuccess: (session: DappSession) -> Unit, onError: () -> Unit) {
+    private fun removeDappSession(
+        peerId: String,
+        onSuccess: (session: DappSession) -> Unit,
+        onError: () -> Unit
+    ) {
         checkDisposable()
         getDappSessionById(peerId)
             .flatMap { session -> deleteDappSession(session.peerId).toSingleDefault(session) }
@@ -181,6 +203,7 @@ class WalletConnectRepositoryImpl(
     }
 
     override fun rejectSession(peerId: String) {
+        logger.logToFirebase("${LoggerMessages.REJECT_SESSION} $peerId")
         with(clientMap) {
             this[peerId]?.rejectSession()
             this[peerId]?.disconnect()
@@ -218,7 +241,8 @@ class WalletConnectRepositoryImpl(
         dappDao.getAll().firstOrError().map { EntitiesToDappSessionsMapper.map(it) }
 
     override fun getSessionsFlowable(): Flowable<List<DappSession>> =
-        dappDao.getAll().map { sessionEntities -> EntitiesToDappSessionsMapper.map(sessionEntities) }
+        dappDao.getAll()
+            .map { sessionEntities -> EntitiesToDappSessionsMapper.map(sessionEntities) }
 
     override fun getDappSessionById(peerId: String): Single<DappSession> =
         dappDao.getDappSessionById(peerId).map { SessionEntityToDappSessionMapper.map(it) }
@@ -232,8 +256,14 @@ class WalletConnectRepositoryImpl(
     override fun getWCSessionFromQr(qrCode: String): WalletConnectSession =
         WCSessionToWalletConnectSessionMapper.map(WCSession.from(qrCode))
 
-    override fun approveSession(addresses: List<String>, chainId: Int, peerId: String, dapp: DappSession): Completable =
+    override fun approveSession(
+        addresses: List<String>,
+        chainId: Int,
+        peerId: String,
+        dapp: DappSession
+    ): Completable =
         if (clientMap[peerId]?.approveSession(addresses, chainId, peerId) == true) {
+            logger.logToFirebase("${LoggerMessages.APPROVE_SESSION} $peerId")
             saveDappSession(dapp)
         } else {
             Completable.error(Throwable("Session not approved"))
@@ -251,7 +281,11 @@ class WalletConnectRepositoryImpl(
             clientMap.forEach { entry ->
                 val currentDapp = dapps.find { dapp -> dapp.peerId == entry.key }
                 if (shouldPing(entry)) {
-                    entry.value.approveSession(entry.value.accounts!!, entry.value.chainId!!, entry.key)
+                    entry.value.approveSession(
+                        entry.value.accounts!!,
+                        entry.value.chainId!!,
+                        entry.key
+                    )
                 } else if (dapps.isNotEmpty() && currentDapp != null && entry.value.session != null) {
                     entry.value.approveSession(
                         listOf(currentDapp.address),
@@ -271,10 +305,12 @@ class WalletConnectRepositoryImpl(
         it.value.isConnected && it.value.accounts != null && it.value.chainId != null
 
     override fun approveRequest(peerId: String, privateKey: String) {
+        logger.logToFirebase("${LoggerMessages.APPROVE_REQUEST} $peerId")
         clientMap[peerId]?.approveRequest(currentRequestId, signData(privateKey))
     }
 
     override fun approveTransactionRequest(peerId: String, message: String) {
+        logger.logToFirebase("${LoggerMessages.APPROVE_TX_REQUEST} $peerId")
         clientMap[peerId]?.approveRequest(currentRequestId, message)
     }
 
@@ -285,13 +321,19 @@ class WalletConnectRepositoryImpl(
     }
 
     override fun rejectRequest(peerId: String) {
+        logger.logToFirebase("${LoggerMessages.REJECT_REQUEST} $peerId")
         clientMap[peerId]?.rejectRequest(currentRequestId)
     }
 
     override fun killAllAccountSessions(address: String, chainId: Int): Completable =
         getSessions()
             .map { sessions ->
-                sessions.filter { session -> session.chainId == chainId && session.address.equals(address, true) }
+                sessions.filter { session ->
+                    session.chainId == chainId && session.address.equals(
+                        address,
+                        true
+                    )
+                }
                     .forEach { session ->
                         with(clientMap) {
                             this[session.peerId]?.killSession()
@@ -302,8 +344,9 @@ class WalletConnectRepositoryImpl(
                 dappDao.deleteAllDappsForAccount(address)
             }
 
-    override fun killSession(peerId: String): Completable =
-        deleteDappSession(peerId)
+    override fun killSession(peerId: String): Completable {
+        logger.logToFirebase("${LoggerMessages.KILL_SESSION} $peerId")
+        return deleteDappSession(peerId)
             .andThen {
                 with(clientMap) {
                     if (this[peerId]?.session != null) {
@@ -312,6 +355,7 @@ class WalletConnectRepositoryImpl(
                     remove(peerId)
                 }
             }
+    }
 
     override fun dispose() {
         disposable.dispose()

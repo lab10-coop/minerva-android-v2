@@ -7,12 +7,12 @@ plugins {
 apply from: "$rootProject.projectDir/dependencies.gradle"
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion _compileSdkVersion
+    buildToolsVersion _buildToolsVersion
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion _targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -33,9 +33,12 @@ android {
         buildConfigField "String", "X_DAI_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/xdai/"'
         buildConfigField "String", "LUKSO_TOKEN_BALANCE_URL", '"https://blockscout.com/lukso/l14/"'
         buildConfigField "String", "POLYGON_TOKEN_BALANCE_URL", '"https://api.polygonscan.com/"'
+        buildConfigField "String", "BINANCE_SMART_CHAIN_MAINNET_TOKEN_BALANCE_URL", '"https://api.bscscan.com/"'
+        buildConfigField "String", "BINANCE_SMART_CHAIN_TESTNET_TOKEN_BALANCE_URL", '"https://api-testnet.bscscan.com/"'
         buildConfigField "String", "POLYGONSCAN_KEY", System.env.POLYGONSCAN_KEY ?: localProperty("polygonscan.key")
         buildConfigField "String", "ETHERSCAN_KEY", System.env.ETHERSCAN_KEY ?: localProperty("etherscan.key")
         buildConfigField "String", "INFURA_API_KEY", System.env.INFURA_API_KEY ?: localProperty("infura.key")
+        buildConfigField "String", "BSCSCAN_KEY", System.env.BSCSCAN_KEY ?: localProperty("bscscan.key")
     }
 
     buildTypes {

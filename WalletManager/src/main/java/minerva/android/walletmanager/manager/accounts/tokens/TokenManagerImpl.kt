@@ -28,6 +28,8 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
@@ -49,7 +51,6 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -459,7 +460,7 @@ class TokenManagerImpl(
 
     override fun downloadTokensList(account: Account): Single<List<ERC20Token>> =
         when (account.chainId) {
-            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, MATIC -> getTokensFromTx(account)
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, MATIC, BSC, BSC_TESTNET -> getTokensFromTx(account)
             MUMBAI -> Single.just(emptyList()) // Networks without token explorer urls
             else -> getTokensForAccount(account)
         }
@@ -470,7 +471,7 @@ class TokenManagerImpl(
     override fun getTokensRates(tokens: Map<Int, List<ERC20Token>>): Completable =
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
             with(localStorage.loadCurrentFiat()) {
-                if (currentFiat != this) rateStorage.clearRates()
+                if (currentFiat != this && currentFiat != String.Empty) rateStorage.clearRates()
                 tokens.forEach { (chainId, tokens) ->
                     val marketId = MarketUtils.getTokenGeckoMarketId(chainId)
                     if (!rateStorage.areRatesSynced && marketId != String.Empty) {
@@ -578,6 +579,7 @@ class TokenManagerImpl(
         when (chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHERSCAN_KEY
             MATIC -> POLYGONSCAN_KEY
+            BSC, BSC_TESTNET -> BSCSCAN_KEY
             else -> throw NetworkNotFoundThrowable()
         }
 
@@ -595,6 +597,8 @@ class TokenManagerImpl(
             XDAI -> X_DAI_TOKEN_BALANCE_URL
             LUKSO_14 -> LUKSO_TOKEN_BALANCE_URL
             MATIC -> POLYGON_TOKEN_BALANCE_URL
+            BSC -> BINANCE_SMART_CHAIN_MAINNET_TOKEN_BALANCE_URL
+            BSC_TESTNET -> BINANCE_SMART_CHAIN_TESTNET_TOKEN_BALANCE_URL
             else -> throw NetworkNotFoundThrowable()
         }
 

@@ -15,22 +15,31 @@ import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.Space
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.list.inBounds
+import minerva.android.walletmanager.database.MinervaDatabase
+import minerva.android.walletmanager.database.dao.CoinBalanceDao
+import minerva.android.walletmanager.database.dao.TokenBalanceDao
+import minerva.android.walletmanager.database.entity.CoinBalanceEntity
+import minerva.android.walletmanager.database.entity.TokenBalanceEntity
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwnersThrowable
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.utils.TokenUtils
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.util.*
 
 class AccountManagerImpl(
     private val walletManager: WalletConfigManager,
@@ -38,7 +47,8 @@ class AccountManagerImpl(
     private val localStorage: LocalStorage,
     private val unitConverter: UnitConverter,
     private val ensRepository: ENSRepository,
-    private val timeProvider: CurrentTimeProvider //TODO make one class with DateUtils
+    private val timeProvider: CurrentTimeProvider, //TODO make one class with DateUtils
+    database: MinervaDatabase
 ) : AccountManager {
     override var hasAvailableAccounts: Boolean = false
     override var activeAccounts: List<Account> = emptyList()
@@ -49,6 +59,8 @@ class AccountManagerImpl(
     override val isProtectTransactionsEnabled: Boolean get() = localStorage.isProtectTransactionsEnabled
     override val masterSeed: MasterSeed get() = walletManager.masterSeed
     override val getTokenVisibilitySettings: TokenVisibilitySettings get() = localStorage.getTokenVisibilitySettings()
+    private val coinBalanceDao: CoinBalanceDao = database.coinBalanceDao()
+    private val tokenBalanceDao: TokenBalanceDao = database.tokenBalanceDao()
 
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = Transformations.map(walletManager.walletConfigLiveData) { walletConfigEvent ->
@@ -69,14 +81,21 @@ class AccountManagerImpl(
 
     private fun getNextAvailableIndexForNetwork(network: Network): Int {
         val usedIds = getAllActiveAccounts(network.chainId).map { account -> account.id }
-        return getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted && !usedIds.contains(account.id) }
+        return getAllAccountsForSelectedNetworksType().filter { account ->
+            !account.isDeleted && !usedIds.contains(
+                account.id
+            )
+        }
             .minBy { account -> account.id }!!.id
     }
 
     override fun createEmptyAccounts(numberOfAccounts: Int) =
         walletManager.getWalletConfig().run {
             val newAccounts = mutableListOf<Account>()
-            val (firstFreeIndex, derivationPath) = getIndexWithDerivationPath(!areMainNetworksEnabled, this)
+            val (firstFreeIndex, derivationPath) = getIndexWithDerivationPath(
+                !areMainNetworksEnabled,
+                this
+            )
 
             for (shift in 0 until numberOfAccounts) {
                 val index = firstFreeIndex + shift
@@ -98,7 +117,8 @@ class AccountManagerImpl(
 
     private fun createRegularAccountWithGivenIndex(index: Int, network: Network): Single<String> =
         walletManager.getWalletConfig().run {
-            val derivationPath = if (network.testNet) DerivationPath.TEST_NET_PATH else DerivationPath.MAIN_NET_PATH
+            val derivationPath =
+                if (network.testNet) DerivationPath.TEST_NET_PATH else DerivationPath.MAIN_NET_PATH
             val accountName = CryptoUtils.prepareName(network.name, index)
             cryptographyRepository.calculateDerivedKeysSingle(
                 walletManager.masterSeed.seed,
@@ -113,7 +133,8 @@ class AccountManagerImpl(
                     address = keys.address
                 )
                 addAccount(newAccount, this)
-            }.flatMapCompletable { config -> walletManager.updateWalletConfig(config) }.toSingleDefault(accountName)
+            }.flatMapCompletable { config -> walletManager.updateWalletConfig(config) }
+                .toSingleDefault(accountName)
         }
 
     private fun addAccount(newAccount: Account, config: WalletConfig): WalletConfig {
@@ -122,7 +143,10 @@ class AccountManagerImpl(
         return config.copy(version = config.updateVersion, accounts = newAccounts)
     }
 
-    private fun getWalletConfigWithNewAccounts(accounts: List<Account>, config: WalletConfig): WalletConfig {
+    private fun getWalletConfigWithNewAccounts(
+        accounts: List<Account>,
+        config: WalletConfig
+    ): WalletConfig {
         val newAccounts = config.accounts.toMutableList().apply { addAll(accounts) }
         return config.copy(version = config.updateVersion, accounts = newAccounts)
     }
@@ -142,6 +166,54 @@ class AccountManagerImpl(
         return connectAccountToNetwork(index, network)
     }
 
+    override fun insertCoinBalance(coinBalance: CoinBalance): Completable =
+        with(coinBalance) {
+            coinBalanceDao.insert(
+                CoinBalanceEntity(
+                    balanceHash = TokenUtils.generateTokenHash(chainId, address),
+                    address = address,
+                    chainId = chainId,
+                    cryptoBalance = coinBalance.balance.cryptoBalance,
+                    fiatBalance = coinBalance.balance.fiatBalance,
+                    rate = rate ?: Double.InvalidValue
+                )
+            )
+        }
+
+    override fun insertTokenBalance(coinBalance: CoinBalance, accountAddress: String): Completable =
+        with(coinBalance) {
+            tokenBalanceDao.insert(
+                TokenBalanceEntity(
+                    balanceHash = (address + accountAddress).toLowerCase(Locale.ROOT),
+                    address = address,
+                    chainId = chainId,
+                    cryptoBalance = coinBalance.balance.cryptoBalance,
+                    fiatBalance = coinBalance.balance.fiatBalance,
+                    rate = rate ?: Double.InvalidValue,
+                    accountAddress = accountAddress
+                )
+            )
+        }
+
+    override fun getCachedCoinBalance(address: String, chainId: Int): Single<CoinBalance> =
+        coinBalanceDao.getCoinBalance(address, chainId)
+            .map { entity ->
+                with(entity) {
+                    CoinBalance(chainId, address, Balance(cryptoBalance, fiatBalance), rate)
+                }
+            }
+
+    override fun getCachedTokenBalance(
+        address: String,
+        accountAddress: String
+    ): Single<CoinBalance> =
+        tokenBalanceDao.getTokenBalance(address, accountAddress)
+            .map { entity ->
+                with(entity) {
+                    CoinBalance(chainId, address, Balance(cryptoBalance, fiatBalance), rate)
+                }
+            }
+
     private fun updateAccount(existedAccount: Account, network: Network): Single<String> {
         val accountName =
             if (existedAccount.name.isBlank()) CryptoUtils.prepareName(
@@ -158,12 +230,20 @@ class AccountManagerImpl(
                 chainId = network.chainId
                 isHide = false
             }
-            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = newAccountsList))
+            return walletManager.updateWalletConfig(
+                copy(
+                    version = updateVersion,
+                    accounts = newAccountsList
+                )
+            )
                 .toSingleDefault(accountName)
         }
     }
 
-    private fun changeAccountIndexToLast(accountsList: MutableList<Account>, account: Account): List<Account> =
+    private fun changeAccountIndexToLast(
+        accountsList: MutableList<Account>,
+        account: Account
+    ): List<Account> =
         accountsList.toMutableList().apply {
             remove(account)
             add(account)
@@ -176,7 +256,12 @@ class AccountManagerImpl(
                 ?.apply {
                     name = accountName
                 }
-            return walletManager.updateWalletConfig(copy(version = updateVersion, accounts = accounts))
+            return walletManager.updateWalletConfig(
+                copy(
+                    version = updateVersion,
+                    accounts = accounts
+                )
+            )
         }
     }
 
@@ -216,11 +301,17 @@ class AccountManagerImpl(
         return newMap
     }
 
-    private fun getVisibleTokensList(tokenMap: Map<Int, List<ERC20Token>>, account: Account): List<ERC20Token> =
+    private fun getVisibleTokensList(
+        tokenMap: Map<Int, List<ERC20Token>>,
+        account: Account
+    ): List<ERC20Token> =
         tokenMap[account.chainId]?.let { tokens ->
             tokens.filter { token ->
                 token.accountAddress.equals(account.address, true) &&
-                        getTokenVisibilitySettings.getTokenVisibility(account.address, token.address) == true
+                        getTokenVisibilitySettings.getTokenVisibility(
+                            account.address,
+                            token.address
+                        ) == true
             }
         } ?: emptyList()
 
@@ -277,15 +368,21 @@ class AccountManagerImpl(
     override fun getFirstActiveAccountOrNull(chainId: Int): Account? =
         getAllActiveAccounts(chainId).firstOrNull()
 
-    override fun toChecksumAddress(address: String): String = ensRepository.toChecksumAddress(address)
+    override fun toChecksumAddress(address: String): String =
+        ensRepository.toChecksumAddress(address)
 
     override fun getAllAccountsForSelectedNetworksType(): List<Account> =
         getAllAccounts().filter { account -> account.isTestNetwork == !areMainNetworksEnabled }
 
     override fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>> {
         val usedIds = getAllActiveAccounts(chainId).map { account -> account.id }
-        return getAllAccountsForSelectedNetworksType().filter { account -> !account.isDeleted && !usedIds.contains(account.id) }
-            .map { account -> account.id to account.address }.distinctBy { account -> account.first }
+        return getAllAccountsForSelectedNetworksType().filter { account ->
+            !account.isDeleted && !usedIds.contains(
+                account.id
+            )
+        }
+            .map { account -> account.id to account.address }
+            .distinctBy { account -> account.first }
             .sortedBy { account -> account.first }
     }
 
@@ -296,7 +393,9 @@ class AccountManagerImpl(
     override fun clearFiat() =
         walletManager.getWalletConfig().accounts.forEach { account ->
             account.fiatBalance = Double.InvalidValue.toBigDecimal()
-            account.accountTokens.forEach { accountToken -> accountToken.tokenPrice = Double.InvalidValue }
+            account.accountTokens.forEach { accountToken ->
+                accountToken.tokenPrice = Double.InvalidValue
+            }
         }
 
     override fun removeAccount(account: Account): Completable =
@@ -310,14 +409,26 @@ class AccountManagerImpl(
             Completable.error(MissingAccountThrowable())
         }
 
-    private fun handleRemovingAccount(item: Account, config: WalletConfig, newAccounts: MutableList<Account>, index: Int)
+    private fun handleRemovingAccount(
+        item: Account,
+        config: WalletConfig,
+        newAccounts: MutableList<Account>,
+        index: Int
+    )
             : Completable =
         when {
             areFundsOnValue(item.cryptoBalance, item.accountTokens) -> handleNoFundsError(item)
-            isNotSAMasterOwner(config.accounts, item) -> Completable.error(IsNotSafeAccountMasterOwnerThrowable())
+            isNotSAMasterOwner(config.accounts, item) -> Completable.error(
+                IsNotSafeAccountMasterOwnerThrowable()
+            )
             else -> {
                 newAccounts[index] = item.copy(isDeleted = true)
-                walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+                walletManager.updateWalletConfig(
+                    config.copy(
+                        version = config.updateVersion,
+                        accounts = newAccounts
+                    )
+                )
             }
         }
 
@@ -352,7 +463,12 @@ class AccountManagerImpl(
                 }
             }
         }
-        return walletManager.updateWalletConfig(config.copy(version = config.updateVersion, accounts = newAccounts))
+        return walletManager.updateWalletConfig(
+            config.copy(
+                version = config.updateVersion,
+                accounts = newAccounts
+            )
+        )
     }
 
     private fun handleNoFundsError(account: Account): Completable =

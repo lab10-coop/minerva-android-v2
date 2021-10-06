@@ -19,6 +19,7 @@ import minerva.android.extension.*
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.widget.state.AccountWidgetState
@@ -57,7 +58,7 @@ class AccountViewHolder(
     fun setupAccountView(
         account: Account,
         fiatSymbol: String,
-        tokens: List<ERC20Token>
+        tokens: List<AccountToken>
     ) {
         view.apply {
             prepareView(account)
@@ -135,7 +136,7 @@ class AccountViewHolder(
         }
     }
 
-    private fun View.prepareTokens(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) {
+    private fun View.prepareTokens(account: Account, fiatSymbol: String, tokens: List<AccountToken>) {
         binding.apply {
             tokensAndCollectibles.prepareView(viewGroup, this@AccountViewHolder, accountWidgetState.isWidgetOpen)
             tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens, accountWidgetState.isWidgetOpen)
@@ -149,7 +150,7 @@ class AccountViewHolder(
         }
     }
 
-    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: List<ERC20Token>) =
+    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: List<AccountToken>) =
         setOnClickListener {
             if (isWidgetOpen) {
                 close()

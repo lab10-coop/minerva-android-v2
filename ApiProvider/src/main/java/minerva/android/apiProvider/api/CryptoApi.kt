@@ -4,6 +4,7 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.ServicesApi.Companion.APPLICATION_JSON
 import minerva.android.apiProvider.api.ServicesApi.Companion.CONTENT_TYPE
 import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.gaswatch.GasPrices
 import retrofit2.http.*
 
 interface CryptoApi {
@@ -28,6 +29,13 @@ interface CryptoApi {
     fun getGasPriceForMatic(
         @Url url: String
     ): Single<GasPricesMatic>
+
+    @POST
+    fun getGasPriceFromRpcOverHttp(
+        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
+        @Url url: String,
+        @Body rpcOverHttpPayload: RpcOverHttpPayload = RpcOverHttpPayload.GET_GAS_PRICE_PAYLOAD
+    ): Single<GasPricesFromRpcOverHttp>
 
     @GET
     fun getTokenDetails(@Url url: String): Single<List<TokenDetails>>

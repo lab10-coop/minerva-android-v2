@@ -16,6 +16,7 @@
         android:layout_marginLeft="@dimen/margin_normal"
         android:layout_marginRight="@dimen/margin_normal"
         android:fontFamily="@font/rubik_medium"
+        android:typeface="monospace"
         android:gravity="center_vertical"
         android:paddingTop="@dimen/margin_small"
         android:paddingBottom="@dimen/margin_xsmall"
