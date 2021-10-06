@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.iid.FirebaseInstanceId
 import minerva.android.R
 import minerva.android.accounts.adapter.AccountAdapter
 import minerva.android.accounts.adapter.AccountViewHolder
@@ -23,7 +23,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.widget.dialog.EditAccountNameDialog
 import minerva.android.widget.dialog.ExportPrivateKeyDialog
@@ -36,12 +36,12 @@ import minerva.android.wrapped.startRampWrappedActivity
 import minerva.android.wrapped.startSafeAccountWrappedActivity
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout),
     AccountsFragmentToAdapterListener {
     private val viewModel: AccountsViewModel by viewModel()
     private val appUIState: AppUIState by inject()
+    private val logger: Logger by inject()
     private val accountAdapter: AccountAdapter by lazy { AccountAdapter(this) }
     private lateinit var binding: RefreshableRecyclerViewLayoutBinding
 
@@ -179,7 +179,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun initFragment() {
         binding.apply {
             viewModel.apply {
-                syncError.isGone = isSynced
+                logToFirebaseIfNotSynced()
                 networksHeader.text = getHeader(areMainNetsEnabled)
                 addCryptoButton.apply { text = getBuyCryptoButtonText(this) }
                 if (!appUIState.shouldShowSplashScreen && isFirstLaunch) {
@@ -366,11 +366,18 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
         viewModel.createNewAccount(chainId)
     }
 
+    private fun logToFirebaseIfNotSynced() {
+        if (!viewModel.isSynced) {
+            val firebaseID: String = FirebaseInstanceId.getInstance().id
+            logger.logToFirebase("Wallet synchronization error - firebaseId: $firebaseID")
+        }
+    }
+
     private inner class EventObserverWithSyncChecking<T>(private val onEventUnhandledContent: (T) -> Unit) :
         Observer<Event<T>> {
         override fun onChanged(event: Event<T>?) {
             event?.getContentIfNotHandled()?.let {
-                binding.syncError.isGone = viewModel.isSynced
+                logToFirebaseIfNotSynced()
                 onEventUnhandledContent(it)
             }
         }
@@ -379,7 +386,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private inner class ObserverWithSyncChecking<T>(private val onValueChanged: (T) -> Unit) :
         Observer<T> {
         override fun onChanged(value: T) {
-            binding.syncError.isGone = viewModel.isSynced
+            logToFirebaseIfNotSynced()
             onValueChanged(value)
         }
     }
