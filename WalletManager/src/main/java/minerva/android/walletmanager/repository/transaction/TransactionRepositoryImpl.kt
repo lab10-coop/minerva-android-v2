@@ -8,6 +8,7 @@ import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.gaswatch.GasPrices
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
@@ -390,7 +391,13 @@ class TransactionRepositoryImpl(
             }
             shouldGetGasPriceFromApi(chainId) -> {
                 cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
-                    .flatMap { gasPrice -> getTxCosts(txCostPayload, gasPrice.speed, gasPrice.speed.fast) }
+                    .flatMap { gasPrice ->
+                        getTxCosts(
+                            txCostPayload,
+                            gasPrice.toTransactionSpeed(),
+                            gasPrice.toTransactionSpeed().fast
+                        )
+                    }
                     .onErrorResumeNext { getTxCosts(txCostPayload, null, null) }
             }
             else -> getTxCosts(txCostPayload, null, null)
@@ -472,6 +479,14 @@ class TransactionRepositoryImpl(
         fast = unitConverter.toGwei(fast),
         standard = unitConverter.toGwei(standard),
         slow = unitConverter.toGwei(slow)
+    )
+
+    private fun GasPrices.toTransactionSpeed() = TransactionSpeed(
+        rapid = unitConverter.toGwei(instant.gwei),
+        fast = unitConverter.toGwei(fast.gwei),
+        standard = unitConverter.toGwei(normal.gwei),
+        slow = unitConverter.toGwei(slow.gwei),
+        timestamp = lastUpdated
     )
 
     private fun getPendingAccountsWithBlockHashes(pendingTxList: List<Pair<String, String?>>): MutableList<PendingAccount> {
