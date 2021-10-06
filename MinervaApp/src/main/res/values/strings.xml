@@ -413,10 +413,14 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.6.0</item>
+        <item>* Caching of token values and icons</item>
+        <item>* BNB on BSC and ETH on Polygon direct purchase</item>
+        <item>* Fancier and faster welcome screen animation</item>
         <item>1.5.5</item>
-        <item>* Integration with Mobile Walletconnect</item>
-        <item>* Automatic Supertoken Stream detection</item>
-        <item>* Improvements and optimisations</item>
+        <item>* Integration of mobile WalletConnect</item>
+        <item>* Automatic SuperToken stream detection and animation</item>
+        <item>* Several usability improvements and fixes</item>
         <item>1.5.0</item>
         <item>* Wallet restore from the most popular 3rd party wallets</item>
         <item>* Use a scanner to connect to any DApp on any network</item>
