@@ -23,7 +23,6 @@ validateBranch:
       - master
       - production
   script:
-    - pwd
     - ./gradlew test
 
 validateLint:
