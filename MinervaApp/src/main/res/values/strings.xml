@@ -414,9 +414,11 @@
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
         <item>1.6.0</item>
+        <item>* Full support of Binance Smart Chain (BSC) mainnet and testnet</item>
         <item>* Caching of token values and icons</item>
-        <item>* BNB on BSC and ETH on Polygon direct purchase</item>
-        <item>* Fancier and faster welcome screen animation</item>
+        <item>* BNB on BSC direct purchase via ramp.network</item>
+        <item>* ETH on Polygon direct purchase via ramp.network</item>
+        <item>* Fancier and faster welcome screen &amp; onboarding animation</item>
         <item>1.5.5</item>
         <item>* Integration of mobile WalletConnect</item>
         <item>* Automatic SuperToken stream detection and animation</item>
