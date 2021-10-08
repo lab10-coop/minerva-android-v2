@@ -1,14 +1,8 @@
-image: code.lab10.io:4567/graz/10-minerva/minerva-android-v2:builder
-
-variables:
-  ANDROID_BUILD_TOOLS: 30.0.3
-  ANDROID_HOME: /android-sdk-linux
+image: code.lab10.io:4567/graz/10-minerva/minerva-android-v2:builder-v2
 
 before_script:
   - cp ./gradle/wrapper/gradle-wrapper.properties.ci ./gradle/wrapper/gradle-wrapper.properties
-  - yes | /android-sdk-linux/tools/bin/sdkmanager "platform-tools" >/dev/null 2>&1 || true
-  - yes | /android-sdk-linux/tools/bin/sdkmanager "build-tools;$ANDROID_BUILD_TOOLS" >/dev/null 2>&1 || true
-  - yes | /android-sdk-linux/tools/bin/sdkmanager --licenses >/dev/null 2>&1 || true
+  - cp /usr/src/builder/local.properties .
 
 stages:
   - validation
@@ -44,7 +38,6 @@ distributeStagingBuild:
     - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
-    - ./BuildScripts/build_fastlane.sh
     - fastlane firebaseStaging
 
   artifacts:
@@ -71,7 +64,6 @@ alphaGooglePlayStore:
     - base64 -d $KEY_STORE_FILE > MinervaApp/keyStoreMinerva.jks
     - ./gradlew build
     - . /etc/profile.d/rvm.sh
-    - ./BuildScripts/build_fastlane.sh
     - echo $PLAY_JSON > ./json_file.json
     - fastlane productionAlphaRelease json_path:./json_file.json
 
