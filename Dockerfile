@@ -3,21 +3,22 @@ USER root
 
 COPY . .
 
-#Install updates
+# Install updates
 RUN apt-get --quiet update --yes; \
     apt-get install -y --no-install-recommends apt-utils; \
     apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1 software-properties-common; \
     apt-get update --yes;
 
 # Install RVM
-RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB; \
-    \curl -L https://get.rvm.io | bash -s stable --ruby
+# import keys from gitlab snippet instead of flaky keyservers
+RUN [ "/bin/bash", "-c", "gpg --import <(curl -s https://gitlab.binarapps.com/snippets/30/raw)" ]
+RUN curl -L https://get.rvm.io | bash -s stable
 
 # Install firebase
 RUN wget -qO /usr/local/bin/firebase https://firebase.tools/bin/linux/latest; \
     chmod +x /usr/local/bin/firebase;
 
-#Get android SDK
+# Get android SDK
 RUN ANDROID_COMPILE_SDK=30; \
     ANDROID_BUILD_TOOLS=30.0.3; \
     ANDROID_SDK_TOOLS=7583922; \
@@ -34,7 +35,7 @@ RUN ANDROID_COMPILE_SDK=30; \
     rm -rf android-sdk.zip .idea .gradle; \
     chmod +x ./gradlew;
 
-#Config RVM and fastlane
+# Config RVM and fastlane
 RUN BuildScripts/build_fastlane.sh
 
 VOLUME /var/app

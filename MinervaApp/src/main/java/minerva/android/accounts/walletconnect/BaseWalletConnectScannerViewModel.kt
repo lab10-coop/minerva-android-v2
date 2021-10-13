@@ -15,6 +15,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnFailure
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
@@ -27,7 +28,8 @@ abstract class BaseWalletConnectScannerViewModel(
     private val accountManager: AccountManager,
     private val walletConnectRepository: WalletConnectRepository,
     private val logger: Logger,
-    private val walletActionsRepository: WalletActionsRepository
+    private val walletActionsRepository: WalletActionsRepository,
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository
 ) : BaseViewModel() {
 
     abstract var account: Account
@@ -183,6 +185,22 @@ abstract class BaseWalletConnectScannerViewModel(
 
     protected fun isNetworkNotSupported(chainId: Int): Boolean =
         NetworkManager.networks.find { network -> network.chainId == chainId } == null
+
+    fun fetchUnsupportedNetworkName(chainId: Int) {
+        launchDisposable {
+            unsupportedNetworkRepository.getNetworkName(chainId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { chainName ->
+                        updateWCState(BaseNetworkData(chainId, chainName), WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING)
+                    },
+                    onError = {
+                        setLiveDataError(it)
+                    }
+                )
+        }
+    }
 
     private fun getWalletAddAction(name: String) =
         WalletAction(

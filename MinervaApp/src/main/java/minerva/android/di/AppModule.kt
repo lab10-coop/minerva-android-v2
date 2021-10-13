@@ -63,7 +63,7 @@ private val appModules = module {
     viewModel { AppViewModel(get(), get()) }
     viewModel { ClubCardViewModel(get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { WalletConnectInteractionsViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { WalletConnectInteractionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { LaunchApplicationViewModel(get(), get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }
@@ -82,8 +82,8 @@ private val appModules = module {
     viewModel { WalletActionsViewModel(get()) }
     viewModel { ThirdPartyRequestViewModel(get(), get(), get()) }
     viewModel { EditOrderViewModel(get()) }
-    viewModel { WalletConnectViewModel(get(), get(), get(), get()) }
-    viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { WalletConnectViewModel(get(), get(), get(), get(), get()) }
+    viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
