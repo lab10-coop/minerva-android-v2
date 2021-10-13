@@ -319,14 +319,14 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `is address valid success`() {
-        whenever(transactionRepository.isAddressValid(any())).thenReturn(true)
+        whenever(transactionRepository.isAddressValid(any(), anyOrNull())).thenReturn(true)
         val result = viewModel.isAddressValid("0x12345")
         assertEquals(true, result)
     }
 
     @Test
     fun `is address valid false`() {
-        whenever(transactionRepository.isAddressValid(any())).thenReturn(false)
+        whenever(transactionRepository.isAddressValid(any(), anyOrNull())).thenReturn(false)
         val result = viewModel.isAddressValid("eeee")
         assertEquals(false, result)
     }

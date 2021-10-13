@@ -5,6 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
+import minerva.android.blockchainprovider.repository.validation.ValidationRepository
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivedKeys
 import minerva.android.kotlinUtils.InvalidValue
@@ -44,15 +45,16 @@ class AccountManagerTest : RxTest() {
     private val unitConverter: UnitConverter = mock()
     private val tokenDao: TokenBalanceDao = mock()
     private var database: MinervaDatabase = mock { whenever(mock.tokenBalanceDao()).thenReturn(tokenDao) }
+    private val validationRepository: ValidationRepository = mock()
 
     private val manager = AccountManagerImpl(
         walletConfigManager,
         cryptographyRepository,
         localStorage,
         unitConverter,
-        ensRepository,
         timeProvider,
-        database
+        database,
+        validationRepository
     )
 
     @Before
@@ -66,7 +68,7 @@ class AccountManagerTest : RxTest() {
     fun `Check that wallet manager creates empty account`() {
         NetworkManager.initialize(MockDataProvider.networks)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).thenReturn("address1")
         whenever(cryptographyRepository.calculateDerivedKeys(any(), any(), any(), any()))
             .thenReturn(DerivedKeys(0, "publicKey", "privateKey", "address1"))
 
@@ -103,7 +105,7 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
 
         manager.connectAccountToNetwork(1, Network(chainId = 4, name = "Ethereum"))
         verify(walletConfigManager).updateWalletConfig(
@@ -141,7 +143,7 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
 
         manager.createOrUnhideAccount(Network(chainId = 4, name = "Ethereum"))
         verify(walletConfigManager).updateWalletConfig(
@@ -181,7 +183,7 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
 
         manager.createOrUnhideAccount(Network(chainId = 4, name = "Ethereum"))
         verify(walletConfigManager).updateWalletConfig(
@@ -221,7 +223,8 @@ class AccountManagerTest : RxTest() {
         )
         whenever(walletConfigManager.getWalletConfig()).thenReturn(walletConfig)
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
+
 
         manager.connectAccountToNetwork(1, Network(chainId = 4, name = "Ethereum"))
         verify(walletConfigManager).updateWalletConfig(
@@ -257,7 +260,7 @@ class AccountManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
         )
         whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
         manager.removeAccount(account).test()
         val removedValue = manager.loadAccount(0)
         val notRemovedValue = manager.loadAccount(1)
@@ -275,7 +278,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey1", "privateKey1", "address1")))
         whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(300))
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
         doNothing().whenever(walletConfigManager).initWalletConfig()
 
         manager.removeAccount(account).test()
@@ -303,7 +306,7 @@ class AccountManagerTest : RxTest() {
             Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1"))
         )
         whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
         manager.removeAccount(account).test()
         manager.removeAccount(account2).test()
         manager.loadAccount(2).apply {
@@ -326,7 +329,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address1")))
         whenever(unitConverter.toGwei(any())).thenReturn(BigDecimal.valueOf(256))
-        whenever(ensRepository.toChecksumAddress(any())).doReturn("address1")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
         doNothing().whenever(walletConfigManager).initWalletConfig()
 
         manager.removeAccount(account).test()
@@ -380,7 +383,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.complete())
-        whenever(ensRepository.toChecksumAddress(any())).thenReturn("address")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address1")
         manager.createSafeAccount(Account(1, chainId = 4), "contract")
             .test()
             .assertComplete()
@@ -392,7 +395,7 @@ class AccountManagerTest : RxTest() {
         whenever(cryptographyRepository.calculateDerivedKeysSingle(any(), any(), any(), any()))
             .thenReturn(Single.just(DerivedKeys(0, "publicKey", "privateKey", "address")))
         whenever(walletConfigManager.updateWalletConfig(any())).thenReturn(Completable.error(error))
-        whenever(ensRepository.toChecksumAddress(any())).thenReturn("address")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).doReturn("address")
         manager.createSafeAccount(Account(1, chainId = 4), "contract")
             .test()
             .assertError(error)
@@ -407,14 +410,14 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `is address valid success`() {
-        whenever(ensRepository.isAddressValid(any())).thenReturn(true)
+        whenever(validationRepository.isAddressValid(any(), anyOrNull())).thenReturn(true)
         val result = manager.isAddressValid("0x12345")
         assertEquals(true, result)
     }
 
     @Test
     fun `is address valid false`() {
-        whenever(ensRepository.isAddressValid(any())).thenReturn(false)
+        whenever(validationRepository.isAddressValid(any(), anyOrNull())).thenReturn(false)
         val result = manager.isAddressValid("2342343")
         assertEquals(false, result)
     }
@@ -496,9 +499,9 @@ class AccountManagerTest : RxTest() {
 
     @Test
     fun `to checksum address test`() {
-        whenever(ensRepository.toChecksumAddress(any())).thenReturn("checksum")
+        whenever(validationRepository.toChecksumAddress(any(), anyOrNull())).thenReturn("checksum")
         val result = manager.toChecksumAddress("address")
-        assertEquals(result, "checksum")
+        assertEquals("checksum", result)
     }
 
     @Test

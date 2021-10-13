@@ -127,7 +127,9 @@ class TransactionViewModel(
         recipients = transactionRepository.loadRecipients()
     }
 
-    fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address)
+    fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address, network.chainId)
+
+    fun toRecipientChecksum(address: String): String = transactionRepository.toRecipientChecksum(address, network.chainId)
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {

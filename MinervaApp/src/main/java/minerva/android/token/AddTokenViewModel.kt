@@ -45,7 +45,7 @@ class AddTokenViewModel(
         this.accountAddress = accountAddress
     }
 
-    fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address)
+    fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address, chainId)
 
     fun getTokenDetails(address: String) =
         launchDisposable {

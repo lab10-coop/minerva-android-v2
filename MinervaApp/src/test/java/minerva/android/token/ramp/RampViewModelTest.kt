@@ -39,7 +39,7 @@ class RampViewModelTest : BaseViewModelTest() {
             Account(4, chainId = 3, name = "account4", address = "0x0")
         )
         whenever(accountManager.getAllActiveAccounts(any())).thenReturn(currentAccounts)
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("0xCHECKxSUM")
+        whenever(accountManager.toChecksumAddress(any(), any())).thenReturn("0xCHECKxSUM")
         viewModel.apply {
             currentChainId shouldBeEqualTo Int.InvalidId
             currentChainId = 3

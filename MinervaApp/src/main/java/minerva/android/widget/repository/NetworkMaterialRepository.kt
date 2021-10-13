@@ -21,6 +21,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 
 fun getNetworkIcon(context: Context, chainId: Int, isSafeAccount: Boolean = false): Drawable? =
@@ -39,6 +41,7 @@ private fun getMainIcon(chainId: Int): Int =
         ETH_GOR -> R.drawable.ic_gorli
         MATIC, MUMBAI -> R.drawable.ic_polygon_matic
         BSC, BSC_TESTNET -> R.drawable.ic_bsc
+        RSK_MAIN, RSK_TEST -> R.drawable.ic_rsk
         else -> Int.InvalidId
     }
 
@@ -54,6 +57,7 @@ fun getMainTokenIconRes(chainId: Int): Int =
         LUKSO_14 -> R.drawable.ic_lukso
         MATIC, MUMBAI -> R.drawable.ic_polygon_matic_token
         BSC, BSC_TESTNET -> R.drawable.ic_bsc_token
+        RSK_MAIN, RSK_TEST -> R.drawable.ic_rsk_token
         else -> R.drawable.ic_default_token
     }
 

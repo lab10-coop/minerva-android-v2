@@ -72,7 +72,7 @@ fun createWalletModules() = module {
     factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get(), get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
-    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SafeAccountRepository> { SafeAccountRepositoryImpl(get(), get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }

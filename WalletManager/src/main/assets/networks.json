@@ -213,5 +213,31 @@
     "color": "#f3ba2f",
     "testNet": true,
     "chainId": 97
+  },
+  {
+    "name": "RSK Mainnet",
+    "token": "RBTC",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://public-node.rsk.co",
+    "wsRpc": "",
+    "gasPriceOracle": "https://public-node.rsk.co",
+    "gasPrice": "100000000000",
+    "tokens": [],
+    "color": "#2ca93c",
+    "testNet": false,
+    "chainId": 30
+  },
+  {
+    "name": "RSK Testnet",
+    "token": "tRBTC",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://public-node.testnet.rsk.co",
+    "wsRpc": "",
+    "gasPriceOracle": "https://public-node.testnet.rsk.co",
+    "gasPrice": "10000000000",
+    "tokens": [],
+    "color": "#2ca93c",
+    "testNet": true,
+    "chainId": 31
   }
 ]

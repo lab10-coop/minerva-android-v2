@@ -16,6 +16,7 @@ import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
 import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
+import minerva.android.blockchainprovider.repository.validation.ValidationRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
@@ -31,6 +32,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.ActiveSuperToken
@@ -58,7 +61,8 @@ class TransactionRepositoryImpl(
     private val cryptoApi: CryptoApi,
     private val localStorage: LocalStorage,
     private val webSocketRepository: WebSocketRepository,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val validationRepository: ValidationRepository
 ) : TransactionRepository {
     override val masterSeed: MasterSeed get() = walletConfigManager.masterSeed
     override var newTaggedTokens: MutableList<ERC20Token> = mutableListOf()
@@ -371,7 +375,7 @@ class TransactionRepositoryImpl(
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         when {
-            isBscNetwork(chainId) -> {
+            isBscNetwork(chainId) || isRskNetwork(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
                         getTxCosts(txCostPayload, null, gasPrice.result) }
@@ -404,7 +408,9 @@ class TransactionRepositoryImpl(
         }
     }
 
-    override fun isAddressValid(address: String): Boolean = ensRepository.isAddressValid(address)
+    override fun isAddressValid(address: String, chainId: Int?): Boolean = validationRepository.isAddressValid(address, chainId)
+
+    override fun toRecipientChecksum(address: String, chainId: Int?): String = validationRepository.toRecipientChecksum(address, chainId)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.run { getTransactionCostInEth(unitConverter.toGwei(gasPrice), BigDecimal(gasLimit)) }
@@ -461,6 +467,7 @@ class TransactionRepositoryImpl(
 
     private fun isMaticNetwork(chainId: Int) = chainId == MATIC || chainId == MUMBAI
     private fun isBscNetwork(chainId: Int) = chainId == BSC || chainId == BSC_TESTNET
+    private fun isRskNetwork(chainId: Int) = chainId == RSK_MAIN || chainId == RSK_TEST
 
     private fun getTxCosts(
         payload: TxCostPayload,
