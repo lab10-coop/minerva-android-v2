@@ -9,7 +9,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.BaseWalletConnectScannerViewModel
 import minerva.android.accounts.walletconnect.WalletConnectAlertType
-import minerva.android.extension.empty
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
@@ -27,6 +27,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
@@ -39,8 +40,15 @@ class ServicesScannerViewModel(
     private val walletConnectRepository: WalletConnectRepository,
     private val accountManager: AccountManager,
     logger: Logger,
-    private val identityManager: IdentityManager
-) : BaseWalletConnectScannerViewModel(accountManager, walletConnectRepository, logger, walletActionsRepository) {
+    private val identityManager: IdentityManager,
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository
+) : BaseWalletConnectScannerViewModel(
+    accountManager,
+    walletConnectRepository,
+    logger,
+    walletActionsRepository,
+    unsupportedNetworkRepository
+) {
 
     private val _viewStateLiveData = MutableLiveData<ServicesScannerViewState>()
     val viewStateLiveData: LiveData<ServicesScannerViewState> get() = _viewStateLiveData
@@ -64,7 +72,7 @@ class ServicesScannerViewModel(
     }
 
     override fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
-        _viewStateLiveData.postValue(WalletConnectUpdateDataState(requestedNetwork, dialogType))
+        _viewStateLiveData.postValue(WalletConnectUpdateDataState(network, dialogType))
     }
 
     override fun closeScanner() {
@@ -137,24 +145,25 @@ class ServicesScannerViewModel(
 
     override fun handleSessionRequest(sessionRequest: OnSessionRequest) {
         val id = sessionRequest.chainId
-        _viewStateLiveData.value = when {
+        when {
             id == null -> {
                 accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
-                WalletConnectSessionRequestResult(
+                _viewStateLiveData.value = WalletConnectSessionRequestResult(
                     sessionRequest.meta,
                     requestedNetwork,
                     WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
                 )
             }
             isNetworkNotSupported(chainId = id) -> {
-                requestedNetwork = BaseNetworkData(id, String.empty)
-                WalletConnectSessionRequestResult(
+                requestedNetwork = BaseNetworkData(id, String.Empty)
+                _viewStateLiveData.value = WalletConnectSessionRequestResult(
                     sessionRequest.meta,
                     requestedNetwork,
                     WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
                 )
+                fetchUnsupportedNetworkName(id)
             }
-            else -> getWalletConnectStateForRequestedNetwork(sessionRequest, id)
+            else ->  _viewStateLiveData.value = getWalletConnectStateForRequestedNetwork(sessionRequest, id)
         }
     }
 

@@ -29,6 +29,8 @@ import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
 import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepositoryImpl
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
@@ -77,6 +79,7 @@ fun createWalletModules() = module {
     factory<SafeAccountRepository> { SafeAccountRepositoryImpl(get(), get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
     factory<CurrentTimeProvider> { CurrentTimeProviderImpl() }
+    factory<UnsupportedNetworkRepository> { UnsupportedNetworkRepositoryImpl(get()) }
     single<WalletConnectRepository> { WalletConnectRepositoryImpl(get(), get(), get()) }
     single {
         Room.databaseBuilder(androidContext(), MinervaDatabase::class.java, "minerva_database")

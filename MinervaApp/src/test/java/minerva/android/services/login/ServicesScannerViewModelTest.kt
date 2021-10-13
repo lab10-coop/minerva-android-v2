@@ -22,6 +22,7 @@ import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
@@ -42,6 +43,7 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
     private val logger: Logger = mock()
     private val serviceManager: ServiceManager = mock()
     private val identityManager: IdentityManager = mock()
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository = mock()
 
     private lateinit var viewModel: ServicesScannerViewModel
 
@@ -58,7 +60,8 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
             walletConnectRepository,
             accountManager,
             logger,
-            identityManager
+            identityManager,
+            unsupportedNetworkRepository
         )
     }
 
@@ -111,14 +114,19 @@ class ServicesScannerViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 5, Topic("peerID", "remotePeerID"), 1)))
         NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1, token = "Ethereum"))
+        whenever(unsupportedNetworkRepository.getNetworkName(5)).thenReturn(Single.just("networkname"))
         viewModel.viewStateLiveData.observeForever(stateObserver)
         viewModel.subscribeToWCConnectionStatusFlowable()
         stateCaptor.run {
-            verify(stateObserver, times(2)).onChanged(capture())
+            verify(stateObserver, times(3)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
             secondValue shouldBeEqualTo WalletConnectSessionRequestResult(
                 meta,
-                BaseNetworkData(5, String.Empty),
+                BaseNetworkData(5,String.Empty),
+                WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
+            )
+            thirdValue shouldBeEqualTo WalletConnectUpdateDataState(
+                BaseNetworkData(5, "networkname"),
                 WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
             )
         }

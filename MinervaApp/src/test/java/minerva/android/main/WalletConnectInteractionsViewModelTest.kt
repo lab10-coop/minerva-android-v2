@@ -11,6 +11,7 @@ import minerva.android.extension.empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
+import minerva.android.services.login.WalletConnectUpdateDataState
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -24,6 +25,7 @@ import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxSpeed
 import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
@@ -45,6 +47,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     private val logger: Logger = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val accountManager: AccountManager = mock()
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository =mock()
+
     private val viewModel: WalletConnectInteractionsViewModel =
         WalletConnectInteractionsViewModel(
             transactionRepository,
@@ -52,7 +56,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             logger,
             tokenManager,
             accountManager,
-            walletActionsRepository
+            walletActionsRepository,
+            unsupportedNetworkRepository
         )
 
     private val requestObserver: Observer<WalletConnectState> = mock()
@@ -836,15 +841,20 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 134, Topic("peerID", "remotePeerID"), 1)))
         NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1, token = "Ethereum"))
+        whenever(unsupportedNetworkRepository.getNetworkName(134)).thenReturn(Single.just("networkname"))
         whenever(accountManager.getFirstActiveAccountOrNull(1)).thenReturn(null)
         viewModel.account = Account(1, chainId = 1)
         viewModel.walletConnectStatus.observeForever(requestObserver)
         viewModel.subscribeToWCConnectionStatusFlowable()
         requestCaptor.run {
-            verify(requestObserver).onChanged(capture())
+            verify(requestObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo minerva.android.accounts.walletconnect.OnSessionRequest(
                 meta,
                 BaseNetworkData(134, String.empty),
+                WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
+            )
+            secondValue shouldBeEqualTo UpdateOnSessionRequest(
+                BaseNetworkData(134, "networkname"),
                 WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
             )
         }
