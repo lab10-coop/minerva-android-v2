@@ -13,6 +13,7 @@ import minerva.android.accounts.walletconnect.WalletConnectScannerFragment.Compa
 import minerva.android.databinding.DappConfirmationDialogBinding
 import minerva.android.databinding.DappNetworkHeaderBinding
 import minerva.android.extension.*
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.FirstIndex
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.OneElement
@@ -146,14 +147,37 @@ class DappConfirmationDialog(context: Context, approve: () -> Unit, deny: () -> 
         }
     }
 
-    fun setUnsupportedNetworkMessage(networkId: String) = with(binding) {
+    private fun getHeaderText(network: BaseNetworkData, context: Context) = if (network.name == String.Empty) context.getString(
+            R.string.chain_id,
+            *arrayOf(network.chainId)
+        ) else context.getString(
+            R.string.chain_name,
+            *arrayOf(network.name))
+
+
+    private fun getWarningText(network: BaseNetworkData, context: Context) =
+         if (network.name == String.Empty) context.getString(
+            R.string.unsupported_network_id_message,
+            *arrayOf(network.chainId)
+        ) else context.getString(
+            R.string.unsupported_network_name_message,
+            *arrayOf(network.name))
+
+
+    fun setUnsupportedNetworkMessage(network: BaseNetworkData) = with(binding) {
         networkHeader.network.apply {
-            setTextWithArgs(R.string.chain_id, networkId)
-            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_alert_small, NO_ICON, NO_ICON, NO_ICON)
+            networkHeader.network.text = getHeaderText(network, context)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(
+                R.drawable.ic_alert_small,
+                NO_ICON,
+                NO_ICON,
+                NO_ICON
+            )
             setBackgroundResource(R.drawable.error_background)
             setTextColor(ContextCompat.getColor(context, R.color.alertRed))
         }
-        warning.setTextWithArgs(R.string.unsupported_network_message, networkId)
+
+        warning.text = getWarningText(network, context)
         confirmationButtons.confirm.isEnabled = false
         showWaring()
     }

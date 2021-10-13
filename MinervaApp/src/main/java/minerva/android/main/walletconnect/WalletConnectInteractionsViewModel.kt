@@ -9,7 +9,6 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.*
-import minerva.android.extension.empty
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidBigDecimal
 import minerva.android.kotlinUtils.InvalidId
@@ -31,6 +30,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
@@ -49,8 +49,15 @@ class WalletConnectInteractionsViewModel(
     private val logger: Logger,
     private val tokenManager: TokenManager,
     private val accountManager: AccountManager,
-    walletActionsRepository: WalletActionsRepository
-) : BaseWalletConnectScannerViewModel(accountManager, walletConnectRepository, logger, walletActionsRepository) {
+    walletActionsRepository: WalletActionsRepository,
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository
+) : BaseWalletConnectScannerViewModel(
+    accountManager,
+    walletConnectRepository,
+    logger,
+    walletActionsRepository,
+    unsupportedNetworkRepository
+) {
     internal var currentDappSession: DappSession? = null
     private var currentRate: BigDecimal = Double.InvalidBigDecimal
     private lateinit var currentTransaction: WalletConnectTransaction
@@ -404,24 +411,25 @@ class WalletConnectInteractionsViewModel(
 
     override fun handleSessionRequest(sessionRequest: OnSessionRequestData) {
         val id = sessionRequest.chainId
-        _walletConnectStatus.value = when {
+         when {
             id == null -> {
                 accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
-                OnSessionRequestResult(
+                _walletConnectStatus.value = OnSessionRequestResult(
                     sessionRequest.meta,
                     requestedNetwork,
                     WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
                 )
             }
             isNetworkNotSupported(chainId = id) -> {
-                requestedNetwork = BaseNetworkData(id, String.empty)
-                OnSessionRequestResult(
+                requestedNetwork = BaseNetworkData(id,String.Empty)
+                _walletConnectStatus.value = OnSessionRequestResult(
                     sessionRequest.meta,
                     requestedNetwork,
                     WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
                 )
+                fetchUnsupportedNetworkName(id)
             }
-            else -> getWalletConnectStateForRequestedNetwork(sessionRequest, id)
+            else -> _walletConnectStatus.value = getWalletConnectStateForRequestedNetwork(sessionRequest, id)
         }
     }
 
@@ -451,7 +459,7 @@ class WalletConnectInteractionsViewModel(
     }
 
     override fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
-        _walletConnectStatus.postValue(UpdateOnSessionRequest(requestedNetwork, dialogType))
+        _walletConnectStatus.postValue(UpdateOnSessionRequest(network, dialogType))
     }
 
     fun handleDeepLink(deepLink: String) {
