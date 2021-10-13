@@ -152,7 +152,7 @@ class AccountsViewModel(
                 .observeOn(Schedulers.io())
                 .andThen(
                     walletConnectRepository.killAllAccountSessions(
-                        accountManager.toChecksumAddress(account.address),
+                        accountManager.toChecksumAddress(account.address, account.chainId),
                         account.chainId
                     )
                 )

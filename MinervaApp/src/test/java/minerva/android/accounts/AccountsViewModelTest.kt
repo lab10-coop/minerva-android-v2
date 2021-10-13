@@ -92,7 +92,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `refresh balances coin balance test`() {
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
             .thenReturn(
@@ -117,7 +117,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("Error Balance")
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
             .thenReturn(Flowable.just(CoinError(1, "123", error)))
@@ -135,7 +135,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("Error Balance")
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
             .thenReturn(Flowable.error(error))
@@ -252,7 +252,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             Completable.error(error)
         )
         whenever(walletConnectRepository.killAllAccountSessions(any(), any())).thenReturn(Completable.complete())
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.hideAccount(0)
@@ -266,7 +266,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.hideAccount(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(walletConnectRepository.killAllAccountSessions(any(), any())).thenReturn(Completable.complete())
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.accountHideLiveData.observeForever(accountRemoveObserver)
         viewModel.hideAccount(0)
@@ -381,7 +381,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 listOf(DappSession(address = "address"))
             )
         )
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         viewModel.dappSessions.observeForever(dappSessionObserver)
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {
@@ -394,7 +394,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get sessions and update accounts error`() {
         val error = Throwable()
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.error(error))
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.getSessions(accounts)
         errorCaptor.run {

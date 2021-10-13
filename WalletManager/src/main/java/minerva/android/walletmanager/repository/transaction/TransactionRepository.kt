@@ -42,7 +42,8 @@ interface TransactionRepository {
     fun getTransactions(): Single<List<PendingAccount>>
     fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost>
 
-    fun isAddressValid(address: String): Boolean
+    fun isAddressValid(address: String, chainId: Int? = null): Boolean
+    fun toRecipientChecksum(address: String, chainId: Int? = null): String
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun checkMissingTokensDetails(): Completable
     fun getCoinFiatRate(chainId: Int): Single<Double>

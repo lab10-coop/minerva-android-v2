@@ -13,6 +13,7 @@ import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
 import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
+import minerva.android.blockchainprovider.repository.validation.ValidationRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -41,6 +42,7 @@ import org.junit.Test
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class TransactionRepositoryTest : RxTest() {
 
@@ -53,6 +55,7 @@ class TransactionRepositoryTest : RxTest() {
     private val webSocketRepositoryImpl: WebSocketRepositoryImpl = mock()
     private val cryptoApi: CryptoApi = mock()
     private val tokenManager: TokenManager = mock()
+    private val validationRepository: ValidationRepository = mock()
 
     private val repository =
         TransactionRepositoryImpl(
@@ -64,7 +67,8 @@ class TransactionRepositoryTest : RxTest() {
             cryptoApi,
             localStorage,
             webSocketRepositoryImpl,
-            tokenManager
+            tokenManager,
+            validationRepository
         )
 
     @Before
@@ -718,16 +722,30 @@ class TransactionRepositoryTest : RxTest() {
 
     @Test
     fun `is address valid success`() {
-        whenever(ensRepository.isAddressValid(any())).thenReturn(true)
+        whenever(validationRepository.isAddressValid(any(), anyOrNull())).thenReturn(true)
         val result = repository.isAddressValid("0x12345")
         assertEquals(true, result)
     }
 
     @Test
     fun `is address valid false`() {
-        whenever(ensRepository.isAddressValid(any())).thenReturn(false)
+        whenever(validationRepository.isAddressValid(any(), anyOrNull())).thenReturn(false)
         val result = repository.isAddressValid("123455")
         assertEquals(false, result)
+    }
+
+    @Test
+    fun `is recipient checksum success`() {
+        whenever(validationRepository.toRecipientChecksum(any(), anyOrNull())).thenReturn("checksum")
+        val result = repository.toRecipientChecksum("0x12345")
+        assertEquals("checksum", result)
+    }
+
+    @Test
+    fun `is recipient checksum fail`() {
+        whenever(validationRepository.toRecipientChecksum(any(), anyOrNull())).thenReturn("checksum")
+        val result = repository.toRecipientChecksum("123455")
+        assertNotEquals("otherChecksum", result)
     }
 
     @Test
@@ -745,7 +763,7 @@ class TransactionRepositoryTest : RxTest() {
                 accounts = listOf(Account(1, chainId = 1, address = "address"))
             )
         )
-        whenever(ensRepository.toChecksumAddress(any())).thenReturn("address")
+        whenever(validationRepository.toChecksumAddress(any(), isNull())).doReturn("address")
         val result = repository.getAccountByAddressAndChainId("address", 1)
         assertEquals(result?.address, "address")
         assertEquals(result?.chainId, 1)

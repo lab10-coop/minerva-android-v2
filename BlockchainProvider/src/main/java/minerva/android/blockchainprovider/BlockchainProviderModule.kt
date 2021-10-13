@@ -17,6 +17,10 @@ import minerva.android.blockchainprovider.repository.transaction.BlockchainTrans
 import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepositoryImpl
 import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.blockchainprovider.repository.units.UnitConverterImpl
+import minerva.android.blockchainprovider.repository.validation.ChecksumRepository
+import minerva.android.blockchainprovider.repository.validation.ChecksumRepositoryImpl
+import minerva.android.blockchainprovider.repository.validation.ValidationRepository
+import minerva.android.blockchainprovider.repository.validation.ValidationRepositoryImpl
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepositoryImpl
 import minerva.android.blockchainprovider.repository.wss.WebSocketServiceProvider
@@ -41,4 +45,6 @@ fun createBlockchainProviderModule(
     factory<ERC20TokenRepository> { ERC20TokenRepositoryImpl(get(), gasPrice) }
     factory<UnitConverter> { UnitConverterImpl() }
     factory<FreeTokenRepository> { FreeTokenRepositoryImpl() }
+    factory<ValidationRepository> { ValidationRepositoryImpl(get()) }
+    factory<ChecksumRepository> { ChecksumRepositoryImpl() }
 }

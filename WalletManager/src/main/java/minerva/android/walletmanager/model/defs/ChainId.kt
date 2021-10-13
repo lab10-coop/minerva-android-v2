@@ -15,10 +15,12 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 
 @Retention(AnnotationRetention.SOURCE)
-@IntDef(ATS_TAU, ETH_ROP, ETH_RIN, ETH_KOV, ETH_GOR, POA_SKL, LUKSO_14, ETH_MAIN, ATS_SIGMA, XDAI, POA_CORE, MATIC, MUMBAI, BSC, BSC_TESTNET)
+@IntDef(ATS_TAU, ETH_ROP, ETH_RIN, ETH_KOV, ETH_GOR, POA_SKL, LUKSO_14, ETH_MAIN, ATS_SIGMA, XDAI, POA_CORE, MATIC, MUMBAI, BSC, BSC_TESTNET, RSK_MAIN, RSK_TEST)
 annotation class ChainId {
     companion object {
         const val ATS_TAU = 246785
@@ -36,5 +38,7 @@ annotation class ChainId {
         const val MUMBAI = 80001
         const val BSC = 56
         const val BSC_TESTNET = 97
+        const val RSK_MAIN = 30
+        const val RSK_TEST = 31
     }
 }
