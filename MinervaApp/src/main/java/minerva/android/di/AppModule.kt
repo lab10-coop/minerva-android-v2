@@ -6,6 +6,7 @@ import minerva.android.accounts.AccountsViewModel
 import minerva.android.accounts.address.AddressViewModel
 import minerva.android.accounts.akm.SafeAccountSettingsViewModel
 import minerva.android.accounts.create.NewAccountViewModel
+import minerva.android.accounts.nft.viewmodel.NftCollectionViewModel
 import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.accounts.walletconnect.WalletConnectViewModel
 import minerva.android.app.AppViewModel
@@ -91,6 +92,7 @@ private val appModules = module {
     viewModel { RampViewModel(get(), get()) }
     viewModel { DappsViewModel() }
     viewModel { FiatViewModel(get(), get(), get()) }
+    viewModel { (accountId: Int, collectionAddress: String) -> NftCollectionViewModel(get(), get(), accountId, collectionAddress) }
 }
 
 private const val MinervaCache = "MinervaCache"

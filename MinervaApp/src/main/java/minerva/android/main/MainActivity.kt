@@ -9,9 +9,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import minerva.android.R
 import minerva.android.accounts.AccountsFragment
+import minerva.android.accounts.nft.view.NftCollectionActivity
+import minerva.android.accounts.nft.view.NftCollectionActivity.Companion.COLLECTION_NAME
 import minerva.android.accounts.transaction.activity.TransactionActivity
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.COIN_BALANCE_ERROR
-import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TOKEN_ADDRESS
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TOKEN_BALANCE_ERROR
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_MESSAGE
 import minerva.android.accounts.transaction.activity.TransactionActivity.Companion.TRANSACTION_SCREEN
@@ -344,6 +345,14 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
         }
     }
 
+    override fun showNftCollectionScreen(index: Int, tokenAddress: String, collectionName: String) {
+        launchActivity<NftCollectionActivity> {
+            putExtra(ACCOUNT_INDEX, index)
+            putExtra(TOKEN_ADDRESS, tokenAddress)
+            putExtra(COLLECTION_NAME, collectionName)
+        }
+    }
+
     private fun setDefaultBottomNavigationIcon() {
         binding.bottomNavigation.selectedItemId = R.id.values
     }
@@ -380,6 +389,7 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
         const val TRANSACTION_RESULT_REQUEST_CODE = 4
         const val EDIT_IDENTITY_RESULT_REQUEST_CODE = 5
         const val JWT = "jwt"
+        const val TOKEN_ADDRESS = "token_address"
         const val ACCOUNT_INDEX = "account_index"
         const val ACCOUNT_CHAIN_ID = "account_indicator"
     }

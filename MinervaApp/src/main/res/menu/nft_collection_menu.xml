@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/gridView"
+        android:icon="@drawable/ic_grid"
+        android:title="@string/grid"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/timelineView"
+        android:icon="@drawable/ic_timeline"
+        android:title="@string/timeline"
+        app:showAsAction="always" />
+
+</menu>

@@ -7,6 +7,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.Asset
 import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.NftVisibilityResult
 import minerva.android.walletmanager.model.token.UpdateTokensResult
 
 interface TokenManager {
@@ -49,4 +50,11 @@ interface TokenManager {
         tokensPerChainIdMap: Map<Int, List<ERCToken>>,
         accounts: List<Account>
     ): Single<UpdateTokensResult>
+
+    fun getNftsPerAccountTokenFlowable(
+        privateKey: String,
+        chainId: Int,
+        accountAddress: String,
+        collectionAddress: String
+    ): Flowable<NftVisibilityResult>
 }

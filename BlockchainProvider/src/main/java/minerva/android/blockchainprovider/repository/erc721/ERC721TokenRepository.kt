@@ -16,4 +16,12 @@ interface ERC721TokenRepository {
         tokenAddress: String,
         safeAccountAddress: String
     ): Flowable<Token>
+
+    fun isTokenOwner(
+        tokenId: String,
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        safeAccountAddress: String
+    ): Single<Boolean>
 }

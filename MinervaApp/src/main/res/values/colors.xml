@@ -71,4 +71,6 @@
     <color name="darkGray80">#3f3f4b</color>
     <color name="lightGray90">#908f9d</color>
     <color name="splashScreenPurple">#6442d1</color>
+    <color name="nftNameGray">#4a4857</color>
+    <color name="nftErrorBackgroundPurple">#1AA8A8FF</color>
 </resources>

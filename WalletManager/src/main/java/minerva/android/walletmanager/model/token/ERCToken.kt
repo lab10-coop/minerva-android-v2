@@ -52,4 +52,3 @@ enum class TokenType {
         else -> true
     }
 }
-

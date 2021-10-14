@@ -365,6 +365,9 @@
     <string name="backup_server_error">Error when looking for backup data for the Secret Recovery Phrase you entered. Make sure your device is currently online and please try again</string>
     <string name="empty" />
     <string name="nft_header">NFTs</string>
+    <string name="timeline">Timeline view</string>
+    <string name="grid">Grid view</string>
+    <string name="more_label">more</string>
 
     <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
     <string name="default_dapp_dialog_confirm">Open</string>
@@ -372,6 +375,7 @@
     <string name="uniswap_dialog_confirm">Open Uniswap</string>
     <string name="honeyswap_dialog_description">To use your Minerva Wallet, in Honeyswap tap "Connect Wallet" then "Wallet Connect"</string>
     <string name="honeyswap_dialog_confirm">Open Honeyswap</string>
+    <string name="nft_graphic_error_message">This NFT graphic cannot be displayed</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
