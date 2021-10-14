@@ -41,5 +41,7 @@ data class TokenTx(
     @SerializedName("input")
     val input: String = String.Empty,
     @SerializedName("confirmations")
-    val confirmations: String = String.Empty
+    val confirmations: String = String.Empty,
+    @SerializedName("tokenID")
+    val tokenId: String = String.Empty
 )

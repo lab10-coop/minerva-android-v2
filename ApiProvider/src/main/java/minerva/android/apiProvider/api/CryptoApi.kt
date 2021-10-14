@@ -52,6 +52,9 @@ interface CryptoApi {
     @GET(CHAIN_DETAILS_URL)
     fun getChainDetails(): Single<List<ChainDetails>>
 
+    @GET
+    fun getERC721TokenDetails(@Url url: String): Single<ERC721Details>
+
     companion object {
         private const val ID = "id"
         private const val IDS = "ids"

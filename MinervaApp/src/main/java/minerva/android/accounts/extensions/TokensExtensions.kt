@@ -3,7 +3,7 @@ package minerva.android.accounts.extensions
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import java.math.BigDecimal
 
@@ -15,7 +15,7 @@ fun MutableList<AccountToken>.findCachedAccountToken(accountToken: AccountToken)
 fun AccountToken.isTheSameToken(tokenAddress: String, accountAddress: String): Boolean =
     token.address.equals(tokenAddress, true) && token.accountAddress.equals(accountAddress, true)
 
-fun List<ERC20Token>.findCachedToken(balance: AssetError): ERC20Token? =
+fun List<ERCToken>.findCachedToken(balance: AssetError): ERCToken? =
     find { token ->
         token.address.equals(balance.tokenAddress, true) &&
                 token.accountAddress.equals(balance.accountAddress, true)

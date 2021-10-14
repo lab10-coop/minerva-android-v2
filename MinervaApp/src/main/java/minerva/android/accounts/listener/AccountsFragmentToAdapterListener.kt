@@ -3,7 +3,7 @@ package minerva.android.accounts.listener
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.widget.state.AccountWidgetState
 
 interface AccountsFragmentToAdapterListener {

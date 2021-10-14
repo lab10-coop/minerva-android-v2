@@ -5,6 +5,8 @@ import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.ens.ENSRepositoryImpl
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepositoryImpl
+import minerva.android.blockchainprovider.repository.erc721.ERC721TokenRepository
+import minerva.android.blockchainprovider.repository.erc721.ERC721TokenRepositoryImpl
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepository
 import minerva.android.blockchainprovider.repository.freeToken.FreeTokenRepositoryImpl
 import minerva.android.blockchainprovider.repository.safeAccount.BlockchainSafeAccountRepository
@@ -43,6 +45,7 @@ fun createBlockchainProviderModule(
     factory<BlockchainTransactionRepository> { BlockchainTransactionRepositoryImpl(get(), gasPrice, get(), get(), get()) }
     factory<ENSRepository> { ENSRepositoryImpl(get()) }
     factory<ERC20TokenRepository> { ERC20TokenRepositoryImpl(get(), gasPrice) }
+    factory<ERC721TokenRepository> { ERC721TokenRepositoryImpl(get(), gasPrice) }
     factory<UnitConverter> { UnitConverterImpl() }
     factory<FreeTokenRepository> { FreeTokenRepositoryImpl() }
     factory<ValidationRepository> { ValidationRepositoryImpl(get()) }

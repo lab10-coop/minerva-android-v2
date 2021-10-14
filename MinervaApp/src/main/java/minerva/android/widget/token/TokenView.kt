@@ -8,8 +8,9 @@ import minerva.android.databinding.TokenViewBinding
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.NativeToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.utils.BalanceUtils.getCryptoBalance
 import minerva.android.walletmanager.utils.BalanceUtils.getFiatBalance
 import minerva.android.widget.CryptoAmountView

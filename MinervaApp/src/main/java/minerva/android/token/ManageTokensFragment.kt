@@ -6,7 +6,7 @@ import minerva.android.R
 import minerva.android.accounts.listener.ShowFragmentListener
 import minerva.android.databinding.FragmentManageTokensBinding
 import minerva.android.main.base.BaseFragment
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.Token
 import minerva.android.widget.token.SwitchTokenRow
 import minerva.android.widget.token.TokenRow
@@ -70,7 +70,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
     private fun addTokens(tokens: List<Token>) {
         binding.tokenContainer.apply {
             tokens.drop(FIRST_ELEMENT).forEach {
-                (it as? ERC20Token)?.let { token ->
+                (it as? ERCToken)?.let { token ->
                     addView(SwitchTokenRow(requireContext()).apply {
                         initView(token, viewModel.getTokenVisibilitySettings(token.address)) { address, isChecked ->
                             viewModel.saveTokenVisibilitySettings(address, isChecked)
