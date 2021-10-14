@@ -12,7 +12,10 @@ import kotlin.test.assertEquals
 
 class KeyStoreRepositoryTest {
 
-    private val secretKey = mockk<SecretKey>()
+    // Workaround for JAVA 11 issue https://github.com/mockk/mockk/issues/280
+    interface MockSecretKey : SecretKey
+
+    private val secretKey = mockk<MockSecretKey>()
     private val cipherInstance = mockk<Cipher>()
 
     private val sharedPref = mockk<SharedPreferences> {

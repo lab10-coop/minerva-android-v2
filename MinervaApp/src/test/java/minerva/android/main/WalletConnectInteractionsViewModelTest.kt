@@ -21,7 +21,8 @@ import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxSpeed
 import minerva.android.walletmanager.model.walletconnect.*
@@ -224,7 +225,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 chainId = ETH_MAIN,
                 accountTokens = mutableListOf(
                     AccountToken(
-                        ERC20Token(1, symbol = "WTF")
+                        ERCToken(1, symbol = "WTF", type = TokenType.ERC20)
                     )
                 )
             )

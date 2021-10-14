@@ -7,7 +7,8 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import java.math.BigDecimal
 
 data class Account(
@@ -48,7 +49,12 @@ data class Account(
         get() = if (network.chainId != Int.InvalidValue) network.testNet else _isTestNetwork
 
     fun getToken(tokenAddress: String): AccountToken =
-        accountTokens.find { it.token.address == tokenAddress } ?: AccountToken(ERC20Token(Int.InvalidIndex))
+        accountTokens.find { it.token.address == tokenAddress } ?: AccountToken(
+            ERCToken(
+                chainId = Int.InvalidIndex,
+                type = TokenType.ERC20
+            )
+        )
 
     fun getTokenIndex(tokenAddress: String) = accountTokens.indexOf(getToken(tokenAddress))
 }

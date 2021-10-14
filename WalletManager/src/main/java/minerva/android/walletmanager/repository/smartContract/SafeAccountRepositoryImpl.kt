@@ -11,7 +11,8 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.mappers.TransactionMapper
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.storage.LocalStorage
@@ -80,14 +81,21 @@ class SafeAccountRepositoryImpl(
     override fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal =
         walletConfigManager.getSafeAccountMasterOwnerBalance(address)
 
-    override fun getERC20TokenDetails(privateKey: String, chainId: Int, tokenAddress: String): Single<ERC20Token> =
+    override fun getERC20TokenDetails(privateKey: String, chainId: Int, tokenAddress: String): Single<ERCToken> =
         (erC20TokenRepository).run {
             Observable.zip(
                 getERC20TokenName(privateKey, chainId, tokenAddress),
                 getERC20TokenSymbol(privateKey, chainId, tokenAddress),
                 getERC20TokenDecimals(privateKey, chainId, tokenAddress),
-                Function3<String, String, BigInteger, ERC20Token> { name, symbol, decimals ->
-                    ERC20Token(chainId, name, symbol, tokenAddress, decimals.toString())
+                Function3<String, String, BigInteger, ERCToken> { name, symbol, decimals ->
+                    ERCToken(
+                        chainId = chainId,
+                        name = name,
+                        symbol = symbol,
+                        address = tokenAddress,
+                        decimals = decimals.toString(),
+                        type = TokenType.ERC20
+                    )
                 }
             ).firstOrError()
         }

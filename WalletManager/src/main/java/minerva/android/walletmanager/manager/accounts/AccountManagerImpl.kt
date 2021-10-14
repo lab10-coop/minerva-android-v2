@@ -30,7 +30,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.wallet.MasterSeed
@@ -54,7 +54,7 @@ class AccountManagerImpl(
     override var hasAvailableAccounts: Boolean = false
     override var activeAccounts: List<Account> = emptyList()
     override var rawAccounts: List<Account> = emptyList()
-    override var cachedTokens: Map<Int, List<ERC20Token>> = mapOf()
+    override var cachedTokens: Map<Int, List<ERCToken>> = mapOf()
     override val areMainNetworksEnabled: Boolean get() = walletManager.areMainNetworksEnabled
     override val isProtectKeysEnabled: Boolean get() = localStorage.isProtectKeysEnabled
     override val isProtectTransactionsEnabled: Boolean get() = localStorage.isProtectTransactionsEnabled
@@ -290,8 +290,8 @@ class AccountManagerImpl(
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }
         }
 
-    internal fun filterCachedTokens(tokenMap: Map<Int, List<ERC20Token>>): Map<Int, List<ERC20Token>> {
-        val newMap: MutableMap<Int, MutableList<ERC20Token>> = mutableMapOf()
+    internal fun filterCachedTokens(tokenMap: Map<Int, List<ERCToken>>): Map<Int, List<ERCToken>> {
+        val newMap: MutableMap<Int, MutableList<ERCToken>> = mutableMapOf()
         activeAccounts.filter { account -> !account.isPending }.forEach { account ->
             if (newMap.containsKey(account.chainId)) {
                 newMap[account.chainId]?.addAll(getVisibleTokensList(tokenMap, account))
@@ -303,9 +303,9 @@ class AccountManagerImpl(
     }
 
     private fun getVisibleTokensList(
-        tokenMap: Map<Int, List<ERC20Token>>,
+        tokenMap: Map<Int, List<ERCToken>>,
         account: Account
-    ): List<ERC20Token> =
+    ): List<ERCToken> =
         tokenMap[account.chainId]?.let { tokens ->
             tokens.filter { token ->
                 token.accountAddress.equals(account.address, true) &&

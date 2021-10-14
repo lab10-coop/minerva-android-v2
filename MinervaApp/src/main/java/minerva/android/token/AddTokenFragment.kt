@@ -19,7 +19,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedActivity
 import minerva.android.wrapped.WrappedActivity.Companion.ADDRESS
@@ -68,7 +68,7 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
         }
     }
 
-    private fun showTokenData(token: ERC20Token) {
+    private fun showTokenData(token: ERCToken) {
         binding.apply {
             if (tokenAddress.text.toString() == token.address) {
                 TransitionManager.beginDelayedTransition(root)
