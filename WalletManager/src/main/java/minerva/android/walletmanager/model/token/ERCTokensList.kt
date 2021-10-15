@@ -22,5 +22,7 @@ data class ERCTokensList(
 
     fun isERC20TokensListNotEmpty() = getERC20Tokens().isNotEmpty()
 
+    fun isCollectiblesListNotEmpty() = getCollectibles().isNotEmpty()
+
     fun isNotEmpty() = list.isNotEmpty()
 }
