@@ -2,8 +2,7 @@ image: code.lab10.io:4567/graz/10-minerva/minerva-android-v2:builder-v2
 
 before_script:
   - cp ./gradle/wrapper/gradle-wrapper.properties.ci ./gradle/wrapper/gradle-wrapper.properties
-  - cp /usr/src/builder/local.properties . 2> /dev/null
-
+  - cp /usr/src/builder/local.properties .  >/dev/null 2>&1 || true
 stages:
   - validation
   - distribution
