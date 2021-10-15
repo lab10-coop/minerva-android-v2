@@ -7,7 +7,10 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.GasPricesMatic
+import minerva.android.apiProvider.model.MarketIds
+import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.apiProvider.model.gaswatch.GasPrices
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.TokenWithBalance
@@ -21,7 +24,6 @@ import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.kotlinUtils.crypto.hexToBigDecimal
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -310,7 +312,7 @@ class TransactionRepositoryImpl(
                                     )
                                         .onErrorReturn {
                                             Timber.e(it)
-                                            UpdateTokensResult(false, newAndLocalTokensPerChainIdMap)
+                                            UpdateTokensResult(true, newAndLocalTokensPerChainIdMap)
                                         }
                                 }
                                 .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->

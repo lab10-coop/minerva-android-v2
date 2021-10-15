@@ -50,7 +50,8 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: ERCTokensList, isWidgetOpen: Boolean) {
         initMainToken(account, fiatSymbol, callback)
         initTokensList(account, fiatSymbol, tokens.getERC20Tokens(), isWidgetOpen)
-        initCollectiblesList(tokens.getCollectiblesWithBalance(account), tokens.isERC20TokensListNotEmpty(), isWidgetOpen)
+        prepareSeparator(tokens.isERC20TokensListNotEmpty() && tokens.isCollectiblesListNotEmpty())
+        initCollectiblesList(tokens.getCollectiblesWithBalance(account), isWidgetOpen)
     }
 
     private fun initView() {
@@ -121,16 +122,12 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         if (isContainerVisible) Pair(START_ROTATION_LEVEL, STOP_ROTATION_LEVEL)
         else Pair(STOP_ROTATION_LEVEL, START_ROTATION_LEVEL)
 
-    companion object {
-        private const val LEVEL = "level"
-        private const val START_DRAWABLE_INDEX = 0
-        private const val START_ROTATION_LEVEL = 10000
-        private const val STOP_ROTATION_LEVEL = 0
+    private fun prepareSeparator(isSeparatorVisible: Boolean) = with(binding) {
+        collectiblesSeparator.visibleOrGone(isSeparatorVisible)
     }
 
     private fun initCollectiblesList(
         collectibles: List<Pair<AccountToken, BigDecimal>>,
-        isSeparatorVisible: Boolean,
         isWidgetOpen: Boolean
     ) {
         binding.apply {
@@ -139,7 +136,6 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                     collectibles.isNotEmpty().let { visibility ->
                         visibleOrGone(visibility)
                         removeAllViews()
-                        collectiblesSeparator.visibleOrGone(isSeparatorVisible)
                         collectiblesHeader.visibleOrGone(visibility)
                         collectibles.forEach { collectiblesWithBalance ->
                             addView(
@@ -155,6 +151,13 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                 }
             }
         }
+    }
+
+    companion object {
+        private const val LEVEL = "level"
+        private const val START_DRAWABLE_INDEX = 0
+        private const val START_ROTATION_LEVEL = 10000
+        private const val STOP_ROTATION_LEVEL = 0
     }
 
     //TODO this method is not used, because Asset Manage screen is not implemented yet - ready to use UI
