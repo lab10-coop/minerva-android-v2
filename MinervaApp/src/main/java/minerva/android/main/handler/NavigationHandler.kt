@@ -31,7 +31,7 @@ internal fun MainActivity.prepareBottomNavMenu() {
             when (item.itemId) {
                 R.id.identities -> replaceFragment(IdentitiesFragment(), R.string.identities)
                 R.id.values -> replaceFragment(AccountsFragment(), R.string.values)
-                R.id.services -> replaceFragment(ServicesFragment.newInstance(), R.string.services)
+                R.id.services -> replaceFragment(ServicesFragment(), R.string.services)
                 R.id.activity -> replaceFragment(WalletActionsFragment(), R.string.activity)
                 R.id.settings -> replaceFragment(SettingsFragment(), R.string.settings)
             }

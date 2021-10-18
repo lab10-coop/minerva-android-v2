@@ -1,50 +1,82 @@
 package minerva.android.services
 
-import androidx.lifecycle.Observer
+import android.os.Bundle
+import android.view.View
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import kotlinx.android.synthetic.main.services_fragment_layout.*
 import minerva.android.R
-import minerva.android.extension.visibleOrGone
+import minerva.android.databinding.ServicesFragmentLayoutBinding
+import minerva.android.extension.onTabSelected
 import minerva.android.kotlinUtils.event.EventObserver
-import minerva.android.minervaPrimitive.MinervaPrimitiveListFragment
-import minerva.android.utils.AlertDialogHandler
-import minerva.android.walletmanager.model.walletconnect.DappSession
-import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
-import minerva.android.walletmanager.model.minervaprimitives.Service
+import minerva.android.main.base.BaseFragment
+import minerva.android.services.adapter.ServicesPagerAdapter
+import minerva.android.services.connections.ConnectionsFragment
+import minerva.android.services.dapps.DappsFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ServicesFragment : MinervaPrimitiveListFragment() {
+class ServicesFragment : BaseFragment(R.layout.services_fragment_layout) {
 
+    private lateinit var binding: ServicesFragmentLayoutBinding
+    var currentFragment: Fragment = getFragment(DAPPS_POSITION)
     private val viewModel: ServicesViewModel by viewModel()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding =  ServicesFragmentLayoutBinding.bind(view)
+        setupLiveData()
+        setupViewPager()
+    }
+
+    private fun setupLiveData() {
+        viewModel.apply {
+            errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
+        }
+    }
+
+    private fun setupViewPager() {
+        with(binding) {
+            servicesViewPager.apply {
+                adapter = ServicesPagerAdapter(this@ServicesFragment, ::getFragment)
+                setCurrentItem(FIRST_PAGE, false)
+
+                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        servicesTabs.selectTab(servicesTabs.getTabAt(position % CARD_NUMBER))
+                    }
+                })
+
+                addTab(servicesTabs, R.string.dapps_label)
+                addTab(servicesTabs, R.string.connections_label)
+
+                servicesTabs.onTabSelected {
+                    currentFragment = getFragment(it)
+                    requireActivity().invalidateOptionsMenu()
+                    setCurrentItem(it, true)
+                }
+            }
+        }
+    }
 
     override fun onResume() {
         super.onResume()
         interactor.changeActionBarColor(R.color.lightGray)
     }
 
-    override fun prepareObservers() {
-        viewModel.apply {
-            servicesLiveData.observe(viewLifecycleOwner, Observer { updateList(it) })
-            dappSessionsLiveData.observe(viewLifecycleOwner, Observer { updateList(it) })
-            serviceRemovedLiveData.observe(viewLifecycleOwner, EventObserver { activity?.invalidateOptionsMenu() })
-            errorLiveData.observe(viewLifecycleOwner, EventObserver { handleAutomaticBackupError(it) })
+    private fun getFragment(position: Int) =
+        when (position) {
+            DAPPS_POSITION -> DappsFragment.newInstance()
+            else -> ConnectionsFragment.newInstance()
         }
-    }
 
-    private fun updateList(it: List<MinervaPrimitive>) {
-        binding.noDataMessage.visibleOrGone(it.isEmpty())
-        primitivesAdapter.updateList(it)
-    }
-
-    override fun onRemoveService(service: Service) = with(service) {
-        AlertDialogHandler.showRemoveDialog(requireContext(), name, getString(R.string.remove_service_dialog_message))
-        { viewModel.removeService(issuer, name) }
-    }
-
-    override fun onRemoveDappSession(dapp: DappSession) {
-        viewModel.removeSession(dapp)
+    private fun addTab(tabLayout: TabLayout, titleRes: Int) {
+        tabLayout.addTab(tabLayout.newTab().setText(getString(titleRes)))
     }
 
     companion object {
-        @JvmStatic
-        fun newInstance() = ServicesFragment()
+        const val DAPPS_POSITION = 0
+        const val CARD_NUMBER = 2
+        private const val FIRST_PAGE = 0
     }
 }

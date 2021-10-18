@@ -62,6 +62,7 @@
     <color name="dappLabelColorGray">#908e9f</color>
     <color name="dappDragColorGray">#d8d8d8</color>
     <color name="dappSeparatorColor">#eaeaee</color>
+    <color name="dappCircleColor">#3ceaeaee</color>
     <color name="transparentErrorRed">#10e42c00</color>
     <color name="errorRed">#e42c00</color>
     <color name="warningMessageOrange">#dc7500</color>
