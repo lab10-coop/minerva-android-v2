@@ -18,6 +18,7 @@ import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
 import minerva.android.onboarding.create.CreateWalletViewModel
 import minerva.android.onboarding.restore.RestoreWalletViewModel
 import minerva.android.services.ServicesViewModel
+import minerva.android.services.dapps.DappsViewModel
 import minerva.android.services.login.ServicesScannerViewModel
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.LoginScannerViewModel
@@ -88,6 +89,7 @@ private val appModules = module {
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
     viewModel { RampViewModel(get(), get()) }
+    viewModel { DappsViewModel() }
     viewModel { FiatViewModel(get(), get(), get()) }
 }
 

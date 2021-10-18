@@ -191,6 +191,8 @@
     <string name="credentials_label">Credentials</string>
     <string name="contacts_label">Contacts</string>
     <string name="my_identities_label">My Identities</string>
+    <string name="connections_label">Connections</string>
+    <string name="dapps_label">Dapps</string>
     <string name="valid_until">Valid until:</string>
     <string name="memberId">MemberID:</string>
     <string name="name_colon">Name:</string>
@@ -363,6 +365,13 @@
     <string name="backup_server_error">Error when looking for backup data for the Secret Recovery Phrase you entered. Make sure your device is currently online and please try again</string>
     <string name="empty" />
     <string name="nft_header">NFTs</string>
+
+    <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
+    <string name="default_dapp_dialog_confirm">Open</string>
+    <string name="uniswap_dialog_description">To use your Minerva Wallet, in Uniswap tap "Connect Wallet" then "Wallet Connect"</string>
+    <string name="uniswap_dialog_confirm">Open Uniswap</string>
+    <string name="honeyswap_dialog_description">To use your Minerva Wallet, in Honeyswap tap "Connect Wallet" then "Wallet Connect"</string>
+    <string name="honeyswap_dialog_confirm">Open Honeyswap</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
