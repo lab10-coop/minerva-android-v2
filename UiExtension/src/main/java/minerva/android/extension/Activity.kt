@@ -38,7 +38,11 @@ inline fun <reified T : Any> Activity.launchActivityForResult(
 inline fun <reified T : Any> newIntent(context: Context): Intent =
     Intent(context, T::class.java)
 
-fun AppCompatActivity.getCurrentFragment(): Fragment? = supportFragmentManager.fragments.last { it.isVisible }
+fun AppCompatActivity.getCurrentFragment(): Fragment? = try {
+    supportFragmentManager.fragments.last { it.isVisible }
+} catch (e: NoSuchElementException) {
+    null
+}
 
 private fun AppCompatActivity.showFragment(
     containerId: Int,
@@ -50,9 +54,9 @@ private fun AppCompatActivity.showFragment(
 ) {
     supportFragmentManager.beginTransaction().apply {
         setCustomAnimations(slideIn, 0, 0, slideOut)
-        if(replace) replace(containerId, fragment)
+        if (replace) replace(containerId, fragment)
         else add(containerId, fragment)
-        if(addToBackstack) addToBackStack(fragment.tag)
+        if (addToBackstack) addToBackStack(fragment.tag)
         commit()
     }
 }

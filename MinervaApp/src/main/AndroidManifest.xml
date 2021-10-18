@@ -25,7 +25,6 @@
         <activity
             android:name=".walletConnect.HandlingWalletConnectDeepLinkActivity"
             android:label="@string/empty"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.Transparent">
             <intent-filter android:label="@string/minerva">
                 <action android:name="android.intent.action.VIEW" />
