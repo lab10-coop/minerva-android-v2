@@ -69,12 +69,12 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     private fun initTokensList(account: Account, fiatSymbol: String, tokens: List<AccountToken>, isWidgetOpen: Boolean) {
         binding.apply {
-            if (isWidgetOpen && tokensContainer.isVisible) {
-                tokensContainer.children.forEach { view -> (view as TokenView).endStreamAnimation() }
-                tokensContainer.removeAllViews()
-                tokens.isNotEmpty().let { areTokensVisible ->
-                    tokensHeader.visibleOrGone(areTokensVisible)
-                    tokensContainer.visibleOrGone(areTokensVisible)
+            tokensContainer.children.forEach { view -> (view as TokenView).endStreamAnimation() }
+            tokens.isNotEmpty().let { areTokensVisible ->
+                tokensHeader.visibleOrGone(areTokensVisible)
+                tokensContainer.visibleOrGone(areTokensVisible)
+                if (isWidgetOpen && tokensContainer.isVisible) {
+                    tokensContainer.removeAllViews()
                     tokens.forEach { accountToken ->
                         tokensContainer.addView(TokenView(context).apply {
                             initView(account, callback, fiatSymbol, accountToken)
@@ -131,12 +131,12 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         isWidgetOpen: Boolean
     ) {
         binding.apply {
-            if (isWidgetOpen && collectiblesContainer.isVisible) {
-                with(collectiblesContainer) {
-                    collectibles.isNotEmpty().let { visibility ->
-                        visibleOrGone(visibility)
+            with(collectiblesContainer) {
+                collectibles.isNotEmpty().let { visibility ->
+                    visibleOrGone(visibility)
+                    collectiblesHeader.visibleOrGone(visibility)
+                    if (isWidgetOpen && collectiblesContainer.isVisible) {
                         removeAllViews()
-                        collectiblesHeader.visibleOrGone(visibility)
                         collectibles.forEach { collectiblesWithBalance ->
                             addView(
                                 CollectibleView(
@@ -147,8 +147,8 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                             )
                         }
                     }
-                    setHeaderArrow(collectiblesHeader, this)
                 }
+                setHeaderArrow(collectiblesHeader, this)
             }
         }
     }
