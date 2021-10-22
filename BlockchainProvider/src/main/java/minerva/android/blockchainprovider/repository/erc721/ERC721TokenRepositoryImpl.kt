@@ -21,6 +21,32 @@ class ERC721TokenRepositoryImpl(
     private val gasPrices: Map<Int, BigInteger>
 ) : ERC721TokenRepository {
 
+    override fun isTokenOwner(
+        tokenId: String,
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        safeAccountAddress: String
+    ): Single<Boolean> =
+        if (safeAccountAddress.isEmpty()) {
+            isOwner(tokenId, tokenAddress, chainId, privateKey, Credentials.create(privateKey).address)
+        } else {
+            isOwner(tokenId, tokenAddress, chainId, privateKey, safeAccountAddress)
+        }
+
+    private fun isOwner(
+        tokenId: String,
+        tokenAddress: String,
+        chainId: Int,
+        privateKey: String,
+        address: String
+    ): Single<Boolean> =
+        loadERC721(privateKey, chainId, tokenAddress)
+            .ownerOf(BigInteger(tokenId))
+            .flowable()
+            .map { ownerAddress -> ownerAddress.equals(address, true) }
+            .firstOrError()
+
     override fun getTokenBalance(
         privateKey: String,
         chainId: Int,

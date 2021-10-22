@@ -20,6 +20,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.main.MainActivity.Companion.ACCOUNT_CHAIN_ID
 import minerva.android.main.MainActivity.Companion.ACCOUNT_INDEX
+import minerva.android.main.MainActivity.Companion.TOKEN_ADDRESS
 import minerva.android.services.login.scanner.BaseScannerFragment
 import minerva.android.widget.MinervaFlashbar
 import minerva.android.wrapped.WrappedFragmentType
@@ -146,7 +147,6 @@ class TransactionActivity : AppCompatActivity(), TransactionListener {
         const val SEND_TRANSACTION_INDEX = 0
         const val IS_TRANSACTION_SUCCESS = "is_transaction_succeed"
         const val TRANSACTION_MESSAGE = "transaction_message"
-        const val TOKEN_ADDRESS = "token_address"
         const val TRANSACTION_SCREEN = "transaction_screen"
         const val COIN_BALANCE_ERROR = "coin_balance_error"
         const val TOKEN_BALANCE_ERROR = "token_balance_error"

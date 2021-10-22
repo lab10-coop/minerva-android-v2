@@ -28,7 +28,8 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     private var binding =
         TokensAndCollectiblesLayoutBinding.bind(inflate(context, R.layout.tokens_and_collectibles_layout, this))
-    private lateinit var callback: TokenView.TokenViewCallback
+    private lateinit var tokenViewCallback: TokenView.TokenViewCallback
+    private lateinit var collectibleViewCallback: CollectibleView.CollectibleViewCallback
     private lateinit var parent: ViewGroup
     private var showMainToken = false
 
@@ -39,19 +40,21 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     fun prepareView(
         viewGroup: ViewGroup,
-        callback: TokenView.TokenViewCallback,
+        tokenViewCallback: TokenView.TokenViewCallback,
+        collectibleViewCallback: CollectibleView.CollectibleViewCallback,
         isOpen: Boolean
     ) {
         parent = viewGroup
-        this.callback = callback
+        this.tokenViewCallback = tokenViewCallback
+        this.collectibleViewCallback = collectibleViewCallback
         visibleOrGone(isOpen)
     }
 
     fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: ERCTokensList, isWidgetOpen: Boolean) {
-        initMainToken(account, fiatSymbol, callback)
+        initMainToken(account, fiatSymbol, tokenViewCallback)
         initTokensList(account, fiatSymbol, tokens.getERC20Tokens(), isWidgetOpen)
         prepareSeparator(tokens.isERC20TokensListNotEmpty() && tokens.isCollectiblesListNotEmpty())
-        initCollectiblesList(tokens.getCollectiblesWithBalance(account), isWidgetOpen)
+        initCollectiblesList(account, tokens.getCollectiblesWithBalance(account), isWidgetOpen)
     }
 
     private fun initView() {
@@ -77,7 +80,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                     tokensContainer.removeAllViews()
                     tokens.forEach { accountToken ->
                         tokensContainer.addView(TokenView(context).apply {
-                            initView(account, callback, fiatSymbol, accountToken)
+                            initView(account, tokenViewCallback, fiatSymbol, accountToken)
                             resources.getDimensionPixelOffset(R.dimen.margin_xxsmall)
                                 .let { padding -> updatePadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding) }
                         })
@@ -127,6 +130,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     }
 
     private fun initCollectiblesList(
+        account: Account,
         collectibles: List<Pair<AccountToken, BigDecimal>>,
         isWidgetOpen: Boolean
     ) {
@@ -138,13 +142,14 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
                     if (isWidgetOpen && collectiblesContainer.isVisible) {
                         removeAllViews()
                         collectibles.forEach { collectiblesWithBalance ->
-                            addView(
-                                CollectibleView(
-                                    context,
+                            addView(CollectibleView(context).apply {
+                                initView(
+                                    account,
+                                    collectibleViewCallback,
                                     collectiblesWithBalance.first.token,
                                     collectiblesWithBalance.second
                                 )
-                            )
+                            })
                         }
                     }
                 }

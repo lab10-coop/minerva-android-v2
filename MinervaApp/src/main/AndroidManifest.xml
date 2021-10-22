@@ -76,6 +76,9 @@
             android:name=".services.login.ServicesScannerActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".accounts.nft.view.NftCollectionActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".wrapped.WrappedActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />

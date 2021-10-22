@@ -167,6 +167,32 @@ class TokenManagerImpl(
         walletManager.getWalletConfig().erc20Tokens[account.chainId]
             ?.filter { token -> token.accountAddress.equals(account.address, true) } ?: listOf()
 
+    override fun getNftsPerAccountTokenFlowable(
+        privateKey: String,
+        chainId: Int,
+        accountAddress: String,
+        collectionAddress: String
+    ): Flowable<NftVisibilityResult> {
+        val tokens = walletManager.getWalletConfig().erc20Tokens[chainId]
+            ?.filter { token -> token.accountAddress.equals(accountAddress, true) && token.address.equals(collectionAddress, true) }
+            ?: listOf()
+        return Single.mergeDelayError(getNftVisibility(privateKey, chainId, accountAddress, collectionAddress, tokens))
+    }
+
+    private fun getNftVisibility(
+        privateKey: String,
+        chainId: Int,
+        accountAddress: String,
+        collectionAddress: String,
+        tokens: List<ERCToken>
+    ) = mutableListOf<Single<NftVisibilityResult>>().apply {
+        tokens.forEach { token ->
+            add(erc721TokenRepository.isTokenOwner(token.tokenId!!, privateKey, chainId, collectionAddress, accountAddress)
+                .map { isVisible -> NftVisibilityResult(isVisible, token) }
+                .subscribeOn(Schedulers.io()))
+        }
+    }
+
     private fun getAllTokensPerAccount(account: Account): List<ERCToken> {
         val localTokensPerNetwork = NetworkManager.getTokens(account.chainId)
         val remoteTokensPerNetwork =
@@ -785,7 +811,10 @@ class TokenManagerImpl(
                 .reduce(UpdateTokensResult(true, tokensPerChainIdMap)) { resultData, token ->
                     resultData.apply {
                         tokensPerChainIdMap[token.chainId]?.find {
-                            it.address == token.address && it.accountAddress == token.accountAddress
+                            it.address.equals(token.address, true) && it.accountAddress.equals(
+                                token.accountAddress,
+                                true
+                            ) && token.tokenId == it.tokenId
                         }?.apply {
                             description = token.description
                             contentUri = token.contentUri
