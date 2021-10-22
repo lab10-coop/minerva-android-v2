@@ -75,7 +75,7 @@ class ServicesScannerViewModel(
         _viewStateLiveData.postValue(WalletConnectUpdateDataState(network, dialogType))
     }
 
-    override fun closeScanner() {
+    override fun closeScanner(isMobileWalletConnect: Boolean) {
         _viewStateLiveData.value = CloseScannerState
     }
 
