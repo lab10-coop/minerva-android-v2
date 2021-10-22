@@ -48,7 +48,7 @@
         </activity>
         <activity
             android:name=".main.MainActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait">
 
@@ -74,6 +74,9 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".services.login.ServicesScannerActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".accounts.nft.view.NftCollectionActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".wrapped.WrappedActivity"

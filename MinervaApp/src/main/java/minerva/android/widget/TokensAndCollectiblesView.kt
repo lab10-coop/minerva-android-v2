@@ -28,7 +28,8 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     private var binding =
         TokensAndCollectiblesLayoutBinding.bind(inflate(context, R.layout.tokens_and_collectibles_layout, this))
-    private lateinit var callback: TokenView.TokenViewCallback
+    private lateinit var tokenViewCallback: TokenView.TokenViewCallback
+    private lateinit var collectibleViewCallback: CollectibleView.CollectibleViewCallback
     private lateinit var parent: ViewGroup
     private var showMainToken = false
 
@@ -39,19 +40,21 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     fun prepareView(
         viewGroup: ViewGroup,
-        callback: TokenView.TokenViewCallback,
+        tokenViewCallback: TokenView.TokenViewCallback,
+        collectibleViewCallback: CollectibleView.CollectibleViewCallback,
         isOpen: Boolean
     ) {
         parent = viewGroup
-        this.callback = callback
+        this.tokenViewCallback = tokenViewCallback
+        this.collectibleViewCallback = collectibleViewCallback
         visibleOrGone(isOpen)
     }
 
     fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: ERCTokensList, isWidgetOpen: Boolean) {
-        initMainToken(account, fiatSymbol, callback)
+        initMainToken(account, fiatSymbol, tokenViewCallback)
         initTokensList(account, fiatSymbol, tokens.getERC20Tokens(), isWidgetOpen)
         prepareSeparator(tokens.isERC20TokensListNotEmpty() && tokens.isCollectiblesListNotEmpty())
-        initCollectiblesList(tokens.getCollectiblesWithBalance(account), isWidgetOpen)
+        initCollectiblesList(account, tokens.getCollectiblesWithBalance(account), isWidgetOpen)
     }
 
     private fun initView() {
@@ -69,15 +72,15 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     private fun initTokensList(account: Account, fiatSymbol: String, tokens: List<AccountToken>, isWidgetOpen: Boolean) {
         binding.apply {
-            if (isWidgetOpen && tokensContainer.isVisible) {
-                tokensContainer.children.forEach { view -> (view as TokenView).endStreamAnimation() }
-                tokensContainer.removeAllViews()
-                tokens.isNotEmpty().let { areTokensVisible ->
-                    tokensHeader.visibleOrGone(areTokensVisible)
-                    tokensContainer.visibleOrGone(areTokensVisible)
+            tokensContainer.children.forEach { view -> (view as TokenView).endStreamAnimation() }
+            tokens.isNotEmpty().let { areTokensVisible ->
+                tokensHeader.visibleOrGone(areTokensVisible)
+                tokensContainer.visibleOrGone(areTokensVisible)
+                if (isWidgetOpen && tokensContainer.isVisible) {
+                    tokensContainer.removeAllViews()
                     tokens.forEach { accountToken ->
                         tokensContainer.addView(TokenView(context).apply {
-                            initView(account, callback, fiatSymbol, accountToken)
+                            initView(account, tokenViewCallback, fiatSymbol, accountToken)
                             resources.getDimensionPixelOffset(R.dimen.margin_xxsmall)
                                 .let { padding -> updatePadding(Int.NO_PADDING, padding, Int.NO_PADDING, padding) }
                         })
@@ -127,28 +130,30 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     }
 
     private fun initCollectiblesList(
+        account: Account,
         collectibles: List<Pair<AccountToken, BigDecimal>>,
         isWidgetOpen: Boolean
     ) {
         binding.apply {
-            if (isWidgetOpen && collectiblesContainer.isVisible) {
-                with(collectiblesContainer) {
-                    collectibles.isNotEmpty().let { visibility ->
-                        visibleOrGone(visibility)
+            with(collectiblesContainer) {
+                collectibles.isNotEmpty().let { visibility ->
+                    visibleOrGone(visibility)
+                    collectiblesHeader.visibleOrGone(visibility)
+                    if (isWidgetOpen && collectiblesContainer.isVisible) {
                         removeAllViews()
-                        collectiblesHeader.visibleOrGone(visibility)
                         collectibles.forEach { collectiblesWithBalance ->
-                            addView(
-                                CollectibleView(
-                                    context,
+                            addView(CollectibleView(context).apply {
+                                initView(
+                                    account,
+                                    collectibleViewCallback,
                                     collectiblesWithBalance.first.token,
                                     collectiblesWithBalance.second
                                 )
-                            )
+                            })
                         }
                     }
-                    setHeaderArrow(collectiblesHeader, this)
                 }
+                setHeaderArrow(collectiblesHeader, this)
             }
         }
     }

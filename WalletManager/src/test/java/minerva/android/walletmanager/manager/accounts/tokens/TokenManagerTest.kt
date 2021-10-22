@@ -1007,4 +1007,47 @@ class TokenManagerTest : RxTest() {
                 result.isEmpty()
             }
     }
+
+    @Test
+    fun `test get nft for account`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val collectionAddress = "collectionAddress"
+        val token1 = ERCToken(
+            XDAI,
+            "token1",
+            address = collectionAddress,
+            accountAddress = "accountAddress",
+            type = TokenType.ERC721,
+            tokenId = "1"
+        )
+        val token2 = ERCToken(
+            XDAI,
+            "token2",
+            address = collectionAddress,
+            accountAddress = "accountAddress",
+            type = TokenType.ERC721,
+            tokenId = "2"
+        )
+        val token3 = ERCToken(
+            XDAI,
+            "token3",
+            address = collectionAddress,
+            accountAddress = "accountAddress",
+            type = TokenType.ERC721,
+            tokenId = "3"
+        )
+        val localTokens = tokenManager.sortTokensByChainId(listOf(token1, token2, token3))
+        whenever(walletManager.getWalletConfig()).thenReturn(WalletConfig(1, erc20Tokens = localTokens))
+        whenever(erc721TokenRepository.isTokenOwner(any(), any(), any(), any(), any()))
+            .thenReturn(Single.just(true)).thenReturn(Single.just(false)).thenReturn(Single.just(true))
+        val account = Account(1, chainId = XDAI, address = "accountAddress", privateKey = "privateKey")
+        tokenManager.getNftsPerAccountTokenFlowable(account.privateKey, XDAI, account.address, collectionAddress)
+            .test()
+            .await()
+            .assertNoErrors()
+            .assertValueCount(3)
+            .assertValueAt(0, NftVisibilityResult(true, token1))
+            .assertValueAt(1, NftVisibilityResult(false, token2))
+            .assertValueAt(2, NftVisibilityResult(true, token3))
+    }
 }
