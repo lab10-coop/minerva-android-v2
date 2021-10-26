@@ -11,7 +11,6 @@ import minerva.android.extension.empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.walletconnect.WalletConnectInteractionsViewModel
-import minerva.android.services.login.WalletConnectUpdateDataState
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -679,7 +678,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(Account(1))
         viewModel.getWalletConnectSessions()
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
-        viewModel.acceptRequest()
+        viewModel.acceptRequest(isMobileWalletConnect = false)
         verify(walletConnectRepository).approveRequest(any(), any())
     }
 
@@ -696,7 +695,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
         viewModel.getWalletConnectSessions()
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
-        viewModel.rejectRequest()
+        viewModel.rejectRequest(isMobileWalletConnect = false)
         verify(walletConnectRepository).rejectRequest(any())
     }
 
@@ -913,7 +912,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `approve session test`() {
+    fun `approve session test and close app state `() {
         NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
         viewModel.topic = Topic()
         viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
@@ -924,7 +923,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 any(), any(), any(), any()
             )
         ).thenReturn(Completable.complete())
-        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"))
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = true)
         verify(walletConnectRepository).approveSession(
             any(), any(), any(), any()
         )
@@ -933,6 +932,29 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             firstValue is CloseScannerState
         }
     }
+
+    @Test
+    fun `approve session test and close dialog state `() {
+        NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
+        viewModel.topic = Topic()
+        viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
+        viewModel.account = Account(1, chainId = 2)
+        viewModel.walletConnectStatus.observeForever(requestObserver)
+        whenever(
+            walletConnectRepository.approveSession(
+                any(), any(), any(), any()
+            )
+        ).thenReturn(Completable.complete())
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = false)
+        verify(walletConnectRepository).approveSession(
+            any(), any(), any(), any()
+        )
+        requestCaptor.run {
+            verify(requestObserver).onChanged(capture())
+            firstValue is CloseDialogState
+        }
+    }
+
 
     @Test
     fun `reject session test`() {

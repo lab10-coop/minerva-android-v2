@@ -10,7 +10,6 @@ import minerva.android.accounts.walletconnect.*
 import minerva.android.extension.empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.services.login.WalletConnectUpdateDataState
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -267,7 +266,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.account = Account(1, chainId = 2)
         viewModel.stateLiveData.observeForever(stateObserver)
         whenever(repository.approveSession(any(), any(), any(), any())).thenReturn(Completable.complete())
-        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"))
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = false)
         verify(repository).approveSession(any(), any(), any(), any())
         stateCaptor.run {
             verify(stateObserver).onChanged(capture())
