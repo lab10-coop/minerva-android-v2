@@ -21,7 +21,6 @@ class SwitchTokenRow(context: Context, attributeSet: AttributeSet? = null) : Lin
             this.isChecked = isChecked
             gravity = Gravity.CENTER_VERTICAL
             setOnCheckedChangeListener { _, _ -> onCheckChangeAction(token.address, this.isChecked) }
-
         }
         binding.tokenLogo.initView(token)
         resources.getDimension(R.dimen.margin_xsmall).toInt().let { padding ->

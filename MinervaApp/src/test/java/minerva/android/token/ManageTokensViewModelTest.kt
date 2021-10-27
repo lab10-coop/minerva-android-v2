@@ -47,17 +47,20 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
         whenever(tokenManager.getActiveTokensPerAccount(any())).thenReturn(
             listOf(
-                ERCToken(1, symbol = "token1", type = TokenType.ERC20),
-                ERCToken(3, symbol = "token2", type = TokenType.ERC20)
+                ERCToken(1, symbol = "token1", address = "address1", type = TokenType.ERC20),
+                ERCToken(3, symbol = "token2", address = "address2", type = TokenType.ERC20),
+                ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721),
+                ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721)
             )
         )
         viewModel.initViewModel(0)
 
         val tokens = viewModel.loadTokens()
-        tokens.size shouldBeEqualTo 3
+        tokens.size shouldBeEqualTo 4
         tokens[0].symbol shouldBeEqualTo "cookie"
         tokens[1].symbol shouldBeEqualTo "token1"
         tokens[2].symbol shouldBeEqualTo "token2"
+        tokens[3].symbol shouldBeEqualTo "token3"
     }
 
     @Test

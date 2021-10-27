@@ -25,7 +25,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentManageTokensBinding.bind(view)
         showFragmentListener = (activity as WrappedActivity)
-        initFragment()
+        initViewModel()
         prepareListeners()
     }
 
@@ -81,7 +81,7 @@ class ManageTokensFragment : BaseFragment(R.layout.fragment_manage_tokens) {
         }
     }
 
-    private fun initFragment() {
+    private fun initViewModel() {
         arguments?.let {
             viewModel.initViewModel(it.getInt(INDEX))
         }
