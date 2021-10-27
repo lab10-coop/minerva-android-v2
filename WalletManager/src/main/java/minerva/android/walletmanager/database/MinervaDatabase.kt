@@ -16,7 +16,7 @@ import minerva.android.walletmanager.model.token.ERCToken
 
 @Database(
     entities = [ERCToken::class, DappSessionEntity::class, CoinBalanceEntity::class, TokenBalanceEntity::class],
-    version = 24
+    version = 25
 )
 @TypeConverters(TokenTypeConverter::class, Converter::class)
 abstract class MinervaDatabase : RoomDatabase() {

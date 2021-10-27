@@ -34,7 +34,7 @@ class ManageTokensViewModel(
                 network.token,
                 logoRes = getMainTokenIconRes(network.chainId)
             )
-        ) + tokenManager.getActiveTokensPerAccount(account)
+        ) + tokenManager.getActiveTokensPerAccount(account).distinctBy { token -> token.address }
     }
 
     fun getTokenVisibilitySettings(tokenAddress: String): Boolean =

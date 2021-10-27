@@ -20,5 +20,7 @@ data class DappSessionEntity(
     @ColumnInfo(name = "network_name") val networkName: String = String.Empty,
     @ColumnInfo(name = "account_name") val accountName: String = String.Empty,
     @ColumnInfo(name = "chain_id") val chainId: Int = Int.InvalidValue,
-    @ColumnInfo(name = "handshake_id") val handshakeId: Long = 0L
+    @ColumnInfo(name = "handshake_id") val handshakeId: Long = 0L,
+    @ColumnInfo(name = "is_mobile_wallet_connect") val isMobileWalletConnect: Boolean = false
+
 )

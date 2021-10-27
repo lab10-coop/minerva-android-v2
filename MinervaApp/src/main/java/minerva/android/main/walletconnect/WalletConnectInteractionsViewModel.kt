@@ -50,7 +50,7 @@ class WalletConnectInteractionsViewModel(
     private val tokenManager: TokenManager,
     private val accountManager: AccountManager,
     walletActionsRepository: WalletActionsRepository,
-    private val unsupportedNetworkRepository: UnsupportedNetworkRepository
+    unsupportedNetworkRepository: UnsupportedNetworkRepository
 ) : BaseWalletConnectScannerViewModel(
     accountManager,
     walletConnectRepository,
@@ -89,7 +89,11 @@ class WalletConnectInteractionsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onNext = { state -> _walletConnectStatus.value = state },
+                    onNext = { state ->
+                        if (_walletConnectStatus.value != state) {
+                            _walletConnectStatus.value = state
+                        }
+                    },
                     onError = { error ->
                         Timber.e(error)
                         _errorLiveData.value = Event(error)
@@ -134,7 +138,7 @@ class WalletConnectInteractionsViewModel(
             ?.let { account -> currentAccount = account }
         val txValue: BigDecimal = getTransactionValue(status.transaction.value)
         if (txValue == WRONG_TX_VALUE) {
-            rejectRequest()
+            rejectRequest(session.isMobileWalletConnect)
             return Single.just(WrongTransactionValueState(status.transaction))
         }
         val transferType: TransferType = getTransferType(status, txValue)
@@ -310,7 +314,7 @@ class WalletConnectInteractionsViewModel(
     private fun isContractDataEmpty(transaction: WalletConnectTransaction) =
         hexToBigDecimal(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO
 
-    fun sendTransaction() {
+    fun sendTransaction(isMobileWalletConnect: Boolean) {
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map { txReceipt ->
@@ -325,12 +329,12 @@ class WalletConnectInteractionsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _walletConnectStatus.value = ProgressBarState(true) }
                 .doOnError {
-                    rejectRequest()
+                    rejectRequest(isMobileWalletConnect)
                     _walletConnectStatus.value = ProgressBarState(false)
                 }
                 .doAfterTerminate { weiCoinTransactionValue = NO_COIN_TX_VALUE }
                 .subscribeBy(
-                    onSuccess = { _walletConnectStatus.value = CloseScannerState },
+                    onSuccess = { successWalletConnectInteraction(isMobileWalletConnect) },
                     onError = { error ->
                         logToFirebase("WalletConnect transaction error: $error; $currentTransaction")
                         Timber.e(error)
@@ -338,6 +342,10 @@ class WalletConnectInteractionsViewModel(
                     }
                 )
         }
+    }
+
+    private fun successWalletConnectInteraction(shouldCloseApp: Boolean) {
+        _walletConnectStatus.value = if (shouldCloseApp) CloseScannerState else CloseDialogState
     }
 
     private val transaction
@@ -361,20 +369,20 @@ class WalletConnectInteractionsViewModel(
         return currentTransaction
     }
 
-    fun acceptRequest() {
+    fun acceptRequest(isMobileWalletConnect: Boolean) {
         currentDappSession?.let { session ->
             transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
                 walletConnectRepository.approveRequest(session.peerId, it.privateKey)
-                _walletConnectStatus.value = CloseScannerState
+                successWalletConnectInteraction(isMobileWalletConnect)
             }
         }
     }
 
-    fun rejectRequest() {
+    fun rejectRequest(isMobileWalletConnect: Boolean) {
         weiCoinTransactionValue = NO_COIN_TX_VALUE
         currentDappSession?.let { session ->
             walletConnectRepository.rejectRequest(session.peerId)
-            _walletConnectStatus.value = CloseScannerState
+            successWalletConnectInteraction(isMobileWalletConnect)
         }
     }
 
@@ -411,7 +419,7 @@ class WalletConnectInteractionsViewModel(
 
     override fun handleSessionRequest(sessionRequest: OnSessionRequestData) {
         val id = sessionRequest.chainId
-         when {
+        when {
             id == null -> {
                 accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
                 _walletConnectStatus.value = OnSessionRequestResult(
@@ -421,7 +429,7 @@ class WalletConnectInteractionsViewModel(
                 )
             }
             isNetworkNotSupported(chainId = id) -> {
-                requestedNetwork = BaseNetworkData(id,String.Empty)
+                requestedNetwork = BaseNetworkData(id, String.Empty)
                 _walletConnectStatus.value = OnSessionRequestResult(
                     sessionRequest.meta,
                     requestedNetwork,
@@ -454,8 +462,8 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    override fun closeScanner() {
-        _walletConnectStatus.value = CloseScannerState
+    override fun closeScanner(isMobileWalletConnect: Boolean) {
+        successWalletConnectInteraction(isMobileWalletConnect)
     }
 
     override fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
@@ -472,8 +480,8 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    override fun rejectSession() {
+    override fun rejectSession(isMobileWalletConnect: Boolean) {
         walletConnectRepository.rejectSession(topic.peerId)
-        closeScanner()
+        closeScanner(isMobileWalletConnect)
     }
 }

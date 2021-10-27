@@ -68,7 +68,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
     protected fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         confirmationDialogDialog = DappConfirmationDialog(requireContext(),
             {
-                viewModel.approveSession(meta)
+                viewModel.approveSession(meta, false)
                 binding.dappsBottomSheet.dapps.visible()
                 binding.closeButton.margin(bottom = WalletConnectScannerFragment.INCREASED_MARGIN)
             },
