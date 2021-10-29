@@ -10,6 +10,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinCryptoBalance
@@ -52,6 +53,7 @@ object MarketUtils {
             XDAI -> markets.daiFiatPrice?.getRate(currentFiatCurrency)
             MATIC -> markets.maticFiatPrice?.getRate(currentFiatCurrency)
             BSC -> markets.bscFiatPrice?.getRate(currentFiatCurrency)
+            RSK_MAIN -> markets.rskFiatPrice?.getRate(currentFiatCurrency)
             else -> null
         }
 
@@ -62,6 +64,7 @@ object MarketUtils {
             XDAI -> MarketIds.XDAI
             MATIC -> MarketIds.POLYGON
             BSC -> MarketIds.BSC_TOKEN
+            RSK_MAIN -> MarketIds.RSK
             else -> String.Empty
         }
 
@@ -72,6 +75,7 @@ object MarketUtils {
             XDAI -> MarketIds.XDAI
             MATIC -> MarketIds.MATIC
             BSC -> MarketIds.BSC_COIN
+            RSK_MAIN -> MarketIds.RSK
             else -> String.Empty
         }
 }
