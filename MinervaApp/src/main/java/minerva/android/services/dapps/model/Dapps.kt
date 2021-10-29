@@ -2,199 +2,252 @@ package minerva.android.services.dapps.model
 
 import minerva.android.R
 import minerva.android.kotlinUtils.Empty
-import minerva.android.kotlinUtils.EmptyResource
-import minerva.android.services.dapps.dialog.OpenDappDialog
-import kotlin.reflect.full.memberProperties
 
 object Dapps {
-    val values = listOf(
-        Dapp(
-            Labels.MINERVA,
-            Backgrounds.MINERVA,
-            OpenDappDialog.Data(
-                Titles.MINERVA,
-                Urls.MINERVA,
-                Descriptions.MINERVA,
-                Confirms.MINERVA
-            )
-        ),
-        Dapp(
-            Labels.ZEROALPHA,
-            Backgrounds.ZEROALPHA,
-            OpenDappDialog.Data(
-                Titles.ZEROALPHA,
-                Urls.ZEROALPHA,
-                Descriptions.ZEROALPHA,
-                Confirms.ZEROALPHA
-            )
-        ),
-        Dapp(
-            Labels.SUPERFLUID,
-            Backgrounds.SUPERFLUID,
-            OpenDappDialog.Data(
-                Titles.SUPERFLUID,
-                Urls.SUPERFLUID,
-                Descriptions.SUPERFLUID,
-                Confirms.SUPERFLUID
-            )
-        ),
-        Dapp(
-            Labels.HONEYSWAP,
-            Backgrounds.HONEYSWAP,
-            OpenDappDialog.Data(
-                Titles.HONEYSWAP,
-                Urls.HONEYSWAP,
-                Descriptions.HONEYSWAP,
-                Confirms.HONEYSWAP
-            )
-        ),
 
-        Dapp(
-            Labels.QUICKSWAP,
-            Backgrounds.QUICKSWAP,
-            OpenDappDialog.Data(
-                Titles.QUICKSWAP,
-                Urls.QUICKSWAP,
-                Descriptions.QUICKSWAP,
-                Confirms.QUICKSWAP
-            )
-        ),
-
-        Dapp(
-            Labels.UNISWAP,
-            Backgrounds.UNISWAP,
-            OpenDappDialog.Data(
-                Titles.UNISWAP,
-                Urls.UNISWAP,
-                Descriptions.UNISWAP,
-                Confirms.UNISWAP
-            )
-        ),
-        Dapp(
-            Labels.PANCAKESWAP,
-            Backgrounds.PANCAKESWAP,
-            OpenDappDialog.Data(
-                Titles.PANCAKESWAP,
-                Urls.PANCAKESWAP,
-                Descriptions.PANCAKESWAP,
-                Confirms.PANCAKESWAP
-            )
-        ),
-        Dapp(
-            Labels.TORNADO_CASH,
-            Backgrounds.TORNADO_CASH,
-            OpenDappDialog.Data(
-                Titles.TORNADO_CASH,
-                Urls.TORNADO_CASH,
-                Descriptions.TORNADO_CASH,
-                Confirms.TORNADO_CASH
-            )
-        ),
-
-        Dapp(
-            Labels.AAVE,
-            Backgrounds.AAVE,
-            OpenDappDialog.Data(
-                Titles.AAVE,
-                Urls.AAVE,
-                Descriptions.AAVE,
-                Confirms.AAVE
-            )
-        ),
-        Dapp(
-            Labels.STAKEWISE,
-            Backgrounds.STAKEWISE,
-            OpenDappDialog.Data(
-                Titles.STAKEWISE,
-                Urls.STAKEWISE,
-                Descriptions.STAKEWISE,
-                Confirms.STAKEWISE
-            )
-        )
+    val valuesOrdered = listOf(
+        Dapps.STAKEWISE,
+        Dapps.HONEYSWAP,
+        Dapps.SUPERFLUID,
+        Dapps.EPORIO,
+        Dapps.QUICKSWAP,
+        Dapps.AAVE,
+        Dapps.MINERVA,
+        Dapps.SYMMETRIC,
+        Dapps.SYMMETRIC_POOLS,
+        Dapps.ZEROALPHA,
+        Dapps.ONEINCH,
+        Dapps.UNISWAP,
+        Dapps.PANCAKESWAP,
+        Dapps.OPENSEA,
+        Dapps.TORNADO_CASH
     )
 
-    private object Labels {
-        const val MINERVA = "Minerva"
+    private object Dapps {
+        val MINERVA = Dapp(
+            ShortNames.MINERVA,
+            LongNames.MINERVA,
+            Descriptions.MINERVA,
+            Colors.MINERVA,
+            String.Empty,
+            Icons.MINERVA,
+            OpenDappDialogs.Data.MINERVA
+        )
+        val HONEYSWAP = Dapp(
+            ShortNames.HONEYSWAP,
+            LongNames.HONEYSWAP,
+            Descriptions.HONEYSWAP,
+            Colors.HONEYSWAP,
+            String.Empty,
+            Icons.HONEYSWAP,
+            OpenDappDialogs.Data.HONEYSWAP
+        )
+        val SUPERFLUID = Dapp(
+            ShortNames.SUPERFLUID,
+            LongNames.SUPERFLUID,
+            Descriptions.SUPERFLUID,
+            Colors.SUPERFLUID,
+            String.Empty,
+            Icons.SUPERFLUID,
+            OpenDappDialogs.Data.SUPERFLUID
+        )
+        val ZEROALPHA = Dapp(
+            ShortNames.ZEROALPHA,
+            LongNames.ZEROALPHA,
+            Descriptions.ZEROALPHA,
+            Colors.ZEROALPHA,
+            String.Empty,
+            Icons.ZEROALPHA,
+            OpenDappDialogs.Data.ZEROALPHA
+        )
+        val QUICKSWAP = Dapp(
+            ShortNames.QUICKSWAP,
+            LongNames.QUICKSWAP,
+            Descriptions.QUICKSWAP,
+            Colors.QUICKSWAP,
+            String.Empty,
+            Icons.QUICKSWAP,
+            OpenDappDialogs.Data.QUICKSWAP
+        )
+        val UNISWAP = Dapp(
+            ShortNames.UNISWAP,
+            LongNames.UNISWAP,
+            Descriptions.UNISWAP,
+            Colors.UNISWAP,
+            String.Empty,
+            Icons.UNISWAP,
+            OpenDappDialogs.Data.UNISWAP
+        )
+        val PANCAKESWAP = Dapp(
+            ShortNames.PANCAKESWAP,
+            LongNames.PANCAKESWAP,
+            Descriptions.PANCAKESWAP,
+            Colors.PANCAKESWAP,
+            String.Empty,
+            Icons.PANCAKESWAP,
+            OpenDappDialogs.Data.PANCAKESWAP
+        )
+        val TORNADO_CASH = Dapp(
+            ShortNames.TORNADO_CASH,
+            LongNames.TORNADO_CASH,
+            Descriptions.TORNADO_CASH,
+            Colors.TORNADO_CASH,
+            String.Empty,
+            Icons.TORNADO_CASH,
+            OpenDappDialogs.Data.TORNADO_CASH
+        )
+        val AAVE = Dapp(
+            ShortNames.AAVE,
+            LongNames.AAVE,
+            Descriptions.AAVE,
+            Colors.AAVE,
+            String.Empty,
+            Icons.AAVE,
+            OpenDappDialogs.Data.AAVE
+        )
+        val STAKEWISE = Dapp(
+            ShortNames.STAKEWISE,
+            LongNames.STAKEWISE,
+            Descriptions.STAKEWISE,
+            Colors.STAKEWISE,
+            String.Empty,
+            Icons.STAKEWISE,
+            OpenDappDialogs.Data.STAKEWISE
+        )
+        val OPENSEA = Dapp(
+            ShortNames.OPENSEA,
+            LongNames.OPENSEA,
+            Descriptions.OPENSEA,
+            Colors.OPENSEA,
+            String.Empty,
+            Icons.OPENSEA,
+            OpenDappDialogs.Data.OPENSEA
+        )
+        val ONEINCH = Dapp(
+            ShortNames.ONEINCH,
+            LongNames.ONEINCH,
+            Descriptions.ONEINCH,
+            Colors.ONEINCH,
+            String.Empty,
+            Icons.ONEINCH,
+            OpenDappDialogs.Data.ONEINCH
+        )
+        val SYMMETRIC_POOLS = Dapp(
+            ShortNames.SYMMETRIC_POOLS,
+            LongNames.SYMMETRIC_POOLS,
+            Descriptions.SYMMETRIC_POOLS,
+            Colors.SYMMETRIC_POOLS,
+            String.Empty,
+            Icons.SYMMETRIC_POOLS,
+            OpenDappDialogs.Data.SYMMETRIC_POOLS
+        )
+        val SYMMETRIC = Dapp(
+            ShortNames.SYMMETRIC,
+            LongNames.SYMMETRIC,
+            Descriptions.SYMMETRIC,
+            Colors.SYMMETRIC,
+            String.Empty,
+            Icons.SYMMETRIC,
+            OpenDappDialogs.Data.SYMMETRIC
+        )
+        val EPORIO = Dapp(
+            ShortNames.EPORIO,
+            LongNames.EPORIO,
+            Descriptions.EPORIO,
+            Colors.EPORIO,
+            String.Empty,
+            Icons.EPORIO,
+            OpenDappDialogs.Data.EPORIO
+        )
+    }
+
+    object LongNames {
+        const val MINERVA = "Minerva Streaming Farms"
+        const val HONEYSWAP = "Honeyswap DEX"
+        const val SUPERFLUID = "Superfluid Dashboard"
+        const val ZEROALPHA = "Zeroalpha NFT Marketplace"
+        const val QUICKSWAP = "QuickSwap DEX"
+        const val UNISWAP = "Uniswap DEX"
+        const val PANCAKESWAP = "PancakeSwap DEX"
+        const val TORNADO_CASH = "Tornado Cash"
+        const val AAVE = "AAVE"
+        const val STAKEWISE = "StakeWise ETH 2.0 Staking"
+        const val OPENSEA = "OpenSea NFT Marketplace"
+        const val ONEINCH = "1inch DEX Aggregator"
+        const val SYMMETRIC_POOLS = "Symmetric DEX Pools"
+        const val SYMMETRIC = "Symmetric DEX"
+        const val EPORIO = "Eporio NFT Marketplace"
+    }
+
+    private object ShortNames {
+        const val MINERVA = "Minerva Farms"
         const val HONEYSWAP = "Honeyswap"
         const val SUPERFLUID = "Superfluid"
         const val ZEROALPHA = "ZeroAlpha"
-        const val QUICKSWAP = "Quickswap"
+        const val QUICKSWAP = "QuickSwap"
         const val UNISWAP = "Uniswap"
-        const val PANCAKESWAP = "Pancakeswap"
+        const val PANCAKESWAP = "PancakeSwap"
         const val TORNADO_CASH = "Tornado Cash"
         const val AAVE = "AAVE"
-        const val STAKEWISE = "Stakewise"
+        const val STAKEWISE = "StakeWise"
+        const val OPENSEA = "OpenSea"
+        const val ONEINCH = "1inch"
+        const val SYMMETRIC_POOLS = "Symmetric Pools"
+        const val SYMMETRIC = "Symmetric"
+        const val EPORIO = "Eporio"
     }
 
-    private object Urls {
-        const val MINERVA = "https://farm.minerva.digital"
-        const val HONEYSWAP = "https://app.honeyswap.org/"
-        const val SUPERFLUID = "https://app.superfluid.finance/dashboard"
-        const val ZEROALPHA = "https://zeroalpha.art"
-        const val QUICKSWAP = "https://quickswap.exchange/#/swap"
-        const val UNISWAP = "https://app.uniswap.org/#/swap"
-        const val PANCAKESWAP = "https://pancakeswap.finance"
-        const val TORNADO_CASH = "https://tornado.cash"
-        const val AAVE = "https://aave.com"
-        const val STAKEWISE = "https://stakewise.io"
-    }
-
-    // TODO MNR-622 Replace all missing titles before releasing to production. Titles are to be provided by client.
-    private object Titles {
-        const val MINERVA = "Minerva Streaming Farms"
-        const val HONEYSWAP = Labels.HONEYSWAP
-        const val SUPERFLUID = Labels.SUPERFLUID
-        const val ZEROALPHA = Labels.ZEROALPHA
-        const val QUICKSWAP = Labels.QUICKSWAP
-        const val UNISWAP = Labels.UNISWAP
-        const val PANCAKESWAP = Labels.PANCAKESWAP
-        const val TORNADO_CASH = Labels.TORNADO_CASH
-        const val AAVE = Labels.AAVE
-        const val STAKEWISE = Labels.STAKEWISE
-    }
-
-    // TODO MNR-622 Replace all missing descriptions before releasing to production. Descriptions are to be provided by client.
     private object Descriptions {
-        const val DEFAULT = R.string.default_dapp_dialog_description
-        const val MINERVA = DEFAULT
-        const val HONEYSWAP = DEFAULT
-        const val SUPERFLUID = DEFAULT
-        const val ZEROALPHA = DEFAULT
-        const val QUICKSWAP = DEFAULT
-        const val UNISWAP = DEFAULT
-        const val PANCAKESWAP = DEFAULT
-        const val TORNADO_CASH = DEFAULT
-        const val AAVE = DEFAULT
-        const val STAKEWISE = DEFAULT
+        const val MINERVA = "MIVA Liquidity Mining"
+        const val HONEYSWAP = "Decentralized Exchange"
+        const val SUPERFLUID = "Programmable Cashflows"
+        const val ZEROALPHA = "Always-on-Sale Artwork"
+        const val QUICKSWAP = "Decentralized Exchange"
+        const val UNISWAP = "Decentralized Exchange"
+        const val PANCAKESWAP = "Decentralized Exchange"
+        const val TORNADO_CASH = "Private Transactions"
+        const val AAVE = "Borrowing / Lending Protocol"
+        const val STAKEWISE = "ETH 2.0 Staking Service"
+        const val OPENSEA = "NFT Marketplace"
+        const val ONEINCH = "DEX Aggregator Service"
+        const val SYMMETRIC_POOLS = "Decentralized Exchange"
+        const val SYMMETRIC = "Decentralized Exchange"
+        const val EPORIO = "NFT Marketplace"
     }
 
-    // TODO MNR-622 Replace all missing confirmation texts before releasing to production. Texts are to be provided by client.
-    private object Confirms {
-        const val DEFAULT = R.string.default_dapp_dialog_confirm
-        const val MINERVA = DEFAULT
-        const val HONEYSWAP = DEFAULT
-        const val SUPERFLUID = DEFAULT
-        const val ZEROALPHA = DEFAULT
-        const val QUICKSWAP = DEFAULT
-        const val UNISWAP = DEFAULT
-        const val PANCAKESWAP = DEFAULT
-        const val TORNADO_CASH = DEFAULT
-        const val AAVE = DEFAULT
-        const val STAKEWISE = DEFAULT
+    private object Colors {
+        const val MINERVA = "#5858ed"
+        const val HONEYSWAP = "#ffaa00"
+        const val SUPERFLUID = "#908f9d"
+        const val ZEROALPHA = "#3f3f4b"
+        const val QUICKSWAP = "#418aca"
+        const val UNISWAP = "#e8006f"
+        const val PANCAKESWAP = "#39c3cc"
+        const val TORNADO_CASH = "#5c5d6d"
+        const val AAVE = "#cc88bd"
+        const val STAKEWISE = "#4b4fab"
+        const val OPENSEA = "#1868b7"
+        const val ONEINCH = "#192951"
+        const val SYMMETRIC_POOLS = "#334956"
+        const val SYMMETRIC = "#334956"
+        const val EPORIO = "#00b4c7"
     }
 
-    // TODO MNR-622 Confirm that defined backgrounds are matching client definition
-    private object Backgrounds {
-        const val DEFAULT = R.drawable.dapp_background_default
-        const val MINERVA = R.drawable.dapp_background_minerva
-        const val HONEYSWAP = R.drawable.dapp_background_honeyswap
-        const val SUPERFLUID = DEFAULT
-        const val ZEROALPHA = DEFAULT
-        const val QUICKSWAP = DEFAULT
-        const val UNISWAP = DEFAULT
-        const val PANCAKESWAP = DEFAULT
-        const val TORNADO_CASH = DEFAULT
-        const val AAVE = DEFAULT
-        const val STAKEWISE = DEFAULT
+    private object Icons {
+        val MINERVA = R.drawable.ic_minerva_icon
+        val HONEYSWAP = R.drawable.ic_honeyswap
+        val SUPERFLUID = R.drawable.ic_superfluid
+        val ZEROALPHA = R.drawable.ic_zeroalpha
+        val QUICKSWAP = R.drawable.ic_quickswap
+        val UNISWAP = R.drawable.ic_uniswap
+        val PANCAKESWAP = R.drawable.ic_pancakeswap
+        val TORNADO_CASH = R.drawable.ic_tornado_cash
+        val AAVE = R.drawable.ic_aave
+        val STAKEWISE = R.drawable.ic_stakewise
+        val OPENSEA = R.drawable.ic_opensea
+        val ONEINCH = R.drawable.ic_oneinch
+        val SYMMETRIC_POOLS = R.drawable.ic_symmetric
+        val SYMMETRIC = R.drawable.ic_symmetric
+        val EPORIO = R.drawable.ic_eporio
     }
 }

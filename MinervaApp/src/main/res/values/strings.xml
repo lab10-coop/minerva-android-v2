@@ -151,6 +151,7 @@
     <string name="iban">IBAN</string>
     <string name="finger_print_instruction">Confirm this operation with your fingerprint</string>
     <string name="cancel">Cancel</string>
+    <string name="open">Open</string>
     <string name="confirm_payment">Confirm payment</string>
     <string name="share_via">Share via</string>
     <string name="soon">Soon</string>
@@ -376,6 +377,7 @@
     <string name="honeyswap_dialog_description">To use your Minerva Wallet, in Honeyswap tap "Connect Wallet" then "Wallet Connect"</string>
     <string name="honeyswap_dialog_confirm">Open Honeyswap</string>
     <string name="nft_graphic_error_message">This NFT graphic cannot be displayed</string>
+    <string name="cd_dapp_icon">Dapp icon</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

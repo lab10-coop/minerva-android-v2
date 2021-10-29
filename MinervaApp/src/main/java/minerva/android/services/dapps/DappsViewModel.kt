@@ -9,6 +9,6 @@ class DappsViewModel : BaseViewModel() {
     val dappsLiveData get() = _dappsLiveData
 
     companion object {
-        private val dapps = Dapps.values
+        private val dapps = Dapps.valuesOrdered
     }
 }
