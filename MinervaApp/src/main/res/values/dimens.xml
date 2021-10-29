@@ -44,7 +44,7 @@
     <dimen name="circle_icon_background">48dp</dimen>
     <dimen name="confirm_dialog_button_margin">24dp</dimen>
 
-    <dimen name="dapp_circle">68dp</dimen>
+    <dimen name="dapp_icon_size">50dp</dimen>
 
     <dimen name="qr_code_margin">6dp</dimen>
     <dimen name="clickable_area">32dp</dimen>
@@ -73,6 +73,6 @@
     <dimen name="divider_height_small">1dp</dimen>
     <dimen name="on_boarding_image_max_height">200dp</dimen>
     <dimen name="splash_logo_size">150dp</dimen>
-    <dimen name="dapp_list_row_height">100dp</dimen>
+    <dimen name="dapp_list_row_height">80dp</dimen>
     <dimen name="nft_loading_size">80dp</dimen>
 </resources>

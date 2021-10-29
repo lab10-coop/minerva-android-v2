@@ -1,5 +1,6 @@
 package minerva.android.services.dapps.adapter
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -33,9 +34,11 @@ class DappsAdapter(private val listener: Listener) :
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(dapp: Dapp) {
             with(binding) {
-                dappName.text = dapp.label
+                dappName.text = dapp.shortName
+                dappDescription.text = dapp.description
+                dappIcon.setImageResource(dapp.iconDrawable)
                 mainContent.apply {
-                    background = ContextCompat.getDrawable(mainContent.context, dapp.background)
+                    setBackgroundColor(Color.parseColor(dapp.colorHex))
                     setOnClickListener { listener.onDappSelected(Listener.OnDappSelected(dapp)) }
                 }
             }

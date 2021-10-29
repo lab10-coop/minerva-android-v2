@@ -13,6 +13,7 @@ import android.net.Uri
 import android.content.Intent
 import minerva.android.services.dapps.adapter.DappsAdapter
 import minerva.android.services.dapps.dialog.OpenDappDialog
+import minerva.android.utils.VerticalMarginItemDecoration
 
 
 class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.Listener,
@@ -45,7 +46,14 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = dappAdapter
+            addItemDecoration(getRecyclerViewItemDecorator())
         }
+    }
+
+    private fun getRecyclerViewItemDecorator(): VerticalMarginItemDecoration {
+        val margin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
+        val topMargin = requireContext().resources.getDimension(R.dimen.margin_xbig).toInt()
+        return VerticalMarginItemDecoration(margin, topMargin, margin)
     }
 
     companion object {
