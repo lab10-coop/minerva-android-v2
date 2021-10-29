@@ -174,7 +174,12 @@ class TokenManagerImpl(
         collectionAddress: String
     ): Flowable<NftVisibilityResult> {
         val tokens = walletManager.getWalletConfig().erc20Tokens[chainId]
-            ?.filter { token -> token.accountAddress.equals(accountAddress, true) && token.address.equals(collectionAddress, true) }
+            ?.filter { token ->
+                token.accountAddress.equals(accountAddress, true) && token.address.equals(
+                    collectionAddress,
+                    true
+                ) && token.type.isERC721()
+            }
             ?: listOf()
         return Single.mergeDelayError(getNftVisibility(privateKey, chainId, accountAddress, collectionAddress, tokens))
     }
@@ -433,7 +438,7 @@ class TokenManagerImpl(
         tokenWithBalance: TokenWithBalance,
         account: Account
     ): AssetBalance =
-        tokens.find { token -> token.address.equals(tokenWithBalance.address, true) }
+        tokens.find { token -> token.address.equals(tokenWithBalance.address, true) && token.tokenId == tokenWithBalance.tokenId }
             ?.let { token ->
                 AssetBalance(
                     account.chainId,
@@ -455,16 +460,18 @@ class TokenManagerImpl(
             tokens.forEach { ercToken ->
                 if (ercToken.type.isERC721()) {
                     tokenBalanceFlowables.add(
-                        erc721TokenRepository.getTokenBalance(privateKey, chainId, ercToken.address, address)
+                        erc721TokenRepository.getTokenBalance(ercToken.tokenId!!, privateKey, chainId, ercToken.address, address)
                             .map { token -> Pair(token, ercToken.tag) }
                             .subscribeOn(Schedulers.io())
                     )
                 } else {
-                    tokenBalanceFlowables.add(
-                        erc20TokenRepository.getTokenBalance(privateKey, chainId, ercToken.address, address)
-                            .map { token -> Pair(token, ercToken.tag) }
-                            .subscribeOn(Schedulers.io())
-                    )
+                    if (ercToken.decimals.isNotBlank()) {
+                        tokenBalanceFlowables.add(
+                            erc20TokenRepository.getTokenBalance(privateKey, chainId, ercToken.address, address)
+                                .map { token -> Pair(token, ercToken.tag) }
+                                .subscribeOn(Schedulers.io())
+                        )
+                    }
                 }
             }
             return tokenBalanceFlowables

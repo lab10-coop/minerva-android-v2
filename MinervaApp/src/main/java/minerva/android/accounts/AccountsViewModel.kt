@@ -16,7 +16,10 @@ import minerva.android.accounts.extensions.*
 import minerva.android.accounts.state.*
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.base.BaseViewModel
-import minerva.android.kotlinUtils.*
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
@@ -445,7 +448,6 @@ class AccountsViewModel(
                                 accountIndex = index
                             }
                         }
-
                     } else {
                         return showCachedTokenBalancesWhenError(balance, account, index)
                     }

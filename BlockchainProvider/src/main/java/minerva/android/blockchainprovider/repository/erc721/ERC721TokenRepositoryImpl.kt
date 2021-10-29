@@ -48,18 +48,20 @@ class ERC721TokenRepositoryImpl(
             .firstOrError()
 
     override fun getTokenBalance(
+        tokenId: String,
         privateKey: String,
         chainId: Int,
         tokenAddress: String,
         safeAccountAddress: String
     ): Flowable<Token> =
         if (safeAccountAddress.isEmpty()) {
-            getBalance(tokenAddress, chainId, privateKey, Credentials.create(privateKey).address)
+            getBalance(tokenId, tokenAddress, chainId, privateKey, Credentials.create(privateKey).address)
         } else {
-            getBalance(tokenAddress, chainId, privateKey, safeAccountAddress)
+            getBalance(tokenId, tokenAddress, chainId, privateKey, safeAccountAddress)
         }
 
     private fun getBalance(
+        tokenId: String,
         tokenAddress: String,
         chainId: Int,
         privateKey: String,
@@ -68,8 +70,8 @@ class ERC721TokenRepositoryImpl(
         loadERC721(privateKey, chainId, tokenAddress)
             .balanceOf(address)
             .flowable()
-            .map { balance -> TokenWithBalance(chainId, tokenAddress, balance.toBigDecimal()) as Token }
-            .onErrorReturn { error -> TokenWithError(chainId, tokenAddress, error) }
+            .map { balance -> TokenWithBalance(chainId, tokenAddress, balance.toBigDecimal(), tokenId) as Token }
+            .onErrorReturn { error -> TokenWithError(chainId, tokenAddress, error, tokenId) }
 
     override fun getERC721TokenName(privateKey: String, chainId: Int, tokenAddress: String): Observable<String> =
         loadERC721Metadata(privateKey, chainId, tokenAddress).name().flowable().toObservable()
