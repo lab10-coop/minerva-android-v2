@@ -9,11 +9,12 @@ import java.math.BigDecimal
 
 fun MutableList<AccountToken>.findCachedAccountToken(accountToken: AccountToken): AccountToken? =
     find { cachedAccountToken ->
-        cachedAccountToken.isTheSameToken(accountToken.token.address, accountToken.token.accountAddress)
+        cachedAccountToken.isTheSameToken(accountToken.token.address, accountToken.token.accountAddress, accountToken.token.tokenId)
     }
 
-fun AccountToken.isTheSameToken(tokenAddress: String, accountAddress: String): Boolean =
-    token.address.equals(tokenAddress, true) && token.accountAddress.equals(accountAddress, true)
+fun AccountToken.isTheSameToken(tokenAddress: String, accountAddress: String, tokenId: String?): Boolean =
+    token.address.equals(tokenAddress, true) && token.accountAddress.equals(accountAddress, true) &&
+            token.tokenId == tokenId
 
 fun List<ERCToken>.findCachedToken(balance: AssetError): ERCToken? =
     find { token ->
@@ -23,7 +24,7 @@ fun List<ERCToken>.findCachedToken(balance: AssetError): ERCToken? =
 
 fun AccountToken.isTokenShown(account: Account): Boolean =
     account.accountTokens.find { accountToken ->
-        accountToken.isTheSameToken(token.address, token.accountAddress)
+        accountToken.isTheSameToken(token.address, token.accountAddress, token.tokenId)
     } != null
 
 fun MutableList<AccountToken>.filterAccountTokensForGivenAccount(account: Account): MutableList<AccountToken> =
@@ -62,7 +63,7 @@ fun AccountToken.shouldUpdateBalance(balance: AssetBalance): Boolean =
     currentRawBalance != balance.accountToken.currentRawBalance || tokenPrice != balance.accountToken.tokenPrice
 
 fun AccountToken.isTokenError(balance: AssetError) =
-    isTheSameToken(balance.tokenAddress, balance.accountAddress) && !token.isError
+    isTheSameToken(balance.tokenAddress, balance.accountAddress, balance.tokenId) && !token.isError
 
 fun Asset.isTokenInAccount(account: Account): Boolean =
     chainId == account.chainId && privateKey.equals(account.privateKey, true)

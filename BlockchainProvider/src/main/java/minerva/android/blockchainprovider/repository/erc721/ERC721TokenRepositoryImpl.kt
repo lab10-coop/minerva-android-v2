@@ -14,6 +14,7 @@ import org.web3j.contracts.eip721.generated.ERC721Metadata
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.tx.RawTransactionManager
+import java.math.BigDecimal
 import java.math.BigInteger
 
 class ERC721TokenRepositoryImpl(
@@ -68,9 +69,12 @@ class ERC721TokenRepositoryImpl(
         address: String
     ): Flowable<Token> =
         loadERC721(privateKey, chainId, tokenAddress)
-            .balanceOf(address)
+            .ownerOf(BigInteger(tokenId))
             .flowable()
-            .map { balance -> TokenWithBalance(chainId, tokenAddress, balance.toBigDecimal(), tokenId) as Token }
+            .map { ownerAddress ->
+                val balance = if (ownerAddress.equals(address, true)) BigDecimal.ONE else BigDecimal.ZERO
+                TokenWithBalance(chainId, tokenAddress, balance, tokenId) as Token
+            }
             .onErrorReturn { error -> TokenWithError(chainId, tokenAddress, error, tokenId) }
 
     override fun getERC721TokenName(privateKey: String, chainId: Int, tokenAddress: String): Observable<String> =

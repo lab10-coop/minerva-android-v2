@@ -167,36 +167,17 @@ class TokenManagerImpl(
         walletManager.getWalletConfig().erc20Tokens[account.chainId]
             ?.filter { token -> token.accountAddress.equals(account.address, true) } ?: listOf()
 
-    override fun getNftsPerAccountTokenFlowable(
-        privateKey: String,
+    override fun getNftsPerAccount(
         chainId: Int,
         accountAddress: String,
         collectionAddress: String
-    ): Flowable<NftVisibilityResult> {
-        val tokens = walletManager.getWalletConfig().erc20Tokens[chainId]
-            ?.filter { token ->
-                token.accountAddress.equals(accountAddress, true) && token.address.equals(
-                    collectionAddress,
-                    true
-                ) && token.type.isERC721()
-            }
-            ?: listOf()
-        return Single.mergeDelayError(getNftVisibility(privateKey, chainId, accountAddress, collectionAddress, tokens))
-    }
-
-    private fun getNftVisibility(
-        privateKey: String,
-        chainId: Int,
-        accountAddress: String,
-        collectionAddress: String,
-        tokens: List<ERCToken>
-    ) = mutableListOf<Single<NftVisibilityResult>>().apply {
-        tokens.forEach { token ->
-            add(erc721TokenRepository.isTokenOwner(token.tokenId!!, privateKey, chainId, collectionAddress, accountAddress)
-                .map { isVisible -> NftVisibilityResult(isVisible, token) }
-                .subscribeOn(Schedulers.io()))
-        }
-    }
+    ): List<ERCToken> = walletManager.getWalletConfig().erc20Tokens[chainId]
+        ?.filter { token ->
+            token.accountAddress.equals(accountAddress, true) && token.address.equals(
+                collectionAddress,
+                true
+            ) && token.type.isERC721()
+        } ?: listOf()
 
     private fun getAllTokensPerAccount(account: Account): List<ERCToken> {
         val localTokensPerNetwork = NetworkManager.getTokens(account.chainId)

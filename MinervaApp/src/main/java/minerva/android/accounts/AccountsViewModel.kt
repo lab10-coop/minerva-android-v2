@@ -526,7 +526,7 @@ class AccountsViewModel(
         var accountIndex: Flowable<Int> = Flowable.just(Int.InvalidIndex)
         if (balance.accountToken.isTokenShown(account)) {
             account.accountTokens.find { accountToken ->
-                accountToken.isTheSameToken(balance.tokenAddress, balance.accountAddress)
+                accountToken.isTheSameToken(balance.tokenAddress, balance.accountAddress, balance.accountToken.token.tokenId)
             }?.let { accountToken ->
                 if (accountToken.shouldUpdateBalance(balance)) {
                     accountIndex = updateTokenBalanceAndReturnIndex(balance, accountToken, index)

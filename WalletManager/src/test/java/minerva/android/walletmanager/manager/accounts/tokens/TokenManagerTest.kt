@@ -559,7 +559,7 @@ class TokenManagerTest : RxTest() {
         val tauTokenResponse02 = Flowable.just(TokenWithBalance(246785, "0xS0m3T0k3N", 100000000.toBigDecimal()) as Token)
         val tauTokenResponse03 = Flowable.just(TokenWithBalance(246785, "0xC00k1e", 100000000.toBigDecimal()) as Token)
         val tauTokenResponse04 = Flowable.just(TokenWithBalance(246785, "0x0th3r", 100000000.toBigDecimal()) as Token)
-        val tauTokenResponse05 = Flowable.just(TokenWithBalance(246785, "0xC00k14", 100000000.toBigDecimal()) as Token)
+        val tauTokenResponse05 = Flowable.just(TokenWithBalance(246785, "0xC00k14", BigDecimal.ONE, "1") as Token)
 
         val atsSigmaAccount = Account(246529, chainId = ATS_SIGMA, address = "0xADDRESSxTWO")
         val sigmaTokenResponse01 = Flowable.just(TokenWithBalance(246529, "0xC00k1e", 10000.toBigDecimal()) as Token)
@@ -574,7 +574,7 @@ class TokenManagerTest : RxTest() {
                 sigmaTokenResponse01, sigmaTokenResponse02, sigmaTokenResponse03
 
             )
-        whenever(erc721TokenRepository.getTokenBalance(any(), any(), any(), any()))
+        whenever(erc721TokenRepository.getTokenBalance(any(), any(), any(), any(), any()))
             .thenReturn(tauTokenResponse05)
         whenever(tokenDao.getTaggedTokens())
             .thenReturn(
@@ -626,7 +626,7 @@ class TokenManagerTest : RxTest() {
         tokenManager.getTokenBalance(atsTauAccount)
             .test()
             .assertNoErrors()
-            .assertValueCount(6)
+            .assertValueCount(5)
             .assertValueAt(
                 0,
                 AssetBalance(
@@ -642,56 +642,6 @@ class TokenManagerTest : RxTest() {
                             accountAddress = "",
                             logoURI = null,
                             tag = "super2",
-                            type = TokenType.ERC20,
-                            isError = false
-                        ), currentRawBalance = BigDecimal(10000), tokenPrice = 2.0
-                    )
-                )
-            )
-            .assertValueAt(
-                5,
-                AssetBalance(
-                    chainId = 246785,
-                    privateKey = "",
-                    accountToken = AccountToken(
-                        token = ERCToken(
-                            chainId = 246785,
-                            name = "testNFTToken",
-                            symbol = "NFT",
-                            address = "0xC00k14",
-                            decimals = "",
-                            accountAddress = "",
-                            tokenId = "1",
-                            logoURI = null,
-                            tag = "super2",
-                            type = TokenType.ERC721,
-                            isError = false
-                        ), currentRawBalance = BigDecimal(10000), tokenPrice = 2.0
-                    )
-                )
-            )
-
-
-        tokenManager.getTokenBalance(atsSigmaAccount)
-            .test()
-            .await()
-            .assertNoErrors()
-            .assertValueCount(3)
-            .assertValueAt(
-                0,
-                AssetBalance(
-                    chainId = 246529,
-                    privateKey = "",
-                    accountToken = AccountToken(
-                        token = ERCToken(
-                            chainId = 246529,
-                            name = "SecondOtherATS",
-                            symbol = "Other22",
-                            address = "0x0th3r22",
-                            decimals = "22",
-                            accountAddress = "0xADDRESSxTWO",
-                            logoURI = null,
-                            tag = "",
                             type = TokenType.ERC20,
                             isError = false
                         ), currentRawBalance = BigDecimal(10000), tokenPrice = 2.0
@@ -1038,16 +988,9 @@ class TokenManagerTest : RxTest() {
         )
         val localTokens = tokenManager.sortTokensByChainId(listOf(token1, token2, token3))
         whenever(walletManager.getWalletConfig()).thenReturn(WalletConfig(1, erc20Tokens = localTokens))
-        whenever(erc721TokenRepository.isTokenOwner(any(), any(), any(), any(), any()))
-            .thenReturn(Single.just(true)).thenReturn(Single.just(false)).thenReturn(Single.just(true))
         val account = Account(1, chainId = XDAI, address = "accountAddress", privateKey = "privateKey")
-        tokenManager.getNftsPerAccountTokenFlowable(account.privateKey, XDAI, account.address, collectionAddress)
-            .test()
-            .await()
-            .assertNoErrors()
-            .assertValueCount(3)
-            .assertValueAt(0, NftVisibilityResult(true, token1))
-            .assertValueAt(1, NftVisibilityResult(false, token2))
-            .assertValueAt(2, NftVisibilityResult(true, token3))
+        tokenManager.getNftsPerAccount(XDAI, account.address, collectionAddress)[0] shouldBeEqualTo token1
+        tokenManager.getNftsPerAccount(XDAI, account.address, collectionAddress)[1] shouldBeEqualTo token2
+        tokenManager.getNftsPerAccount(XDAI, account.address, collectionAddress)[2] shouldBeEqualTo token3
     }
 }
