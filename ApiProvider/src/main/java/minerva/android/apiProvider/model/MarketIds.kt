@@ -10,5 +10,6 @@ annotation class MarketIds {
         const val POLYGON = "polygon-pos"
         const val BSC_COIN = "binancecoin"
         const val BSC_TOKEN = "binance-smart-chain"
+        const val RSK = "rootstock"
     }
 }
