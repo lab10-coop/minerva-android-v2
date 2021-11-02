@@ -16,7 +16,10 @@ import minerva.android.accounts.extensions.*
 import minerva.android.accounts.state.*
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.base.BaseViewModel
-import minerva.android.kotlinUtils.*
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
@@ -445,7 +448,6 @@ class AccountsViewModel(
                                 accountIndex = index
                             }
                         }
-
                     } else {
                         return showCachedTokenBalancesWhenError(balance, account, index)
                     }
@@ -524,7 +526,7 @@ class AccountsViewModel(
         var accountIndex: Flowable<Int> = Flowable.just(Int.InvalidIndex)
         if (balance.accountToken.isTokenShown(account)) {
             account.accountTokens.find { accountToken ->
-                accountToken.isTheSameToken(balance.tokenAddress, balance.accountAddress)
+                accountToken.isTheSameToken(balance.tokenAddress, balance.accountAddress, balance.accountToken.token.tokenId)
             }?.let { accountToken ->
                 if (accountToken.shouldUpdateBalance(balance)) {
                     accountIndex = updateTokenBalanceAndReturnIndex(balance, accountToken, index)

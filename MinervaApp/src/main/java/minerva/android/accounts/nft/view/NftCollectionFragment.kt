@@ -8,7 +8,6 @@ import minerva.android.R
 import minerva.android.accounts.nft.viewmodel.NftCollectionViewModel
 import minerva.android.databinding.FragmentNftCollectionBinding
 import minerva.android.extension.visibleOrGone
-import minerva.android.widget.MinervaFlashbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -38,7 +37,6 @@ class NftCollectionFragment : Fragment(R.layout.fragment_nft_collection) {
         nftListLiveData.observe(viewLifecycleOwner, Observer { list ->
             nftAdapter.updateList(list)
         })
-        errorLiveData.observe(viewLifecycleOwner, Observer { handleError() })
         loadingLiveData.observe(viewLifecycleOwner, Observer { handleLoadingState(it) })
     }
 
@@ -46,9 +44,6 @@ class NftCollectionFragment : Fragment(R.layout.fragment_nft_collection) {
         if (!isVisible) cancelAnimation()
         visibleOrGone(isVisible)
     }
-
-    private fun handleError() =
-        MinervaFlashbar.show(requireActivity(), getString(R.string.error_header), getString(R.string.unexpected_error))
 
     companion object {
         private const val COLLECTION_ADDRESS = "collection_address"

@@ -167,31 +167,17 @@ class TokenManagerImpl(
         walletManager.getWalletConfig().erc20Tokens[account.chainId]
             ?.filter { token -> token.accountAddress.equals(account.address, true) } ?: listOf()
 
-    override fun getNftsPerAccountTokenFlowable(
-        privateKey: String,
+    override fun getNftsPerAccount(
         chainId: Int,
         accountAddress: String,
         collectionAddress: String
-    ): Flowable<NftVisibilityResult> {
-        val tokens = walletManager.getWalletConfig().erc20Tokens[chainId]
-            ?.filter { token -> token.accountAddress.equals(accountAddress, true) && token.address.equals(collectionAddress, true) }
-            ?: listOf()
-        return Single.mergeDelayError(getNftVisibility(privateKey, chainId, accountAddress, collectionAddress, tokens))
-    }
-
-    private fun getNftVisibility(
-        privateKey: String,
-        chainId: Int,
-        accountAddress: String,
-        collectionAddress: String,
-        tokens: List<ERCToken>
-    ) = mutableListOf<Single<NftVisibilityResult>>().apply {
-        tokens.forEach { token ->
-            add(erc721TokenRepository.isTokenOwner(token.tokenId!!, privateKey, chainId, collectionAddress, accountAddress)
-                .map { isVisible -> NftVisibilityResult(isVisible, token) }
-                .subscribeOn(Schedulers.io()))
-        }
-    }
+    ): List<ERCToken> = walletManager.getWalletConfig().erc20Tokens[chainId]
+        ?.filter { token ->
+            token.accountAddress.equals(accountAddress, true) && token.address.equals(
+                collectionAddress,
+                true
+            ) && token.type.isERC721()
+        } ?: listOf()
 
     private fun getAllTokensPerAccount(account: Account): List<ERCToken> {
         val localTokensPerNetwork = NetworkManager.getTokens(account.chainId)
@@ -433,7 +419,7 @@ class TokenManagerImpl(
         tokenWithBalance: TokenWithBalance,
         account: Account
     ): AssetBalance =
-        tokens.find { token -> token.address.equals(tokenWithBalance.address, true) }
+        tokens.find { token -> token.address.equals(tokenWithBalance.address, true) && token.tokenId == tokenWithBalance.tokenId }
             ?.let { token ->
                 AssetBalance(
                     account.chainId,
@@ -455,16 +441,18 @@ class TokenManagerImpl(
             tokens.forEach { ercToken ->
                 if (ercToken.type.isERC721()) {
                     tokenBalanceFlowables.add(
-                        erc721TokenRepository.getTokenBalance(privateKey, chainId, ercToken.address, address)
+                        erc721TokenRepository.getTokenBalance(ercToken.tokenId!!, privateKey, chainId, ercToken.address, address)
                             .map { token -> Pair(token, ercToken.tag) }
                             .subscribeOn(Schedulers.io())
                     )
                 } else {
-                    tokenBalanceFlowables.add(
-                        erc20TokenRepository.getTokenBalance(privateKey, chainId, ercToken.address, address)
-                            .map { token -> Pair(token, ercToken.tag) }
-                            .subscribeOn(Schedulers.io())
-                    )
+                    if (ercToken.decimals.isNotBlank()) {
+                        tokenBalanceFlowables.add(
+                            erc20TokenRepository.getTokenBalance(privateKey, chainId, ercToken.address, address)
+                                .map { token -> Pair(token, ercToken.tag) }
+                                .subscribeOn(Schedulers.io())
+                        )
+                    }
                 }
             }
             return tokenBalanceFlowables

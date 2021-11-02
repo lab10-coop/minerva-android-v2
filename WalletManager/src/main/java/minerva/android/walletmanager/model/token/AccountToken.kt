@@ -20,10 +20,12 @@ data class AccountToken(
             .orElse { false }
 
     override val currentBalance: BigDecimal
-        get() = if (token.type.isERC721()) currentRawBalance else getBalanceForERC20Token(currentRawBalance)
+        get() = if (token.type.isERC721() || token.decimals.isBlank()) currentRawBalance else getBalanceForERC20Token(
+            currentRawBalance
+        )
 
     val nextBalance: BigDecimal
-        get() = if (token.type.isERC721()) nextRawBalance else getBalanceForERC20Token(nextRawBalance)
+        get() = if (token.type.isERC721() || token.decimals.isBlank()) nextRawBalance else getBalanceForERC20Token(nextRawBalance)
 
     override val fiatBalance: BigDecimal
         get() =

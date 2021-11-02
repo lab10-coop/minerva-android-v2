@@ -22,6 +22,6 @@ object TokenToCoinBalanceErrorMapper : Mapper<TokenWithError, CoinError> {
 
 object TokenToAssetBalanceErrorMapper {
     fun map(account: Account, input: TokenWithError): AssetError = with(input) {
-        AssetError(chainId, account.privateKey, account.address, address, error)
+        AssetError(chainId, account.privateKey, account.address, address, error, input.tokenId)
     }
 }
