@@ -54,7 +54,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         initMainToken(account, fiatSymbol, tokenViewCallback)
         initTokensList(account, fiatSymbol, tokens.getERC20Tokens(), isWidgetOpen)
         prepareSeparator(tokens.isERC20TokensListNotEmpty() && tokens.isCollectiblesListNotEmpty())
-        initCollectiblesList(account, tokens.getCollectiblesWithBalance(account), isWidgetOpen)
+        initCollectiblesList(account, tokens.getCollectionsWithBalance(account), isWidgetOpen)
     }
 
     private fun initView() {

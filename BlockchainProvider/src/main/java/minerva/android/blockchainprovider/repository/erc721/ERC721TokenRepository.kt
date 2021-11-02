@@ -11,6 +11,7 @@ interface ERC721TokenRepository {
     fun getERC721TokenSymbol(privateKey: String, chainId: Int, tokenAddress: String): Observable<String>
     fun getERC721DetailsUri(privateKey: String, chainId: Int, tokenAddress: String, tokenId: BigInteger): Single<String>
     fun getTokenBalance(
+        tokenId: String,
         privateKey: String,
         chainId: Int,
         tokenAddress: String,

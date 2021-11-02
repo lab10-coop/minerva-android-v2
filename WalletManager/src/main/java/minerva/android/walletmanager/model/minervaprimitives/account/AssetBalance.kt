@@ -23,5 +23,6 @@ data class AssetError(
     override val privateKey: String,
     val accountAddress: String,
     val tokenAddress: String,
-    val error: Throwable
+    val error: Throwable,
+    val tokenId: String?
 ) : Asset

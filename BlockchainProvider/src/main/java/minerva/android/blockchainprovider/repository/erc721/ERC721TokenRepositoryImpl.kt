@@ -14,6 +14,7 @@ import org.web3j.contracts.eip721.generated.ERC721Metadata
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.tx.RawTransactionManager
+import java.math.BigDecimal
 import java.math.BigInteger
 
 class ERC721TokenRepositoryImpl(
@@ -48,28 +49,33 @@ class ERC721TokenRepositoryImpl(
             .firstOrError()
 
     override fun getTokenBalance(
+        tokenId: String,
         privateKey: String,
         chainId: Int,
         tokenAddress: String,
         safeAccountAddress: String
     ): Flowable<Token> =
         if (safeAccountAddress.isEmpty()) {
-            getBalance(tokenAddress, chainId, privateKey, Credentials.create(privateKey).address)
+            getBalance(tokenId, tokenAddress, chainId, privateKey, Credentials.create(privateKey).address)
         } else {
-            getBalance(tokenAddress, chainId, privateKey, safeAccountAddress)
+            getBalance(tokenId, tokenAddress, chainId, privateKey, safeAccountAddress)
         }
 
     private fun getBalance(
+        tokenId: String,
         tokenAddress: String,
         chainId: Int,
         privateKey: String,
         address: String
     ): Flowable<Token> =
         loadERC721(privateKey, chainId, tokenAddress)
-            .balanceOf(address)
+            .ownerOf(BigInteger(tokenId))
             .flowable()
-            .map { balance -> TokenWithBalance(chainId, tokenAddress, balance.toBigDecimal()) as Token }
-            .onErrorReturn { error -> TokenWithError(chainId, tokenAddress, error) }
+            .map { ownerAddress ->
+                val balance = if (ownerAddress.equals(address, true)) BigDecimal.ONE else BigDecimal.ZERO
+                TokenWithBalance(chainId, tokenAddress, balance, tokenId) as Token
+            }
+            .onErrorReturn { error -> TokenWithError(chainId, tokenAddress, error, tokenId) }
 
     override fun getERC721TokenName(privateKey: String, chainId: Int, tokenAddress: String): Observable<String> =
         loadERC721Metadata(privateKey, chainId, tokenAddress).name().flowable().toObservable()

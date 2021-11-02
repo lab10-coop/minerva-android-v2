@@ -123,7 +123,7 @@ class WalletConnectInteractionsViewModel(
                         currentDappSession = session
                         OnEthSignRequest(status.message, session)
                     }
-            is OnDisconnect -> Single.just(OnDisconnected())
+            is OnDisconnect -> Single.just(OnDisconnected(sessionName = status.sessionName))
             is OnEthSendTransaction -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }

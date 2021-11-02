@@ -8,14 +8,14 @@ data class ERCTokensList(
 ) {
     private fun getCollectibles() = list.filter { accountToken -> accountToken.token.type.isERC721() }
 
-    fun getCollectiblesWithBalance(account: Account) = getCollectibles()
-        .distinctBy { accountToken -> accountToken.token.address }
+    fun getCollectionsWithBalance(account: Account) = getCollectibles()
         .map { accountToken ->
             val balance =
-                account.accountTokens.find { token -> token.token.address == accountToken.token.address }?.currentRawBalance
-                    ?: BigDecimal.ZERO
-            accountToken to balance
+                account.accountTokens.filter { token -> token.token.address.equals(accountToken.token.address, true) }
+                    .sumBy { token -> token.currentRawBalance.intValueExact() }
+            accountToken to BigDecimal(balance)
         }
+        .distinctBy { pair -> pair.first.token.address }
         .sortedByDescending { pair -> pair.second }
 
     fun getERC20Tokens() = list.filter { accountToken -> accountToken.token.type.isERC20() }

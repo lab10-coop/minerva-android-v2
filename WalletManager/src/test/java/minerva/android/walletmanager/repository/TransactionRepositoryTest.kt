@@ -5,7 +5,10 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.FiatPrice
+import minerva.android.apiProvider.model.GasPricesFromRpcOverHttp
+import minerva.android.apiProvider.model.GasPricesMatic
+import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.gaswatch.GasPrices
 import minerva.android.apiProvider.model.gaswatch.TransactionSpeedStats
 import minerva.android.blockchainprovider.model.*
@@ -885,7 +888,8 @@ class TransactionRepositoryTest : RxTest() {
                     "key",
                     "accAdd",
                     "tokenAdd",
-                    error
+                    error,
+                    null
                 )
             )
         )
@@ -900,7 +904,8 @@ class TransactionRepositoryTest : RxTest() {
                     "key",
                     "accAdd",
                     "tokenAdd",
-                    error
+                    error,
+                    null
                 )
             )
     }
@@ -1063,7 +1068,8 @@ class TransactionRepositoryTest : RxTest() {
                     "privateKey",
                     error = error,
                     accountAddress = "address",
-                    tokenAddress = "address"
+                    tokenAddress = "address",
+                    tokenId = null
                 )
             )
         )
@@ -1162,7 +1168,8 @@ class TransactionRepositoryTest : RxTest() {
                     "privateKey",
                     error = error,
                     accountAddress = "address",
-                    tokenAddress = "address"
+                    tokenAddress = "address",
+                    tokenId = null
                 )
             )
         )
