@@ -84,7 +84,7 @@ object OpenDappDialogs {
         const val UNISWAP = "https://app.uniswap.org/"
         const val PANCAKESWAP = "https://pancakeswap.finance"
         const val TORNADO_CASH = "https://app.tornado.cash"
-        const val AAVE = "https://aave.com/markets"
+        const val AAVE = "https://app.aave.com/markets"
         const val STAKEWISE = "https://stakewise.io/app/pool"
         const val OPENSEA = "https://opensea.io/"
         const val ONEINCH = "https://app.1inch.io/"
