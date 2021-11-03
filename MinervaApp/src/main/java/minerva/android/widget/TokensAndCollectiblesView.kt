@@ -61,7 +61,7 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
         setPadding(
             Int.NO_PADDING,
             resources.getDimension(R.dimen.margin_xxsmall).toInt(),
-            resources.getDimension(R.dimen.margin_normal).toInt(),
+            Int.NO_PADDING,
             resources.getDimension(R.dimen.margin_xxsmall).toInt()
         )
         orientation = VERTICAL
