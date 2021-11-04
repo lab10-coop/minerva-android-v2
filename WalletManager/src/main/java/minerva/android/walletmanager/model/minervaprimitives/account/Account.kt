@@ -56,5 +56,6 @@ data class Account(
             )
         )
 
-    fun getTokenIndex(tokenAddress: String) = accountTokens.indexOf(getToken(tokenAddress))
+    fun getTokenIndex(tokenAddress: String) =
+        accountTokens.filter { accountToken -> accountToken.token.type.isERC20() }.indexOf(getToken(tokenAddress))
 }
