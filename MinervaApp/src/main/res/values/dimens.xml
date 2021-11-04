@@ -76,4 +76,8 @@
     <dimen name="splash_logo_size">150dp</dimen>
     <dimen name="dapp_list_row_height">80dp</dimen>
     <dimen name="nft_loading_size">80dp</dimen>
+    <dimen name="dialog_hide_account_button_margin_in_between">5dp</dimen>
+    <dimen name="dialog_hide_account_button_margin_bottom">10dp</dimen>
+    <dimen name="token_view_margin_end">22dp</dimen>
+    <dimen name="accounts_srl_margin_top">6dp</dimen>
 </resources>

@@ -19,8 +19,10 @@ import minerva.android.databinding.RefreshableRecyclerViewLayoutBinding
 import minerva.android.extension.visibleOrGone
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.FirstIndex
+import minerva.android.kotlinUtils.NO_MARGIN
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.base.BaseFragment
+import minerva.android.utils.VerticalMarginItemDecoration
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.utils.logger.Logger
@@ -242,8 +244,15 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 layoutManager = LinearLayoutManager(view.context)
                 adapter = accountAdapter
                 (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+                addItemDecoration(getRecyclerViewItemDecorator())
             }
         }
+    }
+
+    private fun getRecyclerViewItemDecorator(): VerticalMarginItemDecoration {
+        val margin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
+        val bottomMargin = requireContext().resources.getDimension(R.dimen.margin_xbig).toInt()
+        return VerticalMarginItemDecoration(margin, Int.NO_MARGIN, bottomMargin)
     }
 
     private fun checkSwipe() = binding.swipeRefresh.run {

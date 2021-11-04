@@ -12,6 +12,7 @@ import minerva.android.identities.adapter.IdentityAdapter
 import minerva.android.identities.adapter.IdentityFragmentListener
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.utils.AlertDialogHandler
+import minerva.android.utils.VerticalMarginItemDecoration
 import minerva.android.walletmanager.model.minervaprimitives.Identity
 import minerva.android.walletmanager.model.minervaprimitives.MinervaPrimitive
 import minerva.android.walletmanager.model.minervaprimitives.Service
@@ -50,7 +51,14 @@ class MyIdentitiesFragment : Fragment(R.layout.recycler_view_layout), IdentityFr
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = identityAdapter
+            addItemDecoration(getRecyclerViewItemDecorator())
         }
+    }
+
+    private fun getRecyclerViewItemDecorator(): VerticalMarginItemDecoration {
+        val margin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
+        val bottomMargin = requireContext().resources.getDimension(R.dimen.margin_xbig).toInt()
+        return VerticalMarginItemDecoration(margin, margin, bottomMargin)
     }
 
     override fun showIdentity(identity: Identity, position: Int) {
