@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipToPadding="false"
     android:orientation="horizontal"
     android:padding="@dimen/margin_normal">
 
@@ -22,6 +23,8 @@
         android:id="@+id/network_logo"
         android:layout_width="@dimen/xxsmall_logo_size"
         android:layout_height="@dimen/xxsmall_logo_size"
+        android:background="@drawable/round_background"
+        android:elevation="@dimen/elevation_normal"
         app:layout_constraintBottom_toBottomOf="@id/token_logo"
         app:layout_constraintStart_toStartOf="@id/token_logo"
         tools:ignore="ContentDescription"

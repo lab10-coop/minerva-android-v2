@@ -30,7 +30,7 @@ class TokenAdapter(
 
     override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = convertView ?: createView(position, parent)
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = createView(position, parent)
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View = createDropDownView(position, parent)
 
