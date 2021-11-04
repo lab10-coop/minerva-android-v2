@@ -138,8 +138,8 @@ class MapperTest {
 
     @Test
     fun `Mapping ERC20Token to ERC20TokenPayload Test`() {
-        val value = ERC20Token(3, "name", "symbol", "address", "decimals", "key")
-        val valueResponse = ERC20TokenToERC20TokenPayloadMapper.map(value)
+        val value = ERCToken(3, "name", "symbol", "address", "decimals", "key", type = TokenType.ERC20)
+        val valueResponse = ERCTokenToERC20TokenPayloadMapper.map(value)
 
         value.name shouldBeEqualTo valueResponse.name
         value.symbol shouldBeEqualTo valueResponse.symbol
@@ -152,7 +152,7 @@ class MapperTest {
     @Test
     fun `Mapping ERC20TokenPayload to ERC20Token Test`() {
         val value = ERC20TokenPayload(1, "name", "symbol", "address", "decimals")
-        val valueResponse = ERC20TokenPayloadToERC20TokenMapper.map(value)
+        val valueResponse = ERC20TokenPayloadToERCTokenMapper.map(value)
 
         valueResponse.name shouldBeEqualTo value.name
         valueResponse.symbol shouldBeEqualTo value.symbol
@@ -401,10 +401,10 @@ class MapperTest {
             "0xC00KiE02",
             "200000000000000000"
         )
-        val result01 = TokenDataToERC20Token.map(ATS_TAU, tokenBalance01, "key")
+        val result01 = TokenDataToERCToken.map(ATS_TAU, tokenBalance01, "key")
         result01.name shouldBeEqualTo "Cookie Token"
         result01.address shouldBeEqualTo "0xC00KiE01"
-        val result02 = TokenDataToERC20Token.map(ATS_TAU, tokenBalance02, "key")
+        val result02 = TokenDataToERCToken.map(ATS_TAU, tokenBalance02, "key")
         result02.name shouldBeEqualTo "Cookie Token 2"
         result02.address shouldBeEqualTo "0xC00KiE02"
     }

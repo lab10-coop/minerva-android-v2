@@ -8,7 +8,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Asset
 import minerva.android.walletmanager.model.minervaprimitives.account.Coin
 import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
 import minerva.android.walletmanager.model.token.ActiveSuperToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
@@ -18,7 +18,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 interface TransactionRepository {
-    var newTaggedTokens: MutableList<ERC20Token>
+    var newTaggedTokens: MutableList<ERCToken>
     val masterSeed: MasterSeed
     fun getCoinBalance(): Flowable<Coin>
     fun getTokenBalance(): Flowable<Asset>
@@ -42,7 +42,8 @@ interface TransactionRepository {
     fun getTransactions(): Single<List<PendingAccount>>
     fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost>
 
-    fun isAddressValid(address: String): Boolean
+    fun isAddressValid(address: String, chainId: Int? = null): Boolean
+    fun toRecipientChecksum(address: String, chainId: Int? = null): String
     fun shouldOpenNewWssConnection(accountIndex: Int): Boolean
     fun checkMissingTokensDetails(): Completable
     fun getCoinFiatRate(chainId: Int): Single<Double>
@@ -51,7 +52,7 @@ interface TransactionRepository {
     fun sendTransaction(chainId: Int, transaction: Transaction): Single<String>
     fun getFiatSymbol(): String
     fun isProtectTransactionEnabled(): Boolean
-    fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>>
+    fun getTaggedTokensUpdate(): Flowable<List<ERCToken>>
     fun updateTaggedTokens(): Completable
 
     var isSuperTokenStreamAvailable: Boolean

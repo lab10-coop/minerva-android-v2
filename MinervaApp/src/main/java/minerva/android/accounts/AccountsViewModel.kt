@@ -16,7 +16,10 @@ import minerva.android.accounts.extensions.*
 import minerva.android.accounts.state.*
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.base.BaseViewModel
-import minerva.android.kotlinUtils.*
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
@@ -34,7 +37,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ActiveSuperToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.wallet.WalletAction
@@ -59,7 +62,7 @@ class AccountsViewModel(
     val hasAvailableAccounts: Boolean get() = accountManager.hasAvailableAccounts
     val activeAccounts: List<Account> get() = accountManager.activeAccounts
     private val rawAccounts: List<Account> get() = accountManager.rawAccounts
-    private val cachedTokens: Map<Int, List<ERC20Token>> get() = accountManager.cachedTokens
+    private val cachedTokens: Map<Int, List<ERCToken>> get() = accountManager.cachedTokens
     private var cachedAccountTokens: MutableList<AccountToken> = mutableListOf()
     private var newTokens: MutableList<AccountToken> = mutableListOf()
     private var newCachedTokens: MutableList<AccountToken> = mutableListOf()
@@ -152,7 +155,7 @@ class AccountsViewModel(
                 .observeOn(Schedulers.io())
                 .andThen(
                     walletConnectRepository.killAllAccountSessions(
-                        accountManager.toChecksumAddress(account.address),
+                        accountManager.toChecksumAddress(account.address, account.chainId),
                         account.chainId
                     )
                 )
@@ -445,7 +448,6 @@ class AccountsViewModel(
                                 accountIndex = index
                             }
                         }
-
                     } else {
                         return showCachedTokenBalancesWhenError(balance, account, index)
                     }
@@ -524,7 +526,7 @@ class AccountsViewModel(
         var accountIndex: Flowable<Int> = Flowable.just(Int.InvalidIndex)
         if (balance.accountToken.isTokenShown(account)) {
             account.accountTokens.find { accountToken ->
-                accountToken.isTheSameToken(balance.tokenAddress, balance.accountAddress)
+                accountToken.isTheSameToken(balance.tokenAddress, balance.accountAddress, balance.accountToken.token.tokenId)
             }?.let { accountToken ->
                 if (accountToken.shouldUpdateBalance(balance)) {
                     accountIndex = updateTokenBalanceAndReturnIndex(balance, accountToken, index)

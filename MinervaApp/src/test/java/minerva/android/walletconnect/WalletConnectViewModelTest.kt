@@ -15,6 +15,7 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
@@ -39,10 +40,12 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
     private val errorObserver: Observer<Event<Throwable>> = mock()
     private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
     private val meta = WalletConnectPeerMeta(name = "token", url = "test.xdai.com", description = "dsc")
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository =mock()
+
 
     @Before
     fun setup() {
-        viewModel = WalletConnectViewModel(manager, repository, logger, walletActionsRepository)
+        viewModel = WalletConnectViewModel(manager, repository, logger, walletActionsRepository,unsupportedNetworkRepository)
     }
 
     @Test
@@ -138,15 +141,20 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
             .thenReturn(Flowable.just(OnSessionRequest(meta, 5, Topic("peerID", "remotePeerID"), 1)))
         NetworkManager.networks =
             listOf(Network(name = "xDai", chainId = 2, token = "xDai"), Network(name = "Ethereum", chainId = 1, token = "Ethereum"))
+        whenever(unsupportedNetworkRepository.getNetworkName(5)).thenReturn(Single.just("networkname"))
         viewModel.account = Account(1, chainId = 1)
         viewModel.stateLiveData.observeForever(stateObserver)
         viewModel.subscribeToWCConnectionStatusFlowable()
         stateCaptor.run {
-            verify(stateObserver, times(2)).onChanged(capture())
+            verify(stateObserver, times(3)).onChanged(capture())
             firstValue shouldBeEqualTo ProgressBarState(false)
             secondValue shouldBeEqualTo OnSessionRequest(
                 meta,
                 BaseNetworkData(5, String.empty),
+                WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
+            )
+            thirdValue shouldBeEqualTo UpdateOnSessionRequest(
+                BaseNetworkData(5, "networkname"),
                 WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
             )
         }
@@ -258,7 +266,7 @@ class WalletConnectViewModelTest : BaseViewModelTest() {
         viewModel.account = Account(1, chainId = 2)
         viewModel.stateLiveData.observeForever(stateObserver)
         whenever(repository.approveSession(any(), any(), any(), any())).thenReturn(Completable.complete())
-        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"))
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = false)
         verify(repository).approveSession(any(), any(), any(), any())
         stateCaptor.run {
             verify(stateObserver).onChanged(capture())

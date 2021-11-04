@@ -8,7 +8,7 @@ class AccountTokenTest {
 
     @Test
     fun `check getting correct values test` () {
-        val erc20Token = ERC20Token(1, "token", decimals = "5")
+        val erc20Token = ERCToken(1, "token", decimals = "5", type = TokenType.ERC20)
         val accountToken01 = AccountToken(erc20Token, 200000.toBigDecimal(), 3.3)
         val accountToken02 = AccountToken(erc20Token, BigDecimal.ZERO, 3.14)
 

@@ -7,7 +7,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.network.Network
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.wallet.MasterSeed
 
@@ -19,7 +19,7 @@ interface AccountManager : Manager {
     var hasAvailableAccounts: Boolean
     var activeAccounts: List<Account>
     var rawAccounts: List<Account>
-    var cachedTokens: Map<Int, List<ERC20Token>>
+    var cachedTokens: Map<Int, List<ERCToken>>
     val getTokenVisibilitySettings: TokenVisibilitySettings
     fun areAllEmptyMainNetworkAccounts(): Boolean
     fun loadAccount(index: Int): Account
@@ -39,7 +39,7 @@ interface AccountManager : Manager {
     fun getNumberOfAccountsToUse(): Int
     fun getAllAccountsForSelectedNetworksType(): List<Account>
     fun getAllFreeAccountForNetwork(chainId: Int): List<Pair<Int, String>>
-    fun toChecksumAddress(address: String): String
+    fun toChecksumAddress(address: String, chainId: Int? = null): String
     fun clearFiat()
     fun connectAccountToNetwork(index: Int, network: Network): Single<String>
     fun changeAccountName(existedAccount: Account, newName: String): Completable

@@ -11,5 +11,8 @@ data class ERC20TokenPayload(
     val decimals: String = String.Empty,
     val logoURI: String? = null,
     val accountAddress: String = String.Empty,
-    val tag: String = String.Empty
+    val tag: String = String.Empty,
+    val type: String = String.Empty,
+    val tokenId: String? = null,
+    val collectionName: String? = null
 )

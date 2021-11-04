@@ -19,7 +19,8 @@ object DappSessionToEntityMapper : Mapper<DappSession, DappSessionEntity> {
             networkName,
             accountName,
             chainId,
-            handshakeId
+            handshakeId,
+            isMobileWalletConnect
         )
     }
 }

@@ -21,7 +21,8 @@ import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinError
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
@@ -92,7 +93,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `refresh balances coin balance test`() {
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
             .thenReturn(
@@ -117,7 +118,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("Error Balance")
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
             .thenReturn(Flowable.just(CoinError(1, "123", error)))
@@ -135,7 +136,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         val error = Throwable("Error Balance")
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.getAllAccounts()).thenReturn(accounts)
         whenever(transactionRepository.getCoinBalance())
             .thenReturn(Flowable.error(error))
@@ -150,9 +151,9 @@ class AccountsViewModelTest : BaseViewModelTest() {
     @Test
     fun `get tokens balance success when tagged tokens are not empty test`() {
         whenever(transactionRepository.getTaggedTokensUpdate())
-            .thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
+            .thenReturn(Flowable.just(listOf(ERCToken(1, "token", type = TokenType.ERC20))))
         whenever(transactionRepository.getTokenBalance())
-            .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERC20Token(1, "name")))))
+            .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
         whenever(transactionRepository.updateTaggedTokens()).thenReturn(Completable.complete())
         viewModel.refreshTokensBalances()
         viewModel.balanceStateLiveData.observeForever(balanceObserver)
@@ -165,7 +166,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get tokens balance success when tagged tokens are empty test`() {
         whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(Flowable.just(emptyList()))
         whenever(transactionRepository.getTokenBalance())
-            .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERC20Token(1, "name")))))
+            .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
         viewModel.refreshTokensBalances()
         viewModel.balanceStateLiveData.observeForever(balanceObserver)
         balanceCaptor.run {
@@ -177,10 +178,10 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get tokens balance success when tagged tokens are not empty and check tokens visibility test`() {
         whenever(transactionRepository.getTaggedTokensUpdate())
             .thenReturn(
-                Flowable.just(listOf(ERC20Token(1, "name1", address = "tokenAddress1", tag = "tag")))
+                Flowable.just(listOf(ERCToken(1, "name1", address = "tokenAddress1", tag = "tag", type = TokenType.ERC20)))
             )
         whenever(transactionRepository.getTokenBalance())
-            .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERC20Token(1, "name")))))
+            .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
         whenever(transactionRepository.updateTaggedTokens()).thenReturn(Completable.complete())
 
         whenever(accountManager.activeAccounts).thenReturn(
@@ -215,7 +216,17 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get tokens balance error test`() {
         val error = Throwable()
         whenever(transactionRepository.getTokenBalance()).thenReturn(Flowable.error(error))
-        whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
+        whenever(transactionRepository.getTaggedTokensUpdate()).thenReturn(
+            Flowable.just(
+                listOf(
+                    ERCToken(
+                        1,
+                        "token",
+                        type = TokenType.ERC20
+                    )
+                )
+            )
+        )
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.refreshTokensBalances()
         errorCaptor.run {
@@ -232,11 +243,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
             Single.error(Throwable("Refresh tokens list error"))
         )
         whenever(transactionRepository.getTaggedTokensUpdate())
-            .thenReturn(Flowable.just(listOf(ERC20Token(1, "token"))))
+            .thenReturn(Flowable.just(listOf(ERCToken(1, "token", type = TokenType.ERC20))))
         whenever(walletConnectRepository.getSessionsFlowable())
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
         whenever(transactionRepository.getTokenBalance())
-            .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERC20Token(1, "name")))))
+            .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
 
         viewModel.discoverNewTokens()
         viewModel.discoverNewTokens()
@@ -252,7 +263,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             Completable.error(error)
         )
         whenever(walletConnectRepository.killAllAccountSessions(any(), any())).thenReturn(Completable.complete())
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.hideAccount(0)
@@ -266,7 +277,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.hideAccount(any())).thenReturn(Completable.complete())
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(walletConnectRepository.killAllAccountSessions(any(), any())).thenReturn(Completable.complete())
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         whenever(accountManager.rawAccounts).thenReturn(listOf(Account(1)))
         viewModel.accountHideLiveData.observeForever(accountRemoveObserver)
         viewModel.hideAccount(0)
@@ -381,7 +392,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 listOf(DappSession(address = "address"))
             )
         )
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         viewModel.dappSessions.observeForever(dappSessionObserver)
         viewModel.getSessions(accounts)
         dappSessionCaptor.run {
@@ -394,7 +405,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `get sessions and update accounts error`() {
         val error = Throwable()
         whenever(walletConnectRepository.getSessionsFlowable()).thenReturn(Flowable.error(error))
-        whenever(accountManager.toChecksumAddress(any())).thenReturn("address")
+        whenever(accountManager.toChecksumAddress(any(), anyOrNull())).thenReturn("address")
         viewModel.errorLiveData.observeForever(errorObserver)
         viewModel.getSessions(accounts)
         errorCaptor.run {
@@ -416,7 +427,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     fun `Check if calling getTokenVisibility() method is calling the method`() {
         viewModel.tokenVisibilitySettings = mock()
         viewModel.tokenVisibilitySettings.let { settings ->
-            val erc20Token = ERC20Token(1, address = "0xC00KiE", decimals = "2")
+            val erc20Token = ERCToken(1, address = "0xC00KiE", decimals = "2", type = TokenType.ERC20)
             whenever(settings.getTokenVisibility(any(), any())).thenReturn(false, false, true, true, null)
             viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ONE)) shouldBeEqualTo false
             viewModel.isTokenVisible("", AccountToken(erc20Token, BigDecimal.ZERO)) shouldBeEqualTo false
@@ -429,12 +440,13 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `get cached tokens when no account tokens test`() {
-        val token = ERC20Token(
+        val token = ERCToken(
             1,
             address = "tokenAddress",
             name = "cachedToken",
             accountAddress = "address1",
-            decimals = "9"
+            decimals = "9",
+            type = TokenType.ERC20
         )
         whenever(accountManager.cachedTokens).thenReturn(
             mapOf(
@@ -457,10 +469,11 @@ class AccountsViewModelTest : BaseViewModelTest() {
         whenever(accountManager.cachedTokens).thenReturn(
             mapOf(
                 1 to listOf(
-                    ERC20Token(
+                    ERCToken(
                         1,
                         name = "cachedToken",
-                        accountAddress = "address1"
+                        accountAddress = "address1",
+                        type = TokenType.ERC20
                     )
                 )
             )
@@ -473,23 +486,25 @@ class AccountsViewModelTest : BaseViewModelTest() {
                 AccountToken(
                     currentRawBalance = BigDecimal.TEN,
                     tokenPrice = 2.0,
-                    token = ERC20Token(
+                    token = ERCToken(
                         1,
                         name = "cachedToken1",
                         accountAddress = "address1",
                         address = "heh2",
-                        decimals = "2"
+                        decimals = "2",
+                        type = TokenType.ERC20
                     )
                 ),
                 AccountToken(
                     tokenPrice = 3.0,
                     currentRawBalance = BigDecimal.TEN,
-                    token = ERC20Token(
+                    token = ERCToken(
                         1,
                         name = "cachedToken2",
                         accountAddress = "address1",
                         address = "hehe1",
-                        decimals = "2"
+                        decimals = "2",
+                        type = TokenType.ERC20
                     )
                 )
             )

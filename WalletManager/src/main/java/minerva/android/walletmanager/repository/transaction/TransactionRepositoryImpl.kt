@@ -7,7 +7,10 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.*
+import minerva.android.apiProvider.model.GasPricesMatic
+import minerva.android.apiProvider.model.MarketIds
+import minerva.android.apiProvider.model.Markets
+import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.apiProvider.model.gaswatch.GasPrices
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.TokenWithBalance
@@ -16,11 +19,11 @@ import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
 import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
+import minerva.android.blockchainprovider.repository.validation.ValidationRepository
 import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
-import minerva.android.kotlinUtils.crypto.hexToBigDecimal
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -31,10 +34,13 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
+import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_TEST
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.ActiveSuperToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.UpdateTokensResult
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
@@ -58,10 +64,11 @@ class TransactionRepositoryImpl(
     private val cryptoApi: CryptoApi,
     private val localStorage: LocalStorage,
     private val webSocketRepository: WebSocketRepository,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val validationRepository: ValidationRepository
 ) : TransactionRepository {
     override val masterSeed: MasterSeed get() = walletConfigManager.masterSeed
-    override var newTaggedTokens: MutableList<ERC20Token> = mutableListOf()
+    override var newTaggedTokens: MutableList<ERCToken> = mutableListOf()
     override var isSuperTokenStreamAvailable: Boolean = tokenManager.activeSuperTokenStreams.isEmpty()
     override var activeSuperTokenStreams: MutableList<ActiveSuperToken> = tokenManager.activeSuperTokenStreams
     private val currentFiatCurrency: String get() = localStorage.loadCurrentFiat()
@@ -223,9 +230,9 @@ class TransactionRepositoryImpl(
         }
     }
 
-    internal fun getTokensWithAccountAddress(erc20Tokens: Map<Int, List<ERC20Token>>): Map<Int, List<ERC20Token>> {
-        val allLocalTokensMap: MutableMap<Int, List<ERC20Token>> = erc20Tokens.toMutableMap()
-        val newTokensMap: Map<Int, List<ERC20Token>> = newTaggedTokens.groupBy { token -> token.chainId }
+    internal fun getTokensWithAccountAddress(erc20Tokens: Map<Int, List<ERCToken>>): Map<Int, List<ERCToken>> {
+        val allLocalTokensMap: MutableMap<Int, List<ERCToken>> = erc20Tokens.toMutableMap()
+        val newTokensMap: Map<Int, List<ERCToken>> = newTaggedTokens.groupBy { token -> token.chainId }
 
         for ((chainId, newTokens) in newTokensMap) {
             val localTokensPerChainId = allLocalTokensMap[chainId] ?: listOf()
@@ -235,8 +242,8 @@ class TransactionRepositoryImpl(
         return allLocalTokensMap
     }
 
-    private fun mergeNewTokensWithLocal(localChainTokens: List<ERC20Token>, newTokens: List<ERC20Token>) =
-        mutableListOf<ERC20Token>().apply {
+    private fun mergeNewTokensWithLocal(localChainTokens: List<ERCToken>, newTokens: List<ERCToken>) =
+        mutableListOf<ERCToken>().apply {
             addAll(localChainTokens)
             newTokens.forEach { newToken -> add(newToken) }
         }
@@ -268,7 +275,7 @@ class TransactionRepositoryImpl(
         refreshBalanceFilter(account) && account.network.testNet == !localStorage.areMainNetworksEnabled
 
     private fun refreshBalanceFilter(account: Account) = !account.isHide && !account.isDeleted && !account.isPending
-    override fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>> = tokenManager.getTaggedTokensUpdate()
+    override fun getTaggedTokensUpdate(): Flowable<List<ERCToken>> = tokenManager.getTaggedTokensUpdate()
 
     override fun getTokensRates(): Completable =
         walletConfigManager.getWalletConfig().let { config -> tokenManager.getTokensRates(config.erc20Tokens) }
@@ -294,7 +301,18 @@ class TransactionRepositoryImpl(
                                     tokenManager.updateTokenIcons(shouldUpdateIcon, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)
-                                            Pair(false, newAndLocalTokensPerChainIdMap)
+                                            UpdateTokensResult(false, newAndLocalTokensPerChainIdMap)
+                                        }
+                                }
+                                .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
+                                    tokenManager.updateMissingNFTTokensDetails(
+                                        shouldSafeNewTokens,
+                                        newAndLocalTokensPerChainIdMap,
+                                        accounts
+                                    )
+                                        .onErrorReturn {
+                                            Timber.e(it)
+                                            UpdateTokensResult(true, newAndLocalTokensPerChainIdMap)
                                         }
                                 }
                                 .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
@@ -308,21 +326,21 @@ class TransactionRepositoryImpl(
                 }
         }
 
-    private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERC20Token>> =
+    private fun downloadTokensListWithBuffer(accounts: List<Account>): Single<List<ERCToken>> =
         Observable.fromIterable(accounts)
             .buffer(ETHERSCAN_REQUEST_TIMESPAN, TimeUnit.SECONDS, ETHERSCAN_REQUEST_PACKAGE)
             .flatMapSingle { accountList -> downloadTokensList(accountList) }
             .toList()
             .map { tokens -> mergeLists(tokens) }
 
-    private fun downloadTokensList(accounts: List<Account>): Single<List<ERC20Token>> =
+    private fun downloadTokensList(accounts: List<Account>): Single<List<ERCToken>> =
         Observable.fromIterable(accounts)
             .flatMapSingle { account -> tokenManager.downloadTokensList(account) }
             .toList()
             .map { tokens -> mergeLists(tokens) }
 
-    private fun mergeLists(lists: List<List<ERC20Token>>): List<ERC20Token> =
-        mutableListOf<ERC20Token>().apply {
+    private fun mergeLists(lists: List<List<ERCToken>>): List<ERCToken> =
+        mutableListOf<ERCToken>().apply {
             lists.forEach { tokens -> addAll(tokens) }
         }
 
@@ -371,7 +389,7 @@ class TransactionRepositoryImpl(
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         when {
-            isBscNetwork(chainId) -> {
+            isBscNetwork(chainId) || isRskNetwork(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
                         getTxCosts(txCostPayload, null, gasPrice.result) }
@@ -404,7 +422,9 @@ class TransactionRepositoryImpl(
         }
     }
 
-    override fun isAddressValid(address: String): Boolean = ensRepository.isAddressValid(address)
+    override fun isAddressValid(address: String, chainId: Int?): Boolean = validationRepository.isAddressValid(address, chainId)
+
+    override fun toRecipientChecksum(address: String, chainId: Int?): String = validationRepository.toRecipientChecksum(address, chainId)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.run { getTransactionCostInEth(unitConverter.toGwei(gasPrice), BigDecimal(gasLimit)) }
@@ -461,6 +481,7 @@ class TransactionRepositoryImpl(
 
     private fun isMaticNetwork(chainId: Int) = chainId == MATIC || chainId == MUMBAI
     private fun isBscNetwork(chainId: Int) = chainId == BSC || chainId == BSC_TESTNET
+    private fun isRskNetwork(chainId: Int) = chainId == RSK_MAIN || chainId == RSK_TEST
 
     private fun getTxCosts(
         payload: TxCostPayload,

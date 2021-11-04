@@ -135,7 +135,7 @@ class WalletConnectRepositoryImpl(
         if (reconnectionAttempts[peerId] == MAX_RECONNECTION_ATTEMPTS) {
             terminateConnection(peerId, error)
         } else {
-            retryConnection(peerId, remotePeerId)
+            retryConnection(peerId, remotePeerId, error)
         }
     }
 
@@ -152,7 +152,7 @@ class WalletConnectRepositoryImpl(
         })
     }
 
-    private fun retryConnection(peerId: String, remotePeerId: String?) {
+    private fun retryConnection(peerId: String, remotePeerId: String?, error: Throwable) {
         checkDisposable()
         Observable.timer(RETRY_DELAY, TimeUnit.SECONDS)
             .flatMapSingle { getDappSessionById(peerId) }
@@ -176,6 +176,7 @@ class WalletConnectRepositoryImpl(
                     )
                 }
             }
+            .doOnError { terminateConnection(peerId, error)  }
             .subscribeOn(Schedulers.io())
             .subscribeBy(onError = { Timber.e(it) })
             .addTo(disposable)

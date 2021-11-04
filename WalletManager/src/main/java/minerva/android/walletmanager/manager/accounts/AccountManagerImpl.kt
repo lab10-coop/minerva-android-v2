@@ -6,6 +6,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
+import minerva.android.blockchainprovider.repository.validation.ValidationRepository
 import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.cryptographyProvider.repository.CryptographyRepository
 import minerva.android.cryptographyProvider.repository.model.DerivationPath
@@ -29,7 +30,7 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.CoinBalance
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import minerva.android.walletmanager.model.transactions.Balance
 import minerva.android.walletmanager.model.wallet.MasterSeed
@@ -46,14 +47,14 @@ class AccountManagerImpl(
     private val cryptographyRepository: CryptographyRepository,
     private val localStorage: LocalStorage,
     private val unitConverter: UnitConverter,
-    private val ensRepository: ENSRepository,
     private val timeProvider: CurrentTimeProvider, //TODO make one class with DateUtils
-    database: MinervaDatabase
+    database: MinervaDatabase,
+    private val validationRepository: ValidationRepository
 ) : AccountManager {
     override var hasAvailableAccounts: Boolean = false
     override var activeAccounts: List<Account> = emptyList()
     override var rawAccounts: List<Account> = emptyList()
-    override var cachedTokens: Map<Int, List<ERC20Token>> = mapOf()
+    override var cachedTokens: Map<Int, List<ERCToken>> = mapOf()
     override val areMainNetworksEnabled: Boolean get() = walletManager.areMainNetworksEnabled
     override val isProtectKeysEnabled: Boolean get() = localStorage.isProtectKeysEnabled
     override val isProtectTransactionsEnabled: Boolean get() = localStorage.isProtectTransactionsEnabled
@@ -289,8 +290,8 @@ class AccountManagerImpl(
             }.flatMapCompletable { walletManager.updateWalletConfig(it) }
         }
 
-    internal fun filterCachedTokens(tokenMap: Map<Int, List<ERC20Token>>): Map<Int, List<ERC20Token>> {
-        val newMap: MutableMap<Int, MutableList<ERC20Token>> = mutableMapOf()
+    internal fun filterCachedTokens(tokenMap: Map<Int, List<ERCToken>>): Map<Int, List<ERCToken>> {
+        val newMap: MutableMap<Int, MutableList<ERCToken>> = mutableMapOf()
         activeAccounts.filter { account -> !account.isPending }.forEach { account ->
             if (newMap.containsKey(account.chainId)) {
                 newMap[account.chainId]?.addAll(getVisibleTokensList(tokenMap, account))
@@ -302,9 +303,9 @@ class AccountManagerImpl(
     }
 
     private fun getVisibleTokensList(
-        tokenMap: Map<Int, List<ERC20Token>>,
+        tokenMap: Map<Int, List<ERCToken>>,
         account: Account
-    ): List<ERC20Token> =
+    ): List<ERCToken> =
         tokenMap[account.chainId]?.let { tokens ->
             tokens.filter { token ->
                 token.accountAddress.equals(account.address, true) &&
@@ -343,7 +344,7 @@ class AccountManagerImpl(
     override fun getSafeAccountName(account: Account): String =
         account.name.replaceFirst(String.Space, " | ${getSafeAccountCount(account.address)} ")
 
-    override fun isAddressValid(address: String): Boolean = ensRepository.isAddressValid(address)
+    override fun isAddressValid(address: String): Boolean = validationRepository.isAddressValid(address)
 
     override fun saveFreeATSTimestamp() {
         localStorage.saveFreeATSTimestamp(timeProvider.currentTimeMills())
@@ -368,8 +369,8 @@ class AccountManagerImpl(
     override fun getFirstActiveAccountOrNull(chainId: Int): Account? =
         getAllActiveAccounts(chainId).firstOrNull()
 
-    override fun toChecksumAddress(address: String): String =
-        ensRepository.toChecksumAddress(address)
+    override fun toChecksumAddress(address: String, chainId: Int?): String =
+        validationRepository.toChecksumAddress(address, chainId)
 
     override fun getAllAccountsForSelectedNetworksType(): List<Account> =
         getAllAccounts().filter { account -> account.isTestNetwork == !areMainNetworksEnabled }
@@ -500,7 +501,7 @@ class AccountManagerImpl(
     override fun loadAccount(index: Int): Account = walletManager.getWalletConfig().accounts.run {
         if (inBounds(index)) {
             val account = this[index]
-            account.copy(address = ensRepository.toChecksumAddress(account.address))
+            account.copy(address = toChecksumAddress(account.address, account.chainId))
         } else Account(Int.InvalidIndex)
     }
 

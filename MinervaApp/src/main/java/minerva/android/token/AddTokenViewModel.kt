@@ -12,7 +12,7 @@ import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import timber.log.Timber
@@ -30,8 +30,8 @@ class AddTokenViewModel(
     private val _errorLiveData = MutableLiveData<Event<Throwable>>()
     val errorLiveData: LiveData<Event<Throwable>> get() = _errorLiveData
 
-    private val _addressDetailsLiveData = MutableLiveData<ERC20Token>()
-    val addressDetailsLiveData: LiveData<ERC20Token> get() = _addressDetailsLiveData
+    private val _addressDetailsLiveData = MutableLiveData<ERCToken>()
+    val addressDetailsLiveData: LiveData<ERCToken> get() = _addressDetailsLiveData
 
     private val _tokenAddedLiveData = MutableLiveData<Event<Unit>>()
     val tokenAddedLiveData: LiveData<Event<Unit>> get() = _tokenAddedLiveData
@@ -45,13 +45,13 @@ class AddTokenViewModel(
         this.accountAddress = accountAddress
     }
 
-    fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address)
+    fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address, chainId)
 
     fun getTokenDetails(address: String) =
         launchDisposable {
             safeAccountRepository.getERC20TokenDetails(privateKey, chainId, address)
                 .zipWith(tokenManager.getTokenIconURL(chainId, address),
-                    BiFunction<ERC20Token, String, ERC20Token> { token, logoURI ->
+                    BiFunction<ERCToken, String, ERCToken> { token, logoURI ->
                         token.apply {
                             this.logoURI = if (logoURI != String.Empty) logoURI
                             else null
@@ -73,7 +73,7 @@ class AddTokenViewModel(
                 )
         }
 
-    fun addToken(token: ERC20Token) =
+    fun addToken(token: ERCToken) =
         launchDisposable {
             tokenManager.saveToken(accountAddress, chainId, token)
                 .subscribeOn(Schedulers.io())

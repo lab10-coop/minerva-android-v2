@@ -276,6 +276,17 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
             setDropDownBackgroundResource(R.drawable.drop_down_menu_background)
             dropDownVerticalOffset = DROP_DOWN_VERTICAL_OFFSET
             threshold = MIN_SIGN_TO_FILTER
+            afterTextChanged { address -> handleRecipientChecksum(address)}
+        }
+    }
+
+    private fun handleRecipientChecksum(address: String) {
+        binding.receiver.apply {
+            val checksum = viewModel.toRecipientChecksum(address)
+            if (address != checksum) {
+                setText(checksum)
+                setSelection(length())
+            }
         }
     }
 

@@ -20,7 +20,8 @@ import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCTokensList
+import minerva.android.widget.CollectibleView
 import minerva.android.widget.repository.getNetworkIcon
 import minerva.android.widget.state.AccountWidgetState
 import minerva.android.widget.token.TokenView
@@ -28,7 +29,7 @@ import minerva.android.widget.token.TokenView
 class AccountViewHolder(
     private val view: View,
     private val viewGroup: ViewGroup
-) : TokenView.TokenViewCallback, RecyclerView.ViewHolder(view) {
+) : TokenView.TokenViewCallback, CollectibleView.CollectibleViewCallback, RecyclerView.ViewHolder(view) {
     private var binding = AccountListRowBinding.bind(view)
     private lateinit var listener: AccountsAdapterListener
     private var rawPosition: Int = Int.InvalidIndex
@@ -42,6 +43,9 @@ class AccountViewHolder(
     }
 
     override fun onSendCoinClicked(account: Account) = listener.onSendCoinClicked(account)
+
+    override fun onCollectibleClicked(account: Account, tokenAddress: String, collectionName: String) =
+        listener.onNftCollectionClicked(account, tokenAddress, collectionName)
 
     fun endStreamAnimation() {
         binding.tokensAndCollectibles.endStreamAnimations()
@@ -62,7 +66,7 @@ class AccountViewHolder(
     ) {
         view.apply {
             prepareView(account)
-            prepareTokens(account, fiatSymbol, tokens)
+            prepareTokens(account, fiatSymbol, ERCTokensList(tokens))
             bindData(account, fiatSymbol)
             setOnMenuClickListener(rawPosition, account)
         }
@@ -136,11 +140,17 @@ class AccountViewHolder(
         }
     }
 
-    private fun View.prepareTokens(account: Account, fiatSymbol: String, tokens: List<AccountToken>) {
+    private fun View.prepareTokens(account: Account, fiatSymbol: String, tokens: ERCTokensList) {
         binding.apply {
-            tokensAndCollectibles.prepareView(viewGroup, this@AccountViewHolder, accountWidgetState.isWidgetOpen)
+            tokensAndCollectibles.prepareView(
+                viewGroup,
+                this@AccountViewHolder,
+                this@AccountViewHolder,
+                accountWidgetState.isWidgetOpen
+            )
             tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens, accountWidgetState.isWidgetOpen)
-            tokens.isNotEmpty().let { visible ->
+            // change connected to playstore release MNR-637 - added getting ERC20 tokens only
+            tokens.getERC20Tokens().isNotEmpty().let { visible ->
                 if (visible) setOnItemClickListener(account, fiatSymbol, tokens)
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
@@ -150,12 +160,12 @@ class AccountViewHolder(
         }
     }
 
-    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: List<AccountToken>) =
+    private fun View.setOnItemClickListener(account: Account, fiatSymbol: String, tokens: ERCTokensList) =
         setOnClickListener {
             if (isWidgetOpen) {
                 close()
             } else {
-                binding.tokensAndCollectibles.initTokensList(account, fiatSymbol, tokens, true)
+                binding.tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens, true)
                 open()
             }
         }

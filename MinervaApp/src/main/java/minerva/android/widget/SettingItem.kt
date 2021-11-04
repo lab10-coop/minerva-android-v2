@@ -8,10 +8,9 @@ import minerva.android.databinding.SettingItemLayoutBinding
 import minerva.android.extension.addRippleEffect
 import minerva.android.extension.empty
 import minerva.android.extension.visibleOrGone
+import minerva.android.extension.visibleOrInvisible
 import minerva.android.kotlinUtils.EmptyResource
-import minerva.android.kotlinUtils.InvalidId
 import minerva.android.settings.model.SettingRow
-import minerva.android.settings.model.SettingsRowType
 
 class SettingItem(context: Context) : ConstraintLayout(context) {
 
@@ -36,7 +35,7 @@ class SettingItem(context: Context) : ConstraintLayout(context) {
                 }
                 detailMessage.text = detailText
                 settingsArrow.visibleOrGone(isArrowVisible)
-                mainNetworksSwitch.visibleOrGone(isSwitchVisible)
+                mainNetworksSwitch.visibleOrInvisible(isSwitchVisible)
             }
         }
     }

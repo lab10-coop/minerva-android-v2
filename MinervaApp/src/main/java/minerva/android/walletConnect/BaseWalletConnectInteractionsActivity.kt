@@ -37,12 +37,13 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     private fun rejectRequest() {
         dappDialog?.let {
             it.dismiss()
-            walletConnectViewModel.rejectRequest()
+            walletConnectViewModel.rejectRequest(true)
         }
     }
 
     override fun onPause() {
         super.onPause()
+        walletConnectViewModel.dispose()
         rejectRequest()
     }
 
@@ -53,14 +54,19 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        walletConnectViewModel.dispose()
         clearAllDialogs()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        with(walletConnectViewModel) {
+            getWalletConnectSessions()
+            subscribeToWCConnectionStatusFlowable()
+        }
     }
 
     protected fun prepareWalletConnect() {
         prepareWalletConnectInteractionObservers()
-        walletConnectViewModel.getWalletConnectSessions()
-        walletConnectViewModel.subscribeToWCConnectionStatusFlowable()
         handleDeepLink(intent)
     }
 
@@ -84,8 +90,9 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
                 is OnWalletConnectConnectionError -> handleWalletConnectError(state.sessionName)
                 is OnSessionRequest -> showConnectionDialog(state.meta, state.network, state.dialogType)
                 is UpdateOnSessionRequest -> updateConnectionDialog(state.network, state.dialogType)
-                is CloseScannerState -> closeToBackground()
-                is CorrectWalletConnectCodeState -> handleLoadingDialogForWCConnection(true)
+                CloseScannerState -> closeToBackground()
+                CloseDialogState -> closeDialog()
+                CorrectWalletConnectCodeState -> handleLoadingDialogForWCConnection(true)
                 else -> {
                 }
             }
@@ -145,14 +152,15 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             DappSendTransactionDialog(
                 this@BaseWalletConnectInteractionsActivity,
                 {
-                    if (isProtectTransactionEnabled()) getCurrentFragment()?.showBiometricPrompt(
-                        ::sendTransaction,
-                        ::rejectRequest
-                    )
-                    else sendTransaction()
+                    if (isProtectTransactionEnabled()) {
+                        getCurrentFragment()?.showBiometricPrompt(
+                            { sendTransaction(txRequest.session.isMobileWalletConnect) },
+                            { rejectRequest(txRequest.session.isMobileWalletConnect) }
+                        )
+                    } else sendTransaction(txRequest.session.isMobileWalletConnect)
                 },
                 {
-                    rejectRequest()
+                    rejectRequest(txRequest.session.isMobileWalletConnect)
                 }).apply {
                 setContent(
                     txRequest.transaction, txRequest.session, txRequest.account,
@@ -175,8 +183,8 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
 
     private fun getDappSignDialog(it: OnEthSignRequest) =
         DappSignMessageDialog(this@BaseWalletConnectInteractionsActivity,
-            { walletConnectViewModel.acceptRequest() },
-            { walletConnectViewModel.rejectRequest() }
+            { walletConnectViewModel.acceptRequest(it.session.isMobileWalletConnect) },
+            { walletConnectViewModel.rejectRequest(it.session.isMobileWalletConnect) }
         ).apply {
             setContent(it.message, it.session)
             show()
@@ -223,7 +231,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         confirmationDialogDialog = DappConfirmationDialog(this,
             {
-                walletConnectViewModel.approveSession(meta)
+                walletConnectViewModel.approveSession(meta, true)
                 clearAllDialogs()
             },
             {
@@ -255,7 +263,7 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
             }
             WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
             WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)
-            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network.chainId.toString())
+            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network)
         }
     }
 
@@ -280,6 +288,10 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     private fun dismissDialogs() {
         loadingDialog?.dismiss()
         errorDialog?.dismiss()
+    }
+
+    private fun closeDialog() {
+        clearAllDialogs()
     }
 
     private fun closeToBackground() {

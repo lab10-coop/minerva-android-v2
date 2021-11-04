@@ -7,7 +7,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 data class AccountToken(
-    override var token: ERC20Token,
+    override var token: ERCToken,
     var currentRawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var tokenPrice: Double? = Double.InvalidValue,
     var nextRawBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
@@ -20,12 +20,12 @@ data class AccountToken(
             .orElse { false }
 
     override val currentBalance: BigDecimal
-        get() = if (currentRawBalance == Double.InvalidValue.toBigDecimal()) currentRawBalance
-        else BalanceUtils.convertFromWei(currentRawBalance, token.decimals.toInt())
+        get() = if (token.type.isERC721() || token.decimals.isBlank()) currentRawBalance else getBalanceForERC20Token(
+            currentRawBalance
+        )
 
     val nextBalance: BigDecimal
-        get() = if (nextRawBalance == Double.InvalidValue.toBigDecimal()) nextRawBalance
-        else BalanceUtils.convertFromWei(nextRawBalance, token.decimals.toInt())
+        get() = if (token.type.isERC721() || token.decimals.isBlank()) nextRawBalance else getBalanceForERC20Token(nextRawBalance)
 
     override val fiatBalance: BigDecimal
         get() =
@@ -35,6 +35,12 @@ data class AccountToken(
                     else -> BigDecimal(price).multiply(currentBalance).setScale(FIAT_SCALE, RoundingMode.HALF_UP)
                 }
             }.orElse { Double.InvalidValue.toBigDecimal() }
+
+
+    private fun getBalanceForERC20Token(rawBalance: BigDecimal) =
+        if (rawBalance == Double.InvalidValue.toBigDecimal()) rawBalance
+        else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
+
 
     companion object {
         private const val FIAT_SCALE = 13

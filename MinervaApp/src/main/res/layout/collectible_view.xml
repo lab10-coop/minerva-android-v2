@@ -9,10 +9,10 @@
         android:id="@+id/collectible_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/collectible_logo"
-        android:layout_marginLeft="@dimen/margin_xxsmall"
-        android:layout_marginTop="@dimen/margin_xsmall"
+        app:layout_constraintTop_toTopOf="@id/collectible_logo"
+        app:layout_constraintStart_toEndOf="@id/collectible_logo"
+        app:layout_constraintBottom_toTopOf="@id/collectible_desc"
+        android:layout_marginStart="@dimen/margin_xsmall"
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal"
         tools:text="POAP" />
@@ -22,8 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="@id/collectible_name"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginRight="@dimen/margin_xsmall"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="@dimen/margin_xsmall"
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal"
         tools:text="3" />
@@ -32,24 +32,21 @@
         android:id="@+id/collectible_logo"
         android:layout_width="@dimen/xsmall_logo_size"
         android:layout_height="@dimen/xsmall_logo_size"
-        android:src="@drawable/ic_collectible"
-        android:layout_marginTop="@dimen/margin_xxsmall"
-        android:layout_marginBottom="@dimen/margin_xxsmall"
-        app:layout_constraintTop_toTopOf="@id/collectible_name"
-        app:layout_constraintBottom_toBottomOf="@id/collectible_desc"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        android:src="@drawable/ic_collectible_square"
+        android:layout_marginTop="@dimen/margin_xsmall"
+        android:layout_marginBottom="@dimen/margin_xsmall"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/collectible_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/collectible_name"
-        app:layout_constraintLeft_toLeftOf="@id/collectible_name"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="@dimen/margin_xxsmall"
+        app:layout_constraintStart_toStartOf="@id/collectible_name"
+        app:layout_constraintBottom_toBottomOf="@id/collectible_logo"
         android:textSize="@dimen/text_xsmall"
-        android:textColor="@color/titleColor"
-        android:layout_marginBottom="@dimen/margin_xsmall"
         tools:text="The protocol of Atteddance Protocol" />
 
 

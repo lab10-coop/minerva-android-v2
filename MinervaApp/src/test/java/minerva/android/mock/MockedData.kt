@@ -3,7 +3,8 @@ package minerva.android.mock
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import java.math.BigDecimal
 
 val accounts = listOf(
@@ -27,22 +28,24 @@ val networks = listOf(
 val accountTokensForPrivateKey1 = listOf(
     AccountToken(
         currentRawBalance = BigDecimal.TEN,
-        token = ERC20Token(
+        token = ERCToken(
             1,
             "name",
             accountAddress = "address1",
             address = "tokenAddress1",
-            decimals = "18"
+            decimals = "18",
+            type = TokenType.ERC20
         )
     ),
     AccountToken(
         currentRawBalance = BigDecimal.TEN,
-        token = ERC20Token(
+        token = ERCToken(
             1,
             "name",
             accountAddress = "address1",
             address = "tokenAddress2",
-            decimals = "18"
+            decimals = "18",
+            type = TokenType.ERC20
         )
     )
 )
@@ -50,22 +53,24 @@ val accountTokensForPrivateKey1 = listOf(
 val accountTokensForPrivateKey2 = listOf(
     AccountToken(
         currentRawBalance = BigDecimal.TEN,
-        token = ERC20Token(
+        token = ERCToken(
             2,
             "name",
             accountAddress = "address2",
             address = "tokenAddress3",
-            decimals = "18"
+            decimals = "18",
+            type = TokenType.ERC20
         )
     ),
     AccountToken(
         currentRawBalance = BigDecimal.TEN,
-        token = ERC20Token(
+        token = ERCToken(
             2,
             "name",
             accountAddress = "address2",
             address = "tokenAddress4",
-            decimals = "18"
+            decimals = "18",
+            type = TokenType.ERC20
         )
     )
 )

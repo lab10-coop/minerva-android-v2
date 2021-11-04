@@ -1,10 +1,10 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <rotate
-            android:drawable="@drawable/ic_arrow_down"
+            android:drawable="@drawable/ic_arrow_up"
             android:pivotX="50%"
             android:pivotY="50%"
-            android:fromDegrees="180"
-            android:toDegrees="0" />
+            android:fromDegrees="0"
+            android:toDegrees="180" />
     </item>
 </layer-list>

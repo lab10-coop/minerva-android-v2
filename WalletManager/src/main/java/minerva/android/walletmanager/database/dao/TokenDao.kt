@@ -3,25 +3,25 @@ package minerva.android.walletmanager.database.dao
 import androidx.room.*
 import io.reactivex.Flowable
 import io.reactivex.Single
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 
 @Dao
 interface TokenDao {
 
     @Query("SELECT * FROM tokens")
-    fun getTaggedTokens(): Single<List<ERC20Token>>
+    fun getTaggedTokens(): Single<List<ERCToken>>
 
     @Query("SELECT * FROM tokens")
-    fun getTaggedTokensFlowable(): Flowable<List<ERC20Token>>
+    fun getTaggedTokensFlowable(): Flowable<List<ERCToken>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(tokens: List<ERC20Token>)
+    fun insertAll(tokens: List<ERCToken>)
 
     @Query("DELETE FROM tokens")
     fun deleteAll()
 
     @Transaction
-    fun updateTaggedTokens(tokens: List<ERC20Token>) {
+    fun updateTaggedTokens(tokens: List<ERCToken>) {
         deleteAll()
         insertAll(tokens)
     }

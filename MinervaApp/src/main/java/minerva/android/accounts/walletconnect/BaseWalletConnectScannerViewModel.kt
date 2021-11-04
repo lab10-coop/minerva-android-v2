@@ -15,6 +15,7 @@ import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.WalletAction
 import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnFailure
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
@@ -27,7 +28,8 @@ abstract class BaseWalletConnectScannerViewModel(
     private val accountManager: AccountManager,
     private val walletConnectRepository: WalletConnectRepository,
     private val logger: Logger,
-    private val walletActionsRepository: WalletActionsRepository
+    private val walletActionsRepository: WalletActionsRepository,
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository
 ) : BaseViewModel() {
 
     abstract var account: Account
@@ -37,7 +39,7 @@ abstract class BaseWalletConnectScannerViewModel(
     abstract fun setLiveDataOnConnectionError(error: Throwable, sessionName: String)
     abstract fun setLiveDataError(error: Throwable)
     abstract fun handleSessionRequest(sessionRequest: OnSessionRequest)
-    abstract fun closeScanner()
+    abstract fun closeScanner(isMobileWalletConnect: Boolean = false)
     abstract fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType)
 
     protected open val selectedChainId
@@ -112,26 +114,26 @@ abstract class BaseWalletConnectScannerViewModel(
         account = newAccount
     }
 
-    fun approveSession(meta: WalletConnectPeerMeta) {
+    fun approveSession(meta: WalletConnectPeerMeta, isMobileWalletConnect: Boolean) {
         if (account.id != Int.InvalidId) {
             launchDisposable {
                 walletConnectRepository.approveSession(
                     listOf(account.address),
                     account.chainId,
                     topic.peerId,
-                    getDapp(meta, account.chainId, account)
+                    getDapp(meta, account.chainId, account, isMobileWalletConnect)
                 )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy(
-                        onComplete = { closeScanner() },
+                        onComplete = { closeScanner(isMobileWalletConnect) },
                         onError = { setLiveDataError(it) }
                     )
             }
         }
     }
 
-    private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int, account: Account) = DappSession(
+    private fun getDapp(meta: WalletConnectPeerMeta, chainId: Int, account: Account, isMobileWalletConnect: Boolean) = DappSession(
         account.address,
         currentSession.topic,
         currentSession.version,
@@ -144,7 +146,8 @@ abstract class BaseWalletConnectScannerViewModel(
         requestedNetwork.name,
         account.name,
         chainId,
-        handshakeId
+        handshakeId,
+        isMobileWalletConnect
     )
 
     private fun getIcon(icons: List<String>) =
@@ -152,7 +155,7 @@ abstract class BaseWalletConnectScannerViewModel(
         else icons[Int.FirstIndex]
 
 
-    open fun rejectSession() {
+    open fun rejectSession(isMobileWalletConnect: Boolean = false) {
         walletConnectRepository.rejectSession(topic.peerId)
     }
 
@@ -182,7 +185,26 @@ abstract class BaseWalletConnectScannerViewModel(
         NetworkManager.networks.find { network -> network.chainId == chainId }?.name.orElse { String.Empty }
 
     protected fun isNetworkNotSupported(chainId: Int): Boolean =
-        NetworkManager.networks.find { network -> network.chainId == chainId } == null
+        NetworkManager.networks.find { network -> network.chainId == chainId && isNotRSK(chainId) } == null
+
+    // change connected to playstore release MNR-637
+    private fun isNotRSK(chainId: Int) = chainId != ChainId.RSK_MAIN && chainId != ChainId.RSK_TEST
+
+    fun fetchUnsupportedNetworkName(chainId: Int) {
+        launchDisposable {
+            unsupportedNetworkRepository.getNetworkName(chainId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = { chainName ->
+                        updateWCState(BaseNetworkData(chainId, chainName), WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING)
+                    },
+                    onError = {
+                        setLiveDataError(it)
+                    }
+                )
+        }
+    }
 
     private fun getWalletAddAction(name: String) =
         WalletAction(

@@ -49,10 +49,17 @@ interface CryptoApi {
     @GET
     fun getTokenTx(@Url url: String): Single<TokenTxResponse>
 
+    @GET(CHAIN_DETAILS_URL)
+    fun getChainDetails(): Single<List<ChainDetails>>
+
+    @GET
+    fun getERC721TokenDetails(@Url url: String): Single<ERC721Details>
+
     companion object {
         private const val ID = "id"
         private const val IDS = "ids"
         private const val VS_CURRENCIES = "vs_currencies"
         private const val CONTRACT_ADDRESSES = "contract_addresses"
+        private const val CHAIN_DETAILS_URL = "https://chainlist.org/chains.json"
     }
 }

@@ -1,10 +1,9 @@
 package minerva.android.walletmanager.model.token
 
-import minerva.android.walletmanager.model.token.ERC20Token
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
-class ERC20TokenTest {
+class ERCTokenTest {
 
     @Test
     fun `Check equals method for ERC20Token`() {
@@ -15,32 +14,35 @@ class ERC20TokenTest {
 
 
     private val tokenOne =
-        ERC20Token(
+        ERCToken(
             1,
             "nameOne",
             "symbolOne",
             "addressOne",
             "decimalsOne",
-            "logoUriOne"
+            "logoUriOne",
+            type = TokenType.ERC20
         )
 
     private val tokenOneOne =
-        ERC20Token(
+        ERCToken(
             1,
             "nameOne",
             "symbolOne",
             "ADDRESSoNE",
             "decimalsOne",
-            "logoUriOne"
+            "logoUriOne",
+            type = TokenType.ERC20
         )
 
     private val tokenTwo =
-        ERC20Token(
+        ERCToken(
             2,
             "nameTwo",
             "symbolTwo",
             "addressTwo",
             "decimalsTwo",
-            "logoUriTwo"
+            "logoUriTwo",
+            type = TokenType.ERC20
         )
 }

@@ -3,19 +3,20 @@ package minerva.android.accounts.extensions
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenVisibilitySettings
 import java.math.BigDecimal
 
 fun MutableList<AccountToken>.findCachedAccountToken(accountToken: AccountToken): AccountToken? =
     find { cachedAccountToken ->
-        cachedAccountToken.isTheSameToken(accountToken.token.address, accountToken.token.accountAddress)
+        cachedAccountToken.isTheSameToken(accountToken.token.address, accountToken.token.accountAddress, accountToken.token.tokenId)
     }
 
-fun AccountToken.isTheSameToken(tokenAddress: String, accountAddress: String): Boolean =
-    token.address.equals(tokenAddress, true) && token.accountAddress.equals(accountAddress, true)
+fun AccountToken.isTheSameToken(tokenAddress: String, accountAddress: String, tokenId: String?): Boolean =
+    token.address.equals(tokenAddress, true) && token.accountAddress.equals(accountAddress, true) &&
+            token.tokenId == tokenId
 
-fun List<ERC20Token>.findCachedToken(balance: AssetError): ERC20Token? =
+fun List<ERCToken>.findCachedToken(balance: AssetError): ERCToken? =
     find { token ->
         token.address.equals(balance.tokenAddress, true) &&
                 token.accountAddress.equals(balance.accountAddress, true)
@@ -23,7 +24,7 @@ fun List<ERC20Token>.findCachedToken(balance: AssetError): ERC20Token? =
 
 fun AccountToken.isTokenShown(account: Account): Boolean =
     account.accountTokens.find { accountToken ->
-        accountToken.isTheSameToken(token.address, token.accountAddress)
+        accountToken.isTheSameToken(token.address, token.accountAddress, token.tokenId)
     } != null
 
 fun MutableList<AccountToken>.filterAccountTokensForGivenAccount(account: Account): MutableList<AccountToken> =
@@ -62,7 +63,7 @@ fun AccountToken.shouldUpdateBalance(balance: AssetBalance): Boolean =
     currentRawBalance != balance.accountToken.currentRawBalance || tokenPrice != balance.accountToken.tokenPrice
 
 fun AccountToken.isTokenError(balance: AssetError) =
-    isTheSameToken(balance.tokenAddress, balance.accountAddress) && !token.isError
+    isTheSameToken(balance.tokenAddress, balance.accountAddress, balance.tokenId) && !token.isError
 
 fun Asset.isTokenInAccount(account: Account): Boolean =
     chainId == account.chainId && privateKey.equals(account.privateKey, true)

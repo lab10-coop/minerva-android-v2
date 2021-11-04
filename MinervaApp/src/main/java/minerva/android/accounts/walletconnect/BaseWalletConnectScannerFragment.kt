@@ -68,7 +68,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
     protected fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {
         confirmationDialogDialog = DappConfirmationDialog(requireContext(),
             {
-                viewModel.approveSession(meta)
+                viewModel.approveSession(meta, false)
                 binding.dappsBottomSheet.dapps.visible()
                 binding.closeButton.margin(bottom = WalletConnectScannerFragment.INCREASED_MARGIN)
             },
@@ -102,7 +102,7 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
             }
             WalletConnectAlertType.CHANGE_ACCOUNT_WARNING -> setChangeAccountMessage(network.name)
             WalletConnectAlertType.NO_AVAILABLE_ACCOUNT_ERROR -> setNoAvailableAccountMessage(network)
-            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network.chainId.toString())
+            WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING -> setUnsupportedNetworkMessage(network)
         }
     }
 

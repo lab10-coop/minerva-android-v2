@@ -17,5 +17,6 @@ data class DappSession(
     val networkName: String = String.Empty,
     val accountName: String = String.Empty,
     val chainId: Int = Int.InvalidValue,
-    val handshakeId: Long = Long.InvalidValue
+    val handshakeId: Long = Long.InvalidValue,
+    val isMobileWalletConnect: Boolean = false
 ) : MinervaPrimitive(address = address, name = name, iconUrl = iconUrl)

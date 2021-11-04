@@ -6,41 +6,53 @@ import io.reactivex.Single
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.Asset
 import minerva.android.walletmanager.model.token.ActiveSuperToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.UpdateTokensResult
 
 interface TokenManager {
     fun checkMissingTokensDetails(): Completable
-    fun getActiveTokensPerAccount(account: Account): List<ERC20Token>
-    fun saveToken(accountAddress: String, chainId: Int, token: ERC20Token): Completable
+    fun getActiveTokensPerAccount(account: Account): List<ERCToken>
+    fun saveToken(accountAddress: String, chainId: Int, token: ERCToken): Completable
     fun saveTokens(
         shouldSafeNewTokens: Boolean,
-        newAndLocalTokensPerChainIdMap: Map<Int, List<ERC20Token>>
+        newAndLocalTokensPerChainIdMap: Map<Int, List<ERCToken>>
     ): Single<Boolean>
 
     fun getTokenIconURL(chainId: Int, address: String): Single<String>
-    fun sortTokensByChainId(tokenList: List<ERC20Token>): Map<Int, List<ERC20Token>>
+    fun sortTokensByChainId(tokenList: List<ERCToken>): Map<Int, List<ERCToken>>
 
     /**
      * arguments: Map<ChainId, List<ERC20Token>>
      *     return statement: Pair<isUpdated, Map<ChainId<List<ERC20Token>>>
      */
-    fun mergeWithLocalTokensList(newTokensPerChainIdMap: Map<Int, List<ERC20Token>>): Pair<Boolean, Map<Int, List<ERC20Token>>>
+    fun mergeWithLocalTokensList(newTokensPerChainIdMap: Map<Int, List<ERCToken>>): UpdateTokensResult
 
     /**
      * return statement: Map<ChainId, List<ERC20Token>>
      */
     fun updateTokenIcons(
         shouldBeUpdated: Boolean,
-        tokensPerChainIdMap: Map<Int, List<ERC20Token>>
-    ): Single<Pair<Boolean, Map<Int, List<ERC20Token>>>>
+        tokensPerChainIdMap: Map<Int, List<ERCToken>>
+    ): Single<UpdateTokensResult>
 
     fun getTokenBalance(account: Account): Flowable<Asset>
-    fun downloadTokensList(account: Account): Single<List<ERC20Token>>
-    fun getTokensRates(tokens: Map<Int, List<ERC20Token>>): Completable
+    fun downloadTokensList(account: Account): Single<List<ERCToken>>
+    fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable
     fun updateTokensRate(account: Account)
     fun getSingleTokenRate(tokenHash: String): Double
-    fun getTaggedTokensUpdate(): Flowable<List<ERC20Token>>
-    fun getTaggedTokensSingle(): Single<List<ERC20Token>>
+    fun getTaggedTokensUpdate(): Flowable<List<ERCToken>>
+    fun getTaggedTokensSingle(): Single<List<ERCToken>>
     fun getSuperTokenBalance(account: Account): Flowable<Asset>
     var activeSuperTokenStreams: MutableList<ActiveSuperToken>
+    fun updateMissingNFTTokensDetails(
+        shouldBeUpdated: Boolean,
+        tokensPerChainIdMap: Map<Int, List<ERCToken>>,
+        accounts: List<Account>
+    ): Single<UpdateTokensResult>
+
+    fun getNftsPerAccount(
+        chainId: Int,
+        accountAddress: String,
+        collectionAddress: String
+    ): List<ERCToken>
 }

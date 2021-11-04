@@ -3,12 +3,12 @@ package minerva.android.accounts.listener
 import minerva.android.accounts.transaction.model.DappSessionData
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
 import minerva.android.widget.state.AccountWidgetState
 
 interface AccountsFragmentToAdapterListener {
     fun onSendTransaction(account: Account)
     fun onSendTokenTransaction(account: Account, tokenAddress: String, isTokenError: Boolean)
+    fun onNftCollectionClicked(account: Account, tokenAddress: String, collectionName: String)
     fun onCreateSafeAccount(account: Account)
     fun onAccountHide(index: Int)
     fun onShowAddress(account: Account)

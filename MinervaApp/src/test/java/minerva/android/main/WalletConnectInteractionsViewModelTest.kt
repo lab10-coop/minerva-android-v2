@@ -20,10 +20,12 @@ import minerva.android.walletmanager.model.defs.TxType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
-import minerva.android.walletmanager.model.token.ERC20Token
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxSpeed
 import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
@@ -45,6 +47,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     private val logger: Logger = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val accountManager: AccountManager = mock()
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository =mock()
+
     private val viewModel: WalletConnectInteractionsViewModel =
         WalletConnectInteractionsViewModel(
             transactionRepository,
@@ -52,7 +56,8 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             logger,
             tokenManager,
             accountManager,
-            walletActionsRepository
+            walletActionsRepository,
+            unsupportedNetworkRepository
         )
 
     private val requestObserver: Observer<WalletConnectState> = mock()
@@ -219,7 +224,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 chainId = ETH_MAIN,
                 accountTokens = mutableListOf(
                     AccountToken(
-                        ERC20Token(1, symbol = "WTF")
+                        ERCToken(1, symbol = "WTF", type = TokenType.ERC20)
                     )
                 )
             )
@@ -673,7 +678,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.getAccountByAddressAndChainId(any(), any())).thenReturn(Account(1))
         viewModel.getWalletConnectSessions()
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
-        viewModel.acceptRequest()
+        viewModel.acceptRequest(isMobileWalletConnect = false)
         verify(walletConnectRepository).approveRequest(any(), any())
     }
 
@@ -690,7 +695,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.calculateTransactionCost(any(), any())).thenReturn(BigDecimal.TEN)
         viewModel.getWalletConnectSessions()
         viewModel.currentDappSession = DappSession(address = "address1", peerId = "id")
-        viewModel.rejectRequest()
+        viewModel.rejectRequest(isMobileWalletConnect = false)
         verify(walletConnectRepository).rejectRequest(any())
     }
 
@@ -836,15 +841,20 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
         whenever(walletConnectRepository.connectionStatusFlowable)
             .thenReturn(Flowable.just(OnSessionRequest(meta, 134, Topic("peerID", "remotePeerID"), 1)))
         NetworkManager.networks = listOf(Network(name = "Ethereum", chainId = 1, token = "Ethereum"))
+        whenever(unsupportedNetworkRepository.getNetworkName(134)).thenReturn(Single.just("networkname"))
         whenever(accountManager.getFirstActiveAccountOrNull(1)).thenReturn(null)
         viewModel.account = Account(1, chainId = 1)
         viewModel.walletConnectStatus.observeForever(requestObserver)
         viewModel.subscribeToWCConnectionStatusFlowable()
         requestCaptor.run {
-            verify(requestObserver).onChanged(capture())
+            verify(requestObserver, times(2)).onChanged(capture())
             firstValue shouldBeEqualTo minerva.android.accounts.walletconnect.OnSessionRequest(
                 meta,
                 BaseNetworkData(134, String.empty),
+                WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
+            )
+            secondValue shouldBeEqualTo UpdateOnSessionRequest(
+                BaseNetworkData(134, "networkname"),
                 WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
             )
         }
@@ -902,7 +912,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `approve session test`() {
+    fun `approve session test and close app state `() {
         NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
         viewModel.topic = Topic()
         viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
@@ -913,7 +923,7 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
                 any(), any(), any(), any()
             )
         ).thenReturn(Completable.complete())
-        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"))
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = true)
         verify(walletConnectRepository).approveSession(
             any(), any(), any(), any()
         )
@@ -922,6 +932,29 @@ class WalletConnectInteractionsViewModelTest : BaseViewModelTest() {
             firstValue is CloseScannerState
         }
     }
+
+    @Test
+    fun `approve session test and close dialog state `() {
+        NetworkManager.initialize(listOf(Network(name = "Ethereum", chainId = 2, testNet = false, httpRpc = "url")))
+        viewModel.topic = Topic()
+        viewModel.currentSession = WalletConnectSession("topic", "version", "bridge", "key")
+        viewModel.account = Account(1, chainId = 2)
+        viewModel.walletConnectStatus.observeForever(requestObserver)
+        whenever(
+            walletConnectRepository.approveSession(
+                any(), any(), any(), any()
+            )
+        ).thenReturn(Completable.complete())
+        viewModel.approveSession(WalletConnectPeerMeta(name = "name", url = "url"), isMobileWalletConnect = false)
+        verify(walletConnectRepository).approveSession(
+            any(), any(), any(), any()
+        )
+        requestCaptor.run {
+            verify(requestObserver).onChanged(capture())
+            firstValue is CloseDialogState
+        }
+    }
+
 
     @Test
     fun `reject session test`() {

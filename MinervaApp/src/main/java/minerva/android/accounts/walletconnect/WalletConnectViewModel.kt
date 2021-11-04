@@ -7,7 +7,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser.WALLET_CONNECT
-import minerva.android.extension.empty
+import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
@@ -16,6 +16,7 @@ import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnSessionRequest
 import minerva.android.walletmanager.repository.walletconnect.WalletConnectRepository
 import minerva.android.walletmanager.utils.logger.Logger
@@ -26,8 +27,9 @@ class WalletConnectViewModel(
     private val accountManager: AccountManager,
     private val repository: WalletConnectRepository,
     logger: Logger,
-    walletActionsRepository: WalletActionsRepository
-) : BaseWalletConnectScannerViewModel(accountManager, repository, logger, walletActionsRepository) {
+    walletActionsRepository: WalletActionsRepository,
+    private val unsupportedNetworkRepository: UnsupportedNetworkRepository
+) : BaseWalletConnectScannerViewModel(accountManager, repository, logger, walletActionsRepository,unsupportedNetworkRepository) {
 
     private val _viewStateLiveData = MutableLiveData<WalletConnectState>()
     val stateLiveData: LiveData<WalletConnectState> get() = _viewStateLiveData
@@ -56,32 +58,35 @@ class WalletConnectViewModel(
     }
 
     override fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
-        _viewStateLiveData.postValue(UpdateOnSessionRequest(requestedNetwork, dialogType))
+        _viewStateLiveData.postValue(UpdateOnSessionRequest(network, dialogType))
     }
 
-    override fun closeScanner() {
+    override fun closeScanner(isMobileWalletConnect: Boolean) {
         _viewStateLiveData.value = CloseScannerState
     }
 
     override fun handleSessionRequest(sessionRequest: OnSessionRequest) {
         val id = sessionRequest.chainId
-        _viewStateLiveData.value = when {
+        when {
             id == null -> {
                 accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
-                OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
+                _viewStateLiveData.value = OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.UNDEFINED_NETWORK_WARNING)
             }
             isNetworkNotSupported(chainId = id) -> {
-                requestedNetwork = BaseNetworkData(id, String.empty)
-                OnSessionRequest(
+                requestedNetwork = BaseNetworkData(id, String.Empty)
+                _viewStateLiveData.value = OnSessionRequest(
                     sessionRequest.meta,
                     requestedNetwork,
                     WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
                 )
+                fetchUnsupportedNetworkName(id)
             }
-            account.chainId != id -> getWalletConnectStateForNotEqualNetworks(sessionRequest, id)
+            account.chainId != id -> {
+                _viewStateLiveData.value = getWalletConnectStateForNotEqualNetworks(sessionRequest, id)
+            }
             else -> {
                 requestedNetwork = BaseNetworkData(id, getNetworkName(id))
-                OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.NO_ALERT)
+                _viewStateLiveData.value = OnSessionRequest(sessionRequest.meta, requestedNetwork, WalletConnectAlertType.NO_ALERT)
             }
         }
     }

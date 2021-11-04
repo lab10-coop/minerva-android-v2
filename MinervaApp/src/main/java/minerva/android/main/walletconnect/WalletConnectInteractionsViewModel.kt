@@ -9,7 +9,6 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.accounts.transaction.fragment.scanner.AddressParser
 import minerva.android.accounts.walletconnect.*
-import minerva.android.extension.empty
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidBigDecimal
 import minerva.android.kotlinUtils.InvalidId
@@ -31,6 +30,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.repository.walletconnect.*
 import minerva.android.walletmanager.utils.BalanceUtils
@@ -49,8 +49,15 @@ class WalletConnectInteractionsViewModel(
     private val logger: Logger,
     private val tokenManager: TokenManager,
     private val accountManager: AccountManager,
-    walletActionsRepository: WalletActionsRepository
-) : BaseWalletConnectScannerViewModel(accountManager, walletConnectRepository, logger, walletActionsRepository) {
+    walletActionsRepository: WalletActionsRepository,
+    unsupportedNetworkRepository: UnsupportedNetworkRepository
+) : BaseWalletConnectScannerViewModel(
+    accountManager,
+    walletConnectRepository,
+    logger,
+    walletActionsRepository,
+    unsupportedNetworkRepository
+) {
     internal var currentDappSession: DappSession? = null
     private var currentRate: BigDecimal = Double.InvalidBigDecimal
     private lateinit var currentTransaction: WalletConnectTransaction
@@ -82,7 +89,11 @@ class WalletConnectInteractionsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onNext = { state -> _walletConnectStatus.value = state },
+                    onNext = { state ->
+                        if (_walletConnectStatus.value != state) {
+                            _walletConnectStatus.value = state
+                        }
+                    },
                     onError = { error ->
                         Timber.e(error)
                         _errorLiveData.value = Event(error)
@@ -112,7 +123,7 @@ class WalletConnectInteractionsViewModel(
                         currentDappSession = session
                         OnEthSignRequest(status.message, session)
                     }
-            is OnDisconnect -> Single.just(OnDisconnected())
+            is OnDisconnect -> Single.just(OnDisconnected(sessionName = status.sessionName))
             is OnEthSendTransaction -> {
                 walletConnectRepository.getDappSessionById(status.peerId)
                     .flatMap { session -> getTransactionCosts(session, status) }
@@ -127,7 +138,7 @@ class WalletConnectInteractionsViewModel(
             ?.let { account -> currentAccount = account }
         val txValue: BigDecimal = getTransactionValue(status.transaction.value)
         if (txValue == WRONG_TX_VALUE) {
-            rejectRequest()
+            rejectRequest(session.isMobileWalletConnect)
             return Single.just(WrongTransactionValueState(status.transaction))
         }
         val transferType: TransferType = getTransferType(status, txValue)
@@ -303,7 +314,7 @@ class WalletConnectInteractionsViewModel(
     private fun isContractDataEmpty(transaction: WalletConnectTransaction) =
         hexToBigDecimal(transaction.data, BigDecimal.ZERO) == BigDecimal.ZERO
 
-    fun sendTransaction() {
+    fun sendTransaction(isMobileWalletConnect: Boolean) {
         launchDisposable {
             transactionRepository.sendTransaction(currentAccount.network.chainId, transaction)
                 .map { txReceipt ->
@@ -318,12 +329,12 @@ class WalletConnectInteractionsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _walletConnectStatus.value = ProgressBarState(true) }
                 .doOnError {
-                    rejectRequest()
+                    rejectRequest(isMobileWalletConnect)
                     _walletConnectStatus.value = ProgressBarState(false)
                 }
                 .doAfterTerminate { weiCoinTransactionValue = NO_COIN_TX_VALUE }
                 .subscribeBy(
-                    onSuccess = { _walletConnectStatus.value = CloseScannerState },
+                    onSuccess = { successWalletConnectInteraction(isMobileWalletConnect) },
                     onError = { error ->
                         logToFirebase("WalletConnect transaction error: $error; $currentTransaction")
                         Timber.e(error)
@@ -331,6 +342,10 @@ class WalletConnectInteractionsViewModel(
                     }
                 )
         }
+    }
+
+    private fun successWalletConnectInteraction(shouldCloseApp: Boolean) {
+        _walletConnectStatus.value = if (shouldCloseApp) CloseScannerState else CloseDialogState
     }
 
     private val transaction
@@ -354,20 +369,20 @@ class WalletConnectInteractionsViewModel(
         return currentTransaction
     }
 
-    fun acceptRequest() {
+    fun acceptRequest(isMobileWalletConnect: Boolean) {
         currentDappSession?.let { session ->
             transactionRepository.getAccountByAddressAndChainId(session.address, session.chainId)?.let {
                 walletConnectRepository.approveRequest(session.peerId, it.privateKey)
-                _walletConnectStatus.value = CloseScannerState
+                successWalletConnectInteraction(isMobileWalletConnect)
             }
         }
     }
 
-    fun rejectRequest() {
+    fun rejectRequest(isMobileWalletConnect: Boolean) {
         weiCoinTransactionValue = NO_COIN_TX_VALUE
         currentDappSession?.let { session ->
             walletConnectRepository.rejectRequest(session.peerId)
-            _walletConnectStatus.value = CloseScannerState
+            successWalletConnectInteraction(isMobileWalletConnect)
         }
     }
 
@@ -404,24 +419,25 @@ class WalletConnectInteractionsViewModel(
 
     override fun handleSessionRequest(sessionRequest: OnSessionRequestData) {
         val id = sessionRequest.chainId
-        _walletConnectStatus.value = when {
+        when {
             id == null -> {
                 accountManager.getFirstActiveAccountOrNull(ChainId.ETH_MAIN)?.let { ethAccount -> account = ethAccount }
-                OnSessionRequestResult(
+                _walletConnectStatus.value = OnSessionRequestResult(
                     sessionRequest.meta,
                     requestedNetwork,
                     WalletConnectAlertType.UNDEFINED_NETWORK_WARNING
                 )
             }
             isNetworkNotSupported(chainId = id) -> {
-                requestedNetwork = BaseNetworkData(id, String.empty)
-                OnSessionRequestResult(
+                requestedNetwork = BaseNetworkData(id, String.Empty)
+                _walletConnectStatus.value = OnSessionRequestResult(
                     sessionRequest.meta,
                     requestedNetwork,
                     WalletConnectAlertType.UNSUPPORTED_NETWORK_WARNING
                 )
+                fetchUnsupportedNetworkName(id)
             }
-            else -> getWalletConnectStateForRequestedNetwork(sessionRequest, id)
+            else -> _walletConnectStatus.value = getWalletConnectStateForRequestedNetwork(sessionRequest, id)
         }
     }
 
@@ -446,12 +462,12 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    override fun closeScanner() {
-        _walletConnectStatus.value = CloseScannerState
+    override fun closeScanner(isMobileWalletConnect: Boolean) {
+        successWalletConnectInteraction(isMobileWalletConnect)
     }
 
     override fun updateWCState(network: BaseNetworkData, dialogType: WalletConnectAlertType) {
-        _walletConnectStatus.postValue(UpdateOnSessionRequest(requestedNetwork, dialogType))
+        _walletConnectStatus.postValue(UpdateOnSessionRequest(network, dialogType))
     }
 
     fun handleDeepLink(deepLink: String) {
@@ -464,8 +480,8 @@ class WalletConnectInteractionsViewModel(
         }
     }
 
-    override fun rejectSession() {
+    override fun rejectSession(isMobileWalletConnect: Boolean) {
         walletConnectRepository.rejectSession(topic.peerId)
-        closeScanner()
+        closeScanner(isMobileWalletConnect)
     }
 }
