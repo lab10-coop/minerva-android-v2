@@ -19,8 +19,9 @@ class ReminderView(context: Context, attrs: AttributeSet? = null, rows: List<Set
         inflate(context, R.layout.reminder_view, this)
         setBackgroundResource(R.drawable.rounded_white_background)
         val dimen = resources.getDimension(R.dimen.margin_small).toInt()
+        val topMargin = resources.getDimension(R.dimen.margin_xxsmall).toInt()
         val params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
-        params.setMargins(dimen, dimen, dimen, dimen)
+        params.setMargins(dimen, topMargin, dimen, dimen)
         layoutParams = params
         setPadding(dimen, dimen, dimen, dimen)
         elevation = 4f

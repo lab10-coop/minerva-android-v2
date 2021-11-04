@@ -9,8 +9,9 @@
     <TextView
         android:id="@+id/networks_header"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/margin_xlarge"
+        android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xsmall"
         android:fontFamily="@font/rubik_medium"
         android:gravity="center_vertical"
         android:paddingTop="@dimen/margin_small"
@@ -39,8 +40,9 @@
         android:textColor="@color/white"
         android:textSize="@dimen/text_xsmall"
         app:cornerRadius="@dimen/rounded_background_small"
+        app:layout_constraintBottom_toBottomOf="@+id/networks_header"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/networks_header"
         tools:text="@string/add_tats" />
 
     <TextView
@@ -59,11 +61,11 @@
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/accounts_srl_margin_top"
         app:layout_constraintBottom_toTopOf="@id/sync_error"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/networks_header">
+        app:layout_constraintTop_toBottomOf="@+id/add_crypto_button">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"

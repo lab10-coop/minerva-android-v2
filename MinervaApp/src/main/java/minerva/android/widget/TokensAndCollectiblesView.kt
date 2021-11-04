@@ -35,7 +35,8 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
 
     init {
         initView()
-        prepareListeners()
+        // change connected to playstore release MNR-637
+        // prepareListeners()
     }
 
     fun prepareView(
@@ -53,15 +54,16 @@ class TokensAndCollectiblesView @JvmOverloads constructor(
     fun prepareTokenLists(account: Account, fiatSymbol: String, tokens: ERCTokensList, isWidgetOpen: Boolean) {
         initMainToken(account, fiatSymbol, tokenViewCallback)
         initTokensList(account, fiatSymbol, tokens.getERC20Tokens(), isWidgetOpen)
-        prepareSeparator(tokens.isERC20TokensListNotEmpty() && tokens.isCollectiblesListNotEmpty())
-        initCollectiblesList(account, tokens.getCollectionsWithBalance(account), isWidgetOpen)
+        // change connected to playstore release MNR-637
+        // prepareSeparator(tokens.isERC20TokensListNotEmpty() && tokens.isCollectiblesListNotEmpty())
+        // initCollectiblesList(account, tokens.getCollectionsWithBalance(account), isWidgetOpen)
     }
 
     private fun initView() {
         setPadding(
             Int.NO_PADDING,
             resources.getDimension(R.dimen.margin_xxsmall).toInt(),
-            resources.getDimension(R.dimen.margin_normal).toInt(),
+            Int.NO_PADDING,
             resources.getDimension(R.dimen.margin_xxsmall).toInt()
         )
         orientation = VERTICAL

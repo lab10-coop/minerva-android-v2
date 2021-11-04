@@ -56,6 +56,7 @@
     <dimen name="card_height">242dp</dimen>
     <dimen name="card_width">384dp</dimen>
     <dimen name="tab_height">30dp</dimen>
+    <dimen name="elevation_normal">4dp</dimen>
     <dimen name="elevation_small">3dp</dimen>
     <dimen name="elevation_xsmall">2dp</dimen>
     <dimen name="no_elevation">0dp</dimen>
@@ -75,4 +76,8 @@
     <dimen name="splash_logo_size">150dp</dimen>
     <dimen name="dapp_list_row_height">80dp</dimen>
     <dimen name="nft_loading_size">80dp</dimen>
+    <dimen name="dialog_hide_account_button_margin_in_between">5dp</dimen>
+    <dimen name="dialog_hide_account_button_margin_bottom">10dp</dimen>
+    <dimen name="token_view_margin_end">22dp</dimen>
+    <dimen name="accounts_srl_margin_top">6dp</dimen>
 </resources>
