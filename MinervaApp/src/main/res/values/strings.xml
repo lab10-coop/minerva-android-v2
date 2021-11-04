@@ -431,6 +431,11 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.6.5</item>
+        <item>* Direct DApp access from Services screen</item>
+        <item>* WalletConnect improvements</item>
+        <item>* UI improvements (buttons, spaces, etc.)</item>
+        <item>* Bug fixes (e.g. Android 8 crashes)</item>
         <item>1.6.0</item>
         <item>* Full support of Binance Smart Chain (BSC) mainnet and testnet</item>
         <item>* Caching of token values and icons</item>
