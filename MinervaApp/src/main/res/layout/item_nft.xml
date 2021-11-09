@@ -7,11 +7,22 @@
     android:layout_marginTop="@dimen/margin_small"
     android:background="@color/white">
 
-    <ImageView
+    <WebView
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="WebViewLayout" />
+
+    <ImageView
+        android:id="@+id/placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:scaleType="center"
+        android:visibility="gone"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,7 +53,7 @@
         android:textColor="@color/colorPrimary"
         android:textSize="@dimen/text_xsmall"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/content"
+        app:layout_constraintBottom_toBottomOf="@id/placeholder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

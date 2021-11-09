@@ -1,14 +1,9 @@
 package minerva.android.accounts.nft.view
 
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.webkit.WebViewClient
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import minerva.android.R
 import minerva.android.accounts.nft.model.NftItem
 import minerva.android.databinding.ItemNftBinding
@@ -38,6 +33,7 @@ class NftAdapter : RecyclerView.Adapter<NftViewHolder>() {
 }
 
 class NftViewHolder(val binding: ItemNftBinding) : RecyclerView.ViewHolder(binding.root) {
+
     fun bind(item: NftItem) = with(binding) {
         name.text = item.name
         description.apply {
@@ -47,38 +43,27 @@ class NftViewHolder(val binding: ItemNftBinding) : RecyclerView.ViewHolder(bindi
         if (item.contentUrl.isBlank()) {
             hideLoading()
             errorView.visible()
-            content.setImageResource(R.drawable.ic_placeholder_nft)
+            content.invisible()
+            placeholder.visible()
+            placeholder.setImageResource(R.drawable.ic_placeholder_nft)
         } else {
-            prepareGlideContent(item.contentUrl)
+            prepareNftContent(item.contentUrl)
         }
     }
 
-    private fun prepareGlideContent(contentUrl: String) = with(binding) {
-        Glide.with(root)
-            .load(contentUrl)
-            .listener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    isFirstResource: Boolean
-                ): Boolean = false
-
-                override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    hideLoading()
-                    return false
-                }
-            }).centerCrop().into(content)
+    private fun prepareNftContent(contentUrl: String) = with(binding) {
+        content.webViewClient = WebViewClient()
+        content.loadData(HtmlGenerator.getNftContentEncodedHtmlFromUrl(contentUrl), MIME_TYPE_HTML, ENCODING)
+        hideLoading()
     }
 
     private fun hideLoading() = with(binding.progress) {
         cancelAnimation()
         invisible()
+    }
+
+    companion object {
+        private const val MIME_TYPE_HTML = "text/html"
+        private const val ENCODING = "base64"
     }
 }
