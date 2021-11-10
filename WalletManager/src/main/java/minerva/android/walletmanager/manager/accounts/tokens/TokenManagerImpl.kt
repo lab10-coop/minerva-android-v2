@@ -55,6 +55,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
+import minerva.android.walletmanager.utils.parseIPFSContentUrl
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -846,7 +847,7 @@ class TokenManagerImpl(
     ): Single<ERCToken> =
         erc721TokenRepository.getERC721DetailsUri(privateKey, chainId, tokenAddress, tokenId)
             .flatMap { url ->
-                cryptoApi.getERC721TokenDetails(url).map { details ->
+                cryptoApi.getERC721TokenDetails(parseIPFSContentUrl(url)).map { details ->
                     contentUri = details.contentUri
                     description = details.description
                     name = details.name
