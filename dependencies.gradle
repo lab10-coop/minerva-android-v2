@@ -14,6 +14,7 @@ ext {
     swipeRefreshVersion = '1.0.0'
     recyclerVersion = '1.2.0-alpha04'
     flowLayoutVersion = '1.10'
+    coilVersion = '1.2.0'
 
     rxAndroidVersion = '2.1.1'
     rxJavaVersion = '2.2.19'
@@ -155,7 +156,9 @@ ext {
             recyclerView   : "androidx.recyclerview:recyclerview:$recyclerVersion",
             flowLayout     : "org.apmem.tools:layouts:$flowLayoutVersion",
             lottie         : "com.airbnb.android:lottie:$lottieVersion",
-            expandableText : "it.mike5v:viewmore-textview:$expandableTextVersion"
+            expandableText : "it.mike5v:viewmore-textview:$expandableTextVersion",
+            coil           : "io.coil-kt:coil:$coilVersion",
+            coilSvg        : "io.coil-kt:coil-svg:$coilVersion"
     ]
 
     blockChainDependencies = [

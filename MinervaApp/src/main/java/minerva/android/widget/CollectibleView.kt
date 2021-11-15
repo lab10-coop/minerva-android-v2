@@ -2,7 +2,12 @@ package minerva.android.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
+import coil.ImageLoader
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
+import coil.transform.RoundedCornersTransformation
 import minerva.android.R
 import minerva.android.databinding.CollectibleViewBinding
 import minerva.android.kotlinUtils.Empty
@@ -29,6 +34,7 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
         collectibleName.text = collectible.collectionName
         collectibleDesc.text = collectible.symbol
         collectibleItem.text = balance.toEngineeringString()
+        collectible.logoURI?.let { logoUri -> collectibleLogo.loadUrl(logoUri) }
     }
 
     private fun prepareListener(callback: CollectibleViewCallback, account: Account, collectible: ERCToken) {
@@ -39,5 +45,21 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
 
     interface CollectibleViewCallback {
         fun onCollectibleClicked(account: Account, tokenAddress: String, collectionName: String)
+    }
+
+    private fun ImageView.loadUrl(url: String) {
+        val roundedCornerRadius = 10f
+        val imageLoader = ImageLoader.Builder(this.context)
+            .componentRegistry { add(SvgDecoder(this@loadUrl.context)) }
+            .build()
+        val request = ImageRequest.Builder(this.context)
+            .transformations(RoundedCornersTransformation(roundedCornerRadius))
+            .placeholder(R.drawable.ic_collectible_square)
+            .error(R.drawable.ic_collectible_square)
+            .data(url)
+            .target(this)
+            .build()
+
+        imageLoader.enqueue(request)
     }
 }

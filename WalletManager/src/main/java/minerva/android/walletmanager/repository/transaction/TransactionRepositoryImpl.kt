@@ -316,6 +316,16 @@ class TransactionRepositoryImpl(
                                         }
                                 }
                                 .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
+                                    tokenManager.updateNFTCollectionsImage(
+                                        shouldSafeNewTokens,
+                                        newAndLocalTokensPerChainIdMap
+                                    )
+                                        .onErrorReturn {
+                                            Timber.e(it)
+                                            UpdateTokensResult(true, newAndLocalTokensPerChainIdMap)
+                                        }
+                                }
+                                .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
                                     tokenManager.saveTokens(shouldSafeNewTokens, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)
@@ -392,9 +402,11 @@ class TransactionRepositoryImpl(
             isBscNetwork(chainId) || isRskNetwork(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
-                        getTxCosts(txCostPayload, null, gasPrice.result) }
+                        getTxCosts(txCostPayload, null, gasPrice.result)
+                    }
                     .onErrorResumeNext {
-                        getTxCosts(txCostPayload, null, null) }
+                        getTxCosts(txCostPayload, null, null)
+                    }
             }
             shouldGetGasPriceFromApi(chainId) && isMaticNetwork(chainId) -> {
                 cryptoApi.getGasPriceForMatic(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
@@ -424,7 +436,8 @@ class TransactionRepositoryImpl(
 
     override fun isAddressValid(address: String, chainId: Int?): Boolean = validationRepository.isAddressValid(address, chainId)
 
-    override fun toRecipientChecksum(address: String, chainId: Int?): String = validationRepository.toRecipientChecksum(address, chainId)
+    override fun toRecipientChecksum(address: String, chainId: Int?): String =
+        validationRepository.toRecipientChecksum(address, chainId)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.run { getTransactionCostInEth(unitConverter.toGwei(gasPrice), BigDecimal(gasLimit)) }
