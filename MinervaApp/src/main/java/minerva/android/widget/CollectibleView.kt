@@ -26,8 +26,8 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
     }
 
     private fun prepareView(collectible: ERCToken, balance: BigDecimal) = binding.apply {
-        collectibleName.text = collectible.symbol
-        collectibleDesc.text = collectible.collectionName
+        collectibleName.text = collectible.collectionName
+        collectibleDesc.text = collectible.symbol
         collectibleItem.text = balance.toEngineeringString()
     }
 

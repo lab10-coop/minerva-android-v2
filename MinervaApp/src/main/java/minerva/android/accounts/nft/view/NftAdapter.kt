@@ -37,8 +37,14 @@ class NftViewHolder(val binding: ItemNftBinding) : RecyclerView.ViewHolder(bindi
     fun bind(item: NftItem) = with(binding) {
         name.text = item.name
         description.apply {
+            setIsExpanded(item.isDescriptionExpanded)
             text = item.description
-            setOnClickListener { toggle() }
+            setOnClickListener {
+                if (!item.isDescriptionExpanded) {
+                    toggle()
+                    item.isDescriptionExpanded = true
+                }
+            }
         }
         if (item.contentUrl.isBlank()) {
             hideLoading()
