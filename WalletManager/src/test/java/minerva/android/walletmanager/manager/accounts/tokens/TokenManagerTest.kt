@@ -829,6 +829,76 @@ class TokenManagerTest : RxTest() {
             }
     }
 
+
+    @Test
+    fun `test should update collection logo url`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val tokensMap = mapOf(
+            Pair(
+                ATS_TAU,
+                listOf(
+                    ERCToken(
+                        ATS_TAU,
+                        "nftToken",
+                        "NFT",
+                        "tokenAddress",
+                        accountAddress = "accountAddress",
+                        tokenId = "2",
+                        type = TokenType.ERC721
+                    )
+                )
+            )
+        )
+        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(
+            Single.just(
+                listOf(NftCollectionDetails(ATS_TAU, "tokenAddress", "logoUri", "nftToken", "NFT"))
+            )
+        )
+
+        tokenManager.updateNFTCollectionsImage(true, tokensMap)
+            .test()
+            .await()
+            .assertValue { result ->
+                val updatedToken = result.tokensPerChainIdMap[ATS_TAU]?.first()
+                result.shouldSafeNewTokens && updatedToken?.logoURI == "logoUri"
+            }
+    }
+
+    @Test
+    fun `test shouldn't update collection logo url`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val tokensMap = mapOf(
+            Pair(
+                ATS_TAU,
+                listOf(
+                    ERCToken(
+                        ATS_TAU,
+                        "nftToken",
+                        "NFT",
+                        "tokenAddress",
+                        accountAddress = "accountAddress",
+                        tokenId = "2",
+                        type = TokenType.ERC721
+                    )
+                )
+            )
+        )
+        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(
+            Single.just(
+                listOf(NftCollectionDetails(ATS_TAU, "tokenAddress1", "logoUri", "nftToken", "NFT"))
+            )
+        )
+
+        tokenManager.updateNFTCollectionsImage(true, tokensMap)
+            .test()
+            .await()
+            .assertValue { result ->
+                val updatedToken = result.tokensPerChainIdMap[ATS_TAU]?.first()
+                result.shouldSafeNewTokens && updatedToken?.logoURI == null
+            }
+    }
+
+
     @Test
     fun `test download tokens from transactions`() {
         NetworkManager.initialize(MockDataProvider.networks)

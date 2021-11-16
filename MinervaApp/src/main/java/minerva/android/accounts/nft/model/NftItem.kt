@@ -5,5 +5,6 @@ data class NftItem(
     val tokenId: String,
     val description: String,
     val contentUrl: String,
-    val name: String
+    val name: String,
+    var isDescriptionExpanded: Boolean = false
 )
