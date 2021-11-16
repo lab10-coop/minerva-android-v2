@@ -505,6 +505,16 @@ class TokenManagerImpl(
             }
         }
 
+    private fun getNftCollectionsIconURL(): Single<Map<String, String>> =
+        cryptoApi.getNftCollectionDetails().map { data ->
+            data.associate { details ->
+                generateTokenHash(
+                    details.chainId,
+                    details.address
+                ) to details.logoURI
+            }
+        }
+
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, MATIC, BSC, BSC_TESTNET -> getTokensFromTx(account)
@@ -787,12 +797,33 @@ class TokenManagerImpl(
             }
         } else Single.just(UpdateTokensResult(false, tokensPerChainIdMap))
 
+    override fun updateNFTCollectionsImage(
+        shouldBeUpdated: Boolean,
+        tokensPerChainIdMap: Map<Int, List<ERCToken>>
+    ): Single<UpdateTokensResult> =
+        getNftCollectionsIconURL().map { iconUrlMap ->
+            var shouldUpdate = shouldBeUpdated
+            tokensPerChainIdMap.values.forEach { tokens ->
+                tokens.forEach { token ->
+                    token.apply {
+                        if (type.isERC721()) {
+                            iconUrlMap[generateTokenHash(chainId, address)]?.let { newLogoURI ->
+                                logoURI = newLogoURI
+                                shouldUpdate = true
+                            }
+                        }
+                    }
+                }
+            }
+            UpdateTokensResult(shouldUpdate, tokensPerChainIdMap)
+        }
+
     override fun updateMissingNFTTokensDetails(
         shouldBeUpdated: Boolean,
         tokensPerChainIdMap: Map<Int, List<ERCToken>>,
         accounts: List<Account>
     ): Single<UpdateTokensResult> {
-        val updatedTokensSingleList = getMissingNFTTokensDetails(tokensPerChainIdMap, accounts)
+        val updatedTokensSingleList = fetchMissingNFTTokensDetails(tokensPerChainIdMap, accounts)
         return if (updatedTokensSingleList.isEmpty()) {
             Single.just(UpdateTokensResult(shouldBeUpdated, tokensPerChainIdMap))
         } else {
@@ -814,7 +845,7 @@ class TokenManagerImpl(
         }
     }
 
-    private fun getMissingNFTTokensDetails(
+    private fun fetchMissingNFTTokensDetails(
         tokensPerChainIdMap: Map<Int, List<ERCToken>>,
         accounts: List<Account>
     ): List<Single<ERCToken>> =

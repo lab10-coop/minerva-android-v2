@@ -933,6 +933,10 @@ class TransactionRepositoryTest : RxTest() {
             Single.just(updatedTokensMap),
             Single.error(Throwable("Stop thread"))
         )
+        whenever(tokenManager.updateNFTCollectionsImage(any(), any())).thenReturn(
+            Single.just(updatedTokensMap),
+            Single.error(Throwable("Stop thread"))
+        )
         whenever(tokenManager.saveTokens(any(), any())).thenReturn(
             Single.just(true),
             Single.error(Throwable("Stop thread"))
