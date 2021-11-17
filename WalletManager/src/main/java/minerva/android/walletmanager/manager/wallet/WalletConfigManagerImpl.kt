@@ -93,6 +93,9 @@ class WalletConfigManagerImpl(
 
     override fun createWalletConfig(masterSeed: MasterSeed): Completable =
         minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), DefaultWalletConfig.create)
+            .flatMap {
+                it.saveWalletConfigToLocalStorageIfVersionChanged(DefaultWalletConfig.create.version)
+            }
             .ignoreElement()
             .doOnComplete { localStorage.isSynced = true }
             .doOnError { localStorage.isSynced = false }
@@ -109,6 +112,7 @@ class WalletConfigManagerImpl(
                         }, onError = { Timber.e(it) }
                     )
             }
+
 
     override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
         minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
@@ -194,12 +198,16 @@ class WalletConfigManagerImpl(
 
     private fun syncWalletConfig(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> =
         minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), payload)
+            .flatMap {
+                it.saveWalletConfigToLocalStorageIfVersionChanged(payload.version)
+            }
             .ignoreElement()
             .andThen(completeKeys(masterSeed, payload))
             .map { walletConfig ->
                 localStorage.isSynced = true
                 walletConfig
             }
+
             .onErrorResumeNext { _: Observer<in WalletConfig> -> completeKeysWhenError(masterSeed, payload) }
 
     private fun completeKeysWhenError(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> {
@@ -219,10 +227,19 @@ class WalletConfigManagerImpl(
                 .flatMap { walletConfigPayload ->
                     minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), walletConfigPayload)
                 }
+                .flatMap {
+                    it.saveWalletConfigToLocalStorageIfVersionChanged(walletConfig.version)
+                }
                 .map { localStorage.isSynced = true }
                 .ignoreElement()
                 .handleAutomaticBackupFailedError(localStorage)
         } else Completable.error(AutomaticBackupFailedThrowable())
+
+    private fun WalletConfigPayload.saveWalletConfigToLocalStorageIfVersionChanged(oldVersion: Int) =
+        if (version > oldVersion) {
+            localWalletProvider.saveWalletConfig(this)
+        } else Single.just(this)
+
 
     override fun dispose() {
         disposable?.dispose()
