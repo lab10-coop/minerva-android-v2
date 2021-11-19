@@ -1,8 +1,10 @@
 package minerva.android.walletmanager.repository.transaction
 
+import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.Asset
 import minerva.android.walletmanager.model.minervaprimitives.account.Coin
@@ -60,4 +62,5 @@ interface TransactionRepository {
     fun getSuperTokenStreamInitBalance(): Flowable<Asset>
     fun startSuperTokenStreaming(chainId: Int): Flowable<Asset>
     fun disconnectFromSuperTokenStreaming()
+    val ratesMapLiveData: LiveData<Event<Unit>>
 }

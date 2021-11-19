@@ -415,12 +415,19 @@ class TokenManagerImpl(
             else -> TokenToAssetBalanceErrorMapper.map(account, token as TokenWithError)
         }
 
+    private fun String?.isEqualOrBothAreNullOrBlank(other: String?): Boolean {
+        val areEqual = this == other
+        val areBothNullOrBlank = (this.isNullOrBlank() && other.isNullOrBlank())
+        return areEqual || areBothNullOrBlank
+    }
+
     private fun getAssetBalance(
         tokens: List<ERCToken>,
         tokenWithBalance: TokenWithBalance,
         account: Account
     ): AssetBalance =
-        tokens.find { token -> token.address.equals(tokenWithBalance.address, true) && token.tokenId == tokenWithBalance.tokenId }
+        tokens.find { token ->  token.address.equals(tokenWithBalance.address, true)
+                    && token.tokenId.isEqualOrBothAreNullOrBlank(tokenWithBalance.tokenId) }
             ?.let { token ->
                 AssetBalance(
                     account.chainId,
@@ -431,7 +438,9 @@ class TokenManagerImpl(
                     )
                 )
             }
-            .orElse { throw NullPointerException() }
+            .orElse {
+                throw NullPointerException()
+            }
 
     private fun getTokenBalanceFlowables(
         tokens: List<ERCToken>,
@@ -525,35 +534,39 @@ class TokenManagerImpl(
     private fun prepareContractAddresses(tokens: List<ERCToken>): String =
         tokens.joinToString(TOKEN_ADDRESS_SEPARATOR) { token -> token.address }
 
+    private fun shouldUpdateRate(token: ERCToken) =
+        rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address))
+
     override fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable =
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
             with(localStorage.loadCurrentFiat()) {
-                if (currentFiat != this && currentFiat != String.Empty) rateStorage.clearRates()
                 tokens.forEach { (chainId, tokens) ->
                     val marketId = MarketUtils.getTokenGeckoMarketId(chainId)
-                    if (!rateStorage.areRatesSynced && marketId != String.Empty) {
-                        observables.add(
-                            updateAccountTokensRate(
-                                marketId,
-                                chainId,
-                                prepareContractAddresses(tokens.distinctBy { it.address })
-                            )
-                        )
+                    if (marketId != String.Empty) {
+                        tokens.distinctBy { it.address }
+                            .filter { shouldUpdateRate(it) }
+                            .chunked(TOKEN_LIMIT_PER_CALL)
+                            .forEach { chunkedTokens ->
+                                observables.add(
+                                    updateAccountTokensRate(
+                                        marketId,
+                                        chainId,
+                                        prepareContractAddresses(chunkedTokens),
+                                        chunkedTokens.map { it.address }.toMutableList()
+                                    )
+                                )
+                            }
                     }
                 }
                 Observable.merge(observables)
                     .doOnNext { rates ->
-                        rates.forEach { (fiatSymbol, rate) ->
-                            rateStorage.saveRate(
-                                fiatSymbol,
-                                rate
-                            )
+                        rates.forEach { (rateHash, rate) ->
+                            rateStorage.saveRate(rateHash, rate)
                         }
                     }
                     .toList()
                     .doOnSuccess {
                         currentFiat = this
-                        rateStorage.areRatesSynced = true
                     }
                     .ignoreElement()
             }
@@ -562,23 +575,35 @@ class TokenManagerImpl(
     private fun updateAccountTokensRate(
         marketId: String,
         chainId: Int,
-        contractAddresses: String
+        contractAddresses: String,
+        contractAddressesList: MutableList<String>
     ): Observable<List<Pair<String, Double>>> =
-        with(localStorage.loadCurrentFiat()) {
-            cryptoApi.getTokensRate(marketId, contractAddresses, this)
+        localStorage.loadCurrentFiat().let { currentFiat ->
+            cryptoApi.getTokensRate(marketId, contractAddresses, currentFiat)
                 .map { tokenRateResponse ->
                     mutableListOf<Pair<String, Double>>().apply {
                         tokenRateResponse.forEach { (contractAddress, rate) ->
                             add(
                                 Pair(
                                     generateTokenHash(chainId, contractAddress),
-                                    rate[toLowerCase(Locale.ROOT)]?.toDouble()
+                                    rate[currentFiat.toLowerCase(Locale.ROOT)]?.toDoubleOrNull()
                                         ?: Double.InvalidValue
                                 )
                             )
+                            contractAddressesList.remove(contractAddress)
                         }
+                        contractAddressesList.forEach { contractAddress ->
+                            add(
+                                Pair(
+                                    generateTokenHash(chainId, contractAddress),
+                                    Double.InvalidValue
+                                )
+                            )
+                        }
+
                     }.toList()
-                }.toObservable()
+                }
+                .toObservable()
         }
 
     override fun updateTokensRate(account: Account) {
@@ -716,7 +741,6 @@ class TokenManagerImpl(
             (this[chainId] ?: listOf()).toMutableList().let { currentTokens ->
                 currentTokens.add(newToken)
                 put(chainId, currentTokens)
-                rateStorage.areRatesSynced = false
             }
         }
 
@@ -739,7 +763,6 @@ class TokenManagerImpl(
                         if (!shouldUpdateLogosURI) {
                             shouldUpdateLogosURI = localChainTokens.size != tokenList.size
                         }
-                        shouldUpdateLogosURI = true
                         allLocalTokensMap[chainId] = tokenList
                     }
             }
@@ -901,7 +924,6 @@ class TokenManagerImpl(
                 }
                 this[chainId] = tokens.distinct()
             }
-            rateStorage.areRatesSynced = false
         }
     }
 
@@ -914,5 +936,6 @@ class TokenManagerImpl(
         private const val ERC20_TX_ACTION = "tokentx"
         private const val ERC721_TX_ACTION = "tokennfttx"
         private const val TOKEN_ADDRESS_SEPARATOR = ","
+        private const val TOKEN_LIMIT_PER_CALL = 25
     }
 }

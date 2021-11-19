@@ -36,6 +36,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MockDataProvider
 import minerva.android.walletmanager.utils.RxTest
+import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -659,6 +660,12 @@ class TokenManagerTest : RxTest() {
 
         doNothing().whenever(rateStorage).saveRate(any(), any())
         whenever(rateStorage.getRates()).thenReturn(rates)
+        tokens.forEach { (chainId, tokens) ->
+            tokens.forEach { token ->
+                whenever(rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address)))
+                    .thenReturn(true, false, false, false)
+            }
+        }
         whenever(cryptoApi.getTokensRate(any(), any(), any())).thenReturn(
             Single.just(tokensRateResponse),
             Single.just(tokensRateResponse),
@@ -675,8 +682,9 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
 
-        verify(rateStorage, times(2)).saveRate(any(), any())
-        verify(cryptoApi, times(2)).getTokensRate(any(), any(), any())
+        verify(rateStorage, times(3)).saveRate(any(), any())
+        verify(rateStorage, times(4)).shouldUpdateRate(any())
+        verify(cryptoApi, times(1)).getTokensRate(any(), any(), any())
     }
 
     @Test
