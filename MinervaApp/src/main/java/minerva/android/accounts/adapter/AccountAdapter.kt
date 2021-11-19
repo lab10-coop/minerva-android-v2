@@ -39,7 +39,6 @@ class AccountAdapter(
 
     fun updateList(accounts: List<Account>) {
         differ.submitList(accounts)
-        notifyDataSetChanged()
     }
 
     fun setFiat(fiatSymbol: String) {
@@ -52,11 +51,6 @@ class AccountAdapter(
 
     fun updateTokenBalance(index: Int) {
         notifyItemChanged(index)
-    }
-
-    fun refreshList() {
-        //TODO Optimise in MNR-477 - update Accounts singly when changing fiat currency
-        notifyDataSetChanged()
     }
 
     fun updateSessionCount(sessionPerAccount: List<DappSessionData>) {
@@ -74,7 +68,6 @@ class AccountAdapter(
 
     fun stopPendingTransactions() {
         listener.stopPendingAccounts()
-        notifyDataSetChanged()
     }
 
     override fun onSendCoinClicked(account: Account) = listener.onSendTransaction(account)

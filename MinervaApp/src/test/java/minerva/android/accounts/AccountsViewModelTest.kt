@@ -1,5 +1,6 @@
 package minerva.android.accounts
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
@@ -24,6 +25,7 @@ import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.transactions.Balance
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -63,8 +65,14 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val loadingObserver: Observer<Event<Boolean>> = mock()
     private val loadingCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
 
+    private val ratesMapLiveData: LiveData<Event<Unit>> = mock()
+    private val walletConfigLiveData: LiveData<Event<WalletConfig>> = mock()
+
     @Before
     fun initViewModel() {
+        whenever(transactionRepository.ratesMapLiveData).thenReturn(ratesMapLiveData)
+        whenever(accountManager.walletConfigLiveData).thenReturn(walletConfigLiveData)
+
         viewModel = AccountsViewModel(
             accountManager,
             walletActionsRepository,
