@@ -1,9 +1,12 @@
 package minerva.android.walletmanager.repository.transaction
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
@@ -24,6 +27,7 @@ import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -74,6 +78,9 @@ class TransactionRepositoryImpl(
     private val currentFiatCurrency: String get() = localStorage.loadCurrentFiat()
     private val ratesMap: HashMap<Int, Markets> = hashMapOf()
 
+    private val _ratesMapLiveData = MutableLiveData<Event<Unit>>()
+    override val ratesMapLiveData : LiveData<Event<Unit>> get() = _ratesMapLiveData
+
     override fun getCoinBalance(): Flowable<Coin> =
         walletConfigManager.getWalletConfig().accounts
             .filter { account -> accountsFilter(account) && !account.isEmptyAccount }
@@ -94,7 +101,7 @@ class TransactionRepositoryImpl(
             ratesMap[chainId]?.let { markets ->
                 getStoredRate(markets, cryptoBalance, marketId)
             }.orElse {
-                getMarkets(marketId, ratesMap, cryptoBalance)
+                getMarkets(marketId, cryptoBalance)
             }
         } else {
             Single.just(calculateFiat(cryptoBalance))
@@ -108,12 +115,11 @@ class TransactionRepositoryImpl(
         if (MarketUtils.getRate(cryptoBalance.chainId, markets, currentFiatCurrency) != Double.InvalidValue) {
             Single.just(calculateFiat(cryptoBalance, markets))
         } else {
-            getMarkets(marketId, ratesMap, cryptoBalance)
+            getMarkets(marketId,  cryptoBalance)
         }
 
     private fun getMarkets(
         marketId: String,
-        ratesMap: HashMap<Int, Markets>,
         cryptoBalance: CoinCryptoBalance
     ): Single<CoinBalance> =
         cryptoApi.getMarkets(marketId, currentFiatCurrency.toLowerCase(Locale.ROOT))
@@ -121,6 +127,11 @@ class TransactionRepositoryImpl(
             .map { market ->
                 ratesMap[cryptoBalance.chainId] = market
                 calculateFiat(cryptoBalance, market)
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSuccess {
+                _ratesMapLiveData.value = Event(Unit)
             }
 
     private fun fetchCoinRate(id: String): Single<Markets> =

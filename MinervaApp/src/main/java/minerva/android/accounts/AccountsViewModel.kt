@@ -2,8 +2,8 @@ package minerva.android.accounts
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -78,8 +78,23 @@ class AccountsViewModel(
     private var tokenBalancesRefreshed = false
     val fiatSymbol: String = transactionRepository.getFiatSymbol()
     val isFirstLaunch: Boolean get() = accountManager.areAllEmptyMainNetworkAccounts()
-    val accountsLiveData: LiveData<List<Account>> =
-        Transformations.map(accountManager.walletConfigLiveData) { event -> event.peekContent().accounts }
+
+    private val _accountsLiveData = MutableLiveData<List<Account>>(activeAccounts)
+    val accountsLiveData: LiveData<List<Account>> get() = _accountsLiveData
+
+    val mediatorLiveData = MediatorLiveData<List<Account>>().apply {
+        addSource(
+            accountManager.walletConfigLiveData
+        ) {
+            _accountsLiveData.value = activeAccounts
+        }
+        addSource(
+            transactionRepository.ratesMapLiveData
+        ) {
+            _accountsLiveData.value = activeAccounts
+        }
+    }
+
     private lateinit var streamingDisposable: CompositeDisposable
 
     private val _errorLiveData = MutableLiveData<Event<AccountsErrorState>>()
@@ -312,6 +327,8 @@ class AccountsViewModel(
                             onError = { error ->
                                 logError("Refresh tokens error: ${getError(error)}")
                                 _errorLiveData.value = Event(RefreshBalanceError)
+                                updateNewTaggedTokens(isAutoDiscoveryRefresh)
+                                _balanceStateLiveData.value = TokenBalanceCompleted
                             }
                         )
                 }
