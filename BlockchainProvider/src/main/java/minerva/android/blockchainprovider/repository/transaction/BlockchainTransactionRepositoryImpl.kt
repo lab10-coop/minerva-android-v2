@@ -246,7 +246,7 @@ class BlockchainTransactionRepositoryImpl(
                     costData.from,
                     count.transactionCount,
                     BigInteger.ZERO,
-                    BigInteger.ZERO,
+                    null,
                     costData.contractAddress,//token smart contract address
                     BigInteger.ZERO, //value of native coin
                     FunctionEncoder.encode( //data hex field, for token transactions
@@ -262,7 +262,7 @@ class BlockchainTransactionRepositoryImpl(
                     costData.from,
                     count.transactionCount,
                     BigInteger.ZERO,
-                    BigInteger.ZERO,
+                    null,
                     costData.to,
                     Convert.toWei(costData.amount, Convert.Unit.ETHER).toBigInteger(),
                     costData.contractData
