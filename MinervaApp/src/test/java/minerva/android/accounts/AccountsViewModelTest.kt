@@ -67,11 +67,13 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
     private val ratesMapLiveData: LiveData<Event<Unit>> = mock()
     private val walletConfigLiveData: LiveData<Event<WalletConfig>> = mock()
+    private val balancesInsertLiveData: LiveData<Event<Unit>> = mock()
 
     @Before
     fun initViewModel() {
         whenever(transactionRepository.ratesMapLiveData).thenReturn(ratesMapLiveData)
         whenever(accountManager.walletConfigLiveData).thenReturn(walletConfigLiveData)
+        whenever(accountManager.balancesInsertLiveData).thenReturn(balancesInsertLiveData)
 
         viewModel = AccountsViewModel(
             accountManager,

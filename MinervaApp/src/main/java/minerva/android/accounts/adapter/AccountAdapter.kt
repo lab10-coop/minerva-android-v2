@@ -38,8 +38,15 @@ class AccountAdapter(
     override fun getItemCount(): Int = differ.currentList.size
 
     fun updateList(accounts: List<Account>) {
-        differ.submitList(accounts)
+        differ.submitList(accounts.deepCopy())
     }
+
+    fun List<Account>.deepCopy(): List<Account> =
+        mutableListOf<Account>().also { newList ->
+            this.forEach {
+                newList.add(it.deepCopy())
+            }
+        }
 
     fun setFiat(fiatSymbol: String) {
         this.fiatSymbol = fiatSymbol

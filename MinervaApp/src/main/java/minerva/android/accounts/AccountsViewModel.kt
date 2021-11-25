@@ -89,6 +89,11 @@ class AccountsViewModel(
             _accountsLiveData.value = activeAccounts
         }
         addSource(
+            accountManager.balancesInsertLiveData
+        ) {
+            _accountsLiveData.value = activeAccounts
+        }
+        addSource(
             transactionRepository.ratesMapLiveData
         ) {
             _accountsLiveData.value = activeAccounts
@@ -669,8 +674,15 @@ class AccountsViewModel(
     }
 
     fun updateTokensRate() {
-        transactionRepository.updateTokensRate()
-        _balanceStateLiveData.value = UpdateAllState
+        launchDisposable {
+            transactionRepository.getTokensRates()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onComplete = {
+                    transactionRepository.updateTokensRate()
+                    _balanceStateLiveData.value = UpdateAllState
+                })
+        }
     }
 
     fun discoverNewTokens() =

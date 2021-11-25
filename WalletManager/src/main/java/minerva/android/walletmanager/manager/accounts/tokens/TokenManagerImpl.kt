@@ -552,7 +552,7 @@ class TokenManagerImpl(
                                         marketId,
                                         chainId,
                                         prepareContractAddresses(chunkedTokens),
-                                        chunkedTokens.map { it.address }.toMutableList()
+                                        chunkedTokens.map { it.address.toLowerCase(Locale.ROOT) }.toMutableList()
                                     )
                                 )
                             }
@@ -583,14 +583,16 @@ class TokenManagerImpl(
                 .map { tokenRateResponse ->
                     mutableListOf<Pair<String, Double>>().apply {
                         tokenRateResponse.forEach { (contractAddress, rate) ->
-                            add(
-                                Pair(
-                                    generateTokenHash(chainId, contractAddress),
-                                    rate[currentFiat.toLowerCase(Locale.ROOT)]?.toDoubleOrNull()
-                                        ?: Double.InvalidValue
+                            (contractAddress.toLowerCase(Locale.ROOT)).let{ contractAddressLowered ->
+                                add(
+                                    Pair(
+                                        generateTokenHash(chainId, contractAddressLowered),
+                                        rate[currentFiat.toLowerCase(Locale.ROOT)]?.toDoubleOrNull()
+                                            ?: Double.InvalidValue
+                                    )
                                 )
-                            )
-                            contractAddressesList.remove(contractAddress)
+                                contractAddressesList.remove(contractAddressLowered.toLowerCase(Locale.ROOT))
+                            }
                         }
                         contractAddressesList.forEach { contractAddress ->
                             add(
