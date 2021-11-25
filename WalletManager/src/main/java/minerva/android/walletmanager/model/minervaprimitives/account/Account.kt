@@ -1,5 +1,7 @@
 package minerva.android.walletmanager.model.minervaprimitives.account
 
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
@@ -15,9 +17,12 @@ data class Account(
     val id: Int,
     var publicKey: String = String.Empty,
     var privateKey: String = String.Empty,
+    @SerializedName("account_address")
     override var address: String = String.Empty,
+    @SerializedName("account_name")
     override var name: String = String.Empty,
     var chainId: Int = Int.InvalidValue,
+    @SerializedName("account_is_deleted")
     override var isDeleted: Boolean = false,
     var cryptoBalance: BigDecimal = Double.InvalidValue.toBigDecimal(),
     var accountTokens: MutableList<AccountToken> = mutableListOf(),
@@ -27,7 +32,9 @@ data class Account(
     var contractAddress: String = String.Empty,
     var isPending: Boolean = false,
     var dappSessionCount: Int = 0,
+    @SerializedName("account_binded_owner")
     override val bindedOwner: String = String.Empty,
+    @SerializedName("account_is_hide")
     override var isHide: Boolean = false,
     private val _isTestNetwork: Boolean = false,
     var isError: Boolean = false
@@ -58,4 +65,9 @@ data class Account(
 
     fun getTokenIndex(tokenAddress: String) =
         accountTokens.filter { accountToken -> accountToken.token.type.isERC20() }.indexOf(getToken(tokenAddress))
+
+    fun deepCopy(): Account {
+        val JSON = Gson().toJson(this)
+        return Gson().fromJson(JSON, Account::class.java)
+    }
 }

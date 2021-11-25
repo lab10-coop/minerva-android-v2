@@ -1,6 +1,8 @@
 package minerva.android.walletmanager.manager.accounts
 
+import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -62,6 +64,9 @@ class AccountManagerImpl(
     override val getTokenVisibilitySettings: TokenVisibilitySettings get() = localStorage.getTokenVisibilitySettings()
     private val coinBalanceDao: CoinBalanceDao = database.coinBalanceDao()
     private val tokenBalanceDao: TokenBalanceDao = database.tokenBalanceDao()
+
+    private val _balancesInsertLiveData = MutableLiveData<Event<Unit>>()
+    override val balancesInsertLiveData: LiveData<Event<Unit>> get() = _balancesInsertLiveData
 
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = Transformations.map(walletManager.walletConfigLiveData) { walletConfigEvent ->
@@ -178,7 +183,9 @@ class AccountManagerImpl(
                     fiatBalance = coinBalance.balance.fiatBalance,
                     rate = rate ?: Double.InvalidValue
                 )
-            )
+            ).doOnComplete {
+                _balancesInsertLiveData.postValue(Event(Unit))
+            }
         }
 
     override fun insertTokenBalance(coinBalance: CoinBalance, accountAddress: String): Completable =
@@ -193,7 +200,9 @@ class AccountManagerImpl(
                     rate = rate ?: Double.InvalidValue,
                     accountAddress = accountAddress
                 )
-            )
+            ).doOnComplete {
+                _balancesInsertLiveData.postValue(Event(Unit))
+            }
         }
 
     override fun getCachedCoinBalance(address: String, chainId: Int): Single<CoinBalance> =

@@ -4,7 +4,8 @@ import androidx.recyclerview.widget.DiffUtil
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 
 class AccountDiffCallback : DiffUtil.ItemCallback<Account>() {
-    override fun areItemsTheSame(oldItem: Account, newItem: Account): Boolean = oldItem.id == newItem.id
+    override fun areItemsTheSame(oldItem: Account, newItem: Account): Boolean =
+        oldItem.id == newItem.id && oldItem.chainId == newItem.chainId
 
     override fun areContentsTheSame(oldItem: Account, newItem: Account): Boolean = oldItem == newItem
 }

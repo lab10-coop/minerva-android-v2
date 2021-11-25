@@ -1,7 +1,9 @@
 package minerva.android.walletmanager.manager.accounts
 
+import androidx.lifecycle.LiveData
 import io.reactivex.Completable
 import io.reactivex.Single
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.Manager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
@@ -50,4 +52,5 @@ interface AccountManager : Manager {
     fun insertTokenBalance(coinBalance: CoinBalance, accountAddress: String): Completable
     fun getCachedCoinBalance(address: String, chainId: Int): Single<CoinBalance>
     fun getCachedTokenBalance(address: String, accountAddress: String): Single<CoinBalance>
+    val balancesInsertLiveData: LiveData<Event<Unit>>
 }
