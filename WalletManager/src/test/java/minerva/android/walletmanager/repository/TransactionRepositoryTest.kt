@@ -31,6 +31,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
+import minerva.android.walletmanager.repository.asset.AssetBalanceRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepositoryImpl
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MockDataProvider
@@ -57,6 +58,7 @@ class TransactionRepositoryTest : RxTest() {
     private val cryptoApi: CryptoApi = mock()
     private val tokenManager: TokenManager = mock()
     private val validationRepository: ValidationRepository = mock()
+    private val assetBalanceRepository: AssetBalanceRepository = mock()
 
     private val repository =
         TransactionRepositoryImpl(
@@ -69,7 +71,8 @@ class TransactionRepositoryTest : RxTest() {
             localStorage,
             webSocketRepositoryImpl,
             tokenManager,
-            validationRepository
+            validationRepository,
+            assetBalanceRepository
         )
 
     @Before

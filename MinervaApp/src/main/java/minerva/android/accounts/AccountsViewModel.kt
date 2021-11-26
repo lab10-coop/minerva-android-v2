@@ -439,7 +439,7 @@ class AccountsViewModel(
             val cachedAccountToken =
                 cachedAccountTokens.findCachedAccountToken(balance.accountToken)
             newTokens.add(getNewAccountToken(balance, cachedAccountToken))
-            account.accountTokens = newTokens.filterAccountTokensForGivenAccount(account)
+            account.accountTokens = newTokens.filterDistinctAccountTokensForGivenAccount(account)
             return insertTokenBalance(balance, balance.accountAddress)
                 .toFlowable<Int>()
                 .map { index }
@@ -560,7 +560,7 @@ class AccountsViewModel(
 
         } else {
             newTokens.add(getNewAccountToken(balance))
-            account.accountTokens = newTokens.filterAccountTokensForGivenAccount(account)
+            account.accountTokens = newTokens.filterDistinctAccountTokensForGivenAccount(account)
             return insertTokenBalance(balance, balance.accountAddress)
                 .toSingleDefault(index)
                 .map { id ->
