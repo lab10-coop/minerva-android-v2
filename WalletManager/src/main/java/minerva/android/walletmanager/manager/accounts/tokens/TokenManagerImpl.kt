@@ -75,6 +75,11 @@ class TokenManagerImpl(
     private val tokenDao: TokenDao = database.tokenDao()
     private var currentFiat = String.Empty
 
+    @VisibleForTesting
+    fun getTokenVisibility(accountAddress: String, tokenAddress: String) =
+        localStorage.getTokenVisibilitySettings().getTokenVisibility(accountAddress, tokenAddress)
+
+
     override fun saveToken(accountAddress: String, chainId: Int, token: ERCToken): Completable =
         tokenDao.getTaggedTokens()
             .flatMapCompletable { tokens ->
@@ -536,6 +541,8 @@ class TokenManagerImpl(
 
     private fun shouldUpdateRate(token: ERCToken) =
         rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address))
+            .and(getTokenVisibility(token.accountAddress, token.address) ?: true)
+
 
     override fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable =
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
