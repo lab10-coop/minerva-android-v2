@@ -709,7 +709,15 @@ class TokenManagerImpl(
             else -> throw NetworkNotFoundThrowable()
         }
 
-    private fun getTokenExplorerURL(chainId: Int) =
+    override fun hasTokenExplorer(chainId: Int): Boolean = try {
+        getTokenExplorerURL(chainId)
+        true
+    } catch (e: NetworkNotFoundThrowable) {
+        false
+    }
+
+    @VisibleForTesting
+    fun getTokenExplorerURL(chainId: Int) =
         when (chainId) {
             ETH_MAIN -> ETHEREUM_MAINNET_TOKEN_BALANCE_URL
             ETH_RIN -> ETHEREUM_RINKEBY_TOKEN_BALANCE_URL

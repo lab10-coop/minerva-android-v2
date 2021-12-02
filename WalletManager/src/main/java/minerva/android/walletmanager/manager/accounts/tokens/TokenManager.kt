@@ -60,4 +60,6 @@ interface TokenManager {
         tokensPerChainIdMap: Map<Int, List<ERCToken>>,
         accounts: List<Account>
     ): Single<UpdateTokensResult>
+
+    fun hasTokenExplorer(chainId: Int) : Boolean
 }

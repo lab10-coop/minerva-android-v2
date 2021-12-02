@@ -50,6 +50,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.repository.asset.AssetBalanceRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import timber.log.Timber
@@ -69,10 +70,12 @@ class TransactionRepositoryImpl(
     private val localStorage: LocalStorage,
     private val webSocketRepository: WebSocketRepository,
     private val tokenManager: TokenManager,
-    private val validationRepository: ValidationRepository
+    private val validationRepository: ValidationRepository,
+    private val assetBalanceRepository: AssetBalanceRepository
 ) : TransactionRepository {
     override val masterSeed: MasterSeed get() = walletConfigManager.masterSeed
     override var newTaggedTokens: MutableList<ERCToken> = mutableListOf()
+    override val assetBalances: MutableList<AssetBalance> get() = assetBalanceRepository.assetBalances
     override var isSuperTokenStreamAvailable: Boolean = tokenManager.activeSuperTokenStreams.isEmpty()
     override var activeSuperTokenStreams: MutableList<ActiveSuperToken> = tokenManager.activeSuperTokenStreams
     private val currentFiatCurrency: String get() = localStorage.loadCurrentFiat()
@@ -190,10 +193,12 @@ class TransactionRepositoryImpl(
 
     override fun getTokenBalance(): Flowable<Asset> =
         accountsForTokenBalanceRefresh.let { accounts ->
+            assetBalances.clear()
             Flowable.mergeDelayError(getTokenBalanceFlowables(accounts))
                 .flatMap { asset ->
                     when (asset) {
                         is AssetBalance -> handleNewAddedTaggedTokens(asset, accounts)
+                            .also { assetBalances.add(asset) }
                             .filter { assetBalance -> !assetBalance.accountToken.token.isStreamActive }
                         else -> Flowable.just(asset as AssetError)
                     }

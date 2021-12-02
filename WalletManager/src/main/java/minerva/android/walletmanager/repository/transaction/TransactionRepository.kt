@@ -5,10 +5,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.kotlinUtils.event.Event
-import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.minervaprimitives.account.Asset
-import minerva.android.walletmanager.model.minervaprimitives.account.Coin
-import minerva.android.walletmanager.model.minervaprimitives.account.PendingAccount
+import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.transactions.Recipient
@@ -21,6 +18,7 @@ import java.math.BigInteger
 
 interface TransactionRepository {
     var newTaggedTokens: MutableList<ERCToken>
+    val assetBalances: MutableList<AssetBalance>
     val masterSeed: MasterSeed
     fun getCoinBalance(): Flowable<Coin>
     fun getTokenBalance(): Flowable<Asset>

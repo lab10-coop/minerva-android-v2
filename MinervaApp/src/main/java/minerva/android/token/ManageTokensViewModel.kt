@@ -5,15 +5,18 @@ import minerva.android.base.BaseViewModel
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
-import minerva.android.walletmanager.model.token.NativeToken
-import minerva.android.walletmanager.model.token.TokenVisibilitySettings
+import minerva.android.walletmanager.model.minervaprimitives.account.AssetBalance
+import minerva.android.walletmanager.model.token.*
+import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.widget.repository.getMainTokenIconRes
+import java.math.BigDecimal
 
 class ManageTokensViewModel(
     private val accountManager: AccountManager,
     private val localStorage: LocalStorage,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val transactionRepository: TransactionRepository
 ) : BaseViewModel() {
 
     lateinit var account: Account
@@ -27,14 +30,27 @@ class ManageTokensViewModel(
     }
 
     fun loadTokens() = account.network.let { network ->
-        listOf(
+        mutableListOf<Token>(
             NativeToken(
                 network.chainId,
                 network.name,
                 network.token,
                 logoRes = getMainTokenIconRes(network.chainId)
             )
-        ) + tokenManager.getActiveTokensPerAccount(account).distinctBy { token -> token.address }
+        ).apply {
+            tokenManager.getActiveTokensPerAccount(account)
+                .distinctBy { token -> token.address }
+                .forEach { activeToken ->
+                    if (tokenManager.hasTokenExplorer(network.chainId)) {
+                        transactionRepository.assetBalances
+                            .find { it.accountToken.token == activeToken }
+                            ?.takeIf { it.currentBalance > BigDecimal.ZERO }
+                            ?.let { add(activeToken) }
+                    } else {
+                        add(activeToken)
+                    }
+                }
+        }
     }
 
     fun getTokenVisibilitySettings(tokenAddress: String): Boolean =
