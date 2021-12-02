@@ -659,11 +659,13 @@ class TokenManagerTest : RxTest() {
         val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
 
         doNothing().whenever(rateStorage).saveRate(any(), any())
+        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(spy(TokenVisibilitySettings()))
         whenever(rateStorage.getRates()).thenReturn(rates)
         tokens.forEach { (chainId, tokens) ->
             tokens.forEach { token ->
                 whenever(rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address)))
                     .thenReturn(true, false, false, false)
+                whenever(tokenManager.getTokenVisibility(token.accountAddress, token.address)).thenReturn(true)
             }
         }
         whenever(cryptoApi.getTokensRate(any(), any(), any())).thenReturn(
