@@ -75,9 +75,28 @@ class AccountManagerImpl(
                 activeAccounts = getActiveAccounts(this)
                 cachedTokens = filterCachedTokens(erc20Tokens)
                 rawAccounts = accounts
+                updateNftDetails(this)
             }
             walletConfigEvent
         }
+
+    private fun updateNftDetails(walletConfig: WalletConfig) {
+        with(walletConfig) {
+            activeAccounts.forEach { account ->
+                account.accountTokens.forEach { accountToken ->
+                    erc20Tokens[account.chainId]
+                        ?.find { ercToken ->
+                            ercToken.address.equals(accountToken.token.address, true)
+                        }?.let { ercToken ->
+                            accountToken.token.logoURI = ercToken.logoURI
+                            accountToken.token.description = ercToken.description
+                            accountToken.token.contentUri = ercToken.contentUri
+                            accountToken.token.name = ercToken.name
+                        }
+                }
+            }
+        }
+    }
 
     internal fun getActiveAccounts(walletConfig: WalletConfig): List<Account> =
         walletConfig.accounts.filter { account -> account.shouldShow && account.isTestNetwork == !areMainNetworksEnabled }

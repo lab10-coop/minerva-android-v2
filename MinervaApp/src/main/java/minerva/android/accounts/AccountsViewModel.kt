@@ -27,6 +27,7 @@ import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwners
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.WalletActionFields
@@ -53,6 +54,7 @@ import java.util.concurrent.TimeUnit
 
 class AccountsViewModel(
     private val accountManager: AccountManager,
+    private val tokenManager: TokenManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val safeAccountRepository: SafeAccountRepository,
     private val transactionRepository: TransactionRepository,
@@ -125,8 +127,22 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings
         refreshCoinBalances()
         refreshTokensBalances()
+        fetchNFTData()
         discoverNewTokens()
         getSessions(accountManager.getAllAccounts())
+    }
+
+    fun fetchNFTData(){
+        launchDisposable {
+            tokenManager.fetchNFTsDetails()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = {
+                        Timber.e(it)
+                    }
+                )
+        }
     }
 
     internal fun getSessions(accounts: List<Account>) {

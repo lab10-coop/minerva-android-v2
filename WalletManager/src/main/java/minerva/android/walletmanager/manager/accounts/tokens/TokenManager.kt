@@ -56,10 +56,11 @@ interface TokenManager {
     ): List<ERCToken>
 
     fun updateMissingNFTTokensDetails(
-        shouldBeUpdated: Boolean,
         tokensPerChainIdMap: Map<Int, List<ERCToken>>,
         accounts: List<Account>
     ): Single<UpdateTokensResult>
 
     fun hasTokenExplorer(chainId: Int) : Boolean
+
+    fun fetchNFTsDetails() : Single<Boolean>
 }

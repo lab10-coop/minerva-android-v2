@@ -56,6 +56,7 @@ import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import minerva.android.walletmanager.utils.parseIPFSContentUrl
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -858,14 +859,35 @@ class TokenManagerImpl(
             UpdateTokensResult(shouldUpdate, tokensPerChainIdMap)
         }
 
+    private fun getActiveAccounts(): List<Account> =
+        walletManager.getWalletConfig()
+            .accounts.filter { account -> accountsFilter(account) && account.network.isAvailable() }
+
+    private fun accountsFilter(account: Account) =
+        refreshBalanceFilter(account) && account.network.testNet == !localStorage.areMainNetworksEnabled
+
+    private fun refreshBalanceFilter(account: Account) = !account.isHide && !account.isDeleted && !account.isPending
+
+    override fun fetchNFTsDetails(): Single<Boolean> =
+        walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
+            updateMissingNFTTokensDetails(allLocalTokens.toMutableMap(), getActiveAccounts())
+                .flatMap { (shouldUpdate, tokensPerChainIdMap) ->
+                    updateNFTCollectionsImage(shouldUpdate, tokensPerChainIdMap)
+                }
+                .flatMap { (shouldUpdate, tokensPerChainIdMap) ->
+                    saveTokens(shouldUpdate, tokensPerChainIdMap)
+                }
+        }
+
+
     override fun updateMissingNFTTokensDetails(
-        shouldBeUpdated: Boolean,
         tokensPerChainIdMap: Map<Int, List<ERCToken>>,
         accounts: List<Account>
     ): Single<UpdateTokensResult> {
-        val updatedTokensSingleList = fetchMissingNFTTokensDetails(tokensPerChainIdMap, accounts)
+        val updatedTokensSingleList =
+            fetchMissingNFTTokensDetails(tokensPerChainIdMap, accounts)
         return if (updatedTokensSingleList.isEmpty()) {
-            Single.just(UpdateTokensResult(shouldBeUpdated, tokensPerChainIdMap))
+            Single.just(UpdateTokensResult(false, tokensPerChainIdMap))
         } else {
             Single.mergeDelayError(updatedTokensSingleList)
                 .reduce(UpdateTokensResult(true, tokensPerChainIdMap)) { resultData, token ->
@@ -881,6 +903,9 @@ class TokenManagerImpl(
                             name = token.name
                         }
                     }
+                }
+                .onErrorReturn {
+                    UpdateTokensResult(true, tokensPerChainIdMap)
                 }
         }
     }
