@@ -1,6 +1,8 @@
 package minerva.android.walletmanager.manager.accounts
 
+import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -63,6 +65,9 @@ class AccountManagerImpl(
     private val coinBalanceDao: CoinBalanceDao = database.coinBalanceDao()
     private val tokenBalanceDao: TokenBalanceDao = database.tokenBalanceDao()
 
+    private val _balancesInsertLiveData = MutableLiveData<Event<Unit>>()
+    override val balancesInsertLiveData: LiveData<Event<Unit>> get() = _balancesInsertLiveData
+
     override val walletConfigLiveData: LiveData<Event<WalletConfig>>
         get() = Transformations.map(walletManager.walletConfigLiveData) { walletConfigEvent ->
             with(walletConfigEvent.peekContent()) {
@@ -70,9 +75,28 @@ class AccountManagerImpl(
                 activeAccounts = getActiveAccounts(this)
                 cachedTokens = filterCachedTokens(erc20Tokens)
                 rawAccounts = accounts
+                updateNftDetails(this)
             }
             walletConfigEvent
         }
+
+    private fun updateNftDetails(walletConfig: WalletConfig) {
+        with(walletConfig) {
+            activeAccounts.forEach { account ->
+                account.accountTokens.forEach { accountToken ->
+                    erc20Tokens[account.chainId]
+                        ?.find { ercToken ->
+                            ercToken.address.equals(accountToken.token.address, true)
+                        }?.let { ercToken ->
+                            accountToken.token.logoURI = ercToken.logoURI
+                            accountToken.token.description = ercToken.description
+                            accountToken.token.contentUri = ercToken.contentUri
+                            accountToken.token.name = ercToken.name
+                        }
+                }
+            }
+        }
+    }
 
     internal fun getActiveAccounts(walletConfig: WalletConfig): List<Account> =
         walletConfig.accounts.filter { account -> account.shouldShow && account.isTestNetwork == !areMainNetworksEnabled }
@@ -178,7 +202,9 @@ class AccountManagerImpl(
                     fiatBalance = coinBalance.balance.fiatBalance,
                     rate = rate ?: Double.InvalidValue
                 )
-            )
+            ).doOnComplete {
+                _balancesInsertLiveData.postValue(Event(Unit))
+            }
         }
 
     override fun insertTokenBalance(coinBalance: CoinBalance, accountAddress: String): Completable =
@@ -193,7 +219,9 @@ class AccountManagerImpl(
                     rate = rate ?: Double.InvalidValue,
                     accountAddress = accountAddress
                 )
-            )
+            ).doOnComplete {
+                _balancesInsertLiveData.postValue(Event(Unit))
+            }
         }
 
     override fun getCachedCoinBalance(address: String, chainId: Int): Single<CoinBalance> =

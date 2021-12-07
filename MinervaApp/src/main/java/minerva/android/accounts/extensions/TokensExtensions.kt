@@ -27,11 +27,12 @@ fun AccountToken.isTokenShown(account: Account): Boolean =
         accountToken.isTheSameToken(token.address, token.accountAddress, token.tokenId)
     } != null
 
-fun MutableList<AccountToken>.filterAccountTokensForGivenAccount(account: Account): MutableList<AccountToken> =
+fun MutableList<AccountToken>.filterDistinctAccountTokensForGivenAccount(account: Account): MutableList<AccountToken> =
     filter { accountToken ->
         accountToken.token.accountAddress.equals(account.address, true) &&
                 accountToken.token.chainId == account.chainId
-    }.toMutableList()
+    }.distinctBy{ kotlin.Pair(it.token.address, it.token.tokenId) }
+        .toMutableList()
 
 fun Account.shouldUpdateCoinBalance(coinBalance: CoinBalance): Boolean =
     isAccountToUpdate(coinBalance) && (cryptoBalance != coinBalance.balance.cryptoBalance ||

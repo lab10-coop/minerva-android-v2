@@ -56,6 +56,7 @@ import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import minerva.android.walletmanager.utils.parseIPFSContentUrl
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -74,6 +75,11 @@ class TokenManagerImpl(
     private val currentTimeProvider = CurrentTimeProviderImpl()
     private val tokenDao: TokenDao = database.tokenDao()
     private var currentFiat = String.Empty
+
+    @VisibleForTesting
+    fun getTokenVisibility(accountAddress: String, tokenAddress: String) =
+        localStorage.getTokenVisibilitySettings().getTokenVisibility(accountAddress, tokenAddress)
+
 
     override fun saveToken(accountAddress: String, chainId: Int, token: ERCToken): Completable =
         tokenDao.getTaggedTokens()
@@ -536,6 +542,8 @@ class TokenManagerImpl(
 
     private fun shouldUpdateRate(token: ERCToken) =
         rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address))
+            .and(getTokenVisibility(token.accountAddress, token.address) ?: true)
+
 
     override fun getTokensRates(tokens: Map<Int, List<ERCToken>>): Completable =
         mutableListOf<Observable<List<Pair<String, Double>>>>().let { observables ->
@@ -552,7 +560,7 @@ class TokenManagerImpl(
                                         marketId,
                                         chainId,
                                         prepareContractAddresses(chunkedTokens),
-                                        chunkedTokens.map { it.address }.toMutableList()
+                                        chunkedTokens.map { it.address.toLowerCase(Locale.ROOT) }.toMutableList()
                                     )
                                 )
                             }
@@ -583,14 +591,16 @@ class TokenManagerImpl(
                 .map { tokenRateResponse ->
                     mutableListOf<Pair<String, Double>>().apply {
                         tokenRateResponse.forEach { (contractAddress, rate) ->
-                            add(
-                                Pair(
-                                    generateTokenHash(chainId, contractAddress),
-                                    rate[currentFiat.toLowerCase(Locale.ROOT)]?.toDoubleOrNull()
-                                        ?: Double.InvalidValue
+                            (contractAddress.toLowerCase(Locale.ROOT)).let{ contractAddressLowered ->
+                                add(
+                                    Pair(
+                                        generateTokenHash(chainId, contractAddressLowered),
+                                        rate[currentFiat.toLowerCase(Locale.ROOT)]?.toDoubleOrNull()
+                                            ?: Double.InvalidValue
+                                    )
                                 )
-                            )
-                            contractAddressesList.remove(contractAddress)
+                                contractAddressesList.remove(contractAddressLowered.toLowerCase(Locale.ROOT))
+                            }
                         }
                         contractAddressesList.forEach { contractAddress ->
                             add(
@@ -707,7 +717,15 @@ class TokenManagerImpl(
             else -> throw NetworkNotFoundThrowable()
         }
 
-    private fun getTokenExplorerURL(chainId: Int) =
+    override fun hasTokenExplorer(chainId: Int): Boolean = try {
+        getTokenExplorerURL(chainId)
+        true
+    } catch (e: NetworkNotFoundThrowable) {
+        false
+    }
+
+    @VisibleForTesting
+    fun getTokenExplorerURL(chainId: Int) =
         when (chainId) {
             ETH_MAIN -> ETHEREUM_MAINNET_TOKEN_BALANCE_URL
             ETH_RIN -> ETHEREUM_RINKEBY_TOKEN_BALANCE_URL
@@ -841,14 +859,35 @@ class TokenManagerImpl(
             UpdateTokensResult(shouldUpdate, tokensPerChainIdMap)
         }
 
+    private fun getActiveAccounts(): List<Account> =
+        walletManager.getWalletConfig()
+            .accounts.filter { account -> accountsFilter(account) && account.network.isAvailable() }
+
+    private fun accountsFilter(account: Account) =
+        refreshBalanceFilter(account) && account.network.testNet == !localStorage.areMainNetworksEnabled
+
+    private fun refreshBalanceFilter(account: Account) = !account.isHide && !account.isDeleted && !account.isPending
+
+    override fun fetchNFTsDetails(): Single<Boolean> =
+        walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
+            updateMissingNFTTokensDetails(allLocalTokens.toMutableMap(), getActiveAccounts())
+                .flatMap { (shouldUpdate, tokensPerChainIdMap) ->
+                    updateNFTCollectionsImage(shouldUpdate, tokensPerChainIdMap)
+                }
+                .flatMap { (shouldUpdate, tokensPerChainIdMap) ->
+                    saveTokens(shouldUpdate, tokensPerChainIdMap)
+                }
+        }
+
+
     override fun updateMissingNFTTokensDetails(
-        shouldBeUpdated: Boolean,
         tokensPerChainIdMap: Map<Int, List<ERCToken>>,
         accounts: List<Account>
     ): Single<UpdateTokensResult> {
-        val updatedTokensSingleList = fetchMissingNFTTokensDetails(tokensPerChainIdMap, accounts)
+        val updatedTokensSingleList =
+            fetchMissingNFTTokensDetails(tokensPerChainIdMap, accounts)
         return if (updatedTokensSingleList.isEmpty()) {
-            Single.just(UpdateTokensResult(shouldBeUpdated, tokensPerChainIdMap))
+            Single.just(UpdateTokensResult(false, tokensPerChainIdMap))
         } else {
             Single.mergeDelayError(updatedTokensSingleList)
                 .reduce(UpdateTokensResult(true, tokensPerChainIdMap)) { resultData, token ->
@@ -864,6 +903,9 @@ class TokenManagerImpl(
                             name = token.name
                         }
                     }
+                }
+                .onErrorReturn {
+                    UpdateTokensResult(true, tokensPerChainIdMap)
                 }
         }
     }

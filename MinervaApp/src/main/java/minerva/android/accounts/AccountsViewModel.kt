@@ -27,6 +27,7 @@ import minerva.android.walletmanager.exception.BalanceIsNotEmptyAndHasMoreOwners
 import minerva.android.walletmanager.exception.BalanceIsNotEmptyThrowable
 import minerva.android.walletmanager.exception.IsNotSafeAccountMasterOwnerThrowable
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes.Companion.FIRST_DEFAULT_TEST_NETWORK_INDEX
 import minerva.android.walletmanager.model.defs.WalletActionFields
@@ -53,6 +54,7 @@ import java.util.concurrent.TimeUnit
 
 class AccountsViewModel(
     private val accountManager: AccountManager,
+    private val tokenManager: TokenManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val safeAccountRepository: SafeAccountRepository,
     private val transactionRepository: TransactionRepository,
@@ -89,6 +91,11 @@ class AccountsViewModel(
             _accountsLiveData.value = activeAccounts
         }
         addSource(
+            accountManager.balancesInsertLiveData
+        ) {
+            _accountsLiveData.value = activeAccounts
+        }
+        addSource(
             transactionRepository.ratesMapLiveData
         ) {
             _accountsLiveData.value = activeAccounts
@@ -120,8 +127,22 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings
         refreshCoinBalances()
         refreshTokensBalances()
+        fetchNFTData()
         discoverNewTokens()
         getSessions(accountManager.getAllAccounts())
+    }
+
+    fun fetchNFTData(){
+        launchDisposable {
+            tokenManager.fetchNFTsDetails()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = {
+                        Timber.e(it)
+                    }
+                )
+        }
     }
 
     internal fun getSessions(accounts: List<Account>) {
@@ -434,7 +455,7 @@ class AccountsViewModel(
             val cachedAccountToken =
                 cachedAccountTokens.findCachedAccountToken(balance.accountToken)
             newTokens.add(getNewAccountToken(balance, cachedAccountToken))
-            account.accountTokens = newTokens.filterAccountTokensForGivenAccount(account)
+            account.accountTokens = newTokens.filterDistinctAccountTokensForGivenAccount(account)
             return insertTokenBalance(balance, balance.accountAddress)
                 .toFlowable<Int>()
                 .map { index }
@@ -555,7 +576,7 @@ class AccountsViewModel(
 
         } else {
             newTokens.add(getNewAccountToken(balance))
-            account.accountTokens = newTokens.filterAccountTokensForGivenAccount(account)
+            account.accountTokens = newTokens.filterDistinctAccountTokensForGivenAccount(account)
             return insertTokenBalance(balance, balance.accountAddress)
                 .toSingleDefault(index)
                 .map { id ->
@@ -669,8 +690,15 @@ class AccountsViewModel(
     }
 
     fun updateTokensRate() {
-        transactionRepository.updateTokensRate()
-        _balanceStateLiveData.value = UpdateAllState
+        launchDisposable {
+            transactionRepository.getTokensRates()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onComplete = {
+                    transactionRepository.updateTokensRate()
+                    _balanceStateLiveData.value = UpdateAllState
+                })
+        }
     }
 
     fun discoverNewTokens() =

@@ -659,11 +659,13 @@ class TokenManagerTest : RxTest() {
         val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
 
         doNothing().whenever(rateStorage).saveRate(any(), any())
+        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(spy(TokenVisibilitySettings()))
         whenever(rateStorage.getRates()).thenReturn(rates)
         tokens.forEach { (chainId, tokens) ->
             tokens.forEach { token ->
                 whenever(rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address)))
                     .thenReturn(true, false, false, false)
+                whenever(tokenManager.getTokenVisibility(token.accountAddress, token.address)).thenReturn(true)
             }
         }
         whenever(cryptoApi.getTokensRate(any(), any(), any())).thenReturn(
@@ -805,7 +807,7 @@ class TokenManagerTest : RxTest() {
             )
         )
 
-        tokenManager.updateMissingNFTTokensDetails(true, tokensMap, accounts)
+        tokenManager.updateMissingNFTTokensDetails(tokensMap, accounts)
             .test()
             .await()
             .assertValue { result ->
@@ -813,30 +815,6 @@ class TokenManagerTest : RxTest() {
                 result.shouldSafeNewTokens && updatedToken?.contentUri == "contentUri" && updatedToken.description == "description"
             }
     }
-
-    @Test
-    fun `test shouldn't update nft details`() {
-        NetworkManager.initialize(MockDataProvider.networks)
-        val accounts = listOf(Account(1, chainId = ATS_TAU, address = "accountAddress", privateKey = "privateKey"))
-        whenever(erc721TokenRepository.getERC721DetailsUri(any(), any(), any(), any())).thenReturn(Single.just("detailsUrl"))
-        whenever(cryptoApi.getERC721TokenDetails(any())).thenReturn(
-            Single.just(
-                ERC721Details(
-                    "nftToken",
-                    "contentUri",
-                    "description"
-                )
-            )
-        )
-
-        tokenManager.updateMissingNFTTokensDetails(false, map, accounts)
-            .test()
-            .await()
-            .assertValue { result ->
-                !result.shouldSafeNewTokens && result.tokensPerChainIdMap == map
-            }
-    }
-
 
     @Test
     fun `test should update collection logo url`() {

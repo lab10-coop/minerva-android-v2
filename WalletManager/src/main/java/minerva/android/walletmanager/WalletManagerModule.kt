@@ -31,6 +31,8 @@ import minerva.android.walletmanager.provider.CurrentTimeProvider
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepositoryImpl
+import minerva.android.walletmanager.repository.asset.AssetBalanceRepository
+import minerva.android.walletmanager.repository.asset.AssetBalanceRepositoryImpl
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
@@ -74,7 +76,8 @@ fun createWalletModules() = module {
     factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
-    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    single<AssetBalanceRepository> {AssetBalanceRepositoryImpl()  }
+    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SafeAccountRepository> { SafeAccountRepositoryImpl(get(), get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }

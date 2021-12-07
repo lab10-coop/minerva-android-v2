@@ -39,6 +39,7 @@ class AccountAdapter(
 
     fun updateList(accounts: List<Account>) {
         differ.submitList(accounts)
+        notifyDataSetChanged()
     }
 
     fun setFiat(fiatSymbol: String) {
