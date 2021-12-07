@@ -4,8 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
-import coil.ImageLoader
-import coil.decode.SvgDecoder
+import coil.imageLoader
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import minerva.android.R
@@ -49,9 +48,7 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
 
     private fun ImageView.loadUrl(url: String) {
         val roundedCornerRadius = 10f
-        val imageLoader = ImageLoader.Builder(this.context)
-            .componentRegistry { add(SvgDecoder(this@loadUrl.context)) }
-            .build()
+        val imageLoader = context.imageLoader
         val request = ImageRequest.Builder(this.context)
             .transformations(RoundedCornersTransformation(roundedCornerRadius))
             .placeholder(R.drawable.ic_collectible_square)

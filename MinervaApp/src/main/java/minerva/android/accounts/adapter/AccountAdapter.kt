@@ -38,9 +38,7 @@ class AccountAdapter(
     override fun getItemCount(): Int = differ.currentList.size
 
     fun updateList(accounts: List<Account>) {
-        if(differ.currentList.isEmpty()){
-            differ.submitList(accounts)
-        }
+        differ.submitList(accounts)
         notifyDataSetChanged()
     }
 

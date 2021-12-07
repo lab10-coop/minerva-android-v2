@@ -11,6 +11,12 @@ import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
+import coil.ImageLoader
+import coil.Coil
+import coil.util.CoilUtils
+import coil.decode.SvgDecoder
+import okhttp3.OkHttpClient
+
 
 class MinervaApp : Application() {
 
@@ -24,6 +30,7 @@ class MinervaApp : Application() {
         }
         initializeCrashlytics()
         initializeTimber()
+        initializeCoil()
         RxJavaPlugins.setErrorHandler { Timber.e(it) }
         viewModel.checkWalletConfigInitialization()
     }
@@ -41,5 +48,18 @@ class MinervaApp : Application() {
             .disabled(BuildConfig.DEBUG)
             .build()
         Fabric.with(this, Crashlytics.Builder().core(crashlyticsCore).build())
+    }
+
+    private fun initializeCoil(){
+        val imageLoader = ImageLoader.Builder(this)
+            .crossfade(true)
+            .okHttpClient {
+                OkHttpClient.Builder()
+                    .cache(CoilUtils.createDefaultCache(this))
+                    .build()
+            }
+            .componentRegistry { add(SvgDecoder(this@MinervaApp)) }
+            .build()
+        Coil.setImageLoader(imageLoader)
     }
 }

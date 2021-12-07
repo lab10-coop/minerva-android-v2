@@ -14,6 +14,7 @@ import minerva.android.mock.accounts
 import minerva.android.mock.accountsWithoutPrimaryAccount
 import minerva.android.mock.networks
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -45,6 +46,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val safeAccountRepository: SafeAccountRepository = mock()
     private val accountManager: AccountManager = mock()
+    private val tokenManager: TokenManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
     private val logger: Logger = mock()
@@ -77,6 +79,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
 
         viewModel = AccountsViewModel(
             accountManager,
+            tokenManager,
             walletActionsRepository,
             safeAccountRepository,
             transactionRepository,

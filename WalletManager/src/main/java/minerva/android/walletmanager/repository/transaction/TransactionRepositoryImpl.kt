@@ -321,27 +321,6 @@ class TransactionRepositoryImpl(
                                         }
                                 }
                                 .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
-                                    tokenManager.updateMissingNFTTokensDetails(
-                                        shouldSafeNewTokens,
-                                        newAndLocalTokensPerChainIdMap,
-                                        accounts
-                                    )
-                                        .onErrorReturn {
-                                            Timber.e(it)
-                                            UpdateTokensResult(true, newAndLocalTokensPerChainIdMap)
-                                        }
-                                }
-                                .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
-                                    tokenManager.updateNFTCollectionsImage(
-                                        shouldSafeNewTokens,
-                                        newAndLocalTokensPerChainIdMap
-                                    )
-                                        .onErrorReturn {
-                                            Timber.e(it)
-                                            UpdateTokensResult(true, newAndLocalTokensPerChainIdMap)
-                                        }
-                                }
-                                .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
                                     tokenManager.saveTokens(shouldSafeNewTokens, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)

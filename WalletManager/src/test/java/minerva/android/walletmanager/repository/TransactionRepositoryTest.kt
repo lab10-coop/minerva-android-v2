@@ -932,7 +932,7 @@ class TransactionRepositoryTest : RxTest() {
             Single.just(updatedTokensMap),
             Single.error(Throwable("Stop thread"))
         )
-        whenever(tokenManager.updateMissingNFTTokensDetails(any(), any(), any())).thenReturn(
+        whenever(tokenManager.updateMissingNFTTokensDetails(any(), any())).thenReturn(
             Single.just(updatedTokensMap),
             Single.error(Throwable("Stop thread"))
         )
