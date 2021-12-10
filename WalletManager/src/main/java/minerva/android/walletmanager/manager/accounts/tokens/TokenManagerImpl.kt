@@ -847,11 +847,9 @@ class TokenManagerImpl(
             tokensPerChainIdMap.values.forEach { tokens ->
                 tokens.forEach { token ->
                     token.apply {
-                        if (type.isERC721()) {
-                            iconUrlMap[generateTokenHash(chainId, address)]?.let { newLogoURI ->
-                                logoURI = newLogoURI
-                                shouldUpdate = true
-                            }
+                        iconUrlMap[generateTokenHash(chainId, address)]?.let { newLogoURI ->
+                            logoURI = newLogoURI
+                            shouldUpdate = true
                         }
                     }
                 }
