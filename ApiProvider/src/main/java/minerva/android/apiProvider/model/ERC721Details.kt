@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class ERC721Details(
     @SerializedName("name")
     val name: String,
-    @SerializedName("image")
+    @SerializedName("image", alternate = ["image_url"])
     val contentUri: String,
     @SerializedName("description")
     val description: String
