@@ -410,7 +410,7 @@ class TokenManagerTest : RxTest() {
 
         mergedTokenMap01.tokensPerChainIdMap[2]?.get(3)?.name shouldBeEqualTo "tokenTwoTwo"
 
-        mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 4
+        mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 5
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.name shouldBeEqualTo "tokenThreeThree"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.logoURI shouldBeEqualTo "bb1"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeThree2"
@@ -952,6 +952,7 @@ class TokenManagerTest : RxTest() {
                 )
             )
         )
+        whenever(erc721TokenRepository.isTokenOwner(any(), any(),any(), any(),any())).thenReturn(Single.just(true))
         whenever(cryptoApi.getConnectedTokens(any())).thenReturn(
             Single.just(
                 TokenBalanceResponse(
@@ -969,7 +970,8 @@ class TokenManagerTest : RxTest() {
                             symbol = "TK2",
                             address = "address2",
                             decimals = "",
-                            type = Tokens.ERC_721.type
+                            type = Tokens.ERC_721.type,
+                            balance = "1"
                         )
                     )
                 )

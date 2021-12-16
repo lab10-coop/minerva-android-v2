@@ -69,11 +69,10 @@ class ERC721TokenRepositoryImpl(
         address: String
     ): Flowable<Token> =
         loadERC721(privateKey, chainId, tokenAddress)
-            .ownerOf(BigInteger(tokenId))
+            .balanceOf(address)
             .flowable()
-            .map { ownerAddress ->
-                val balance = if (ownerAddress.equals(address, true)) BigDecimal.ONE else BigDecimal.ZERO
-                TokenWithBalance(chainId, tokenAddress, balance, tokenId) as Token
+            .map { balance ->
+                TokenWithBalance(chainId, tokenAddress, balance.toBigDecimal(), tokenId) as Token
             }
             .onErrorReturn { error -> TokenWithError(chainId, tokenAddress, error, tokenId) }
 

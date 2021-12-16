@@ -11,6 +11,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.TokenDetails
+import minerva.android.apiProvider.model.TokenTx
 import minerva.android.blockchainprovider.model.Token
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
@@ -56,7 +57,6 @@ import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import minerva.android.walletmanager.utils.parseIPFSContentUrl
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -457,7 +457,7 @@ class TokenManagerImpl(
             tokens.forEach { ercToken ->
                 if (ercToken.type.isERC721()) {
                     tokenBalanceFlowables.add(
-                        erc721TokenRepository.getTokenBalance(ercToken.tokenId!!, privateKey, chainId, ercToken.address, address)
+                        erc721TokenRepository.getTokenBalance(ercToken.tokenId ?: String.Empty, privateKey, chainId, ercToken.address, address)
                             .map { token -> Pair(token, ercToken.tag) }
                             .subscribeOn(Schedulers.io())
                     )
@@ -627,33 +627,68 @@ class TokenManagerImpl(
         }
     }
 
+    private fun getTokenTransactionsWithOwnership(account: Account) = getTokenTransactions(account)
+        .flattenAsObservable { it.tokens }
+        .flatMap { tokenTx ->
+            Observable.zip(
+                Observable.just(tokenTx),
+                if (tokenTx.tokenId.isNotBlank()) {
+                    erc721TokenRepository.isTokenOwner(
+                        tokenTx.tokenId,
+                        account.privateKey,
+                        account.chainId,
+                        tokenTx.address,
+                        account.address
+                    ).toObservable().onErrorReturn { false }
+                } else Observable.just(false),
+                BiFunction { token: TokenTx, isTokenOwner: Boolean ->
+                    Pair<TokenTx, Boolean>(token, isTokenOwner)
+                })
+        }
+        .toList()
+
     private fun getTokensForAccount(account: Account): Single<List<ERCToken>> =
-        Single.zip(getTokensList(account), getTokenTransactions(account), BiFunction { tokens, tokensTx ->
-            mutableListOf<ERCToken>().apply {
-                tokens.forEach { token ->
-                    if (token.type.isERC721()) {
-                        tokensTx.tokens
-                            .filter { tokenTx -> tokenTx.address == token.address }
-                            .forEach { tx -> add(token.copy(tokenId = tx.tokenId)) }
-                    } else {
-                        add(token)
+        Single.zip(getTokensListWithBalance(account),
+            getTokenTransactionsWithOwnership(account),
+            BiFunction { tokens, tokensTx ->
+                mutableListOf<ERCToken>().apply {
+                    tokens.forEach { (token, balance) ->
+                        if (token.type.isERC721()) {
+                            mutableListOf<ERCToken>().also { collectionTokens ->
+                                tokensTx
+                                    .filter { (tokenTx, isTokenOwner) -> tokenTx.address.equals(token.address, true) }
+                                    .distinctBy { (tokenTx, isTokenOwner) -> tokenTx.tokenId }
+                                    .forEach { (tokenTx, isTokenOwner) ->
+                                        if (isTokenOwner) {
+                                            collectionTokens.add(token.copy(tokenId = tokenTx.tokenId))
+                                        }
+                                    }
+                                balance.toIntOrNull()?.let { balance ->
+                                    repeat(balance - collectionTokens.size ){
+                                        collectionTokens.add(token)
+                                    }
+                                }
+                                addAll(collectionTokens)
+                            }
+                        } else {
+                            add(token)
+                        }
                     }
                 }
-            }
-        })
+            })
 
     private fun getTokenTransactions(account: Account) =
         cryptoApi.getTokenTx(url = getTokensTxApiURL(account))
 
 
-    private fun getTokensList(account: Account): Single<List<ERCToken>> =
+    private fun getTokensListWithBalance(account: Account): Single<List<Pair<ERCToken, String>>> =
         cryptoApi.getConnectedTokens(url = getTokensApiURL(account))
             .map { response ->
-                mutableListOf<ERCToken>().apply {
+                mutableListOf<Pair<ERCToken, String>>().apply {
                     response.tokens
-                        .map { tokenData -> TokenDataToERCToken.map(account.chainId, tokenData, account.address) }
-                        .filter { tokenData -> tokenData.type != TokenType.INVALID }
-                        .forEach { token -> add(token) }
+                        .map { tokenData -> TokenDataToERCToken.map(account.chainId, tokenData, account.address) to tokenData.balance }
+                        .filter { (token, balance) -> token.type != TokenType.INVALID }
+                        .forEach { (token, balance) -> add(token to balance) }
                 }
             }
 
@@ -811,7 +846,7 @@ class TokenManagerImpl(
                 localToken.address.equals(
                     newToken.address,
                     true
-                ) && localToken.tokenId == newToken.tokenId
+                ) && localToken.tokenId == newToken.tokenId && localToken.tokenId != null
             } == null
         } else {
             find { localToken -> localToken.address.equals(newToken.address, true) } == null
@@ -890,15 +925,15 @@ class TokenManagerImpl(
             Single.mergeDelayError(updatedTokensSingleList)
                 .reduce(UpdateTokensResult(true, tokensPerChainIdMap)) { resultData, token ->
                     resultData.apply {
-                        tokensPerChainIdMap[token.chainId]?.find {
+                        tokensPerChainIdMap[token.chainId]?.filter {
                             it.address.equals(token.address, true) && it.accountAddress.equals(
                                 token.accountAddress,
                                 true
                             ) && token.tokenId == it.tokenId
-                        }?.apply {
-                            description = token.description
-                            contentUri = token.contentUri
-                            name = token.name
+                        }?.forEach {
+                            it.description = token.description
+                            it.contentUri = token.contentUri
+                            it.name = token.name
                         }
                     }
                 }
@@ -919,11 +954,16 @@ class TokenManagerImpl(
                         val privateKey =
                             accounts.find { account -> account.chainId == token.chainId && account.address == token.accountAddress }?.privateKey
                         if (!privateKey.isNullOrBlank()) {
-                            add(
-                                token.updateMissingNFTTokensDetails(
-                                    privateKey, token.chainId, token.address, BigInteger(token.tokenId!!)
+                            token.tokenId?.let{ tokenId ->
+                                add(
+                                    token.updateMissingNFTTokensDetails(
+                                        privateKey,
+                                        token.chainId,
+                                        token.address,
+                                        BigInteger(tokenId)
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
