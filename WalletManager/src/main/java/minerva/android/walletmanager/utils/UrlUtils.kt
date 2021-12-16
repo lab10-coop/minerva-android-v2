@@ -7,4 +7,4 @@ fun parseIPFSContentUrl(url: String): String {
 }
 
 private const val IPFS_PREFIX = "ipfs://"
-private const val HTTPS_FOR_IPFS_PREFIX = "https://ipfs.io/"
+private const val HTTPS_FOR_IPFS_PREFIX = "https://ipfs.io/ipfs/"
