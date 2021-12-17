@@ -824,7 +824,7 @@ class TokenManagerImpl(
 
     private fun mergeNewTokensWithLocal(localChainTokens: List<ERCToken>, newTokens: List<ERCToken>) =
         mutableListOf<ERCToken>().apply {
-            addAll(localChainTokens)
+            addAll(localChainTokens.filter { it.type.isERC20() })
             newTokens.forEach { newToken ->
                 if (isNewToken(newToken)) {
                     add(newToken)
@@ -832,13 +832,27 @@ class TokenManagerImpl(
                     add(newToken)
                 }
             }
+            // TODO: PL
+            // TODO: Wypadałoby tutaj zmergować ikonki kolekcji i ich detale, aby nie musieć odświeżać na nowo
+            // TODO: Narazie nie dodaję, aby dobrze zresetować stare NFT.
+            // TODO: ENG
+            // TODO: NFT icons and details should be merged here so as not to fetch them unnecessarily
+            // TODO: I decided not to add them in order to see when token discovery properly works
         }
 
     private fun MutableList<ERCToken>.isNewTokenForAccount(newToken: ERCToken) =
-        find { localToken ->
-            localToken.address.equals(newToken.address, true) &&
-                    localToken.accountAddress.equals(newToken.accountAddress, true)
-        } == null
+        if (newToken.type.isERC721()) {
+            find { localToken ->
+                localToken.address.equals(newToken.address, true) &&
+                        localToken.accountAddress.equals(newToken.accountAddress, true)
+                        && localToken.tokenId == newToken.tokenId && localToken.tokenId != null
+            } == null
+        } else {
+            find { localToken ->
+                localToken.address.equals(newToken.address, true) &&
+                        localToken.accountAddress.equals(newToken.accountAddress, true)
+            } == null
+        }
 
     private fun MutableList<ERCToken>.isNewToken(newToken: ERCToken) =
         if (newToken.type.isERC721()) {

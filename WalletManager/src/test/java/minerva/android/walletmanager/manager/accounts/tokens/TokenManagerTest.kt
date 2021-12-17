@@ -410,12 +410,11 @@ class TokenManagerTest : RxTest() {
 
         mergedTokenMap01.tokensPerChainIdMap[2]?.get(3)?.name shouldBeEqualTo "tokenTwoTwo"
 
-        mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 5
+        mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 4
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.name shouldBeEqualTo "tokenThreeThree"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.logoURI shouldBeEqualTo "bb1"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeThree2"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(2)?.name shouldBeEqualTo "tokenThreeOne"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(2)?.logoURI shouldBeEqualTo null
+        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeOne"
+        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.logoURI shouldBeEqualTo null
 
         val mergedTokenMap02 = tokenManager.mergeWithLocalTokensList(tokenSetTwo)
         mergedTokenMap02.shouldSafeNewTokens shouldBeEqualTo true
