@@ -11,9 +11,10 @@ data class ERCTokensList(
     fun getCollectionsWithBalance(account: Account) = getCollectibles()
         .map { accountToken ->
             val balance =
-                account.accountTokens.filter { token -> token.token.address.equals(accountToken.token.address, true) }
-                    .sumBy { token -> token.currentRawBalance.intValueExact() }
-            accountToken to BigDecimal(balance)
+                account.accountTokens.find { token -> token.token.address.equals(accountToken.token.address, true) }
+                    ?.currentBalance
+                    ?: BigDecimal(0)
+            accountToken to balance
         }
         .distinctBy { pair -> pair.first.token.address }
         .sortedByDescending { pair -> pair.second }
