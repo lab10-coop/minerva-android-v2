@@ -30,8 +30,8 @@ class CollectibleView(context: Context) : ConstraintLayout(context) {
     }
 
     private fun prepareView(collectible: ERCToken, balance: BigDecimal) = binding.apply {
-        collectibleName.text = collectible.collectionName
-        collectibleDesc.text = collectible.symbol
+        collectibleName.text = collectible.symbol
+        collectibleDesc.text = collectible.collectionName
         collectibleItem.text = balance.toEngineeringString()
         collectible.logoURI?.let { logoUri -> collectibleLogo.loadUrl(logoUri) }
     }
