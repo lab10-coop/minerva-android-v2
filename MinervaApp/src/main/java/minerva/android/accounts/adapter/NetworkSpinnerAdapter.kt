@@ -35,7 +35,9 @@ class NetworkSpinnerAdapter(context: Context, @LayoutRes private val layoutResou
                     } else {
                         ResourcesCompat.getDrawable(resources, R.drawable.ic_dropdown_black, null)
                     }
-                    setCompoundDrawablesWithIntrinsicBounds(getNetworkIcon(context, network.chainId), null, arrow, null)
+                    setCompoundDrawablesRelativeWithIntrinsicBounds(
+                        getNetworkIcon(context, network.chainId), null, arrow, null
+                    )
                 }
             }
         }

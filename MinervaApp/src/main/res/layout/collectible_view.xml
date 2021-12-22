@@ -12,7 +12,7 @@
         app:layout_constraintTop_toTopOf="@id/collectible_logo"
         app:layout_constraintStart_toEndOf="@id/collectible_logo"
         app:layout_constraintBottom_toTopOf="@id/collectible_desc"
-        android:layout_marginStart="@dimen/margin_xsmall"
+        android:layout_marginStart="@dimen/margin_small"
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal"
         tools:text="POAP" />
@@ -23,7 +23,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="@id/collectible_name"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="@dimen/margin_xsmall"
         android:textColor="@color/gray"
         android:textSize="@dimen/text_normal"
         tools:text="3" />
