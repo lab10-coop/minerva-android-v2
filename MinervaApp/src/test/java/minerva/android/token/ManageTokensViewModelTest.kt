@@ -51,6 +51,33 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         )
     )
 
+//    @Test
+//    fun `Check loading correct tokens list for account with no token discovery`() {
+//        NetworkManager.initialize(networks)
+//        whenever(accountManager.loadAccount(any())).thenReturn(account)
+//        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
+//        whenever(tokenManager.hasTokenExplorer(any())).thenReturn(false)
+//        whenever(tokenManager.getActiveTokensPerAccount(any())).thenReturn(
+//            listOf(
+//                ERCToken(1, symbol = "token1", address = "address1", type = TokenType.ERC20),
+//                ERCToken(3, symbol = "token2", address = "address2", type = TokenType.ERC20),
+//                ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721),
+//                ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721),
+//                ERCToken(3, symbol = "token4", address = "address4", type = TokenType.ERC20)
+//            )
+//        )
+//        viewModel.initViewModel(0)
+//
+//        val tokens = viewModel.loadTokens()
+//        tokens.size shouldBeEqualTo 5
+//        tokens[0].symbol shouldBeEqualTo "cookie"
+//        tokens[1].symbol shouldBeEqualTo "token1"
+//        tokens[2].symbol shouldBeEqualTo "token2"
+//        tokens[3].symbol shouldBeEqualTo "token3"
+//        tokens[4].symbol shouldBeEqualTo "token4"
+//    }
+
+    // TODO: Uncomment old test and delete current if Nfts should be visible
     @Test
     fun `Check loading correct tokens list for account with no token discovery`() {
         NetworkManager.initialize(networks)
@@ -69,14 +96,58 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         viewModel.initViewModel(0)
 
         val tokens = viewModel.loadTokens()
-        tokens.size shouldBeEqualTo 5
+        tokens.size shouldBeEqualTo 4
         tokens[0].symbol shouldBeEqualTo "cookie"
         tokens[1].symbol shouldBeEqualTo "token1"
         tokens[2].symbol shouldBeEqualTo "token2"
-        tokens[3].symbol shouldBeEqualTo "token3"
-        tokens[4].symbol shouldBeEqualTo "token4"
+        tokens[3].symbol shouldBeEqualTo "token4"
     }
 
+
+//    @Test
+//    fun `Check loading correct tokens list for account with token discovery`() {
+//        NetworkManager.initialize(networks)
+//        whenever(accountManager.loadAccount(any())).thenReturn(account)
+//        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(TokenVisibilitySettings())
+//        whenever(tokenManager.hasTokenExplorer(any())).thenReturn(true)
+//        val positiveBalanceTokens = listOf(
+//            ERCToken(1, symbol = "token1", address = "address1", type = TokenType.ERC20),
+//            ERCToken(3, symbol = "token2", address = "address2", type = TokenType.ERC20),
+//            ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721),
+//            ERCToken(3, symbol = "token3", address = "address3", type = TokenType.ERC721)
+//        )
+//        val zeroBalanceTokens = listOf(ERCToken(3, symbol = "token4", address = "address4", type = TokenType.ERC20))
+//        val activeTokens = positiveBalanceTokens + zeroBalanceTokens
+//        whenever(transactionRepository.assetBalances).thenReturn(
+//            (positiveBalanceTokens.map { token ->
+//                AssetBalance(
+//                    token.chainId,
+//                    "",
+//                    AccountToken(token, currentRawBalance = BigDecimal.ONE)
+//                )
+//            } + zeroBalanceTokens.map { token ->
+//                AssetBalance(
+//                    token.chainId,
+//                    "",
+//                    AccountToken(token, currentRawBalance = BigDecimal.ZERO)
+//                )
+//            }).toMutableList()
+//
+//        )
+//        whenever(tokenManager.getActiveTokensPerAccount(any())).thenReturn(
+//            activeTokens
+//        )
+//        viewModel.initViewModel(0)
+//
+//        val tokens = viewModel.loadTokens()
+//        tokens.size shouldBeEqualTo 4
+//        tokens[0].symbol shouldBeEqualTo "cookie"
+//        tokens[1].symbol shouldBeEqualTo "token1"
+//        tokens[2].symbol shouldBeEqualTo "token2"
+//        tokens[3].symbol shouldBeEqualTo "token3"
+//    }
+
+    // TODO: Uncomment old test and delete current if Nfts should be visible
     @Test
     fun `Check loading correct tokens list for account with token discovery`() {
         NetworkManager.initialize(networks)
@@ -113,11 +184,10 @@ class ManageTokensViewModelTest : BaseViewModelTest() {
         viewModel.initViewModel(0)
 
         val tokens = viewModel.loadTokens()
-        tokens.size shouldBeEqualTo 4
+        tokens.size shouldBeEqualTo 3
         tokens[0].symbol shouldBeEqualTo "cookie"
         tokens[1].symbol shouldBeEqualTo "token1"
         tokens[2].symbol shouldBeEqualTo "token2"
-        tokens[3].symbol shouldBeEqualTo "token3"
     }
 
     @Test
