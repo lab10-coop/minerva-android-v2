@@ -686,6 +686,7 @@ class TokenManagerImpl(
             .map { response ->
                 mutableListOf<Pair<ERCToken, String>>().apply {
                     response.tokens
+                        .filter { tokenData-> tokenData.name != null }
                         .map { tokenData -> TokenDataToERCToken.map(account.chainId, tokenData, account.address) to tokenData.balance }
                         .filter { (token, balance) -> token.type != TokenType.INVALID }
                         .forEach { (token, balance) -> add(token to balance) }

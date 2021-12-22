@@ -11,7 +11,7 @@ object TokenDataToERCToken {
         val tokenType = mapToTokenType(token.type)
         return ERCToken(
             chainId = chainId,
-            name = if (tokenType.isERC20()) token.name else String.Empty,
+            name = if (tokenType.isERC20()) token.name ?: String.Empty else String.Empty,
             symbol = token.symbol,
             address = token.address,
             decimals = token.decimals,

@@ -21,6 +21,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
         tools:ignore="WebViewLayout" />
 
     <ImageView
