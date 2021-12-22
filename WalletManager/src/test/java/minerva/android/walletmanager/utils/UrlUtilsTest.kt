@@ -8,8 +8,12 @@ class UrlUtilsTest {
     @Test
     fun `Check correct parsing ipfs url`() {
         val ipfsUrl = "ipfs://testurl"
+        val ipfsipfsUrl = "ipfs://ipfs/testurl"
         val nonIpfsUrl = "https://api.com/testurl"
-        "https://ipfs.io/ipfs/testurl" shouldBeEqualTo parseIPFSContentUrl(ipfsUrl)
-        nonIpfsUrl shouldBeEqualTo parseIPFSContentUrl(nonIpfsUrl)
+        val ipfsOverHttpUrl = "https://ipfs.io/ipfs/testurl"
+
+        parseIPFSContentUrl(ipfsUrl) shouldBeEqualTo ipfsOverHttpUrl
+        parseIPFSContentUrl(ipfsipfsUrl) shouldBeEqualTo ipfsOverHttpUrl
+        parseIPFSContentUrl(nonIpfsUrl) shouldBeEqualTo nonIpfsUrl
     }
 }
