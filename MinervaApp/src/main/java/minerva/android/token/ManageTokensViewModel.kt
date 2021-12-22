@@ -40,6 +40,7 @@ class ManageTokensViewModel(
         ).apply {
             tokenManager.getActiveTokensPerAccount(account)
                 .distinctBy { token -> token.address }
+                .filter { it.type.isERC20() } // TODO: Remove line for Nft Visibility
                 .forEach { activeToken ->
                     if (tokenManager.hasTokenExplorer(network.chainId)) {
                         transactionRepository.assetBalances
