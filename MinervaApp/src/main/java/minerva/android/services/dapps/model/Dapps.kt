@@ -6,21 +6,28 @@ import minerva.android.kotlinUtils.Empty
 object Dapps {
 
     val valuesOrdered = listOf(
+        Dapps.DEHIVE,
         Dapps.STAKEWISE,
         Dapps.HONEYSWAP,
         Dapps.SUPERFLUID,
         Dapps.EPORIO,
         Dapps.QUICKSWAP,
+        Dapps.AGAVE,
         Dapps.AAVE,
         Dapps.MINERVA,
         Dapps.SYMMETRIC,
         Dapps.SYMMETRIC_POOLS,
+        Dapps.SWAPR,
         Dapps.ZEROALPHA,
         Dapps.ONEINCH,
+        Dapps.COWSWAP,
         Dapps.UNISWAP,
         Dapps.PANCAKESWAP,
         Dapps.OPENSEA,
-        Dapps.TORNADO_CASH
+        Dapps.TORNADO_CASH,
+        Dapps.CURVE_ETHEREUM,
+        Dapps.CURVE_POLYGON,
+        Dapps.CURVE_GNOSIS
     )
 
     private object Dapps {
@@ -159,6 +166,69 @@ object Dapps {
             Icons.EPORIO,
             OpenDappDialogs.Data.EPORIO
         )
+        val DEHIVE = Dapp(
+            ShortNames.DEHIVE,
+            LongNames.DEHIVE,
+            Descriptions.DEHIVE,
+            Colors.DEHIVE,
+            String.Empty,
+            Icons.DEHIVE,
+            OpenDappDialogs.Data.DEHIVE
+        )
+        val SWAPR = Dapp(
+            ShortNames.SWAPR,
+            LongNames.SWAPR,
+            Descriptions.SWAPR,
+            Colors.SWAPR,
+            String.Empty,
+            Icons.SWAPR,
+            OpenDappDialogs.Data.SWAPR
+        )
+        val AGAVE = Dapp(
+            ShortNames.AGAVE,
+            LongNames.AGAVE,
+            Descriptions.AGAVE,
+            Colors.AGAVE,
+            String.Empty,
+            Icons.AGAVE,
+            OpenDappDialogs.Data.AGAVE
+        )
+        val COWSWAP = Dapp(
+            ShortNames.COWSWAP,
+            LongNames.COWSWAP,
+            Descriptions.COWSWAP,
+            Colors.COWSWAP,
+            String.Empty,
+            Icons.COWSWAP,
+            OpenDappDialogs.Data.COWSWAP
+        )
+        val CURVE_ETHEREUM = Dapp(
+            ShortNames.CURVE_ETHEREUM,
+            LongNames.CURVE_ETHEREUM,
+            Descriptions.CURVE_ETHEREUM,
+            Colors.CURVE_ETHEREUM,
+            String.Empty,
+            Icons.CURVE_ETHEREUM,
+            OpenDappDialogs.Data.CURVE_ETHEREUM
+        )
+        val CURVE_POLYGON = Dapp(
+            ShortNames.CURVE_POLYGON,
+            LongNames.CURVE_POLYGON,
+            Descriptions.CURVE_POLYGON,
+            Colors.CURVE_POLYGON,
+            String.Empty,
+            Icons.CURVE_POLYGON,
+            OpenDappDialogs.Data.CURVE_POLYGON
+        )
+        val CURVE_GNOSIS = Dapp(
+            ShortNames.CURVE_GNOSIS,
+            LongNames.CURVE_GNOSIS,
+            Descriptions.CURVE_GNOSIS,
+            Colors.CURVE_GNOSIS,
+            String.Empty,
+            Icons.CURVE_GNOSIS,
+            OpenDappDialogs.Data.CURVE_GNOSIS
+        )
     }
 
     object LongNames {
@@ -177,6 +247,13 @@ object Dapps {
         const val SYMMETRIC_POOLS = "Symmetric DEX Pools"
         const val SYMMETRIC = "Symmetric DEX"
         const val EPORIO = "Eporio NFT Marketplace"
+        const val DEHIVE = "DeHive DeFi Protocol"
+        const val SWAPR = "Swapr DEX"
+        const val AGAVE = "Agave"
+        const val COWSWAP = "CowSwap DEX Aggregator"
+        const val CURVE_ETHEREUM = "Curve DEX"
+        const val CURVE_POLYGON = "Curve DEX"
+        const val CURVE_GNOSIS = "Curve DEX"
     }
 
     private object ShortNames {
@@ -195,6 +272,13 @@ object Dapps {
         const val SYMMETRIC_POOLS = "Symmetric Pools"
         const val SYMMETRIC = "Symmetric"
         const val EPORIO = "Eporio"
+        const val DEHIVE = "DeHive"
+        const val SWAPR = "Swapr"
+        const val AGAVE = "Agave"
+        const val COWSWAP = "CowSwap"
+        const val CURVE_ETHEREUM = "Curve (Ethereum)"
+        const val CURVE_POLYGON = "Curve (Polygon)"
+        const val CURVE_GNOSIS = "Curve (Gnosis Chain)"
     }
 
     private object Descriptions {
@@ -213,6 +297,13 @@ object Dapps {
         const val SYMMETRIC_POOLS = "Decentralized Exchange"
         const val SYMMETRIC = "Decentralized Exchange"
         const val EPORIO = "NFT Marketplace"
+        const val DEHIVE = "Well-Balanced Crypto Indexes"
+        const val SWAPR = "Decentralized Exchange"
+        const val AGAVE = "Borrowing / Lending Protocol"
+        const val COWSWAP = "DEX Aggregator Service"
+        const val CURVE_ETHEREUM = "Decentralized Exchange"
+        const val CURVE_POLYGON = "Decentralized Exchange"
+        const val CURVE_GNOSIS = "Decentralized Exchange"
     }
 
     private object Colors {
@@ -231,6 +322,13 @@ object Dapps {
         const val SYMMETRIC_POOLS = "#334956"
         const val SYMMETRIC = "#334956"
         const val EPORIO = "#00b4c7"
+        const val DEHIVE = "#3F3F4B"
+        const val SWAPR = "#3F3F4B"
+        const val AGAVE = "#204C44"
+        const val COWSWAP = "#7FADBE"
+        const val CURVE_ETHEREUM = "#A5A4CB"
+        const val CURVE_POLYGON = "#A5A4CB"
+        const val CURVE_GNOSIS = "#A5A4CB"
     }
 
     private object Icons {
@@ -249,5 +347,12 @@ object Dapps {
         val SYMMETRIC_POOLS = R.drawable.ic_symmetric
         val SYMMETRIC = R.drawable.ic_symmetric
         val EPORIO = R.drawable.ic_eporio
+        val DEHIVE = R.drawable.ic_dehive
+        val SWAPR = R.drawable.ic_swapr
+        val AGAVE = R.drawable.ic_agave
+        val COWSWAP = R.drawable.ic_cowswap
+        val CURVE_ETHEREUM = R.drawable.ic_curve
+        val CURVE_POLYGON = R.drawable.ic_curve
+        val CURVE_GNOSIS = R.drawable.ic_curve
     }
 }
