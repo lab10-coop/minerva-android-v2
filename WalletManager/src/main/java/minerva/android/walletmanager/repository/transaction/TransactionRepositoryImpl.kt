@@ -1,9 +1,12 @@
 package minerva.android.walletmanager.repository.transaction
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
@@ -24,6 +27,7 @@ import minerva.android.blockchainprovider.repository.wss.WebSocketRepository
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -46,6 +50,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.MasterSeed
+import minerva.android.walletmanager.repository.asset.AssetBalanceRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import timber.log.Timber
@@ -65,14 +70,19 @@ class TransactionRepositoryImpl(
     private val localStorage: LocalStorage,
     private val webSocketRepository: WebSocketRepository,
     private val tokenManager: TokenManager,
-    private val validationRepository: ValidationRepository
+    private val validationRepository: ValidationRepository,
+    private val assetBalanceRepository: AssetBalanceRepository
 ) : TransactionRepository {
     override val masterSeed: MasterSeed get() = walletConfigManager.masterSeed
     override var newTaggedTokens: MutableList<ERCToken> = mutableListOf()
+    override val assetBalances: MutableList<AssetBalance> get() = assetBalanceRepository.assetBalances
     override var isSuperTokenStreamAvailable: Boolean = tokenManager.activeSuperTokenStreams.isEmpty()
     override var activeSuperTokenStreams: MutableList<ActiveSuperToken> = tokenManager.activeSuperTokenStreams
     private val currentFiatCurrency: String get() = localStorage.loadCurrentFiat()
     private val ratesMap: HashMap<Int, Markets> = hashMapOf()
+
+    private val _ratesMapLiveData = MutableLiveData<Event<Unit>>()
+    override val ratesMapLiveData : LiveData<Event<Unit>> get() = _ratesMapLiveData
 
     override fun getCoinBalance(): Flowable<Coin> =
         walletConfigManager.getWalletConfig().accounts
@@ -94,7 +104,7 @@ class TransactionRepositoryImpl(
             ratesMap[chainId]?.let { markets ->
                 getStoredRate(markets, cryptoBalance, marketId)
             }.orElse {
-                getMarkets(marketId, ratesMap, cryptoBalance)
+                getMarkets(marketId, cryptoBalance)
             }
         } else {
             Single.just(calculateFiat(cryptoBalance))
@@ -108,12 +118,11 @@ class TransactionRepositoryImpl(
         if (MarketUtils.getRate(cryptoBalance.chainId, markets, currentFiatCurrency) != Double.InvalidValue) {
             Single.just(calculateFiat(cryptoBalance, markets))
         } else {
-            getMarkets(marketId, ratesMap, cryptoBalance)
+            getMarkets(marketId,  cryptoBalance)
         }
 
     private fun getMarkets(
         marketId: String,
-        ratesMap: HashMap<Int, Markets>,
         cryptoBalance: CoinCryptoBalance
     ): Single<CoinBalance> =
         cryptoApi.getMarkets(marketId, currentFiatCurrency.toLowerCase(Locale.ROOT))
@@ -121,6 +130,11 @@ class TransactionRepositoryImpl(
             .map { market ->
                 ratesMap[cryptoBalance.chainId] = market
                 calculateFiat(cryptoBalance, market)
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSuccess {
+                _ratesMapLiveData.value = Event(Unit)
             }
 
     private fun fetchCoinRate(id: String): Single<Markets> =
@@ -179,10 +193,12 @@ class TransactionRepositoryImpl(
 
     override fun getTokenBalance(): Flowable<Asset> =
         accountsForTokenBalanceRefresh.let { accounts ->
+            assetBalances.clear()
             Flowable.mergeDelayError(getTokenBalanceFlowables(accounts))
                 .flatMap { asset ->
                     when (asset) {
                         is AssetBalance -> handleNewAddedTaggedTokens(asset, accounts)
+                            .also { assetBalances.add(asset) }
                             .filter { assetBalance -> !assetBalance.accountToken.token.isStreamActive }
                         else -> Flowable.just(asset as AssetError)
                     }
@@ -305,17 +321,6 @@ class TransactionRepositoryImpl(
                                         }
                                 }
                                 .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
-                                    tokenManager.updateMissingNFTTokensDetails(
-                                        shouldSafeNewTokens,
-                                        newAndLocalTokensPerChainIdMap,
-                                        accounts
-                                    )
-                                        .onErrorReturn {
-                                            Timber.e(it)
-                                            UpdateTokensResult(true, newAndLocalTokensPerChainIdMap)
-                                        }
-                                }
-                                .flatMap { (shouldSafeNewTokens, newAndLocalTokensPerChainIdMap) ->
                                     tokenManager.saveTokens(shouldSafeNewTokens, newAndLocalTokensPerChainIdMap)
                                         .onErrorReturn {
                                             Timber.e(it)
@@ -392,9 +397,11 @@ class TransactionRepositoryImpl(
             isBscNetwork(chainId) || isRskNetwork(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
-                        getTxCosts(txCostPayload, null, gasPrice.result) }
+                        getTxCosts(txCostPayload, null, gasPrice.result)
+                    }
                     .onErrorResumeNext {
-                        getTxCosts(txCostPayload, null, null) }
+                        getTxCosts(txCostPayload, null, null)
+                    }
             }
             shouldGetGasPriceFromApi(chainId) && isMaticNetwork(chainId) -> {
                 cryptoApi.getGasPriceForMatic(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
@@ -424,7 +431,8 @@ class TransactionRepositoryImpl(
 
     override fun isAddressValid(address: String, chainId: Int?): Boolean = validationRepository.isAddressValid(address, chainId)
 
-    override fun toRecipientChecksum(address: String, chainId: Int?): String = validationRepository.toRecipientChecksum(address, chainId)
+    override fun toRecipientChecksum(address: String, chainId: Int?): String =
+        validationRepository.toRecipientChecksum(address, chainId)
 
     override fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal =
         blockchainRepository.run { getTransactionCostInEth(unitConverter.toGwei(gasPrice), BigDecimal(gasLimit)) }

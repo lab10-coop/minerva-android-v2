@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import minerva.android.accounts.nft.model.NftItem
 import minerva.android.base.BaseViewModel
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -31,7 +32,7 @@ class NftCollectionViewModel(
             tokenManager.getNftsPerAccount(account.chainId, account.address, collectionAddress).forEach { token ->
                 with(token) {
                     if (visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId } != null)
-                        nftList.add(NftItem(address, tokenId!!, description, contentUri, name))
+                        nftList.add(NftItem(address, tokenId ?: String.Empty, description, contentUri, name))
                 }
             }
             updateList()

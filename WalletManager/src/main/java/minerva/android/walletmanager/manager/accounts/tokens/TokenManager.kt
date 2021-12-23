@@ -44,10 +44,9 @@ interface TokenManager {
     fun getTaggedTokensSingle(): Single<List<ERCToken>>
     fun getSuperTokenBalance(account: Account): Flowable<Asset>
     var activeSuperTokenStreams: MutableList<ActiveSuperToken>
-    fun updateMissingNFTTokensDetails(
+    fun updateNFTCollectionsImage(
         shouldBeUpdated: Boolean,
-        tokensPerChainIdMap: Map<Int, List<ERCToken>>,
-        accounts: List<Account>
+        tokensPerChainIdMap: Map<Int, List<ERCToken>>
     ): Single<UpdateTokensResult>
 
     fun getNftsPerAccount(
@@ -55,4 +54,13 @@ interface TokenManager {
         accountAddress: String,
         collectionAddress: String
     ): List<ERCToken>
+
+    fun updateMissingNFTTokensDetails(
+        tokensPerChainIdMap: Map<Int, List<ERCToken>>,
+        accounts: List<Account>
+    ): Single<UpdateTokensResult>
+
+    fun hasTokenExplorer(chainId: Int) : Boolean
+
+    fun fetchNFTsDetails() : Single<Boolean>
 }

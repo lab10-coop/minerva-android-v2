@@ -9,7 +9,7 @@ data class TokenData(
     @SerializedName("symbol")
     val symbol: String = String.Empty,
     @SerializedName("name")
-    val name: String = String.Empty,
+    val name: String? = String.Empty,
     @SerializedName("decimals")
     val decimals: String = String.Empty,
     @SerializedName("contractAddress")

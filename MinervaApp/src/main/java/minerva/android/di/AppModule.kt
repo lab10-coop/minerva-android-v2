@@ -70,7 +70,7 @@ private val appModules = module {
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }
-    viewModel { AccountsViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { AccountsViewModel(get(),get(), get(), get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
@@ -86,7 +86,7 @@ private val appModules = module {
     viewModel { EditOrderViewModel(get()) }
     viewModel { WalletConnectViewModel(get(), get(), get(), get(), get()) }
     viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { ManageTokensViewModel(get(), get(), get()) }
+    viewModel { ManageTokensViewModel(get(), get(), get(), get()) }
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
     viewModel { RampViewModel(get(), get()) }

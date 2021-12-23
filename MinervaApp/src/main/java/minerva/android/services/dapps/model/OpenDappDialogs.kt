@@ -35,6 +35,20 @@ object OpenDappDialogs {
             OpenDappDialog.Data(Titles.SYMMETRIC, Urls.SYMMETRIC, Instructions.SYMMETRIC)
         val EPORIO =
             OpenDappDialog.Data(Titles.EPORIO, Urls.EPORIO, Instructions.EPORIO)
+        val DEHIVE =
+            OpenDappDialog.Data(Titles.DEHIVE, Urls.DEHIVE, Instructions.DEHIVE)
+        val SWAPR =
+            OpenDappDialog.Data(Titles.SWAPR, Urls.SWAPR, Instructions.SWAPR)
+        val AGAVE =
+            OpenDappDialog.Data(Titles.AGAVE, Urls.AGAVE, Instructions.AGAVE)
+        val COWSWAP =
+            OpenDappDialog.Data(Titles.COWSWAP, Urls.COWSWAP, Instructions.COWSWAP)
+        val CURVE_ETHEREUM =
+            OpenDappDialog.Data(Titles.CURVE_ETHEREUM, Urls.CURVE_ETHEREUM, Instructions.CURVE_ETHEREUM)
+        val CURVE_POLYGON =
+            OpenDappDialog.Data(Titles.CURVE_POLYGON, Urls.CURVE_POLYGON, Instructions.CURVE_POLYGON)
+        val CURVE_GNOSIS =
+            OpenDappDialog.Data(Titles.CURVE_GNOSIS, Urls.CURVE_GNOSIS, Instructions.CURVE_GNOSIS)
     }
 
     private object Titles {
@@ -53,6 +67,13 @@ object OpenDappDialogs {
         const val SYMMETRIC_POOLS = Dapps.LongNames.SYMMETRIC_POOLS
         const val SYMMETRIC = Dapps.LongNames.SYMMETRIC
         const val EPORIO = Dapps.LongNames.EPORIO
+        const val DEHIVE = Dapps.LongNames.DEHIVE
+        const val SWAPR = Dapps.LongNames.SWAPR
+        const val AGAVE = Dapps.LongNames.AGAVE
+        const val COWSWAP = Dapps.LongNames.COWSWAP
+        const val CURVE_ETHEREUM = Dapps.LongNames.CURVE_ETHEREUM
+        const val CURVE_POLYGON = Dapps.LongNames.CURVE_POLYGON
+        const val CURVE_GNOSIS = Dapps.LongNames.CURVE_GNOSIS
     }
 
     private object Instructions {
@@ -73,6 +94,13 @@ object OpenDappDialogs {
         const val SYMMETRIC_POOLS = DEFAULT
         const val SYMMETRIC = DEFAULT
         const val EPORIO = DEFAULT
+        const val DEHIVE = DEFAULT
+        const val SWAPR = DEFAULT
+        const val AGAVE = DEFAULT
+        const val COWSWAP = DEFAULT
+        const val CURVE_ETHEREUM = DEFAULT
+        const val CURVE_POLYGON = DEFAULT
+        const val CURVE_GNOSIS = DEFAULT
     }
 
     private object Urls {
@@ -91,5 +119,13 @@ object OpenDappDialogs {
         const val SYMMETRIC_POOLS = "https://xdai-pools.symmetric.exchange/"
         const val SYMMETRIC = "https://xdai.symmetric.exchange/"
         const val EPORIO = "https://epor.io/connect/"
+        const val DEHIVE = "https://app.dehive.finance/"
+        const val SWAPR =
+            "https://bafybeicfhtvm543idbdzmtjw6o5gwkhzkjywqt2tb3qfwwkudjuvjhkjoe.ipfs.dweb.link/#/swap?chainId=100"
+        const val AGAVE = "https://app.agave.finance/"
+        const val COWSWAP = "https://cowswap.exchange"
+        const val CURVE_ETHEREUM = "https://curve.fi"
+        const val CURVE_POLYGON = "https://polygon.curve.fi"
+        const val CURVE_GNOSIS = "https://xdai.curve.fi"
     }
 }

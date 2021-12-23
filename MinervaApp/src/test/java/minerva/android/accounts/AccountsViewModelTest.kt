@@ -1,5 +1,6 @@
 package minerva.android.accounts
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
@@ -13,6 +14,7 @@ import minerva.android.mock.accounts
 import minerva.android.mock.accountsWithoutPrimaryAccount
 import minerva.android.mock.networks
 import minerva.android.walletmanager.manager.accounts.AccountManager
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.defs.DefaultWalletConfigIndexes
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
@@ -24,6 +26,7 @@ import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.transactions.Balance
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
@@ -43,6 +46,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val safeAccountRepository: SafeAccountRepository = mock()
     private val accountManager: AccountManager = mock()
+    private val tokenManager: TokenManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val walletConnectRepository: WalletConnectRepository = mock()
     private val logger: Logger = mock()
@@ -63,10 +67,19 @@ class AccountsViewModelTest : BaseViewModelTest() {
     private val loadingObserver: Observer<Event<Boolean>> = mock()
     private val loadingCaptor: KArgumentCaptor<Event<Boolean>> = argumentCaptor()
 
+    private val ratesMapLiveData: LiveData<Event<Unit>> = mock()
+    private val walletConfigLiveData: LiveData<Event<WalletConfig>> = mock()
+    private val balancesInsertLiveData: LiveData<Event<Unit>> = mock()
+
     @Before
     fun initViewModel() {
+        whenever(transactionRepository.ratesMapLiveData).thenReturn(ratesMapLiveData)
+        whenever(accountManager.walletConfigLiveData).thenReturn(walletConfigLiveData)
+        whenever(accountManager.balancesInsertLiveData).thenReturn(balancesInsertLiveData)
+
         viewModel = AccountsViewModel(
             accountManager,
+            tokenManager,
             walletActionsRepository,
             safeAccountRepository,
             transactionRepository,

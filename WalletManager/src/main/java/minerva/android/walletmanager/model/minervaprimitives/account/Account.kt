@@ -1,5 +1,7 @@
 package minerva.android.walletmanager.model.minervaprimitives.account
 
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.kotlinUtils.InvalidValue

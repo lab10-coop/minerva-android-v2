@@ -139,7 +139,11 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     override fun indexOf(account: Account): Int = viewModel.indexOfRawAccounts(account)
     override fun stopPendingAccounts() {
         viewModel.stopPendingAccounts()
+        updateAccountsList()
     }
+
+    private fun updateAccountsList(accounts: List<Account> = viewModel.activeAccounts) = accountAdapter.updateList(accounts)
+
 
     private fun changeAccountName(account: Account, newName: String) {
         viewModel.changeAccountName(account, newName)
@@ -232,10 +236,12 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                 )
                 setOnRefreshListener {
                     with(viewModel) {
-                        viewModel.stopStreaming()
+                        stopStreaming()
                         refreshCoinBalances()
                         refreshTokensBalances()
                         discoverNewTokens()
+                        fetchNFTData()
+                        updateTokensRate()
                     }
                 }
             }
@@ -262,9 +268,10 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     private fun setupLiveData() {
         viewModel.apply {
             binding.apply {
-                accountsLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { _ ->
+                mediatorLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking{})
+                accountsLiveData.observe(viewLifecycleOwner, ObserverWithSyncChecking { accounts ->
                     noDataMessage.visibleOrGone(hasAvailableAccounts)
-                    accountAdapter.updateList(activeAccounts)
+                    updateAccountsList(accounts)
                     accountAdapter.setFiat(fiatSymbol)
                     setTatsButtonListener()
                 })
@@ -279,7 +286,7 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
                     when (state) {
                         is CoinBalanceState -> updateCoinBalanceState(state)
                         is TokenBalanceState -> updateTokenBalanceState(state)
-                        is UpdateAllState -> accountAdapter.refreshList()
+                        is UpdateAllState -> updateAccountsList()
                     }
                 })
             }

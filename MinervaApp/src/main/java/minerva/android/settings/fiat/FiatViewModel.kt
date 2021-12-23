@@ -21,7 +21,7 @@ class FiatViewModel(
     fun saveCurrentFiat(fiat: String) {
         localStorage.saveCurrentFiat(fiat)
         accountManager.clearFiat()
-        rateStorage.areRatesSynced = false
+        rateStorage.clearRates()
     }
 
     companion object {

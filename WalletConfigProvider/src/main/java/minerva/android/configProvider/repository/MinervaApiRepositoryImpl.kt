@@ -9,10 +9,14 @@ import minerva.android.configProvider.migration.Migration
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
+import minerva.android.configProvider.repository.UpdateWalletConfigInfo.Companion.NO_PENDING_UPDATES
+import minerva.android.kotlinUtils.InvalidValue
 import retrofit2.HttpException
 import java.net.HttpURLConnection
 
 class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiRepository {
+
+    private var updateWalletConfigInfo: UpdateWalletConfigInfo = UpdateWalletConfigInfo()
 
     override fun getWalletConfig(publicKey: String): Single<WalletConfigPayload> =
         api.getWalletConfig(publicKey = publicKey)
@@ -34,10 +38,34 @@ class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiReposito
         publicKey: String,
         walletConfigPayload: WalletConfigPayload
     ): Single<WalletConfigPayload> {
-        return api.saveWalletConfig(publicKey = publicKey, walletConfigPayload = walletConfigPayload)
+        val payload =
+            if (isCorrectVersion(walletConfigPayload.version)) {
+                walletConfigPayload.copy(_version = updateWalletConfigInfo.syncVersion.inc())
+            } else walletConfigPayload
+        updateWalletConfigInfo = UpdateWalletConfigInfo(updateWalletConfigInfo.pendingUpdates.inc(), payload.version)
+        return saveWalletConfigCall(publicKey, payload)
+    }
+
+    private fun isCorrectVersion(version: Int): Boolean =
+        updateWalletConfigInfo.pendingUpdates > NO_PENDING_UPDATES || version <= updateWalletConfigInfo.syncVersion
+
+    private fun saveWalletConfigCall(
+        publicKey: String,
+        walletConfigPayload: WalletConfigPayload
+    ): Single<WalletConfigPayload> =
+        api.saveWalletConfig(publicKey = publicKey, walletConfigPayload = walletConfigPayload)
             .toSingleDefault(walletConfigPayload)
-            .onErrorResumeNext { error -> Single.error(getThrowableWhenSavingWalletConfig(error)) }
+            .doOnSuccess {
+                stopUpdateWalletConfigInfo()
+            }
+            .onErrorResumeNext { error ->
+                stopUpdateWalletConfigInfo()
+                Single.error(getThrowableWhenSavingWalletConfig(error))
+            }
             .subscribeOn(Schedulers.io())
+
+    private fun stopUpdateWalletConfigInfo() {
+        updateWalletConfigInfo = updateWalletConfigInfo.copy(pendingUpdates = updateWalletConfigInfo.pendingUpdates.dec())
     }
 
     private fun getThrowableWhenSavingWalletConfig(error: Throwable) =
@@ -58,3 +86,12 @@ class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiReposito
 
 class HttpBadRequestException : Throwable()
 class HttpNotFoundException : Throwable()
+
+data class UpdateWalletConfigInfo(
+    val pendingUpdates: Int = NO_PENDING_UPDATES,
+    val syncVersion: Int = Int.InvalidValue
+) {
+    companion object {
+        const val NO_PENDING_UPDATES = 0
+    }
+}

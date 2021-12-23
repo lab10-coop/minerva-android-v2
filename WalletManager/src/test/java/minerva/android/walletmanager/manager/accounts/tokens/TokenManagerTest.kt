@@ -36,6 +36,7 @@ import minerva.android.walletmanager.storage.LocalStorage
 import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MockDataProvider
 import minerva.android.walletmanager.utils.RxTest
+import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
@@ -412,9 +413,8 @@ class TokenManagerTest : RxTest() {
         mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 4
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.name shouldBeEqualTo "tokenThreeThree"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.logoURI shouldBeEqualTo "bb1"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeThree2"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(2)?.name shouldBeEqualTo "tokenThreeOne"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(2)?.logoURI shouldBeEqualTo null
+        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeOne"
+        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.logoURI shouldBeEqualTo null
 
         val mergedTokenMap02 = tokenManager.mergeWithLocalTokensList(tokenSetTwo)
         mergedTokenMap02.shouldSafeNewTokens shouldBeEqualTo true
@@ -658,7 +658,15 @@ class TokenManagerTest : RxTest() {
         val tokens = mapOf(Pair(1, listOf(firstToken, secondToken)), Pair(3, listOf(firstTokenII, secondTokenII)))
 
         doNothing().whenever(rateStorage).saveRate(any(), any())
+        whenever(localStorage.getTokenVisibilitySettings()).thenReturn(spy(TokenVisibilitySettings()))
         whenever(rateStorage.getRates()).thenReturn(rates)
+        tokens.forEach { (chainId, tokens) ->
+            tokens.forEach { token ->
+                whenever(rateStorage.shouldUpdateRate(generateTokenHash(token.chainId, token.address)))
+                    .thenReturn(true, false, false, false)
+                whenever(tokenManager.getTokenVisibility(token.accountAddress, token.address)).thenReturn(true)
+            }
+        }
         whenever(cryptoApi.getTokensRate(any(), any(), any())).thenReturn(
             Single.just(tokensRateResponse),
             Single.just(tokensRateResponse),
@@ -675,8 +683,9 @@ class TokenManagerTest : RxTest() {
             .test()
             .assertComplete()
 
-        verify(rateStorage, times(2)).saveRate(any(), any())
-        verify(cryptoApi, times(2)).getTokensRate(any(), any(), any())
+        verify(rateStorage, times(3)).saveRate(any(), any())
+        verify(rateStorage, times(4)).shouldUpdateRate(any())
+        verify(cryptoApi, times(1)).getTokensRate(any(), any(), any())
     }
 
     @Test
@@ -797,7 +806,7 @@ class TokenManagerTest : RxTest() {
             )
         )
 
-        tokenManager.updateMissingNFTTokensDetails(true, tokensMap, accounts)
+        tokenManager.updateMissingNFTTokensDetails(tokensMap, accounts)
             .test()
             .await()
             .assertValue { result ->
@@ -807,27 +816,73 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
-    fun `test shouldn't update nft details`() {
+    fun `test should update collection logo url`() {
         NetworkManager.initialize(MockDataProvider.networks)
-        val accounts = listOf(Account(1, chainId = ATS_TAU, address = "accountAddress", privateKey = "privateKey"))
-        whenever(erc721TokenRepository.getERC721DetailsUri(any(), any(), any(), any())).thenReturn(Single.just("detailsUrl"))
-        whenever(cryptoApi.getERC721TokenDetails(any())).thenReturn(
-            Single.just(
-                ERC721Details(
-                    "nftToken",
-                    "contentUri",
-                    "description"
+        val tokensMap = mapOf(
+            Pair(
+                ATS_TAU,
+                listOf(
+                    ERCToken(
+                        ATS_TAU,
+                        "nftToken",
+                        "NFT",
+                        "tokenAddress",
+                        accountAddress = "accountAddress",
+                        tokenId = "2",
+                        type = TokenType.ERC721
+                    )
                 )
             )
         )
+        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(
+            Single.just(
+                listOf(NftCollectionDetails(ATS_TAU, "tokenAddress", "logoUri", "nftToken", "NFT"))
+            )
+        )
 
-        tokenManager.updateMissingNFTTokensDetails(false, map, accounts)
+        tokenManager.updateNFTCollectionsImage(true, tokensMap)
             .test()
             .await()
             .assertValue { result ->
-                !result.shouldSafeNewTokens && result.tokensPerChainIdMap == map
+                val updatedToken = result.tokensPerChainIdMap[ATS_TAU]?.first()
+                result.shouldSafeNewTokens && updatedToken?.logoURI == "logoUri"
             }
     }
+
+    @Test
+    fun `test shouldn't update collection logo url`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val tokensMap = mapOf(
+            Pair(
+                ATS_TAU,
+                listOf(
+                    ERCToken(
+                        ATS_TAU,
+                        "nftToken",
+                        "NFT",
+                        "tokenAddress",
+                        accountAddress = "accountAddress",
+                        tokenId = "2",
+                        type = TokenType.ERC721
+                    )
+                )
+            )
+        )
+        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(
+            Single.just(
+                listOf(NftCollectionDetails(ATS_TAU, "tokenAddress1", "logoUri", "nftToken", "NFT"))
+            )
+        )
+
+        tokenManager.updateNFTCollectionsImage(true, tokensMap)
+            .test()
+            .await()
+            .assertValue { result ->
+                val updatedToken = result.tokensPerChainIdMap[ATS_TAU]?.first()
+                result.shouldSafeNewTokens && updatedToken?.logoURI == null
+            }
+    }
+
 
     @Test
     fun `test download tokens from transactions`() {
@@ -896,6 +951,7 @@ class TokenManagerTest : RxTest() {
                 )
             )
         )
+        whenever(erc721TokenRepository.isTokenOwner(any(), any(),any(), any(),any())).thenReturn(Single.just(true))
         whenever(cryptoApi.getConnectedTokens(any())).thenReturn(
             Single.just(
                 TokenBalanceResponse(
@@ -913,7 +969,8 @@ class TokenManagerTest : RxTest() {
                             symbol = "TK2",
                             address = "address2",
                             decimals = "",
-                            type = Tokens.ERC_721.type
+                            type = Tokens.ERC_721.type,
+                            balance = "1"
                         )
                     )
                 )

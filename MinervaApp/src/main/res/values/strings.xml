@@ -368,7 +368,7 @@
     <string name="nft_header">NFTs</string>
     <string name="timeline">Timeline view</string>
     <string name="grid">Grid view</string>
-    <string name="more_label">more</string>
+    <string name="more_label"> more</string>
 
     <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
     <string name="default_dapp_dialog_confirm">Open</string>
@@ -431,6 +431,9 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.6.8</item>
+        <item>* Extension of DApp support for 5 more applications</item>
+        <item>* Various visual updates and bug fixes (e.g. token visibility)</item>
         <item>1.6.5</item>
         <item>* Direct DApp access from Services screen</item>
         <item>* WalletConnect improvements</item>
