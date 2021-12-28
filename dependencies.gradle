@@ -53,7 +53,6 @@ ext {
     waitingDotsVersion = '0.6.1'
     glideToVector = 'v2.0.0'
     lottieVersion = '4.1.0'
-    expandableTextVersion = '1.1.3'
 
     w3jVersion = '4.6.0-android'
     rxbindingVersion = '3.1.0'
@@ -156,7 +155,6 @@ ext {
             recyclerView   : "androidx.recyclerview:recyclerview:$recyclerVersion",
             flowLayout     : "org.apmem.tools:layouts:$flowLayoutVersion",
             lottie         : "com.airbnb.android:lottie:$lottieVersion",
-            expandableText : "it.mike5v:viewmore-textview:$expandableTextVersion",
             coil           : "io.coil-kt:coil:$coilVersion",
             coilSvg        : "io.coil-kt:coil-svg:$coilVersion"
     ]

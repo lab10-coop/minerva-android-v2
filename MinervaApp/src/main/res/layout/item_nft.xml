@@ -81,7 +81,7 @@
             app:layout_constraintTop_toBottomOf="@id/content"
             tools:text="Intercom Dreamer" />
 
-        <it.mike5v.viewmoretextview.ViewMoreTextView
+        <minerva.android.widget.RecyclableViewMoreTextView
             android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
