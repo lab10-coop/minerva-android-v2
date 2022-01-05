@@ -9,6 +9,10 @@ import minerva.android.accounts.nft.model.NftItem
 import minerva.android.databinding.ItemNftBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
+import kotlin.reflect.full.declaredMemberFunctions
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.declaredMembers
+import kotlin.reflect.jvm.isAccessible
 
 class NftAdapter : RecyclerView.Adapter<NftViewHolder>() {
 
@@ -37,8 +41,7 @@ class NftViewHolder(val binding: ItemNftBinding) : RecyclerView.ViewHolder(bindi
     fun bind(item: NftItem) = with(binding) {
         name.text = item.name
         description.apply {
-            setIsExpanded(item.isDescriptionExpanded)
-            text = item.description
+            bind(item.description, item.isDescriptionExpanded)
             setOnClickListener {
                 if (!item.isDescriptionExpanded) {
                     toggle()
