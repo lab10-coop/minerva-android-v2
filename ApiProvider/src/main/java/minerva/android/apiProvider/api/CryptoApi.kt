@@ -3,18 +3,7 @@ package minerva.android.apiProvider.api
 import io.reactivex.Single
 import minerva.android.apiProvider.api.ServicesApi.Companion.APPLICATION_JSON
 import minerva.android.apiProvider.api.ServicesApi.Companion.CONTENT_TYPE
-import minerva.android.apiProvider.model.ChainDetails
-import minerva.android.apiProvider.model.CommitElement
-import minerva.android.apiProvider.model.DappDetails
-import minerva.android.apiProvider.model.ERC721Details
-import minerva.android.apiProvider.model.GasPricesFromRpcOverHttp
-import minerva.android.apiProvider.model.GasPricesMatic
-import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.NftCollectionDetails
-import minerva.android.apiProvider.model.RpcOverHttpPayload
-import minerva.android.apiProvider.model.TokenBalanceResponse
-import minerva.android.apiProvider.model.TokenDetails
-import minerva.android.apiProvider.model.TokenTxResponse
+import minerva.android.apiProvider.model.*
 import minerva.android.apiProvider.model.gaswatch.GasPrices
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -74,6 +63,9 @@ interface CryptoApi {
 
     @GET
     fun getERC721TokenDetails(@Url url: String): Single<ERC721Details>
+
+    @GET
+    fun getERC1155TokenDetails(@Url url: String): Single<ERC1155Details>
 
     @GET(DAPPS_DETAILS_URL)
     fun getDappsDetails(): Single<List<DappDetails>>

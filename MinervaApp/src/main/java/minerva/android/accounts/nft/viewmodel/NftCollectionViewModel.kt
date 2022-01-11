@@ -31,8 +31,9 @@ class NftCollectionViewModel(
             val visibleTokens = account.getVisibleTokens()
             tokenManager.getNftsPerAccount(account.chainId, account.address, collectionAddress).forEach { token ->
                 with(token) {
-                    if (visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId } != null)
-                        nftList.add(NftItem(address, tokenId ?: String.Empty, description, contentUri, name))
+                    visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId }?.let {
+                        nftList.add(NftItem(address, tokenId ?: String.Empty, description, contentUri, name, type.isERC1155(), it.currentBalance))
+                    }
                 }
             }
             updateList()
@@ -43,7 +44,7 @@ class NftCollectionViewModel(
         accountToken.token.address.equals(
             collectionAddress,
             true
-        ) && accountToken.token.type.isERC721() && accountToken.currentRawBalance > BigDecimal.ZERO
+        ) && accountToken.token.type.isNft() && accountToken.currentRawBalance > BigDecimal.ZERO
     }
 
     private fun updateList() {

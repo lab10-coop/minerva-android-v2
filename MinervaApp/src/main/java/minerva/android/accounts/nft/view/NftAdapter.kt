@@ -7,8 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import minerva.android.R
 import minerva.android.accounts.nft.model.NftItem
 import minerva.android.databinding.ItemNftBinding
+import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
+import java.math.BigDecimal
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.declaredMembers
@@ -58,7 +60,18 @@ class NftViewHolder(val binding: ItemNftBinding) : RecyclerView.ViewHolder(bindi
         } else {
             prepareNftContent(item.contentUrl)
         }
+        if (item.shouldBalanceBeDisplayed()) {
+            balance.visible()
+            balance.text = binding.root.context.resources.getString(
+                R.string.amount_label,
+                item.balance.toPlainString()
+            )
+        } else {
+            balance.gone()
+        }
     }
+
+    private fun NftItem.shouldBalanceBeDisplayed() = isERC1155.and(balance > BigDecimal.ONE)
 
     private fun prepareNftContent(contentUrl: String) = with(binding) {
         content.webViewClient = WebViewClient()
@@ -74,5 +87,6 @@ class NftViewHolder(val binding: ItemNftBinding) : RecyclerView.ViewHolder(bindi
     companion object {
         private const val MIME_TYPE_HTML = "text/html"
         private const val ENCODING = "base64"
+        private const val AMOUNT = "base64"
     }
 }

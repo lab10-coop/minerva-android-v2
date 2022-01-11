@@ -17,7 +17,7 @@ object TokenDataToERCToken {
             decimals = token.decimals,
             accountAddress = accountAddress,
             type = tokenType,
-            collectionName = if (tokenType.isERC721()) token.name else null
+            collectionName = if (tokenType.isNft()) token.name else null
         )
     }
 
@@ -25,6 +25,7 @@ object TokenDataToERCToken {
         when (type) {
             Tokens.ERC_20.type -> TokenType.ERC20
             Tokens.ERC_721.type -> TokenType.ERC721
+            Tokens.ERC_1155.type -> TokenType.ERC1155
             else -> TokenType.INVALID
         }
 }
