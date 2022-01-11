@@ -73,5 +73,6 @@
     <color name="splashScreenPurple">#6442d1</color>
     <color name="nftNameGray">#4a4857</color>
     <color name="nftDescriptionGray">#747185</color>
+    <color name="nftBalanceGray">#908F9D</color>
     <color name="nftErrorBackgroundPurple">#1AA8A8FF</color>
 </resources>

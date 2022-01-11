@@ -401,12 +401,28 @@ class MapperTest {
             "0xC00KiE02",
             "200000000000000000"
         )
+        val tokenBalance03 = TokenData(
+            "ERC-20"
+        )
+        val tokenBalance04 = TokenData(
+            "ERC-721"
+        )
+        val tokenBalance05 = TokenData(
+            "ERC-1155"
+        )
         val result01 = TokenDataToERCToken.map(ATS_TAU, tokenBalance01, "key")
         result01.name shouldBeEqualTo "Cookie Token"
         result01.address shouldBeEqualTo "0xC00KiE01"
         val result02 = TokenDataToERCToken.map(ATS_TAU, tokenBalance02, "key")
         result02.name shouldBeEqualTo "Cookie Token 2"
         result02.address shouldBeEqualTo "0xC00KiE02"
+        val result03 = TokenDataToERCToken.map(ATS_TAU, tokenBalance03, "key")
+        result03.type.isERC20() shouldBeEqualTo true
+        val result04 = TokenDataToERCToken.map(ATS_TAU, tokenBalance04, "key")
+        result04.type.isERC721() shouldBeEqualTo true
+        val result05 = TokenDataToERCToken.map(ATS_TAU, tokenBalance05, "key")
+        result05.type.isERC1155() shouldBeEqualTo true
+
     }
 
     @Test

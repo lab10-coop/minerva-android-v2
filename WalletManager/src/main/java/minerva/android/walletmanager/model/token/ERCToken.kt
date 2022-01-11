@@ -39,16 +39,19 @@ data class ERCToken(
         accountAddress,
         tokenTx.tokenId,
         tokenType,
-        collectionName = if (tokenType.isERC721()) tokenTx.tokenName else null
+        collectionName = if (tokenType.isNft()) tokenTx.tokenName else null
     )
 }
 
 enum class TokenType {
-    ERC20, ERC721, SUPER_TOKEN, WRAPPER_TOKEN, INVALID;
+    ERC20, ERC721, SUPER_TOKEN, WRAPPER_TOKEN, INVALID, ERC1155;
 
+    fun isERC1155() = this == ERC1155
     fun isERC721() = this == ERC721
     fun isERC20() = when (this) {
-        ERC721 -> false
+        ERC721, ERC1155 -> false
         else -> true
     }
+
+    fun isNft() = isERC1155() || isERC721()
 }
