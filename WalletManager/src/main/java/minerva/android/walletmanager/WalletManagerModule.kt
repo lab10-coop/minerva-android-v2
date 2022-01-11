@@ -33,6 +33,8 @@ import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepositoryImpl
 import minerva.android.walletmanager.repository.asset.AssetBalanceRepository
 import minerva.android.walletmanager.repository.asset.AssetBalanceRepositoryImpl
+import minerva.android.walletmanager.repository.dapps.DappsRepository
+import minerva.android.walletmanager.repository.dapps.DappsRepositoryImpl
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
@@ -89,6 +91,8 @@ fun createWalletModules() = module {
             .fallbackToDestructiveMigration().build()
     }
     single<RateStorage> { RateStorageImpl() }
+    single { get<MinervaDatabase>().dappDao() }
+    single<DappsRepository> { DappsRepositoryImpl(get(), get(), get()) }
 }
 
 private const val MinervaStorage = "MinervaSharedPrefs"

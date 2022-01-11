@@ -28,6 +28,9 @@ interface LocalStorage {
     fun saveTokenIconsUpdateTimestamp(timestamp: Long)
     fun loadTokenIconsUpdateTimestamp(): Long
 
+    fun saveDappDetailsUpdateTimestamp(timestamp: Long)
+    fun loadDappDetailsUpdateTimestamp(): Long
+
     fun loadCurrentFiat(): String
     fun saveCurrentFiat(currency: String)
 
