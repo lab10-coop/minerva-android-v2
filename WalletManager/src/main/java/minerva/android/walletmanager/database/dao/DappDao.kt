@@ -12,6 +12,9 @@ interface DappDao {
     @Query("SELECT * FROM dapps")
     fun getAllDapps(): Single<List<DappEntity>>
 
+    @Query("SELECT * FROM dapps WHERE sponsored_chain_id = :chainId")
+    fun getSponsoredDappForChainId(chainId: Int): Single<DappEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(dapps: List<DappEntity>)
 

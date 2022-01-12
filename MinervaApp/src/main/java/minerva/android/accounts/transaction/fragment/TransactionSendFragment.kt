@@ -2,6 +2,9 @@ package minerva.android.accounts.transaction.fragment
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionManager
 import android.view.View
@@ -10,6 +13,8 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import coil.imageLoader
+import coil.request.ImageRequest
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
@@ -28,6 +33,8 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.OneElement
 import minerva.android.kotlinUtils.event.EventObserver
+import minerva.android.services.dapps.dialog.OpenDappDialog
+import minerva.android.services.dapps.model.Dapp
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.TransactionCost
@@ -38,7 +45,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.properties.Delegates
 
-class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
+class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send), OpenDappDialog.Listener {
 
     private var areTransactionCostsOpen = false
     private var shouldOverrideTransactionCost = true
@@ -47,6 +54,8 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
     private var validationDisposable: Disposable? = null
     private var allPressed: Boolean = false
     private lateinit var binding: FragmentTransactionSendBinding
+
+    private lateinit var dialogOpen: OpenDappDialog
 
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
         binding.apply {
@@ -130,6 +139,28 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                 viewLifecycleOwner,
                 EventObserver { isShown -> handleTransactionCostLoader(isShown) })
             overrideTxCostLiveData.observe(viewLifecycleOwner, EventObserver { shouldOverrideTransactionCost = true })
+            sponsoredDappLiveData.observe(viewLifecycleOwner, EventObserver { handleSponsoredDapp(it) })
+        }
+    }
+
+    private fun handleSponsoredDapp(dapp: Dapp) {
+        with(binding.sponsoredDapp) {
+            card.visible()
+            dappName.text = dapp.shortName
+            dappDescription.text = dapp.description
+            dappIcon.run {
+                val imageLoader = requireContext().imageLoader
+                val request = ImageRequest.Builder(this.context)
+                    .error(R.drawable.white_circle_placeholder)
+                    .data(dapp.iconUrl)
+                    .target(this)
+                    .build()
+                imageLoader.enqueue(request)
+            }
+            mainContent.apply {
+                setBackgroundColor(Color.parseColor(dapp.colorHex))
+                setOnClickListener { onDappSelected(dapp) }
+            }
         }
     }
 
@@ -249,7 +280,12 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                     setSelection(viewModel.spinnerPosition, false)
                     setPopupBackgroundResource(R.drawable.rounded_white_background)
                     onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                        override fun onItemSelected(
+                            adapterView: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
                             viewModel.run {
                                 updateTokenAddress(position - ONE_ELEMENT)
                                 updateFiatRate()
@@ -276,7 +312,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
             setDropDownBackgroundResource(R.drawable.drop_down_menu_background)
             dropDownVerticalOffset = DROP_DOWN_VERTICAL_OFFSET
             threshold = MIN_SIGN_TO_FILTER
-            afterTextChanged { address -> handleRecipientChecksum(address)}
+            afterTextChanged { address -> handleRecipientChecksum(address) }
         }
     }
 
@@ -464,6 +500,21 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send) {
                     BalanceUtils.getFiatBalance(recalculateFiatAmount(getAmount()), fiatSymbol)
             }
         }
+    }
+
+    private fun onDappSelected(dapp: Dapp) {
+        dialogOpen = OpenDappDialog(dapp).apply { listener = this@TransactionSendFragment }
+        dialogOpen.show(childFragmentManager, OpenDappDialog.TAG)
+    }
+
+    override fun onConfirm(onConfirmData: OpenDappDialog.Listener.OnConfirmData) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(onConfirmData.url))
+        startActivity(browserIntent)
+        requireActivity().onBackPressed()
+    }
+
+    override fun onCancel() {
+        dialogOpen.dismiss()
     }
 
     companion object {

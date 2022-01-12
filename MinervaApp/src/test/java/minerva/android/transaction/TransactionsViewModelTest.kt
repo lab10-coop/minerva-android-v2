@@ -1,7 +1,14 @@
 package minerva.android.transaction
 
 import androidx.lifecycle.Observer
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.KArgumentCaptor
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.BaseViewModelTest
@@ -9,13 +16,16 @@ import minerva.android.accounts.transaction.fragment.TransactionViewModel
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.observeLiveDataEvent
+import minerva.android.services.dapps.model.Dapp
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.dapps.DappUIDetails
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
 import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.ERCToken
 import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.transactions.TransactionCost
+import minerva.android.walletmanager.repository.dapps.DappsRepository
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.walletActions.WalletActionsRepository
@@ -31,7 +41,9 @@ class TransactionViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val safeAccountRepository: SafeAccountRepository = mock()
     private val transactionRepository: TransactionRepository = mock()
-    private val viewModel = TransactionViewModel(walletActionsRepository, safeAccountRepository, transactionRepository)
+    private val dappsRepository: DappsRepository = mock()
+    private val viewModel =
+        TransactionViewModel(walletActionsRepository, safeAccountRepository, transactionRepository, dappsRepository)
 
     private val sendTransactionObserver: Observer<Event<Pair<String, Int>>> = mock()
     private val sendTransactionCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
@@ -44,6 +56,8 @@ class TransactionViewModelTest : BaseViewModelTest() {
 
     private val saveActionFailedCaptor: KArgumentCaptor<Event<Pair<String, Int>>> = argumentCaptor()
 
+    private val dappObserver: Observer<Event<Dapp>> = mock()
+    private val dappCaptor: KArgumentCaptor<Event<Dapp>> = argumentCaptor()
 
     private val networks = listOf(
         Network(chainId = 1, httpRpc = "address", testNet = true),
@@ -67,7 +81,12 @@ class TransactionViewModelTest : BaseViewModelTest() {
             address = "address",
             contractAddress = "aa",
             bindedOwner = "binded",
-            accountTokens = mutableListOf(AccountToken(ERCToken(3, symbol = "SomeSymbol", type = TokenType.ERC20), BigDecimal.ZERO))
+            accountTokens = mutableListOf(
+                AccountToken(
+                    ERCToken(3, symbol = "SomeSymbol", type = TokenType.ERC20),
+                    BigDecimal.ZERO
+                )
+            )
         )
 
         val tokenList = viewModel.tokensList
@@ -81,6 +100,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.transferNativeCoin(any(), any(), any())).thenReturn(Completable.complete())
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1))
         NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
         viewModel.run {
@@ -100,6 +120,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just("name"))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.error(error))
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         viewModel.run {
             saveWalletActionFailedLiveData.observeForever(sendTransactionObserver)
             getAccount(0, String.Empty)
@@ -116,6 +137,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             getAccount(0, String.Empty)
@@ -133,6 +155,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
         whenever(safeAccountRepository.getSafeAccountMasterOwnerPrivateKey(any())) doReturn "key"
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         viewModel.run {
             transactionCompletedLiveData.observeForever(transactionCompletedObserver)
             getAccount(0, String.Empty)
@@ -340,6 +363,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         )
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 3))
         whenever(transactionRepository.getAccount(any())).thenReturn(account)
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         viewModel.run {
             transactionCostLiveData.observeForever(getGasLimitObserver)
             getAccount(1, "0x0")
@@ -356,6 +380,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         val error = Throwable()
         whenever(transactionRepository.getTransactionCosts(any())).doReturn(Single.error(error))
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1))
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         viewModel.run {
             getAccount(0, String.Empty)
             getTransactionCosts("address", BigDecimal.TEN)
@@ -380,11 +405,36 @@ class TransactionViewModelTest : BaseViewModelTest() {
     @Test
     fun `is update fiat rate and recalculate fiat amount valid for coins`() {
         whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1, coinRate = 2.0))
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
         viewModel.run {
             getAccount(0, String.Empty)
             updateFiatRate()
             recalculateFiatAmount(BigDecimal("10.51")) shouldBeEqualTo BigDecimal("21.02")
+        }
+    }
+
+    @Test
+    fun `get sponsored dapp for chain Id`() {
+        val dappUIDetails = DappUIDetails(
+            "short", "subtitle", "long", "connectLink",
+            "buttonColor", "iconLink", false, 0
+        )
+
+        val dapp = Dapp(
+            "short", "long", "subtitle", "buttonColor",
+            "iconLink", "connectLink", true, 1
+        )
+        whenever(transactionRepository.getAccount(any())).thenReturn(Account(0, chainId = 1, coinRate = 2.0))
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.just(dappUIDetails))
+        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        viewModel.run {
+            sponsoredDappLiveData.observeForever(dappObserver)
+            getAccount(0, String.Empty)
+        }
+        dappCaptor.run {
+            verify(dappObserver).onChanged(capture())
+            firstValue.peekContent() == dapp
         }
     }
 
@@ -403,6 +453,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
                 )
             )
         )
+        whenever(dappsRepository.getDappForChainId(any())).thenReturn(Single.never())
         NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
         viewModel.run {
             getAccount(0, String.Empty)

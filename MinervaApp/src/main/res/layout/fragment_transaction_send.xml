@@ -18,6 +18,10 @@
         android:elevation="@dimen/cardview_default_elevation"
         android:spinnerMode="dropdown" />
 
+    <include
+        android:id="@+id/sponsored_dapp"
+        layout="@layout/item_dapp_send_screen" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

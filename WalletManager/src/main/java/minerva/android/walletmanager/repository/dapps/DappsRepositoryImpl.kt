@@ -19,6 +19,11 @@ class DappsRepositoryImpl(
 
     private val currentTimeProvider = CurrentTimeProviderImpl()
 
+    override fun getDappForChainId(chainId: Int): Single<DappUIDetails> =
+        dappDao.getSponsoredDappForChainId(chainId).map {
+            it.mapToDappUIDetails()
+        }
+
     override fun getAllDappsDetails(): Single<List<DappUIDetails>> =
         cryptoApi.getLastCommitFromDappsDetails().flatMap {
             getDappList(it)
