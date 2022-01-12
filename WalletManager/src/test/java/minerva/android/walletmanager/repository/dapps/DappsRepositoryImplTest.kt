@@ -135,4 +135,25 @@ class DappsRepositoryImplTest {
                 it == dappsUIDetails
             }
     }
+
+    @Test
+    fun `get sponsored dapp by chain id from db test`() {
+        val entity = DappEntity(
+            2, "short", "subtitle", "connectLink",
+            "buttonColor", emptyList(), "iconLink", "long",
+            "explainerTitle", "explainerText", emptyList(),
+            1, 1
+        )
+        val result = DappUIDetails(
+            "short", "subtitle", "long", "connectLink",
+            "buttonColor", "iconLink", true, 1
+        )
+        whenever(dappDao.getSponsoredDappForChainId(any())).thenReturn(Single.just(entity))
+
+        repository.getDappForChainId(1).test()
+            .await()
+            .assertValue {
+                it == result
+            }
+    }
 }

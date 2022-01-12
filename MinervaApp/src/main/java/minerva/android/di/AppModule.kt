@@ -70,7 +70,7 @@ private val appModules = module {
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get(), get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }
-    viewModel { AccountsViewModel(get(),get(), get(), get(), get(), get(), get()) }
+    viewModel { AccountsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
@@ -78,7 +78,7 @@ private val appModules = module {
     viewModel { LoginScannerViewModel(get(), get(), get()) }
     viewModel { AddressViewModel(get(), get()) }
     viewModel { SafeAccountSettingsViewModel(get(), get()) }
-    viewModel { TransactionViewModel(get(), get(), get()) }
+    viewModel { TransactionViewModel(get(), get(), get(), get()) }
     viewModel { NewAccountViewModel(get(), get()) }
     viewModel { ServicesViewModel(get(), get(), get()) }
     viewModel { WalletActionsViewModel(get()) }
@@ -92,7 +92,14 @@ private val appModules = module {
     viewModel { RampViewModel(get(), get()) }
     viewModel { DappsViewModel(get()) }
     viewModel { FiatViewModel(get(), get(), get()) }
-    viewModel { (accountId: Int, collectionAddress: String) -> NftCollectionViewModel(get(), get(), accountId, collectionAddress) }
+    viewModel { (accountId: Int, collectionAddress: String) ->
+        NftCollectionViewModel(
+            get(),
+            get(),
+            accountId,
+            collectionAddress
+        )
+    }
 }
 
 private const val MinervaCache = "MinervaCache"
