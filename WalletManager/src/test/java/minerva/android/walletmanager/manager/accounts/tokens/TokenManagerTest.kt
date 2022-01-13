@@ -13,6 +13,7 @@ import minerva.android.blockchainprovider.repository.erc1155.ERC1155TokenReposit
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
 import minerva.android.blockchainprovider.repository.erc721.ERC721TokenRepository
 import minerva.android.blockchainprovider.repository.superToken.SuperTokenRepository
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
@@ -899,6 +900,77 @@ class TokenManagerTest : RxTest() {
             }
     }
 
+    @Test
+    fun `test download tokens owned`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val account = Account(1, chainId = XDAI, address = "accountAddress", privateKey = "privateKey")
+        whenever(cryptoApi.getTokensOwned(any())).thenReturn(
+            Single.just(
+                TokensOwnedPayload(
+                    "",
+                    listOf(
+                        TokensOwnedPayload.TokenOwned(
+                            "1",
+                            "address01",
+                            "18",
+                            emptyList(),
+                            "88",
+                            "Name",
+                            "Symbol",
+                            "uri",
+                            listOf("ERC-1155")
+                        ),
+                        TokensOwnedPayload.TokenOwned(
+                            "10",
+                            "address02",
+                            "18",
+                            emptyList(),
+                            "88",
+                            "n4m8",
+                            "Symbol",
+                            "uri",
+                            listOf("ERC-721")
+                        ),
+                        TokensOwnedPayload.TokenOwned(
+                            "1000",
+                            "address03",
+                            "18",
+                            emptyList(),
+                            "",
+                            "Nam3",
+                            "Symb0l",
+                            "uri",
+                            listOf("ERC-20")
+                        )
+                    ),
+                    ""
+                )
+            )
+        )
+
+        tokenManager.downloadTokensList(account)
+            .test()
+            .await()
+            .assertValue { result -> result.size == 3
+                        && result.first().chainId == XDAI
+                        && result.first().name == String.Empty
+                        && result.first().collectionName == "Name"
+                        && result.first().symbol == "Symbol"
+                        && result.first().address == "address01"
+                        && result.first().decimals == "18"
+                        && result.first().accountAddress == "accountAddress"
+                        && result.first().tokenId == "88"
+                        && result.first().type == TokenType.ERC1155
+                        && result.last().chainId == XDAI
+                        && result.last().name == "Nam3"
+                        && result.last().collectionName == null
+                        && result.last().symbol == "Symb0l"
+                        && result.last().address == "address03"
+                        && result.last().decimals == "18"
+                        && result.last().accountAddress == "accountAddress"
+                        && result.last().type.isERC20()
+            }
+    }
 
     @Test
     fun `test download tokens from transactions`() {
@@ -950,7 +1022,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `test download tokens`() {
         NetworkManager.initialize(MockDataProvider.networks)
-        val account = Account(1, chainId = XDAI, address = "accountAddress", privateKey = "privateKey")
+        val account = Account(1, chainId = POA_CORE, address = "accountAddress", privateKey = "privateKey")
         whenever(cryptoApi.getTokenTx(any())).thenReturn(
             Single.just(
                 TokenTxResponse(
@@ -1013,7 +1085,7 @@ class TokenManagerTest : RxTest() {
             .await()
             .assertValue { result ->
                 result.size == 3 &&
-                        result.first().chainId == XDAI &&
+                        result.first().chainId == POA_CORE &&
                         result.first().name == "token1" &&
                         result.first().collectionName == null &&
                         result.first().symbol == "TK1" &&
@@ -1022,7 +1094,7 @@ class TokenManagerTest : RxTest() {
                         result.first().accountAddress == "accountAddress" &&
                         result.first().tokenId == null &&
                         result.first().type == TokenType.ERC20 &&
-                        result[1].chainId == XDAI &&
+                        result[1].chainId == POA_CORE &&
                         result[1].name == "" &&
                         result[1].collectionName == "token2" &&
                         result[1].symbol == "TK2" &&
@@ -1031,7 +1103,7 @@ class TokenManagerTest : RxTest() {
                         result[1].accountAddress == "accountAddress" &&
                         result[1].tokenId == "1" &&
                         result[1].type.isERC721() &&
-                        result[2].chainId == XDAI &&
+                        result[2].chainId == POA_CORE &&
                         result[2].name == "" &&
                         result[2].collectionName == "token3" &&
                         result[2].symbol == "TK3" &&

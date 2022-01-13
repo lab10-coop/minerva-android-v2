@@ -4,7 +4,6 @@ import androidx.annotation.VisibleForTesting
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.ObservableSource
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.zipWith
@@ -51,6 +50,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
 import minerva.android.walletmanager.model.mappers.TokenDataToERCToken
 import minerva.android.walletmanager.model.mappers.TokenDetailsToERC20TokensMapper
 import minerva.android.walletmanager.model.mappers.TokenToAssetBalanceErrorMapper
+import minerva.android.walletmanager.model.mappers.TokensOwnedToERCToken
 import minerva.android.walletmanager.model.minervaprimitives.account.*
 import minerva.android.walletmanager.model.token.*
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
@@ -543,6 +543,7 @@ class TokenManagerImpl(
         when (account.chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, MATIC, BSC, BSC_TESTNET -> getTokensFromTx(account)
             MUMBAI, RSK_TEST, RSK_MAIN -> Single.just(emptyList()) // Networks without token explorer urls
+            XDAI -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
 
@@ -656,6 +657,18 @@ class TokenManagerImpl(
         }
         .toList()
 
+    private fun getTokensOwned(account: Account): Single<List<ERCToken>> =
+        cryptoApi.getTokensOwned(url = getTokensOwnedApiURL(account))
+            .map { response ->
+                mutableListOf<ERCToken>().apply {
+                    response.result
+                        .map { tokenData -> TokensOwnedToERCToken.map(account.chainId, tokenData, account.address) }
+                        .filter { token-> token.type != TokenType.INVALID }
+                        .forEach { token -> add(token) }
+                }
+            }
+
+
     private fun getTokensForAccount(account: Account): Single<List<ERCToken>> =
         Single.zip(getTokensListWithBalance(account),
             getTokenTransactionsWithOwnership(account),
@@ -756,6 +769,9 @@ class TokenManagerImpl(
     fun getTokensTxApiURL(account: Account): String =
         String.format(TOKEN_TX_REQUEST, getTokenExplorerURL(account.chainId), account.address)
 
+    private fun getTokensOwnedApiURL(account: Account): String =
+        String.format(TOKENS_OWNED_REQUEST, getTokensOwnedURL(account.chainId), account.address)
+
     private fun getAPIKey(chainId: Int) =
         when (chainId) {
             ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHERSCAN_KEY
@@ -788,6 +804,13 @@ class TokenManagerImpl(
             MATIC -> POLYGON_TOKEN_BALANCE_URL
             BSC -> BINANCE_SMART_CHAIN_MAINNET_TOKEN_BALANCE_URL
             BSC_TESTNET -> BINANCE_SMART_CHAIN_TESTNET_TOKEN_BALANCE_URL
+            else -> throw NetworkNotFoundThrowable()
+        }
+
+    @VisibleForTesting
+    fun getTokensOwnedURL(chainId: Int) =
+        when (chainId) {
+            XDAI -> X_DAI_TOKENS_OWNED_URL
             else -> throw NetworkNotFoundThrowable()
         }
 
@@ -826,7 +849,8 @@ class TokenManagerImpl(
                 mergeNewTokensWithLocal(localChainTokens, newTokens)
                     .let { tokenList ->
                         if (!shouldUpdateLogosURI) {
-                            shouldUpdateLogosURI = localChainTokens.size != tokenList.size
+//                            shouldUpdateLogosURI = localChainTokens.size != tokenList.size
+                            shouldUpdateLogosURI = true // TODO: Change when nfts are merged properly
                         }
                         allLocalTokensMap[chainId] = tokenList
                     }
@@ -848,9 +872,11 @@ class TokenManagerImpl(
             // TODO: PL
             // TODO: Wypadałoby tutaj zmergować ikonki kolekcji i ich detale, aby nie musieć odświeżać na nowo
             // TODO: Narazie nie dodaję, aby dobrze zresetować stare NFT.
+            // TODO: Zmienić również shouldUpdateLogosURI
             // TODO: ENG
             // TODO: NFT icons and details should be merged here so as not to fetch them unnecessarily
             // TODO: I decided not to add them in order to see when token discovery properly works
+            // TODO: Also change shouldUpdateLogosURI
         }
 
     private fun mergeNewTokenWithLocalNfts(localChainTokens: List<ERCToken>, newToken: ERCToken) {
@@ -1082,6 +1108,7 @@ class TokenManagerImpl(
 
     companion object {
         private const val LAST_UPDATE_INDEX = 0
+        private const val TOKENS_OWNED_REQUEST = "%stokensowned/%s?fetchTokenJson=ERC-1155"
         private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
         private const val TOKEN_TX_REQUEST = "%sapi?module=account&action=tokentx&address=%s"
         private const val ETHEREUM_TOKENTX_REQUEST =
