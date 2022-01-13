@@ -8,17 +8,19 @@ import minerva.android.walletmanager.database.converters.TokenTypeConverter
 import minerva.android.walletmanager.database.dao.CoinBalanceDao
 import minerva.android.walletmanager.database.dao.DappDao
 import minerva.android.walletmanager.database.dao.DappSessionDao
+import minerva.android.walletmanager.database.dao.FavoriteDappDao
 import minerva.android.walletmanager.database.dao.TokenBalanceDao
 import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.database.entity.CoinBalanceEntity
 import minerva.android.walletmanager.database.entity.DappEntity
 import minerva.android.walletmanager.database.entity.DappSessionEntity
+import minerva.android.walletmanager.database.entity.FavoriteDappEntity
 import minerva.android.walletmanager.database.entity.TokenBalanceEntity
 import minerva.android.walletmanager.model.token.ERCToken
 
 @Database(
-    entities = [ERCToken::class, DappSessionEntity::class, CoinBalanceEntity::class, TokenBalanceEntity::class, DappEntity::class],
-    version = 26
+    entities = [ERCToken::class, DappSessionEntity::class, CoinBalanceEntity::class, TokenBalanceEntity::class, DappEntity::class, FavoriteDappEntity::class],
+    version = 27
 )
 @TypeConverters(TokenTypeConverter::class, Converter::class)
 abstract class MinervaDatabase : RoomDatabase() {
@@ -27,4 +29,5 @@ abstract class MinervaDatabase : RoomDatabase() {
     abstract fun coinBalanceDao(): CoinBalanceDao
     abstract fun tokenBalanceDao(): TokenBalanceDao
     abstract fun dappDao(): DappDao
+    abstract fun favoriteDappDao(): FavoriteDappDao
 }

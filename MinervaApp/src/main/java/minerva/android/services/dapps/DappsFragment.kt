@@ -28,10 +28,19 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
     private val dappAdapter = DappsAdapter(this)
     private val sponsoredDappAdapter = DappsAdapter(this)
     private val sponsoredTitleAdapter = TitleAdapter(R.string.sponsored_label)
-    private val separatorAdapter = SeparatorAdapter()
+    private val sponsoredSeparatorAdapter = SeparatorAdapter()
+    private val favoriteDappAdapter = DappsAdapter(this)
+    private val favoriteTitleAdapter = TitleAdapter(R.string.favorite_label)
+    private val favoriteSeparatorAdapter = SeparatorAdapter()
 
     private val concatAdapter = ConcatAdapter(
-        sponsoredTitleAdapter, sponsoredDappAdapter, separatorAdapter, dappAdapter
+        favoriteTitleAdapter,
+        favoriteDappAdapter,
+        favoriteSeparatorAdapter,
+        sponsoredTitleAdapter,
+        sponsoredDappAdapter,
+        sponsoredSeparatorAdapter,
+        dappAdapter
     )
 
     override fun onResume() {
@@ -56,8 +65,11 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
     }
 
     private fun updateDapps(dapps: DappsWithCategories) {
+        favoriteDappAdapter.submitList(dapps.favorite)
+        favoriteTitleAdapter.setVisibility(dapps.isFavoriteVisible)
+        favoriteSeparatorAdapter.setVisibility(dapps.isFavoriteVisible)
         sponsoredTitleAdapter.setVisibility(dapps.isSponsoredVisible)
-        separatorAdapter.setVisibility(dapps.isSponsoredVisible)
+        sponsoredSeparatorAdapter.setVisibility(dapps.isSponsoredVisible)
         sponsoredDappAdapter.submitList(dapps.sponsored)
         dappAdapter.submitList(dapps.remaining)
     }
@@ -84,6 +96,10 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
     override fun onDappSelected(onDappSelected: DappsAdapter.Listener.OnDappSelected) {
         dialogOpen = OpenDappDialog(dapp = onDappSelected.dapp).apply { listener = this@DappsFragment }
         dialogOpen.show(childFragmentManager, OpenDappDialog.TAG)
+    }
+
+    override fun onFavoriteClick(name: String) {
+        viewModel.updateFavoriteDapp(name)
     }
 
     override fun onConfirm(onConfirmData: OpenDappDialog.Listener.OnConfirmData) {

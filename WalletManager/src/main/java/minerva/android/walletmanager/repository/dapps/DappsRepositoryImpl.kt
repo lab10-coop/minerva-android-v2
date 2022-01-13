@@ -1,12 +1,15 @@
 package minerva.android.walletmanager.repository.dapps
 
+import io.reactivex.Completable
 import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.DappDetails
 import minerva.android.kotlinUtils.DateUtils
 import minerva.android.walletmanager.database.dao.DappDao
+import minerva.android.walletmanager.database.dao.FavoriteDappDao
 import minerva.android.walletmanager.database.entity.DappEntity
+import minerva.android.walletmanager.database.entity.FavoriteDappEntity
 import minerva.android.walletmanager.model.dapps.DappUIDetails
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
@@ -14,19 +17,35 @@ import minerva.android.walletmanager.storage.LocalStorage
 class DappsRepositoryImpl(
     private val cryptoApi: CryptoApi,
     private val localStorage: LocalStorage,
-    private val dappDao: DappDao
+    private val dappDao: DappDao,
+    private val favoriteDappDao: FavoriteDappDao
 ) : DappsRepository {
 
     private val currentTimeProvider = CurrentTimeProviderImpl()
+
+    override fun insertFavoriteDapp(name: String): Completable =
+        favoriteDappDao.insert(FavoriteDappEntity(name = name))
+
+
+    override fun removeFavoriteDapp(name: String): Completable =
+        favoriteDappDao.delete(name)
+
+    override fun getFavoriteDapps(): Single<List<String>> =
+        favoriteDappDao.getAllFavoriteDapps().map { list -> list.map { it.name } }
 
     override fun getDappForChainId(chainId: Int): Single<DappUIDetails> =
         dappDao.getSponsoredDappForChainId(chainId).map {
             it.mapToDappUIDetails()
         }
 
+    override fun getAllDappsDetailsFromDB(): Single<List<DappUIDetails>> =
+        dappDao.getAllDapps().map { dappEntityList -> dappEntityList.map { it.mapToDappUIDetails() } }
+
     override fun getAllDappsDetails(): Single<List<DappUIDetails>> =
         cryptoApi.getLastCommitFromDappsDetails().flatMap {
             getDappList(it)
+        }.onErrorResumeNext {
+            dappDao.getAllDapps()
         }.map { dappEntityList ->
             dappEntityList.map { it.mapToDappUIDetails() }
         }
@@ -53,6 +72,7 @@ class DappsRepositoryImpl(
     private fun updateDetails(list: List<DappEntity>): List<DappEntity> {
         dappDao.deleteAll()
         dappDao.insertAll(list)
+        favoriteDappDao.deleteNotMatchingDapps(list.map { it.shortName })
         localStorage.saveDappDetailsUpdateTimestamp(currentTimeProvider.currentTimeMills())
         return list
     }

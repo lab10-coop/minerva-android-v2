@@ -12,7 +12,8 @@ data class Dapp(
     val iconUrl: String = String.Empty,
     val dappUrl: String = String.empty,
     val isSponsored: Boolean = false,
-    val sponsoredOrder: Int = NOT_SPONSORED_ORDER_ID
+    val sponsoredOrder: Int = NOT_SPONSORED_ORDER_ID,
+    var isFavorite: Boolean = false
 ) {
     companion object {
         private const val NOT_SPONSORED_ORDER_ID = 0

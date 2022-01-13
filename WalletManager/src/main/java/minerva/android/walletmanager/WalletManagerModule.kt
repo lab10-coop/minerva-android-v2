@@ -92,7 +92,8 @@ fun createWalletModules() = module {
     }
     single<RateStorage> { RateStorageImpl() }
     single { get<MinervaDatabase>().dappDao() }
-    single<DappsRepository> { DappsRepositoryImpl(get(), get(), get()) }
+    single { get<MinervaDatabase>().favoriteDappDao() }
+    single<DappsRepository> { DappsRepositoryImpl(get(), get(), get(), get()) }
 }
 
 private const val MinervaStorage = "MinervaSharedPrefs"
