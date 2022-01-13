@@ -6,16 +6,10 @@ import java.math.BigDecimal
 data class ERCTokensList(
     private val list: List<AccountToken>
 ) {
-    private fun getCollectibles() = list.filter { accountToken -> accountToken.token.type.isERC721() }
+    private fun getCollectibles() = list.filter { accountToken -> accountToken.token.type.isNft() }
 
     fun getCollectionsWithBalance(account: Account) = getCollectibles()
-        .map { accountToken ->
-            val balance =
-                account.accountTokens.find { token -> token.token.address.equals(accountToken.token.address, true) }
-                    ?.currentBalance
-                    ?: BigDecimal(0)
-            accountToken to balance
-        }
+        .map { accountToken -> accountToken to account.getTokenBalance(accountToken, accountToken.token.type) }
         .distinctBy { pair -> pair.first.token.address }
         .sortedByDescending { pair -> pair.second }
 
@@ -26,4 +20,25 @@ data class ERCTokensList(
     fun isCollectiblesListNotEmpty() = getCollectibles().isNotEmpty()
 
     fun isNotEmpty() = list.isNotEmpty()
+
+    private fun Account.getERC1155Balance(accountToken: AccountToken) = accountTokens
+        .filter { token ->
+            token.token.address.equals(
+                accountToken.token.address,
+                true
+            )
+        }
+        .fold(BigDecimal.ZERO) { acc, e ->
+            acc + e.currentRawBalance
+        }
+
+    private fun Account.getTokenBalance(accountToken: AccountToken) = accountTokens
+        .find { token -> token.token.address.equals(accountToken.token.address, true) }
+        ?.currentBalance
+        ?: BigDecimal.ZERO
+
+    private fun Account.getTokenBalance(accountToken: AccountToken, type: TokenType) = when {
+        type.isERC1155() -> getERC1155Balance(accountToken)
+        else -> getTokenBalance(accountToken)
+    }
 }

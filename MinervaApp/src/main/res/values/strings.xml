@@ -369,6 +369,7 @@
     <string name="timeline">Timeline view</string>
     <string name="grid">Grid view</string>
     <string name="more_label"> more</string>
+    <string name="amount_label">Amount: %s</string>
 
     <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
     <string name="default_dapp_dialog_confirm">Open</string>
@@ -378,6 +379,10 @@
     <string name="honeyswap_dialog_confirm">Open Honeyswap</string>
     <string name="nft_graphic_error_message">This NFT graphic cannot be displayed</string>
     <string name="cd_dapp_icon">Dapp icon</string>
+    <string name="open_dapp_info">To connect this DApp with your Minerva Wallet, hit "Open" and look out for "WalletConnect" or the "WalletConnect"-Icon.</string>
+    <string name="sponsored_label">Sponsored</string>
+    <string name="open_dapp_label">Open DApp</string>
+    <string name="favorite_label">Favorite</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

@@ -87,6 +87,7 @@ class AccountManagerImpl(
                     erc20Tokens[account.chainId]
                         ?.find { ercToken ->
                             ercToken.address.equals(accountToken.token.address, true)
+                                    && ercToken.tokenId == accountToken.token.tokenId
                         }?.let { ercToken ->
                             accountToken.token.logoURI = ercToken.logoURI
                             accountToken.token.description = ercToken.description

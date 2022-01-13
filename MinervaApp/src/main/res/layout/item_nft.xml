@@ -76,12 +76,26 @@
             android:fontFamily="@font/rubik_medium"
             android:textColor="@color/nftNameGray"
             android:textSize="@dimen/text_big"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/balance"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/content"
             tools:text="Intercom Dreamer" />
 
-        <it.mike5v.viewmoretextview.ViewMoreTextView
+        <TextView
+            android:id="@+id/balance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:fontFamily="@font/rubik_medium"
+            android:textColor="@color/nftBalanceGray"
+            android:textSize="@dimen/text_small"
+            app:layout_constraintBottom_toBottomOf="@+id/name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/name"
+            tools:text="Amount: 5"
+            tools:visibility="visible" />
+
+        <minerva.android.widget.RecyclableViewMoreTextView
             android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
