@@ -1,6 +1,7 @@
 package minerva.android.walletmanager.model.token
 
 import minerva.android.apiProvider.model.TokenData
+import minerva.android.apiProvider.model.TokensOwnedPayload
 import minerva.android.apiProvider.model.TransactionSpeed
 import minerva.android.blockchainprovider.defs.BlockchainTransactionType
 import minerva.android.blockchainprovider.model.TokenWithBalance
@@ -10,6 +11,7 @@ import minerva.android.configProvider.model.walletConfig.CredentialsPayload
 import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
 import minerva.android.configProvider.model.walletConfig.IdentityPayload
 import minerva.android.configProvider.model.walletConfig.ServicePayload
+import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.networks.NetworkManager.networks
 import minerva.android.walletmanager.model.CredentialQrCode
@@ -422,6 +424,61 @@ class MapperTest {
         result04.type.isERC721() shouldBeEqualTo true
         val result05 = TokenDataToERCToken.map(ATS_TAU, tokenBalance05, "key")
         result05.type.isERC1155() shouldBeEqualTo true
+
+    }
+
+    @Test
+    fun `map TokensOwned to ERCToken`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val tokenOwned01 = TokensOwnedPayload.TokenOwned(
+            "1",
+            "address01",
+            "18",
+            emptyList(),
+            "88",
+            "Name",
+            "Symbol",
+            "uri",
+            listOf("ERC-1155")
+        )
+        val tokenOwned02 = TokensOwnedPayload.TokenOwned(
+            "10",
+            "address02",
+            "18",
+            emptyList(),
+            "88",
+            "n4m8",
+            "Symbol",
+            "uri",
+            listOf("ERC-721")
+        )
+        val tokenOwned03 = TokensOwnedPayload.TokenOwned(
+            "1000",
+            "address03",
+            "18",
+            emptyList(),
+            "88",
+            "Nam3",
+            "Symb0l",
+            "uri",
+            listOf("ERC-20")
+        )
+
+        val result01 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned01, "key")
+        result01.name shouldBeEqualTo String.Empty
+        result01.collectionName shouldBeEqualTo "Name"
+        result01.address shouldBeEqualTo "address01"
+        result01.type shouldBeEqualTo TokenType.ERC1155
+        val result02 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned02, "key")
+        result02.collectionName shouldBeEqualTo "n4m8"
+        result02.name shouldBeEqualTo String.Empty
+        result02.address shouldBeEqualTo "address02"
+        result02.type shouldBeEqualTo TokenType.ERC721
+        val result03 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned03, "key")
+        result03.name shouldBeEqualTo "Nam3"
+        result03.collectionName shouldBeEqualTo null
+        result03.address shouldBeEqualTo "address03"
+        result03.type shouldBeEqualTo TokenType.ERC20
 
     }
 

@@ -56,6 +56,9 @@ interface CryptoApi {
     fun getConnectedTokens(@Url url: String): Single<TokenBalanceResponse>
 
     @GET
+    fun getTokensOwned(@Url url: String): Single<TokensOwnedPayload>
+
+    @GET
     fun getTokenTx(@Url url: String): Single<TokenTxResponse>
 
     @GET(CHAIN_DETAILS_URL)
