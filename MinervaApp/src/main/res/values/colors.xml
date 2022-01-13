@@ -75,4 +75,5 @@
     <color name="nftDescriptionGray">#747185</color>
     <color name="nftBalanceGray">#908F9D</color>
     <color name="nftErrorBackgroundPurple">#1AA8A8FF</color>
+    <color name="favoriteDappBackgroundBlack">#1A000000</color>
 </resources>

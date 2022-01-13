@@ -46,10 +46,32 @@
             android:layout_height="@dimen/dapp_icon_size"
             android:layout_marginEnd="@dimen/margin_normal"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/favorite_view"
             app:layout_constraintTop_toTopOf="parent"
             android:scaleType="fitXY"
             android:contentDescription="@string/cd_dapp_icon" />
+
+        <View
+            android:id="@+id/favorite_view"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:background="@color/favoriteDappBackgroundBlack"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <ImageView
+            android:id="@+id/favorite_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/favorite_view"
+            app:layout_constraintStart_toStartOf="@id/favorite_view"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_star_deselected"
+            android:contentDescription="@string/cd_dapp_icon" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

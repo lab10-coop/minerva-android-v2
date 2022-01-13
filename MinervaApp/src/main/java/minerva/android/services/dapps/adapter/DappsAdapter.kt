@@ -28,6 +28,7 @@ class DappsAdapter(private val listener: Listener) :
 
     interface Listener {
         fun onDappSelected(onDappSelected: OnDappSelected)
+        fun onFavoriteClick(name: String)
         data class OnDappSelected(val dapp: Dapp)
     }
 
@@ -44,6 +45,12 @@ class DappsAdapter(private val listener: Listener) :
                     setBackgroundColor(Color.parseColor(dapp.colorHex))
                     setOnClickListener { listener.onDappSelected(Listener.OnDappSelected(dapp)) }
                 }
+                setFavoriteButton(dapp.isFavorite)
+                favoriteView.setOnClickListener {
+                    listener.onFavoriteClick(dapp.shortName)
+                    setFavoriteButton(!dapp.isFavorite)
+                    dapp.isFavorite = !dapp.isFavorite
+                }
             }
         }
 
@@ -55,6 +62,11 @@ class DappsAdapter(private val listener: Listener) :
                 .target(this)
                 .build()
             imageLoader.enqueue(request)
+        }
+
+        private fun setFavoriteButton(isFavorite: Boolean) {
+            val imageRes = if (isFavorite) R.drawable.ic_star_selected else R.drawable.ic_star_deselected
+            binding.favoriteButton.setImageResource(imageRes)
         }
     }
 }
