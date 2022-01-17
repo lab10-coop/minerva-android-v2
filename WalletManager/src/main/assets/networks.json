@@ -133,7 +133,7 @@
     "chainId": 1
   },
   {
-    "name": "xDai Chain",
+    "name": "Gnosis Chain",
     "token": "xDAI",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://xdai-rpc.lab10.io",
@@ -141,7 +141,7 @@
     "gasPriceOracle": "",
     "gasPrice": "20000000000",
     "tokens": [],
-    "color": "#48a9a6",
+    "color": "#04795B",
     "testNet": false,
     "chainId": 100,
     "superfluid": {
