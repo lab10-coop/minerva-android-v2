@@ -13,6 +13,7 @@ import minerva.android.walletmanager.database.entity.FavoriteDappEntity
 import minerva.android.walletmanager.model.dapps.DappUIDetails
 import minerva.android.walletmanager.provider.CurrentTimeProviderImpl
 import minerva.android.walletmanager.storage.LocalStorage
+import minerva.android.walletmanager.utils.isNewVersionBigger
 
 class DappsRepositoryImpl(
     private val cryptoApi: CryptoApi,
@@ -45,7 +46,7 @@ class DappsRepositoryImpl(
         cryptoApi.getLastCommitFromDappsDetails().flatMap {
             getDappList(it)
         }.onErrorResumeNext {
-            dappDao.getAllDapps()
+            fetchDappList()
         }.map { dappEntityList ->
             dappEntityList.map { it.mapToDappUIDetails() }
         }
@@ -63,18 +64,21 @@ class DappsRepositoryImpl(
         }
 
     private fun fetchDappList(): Single<List<DappEntity>> =
-        cryptoApi.getDappsDetails().map { list ->
-            updateDetails(list.map { dappDetails -> dappDetails.mapToDappEntity() })
+        cryptoApi.getDappsDetails().flatMap { details ->
+            updateDetails(details.dappsList.map { dappDetails -> dappDetails.mapToDappEntity() }, details.version)
         }.onErrorResumeNext {
             dappDao.getAllDapps()
         }
 
-    private fun updateDetails(list: List<DappEntity>): List<DappEntity> {
-        dappDao.deleteAll()
-        dappDao.insertAll(list)
-        favoriteDappDao.deleteNotMatchingDapps(list.map { it.shortName })
-        localStorage.saveDappDetailsUpdateTimestamp(currentTimeProvider.currentTimeMills())
-        return list
+    private fun updateDetails(list: List<DappEntity>, version: String): Single<List<DappEntity>> {
+        if (isNewVersionBigger(localStorage.loadDappDetailsVersion(), version)) {
+            dappDao.deleteAll()
+            dappDao.insertAll(list)
+            favoriteDappDao.deleteNotMatchingDapps(list.map { it.shortName })
+            localStorage.saveDappDetailsUpdateTimestamp(currentTimeProvider.currentTimeMills())
+            localStorage.saveDappDetailsVersion(version)
+        }
+        return dappDao.getAllDapps()
     }
 
     private fun DappDetails.mapToDappEntity(): DappEntity =
