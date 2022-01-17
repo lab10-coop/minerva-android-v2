@@ -71,9 +71,9 @@ class DappsViewModel(
     private fun handleDappResult(list: List<Dapp>) {
         this.dapps = list
         _dappsLiveData.value = DappsWithCategories(
-            favorite = list.filter { it.isFavorite }.sortedBy { it.shortName },
+            favorite = list.filter { it.isFavorite }.sortedBy { it.shortName.toUpperCase() },
             sponsored = list.filter { !it.isFavorite && it.isSponsored }.sortedBy { it.sponsoredOrder },
-            remaining = list.filter { !it.isFavorite && !it.isSponsored }.sortedBy { it.shortName }
+            remaining = list.filter { !it.isFavorite && !it.isSponsored }.sortedBy { it.shortName.toUpperCase() }
         )
     }
 

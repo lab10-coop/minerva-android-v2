@@ -381,7 +381,7 @@
     <string name="cd_dapp_icon">Dapp icon</string>
     <string name="open_dapp_info">To connect this DApp with your Minerva Wallet, hit "Open" and look out for "WalletConnect" or the "WalletConnect"-Icon.</string>
     <string name="sponsored_label">Sponsored</string>
-    <string name="open_dapp_label">Open DApp</string>
+    <string name="open_dapp_label">Open</string>
     <string name="favorite_label">Favorite</string>
 
     <string-array name="currencies">
