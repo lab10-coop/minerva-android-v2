@@ -16,6 +16,7 @@ import minerva.android.apiProvider.model.Commit
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.Committer
 import minerva.android.apiProvider.model.DappDetails
+import minerva.android.apiProvider.model.DappDetailsList
 import minerva.android.walletmanager.database.dao.DappDao
 import minerva.android.walletmanager.database.dao.FavoriteDappDao
 import minerva.android.walletmanager.database.entity.DappEntity
@@ -40,18 +41,22 @@ class DappsRepositoryImplTest {
     private val commitData: List<CommitElement>
         get() = listOf(CommitElement(Commit(Committer("2021-01-29T19:56:02Z")))) //1611950162000 in mills
 
-    private val dappsDetails = listOf(
-        DappDetails(
-            "short", "subtitle", "connectLink",
-            "buttonColor", emptyList(), "iconLink", "long", "explainerTitle", "explainerText", emptyList(),
-            0, 1
-        ),
-        DappDetails(
-            "short", "subtitle", "connectLink",
-            "buttonColor", emptyList(), "iconLink", "long", "explainerTitle", "explainerText", emptyList(),
-            1, 1
+    private val dappsDetails = DappDetailsList(
+        "1.1.1",
+        listOf(
+            DappDetails(
+                "short", "subtitle", "connectLink",
+                "buttonColor", emptyList(), "iconLink", "long", "explainerTitle", "explainerText", emptyList(),
+                0, 1
+            ),
+            DappDetails(
+                "short", "subtitle", "connectLink",
+                "buttonColor", emptyList(), "iconLink", "long", "explainerTitle", "explainerText", emptyList(),
+                1, 1
+            )
         )
     )
+
 
     private val dappsDetailsEntity = listOf(
         DappEntity(
@@ -99,11 +104,29 @@ class DappsRepositoryImplTest {
     fun `fetch dapp data from server test`() {
         whenever(cryptoApi.getLastCommitFromDappsDetails()).thenReturn(Single.just(commitData))
         whenever(cryptoApi.getDappsDetails()).thenReturn(Single.just(dappsDetails))
+        whenever(localStorage.loadDappDetailsVersion()).thenReturn("1.1.2")
         whenever(localStorage.loadDappDetailsUpdateTimestamp()).thenReturn(1611950161999)
         whenever(favoriteDappDao.deleteNotMatchingDapps(any())).thenReturn(0)
+        whenever(dappDao.getAllDapps()).thenReturn(Single.just(dappsDetailsEntity))
         doNothing().whenever(localStorage).saveDappDetailsUpdateTimestamp(any())
+        doNothing().whenever(localStorage).saveDappDetailsVersion(any())
         doNothing().whenever(dappDao).insertAll(any())
         doNothing().whenever(dappDao).deleteAll()
+
+        repository.getAllDappsDetails().test()
+            .await()
+            .assertValue {
+                it == dappsUIDetails
+            }
+    }
+
+    @Test
+    fun `fetch dapp data from server but server version is not bigger test`() {
+        whenever(cryptoApi.getLastCommitFromDappsDetails()).thenReturn(Single.just(commitData))
+        whenever(cryptoApi.getDappsDetails()).thenReturn(Single.just(dappsDetails))
+        whenever(localStorage.loadDappDetailsUpdateTimestamp()).thenReturn(1611950161999)
+        whenever(localStorage.loadDappDetailsVersion()).thenReturn("1.0.1")
+        whenever(dappDao.getAllDapps()).thenReturn(Single.just(dappsDetailsEntity))
 
         repository.getAllDappsDetails().test()
             .await()
@@ -132,6 +155,10 @@ class DappsRepositoryImplTest {
     @Test
     fun `get dapp data from db, when fetching commits returns error test`() {
         whenever(cryptoApi.getLastCommitFromDappsDetails()).thenReturn(Single.error(Throwable()))
+        whenever(dappDao.getAllDapps()).thenReturn(Single.just(dappsDetailsEntity))
+        whenever(cryptoApi.getDappsDetails()).thenReturn(Single.just(dappsDetails))
+        whenever(localStorage.loadDappDetailsUpdateTimestamp()).thenReturn(1611950161999)
+        whenever(localStorage.loadDappDetailsVersion()).thenReturn("1.0.1")
         whenever(dappDao.getAllDapps()).thenReturn(Single.just(dappsDetailsEntity))
 
         repository.getAllDappsDetails().test()

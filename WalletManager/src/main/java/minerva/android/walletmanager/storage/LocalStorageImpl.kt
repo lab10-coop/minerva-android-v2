@@ -103,6 +103,13 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
     override fun loadDappDetailsUpdateTimestamp(): Long =
         sharedPreferences.getLong(DAPPS_UPDATE_TIMESTAMP, Long.InvalidValue)
 
+    override fun saveDappDetailsVersion(version: String) {
+        sharedPreferences.edit().putString(DAPPS_UPDATE_VERSION, version).apply()
+    }
+
+    override fun loadDappDetailsVersion(): String? =
+        sharedPreferences.getString(DAPPS_UPDATE_VERSION, null)
+
     override fun getProfileImage(name: String): String =
         sharedPreferences.getString(name, String.NO_DATA) ?: String.NO_DATA
 
@@ -143,6 +150,7 @@ class LocalStorageImpl(private val sharedPreferences: SharedPreferences) : Local
         private const val FREE_ATS_TIMESTAMP = "free_ats_timestamp"
         private const val ICON_UPDATE_TIMESTAMP = "last_update_timestamp"
         private const val DAPPS_UPDATE_TIMESTAMP = "dapps_last_update_timestamp"
+        private const val DAPPS_UPDATE_VERSION = "dapps_last_update_version"
         private const val PROTECT_KEYS_ENABLED = "protect_keys_enabled"
         private const val PROTECT_TRANSACTIONS_ENABLED = "protect_transactions_enabled"
         private const val CURRENT_FIAT = "current_fiat"

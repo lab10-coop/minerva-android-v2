@@ -17,14 +17,32 @@
         android:layout_height="match_parent">
 
         <TextView
+            android:id="@+id/sponsored_label"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/sponsored_label_height"
+            android:layout_marginEnd="@dimen/margin_xxxsmall"
+            android:background="@drawable/background_sponsored_label"
+            android:fontFamily="@font/rubik_medium"
+            android:gravity="center"
+            android:text="@string/sponsored_label"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_xxsmall"
+            app:layout_constraintEnd_toStartOf="@id/dapp_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
             android:id="@+id/dapp_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_xxsmall"
+            android:ellipsize="end"
             android:fontFamily="@font/rubik_medium"
+            android:lines="1"
             android:textColor="@color/white"
             android:textSize="@dimen/text_small"
+            app:layout_constraintEnd_toStartOf="@id/open_dapp_button"
             app:layout_constraintStart_toEndOf="@id/dapp_icon"
             app:layout_constraintTop_toTopOf="@id/dapp_icon" />
 
@@ -34,10 +52,13 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginBottom="@dimen/margin_xxsmall"
+            android:ellipsize="end"
             android:fontFamily="@font/rubik_regular"
+            android:lines="1"
             android:textColor="@color/white"
             android:textSize="@dimen/text_xsmall"
             app:layout_constraintBottom_toBottomOf="@id/dapp_icon"
+            app:layout_constraintEnd_toStartOf="@id/open_dapp_button"
             app:layout_constraintStart_toEndOf="@id/dapp_icon" />
 
         <ImageView
@@ -52,6 +73,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/open_dapp_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/margin_normal"

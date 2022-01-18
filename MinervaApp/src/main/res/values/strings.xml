@@ -341,7 +341,7 @@
     <string name="no_addresses_left_info">You reached the maximum number of accounts</string>
     <string name="ethereum_label">Ethereum</string>
     <string name="polygon_label">Polygon (Matic)</string>
-    <string name="xdai_label">xDai Chain</string>
+    <string name="xdai_label">Gnosis Chain</string>
     <string name="create_your_first_account_header">Create your \nfirst account!</string>
     <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
     <string name="skip">Skip</string>
@@ -381,7 +381,7 @@
     <string name="cd_dapp_icon">Dapp icon</string>
     <string name="open_dapp_info">To connect this DApp with your Minerva Wallet, hit "Open" and look out for "WalletConnect" or the "WalletConnect"-Icon.</string>
     <string name="sponsored_label">Sponsored</string>
-    <string name="open_dapp_label">Open DApp</string>
+    <string name="open_dapp_label">Open</string>
     <string name="favorite_label">Favorite</string>
 
     <string-array name="currencies">

@@ -32,7 +32,7 @@ private fun getMainIcon(chainId: Int): Int =
     when (chainId) {
         ATS_SIGMA -> R.drawable.ic_artis_sigma
         ETH_MAIN -> R.drawable.ic_ethereum
-        XDAI -> R.drawable.ic_xdai
+        XDAI -> R.drawable.ic_gnosis_chain
         POA_CORE -> R.drawable.ic_poa_core
         ATS_TAU -> R.drawable.ic_artis
         POA_SKL -> R.drawable.ic_poa
@@ -49,7 +49,7 @@ fun getMainTokenIconRes(chainId: Int): Int =
     when (chainId) {
         ATS_SIGMA -> R.drawable.ic_artis_sigma_token
         ETH_MAIN -> R.drawable.ic_ethereum_token
-        XDAI -> R.drawable.ic_xdai_token
+        XDAI -> R.drawable.ic_gnosis_chain_token
         POA_CORE -> R.drawable.ic_poa_token
         ATS_TAU -> R.drawable.ic_artis_token
         ETH_KOV, ETH_RIN, ETH_ROP, ETH_GOR -> R.drawable.ic_ethereum_token_test

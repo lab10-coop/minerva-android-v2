@@ -21,10 +21,13 @@
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_small"
             android:layout_marginBottom="@dimen/margin_large"
+            android:ellipsize="end"
             android:fontFamily="@font/rubik_medium"
+            android:lines="1"
             android:textColor="@color/white"
             android:textSize="@dimen/text_big"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/dapp_icon"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,10 +37,13 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginBottom="@dimen/margin_big"
+            android:ellipsize="end"
             android:fontFamily="@font/rubik_regular"
+            android:lines="1"
             android:textColor="@color/white"
             android:textSize="@dimen/text_xsmall"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/dapp_icon"
             app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
@@ -45,11 +51,11 @@
             android:layout_width="@dimen/dapp_icon_size"
             android:layout_height="@dimen/dapp_icon_size"
             android:layout_marginEnd="@dimen/margin_normal"
+            android:contentDescription="@string/cd_dapp_icon"
+            android:scaleType="fitXY"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/favorite_view"
-            app:layout_constraintTop_toTopOf="parent"
-            android:scaleType="fitXY"
-            android:contentDescription="@string/cd_dapp_icon" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <View
             android:id="@+id/favorite_view"
@@ -65,12 +71,12 @@
             android:id="@+id/favorite_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/cd_dapp_icon"
+            android:src="@drawable/ic_star_deselected"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/favorite_view"
             app:layout_constraintStart_toStartOf="@id/favorite_view"
-            app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/ic_star_deselected"
-            android:contentDescription="@string/cd_dapp_icon" />
+            app:layout_constraintTop_toTopOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

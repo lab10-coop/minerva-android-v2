@@ -15,20 +15,20 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:scaleType="fitXY"
             android:src="@drawable/background_rounded"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/guideline"
-            android:scaleType="fitXY" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintGuide_percent="0.6"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.6" />
 
         <TextView
             android:id="@+id/header"
@@ -108,7 +108,7 @@
                     android:lines="2"
                     android:textColor="@color/white"
                     android:textSize="@dimen/text_large"
-                    app:icon="@drawable/ic_xdai"
+                    app:icon="@drawable/ic_gnosis_chain"
                     app:name="@string/xdai_label" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -117,11 +117,11 @@
             android:id="@+id/info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_xlarge"
-            android:paddingEnd="@dimen/margin_normal"
             android:fontFamily="@font/rubik_regular"
             android:gravity="center"
+            android:paddingStart="@dimen/margin_normal"
+            android:paddingEnd="@dimen/margin_normal"
             android:text="@string/create_your_first_account_info"
             android:textColor="@color/darkGray"
             android:textSize="@dimen/text_normal"
@@ -138,10 +138,10 @@
             android:gravity="center"
             android:text="@string/skip"
             android:textColor="@color/dividerGray"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/info"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/info" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
