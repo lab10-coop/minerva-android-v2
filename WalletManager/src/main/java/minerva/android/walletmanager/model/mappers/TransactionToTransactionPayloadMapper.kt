@@ -16,7 +16,8 @@ object TransactionToTransactionPayloadMapper : Mapper<Transaction, TransactionPa
                 gasLimit,
                 contractAddress,
                 data,
-                tokenDecimals
+                tokenDecimals,
+                tokenId
             )
         }
 }

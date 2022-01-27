@@ -26,6 +26,8 @@ interface TransactionRepository {
     fun calculateTransactionCost(gasPrice: BigDecimal, gasLimit: BigInteger): BigDecimal
     fun transferNativeCoin(chainId: Int, accountIndex: Int, transaction: Transaction): Completable
     fun transferERC20Token(chainId: Int, transaction: Transaction): Completable
+    fun transferERC721Token(chainId: Int, transaction: Transaction): Completable
+    fun transferERC1155Token(chainId: Int, transaction: Transaction): Completable
     fun loadRecipients(): List<Recipient>
     fun resolveENS(ensName: String): Single<String>
     fun getAccount(accountIndex: Int): Account?

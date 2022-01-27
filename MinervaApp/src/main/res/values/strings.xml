@@ -292,6 +292,7 @@
     <string name="account_balance_is_to_low">Account balance is too low</string>
     <string name="custom">Custom</string>
     <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
+    <string name="unknown_tx_speed">Unknown time</string>
     <string name="sending">Sending</string>
     <string name="rapid">Rapid</string>
     <string name="fast">Fast</string>
@@ -383,6 +384,10 @@
     <string name="sponsored_label">Sponsored</string>
     <string name="open_dapp_label">Open</string>
     <string name="favorite_label">Favorite</string>
+    <string name="failed_to_fetch_transaction_costs_error">Failed to estimate transaction costs. Try again later or add them manually.</string>
+    <string name="transaction_accepted_title">Transaction Accepted</string>
+    <string name="no_nfts_available">No NFTs available</string>
+    <string name="transaction_cost_format">%1$s %2$s (%3$s)</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

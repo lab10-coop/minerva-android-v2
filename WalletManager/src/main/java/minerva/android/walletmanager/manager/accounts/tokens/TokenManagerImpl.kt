@@ -842,16 +842,12 @@ class TokenManagerImpl(
 
     override fun mergeWithLocalTokensList(newTokensPerChainIdMap: Map<Int, List<ERCToken>>): UpdateTokensResult =
         walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
-            var shouldUpdateLogosURI = false
+            val shouldUpdateLogosURI = true
             val allLocalTokensMap = allLocalTokens.toMutableMap()
             for ((chainId, newTokens) in newTokensPerChainIdMap) {
                 val localChainTokens = allLocalTokensMap[chainId] ?: listOf()
                 mergeNewTokensWithLocal(localChainTokens, newTokens)
                     .let { tokenList ->
-                        if (!shouldUpdateLogosURI) {
-//                            shouldUpdateLogosURI = localChainTokens.size != tokenList.size
-                            shouldUpdateLogosURI = true // TODO: Change when nfts are merged properly
-                        }
                         allLocalTokensMap[chainId] = tokenList
                     }
             }
@@ -869,14 +865,6 @@ class TokenManagerImpl(
                     add(newToken)
                 }
             }
-            // TODO: PL
-            // TODO: Wypadałoby tutaj zmergować ikonki kolekcji i ich detale, aby nie musieć odświeżać na nowo
-            // TODO: Narazie nie dodaję, aby dobrze zresetować stare NFT.
-            // TODO: Zmienić również shouldUpdateLogosURI
-            // TODO: ENG
-            // TODO: NFT icons and details should be merged here so as not to fetch them unnecessarily
-            // TODO: I decided not to add them in order to see when token discovery properly works
-            // TODO: Also change shouldUpdateLogosURI
         }
 
     private fun mergeNewTokenWithLocalNfts(localChainTokens: List<ERCToken>, newToken: ERCToken) {
@@ -888,6 +876,9 @@ class TokenManagerImpl(
                 ) && localToken.tokenId == newToken.tokenId && localToken.tokenId != null
             }?.apply {
                 newToken.logoURI = logoURI
+                newToken.contentUri = contentUri
+                newToken.description = description
+                newToken.name = name
             }
         }
     }

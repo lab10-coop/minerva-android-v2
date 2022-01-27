@@ -13,6 +13,7 @@ import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.text.style.UnderlineSpan
 import android.util.AttributeSet
+import android.view.animation.Animation
 import androidx.appcompat.widget.AppCompatTextView
 import minerva.android.R
 
@@ -32,7 +33,8 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
 
     private var visibleLines: Int? = null
     var isExpanded: Boolean = false
-    private var animationDuration: Int? = null
+    var animationDurationMultiplier: Int
+    var maxDuration: Int
     private var foregroundColor: Int? = null
     private var ellipsizeText: String? = null
     private var initialValue: String? = null
@@ -40,11 +42,13 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
     private var ellipsizeTextColor: Int? = null
 
     private val visibleText: String get() = visibleText()
+    fun isAllTextVisible() = initialValue?.isAllTextVisible() ?: false
 
     init {
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.RecyclableViewMoreTextView)
         visibleLines = attributes.getInt(R.styleable.RecyclableViewMoreTextView_visibleLines, 0)
-        animationDuration = attributes.getInt(R.styleable.RecyclableViewMoreTextView_duration, 1000)
+        animationDurationMultiplier = attributes.getInt(R.styleable.RecyclableViewMoreTextView_durationMultiplier, 1)
+        maxDuration = attributes.getInt(R.styleable.RecyclableViewMoreTextView_maxDuration, 500)
         foregroundColor = attributes.getColor(R.styleable.RecyclableViewMoreTextView_foregroundColor, Color.TRANSPARENT)
         ellipsizeText = attributes.getString(R.styleable.RecyclableViewMoreTextView_ellipsizeText)
         isUnderlined = attributes.getBoolean(R.styleable.RecyclableViewMoreTextView_isUnderlined, false)
@@ -93,9 +97,10 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
         val endHeight = measuredHeight
 
         animationSet(startHeight, endHeight).apply {
-            duration = animationDuration?.toLong()!!
-            start()
-
+            duration = minOf(
+                (((endHeight - startHeight) / context.resources.displayMetrics.density) * animationDurationMultiplier).toLong(),
+                maxDuration.toLong()
+            )
             addListener(object : Animator.AnimatorListener {
                 override fun onAnimationEnd(animation: Animator?) {
                     if (!isExpanded!!)
@@ -104,8 +109,12 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
 
                 override fun onAnimationRepeat(animation: Animator?) {}
                 override fun onAnimationCancel(animation: Animator?) {}
-                override fun onAnimationStart(animation: Animator?) {}
+                override fun onAnimationStart(animation: Animator?) {
+                    if (isExpanded!!)
+                        listener?.onExpandAnimationStarted()
+                }
             })
+            start()
         }
     }
 
@@ -126,11 +135,11 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
                 .append(DEFAULT_ELLIPSIZED_TEXT.span())
                 .append(ellipsizeText.orEmpty().span())
         }
+        listener?.afterSetEllipsizedText()
     }
 
     private fun visibleText(): String {
         var end = 0
-
 
         for (i in 0 until visibleLines!!) {
             if (layout?.getLineEnd(i) ?: 0 != 0)
@@ -198,4 +207,20 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
                 )
         }
 
+
+    interface Listener{
+        val nextAnimation: Animation
+        fun afterSetEllipsizedText()
+        fun onExpandAnimationStarted()
+
+        companion object {
+            val Inactive = object : RecyclableViewMoreTextView.Listener {
+                override fun afterSetEllipsizedText() {}
+                override val nextAnimation: Animation = object : Animation() {}
+                override fun onExpandAnimationStarted() {}
+            }
+        }
+    }
+
+    var listener: Listener? = null
 }
