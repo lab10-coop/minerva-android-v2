@@ -20,12 +20,12 @@ data class AccountToken(
             .orElse { false }
 
     override val currentBalance: BigDecimal
-        get() = if (token.type.isNft() || token.decimals.isBlank()) currentRawBalance else getBalanceForERC20Token(
+        get() = if (token.type.isERC721() || token.decimals.isBlank()) currentRawBalance else getBalanceForTokenWithDecimals(
             currentRawBalance
         )
 
     val nextBalance: BigDecimal
-        get() = if (token.type.isNft() || token.decimals.isBlank()) nextRawBalance else getBalanceForERC20Token(nextRawBalance)
+        get() = if (token.type.isERC721() || token.decimals.isBlank()) nextRawBalance else getBalanceForTokenWithDecimals(nextRawBalance)
 
     override val fiatBalance: BigDecimal
         get() =
@@ -37,7 +37,7 @@ data class AccountToken(
             }.orElse { Double.InvalidValue.toBigDecimal() }
 
 
-    private fun getBalanceForERC20Token(rawBalance: BigDecimal) =
+    private fun getBalanceForTokenWithDecimals(rawBalance: BigDecimal) =
         if (rawBalance == Double.InvalidValue.toBigDecimal()) rawBalance
         else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
 

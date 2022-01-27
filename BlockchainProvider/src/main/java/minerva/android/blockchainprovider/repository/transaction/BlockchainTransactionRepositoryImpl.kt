@@ -290,6 +290,8 @@ class BlockchainTransactionRepositoryImpl(
         val gasLimit = it.error?.let {
             when (transferType) {
                 BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP -> Operation.TRANSFER_NATIVE.gasLimit
+                BlockchainTransactionType.ERC721_TRANSFER -> Operation.TRANSFER_ERC721.gasLimit
+                BlockchainTransactionType.ERC1155_TRANSFER -> Operation.TRANSFER_ERC1155.gasLimit
                 else -> Operation.TRANSFER_ERC20.gasLimit
             }
         } ?: estimateGasLimit(it.amountUsed)

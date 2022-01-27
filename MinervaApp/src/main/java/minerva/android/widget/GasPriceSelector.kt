@@ -22,13 +22,13 @@ class GasPriceSelector @JvmOverloads constructor(
 
     private val binding: GasPriceSelectorBinding =
         GasPriceSelectorBinding.bind(inflate(context, R.layout.gas_price_selector, this))
-    private lateinit var adapter: TransactionSpeedAdapter
+    private var adapter: TransactionSpeedAdapter? = null
 
     fun setAdapter(speeds: List<TxSpeed>, recalculateTxCost: (TxSpeed) -> Unit) = with(binding) {
         adapter = TransactionSpeedAdapter()
         if (speeds.size == 1) tabLayout.invisible()
         txSpeedViewPager.adapter = adapter
-        adapter.updateSpeeds(speeds)
+        adapter?.updateSpeeds(speeds)
         TabLayoutMediator(tabLayout, txSpeedViewPager) { _, _ -> }.attach()
         (txSpeedViewPager.children.first() as RecyclerView).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
 
@@ -40,15 +40,24 @@ class GasPriceSelector @JvmOverloads constructor(
                 } else {
                     txSpeedViewPager.currentItem = txSpeedViewPager.currentItem + 1
                 }
-                recalculateTxCost(adapter.getCurrentTxSpeed(txSpeedViewPager.currentItem))
+                adapter?.let {
+                    recalculateTxCost(it.getCurrentTxSpeed(txSpeedViewPager.currentItem))
+                }
             }
         }
     }
 
     fun setDefaultPosition(txType: TxType) = with(binding) {
-        val position = adapter.getPositionOfTxType(txType)
+        val position = adapter?.getPositionOfTxType(txType) ?: Int.InvalidIndex
         if (position != Int.InvalidIndex) {
             txSpeedViewPager.currentItem = position
+        }
+    }
+
+    fun setDefaultPositionWithoutSmoothAnimation(txType: TxType) = with(binding) {
+        val position = adapter?.getPositionOfTxType(txType) ?: Int.InvalidIndex
+        if (position != Int.InvalidIndex) {
+            txSpeedViewPager.setCurrentItem(position, false)
         }
     }
 

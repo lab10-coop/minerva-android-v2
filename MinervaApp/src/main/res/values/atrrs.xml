@@ -14,7 +14,8 @@
     <declare-styleable name="RecyclableViewMoreTextView">
         <attr format="integer" name="visibleLines"/>
         <attr format="boolean" name="isExpanded"/>
-        <attr format="integer" name="duration"/>
+        <attr format="integer" name="durationMultiplier"/>
+        <attr format="integer" name="maxDuration"/>
         <attr format="color" name="foregroundColor"/>
         <attr format="string" name="ellipsizeText"/>
         <attr format="boolean" name="isUnderlined"/>

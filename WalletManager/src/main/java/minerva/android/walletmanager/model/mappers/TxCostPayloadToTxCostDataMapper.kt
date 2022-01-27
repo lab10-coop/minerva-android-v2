@@ -33,5 +33,7 @@ object TxCostPayloadToTxCostDataMapper : Mapper<TxCostPayload, TxCostData> {
             TransferType.DEFAULT_TOKEN_TX -> BlockchainTransactionType.DEFAULT_TOKEN_TX
             TransferType.DEFAULT_COIN_TX -> BlockchainTransactionType.DEFAULT_COIN_TX
             TransferType.UNKNOWN -> BlockchainTransactionType.UNKNOWN
+            TransferType.ERC721_TRANSFER -> BlockchainTransactionType.ERC721_TRANSFER
+            TransferType.ERC1155_TRANSFER -> BlockchainTransactionType.ERC1155_TRANSFER
         }
 }

@@ -1,6 +1,7 @@
 package minerva.android.apiProvider.model
 
 import com.google.gson.annotations.SerializedName
+import minerva.android.kotlinUtils.Empty
 
 data class TokensOwnedPayload(
     @SerializedName("message")
@@ -16,18 +17,47 @@ data class TokensOwnedPayload(
         @SerializedName("contractAddress")
         val contractAddress: String,
         @SerializedName("decimals")
-        val decimals: String,
+        val _decimals: String?,
         @SerializedName("eventsSeen")
         val eventsSeen: List<String>,
         @SerializedName("id")
         val id: String,
         @SerializedName("name")
-        val name: String?,
+        val _name: String?,
         @SerializedName("symbol")
-        val symbol: String?,
+        val _symbol: String?,
         @SerializedName("tokenURI")
         val tokenURI: String,
         @SerializedName("types")
-        val types: List<String>
-    )
+        val types: List<String>,
+        @SerializedName("tokenJson")
+        val tokenJson: TokenJson? = TokenJson.Empty
+    ) {
+
+        companion object {
+            private const val DEFAULT_DECIMALS = "0"
+        }
+
+        val name: String
+            get() = _name ?: tokenJson?.name ?: String.Empty
+
+        val symbol: String
+            get() = _symbol ?: tokenJson?.symbol ?: String.Empty
+
+        val decimals: String
+            get() = _decimals ?: tokenJson?.decimals ?: DEFAULT_DECIMALS
+
+        data class TokenJson(
+            @SerializedName("decimals")
+            val decimals: String?,
+            @SerializedName("name")
+            val name: String?,
+            @SerializedName("symbol")
+            val symbol: String?
+        ) {
+            companion object {
+                val Empty = TokenJson("", "", "")
+            }
+        }
+    }
 }

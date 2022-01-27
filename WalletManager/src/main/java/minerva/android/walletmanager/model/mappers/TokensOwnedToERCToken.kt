@@ -7,17 +7,18 @@ import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.token.Tokens
 
 object TokensOwnedToERCToken {
+
     fun map(chainId: Int, token: TokensOwnedPayload.TokenOwned, accountAddress: String): ERCToken {
         val tokenType = mapToTokenType(token.types)
         return ERCToken(
             chainId = chainId,
-            name = if (tokenType.isERC20()) token.name ?: String.Empty else String.Empty,
-            symbol = token.symbol ?: String.Empty,
+            name = if (tokenType.isERC20()) token.name else String.Empty,
+            symbol = token.symbol,
             address = token.contractAddress,
             decimals = token.decimals,
             accountAddress = accountAddress,
             type = tokenType,
-            collectionName = if (tokenType.isNft()) token.name ?: String.Empty else null,
+            collectionName = if (tokenType.isNft()) token.name else null,
             tokenId = if (tokenType.isNft()) token.id else null
         )
     }

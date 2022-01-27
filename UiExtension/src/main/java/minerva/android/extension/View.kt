@@ -57,6 +57,9 @@ private fun Context.dpToPx(dp: Float): Int =
 fun View.hideKeyboard() = (context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
     .hideSoftInputFromWindow(windowToken, 0)
 
+fun View.showKeyboard() = (context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+    .toggleSoftInput(InputMethodManager.SHOW_FORCED,0)
+
 fun View.addOnGlobalLayoutListener(onPrepare: () -> Unit) {
     viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {

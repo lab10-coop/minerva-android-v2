@@ -96,6 +96,8 @@ private val appModules = module {
         NftCollectionViewModel(
             get(),
             get(),
+            get(),
+            get(),
             accountId,
             collectionAddress
         )

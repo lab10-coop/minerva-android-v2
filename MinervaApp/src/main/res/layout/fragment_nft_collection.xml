@@ -17,7 +17,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:itemCount="2"
-        tools:listitem="@layout/item_nft" />
+        tools:listitem="@layout/item_nft"
+        tools:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/no_nfts_available_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center"
+        android:text="@string/no_nfts_available"
+        />
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/progress"
