@@ -235,6 +235,10 @@ class WalletConfigManagerImpl(
                 .handleAutomaticBackupFailedError(localStorage)
         } else Completable.error(AutomaticBackupFailedThrowable())
 
+    override fun removeAllTokens(): Completable =
+        updateWalletConfig(getWalletConfig().copy(erc20Tokens = emptyMap()))
+
+
     private fun WalletConfigPayload.saveWalletConfigToLocalStorageIfVersionChanged(oldVersion: Int) =
         if (version > oldVersion) {
             localWalletProvider.saveWalletConfig(this)

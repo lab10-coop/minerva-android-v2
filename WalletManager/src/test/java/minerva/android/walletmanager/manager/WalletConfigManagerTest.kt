@@ -25,6 +25,8 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManagerImpl
 import minerva.android.walletmanager.model.minervaprimitives.Service
 import minerva.android.walletmanager.model.network.Network
+import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.wallet.MasterSeed
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.storage.LocalStorage
@@ -437,5 +439,34 @@ class WalletConfigManagerTest {
         whenever(localStorage.areMainNetworksEnabled).thenReturn(false)
         val result = walletManager.areMainNetworksEnabled
         assertEquals(false, result)
+    }
+
+    @Test
+    fun `remove all tokens from wallet config success`() {
+        val tokenMap = mapOf((1 to listOf(ERCToken(1, type = TokenType.INVALID))))
+        mockWallet()
+        walletManager.initWalletConfig()
+        walletManager.updateWalletConfig(WalletConfig(erc20Tokens = tokenMap)).blockingGet()
+        walletManager.removeAllTokens().blockingGet()
+        walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
+        walletConfigCaptor.run {
+            verify(walletConfigObserver).onChanged(capture())
+            firstValue.peekContent().erc20Tokens shouldBeEqualTo emptyMap()
+        }
+    }
+
+    @Test
+    fun `remove all tokens from wallet config fail`() {
+        val tokenMap = mapOf((1 to listOf(ERCToken(1, type = TokenType.INVALID))))
+        mockWallet()
+        walletManager.initWalletConfig()
+        walletManager.updateWalletConfig(WalletConfig(erc20Tokens = tokenMap)).blockingGet()
+        whenever(walletManager.isBackupAllowed).thenReturn(false)
+        walletManager.removeAllTokens().blockingGet()
+        walletManager.walletConfigLiveData.observeForever(walletConfigObserver)
+        walletConfigCaptor.run {
+            verify(walletConfigObserver).onChanged(capture())
+            firstValue.peekContent().erc20Tokens shouldBeEqualTo tokenMap
+        }
     }
 }
