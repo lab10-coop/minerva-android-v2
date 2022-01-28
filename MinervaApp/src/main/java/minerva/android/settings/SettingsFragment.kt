@@ -1,5 +1,6 @@
 package minerva.android.settings
 
+import android.app.Dialog
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -15,9 +16,12 @@ import minerva.android.databinding.FragmentSettingsBinding
 import minerva.android.extension.launchActivity
 import minerva.android.extension.openUri
 import minerva.android.extensions.showBiometricPrompt
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
+import minerva.android.services.dapps.dialog.OpenDappDialog
 import minerva.android.settings.adapter.SettingsAdapter
 import minerva.android.settings.backup.BackupActivity
+import minerva.android.settings.dialog.TokenResetDialog
 import minerva.android.settings.model.SettingsRowType
 import minerva.android.settings.model.SettingsRowType.*
 import minerva.android.settings.model.propagateSettings
@@ -32,7 +36,11 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     private lateinit var binding: FragmentSettingsBinding
     val viewModel: SettingsViewModel by viewModel()
-
+    private val dialog: TokenResetDialog by lazy {
+        TokenResetDialog(requireContext()) {
+            viewModel.resetTokens()
+        }
+    }
     private val settingsAdapter by lazy {
         SettingsAdapter({ onSettingsRowClicked(it) }, { onUseMainNetworkCheckedChange(it) })
     }
@@ -59,6 +67,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentSettingsBinding.bind(view)
         setupRecycleView()
+        setupObservers()
     }
 
     override fun onResume() {
@@ -71,6 +80,10 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     override fun onPause() {
         super.onPause()
         clearConnectionCallbacks()
+    }
+
+    private fun setupObservers() = with(viewModel){
+        resetTokensLiveData.observe(viewLifecycleOwner, EventObserver { handleResetTokenState(it) })
     }
 
     private fun setupRecycleView() {
@@ -120,6 +133,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             AUTHENTICATION -> startAuthenticationWrappedActivity(requireContext())
             CURRENCY -> startCurrencyWrappedActivity(requireContext())
             APP_VERSION -> startAppVersionWrappedActivity(requireContext())
+            TOKEN_RESET -> openTokenResetDialog()
             else -> Timber.d(type.toString())
         }
     }
@@ -135,6 +149,17 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             val request = NetworkRequest.Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
             connectivityManager?.registerNetworkCallback(request, networkCallback)
+        }
+    }
+
+    private fun openTokenResetDialog() {
+        dialog.show()
+    }
+
+    private fun handleResetTokenState(state: Result<Any>) {
+        when {
+            state.isSuccess -> dialog.dismiss()
+            state.isFailure -> dialog.showError(state.exceptionOrNull())
         }
     }
 

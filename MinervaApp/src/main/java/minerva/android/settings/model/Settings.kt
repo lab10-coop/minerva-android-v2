@@ -10,7 +10,8 @@ import minerva.android.settings.SettingsFragment
 data class Settings(
     val sectionTitle: String = String.Empty,
     val rows: List<SettingRow> = listOf(),
-    val section: SettingsSection
+    val section: SettingsSection,
+    val shouldDisplaySeparator: Boolean = true
 )
 
 data class SettingRow(
@@ -24,7 +25,7 @@ data class SettingRow(
 )
 
 enum class SettingsSection {
-    SECURITY, PREFERENCES, INFO, LEGAL
+    SECURITY, PREFERENCES, INFO, LEGAL, FOR_DEVELOPERS
 }
 
 enum class SettingsRowType(val iconRes: Int) {
@@ -40,11 +41,12 @@ enum class SettingsRowType(val iconRes: Int) {
     APP_VERSION(Int.EmptyResource),
     LICENCE(Int.EmptyResource),
     TERMS_OF_SERVICE(Int.EmptyResource),
-    PRIVACY_POLICY(Int.EmptyResource)
+    PRIVACY_POLICY(Int.EmptyResource),
+    TOKEN_RESET(Int.EmptyResource)
 }
 
 fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
-    listOf(
+    mutableListOf(
         Settings(
             getString(R.string.security), listOf(
                 SettingRow(
@@ -120,8 +122,22 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     rowType = SettingsRowType.PRIVACY_POLICY
                 )
 
-            ), SettingsSection.LEGAL
+            ), SettingsSection.LEGAL, viewModel.isForDeveloperSectionEnabled
         )
-    )
+    ).apply {
+        if (viewModel.isForDeveloperSectionEnabled) {
+            add(
+                Settings(
+                    getString(R.string.for_developers), listOf(
+                        SettingRow(
+                            getString(R.string.token_reset),
+                            isArrowVisible = true,
+                            rowType = SettingsRowType.TOKEN_RESET
+                        )
+                    ), SettingsSection.FOR_DEVELOPERS, false
+                )
+            )
+        }
+    }
 
 
