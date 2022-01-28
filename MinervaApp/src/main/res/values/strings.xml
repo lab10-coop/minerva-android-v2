@@ -223,11 +223,13 @@
     <string name="your_preferences">Your preferences</string>
     <string name="info">Info</string>
     <string name="legal">Legal</string>
+    <string name="for_developers">For Developers</string>
     <string name="use_main_networks">Use Main Networks</string>
     <string name="follow_on_twitter">Follow us on Twitter</string>
     <string name="join_community">Join Minerva\'s community</string>
     <string name="version">App Version</string>
     <string name="terms_of_service">Terms of Service</string>
+    <string name="token_reset">Reset tokens</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="test_networks">Test networks</string>
     <string name="main_networks">Main networks</string>
@@ -292,6 +294,7 @@
     <string name="account_balance_is_to_low">Account balance is too low</string>
     <string name="custom">Custom</string>
     <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
+    <string name="unknown_tx_speed">Unknown time</string>
     <string name="sending">Sending</string>
     <string name="rapid">Rapid</string>
     <string name="fast">Fast</string>
@@ -383,6 +386,12 @@
     <string name="sponsored_label">Sponsored</string>
     <string name="open_dapp_label">Open</string>
     <string name="favorite_label">Favorite</string>
+    <string name="token_reset_title">Do you want to clear saved tokens?</string>
+    <string name="token_reset_message">Don\'t worry clearing saved tokens won\'t remove tokens from your blockchain account. It simply clears you Minerva wallet configuration, which will be restored.</string>
+    <string name="failed_to_fetch_transaction_costs_error">Failed to estimate transaction costs. Try again later or add them manually.</string>
+    <string name="transaction_accepted_title">Transaction Accepted</string>
+    <string name="no_nfts_available">No NFTs available</string>
+    <string name="transaction_cost_format">%1$s %2$s (%3$s)</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

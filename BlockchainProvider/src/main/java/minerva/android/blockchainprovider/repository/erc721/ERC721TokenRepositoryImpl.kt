@@ -1,5 +1,6 @@
 package minerva.android.blockchainprovider.repository.erc721
 
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -7,6 +8,7 @@ import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.Token
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
+import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.kotlinUtils.map.value
 import org.web3j.contracts.eip721.generated.ERC721
@@ -14,7 +16,7 @@ import org.web3j.contracts.eip721.generated.ERC721Metadata
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.tx.RawTransactionManager
-import java.math.BigDecimal
+import org.web3j.utils.Convert
 import java.math.BigInteger
 
 class ERC721TokenRepositoryImpl(
@@ -110,4 +112,37 @@ class ERC721TokenRepositoryImpl(
             ),
             ContractGasProvider(gasPrices.value(chainId), Operation.TRANSFER_ERC721.gasLimit)
         )
+
+    private fun loadERC721(privateKey: String, chainId: Int, address: String, gasLimit: BigInteger, gasPrice: BigInteger) =
+        ERC721.load(
+            address, web3j.value(chainId),
+            RawTransactionManager(
+                web3j.value(chainId),
+                Credentials.create(privateKey),
+                chainId.toLong()
+            ),
+            ContractGasProvider(gasPrice, gasLimit)
+        )
+
+    override fun transferERC721Token(chainId: Int, payload: TransactionPayload): Completable =
+        loadERC721(
+            payload.privateKey,
+            chainId,
+            payload.contractAddress,
+            payload.gasLimit,
+            Convert.toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger()
+        )
+            .safeTransferFrom(
+                payload.senderAddress,
+                payload.receiverAddress,
+                BigInteger(payload.tokenId),
+                NO_ADDITIONAL_DATA
+            )
+            .flowable()
+            .ignoreElements()
+
+
+    companion object {
+        val NO_ADDITIONAL_DATA: BigInteger = BigInteger.ZERO
+    }
 }

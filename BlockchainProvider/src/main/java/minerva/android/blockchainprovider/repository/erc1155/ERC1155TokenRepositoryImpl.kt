@@ -1,18 +1,22 @@
 package minerva.android.blockchainprovider.repository.erc1155
 
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.Token
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
+import minerva.android.blockchainprovider.model.TransactionPayload
 import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.smartContracts.ERC1155
 import minerva.android.blockchainprovider.smartContracts.ERC1155Metadata_URI
+import minerva.android.blockchainprovider.utils.CryptoUtils
 import minerva.android.kotlinUtils.map.value
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.tx.RawTransactionManager
+import org.web3j.utils.Convert
 import java.math.BigInteger
 
 class ERC1155TokenRepositoryImpl(
@@ -67,7 +71,7 @@ class ERC1155TokenRepositoryImpl(
                 Credentials.create(privateKey),
                 chainId.toLong()
             ),
-            ContractGasProvider(gasPrices.value(chainId), Operation.DEFAULT_LIMIT.gasLimit)
+            ContractGasProvider(gasPrices.value(chainId), Operation.TRANSFER_ERC1155.gasLimit)
         )
 
 
@@ -79,6 +83,34 @@ class ERC1155TokenRepositoryImpl(
                 Credentials.create(privateKey),
                 chainId.toLong()
             ),
-            ContractGasProvider(gasPrices.value(chainId), Operation.DEFAULT_LIMIT.gasLimit)
+            ContractGasProvider(gasPrices.value(chainId), Operation.TRANSFER_ERC1155.gasLimit)
         )
+
+    private fun loadERC1155(privateKey: String, chainId: Int, address: String, gasLimit: BigInteger, gasPrice: BigInteger) =
+        ERC1155.load(
+            address, web3j.value(chainId),
+            RawTransactionManager(
+                web3j.value(chainId),
+                Credentials.create(privateKey),
+                chainId.toLong()
+            ),
+            ContractGasProvider(gasPrice, gasLimit)
+        )
+
+
+    override fun transferERC1155Token(chainId: Int, payload: TransactionPayload): Completable =
+        loadERC1155(payload.privateKey, chainId, payload.contractAddress, payload.gasLimit, Convert.toWei(payload.gasPrice, Convert.Unit.GWEI).toBigInteger())
+            .safeTransferFrom(
+                payload.senderAddress,
+                payload.receiverAddress,
+                BigInteger(payload.tokenId),
+                CryptoUtils.convertTokenAmount(payload.amount, payload.tokenDecimals),
+                NO_ADDITIONAL_DATA
+            )
+            .flowable()
+            .ignoreElements()
+
+    companion object {
+        val NO_ADDITIONAL_DATA = byteArrayOf()
+    }
 }

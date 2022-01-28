@@ -29,6 +29,7 @@ interface WalletConfigManager : Manager {
     fun getSafeAccountMasterOwnerBalance(address: String?): BigDecimal
     fun updateSafeAccountOwners(position: Int, owners: List<String>): Single<List<String>>
     fun removeSafeAccountOwner(index: Int, owner: String): Single<List<String>>
+    fun removeAllTokens(): Completable
 
     fun getValueIterator(): Int
     fun getLoggedInIdentityByPublicKey(publicKey: String): Identity?
