@@ -8,34 +8,21 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_normal"
-        android:layout_marginEnd="@dimen/margin_normal"
-        android:layout_marginBottom="@dimen/margin_normal"
-        android:fontFamily="@font/rubik_medium"
-        android:text="@string/token_reset_title"
-        android:textSize="@dimen/text_big"
-        app:layout_constraintBottom_toTopOf="@+id/message"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
         android:id="@+id/message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_large"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginBottom="@dimen/margin_normal"
         android:fontFamily="@font/rubik_regular"
         android:text="@string/token_reset_message"
-        android:textSize="@dimen/text_small"
+        android:textSize="@dimen/text_normal"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/progress"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
         android:id="@+id/progress"
@@ -43,7 +30,7 @@
         android:layout_height="wrap_content"
         android:visibility="invisible"
         android:layout_marginBottom="@dimen/margin_normal"
-        app:layout_constraintBottom_toTopOf="@+id/buttons"
+        app:layout_constraintBottom_toTopOf="@+id/cancel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -57,17 +44,33 @@
         android:gravity="center"
         android:textAllCaps="true"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/buttons"
+        app:layout_constraintBottom_toTopOf="@+id/cancel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/message" />
 
-    <include
-        android:id="@+id/buttons"
-        layout="@layout/dapp_dialog_buttons"
-        android:layout_width="match_parent"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/cancel"
+        style="@style/OutlinedButtonStyle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="6dp"
+        android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/clear"
+         />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/clear"
+        style="@style/PurpleButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="@string/clear"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/cancel"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,10 +8,9 @@ import minerva.android.R
 import minerva.android.databinding.TokenResetDialogBinding
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
-import minerva.android.extension.visibleOrGone
 import minerva.android.extension.visibleOrInvisible
 
-class TokenResetDialog(context: Context, onConfirm: () -> Unit) :
+class TokenResetDialog(context: Context, onClear: () -> Unit) :
     Dialog(context, R.style.MaterialDialogStyle) {
 
     private val binding: TokenResetDialogBinding = TokenResetDialogBinding.inflate(layoutInflater)
@@ -20,12 +19,12 @@ class TokenResetDialog(context: Context, onConfirm: () -> Unit) :
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         with(binding) {
             setContentView(root)
-            buttons.cancel.setOnClickListener {
+            cancel.setOnClickListener {
                 dismiss()
             }
 
-            buttons.confirm.setOnClickListener {
-                onConfirm()
+            clear.setOnClickListener {
+                onClear()
                 handleProgress(true)
             }
         }
@@ -53,8 +52,8 @@ class TokenResetDialog(context: Context, onConfirm: () -> Unit) :
 
     private fun handleButtons(areEnabled: Boolean) {
         with(binding) {
-            buttons.confirm.isEnabled = areEnabled
-            buttons.cancel.isEnabled = areEnabled
+            cancel.isEnabled = areEnabled
+            clear.isEnabled = areEnabled
         }
     }
 

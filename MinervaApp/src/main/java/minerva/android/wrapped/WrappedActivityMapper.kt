@@ -131,3 +131,9 @@ fun startAppVersionWrappedActivity(context: Context) {
         putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.APP_VERSION)
     }
 }
+
+fun startAdvancedWrappedActivity(context: Context) {
+    context.launchActivity<WrappedActivity> {
+        putExtra(WrappedActivity.FRAGMENT, WrappedFragmentType.ADVANCED)
+    }
+}
