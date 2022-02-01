@@ -24,6 +24,7 @@ import minerva.android.services.login.ServicesScannerViewModel
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
+import minerva.android.settings.advanced.AdvancedViewModel
 import minerva.android.settings.authentication.AuthenticationViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.settings.fiat.FiatViewModel
@@ -68,7 +69,8 @@ private val appModules = module {
     viewModel { WalletConnectInteractionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { LaunchApplicationViewModel(get(), get()) }
     viewModel { BackupViewModel(get()) }
-    viewModel { SettingsViewModel(get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get())}
+    viewModel { AdvancedViewModel(get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }
     viewModel { AccountsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }

@@ -386,12 +386,16 @@
     <string name="sponsored_label">Sponsored</string>
     <string name="open_dapp_label">Open</string>
     <string name="favorite_label">Favorite</string>
-    <string name="token_reset_title">Do you want to clear saved tokens?</string>
-    <string name="token_reset_message">Don\'t worry clearing saved tokens won\'t remove tokens from your blockchain account. It simply clears you Minerva wallet configuration, which will be restored.</string>
+    <string name="token_reset_message">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
     <string name="failed_to_fetch_transaction_costs_error">Failed to estimate transaction costs. Try again later or add them manually.</string>
     <string name="transaction_accepted_title">Transaction Accepted</string>
     <string name="no_nfts_available">No NFTs available</string>
     <string name="transaction_cost_format">%1$s %2$s (%3$s)</string>
+    <string name="advanced">Advanced</string>
+    <string name="clear_token_cache_title">Clear Token Cache</string>
+    <string name="clear_token_cache_description">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
+    <string name="clear_token_cache_action_text">Clear</string>
+    <string name="clear">Clear</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
