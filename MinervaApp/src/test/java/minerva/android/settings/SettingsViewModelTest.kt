@@ -18,10 +18,7 @@ class SettingsViewModelTest : BaseViewModelTest() {
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val localStorage: LocalStorage = mock()
     private val walletConfigManager: WalletConfigManager = mock()
-    private val viewModel = SettingsViewModel(masterSeedRepository, localStorage, walletConfigManager)
-
-    private val resetTokensObserver: Observer<Event<Result<Any>>> = mock()
-    private val resetTokensCaptor: KArgumentCaptor<Event<Result<Any>>> = argumentCaptor()
+    private val viewModel = SettingsViewModel(masterSeedRepository, localStorage)
 
 
     @Test
@@ -79,27 +76,5 @@ class SettingsViewModelTest : BaseViewModelTest() {
         viewModel.getCurrentFiat(currencies) shouldBeEqualTo "Euro (EUR)"
         viewModel.getCurrentFiat(currencies) shouldBeEqualTo "US Dollar (USD)"
         viewModel.getCurrentFiat(currencies) shouldBeEqualTo ""
-    }
-
-    @Test
-    fun `reset tokens should success update live data`(){
-        whenever(walletConfigManager.removeAllTokens()).thenReturn(Completable.complete())
-        viewModel.resetTokens()
-        viewModel.resetTokensLiveData.observeForever(resetTokensObserver)
-        resetTokensCaptor.run {
-            verify(resetTokensObserver).onChanged(capture())
-            firstValue.peekContent().isSuccess shouldBeEqualTo true
-        }
-    }
-
-    @Test
-    fun `reset tokens should fail update live data`(){
-        whenever(walletConfigManager.removeAllTokens()).thenReturn(Completable.error(Throwable()))
-        viewModel.resetTokens()
-        viewModel.resetTokensLiveData.observeForever(resetTokensObserver)
-        resetTokensCaptor.run {
-            verify(resetTokensObserver).onChanged(capture())
-            firstValue.peekContent().isFailure shouldBeEqualTo true
-        }
     }
 }

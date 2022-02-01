@@ -25,7 +25,7 @@ data class SettingRow(
 )
 
 enum class SettingsSection {
-    SECURITY, PREFERENCES, INFO, LEGAL, FOR_DEVELOPERS
+    SECURITY, PREFERENCES, INFO, LEGAL
 }
 
 enum class SettingsRowType(val iconRes: Int) {
@@ -42,11 +42,11 @@ enum class SettingsRowType(val iconRes: Int) {
     LICENCE(Int.EmptyResource),
     TERMS_OF_SERVICE(Int.EmptyResource),
     PRIVACY_POLICY(Int.EmptyResource),
-    TOKEN_RESET(Int.EmptyResource)
+    ADVANCED(R.drawable.ic_setting_row)
 }
 
 fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
-    mutableListOf(
+    listOf(
         Settings(
             getString(R.string.security), listOf(
                 SettingRow(
@@ -95,6 +95,13 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     isSwitchVisible = true,
                     isArrowVisible = false,
                     rowType = SettingsRowType.MAIN_NETWORKS
+                ),
+                SettingRow(
+                    getString(R.string.advanced),
+                    R.drawable.ic_setting_row,
+                    isSwitchVisible = false,
+                    isArrowVisible = true,
+                    rowType = SettingsRowType.ADVANCED
                 )
             ), SettingsSection.PREFERENCES
         ),
@@ -122,22 +129,8 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     rowType = SettingsRowType.PRIVACY_POLICY
                 )
 
-            ), SettingsSection.LEGAL, viewModel.isForDeveloperSectionEnabled
+            ), SettingsSection.LEGAL, false
         )
-    ).apply {
-        if (viewModel.isForDeveloperSectionEnabled) {
-            add(
-                Settings(
-                    getString(R.string.for_developers), listOf(
-                        SettingRow(
-                            getString(R.string.token_reset),
-                            isArrowVisible = true,
-                            rowType = SettingsRowType.TOKEN_RESET
-                        )
-                    ), SettingsSection.FOR_DEVELOPERS, false
-                )
-            )
-        }
-    }
+    )
 
 
