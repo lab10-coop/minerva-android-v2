@@ -541,9 +541,9 @@ class TokenManagerImpl(
 
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
-            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, MATIC, BSC, BSC_TESTNET -> getTokensFromTx(account)
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, BSC, BSC_TESTNET -> getTokensFromTx(account)
             MUMBAI, RSK_TEST, RSK_MAIN -> Single.just(emptyList()) // Networks without token explorer urls
-            XDAI -> getTokensOwned(account)
+            XDAI, MATIC, ATS_SIGMA -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
 
@@ -811,6 +811,8 @@ class TokenManagerImpl(
     fun getTokensOwnedURL(chainId: Int) =
         when (chainId) {
             XDAI -> X_DAI_TOKENS_OWNED_URL
+            MATIC -> POLYGON_TOKENS_OWNED_URL
+            ATS_SIGMA -> ARTIS_SIGMA_TOKENS_OWNED_URL
             else -> throw NetworkNotFoundThrowable()
         }
 
