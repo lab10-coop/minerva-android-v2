@@ -9,6 +9,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.gas_price_selector.view.*
@@ -20,6 +21,7 @@ import minerva.android.accounts.transaction.fragment.scanner.TransactionAddressS
 import minerva.android.databinding.FragmentSendNftBinding
 import minerva.android.extension.*
 import minerva.android.extension.hideKeyboard
+import minerva.android.extension.validator.ValidationResult
 import minerva.android.extension.validator.Validator
 import minerva.android.extensions.showBiometricPrompt
 import minerva.android.kotlinUtils.event.EventObserver
@@ -52,6 +54,7 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
         requireActivity().invalidateOptionsMenu()
         setupObserver()
         setupNftSendForm()
+        clearTransactionCost()
     }
 
     override fun onAttach(context: Context) {
@@ -74,7 +77,7 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
             nftItem = item
             setupNftDetails()
         })
-        transactionCostLiveData.observe(viewLifecycleOwner, Observer { txCost ->
+        transactionCostLiveData.observe(viewLifecycleOwner, EventObserver { txCost ->
             setTxCost(txCost, viewModel.account)
             viewModel.isAccountBalanceEnough().let { isEnough ->
                 with(binding.sendNftForm) {
@@ -195,6 +198,7 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
                 gasPriceSelector.setDefaultPositionWithoutSmoothAnimation(txType)
                 restoreRecentGasLimitAndPrice()
             }
+            setupCustomGasPrice(false)
         }
     }
 
@@ -242,15 +246,20 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
                         viewModel.selectedItem.decimals.toInt()
                     )
                 } else Observable.just(true),
-                viewModel.getTransactionCosts(receiver.text.toString(), getAmount()).toObservable(),
-                Function3<Boolean, Boolean, TransactionCost, Boolean> { isReceiverValid, isAmountValid, txCost ->
+                BiFunction<Boolean, Boolean, Boolean> { isReceiverValid, isAmountValid ->
                     if (isReceiverValid) {
                         receiverInputLayout.hideKeyboard()
                         receiver.dismissDropDown()
                         scrollToSendButton()
                     }
                     isReceiverValid && isAmountValid
-                }).subscribeBy(
+                }).map { isFormValid ->
+                if (isFormValid) viewModel.getTransactionCosts(
+                    receiver.text.toString(),
+                    getAmount()
+                )
+                isFormValid
+            }.subscribeBy(
                 onNext = { isFormFilled ->
                     viewModel.isTransactionAvailable(isFormFilled).let { isAvailable ->
                         sendButton.isEnabled = isAvailable
@@ -263,6 +272,16 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
                     errorView.visibleOrInvisible(false)
                 }
             )
+        }
+    }
+
+    private fun Validator.validateAmountFieldWithDecimalCheck(amount: String, balance: BigDecimal, decimals: Int = 0): ValidationResult {
+        val validateAmountFieldResult = validateAmountField(amount, balance)
+        return when {
+            validateAmountFieldResult.hasError -> validateAmountFieldResult
+            decimals == 0 && amount.contains(DOT) -> ValidationResult.error(R.string.amount_must_not_contain_decimal_digits)
+            decimals < amount.lastIndex - amount.indexOf(DOT) && amount.contains(DOT) -> ValidationResult.error(R.string.too_many_digits_after_decimal)
+            else -> ValidationResult(true)
         }
     }
 
@@ -349,5 +368,7 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
         @JvmStatic
         fun newInstance() = SendNftFragment()
         private const val EMPTY_VALUE = "-.--"
+        private const val INVALID_INDEX = -1
+        private const val DOT = "."
     }
 }

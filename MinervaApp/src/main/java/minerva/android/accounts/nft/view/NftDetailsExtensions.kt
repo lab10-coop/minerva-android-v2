@@ -100,8 +100,8 @@ internal fun RecyclableViewMoreTextView.expand(nftItem: NftItem) {
     }
 }
 
-internal fun MaterialButton.toggleVisibility(nftItem: NftItem, isAllTextVisible: Boolean) =
-    visibleOrGone(nftItem.isDescriptionExpanded || isAllTextVisible)
+internal fun MaterialButton.toggleVisibility(nftItem: NftItem) =
+    visibleOrGone(nftItem.isDescriptionExpanded)
 
 internal fun MaterialButton.expandAnimation(
     durationMultiplier: Int,

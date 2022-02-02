@@ -159,6 +159,26 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
     }
 
     @Test
+    fun `send erc721 transaction test success and balance changed succeed`() {
+        whenever(transactionRepository.transferERC721Token(any(), any())).thenReturn(
+            Completable.complete())
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        whenever(accountManager.loadAccount(any())).thenReturn(Account(0, chainId = 1))
+        viewModel.selectedItem = NftItem(isERC1155 = false, balance = BigDecimal(13))
+        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        viewModel.run {
+            transactionCompletedLiveData.observeForever(transactionCompletedObserver)
+            account
+            sendTransaction("123", BigDecimal(12))
+        }
+        transactionCompletedCaptor.run {
+            verify(transactionCompletedObserver).onChanged(capture())
+            viewModel.selectedItem.balance shouldBeEqualTo BigDecimal.ONE
+        }
+    }
+
+    @Test
     fun `send erc1155 transaction test success and wallet action succeed`() {
         whenever(transactionRepository.transferERC1155Token(any(), any())).thenReturn(
             Completable.complete())
@@ -174,6 +194,26 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         }
         transactionCompletedCaptor.run {
             verify(transactionCompletedObserver).onChanged(capture())
+        }
+    }
+
+    @Test
+    fun `send erc1155 transaction test success and balance changed`() {
+        whenever(transactionRepository.transferERC1155Token(any(), any())).thenReturn(
+            Completable.complete())
+        whenever(transactionRepository.resolveENS(any())).thenReturn(Single.just(""))
+        whenever(walletActionsRepository.saveWalletActions(any())).thenReturn(Completable.complete())
+        whenever(accountManager.loadAccount(any())).thenReturn(Account(0, chainId = 1))
+        viewModel.selectedItem = NftItem(isERC1155 = true, balance = BigDecimal(13))
+        NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
+        viewModel.run {
+            transactionCompletedLiveData.observeForever(transactionCompletedObserver)
+            account
+            sendTransaction("123", BigDecimal(12))
+        }
+        transactionCompletedCaptor.run {
+            verify(transactionCompletedObserver).onChanged(capture())
+            viewModel.selectedItem.balance shouldBeEqualTo BigDecimal.ONE
         }
     }
 
