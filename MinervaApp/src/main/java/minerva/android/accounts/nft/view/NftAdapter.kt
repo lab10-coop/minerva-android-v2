@@ -47,7 +47,7 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
     private fun ItemNftBinding.setupDescription(nftItem: NftItem) = nftDetails.description.apply {
         listener = object : RecyclableViewMoreTextView.Listener {
             override fun afterSetEllipsizedText() =
-                btSend.toggleVisibility(nftItem, isAllTextVisible())
+                btSend.toggleVisibility(nftItem)
 
             override val nextAnimation: Animation
                 get() = btSend.expandAnimation(animationDurationMultiplier, maxDuration)

@@ -13,7 +13,7 @@ data class NftItem(
     val name: String = String.Empty,
     val isERC1155: Boolean = false,
     val decimals: String = String.Empty,
-    val balance: BigDecimal = BigDecimal.ZERO,
+    var balance: BigDecimal = BigDecimal.ZERO,
     var isDescriptionExpanded: Boolean = false,
     var wasSent: Boolean = false
 ) {

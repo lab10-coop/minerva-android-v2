@@ -187,6 +187,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/margin_normal"
             android:src="@drawable/ic_edit"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/transaction_time"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@+id/speed"
