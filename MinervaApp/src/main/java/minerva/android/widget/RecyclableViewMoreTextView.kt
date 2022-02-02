@@ -16,6 +16,9 @@ import android.util.AttributeSet
 import android.view.animation.Animation
 import androidx.appcompat.widget.AppCompatTextView
 import minerva.android.R
+import minerva.android.kotlinUtils.Empty
+import kotlin.math.max
+
 
 class RecyclableViewMoreTextView @JvmOverloads constructor(
     context: Context,
@@ -79,9 +82,6 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
     }
 
     fun toggle() {
-        if (visibleText.isAllTextVisible()) {
-            return
-        }
 
         isExpanded = !isExpanded
 
@@ -103,14 +103,14 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
             )
             addListener(object : Animator.AnimatorListener {
                 override fun onAnimationEnd(animation: Animator?) {
-                    if (!isExpanded!!)
-                        setEllipsizedText(isExpanded!!)
+                    if (!isExpanded)
+                        setEllipsizedText(isExpanded)
                 }
 
                 override fun onAnimationRepeat(animation: Animator?) {}
                 override fun onAnimationCancel(animation: Animator?) {}
                 override fun onAnimationStart(animation: Animator?) {
-                    if (isExpanded!!)
+                    if (isExpanded)
                         listener?.onExpandAnimationStarted()
                 }
             })
@@ -123,20 +123,26 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
             return
         }
 
-        text = if (isExpanded || visibleText.isAllTextVisible()) {
+        text = if (isExpanded) {
             initialValue
         } else {
             SpannableStringBuilder(
-                 visibleText.substring(
-                    0,
-                    visibleText.length - (ellipsizeText.orEmpty().length + DEFAULT_ELLIPSIZED_TEXT.length)
-                )
+                if (textWillFillOneLine()) {
+                    visibleText
+                } else {
+                    visibleText.substring(
+                        0,
+                        max(0, visibleText.length - (ellipsizeText.orEmpty().length + DEFAULT_ELLIPSIZED_TEXT.length))
+                    )
+                }
             )
                 .append(DEFAULT_ELLIPSIZED_TEXT.span())
                 .append(ellipsizeText.orEmpty().span())
         }
         listener?.afterSetEllipsizedText()
     }
+
+    private fun textWillFillOneLine() = firstLineText() == initialValue
 
     private fun visibleText(): String {
         var end = 0
@@ -146,8 +152,16 @@ class RecyclableViewMoreTextView @JvmOverloads constructor(
                 end = layout.getLineEnd(i)
         }
 
-        return initialValue?.substring(0, end)!!
+        return initialValue?.let {
+            it.substring(0, minOf(it.length, end))
+        } ?: String.Empty
     }
+
+    private fun firstLineEnd() = layout.getLineEnd(0)
+
+    private fun firstLineText() = initialValue?.let {
+        it.substring(0, minOf(it.length, firstLineEnd()))
+    } ?: String.Empty
 
     private fun setMaxLines(isExpanded: Boolean) {
         maxLines = if (!isExpanded) {

@@ -64,7 +64,7 @@ class NftCollectionViewModel(
     var transactionCost: TransactionCost = TransactionCost()
         set(value) {
             field = value
-            _transactionCostLiveData.value = value
+            _transactionCostLiveData.value = Event(value)
         }
 
     private val _nftListLiveData = MutableLiveData<List<NftItem>>(nftList)
@@ -91,8 +91,8 @@ class NftCollectionViewModel(
     private val _transactionCompletedLiveData = MutableLiveData<Event<Any>>()
     val transactionCompletedLiveData: LiveData<Event<Any>> get() = _transactionCompletedLiveData
 
-    private val _transactionCostLiveData = MutableLiveData<TransactionCost>()
-    val transactionCostLiveData: LiveData<TransactionCost> get() = _transactionCostLiveData
+    private val _transactionCostLiveData = MutableLiveData<Event<TransactionCost>>()
+    val transactionCostLiveData: LiveData<Event<TransactionCost>> get() = _transactionCostLiveData
 
     private val _transactionSpeedListLiveData = MutableLiveData<Event<List<TxSpeed>>>()
     val transactionSpeedListLiveData: LiveData<Event<List<TxSpeed>>> get() = _transactionSpeedListLiveData
@@ -152,7 +152,7 @@ class NftCollectionViewModel(
 
     private fun sendTransferTransaction(
         receiverKey: String,
-        amount: BigDecimal,
+            amount: BigDecimal,
         gasPrice: BigDecimal,
         gasLimit: BigInteger,
         transferType: TransferType
@@ -184,6 +184,7 @@ class NftCollectionViewModel(
                     onComplete = {
                         _transactionCompletedLiveData.value = Event(Any())
                         selectedItem.wasSent = true
+                        selectedItem.balance = selectedItem.balance - amount
                         updateList()
                     },
                     onError = {
@@ -284,29 +285,34 @@ class NftCollectionViewModel(
 
     private fun updateList() {
         _loadingLiveData.value = false
-        _nftListLiveData.value = nftList.filter { !it.wasSent }.sortedBy { it.tokenId }
+        _nftListLiveData.value = nftList.filter { !it.wasSent || it.balance > BigDecimal.ZERO}.sortedBy { it.tokenId }
     }
 
-    fun getTransactionCosts(to: String, amount: BigDecimal): Single<TransactionCost> =
-        transactionRepository
-            .getTransactionCosts(getTxCostPayload(to, amount))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {
-                _transactionCostLoadingLiveData.value = Event(true)
-            }
-            .doOnEvent { _, _ -> _transactionCostLoadingLiveData.value = Event(false) }
-            .doOnSuccess {
-                transactionCost = it
-                initialGasLimit = it.gasLimit
-                _transactionSpeedListLiveData.value = Event(it.txSpeeds)
-            }
-            .onErrorReturn {
-                transactionCost = TransactionCost()
-                initialGasLimit = BigInteger.ONE
-                _transactionCostLoadingErrorLiveData.value = Event(it)
-                transactionCost
-            }
+    fun getTransactionCosts(to: String, amount: BigDecimal) {
+        launchDisposable {
+            transactionRepository
+                .getTransactionCosts(getTxCostPayload(to, amount))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe {
+                    _transactionCostLoadingLiveData.value = Event(true)
+                }
+                .doOnEvent { _, _ -> _transactionCostLoadingLiveData.value = Event(false) }
+                .onErrorReturn {
+                    transactionCost = TransactionCost()
+                    initialGasLimit = BigInteger.ONE
+                    _transactionCostLoadingErrorLiveData.value = Event(it)
+                    transactionCost
+                }
+                .subscribeBy (
+                    onSuccess = {
+                        transactionCost = it
+                        initialGasLimit = it.gasLimit
+                        _transactionSpeedListLiveData.value = Event(it.txSpeeds)
+                    }
+                )
+        }
+    }
 
 
     private fun prepareTransaction(
