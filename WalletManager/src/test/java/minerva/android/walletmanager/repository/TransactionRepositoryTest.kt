@@ -964,8 +964,12 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
         whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
         whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
+        whenever(tokenManager.saveTokens(any(), any())).thenReturn(
+            Single.just(true),
+            Single.error(Throwable("Stop thread"))
+        )
 
-        repository.discoverNewTokens().test().assertError(error)
+        repository.discoverNewTokens().test().assertComplete().assertNoErrors()
     }
 
     @Test
