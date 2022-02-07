@@ -41,6 +41,14 @@ data class AccountToken(
         if (rawBalance == Double.InvalidValue.toBigDecimal()) rawBalance
         else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
 
+    fun mergeNftDetails(ercToken: ERCToken){
+        token.logoURI = ercToken.logoURI
+        token.description = ercToken.description
+        token.contentUri = ercToken.contentUri
+        token.name = ercToken.name
+        token.collectionName = ercToken.collectionName
+        token.symbol = ercToken.symbol
+    }
 
     companion object {
         private const val FIAT_SCALE = 13

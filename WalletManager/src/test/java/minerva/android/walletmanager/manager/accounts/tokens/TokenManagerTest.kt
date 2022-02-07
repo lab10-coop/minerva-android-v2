@@ -833,6 +833,65 @@ class TokenManagerTest : RxTest() {
     }
 
     @Test
+    fun `test should update to data from remote config`() {
+        NetworkManager.initialize(MockDataProvider.networks)
+        val tokensMap = mapOf(
+            Pair(
+                ATS_TAU,
+                listOf(
+                    ERCToken(
+                        ATS_TAU,
+                        "nftToken",
+                        "NFT",
+                        "tokenAddress",
+                        collectionName = "nftToken",
+                        accountAddress = "accountAddress",
+                        tokenId = "1",
+                        type = TokenType.ERC721
+                    ),
+                    ERCToken(
+                        ATS_TAU,
+                        "nftToken2",
+                        "NFT2",
+                        "tokenAddress2",
+                        collectionName = "nftToken2",
+                        accountAddress = "accountAddress2",
+                        tokenId = "2",
+                        type = TokenType.ERC721
+                    )
+                )
+            )
+        )
+        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(
+            Single.just(
+                listOf(
+                    NftCollectionDetails(ATS_TAU, "tokenAddress", "logoUri1", "newNftToken", "nNFT", true),
+                    NftCollectionDetails(ATS_TAU, "tokenAddress2", "logoUri2", "nftToken", "NFT", false)
+                )
+            )
+        )
+
+        tokenManager.mergeNFTDetailsWithRemoteConfig(true, tokensMap)
+            .test()
+            .await()
+            .assertValue { result ->
+                 result.tokensPerChainIdMap[ATS_TAU]?.first()?.let { updatedToken ->
+                     updatedToken.logoURI == "logoUri1"
+                             && updatedToken.symbol == "nNFT"
+                             && updatedToken.collectionName == "newNftToken"
+                } ?: false
+            }
+            .assertValue{result ->
+                val asd = result.tokensPerChainIdMap[ATS_TAU]?.last()
+                result.tokensPerChainIdMap[ATS_TAU]?.last()?.let{updatedToken ->
+                    updatedToken.logoURI == "logoUri2"
+                            && updatedToken.symbol == "NFT2"
+                            && updatedToken.collectionName == "nftToken2"
+                } ?: false
+            }
+    }
+
+    @Test
     fun `test should update collection logo url`() {
         NetworkManager.initialize(MockDataProvider.networks)
         val tokensMap = mapOf(
@@ -857,7 +916,7 @@ class TokenManagerTest : RxTest() {
             )
         )
 
-        tokenManager.updateNFTCollectionsImage(true, tokensMap)
+        tokenManager.mergeNFTDetailsWithRemoteConfig(true, tokensMap)
             .test()
             .await()
             .assertValue { result ->
@@ -891,7 +950,7 @@ class TokenManagerTest : RxTest() {
             )
         )
 
-        tokenManager.updateNFTCollectionsImage(true, tokensMap)
+        tokenManager.mergeNFTDetailsWithRemoteConfig(true, tokensMap)
             .test()
             .await()
             .assertValue { result ->
