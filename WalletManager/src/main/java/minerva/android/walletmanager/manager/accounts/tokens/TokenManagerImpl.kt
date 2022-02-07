@@ -529,13 +529,18 @@ class TokenManagerImpl(
             }
         }
 
-    private fun getNftCollectionsIconURL(): Single<Map<String, String>> =
+    private fun getNftCollectionDetails(): Single<Map<String, NftCollectionDetailsResult>> =
         cryptoApi.getNftCollectionDetails().map { data ->
             data.associate { details ->
                 generateTokenHash(
                     details.chainId,
                     details.address
-                ) to details.logoURI
+                ) to NftCollectionDetailsResult(
+                    details.logoURI,
+                    details.name,
+                    details.symbol,
+                    details.override
+                )
             }
         }
 
@@ -877,10 +882,7 @@ class TokenManagerImpl(
                     true
                 ) && localToken.tokenId == newToken.tokenId && localToken.tokenId != null
             }?.apply {
-                newToken.logoURI = logoURI
-                newToken.contentUri = contentUri
-                newToken.description = description
-                newToken.name = name
+                newToken.mergeNftDetails(this)
             }
         }
     }
@@ -932,18 +934,22 @@ class TokenManagerImpl(
             }
         } else Single.just(UpdateTokensResult(false, tokensPerChainIdMap))
 
-    override fun updateNFTCollectionsImage(
+    override fun mergeNFTDetailsWithRemoteConfig(
         shouldBeUpdated: Boolean,
         tokensPerChainIdMap: Map<Int, List<ERCToken>>
     ): Single<UpdateTokensResult> =
-        getNftCollectionsIconURL().map { iconUrlMap ->
+        getNftCollectionDetails().map { nftDetailsMap ->
             var shouldUpdate = shouldBeUpdated
             tokensPerChainIdMap.values.forEach { tokens ->
                 tokens.forEach { token ->
                     token.apply {
-                        iconUrlMap[generateTokenHash(chainId, address)]?.let { newLogoURI ->
-                            logoURI = newLogoURI
+                        nftDetailsMap[generateTokenHash(chainId, address)]?.let { nftDetails ->
+                            logoURI = nftDetails.logoURI
                             shouldUpdate = true
+                            if (nftDetails.override) {
+                                collectionName = nftDetails.name
+                                symbol = nftDetails.symbol
+                            }
                         }
                     }
                 }
@@ -964,7 +970,7 @@ class TokenManagerImpl(
         walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
             updateMissingNFTTokensDetails(allLocalTokens.toMutableMap(), getActiveAccounts())
                 .flatMap { (shouldUpdate, tokensPerChainIdMap) ->
-                    updateNFTCollectionsImage(shouldUpdate, tokensPerChainIdMap)
+                    mergeNFTDetailsWithRemoteConfig(shouldUpdate, tokensPerChainIdMap)
                 }
                 .flatMap { (shouldUpdate, tokensPerChainIdMap) ->
                     saveTokens(shouldUpdate, tokensPerChainIdMap)

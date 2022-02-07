@@ -1104,4 +1104,79 @@ class AccountManagerTest : RxTest() {
         val result = manager.hideAccount(account)
         result.blockingGet() shouldBeInstanceOf MissingAccountThrowable::class
     }
+
+    @Test
+    fun `wallet config to be updated then success`(){
+        NetworkManager.initialize(MockDataProvider.networks)
+        val account = Account(
+            0,
+            chainId = ChainId.ATS_TAU,
+            address = "address0",
+            _isTestNetwork = true,
+            isHide = false
+        )
+        val tokens = listOf(
+            ERCToken(1, symbol="CT",  collectionName = "CookieToken", address = "0x0", type = TokenType.ERC721),
+            ERCToken(2, symbol="AT",  collectionName = "AnotherToken", address = "0x1", type = TokenType.ERC721)
+        )
+        val updatedTokens = listOf(
+            tokens[0].copy(logoURI = "uri_1", symbol="newSymbol_1", collectionName="newCN_1", description = "newDesc_1", contentUri = "newContent_1"),
+            tokens[1].copy(logoURI = "uri_2", symbol="newSymbol_2", collectionName="newCN_2", description = "newDesc_2", contentUri = "newContent_2" )
+        )
+        val walletConfig = WalletConfig(
+            1,
+            erc20Tokens = mapOf(
+                ChainId.ATS_TAU to tokens
+            ),
+            accounts = listOf(
+                account,
+                Account(
+                    1,
+                    chainId = ChainId.ATS_TAU,
+                    address = "address1",
+                    accountTokens = mutableListOf(AccountToken(tokens[0]), AccountToken(tokens[1]))
+                )
+            )
+        )
+        val updatedWalletConfig = walletConfig.copy(erc20Tokens = mapOf(
+            ChainId.ATS_TAU to updatedTokens
+        ))
+        with(walletConfig){
+            manager.activeAccounts = manager.getActiveAccounts(this)
+            manager.updateNftDetails(this)
+            assertEquals(manager.activeAccounts[1].accountTokens,  mutableListOf(AccountToken(tokens[0]), AccountToken(tokens[1])))
+
+            manager.activeAccounts[1].accountTokens[0].token.logoURI shouldBeEqualTo  tokens[0].logoURI
+            manager.activeAccounts[1].accountTokens[0].token.description shouldBeEqualTo tokens[0].description
+            manager.activeAccounts[1].accountTokens[0].token.contentUri shouldBeEqualTo tokens[0].contentUri
+            manager.activeAccounts[1].accountTokens[0].token.name shouldBeEqualTo tokens[0].name
+            manager.activeAccounts[1].accountTokens[0].token.collectionName shouldBeEqualTo tokens[0].collectionName
+            manager.activeAccounts[1].accountTokens[0].token.symbol shouldBeEqualTo tokens[0].symbol
+
+            manager.activeAccounts[1].accountTokens[1].token.logoURI shouldBeEqualTo tokens[1].logoURI
+            manager.activeAccounts[1].accountTokens[1].token.description shouldBeEqualTo tokens[1].description
+            manager.activeAccounts[1].accountTokens[1].token.contentUri shouldBeEqualTo tokens[1].contentUri
+            manager.activeAccounts[1].accountTokens[1].token.name shouldBeEqualTo tokens[1].name
+            manager.activeAccounts[1].accountTokens[1].token.collectionName shouldBeEqualTo tokens[1].collectionName
+            manager.activeAccounts[1].accountTokens[1].token.symbol shouldBeEqualTo tokens[1].symbol
+        }
+        with(updatedWalletConfig){
+            manager.activeAccounts = manager.getActiveAccounts(this)
+            manager.updateNftDetails(this)
+
+            manager.activeAccounts[1].accountTokens[0].token.logoURI shouldBeEqualTo updatedTokens[0].logoURI
+            manager.activeAccounts[1].accountTokens[0].token.description shouldBeEqualTo updatedTokens[0].description
+            manager.activeAccounts[1].accountTokens[0].token.contentUri shouldBeEqualTo updatedTokens[0].contentUri
+            manager.activeAccounts[1].accountTokens[0].token.name shouldBeEqualTo updatedTokens[0].name
+            manager.activeAccounts[1].accountTokens[0].token.collectionName shouldBeEqualTo updatedTokens[0].collectionName
+            manager.activeAccounts[1].accountTokens[0].token.symbol shouldBeEqualTo updatedTokens[0].symbol
+
+            manager.activeAccounts[1].accountTokens[1].token.logoURI shouldBeEqualTo updatedTokens[1].logoURI
+            manager.activeAccounts[1].accountTokens[1].token.description shouldBeEqualTo updatedTokens[1].description
+            manager.activeAccounts[1].accountTokens[1].token.contentUri shouldBeEqualTo updatedTokens[1].contentUri
+            manager.activeAccounts[1].accountTokens[1].token.name shouldBeEqualTo updatedTokens[1].name
+            manager.activeAccounts[1].accountTokens[1].token.collectionName shouldBeEqualTo updatedTokens[1].collectionName
+            manager.activeAccounts[1].accountTokens[1].token.symbol shouldBeEqualTo updatedTokens[1].symbol
+        }
+    }
 }

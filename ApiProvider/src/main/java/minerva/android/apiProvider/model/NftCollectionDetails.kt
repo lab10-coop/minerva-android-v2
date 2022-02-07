@@ -13,5 +13,7 @@ data class NftCollectionDetails(
     @SerializedName("name")
     val name: String = String.Empty,
     @SerializedName("symbol")
-    val symbol: String = String.Empty
+    val symbol: String = String.Empty,
+    @SerializedName("override")
+    val override: Boolean = false
 )

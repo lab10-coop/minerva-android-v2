@@ -344,7 +344,10 @@ class TransactionRepositoryImpl(
 
     private fun downloadTokensList(accounts: List<Account>): Single<List<ERCToken>> =
         Observable.fromIterable(accounts)
-            .flatMapSingle { account -> tokenManager.downloadTokensList(account) }
+            .flatMapSingle { account ->
+                tokenManager.downloadTokensList(account)
+                    .onErrorReturn { emptyList() }
+            }
             .toList()
             .map { tokens -> mergeLists(tokens) }
 

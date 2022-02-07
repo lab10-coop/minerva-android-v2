@@ -11,7 +11,7 @@ import java.math.BigInteger
 data class ERCToken(
     override val chainId: Int,
     override var name: String = String.Empty,
-    override val symbol: String = String.Empty,
+    override var symbol: String = String.Empty,
     @PrimaryKey val address: String = String.Empty,
     val decimals: String = String.Empty,
     var accountAddress: String = String.Empty,
@@ -41,6 +41,14 @@ data class ERCToken(
         tokenType,
         collectionName = if (tokenType.isNft()) tokenTx.tokenName else null
     )
+
+    fun mergeNftDetails(ercToken: ERCToken){
+        logoURI = ercToken.logoURI
+        contentUri = ercToken.contentUri
+        description = ercToken.description
+        collectionName = ercToken.collectionName
+        symbol = ercToken.symbol
+    }
 }
 
 enum class TokenType {

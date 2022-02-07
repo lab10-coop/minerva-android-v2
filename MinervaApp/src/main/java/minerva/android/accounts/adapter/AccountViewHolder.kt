@@ -150,7 +150,7 @@ class AccountViewHolder(
             )
             tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens, accountWidgetState.isWidgetOpen)
             tokens.isNotEmpty().let { visible ->
-                if (visible) setOnItemClickListener(account, fiatSymbol, tokens)
+                if (visible) setOnItemClickListener(account, fiatSymbol, tokens) else setOnClickListener {}
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
                 prepareArrow(visible)
