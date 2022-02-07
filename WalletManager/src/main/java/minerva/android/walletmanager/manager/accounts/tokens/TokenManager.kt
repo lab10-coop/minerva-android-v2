@@ -44,7 +44,7 @@ interface TokenManager {
     fun getTaggedTokensSingle(): Single<List<ERCToken>>
     fun getSuperTokenBalance(account: Account): Flowable<Asset>
     var activeSuperTokenStreams: MutableList<ActiveSuperToken>
-    fun updateNFTCollectionsImage(
+    fun mergeNFTDetailsWithRemoteConfig(
         shouldBeUpdated: Boolean,
         tokensPerChainIdMap: Map<Int, List<ERCToken>>
     ): Single<UpdateTokensResult>
