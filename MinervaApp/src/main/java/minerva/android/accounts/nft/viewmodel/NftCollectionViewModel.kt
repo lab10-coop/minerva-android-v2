@@ -264,7 +264,7 @@ class NftCollectionViewModel(
             tokenManager.getNftsPerAccount(account.chainId, account.address, collectionAddress).forEach { token ->
                 with(token) {
                     visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId }?.let {
-                        nftList.add(NftItem(address, tokenId ?: String.Empty, description, contentUri, name, type.isERC1155(), decimals, it.currentBalance))
+                        nftList.add(NftItem(address, tokenId ?: String.Empty, description, nftContent, name, type.isERC1155(), decimals, it.currentBalance))
                     }
                 }
             }

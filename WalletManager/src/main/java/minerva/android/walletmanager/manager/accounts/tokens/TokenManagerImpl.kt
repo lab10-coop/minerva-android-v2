@@ -10,6 +10,7 @@ import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.CommitElement
+import minerva.android.apiProvider.model.NftDetails
 import minerva.android.apiProvider.model.TokenDetails
 import minerva.android.apiProvider.model.TokenTx
 import minerva.android.blockchainprovider.model.Token
@@ -30,6 +31,8 @@ import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.ContentType
+import minerva.android.walletmanager.model.NftContent
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
@@ -997,7 +1000,7 @@ class TokenManagerImpl(
                             ) && token.tokenId == it.tokenId
                         }?.forEach {
                             it.description = token.description
-                            it.contentUri = token.contentUri
+                            it.nftContent = token.nftContent
                             it.name = token.name
                         }
                     }
@@ -1053,7 +1056,7 @@ class TokenManagerImpl(
         }
 
     private fun ERCToken.shouldNftDetailsBeUpdated() =
-        type.isNft() && (contentUri.isBlank() || collectionName.isNullOrBlank() || name.isBlank() || description.isBlank())
+        type.isNft() && (nftContent.imageUri.isBlank() || collectionName.isNullOrBlank() || name.isBlank() || description.isBlank())
 
     private fun ERCToken.updateMissingERC721TokensDetails(
         privateKey: String,
@@ -1064,9 +1067,7 @@ class TokenManagerImpl(
         erc721TokenRepository.getERC721DetailsUri(privateKey, chainId, tokenAddress, tokenId)
             .flatMap { url ->
                 cryptoApi.getERC721TokenDetails(parseIPFSContentUrl(url)).map { details ->
-                    contentUri = parseIPFSContentUrl(details.contentUri)
-                    description = details.description
-                    name = details.name
+                    handleContentType(details)
                     this
                 }
             }
@@ -1076,16 +1077,27 @@ class TokenManagerImpl(
         chainId: Int,
         tokenAddress: String,
         tokenId: BigInteger
-    ): Single<ERCToken> =
-        erc1155TokenRepository.getERC1155DetailsUri(privateKey, chainId, tokenAddress, tokenId)
-            .flatMap { url ->
-                cryptoApi.getERC1155TokenDetails(parseIPFSContentUrl(url)).map { details ->
-                    contentUri = parseIPFSContentUrl(details.contentUri)
-                    description = details.description
-                    name = details.name
-                    this
-                }
+    ): Single<ERCToken> = erc1155TokenRepository.getERC1155DetailsUri(privateKey, chainId, tokenAddress, tokenId)
+        .flatMap { url ->
+            cryptoApi.getERC1155TokenDetails(parseIPFSContentUrl(url)).map { details ->
+                handleContentType(details)
+                this
             }
+        }
+
+    private fun ERCToken.handleContentType(details: NftDetails)  {
+        val type = when {
+            !details.animationUrl.isNullOrBlank() -> ContentType.VIDEO
+            else -> ContentType.IMAGE
+        }
+        nftContent = NftContent(
+            parseIPFSContentUrl(details.imageUri),
+            type,
+            parseIPFSContentUrl(details.animationUrl ?: String.Empty)
+        )
+        description = details.description
+        name = details.name
+    }
 
     /**
      *

@@ -815,9 +815,10 @@ class TokenManagerTest : RxTest() {
         whenever(erc721TokenRepository.getERC721DetailsUri(any(), any(), any(), any())).thenReturn(Single.just("detailsUrl"))
         whenever(cryptoApi.getERC721TokenDetails(any())).thenReturn(
             Single.just(
-                ERC721Details(
+                NftDetails(
                     "nftToken",
                     "contentUri",
+                    "animationUrl",
                     "description"
                 )
             )
@@ -828,7 +829,7 @@ class TokenManagerTest : RxTest() {
             .await()
             .assertValue { result ->
                 val updatedToken = result.tokensPerChainIdMap[ATS_TAU]?.first()
-                result.shouldSafeNewTokens && updatedToken?.contentUri == "contentUri" && updatedToken.description == "description"
+                result.shouldSafeNewTokens && updatedToken?.nftContent?.imageUri == "contentUri" && updatedToken.description == "description"
             }
     }
 

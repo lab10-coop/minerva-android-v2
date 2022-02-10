@@ -15,6 +15,8 @@ import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.exception.MissingAccountThrowable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.ContentType
+import minerva.android.walletmanager.model.NftContent
 import minerva.android.walletmanager.model.defs.ChainId
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
@@ -1120,8 +1122,8 @@ class AccountManagerTest : RxTest() {
             ERCToken(2, symbol="AT",  collectionName = "AnotherToken", address = "0x1", type = TokenType.ERC721)
         )
         val updatedTokens = listOf(
-            tokens[0].copy(logoURI = "uri_1", symbol="newSymbol_1", collectionName="newCN_1", description = "newDesc_1", contentUri = "newContent_1"),
-            tokens[1].copy(logoURI = "uri_2", symbol="newSymbol_2", collectionName="newCN_2", description = "newDesc_2", contentUri = "newContent_2" )
+            tokens[0].copy(logoURI = "uri_1", symbol="newSymbol_1", collectionName="newCN_1", description = "newDesc_1", nftContent = NftContent( "newContent_1", ContentType.VIDEO, "animation1")),
+            tokens[1].copy(logoURI = "uri_2", symbol="newSymbol_2", collectionName="newCN_2", description = "newDesc_2", nftContent = NftContent( "newContent_2", ContentType.IMAGE, "") )
         )
         val walletConfig = WalletConfig(
             1,
@@ -1148,14 +1150,18 @@ class AccountManagerTest : RxTest() {
 
             manager.activeAccounts[1].accountTokens[0].token.logoURI shouldBeEqualTo  tokens[0].logoURI
             manager.activeAccounts[1].accountTokens[0].token.description shouldBeEqualTo tokens[0].description
-            manager.activeAccounts[1].accountTokens[0].token.contentUri shouldBeEqualTo tokens[0].contentUri
+            manager.activeAccounts[1].accountTokens[0].token.nftContent.imageUri shouldBeEqualTo tokens[0].nftContent.imageUri
+            manager.activeAccounts[1].accountTokens[0].token.nftContent.contentType shouldBeEqualTo tokens[0].nftContent.contentType
+            manager.activeAccounts[1].accountTokens[0].token.nftContent.animationUri shouldBeEqualTo tokens[0].nftContent.animationUri
             manager.activeAccounts[1].accountTokens[0].token.name shouldBeEqualTo tokens[0].name
             manager.activeAccounts[1].accountTokens[0].token.collectionName shouldBeEqualTo tokens[0].collectionName
             manager.activeAccounts[1].accountTokens[0].token.symbol shouldBeEqualTo tokens[0].symbol
 
             manager.activeAccounts[1].accountTokens[1].token.logoURI shouldBeEqualTo tokens[1].logoURI
             manager.activeAccounts[1].accountTokens[1].token.description shouldBeEqualTo tokens[1].description
-            manager.activeAccounts[1].accountTokens[1].token.contentUri shouldBeEqualTo tokens[1].contentUri
+            manager.activeAccounts[1].accountTokens[1].token.nftContent.imageUri shouldBeEqualTo tokens[1].nftContent.imageUri
+            manager.activeAccounts[1].accountTokens[1].token.nftContent.contentType shouldBeEqualTo tokens[1].nftContent.contentType
+            manager.activeAccounts[1].accountTokens[1].token.nftContent.animationUri shouldBeEqualTo tokens[1].nftContent.animationUri
             manager.activeAccounts[1].accountTokens[1].token.name shouldBeEqualTo tokens[1].name
             manager.activeAccounts[1].accountTokens[1].token.collectionName shouldBeEqualTo tokens[1].collectionName
             manager.activeAccounts[1].accountTokens[1].token.symbol shouldBeEqualTo tokens[1].symbol
@@ -1166,14 +1172,18 @@ class AccountManagerTest : RxTest() {
 
             manager.activeAccounts[1].accountTokens[0].token.logoURI shouldBeEqualTo updatedTokens[0].logoURI
             manager.activeAccounts[1].accountTokens[0].token.description shouldBeEqualTo updatedTokens[0].description
-            manager.activeAccounts[1].accountTokens[0].token.contentUri shouldBeEqualTo updatedTokens[0].contentUri
+            manager.activeAccounts[1].accountTokens[0].token.nftContent.imageUri shouldBeEqualTo updatedTokens[0].nftContent.imageUri
+            manager.activeAccounts[1].accountTokens[0].token.nftContent.contentType shouldBeEqualTo updatedTokens[0].nftContent.contentType
+            manager.activeAccounts[1].accountTokens[0].token.nftContent.animationUri shouldBeEqualTo updatedTokens[0].nftContent.animationUri
             manager.activeAccounts[1].accountTokens[0].token.name shouldBeEqualTo updatedTokens[0].name
             manager.activeAccounts[1].accountTokens[0].token.collectionName shouldBeEqualTo updatedTokens[0].collectionName
             manager.activeAccounts[1].accountTokens[0].token.symbol shouldBeEqualTo updatedTokens[0].symbol
 
             manager.activeAccounts[1].accountTokens[1].token.logoURI shouldBeEqualTo updatedTokens[1].logoURI
             manager.activeAccounts[1].accountTokens[1].token.description shouldBeEqualTo updatedTokens[1].description
-            manager.activeAccounts[1].accountTokens[1].token.contentUri shouldBeEqualTo updatedTokens[1].contentUri
+            manager.activeAccounts[1].accountTokens[1].token.nftContent.imageUri shouldBeEqualTo updatedTokens[1].nftContent.imageUri
+            manager.activeAccounts[1].accountTokens[1].token.nftContent.contentType shouldBeEqualTo updatedTokens[1].nftContent.contentType
+            manager.activeAccounts[1].accountTokens[1].token.nftContent.animationUri shouldBeEqualTo updatedTokens[1].nftContent.animationUri
             manager.activeAccounts[1].accountTokens[1].token.name shouldBeEqualTo updatedTokens[1].name
             manager.activeAccounts[1].accountTokens[1].token.collectionName shouldBeEqualTo updatedTokens[1].collectionName
             manager.activeAccounts[1].accountTokens[1].token.symbol shouldBeEqualTo updatedTokens[1].symbol
