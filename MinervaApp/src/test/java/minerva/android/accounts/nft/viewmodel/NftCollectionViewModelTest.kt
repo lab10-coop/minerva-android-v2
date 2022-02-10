@@ -11,6 +11,7 @@ import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
+import minerva.android.walletmanager.model.NftContent
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.network.Network
@@ -65,7 +66,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         accountAddress = "accountAddress",
         type = TokenType.ERC721,
         description = "T1 desctiption",
-        contentUri = "contentUriT1",
+        nftContent = NftContent("contentUriT1"),
         tokenId = "1"
     )
     private val token2 = ERCToken(
@@ -77,7 +78,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         accountAddress = "accountAddress",
         type = TokenType.ERC721,
         description = "T2 desctiption",
-        contentUri = "contentUriT2",
+        nftContent = NftContent("contentUriT2"),
         tokenId = "2"
     )
     private val token3 = ERCToken(
@@ -89,7 +90,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
         accountAddress = "accountAddress",
         type = TokenType.ERC721,
         description = "T3 desctiption",
-        contentUri = "contentUriT3",
+        nftContent = NftContent("contentUriT3"),
         tokenId = "3"
     )
     private val account = Account(
@@ -128,12 +129,16 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
             firstValue == emptyList<NftItem>() &&
                     secondValue[0].name == token1.name &&
                     firstValue[0].tokenId == token1.tokenId &&
-                    firstValue[0].contentUrl == token1.contentUri &&
+                    firstValue[0].nftContent.imageUri == token1.nftContent.imageUri &&
+                    firstValue[0].nftContent.contentType == token1.nftContent.contentType &&
+                    firstValue[0].nftContent.animationUri == token1.nftContent.animationUri &&
                     firstValue[0].description == token1.description &&
                     firstValue[0].tokenAddress == token1.address &&
                     firstValue[1].name == token3.name &&
                     firstValue[1].tokenId == token3.tokenId &&
-                    firstValue[1].contentUrl == token3.contentUri &&
+                    firstValue[1].nftContent.imageUri == token3.nftContent.imageUri &&
+                    firstValue[1].nftContent.contentType == token3.nftContent.contentType &&
+                    firstValue[1].nftContent.animationUri == token3.nftContent.animationUri &&
                     firstValue[1].description == token3.description &&
                     firstValue[1].tokenAddress == token3.address
         }

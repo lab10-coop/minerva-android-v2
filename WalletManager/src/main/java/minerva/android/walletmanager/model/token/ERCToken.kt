@@ -1,10 +1,13 @@
 package minerva.android.walletmanager.model.token
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import minerva.android.apiProvider.model.TokenTx
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.model.ContentType
+import minerva.android.walletmanager.model.NftContent
 import java.math.BigInteger
 
 @Entity(tableName = "tokens")
@@ -21,7 +24,7 @@ data class ERCToken(
     var tag: String = String.Empty,
     var isError: Boolean = false,
     var isStreamActive: Boolean = false,
-    var contentUri: String = String.Empty,
+    @Embedded var nftContent: NftContent = NftContent(),
     var description: String = String.Empty,
     var consNetFlow: BigInteger = BigInteger.ZERO,
     var collectionName: String? = null
@@ -44,10 +47,11 @@ data class ERCToken(
 
     fun mergeNftDetails(ercToken: ERCToken){
         logoURI = ercToken.logoURI
-        contentUri = ercToken.contentUri
+        nftContent = ercToken.nftContent
         description = ercToken.description
         collectionName = ercToken.collectionName
         symbol = ercToken.symbol
+        name = ercToken.name
     }
 }
 

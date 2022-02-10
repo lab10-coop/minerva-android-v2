@@ -15,6 +15,8 @@ import minerva.android.extension.gone
 import minerva.android.extension.invisible
 import minerva.android.extension.visible
 import minerva.android.extension.visibleOrGone
+import minerva.android.walletmanager.model.ContentType
+import minerva.android.walletmanager.model.NftContent
 import minerva.android.widget.RecyclableViewMoreTextView
 import java.math.BigDecimal
 
@@ -43,10 +45,10 @@ internal fun NftDetailsBinding.setupBalance(nftItem: NftItem) {
     }
 }
 
-internal fun NftDetailsBinding.prepareNftContent(contentUrl: String) {
+internal fun NftDetailsBinding.prepareNftContent(nftContent: NftContent) {
     content.webViewClient = WebViewClient()
     content.loadData(
-        HtmlGenerator.getNftContentEncodedHtmlFromUrl(contentUrl),
+        HtmlGenerator.getNftContentEncodedHtmlFromUrl(nftContent),
         Constants.MIME_TYPE_HTML,
         Constants.ENCODING
     )
@@ -54,14 +56,14 @@ internal fun NftDetailsBinding.prepareNftContent(contentUrl: String) {
 }
 
 internal fun NftDetailsBinding.setupContent(nftItem: NftItem) {
-    if (nftItem.contentUrl.isBlank()) {
+    if (nftItem.nftContent.imageUri.isBlank()) {
         hideLoading()
         errorView.visible()
         content.invisible()
         placeholder.visible()
         placeholder.setImageResource(R.drawable.ic_placeholder_nft)
     } else {
-        prepareNftContent(nftItem.contentUrl)
+        prepareNftContent(nftItem.nftContent)
     }
 }
 
