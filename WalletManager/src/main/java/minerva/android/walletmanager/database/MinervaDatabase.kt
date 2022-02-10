@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import minerva.android.walletmanager.database.converter.Converter
+import minerva.android.walletmanager.database.converters.ContentTypeConverter
 import minerva.android.walletmanager.database.converters.TokenTypeConverter
 import minerva.android.walletmanager.database.dao.CoinBalanceDao
 import minerva.android.walletmanager.database.dao.DappDao
@@ -20,9 +21,9 @@ import minerva.android.walletmanager.model.token.ERCToken
 
 @Database(
     entities = [ERCToken::class, DappSessionEntity::class, CoinBalanceEntity::class, TokenBalanceEntity::class, DappEntity::class, FavoriteDappEntity::class],
-    version = 27
+    version = 30
 )
-@TypeConverters(TokenTypeConverter::class, Converter::class)
+@TypeConverters(TokenTypeConverter::class, ContentTypeConverter::class, Converter::class)
 abstract class MinervaDatabase : RoomDatabase() {
     abstract fun dappSessionDao(): DappSessionDao
     abstract fun tokenDao(): TokenDao

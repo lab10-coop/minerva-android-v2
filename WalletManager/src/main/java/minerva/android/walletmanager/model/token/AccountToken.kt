@@ -44,7 +44,7 @@ data class AccountToken(
     fun mergeNftDetails(ercToken: ERCToken){
         token.logoURI = ercToken.logoURI
         token.description = ercToken.description
-        token.contentUri = ercToken.contentUri
+        token.nftContent = ercToken.nftContent
         token.name = ercToken.name
         token.collectionName = ercToken.collectionName
         token.symbol = ercToken.symbol

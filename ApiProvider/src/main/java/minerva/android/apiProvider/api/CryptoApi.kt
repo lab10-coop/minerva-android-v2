@@ -6,8 +6,7 @@ import minerva.android.apiProvider.api.ServicesApi.Companion.CONTENT_TYPE
 import minerva.android.apiProvider.model.ChainDetails
 import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.DappDetailsList
-import minerva.android.apiProvider.model.ERC1155Details
-import minerva.android.apiProvider.model.ERC721Details
+import minerva.android.apiProvider.model.NftDetails
 import minerva.android.apiProvider.model.GasPricesFromRpcOverHttp
 import minerva.android.apiProvider.model.GasPricesMatic
 import minerva.android.apiProvider.model.Markets
@@ -78,10 +77,10 @@ interface CryptoApi {
     fun getChainDetails(): Single<List<ChainDetails>>
 
     @GET
-    fun getERC721TokenDetails(@Url url: String): Single<ERC721Details>
+    fun getERC721TokenDetails(@Url url: String): Single<NftDetails>
 
     @GET
-    fun getERC1155TokenDetails(@Url url: String): Single<ERC1155Details>
+    fun getERC1155TokenDetails(@Url url: String): Single<NftDetails>
 
     @GET(DAPPS_DETAILS_URL)
     fun getDappsDetails(): Single<DappDetailsList>
