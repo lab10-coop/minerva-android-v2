@@ -1035,7 +1035,7 @@ class TokenManagerTest : RxTest() {
     @Test
     fun `test download tokens from transactions`() {
         NetworkManager.initialize(MockDataProvider.networks)
-        val account = Account(1, chainId = ETH_MAIN, address = "accountAddress", privateKey = "privateKey")
+        val account = Account(1, chainId = ETH_ROP, address = "accountAddress", privateKey = "privateKey")
         whenever(cryptoApi.getTokenTx(any())).thenReturn(
             Single.just(
                 TokenTxResponse(
@@ -1058,7 +1058,7 @@ class TokenManagerTest : RxTest() {
             .await()
             .assertValue { result ->
                 result.size == 2 &&
-                        result.first().chainId == ETH_MAIN &&
+                        result.first().chainId == ETH_ROP &&
                         result.first().name == "token1" &&
                         result.first().collectionName == null &&
                         result.first().symbol == "TK1" &&
@@ -1067,7 +1067,7 @@ class TokenManagerTest : RxTest() {
                         result.first().accountAddress == "accountAddress" &&
                         result.first().tokenId == "1" &&
                         result.first().type == TokenType.ERC20 &&
-                        result.last().chainId == ETH_MAIN &&
+                        result.last().chainId == ETH_ROP &&
                         result.last().name == "" &&
                         result.last().collectionName == "token1" &&
                         result.last().symbol == "TK1" &&
