@@ -449,6 +449,16 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.7.0</item>
+        <item>* NFT support for all main networks (ERC-721 &amp; ERC-1155)</item>
+        <item>* Support for all NFT media types (SVG, mp4, mp3, …)</item>
+        <item>* Sending NFTs</item>
+        <item>* Rename xDai Chain to Gnosis Chain</item>
+        <item>* Greater DApp integration variety</item>
+        <item>* Select your DApp Favorites</item>
+        <item>* Sponsored DApps on Send and Services screen</item>
+        <item>* Advanced Settings: Clear Token Cache</item>
+        <item>* Various UI tweaks, updates and bug fixes</item>
         <item>1.6.8</item>
         <item>* Extension of DApp support for 5 more applications</item>
         <item>* Various visual updates and bug fixes (e.g. token visibility)</item>
