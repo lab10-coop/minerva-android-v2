@@ -26,6 +26,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.model.token.NativeTokenWithBalances
 import minerva.android.walletmanager.model.token.TokenWithBalances
@@ -131,8 +132,8 @@ class TransactionViewModel(
     }
 
     fun updateTokenAddress(index: Int) {
-        tokenAddress = if (index == Int.InvalidIndex) String.Empty
-        else account.accountTokens[index].token.address
+        tokenAddress = if (index == Int.InvalidIndex || index == INDEX_OF_NATIVE_COIN) String.Empty
+        else (tokensList[index] as? AccountToken)?.token?.address ?: String.Empty
     }
 
     fun loadRecipients() {
@@ -478,5 +479,6 @@ class TransactionViewModel(
 
     companion object {
         const val ONE_ELEMENT = 1
+        const val INDEX_OF_NATIVE_COIN = 0
     }
 }
