@@ -110,6 +110,10 @@
         <item name="cornerRadius">@dimen/rounded_background_small</item>
     </style>
 
+    <style name="PurpleButtonStyle.AllCaps" parent="PurpleButtonStyle">
+        <item name="textAllCaps">true</item>
+    </style>
+
     <style name="OutlinedButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:theme">@style/MinervaButtonStyle</item>
         <item name="android:textColor">@color/colorPrimary</item>

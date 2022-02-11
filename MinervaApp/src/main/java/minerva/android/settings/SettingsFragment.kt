@@ -15,12 +15,15 @@ import minerva.android.databinding.FragmentSettingsBinding
 import minerva.android.extension.launchActivity
 import minerva.android.extension.openUri
 import minerva.android.extensions.showBiometricPrompt
+import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import minerva.android.settings.adapter.SettingsAdapter
 import minerva.android.settings.backup.BackupActivity
+import minerva.android.settings.dialog.TokenResetDialog
 import minerva.android.settings.model.SettingsRowType
 import minerva.android.settings.model.SettingsRowType.*
 import minerva.android.settings.model.propagateSettings
+import minerva.android.wrapped.startAdvancedWrappedActivity
 import minerva.android.wrapped.startAppVersionWrappedActivity
 import minerva.android.wrapped.startAuthenticationWrappedActivity
 import minerva.android.wrapped.startCurrencyWrappedActivity
@@ -120,6 +123,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             AUTHENTICATION -> startAuthenticationWrappedActivity(requireContext())
             CURRENCY -> startCurrencyWrappedActivity(requireContext())
             APP_VERSION -> startAppVersionWrappedActivity(requireContext())
+            ADVANCED -> startAdvancedWrappedActivity(requireContext())
             else -> Timber.d(type.toString())
         }
     }
@@ -137,6 +141,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             connectivityManager?.registerNetworkCallback(request, networkCallback)
         }
     }
+
 
     private fun clearConnectionCallbacks() {
         connectivityManager?.unregisterNetworkCallback(networkCallback)

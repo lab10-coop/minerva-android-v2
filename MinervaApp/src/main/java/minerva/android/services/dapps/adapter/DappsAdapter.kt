@@ -3,9 +3,12 @@ package minerva.android.services.dapps.adapter
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import android.widget.ImageView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.imageLoader
+import coil.request.ImageRequest
+import minerva.android.R
 import minerva.android.databinding.DappListRowBinding
 import minerva.android.services.dapps.model.Dapp
 
@@ -25,6 +28,7 @@ class DappsAdapter(private val listener: Listener) :
 
     interface Listener {
         fun onDappSelected(onDappSelected: OnDappSelected)
+        fun onFavoriteClick(name: String)
         data class OnDappSelected(val dapp: Dapp)
     }
 
@@ -36,12 +40,33 @@ class DappsAdapter(private val listener: Listener) :
             with(binding) {
                 dappName.text = dapp.shortName
                 dappDescription.text = dapp.description
-                dappIcon.setImageResource(dapp.iconDrawable)
+                dappIcon.loadUrl(dapp.iconUrl)
                 mainContent.apply {
                     setBackgroundColor(Color.parseColor(dapp.colorHex))
                     setOnClickListener { listener.onDappSelected(Listener.OnDappSelected(dapp)) }
                 }
+                setFavoriteButton(dapp.isFavorite)
+                favoriteView.setOnClickListener {
+                    listener.onFavoriteClick(dapp.shortName)
+                    setFavoriteButton(!dapp.isFavorite)
+                    dapp.isFavorite = !dapp.isFavorite
+                }
             }
+        }
+
+        private fun ImageView.loadUrl(url: String) {
+            val imageLoader = context.imageLoader
+            val request = ImageRequest.Builder(this.context)
+                .error(R.drawable.white_circle_placeholder)
+                .data(url)
+                .target(this)
+                .build()
+            imageLoader.enqueue(request)
+        }
+
+        private fun setFavoriteButton(isFavorite: Boolean) {
+            val imageRes = if (isFavorite) R.drawable.ic_star_selected else R.drawable.ic_star_deselected
+            binding.favoriteButton.setImageResource(imageRes)
         }
     }
 }

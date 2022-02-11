@@ -211,12 +211,34 @@ class BlockchainTransactionRepositoryImpl(
                     .timeout(
                         TIMEOUT,
                         TimeUnit.SECONDS,
-                        calculateTransactionCosts(chainId, Operation.TRANSFER_ERC20.gasLimit, gasPrice)
+                        calculateTransactionCosts(chainId, txCostData.transferType, gasPrice)
                     )
             } else {
                 //TODO implement getting gasLimit for Safe Account transaction from Blockchain
                 calculateTransactionCosts(chainId, Operation.SAFE_ACCOUNT_TXS.gasLimit, gasPrice)
             }
+        }
+
+    private fun calculateTransactionCosts(
+        chainId: Int,
+        transferType: BlockchainTransactionType,
+        gasPrice: BigDecimal?
+    ): Single<TransactionCostPayload> = Single.just(
+        getGasLimitForTransferType(transferType).let { gasLimit ->
+            TransactionCostPayload(
+                convertGasPrice(gasPrice, chainId),
+                gasLimit,
+                getTransactionCostInEth(getGasPrice(gasPrice, chainId), BigDecimal(gasLimit))
+            )
+        }
+    )
+
+    private fun getGasLimitForTransferType(transferType: BlockchainTransactionType) =
+        when(transferType){
+            BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP -> Operation.TRANSFER_NATIVE.gasLimit
+            BlockchainTransactionType.ERC721_TRANSFER -> Operation.TRANSFER_ERC721.gasLimit
+            BlockchainTransactionType.ERC1155_TRANSFER -> Operation.TRANSFER_ERC1155.gasLimit
+            else -> Operation.TRANSFER_ERC20.gasLimit
         }
 
     private fun calculateTransactionCosts(
@@ -241,7 +263,9 @@ class BlockchainTransactionRepositoryImpl(
 
     private fun prepareTransaction(count: EthGetTransactionCount, address: String, costData: TxCostData) =
         when (costData.transferType) {
-            BlockchainTransactionType.TOKEN_TRANSFER -> {
+            BlockchainTransactionType.TOKEN_TRANSFER,
+            BlockchainTransactionType.ERC721_TRANSFER,
+            BlockchainTransactionType.ERC1155_TRANSFER -> {
                 Transaction.createFunctionCallTransaction(
                     costData.from,
                     count.transactionCount,
@@ -288,10 +312,7 @@ class BlockchainTransactionRepositoryImpl(
         transferType: BlockchainTransactionType
     ): Single<TransactionCostPayload> {
         val gasLimit = it.error?.let {
-            when (transferType) {
-                BlockchainTransactionType.COIN_TRANSFER, BlockchainTransactionType.COIN_SWAP -> Operation.TRANSFER_NATIVE.gasLimit
-                else -> Operation.TRANSFER_ERC20.gasLimit
-            }
+                getGasLimitForTransferType(transferType)
         } ?: estimateGasLimit(it.amountUsed)
         return calculateTransactionCosts(chainId, gasLimit, gasPrice)
     }

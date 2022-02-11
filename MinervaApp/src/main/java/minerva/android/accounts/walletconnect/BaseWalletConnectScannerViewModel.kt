@@ -4,7 +4,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
-import minerva.android.kotlinUtils.*
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.FirstIndex
+import minerva.android.kotlinUtils.InvalidId
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.walletmanager.manager.accounts.AccountManager
 import minerva.android.walletmanager.manager.networks.NetworkManager
@@ -14,7 +18,11 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.wallet.WalletAction
-import minerva.android.walletmanager.model.walletconnect.*
+import minerva.android.walletmanager.model.walletconnect.BaseNetworkData
+import minerva.android.walletmanager.model.walletconnect.DappSession
+import minerva.android.walletmanager.model.walletconnect.Topic
+import minerva.android.walletmanager.model.walletconnect.WalletConnectPeerMeta
+import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.repository.walletconnect.OnDisconnect
 import minerva.android.walletmanager.repository.walletconnect.OnFailure
@@ -185,9 +193,9 @@ abstract class BaseWalletConnectScannerViewModel(
         NetworkManager.networks.find { network -> network.chainId == chainId }?.name.orElse { String.Empty }
 
     protected fun isNetworkNotSupported(chainId: Int): Boolean =
-        NetworkManager.networks.find { network -> network.chainId == chainId && isNotRSK(chainId) } == null
+        NetworkManager.networks.find { network -> network.chainId == chainId && accountManager.areMainNetworksEnabled == !network.testNet && isNotRSK(chainId)} == null
 
-    // change connected to playstore release MNR-637
+
     private fun isNotRSK(chainId: Int) = chainId != ChainId.RSK_MAIN && chainId != ChainId.RSK_TEST
 
     fun fetchUnsupportedNetworkName(chainId: Int) {

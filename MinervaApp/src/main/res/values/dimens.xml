@@ -18,6 +18,7 @@
     <dimen name="text_normal">16sp</dimen>
     <dimen name="text_small">14sp</dimen>
     <dimen name="text_xsmall">12sp</dimen>
+    <dimen name="text_xxsmall">9sp</dimen>
 
     <dimen name="large_letter_logo_size">128dp</dimen>
     <dimen name="big_letter_logo_size">96dp</dimen>
@@ -45,6 +46,7 @@
     <dimen name="confirm_dialog_button_margin">24dp</dimen>
 
     <dimen name="dapp_icon_size">50dp</dimen>
+    <dimen name="dapp_icon_size_small">40dp</dimen>
 
     <dimen name="qr_code_margin">6dp</dimen>
     <dimen name="clickable_area">32dp</dimen>
@@ -75,9 +77,11 @@
     <dimen name="on_boarding_image_max_height">200dp</dimen>
     <dimen name="splash_logo_size">150dp</dimen>
     <dimen name="dapp_list_row_height">80dp</dimen>
+    <dimen name="sponsored_dapp_height">70dp</dimen>
     <dimen name="nft_loading_size">80dp</dimen>
     <dimen name="dialog_hide_account_button_margin_in_between">5dp</dimen>
     <dimen name="dialog_hide_account_button_margin_bottom">10dp</dimen>
     <dimen name="token_view_margin_end">22dp</dimen>
     <dimen name="accounts_srl_margin_top">6dp</dimen>
+    <dimen name="sponsored_label_height">12dp</dimen>
 </resources>

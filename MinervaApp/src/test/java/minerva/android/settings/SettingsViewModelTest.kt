@@ -1,8 +1,12 @@
 package minerva.android.settings
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import androidx.lifecycle.Observer
+import com.nhaarman.mockitokotlin2.*
+import io.reactivex.Completable
 import minerva.android.BaseViewModelTest
+import minerva.android.kotlinUtils.event.Event
+import minerva.android.walletmanager.manager.wallet.WalletConfigManager
+import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.storage.LocalStorage
 import org.amshove.kluent.shouldBeEqualTo
@@ -13,7 +17,9 @@ class SettingsViewModelTest : BaseViewModelTest() {
 
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val localStorage: LocalStorage = mock()
+    private val walletConfigManager: WalletConfigManager = mock()
     private val viewModel = SettingsViewModel(masterSeedRepository, localStorage)
+
 
     @Test
     fun `are main nets enabled returns true test`() {

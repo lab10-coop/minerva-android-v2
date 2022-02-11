@@ -1,17 +1,20 @@
 package minerva.android.walletmanager.model.token
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import minerva.android.apiProvider.model.TokenTx
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.model.ContentType
+import minerva.android.walletmanager.model.NftContent
 import java.math.BigInteger
 
 @Entity(tableName = "tokens")
 data class ERCToken(
     override val chainId: Int,
     override var name: String = String.Empty,
-    override val symbol: String = String.Empty,
+    override var symbol: String = String.Empty,
     @PrimaryKey val address: String = String.Empty,
     val decimals: String = String.Empty,
     var accountAddress: String = String.Empty,
@@ -21,7 +24,7 @@ data class ERCToken(
     var tag: String = String.Empty,
     var isError: Boolean = false,
     var isStreamActive: Boolean = false,
-    var contentUri: String = String.Empty,
+    @Embedded var nftContent: NftContent = NftContent(),
     var description: String = String.Empty,
     var consNetFlow: BigInteger = BigInteger.ZERO,
     var collectionName: String? = null
@@ -39,16 +42,31 @@ data class ERCToken(
         accountAddress,
         tokenTx.tokenId,
         tokenType,
-        collectionName = if (tokenType.isERC721()) tokenTx.tokenName else null
+        collectionName = if (tokenType.isNft()) tokenTx.tokenName else null
     )
+
+    fun mergeNftDetails(ercToken: ERCToken){
+        logoURI = ercToken.logoURI
+        if(nftContent.imageUri.isEmpty()) nftContent.imageUri = ercToken.nftContent.imageUri
+        if(nftContent.contentType == ContentType.INVALID) nftContent.contentType = ercToken.nftContent.contentType
+        if(nftContent.animationUri.isEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
+        if(nftContent.tokenUri.isEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
+        description = ercToken.description
+        collectionName = ercToken.collectionName
+        symbol = ercToken.symbol
+        name = ercToken.name
+    }
 }
 
 enum class TokenType {
-    ERC20, ERC721, SUPER_TOKEN, WRAPPER_TOKEN, INVALID;
+    ERC20, ERC721, SUPER_TOKEN, WRAPPER_TOKEN, INVALID, ERC1155;
 
+    fun isERC1155() = this == ERC1155
     fun isERC721() = this == ERC721
     fun isERC20() = when (this) {
-        ERC721 -> false
+        ERC721, ERC1155 -> false
         else -> true
     }
+
+    fun isNft() = isERC1155() || isERC721()
 }

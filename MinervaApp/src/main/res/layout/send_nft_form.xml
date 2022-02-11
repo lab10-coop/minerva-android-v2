@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/margin_normal"
+    android:layout_marginTop="@dimen/margin_normal"
+    android:layout_marginEnd="@dimen/margin_normal"
+    android:descendantFocusability="beforeDescendants"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical"
+    tools:ignore="PrivateResource">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/amount_input_layout"
+        style="@style/FormTextInputLayoutStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:hint="@string/amount"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/amount"
+            style="@style/EditTextInputLayoutStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="0123456789."
+            android:drawableEnd="@drawable/ic_all_icon"
+            android:imeOptions="actionNext"
+            android:inputType="number"
+            android:nextFocusForward="@+id/receiver" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:id="@+id/fiat_amount_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/amount_input_layout"
+        tools:ignore="UseCompoundDrawables">
+
+        <TextView
+            android:id="@+id/fiat_amount_label"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginEnd="@dimen/margin_xxsmall"
+            android:fontFamily="@font/rubik_regular"
+            android:gravity="center_vertical"
+            android:text="@string/value"
+            android:textColor="@color/gray" />
+
+        <TextView
+            android:id="@+id/fiat_amount_value"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/rubik_regular"
+            android:gravity="center_vertical"
+            android:text="@string/transaction_cost_amount"
+            android:textColor="@color/gray" />
+
+        <ProgressBar
+            android:id="@+id/fiat_amount_progress_bar"
+            android:layout_width="@dimen/progressbar_size"
+            android:layout_height="@dimen/progressbar_size"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/receiver_input_layout"
+        style="@style/FormTextInputLayoutStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_small"
+        android:hint="@string/receiver"
+        app:layout_constraintBottom_toTopOf="@id/gas_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fiat_amount_layout">
+
+        <AutoCompleteTextView
+            android:id="@+id/receiver"
+            style="@style/EditTextInputLayoutStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableEnd="@drawable/ic_barcode_scanner"
+            android:drawableTint="@color/lightGray90"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            tools:ignore="LabelFor" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/gas_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/send_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/transaction_cost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_xxsmall"
+            android:fontFamily="@font/rubik_medium"
+            android:textColor="@color/dappLabelColorGray"
+            android:textSize="@dimen/text_xsmall"
+            app:layout_constraintBottom_toTopOf="@id/transaction_cost_label"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/gas_price_selector"
+            tools:text="0.0121 ETH (31.50 EUR)" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/transaction_cost_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_large"
+            android:fontFamily="@font/rubik_regular"
+            android:text="@string/transaction_cost"
+            android:textColor="@color/dappLabelColorGray"
+            android:textSize="@dimen/text_xsmall"
+            app:layout_constraintBottom_toTopOf="@id/error_view"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+        <minerva.android.widget.GasPriceSelector
+            android:id="@+id/gas_price_selector"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/margin_xxlarge"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/margin_xsmall"
+            app:layout_constraintBottom_toTopOf="@+id/error_view"
+            app:layout_constraintLeft_toRightOf="@+id/transaction_cost"
+            app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
+            app:layout_constraintTop_toTopOf="@+id/transaction_cost" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/speed"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:fontFamily="@font/rubik_medium"
+            android:gravity="end"
+            android:text="@string/custom"
+            android:textColor="@color/dappLabelColorGray"
+            android:textSize="@dimen/text_xsmall"
+            android:visibility="invisible"
+            app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
+            app:layout_constraintTop_toTopOf="@+id/gas_price_selector" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/transaction_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_xxsmall"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:fontFamily="@font/rubik_regular"
+            android:gravity="end"
+            android:text="@string/unknown_tx_speed"
+            android:textColor="@color/dappLabelColorGray"
+            android:textSize="@dimen/text_xsmall"
+            android:visibility="invisible"
+            app:layout_constraintRight_toLeftOf="@+id/edit_tx_time"
+            app:layout_constraintTop_toBottomOf="@+id/speed" />
+
+        <ImageView
+            android:id="@+id/edit_tx_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:src="@drawable/ic_edit"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/transaction_time"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/speed"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/close_custom_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:src="@drawable/ic_close"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/transaction_time"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/speed"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/error_view"
+            style="@style/RoundedRedLabelStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_marginRight="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_small"
+            android:gravity="center"
+            android:text="@string/account_balance_is_to_low"
+            android:textAllCaps="true"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/send_button"
+        style="@style/PurpleButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:enabled="false"
+        android:text="@string/send"
+        app:layout_constraintBottom_toTopOf="@+id/send_progress_bar"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:enabled="true"
+        tools:visibility="visible" />
+
+
+    <ProgressBar
+        android:id="@+id/send_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:visibility="visible" />
+
+    <ProgressBar
+        android:id="@+id/gas_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/send_button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/gas_layout"
+        tools:visibility="invisible" />
+</androidx.constraintlayout.widget.ConstraintLayout>

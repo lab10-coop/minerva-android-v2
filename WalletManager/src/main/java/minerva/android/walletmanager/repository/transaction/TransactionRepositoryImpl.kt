@@ -19,7 +19,9 @@ import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
 import minerva.android.blockchainprovider.repository.ens.ENSRepository
+import minerva.android.blockchainprovider.repository.erc1155.ERC1155TokenRepository
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
+import minerva.android.blockchainprovider.repository.erc721.ERC721TokenRepository
 import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.blockchainprovider.repository.validation.ValidationRepository
@@ -64,6 +66,8 @@ class TransactionRepositoryImpl(
     private val blockchainRepository: BlockchainTransactionRepository,
     private val walletConfigManager: WalletConfigManager,
     private val erC20TokenRepository: ERC20TokenRepository,
+    private val erc721TokenRepository: ERC721TokenRepository,
+    private val erc1155TokenRepository: ERC1155TokenRepository,
     private val unitConverter: UnitConverter,
     private val ensRepository: ENSRepository,
     private val cryptoApi: CryptoApi,
@@ -340,7 +344,10 @@ class TransactionRepositoryImpl(
 
     private fun downloadTokensList(accounts: List<Account>): Single<List<ERCToken>> =
         Observable.fromIterable(accounts)
-            .flatMapSingle { account -> tokenManager.downloadTokensList(account) }
+            .flatMapSingle { account ->
+                tokenManager.downloadTokensList(account)
+                    .onErrorReturn { emptyList() }
+            }
             .toList()
             .map { tokens -> mergeLists(tokens) }
 
@@ -469,6 +476,18 @@ class TransactionRepositoryImpl(
 
     override fun transferERC20Token(chainId: Int, transaction: Transaction): Completable =
         erC20TokenRepository.transferERC20Token(chainId, TransactionToTransactionPayloadMapper.map(transaction))
+            .andThen(ensRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
+            .map { saveRecipient(it, transaction.receiverKey) }
+            .ignoreElement()
+
+    override fun transferERC721Token(chainId: Int, transaction: Transaction): Completable =
+        erc721TokenRepository.transferERC721Token(chainId, TransactionToTransactionPayloadMapper.map(transaction))
+            .andThen(ensRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
+            .map { saveRecipient(it, transaction.receiverKey) }
+            .ignoreElement()
+
+    override fun transferERC1155Token(chainId: Int, transaction: Transaction): Completable =
+        erc1155TokenRepository.transferERC1155Token(chainId, TransactionToTransactionPayloadMapper.map(transaction))
             .andThen(ensRepository.reverseResolveENS(transaction.receiverKey).onErrorReturn { String.Empty })
             .map { saveRecipient(it, transaction.receiverKey) }
             .ignoreElement()

@@ -1,6 +1,10 @@
 package minerva.android.walletmanager.repository.walletconnect
 
-import io.reactivex.*
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Completable
+import io.reactivex.Flowable
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.addTo
@@ -14,11 +18,19 @@ import minerva.android.kotlinUtils.crypto.getFormattedMessage
 import minerva.android.kotlinUtils.crypto.hexToUtf8
 import minerva.android.walletConnect.client.WCClient
 import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage
-import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.*
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.MESSAGE
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE
+import minerva.android.walletConnect.model.ethereum.WCEthereumSignMessage.WCSignType.TYPED_MESSAGE
 import minerva.android.walletConnect.model.session.WCPeerMeta
 import minerva.android.walletConnect.model.session.WCSession
 import minerva.android.walletmanager.database.MinervaDatabase
-import minerva.android.walletmanager.model.mappers.*
+import minerva.android.walletmanager.model.mappers.DappSessionToEntityMapper
+import minerva.android.walletmanager.model.mappers.EntitiesToDappSessionsMapper
+import minerva.android.walletmanager.model.mappers.SessionEntityToDappSessionMapper
+import minerva.android.walletmanager.model.mappers.WCEthTransactionToWalletConnectTransactionMapper
+import minerva.android.walletmanager.model.mappers.WCPeerToWalletConnectPeerMetaMapper
+import minerva.android.walletmanager.model.mappers.WCSessionToWalletConnectSessionMapper
+import minerva.android.walletmanager.model.mappers.WalletConnectSessionMapper
 import minerva.android.walletmanager.model.walletconnect.DappSession
 import minerva.android.walletmanager.model.walletconnect.Topic
 import minerva.android.walletmanager.model.walletconnect.WalletConnectSession
@@ -41,7 +53,7 @@ class WalletConnectRepositoryImpl(
     internal lateinit var currentEthMessage: WCEthereumSignMessage
     private var disposable: CompositeDisposable = CompositeDisposable()
     private var pingDisposable: Disposable? = null
-    private val dappDao = minervaDatabase.dappDao()
+    private val dappDao = minervaDatabase.dappSessionDao()
     private var reconnectionAttempts: MutableMap<String, Int> = mutableMapOf()
 
     override fun connect(

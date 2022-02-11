@@ -223,11 +223,13 @@
     <string name="your_preferences">Your preferences</string>
     <string name="info">Info</string>
     <string name="legal">Legal</string>
+    <string name="for_developers">For Developers</string>
     <string name="use_main_networks">Use Main Networks</string>
     <string name="follow_on_twitter">Follow us on Twitter</string>
     <string name="join_community">Join Minerva\'s community</string>
     <string name="version">App Version</string>
     <string name="terms_of_service">Terms of Service</string>
+    <string name="token_reset">Reset tokens</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="test_networks">Test networks</string>
     <string name="main_networks">Main networks</string>
@@ -292,6 +294,7 @@
     <string name="account_balance_is_to_low">Account balance is too low</string>
     <string name="custom">Custom</string>
     <string name="custom_tx_speed">1 Gwei ~ 15 sec</string>
+    <string name="unknown_tx_speed">Unknown time</string>
     <string name="sending">Sending</string>
     <string name="rapid">Rapid</string>
     <string name="fast">Fast</string>
@@ -341,7 +344,7 @@
     <string name="no_addresses_left_info">You reached the maximum number of accounts</string>
     <string name="ethereum_label">Ethereum</string>
     <string name="polygon_label">Polygon (Matic)</string>
-    <string name="xdai_label">xDai Chain</string>
+    <string name="xdai_label">Gnosis Chain</string>
     <string name="create_your_first_account_header">Create your \nfirst account!</string>
     <string name="create_your_first_account_info">This is just to get you started. You can easily add more accounts on every supported network.</string>
     <string name="skip">Skip</string>
@@ -369,6 +372,7 @@
     <string name="timeline">Timeline view</string>
     <string name="grid">Grid view</string>
     <string name="more_label"> more</string>
+    <string name="amount_label">Amount: %s</string>
 
     <string name="default_dapp_dialog_description">To use your Minerva Wallet, tap "Connect Wallet" then "Wallet Connect"</string>
     <string name="default_dapp_dialog_confirm">Open</string>
@@ -378,6 +382,20 @@
     <string name="honeyswap_dialog_confirm">Open Honeyswap</string>
     <string name="nft_graphic_error_message">This NFT graphic cannot be displayed</string>
     <string name="cd_dapp_icon">Dapp icon</string>
+    <string name="open_dapp_info">To connect this DApp with your Minerva Wallet, hit "Open" and look out for "WalletConnect" or the "WalletConnect"-Icon.</string>
+    <string name="sponsored_label">Sponsored</string>
+    <string name="open_dapp_label">Open</string>
+    <string name="favorite_label">Favorite</string>
+    <string name="token_reset_message">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
+    <string name="failed_to_fetch_transaction_costs_error">Failed to estimate transaction costs. Try again later or add them manually.</string>
+    <string name="transaction_accepted_title">Transaction Accepted</string>
+    <string name="no_nfts_available">No NFTs available</string>
+    <string name="transaction_cost_format">%1$s %2$s (%3$s)</string>
+    <string name="advanced">Advanced</string>
+    <string name="clear_token_cache_title">Clear Token Cache</string>
+    <string name="clear_token_cache_description">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
+    <string name="clear_token_cache_action_text">Clear</string>
+    <string name="clear">Clear</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
@@ -431,6 +449,16 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.7.0</item>
+        <item>* NFT support for all main networks (ERC-721 &amp; ERC-1155)</item>
+        <item>* Support for all NFT media types (SVG, mp4, mp3, …)</item>
+        <item>* Sending NFTs</item>
+        <item>* Rename xDai Chain to Gnosis Chain</item>
+        <item>* Greater DApp integration variety</item>
+        <item>* Select your DApp Favorites</item>
+        <item>* Sponsored DApps on Send and Services screen</item>
+        <item>* Advanced Settings: Clear Token Cache</item>
+        <item>* Various UI tweaks, updates and bug fixes</item>
         <item>1.6.8</item>
         <item>* Extension of DApp support for 5 more applications</item>
         <item>* Various visual updates and bug fixes (e.g. token visibility)</item>

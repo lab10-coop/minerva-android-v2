@@ -1,14 +1,24 @@
 package minerva.android.settings
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
+import minerva.android.BuildConfig
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.mapper.StringArrayMapper
+import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.storage.LocalStorage
+import timber.log.Timber
 
 class SettingsViewModel(private val masterSeedRepository: MasterSeedRepository, private val localStorage: LocalStorage) :
-    ViewModel() {
+    BaseViewModel() {
 
     fun areMainNetworksEnabled(isChecked: Boolean) {
         masterSeedRepository.areMainNetworksEnabled = isChecked

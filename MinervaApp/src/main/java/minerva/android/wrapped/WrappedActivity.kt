@@ -1,5 +1,6 @@
 package minerva.android.wrapped
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +21,7 @@ import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidId
 import minerva.android.kotlinUtils.InvalidIndex
 import minerva.android.services.login.scanner.BaseScannerFragment
+import minerva.android.settings.advanced.AdvancedFragment
 import minerva.android.settings.authentication.AuthenticationFragment
 import minerva.android.settings.fiat.FiatFragment
 import minerva.android.settings.version.AppVersionFragment
@@ -126,6 +128,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.RAMP -> RampFragment.newInstance()
             WrappedFragmentType.CURRENCY -> FiatFragment.newInstance()
             WrappedFragmentType.APP_VERSION -> AppVersionFragment.newInstance()
+            WrappedFragmentType.ADVANCED -> AdvancedFragment.newInstance()
         }
         addFragment(R.id.container, fragment)
     }
@@ -145,6 +148,7 @@ class WrappedActivity : AppCompatActivity(), AddressScannerListener, OnBackListe
             WrappedFragmentType.AUTHENTICATION -> getString(R.string.authentication)
             WrappedFragmentType.CURRENCY -> getString(R.string.currency)
             WrappedFragmentType.APP_VERSION -> getString(R.string.version)
+            WrappedFragmentType.ADVANCED -> getString(R.string.advanced)
         }
 
     private fun prepareActionBar(fragmentType: WrappedFragmentType) {
@@ -202,5 +206,6 @@ enum class WrappedFragmentType {
     AUTHENTICATION,
     RAMP,
     CURRENCY,
-    APP_VERSION
+    APP_VERSION,
+    ADVANCED
 }

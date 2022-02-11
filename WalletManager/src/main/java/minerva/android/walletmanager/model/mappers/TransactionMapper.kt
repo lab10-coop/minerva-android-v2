@@ -12,6 +12,8 @@ object TransactionMapper : Mapper<Transaction, TransactionPayload> {
             receiverAddress = input.receiverKey,
             amount = input.amount,
             gasLimit = input.gasLimit,
-            gasPrice = input.gasPrice
+            gasPrice = input.gasPrice,
+            tokenDecimals = input.tokenDecimals,
+            tokenId = input.tokenId
         )
 }

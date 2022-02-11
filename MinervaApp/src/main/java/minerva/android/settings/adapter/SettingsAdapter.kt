@@ -58,7 +58,7 @@ class SettingsViewHolder(private val view: View) : RecyclerView.ViewHolder(view)
             binding.apply {
                 sectionTitle.text = settings.sectionTitle
                 addSettingRows(settings, flags, onSettingPressed, onCheckedChange)
-                settingsSeparator.visibleOrGone(settings.section != SettingsSection.LEGAL)
+                settingsSeparator.visibleOrGone(settings.shouldDisplaySeparator)
             }
         }
     }

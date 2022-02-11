@@ -13,7 +13,9 @@ import minerva.android.apiProvider.model.gaswatch.GasPrices
 import minerva.android.apiProvider.model.gaswatch.TransactionSpeedStats
 import minerva.android.blockchainprovider.model.*
 import minerva.android.blockchainprovider.repository.ens.ENSRepository
+import minerva.android.blockchainprovider.repository.erc1155.ERC1155TokenRepository
 import minerva.android.blockchainprovider.repository.erc20.ERC20TokenRepository
+import minerva.android.blockchainprovider.repository.erc721.ERC721TokenRepository
 import minerva.android.blockchainprovider.repository.transaction.BlockchainTransactionRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.blockchainprovider.repository.validation.ValidationRepository
@@ -52,6 +54,8 @@ class TransactionRepositoryTest : RxTest() {
     private val ensRepository: ENSRepository = mock()
     private val unitConverter: UnitConverter = mock()
     private val erC20TokenRepository: ERC20TokenRepository = mock()
+    private val erc721TokenRepository: ERC721TokenRepository = mock()
+    private val erc1155TokenRepository: ERC1155TokenRepository = mock()
     private val blockchainTransactionRepository: BlockchainTransactionRepository = mock()
     private val localStorage: LocalStorage = mock()
     private val webSocketRepositoryImpl: WebSocketRepositoryImpl = mock()
@@ -65,6 +69,8 @@ class TransactionRepositoryTest : RxTest() {
             blockchainTransactionRepository,
             walletConfigManager,
             erC20TokenRepository,
+            erc721TokenRepository,
+            erc1155TokenRepository,
             unitConverter,
             ensRepository,
             cryptoApi,
@@ -936,7 +942,7 @@ class TransactionRepositoryTest : RxTest() {
             Single.just(updatedTokensMap),
             Single.error(Throwable("Stop thread"))
         )
-        whenever(tokenManager.updateNFTCollectionsImage(any(), any())).thenReturn(
+        whenever(tokenManager.mergeNFTDetailsWithRemoteConfig(any(), any())).thenReturn(
             Single.just(updatedTokensMap),
             Single.error(Throwable("Stop thread"))
         )
@@ -958,8 +964,12 @@ class TransactionRepositoryTest : RxTest() {
         whenever(tokenManager.sortTokensByChainId(any())).thenReturn(tokensMap)
         whenever(tokenManager.mergeWithLocalTokensList(any())).thenReturn(updatedTokensMap)
         whenever(tokenManager.updateTokenIcons(any(), any())).thenReturn(Single.just(updatedTokensMap))
+        whenever(tokenManager.saveTokens(any(), any())).thenReturn(
+            Single.just(true),
+            Single.error(Throwable("Stop thread"))
+        )
 
-        repository.discoverNewTokens().test().assertError(error)
+        repository.discoverNewTokens().test().assertComplete().assertNoErrors()
     }
 
     @Test

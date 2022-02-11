@@ -5,100 +5,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardElevation="@dimen/elevation_small"
-    android:layout_marginTop="@dimen/margin_small"
-    android:background="@color/white">
+    android:background="@color/white"
+    app:cardElevation="@dimen/elevation_small">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    <WebView
-        android:id="@+id/content"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_normal"
-        android:layout_marginEnd="@dimen/margin_normal"
-        tools:ignore="WebViewLayout" />
-
-    <ImageView
-        android:id="@+id/placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:scaleType="center"
-        android:visibility="gone"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/ic_placeholder_nft" />
-
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/progress"
-            android:layout_width="@dimen/nft_loading_size"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/name"
-            app:layout_constraintDimensionRatio="1:1"
+        <include
+            android:id="@+id/nft_details"
+            layout="@layout/nft_details"
+            app:layout_constraintBottom_toTopOf="@id/bt_send"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:lottie_autoPlay="true"
-            app:lottie_fileName="loading_owl_animation.json"
-            app:lottie_loop="true" />
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/error_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/nftErrorBackgroundPurple"
-        android:gravity="center"
-        android:padding="@dimen/margin_xxsmall"
-        android:text="@string/nft_graphic_error_message"
-        android:textColor="@color/colorPrimary"
-        android:textSize="@dimen/text_xsmall"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/placeholder"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/name"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/bt_send"
+            style="@style/PurpleButtonStyle.AllCaps"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:layout_marginEnd="@dimen/margin_normal"
-            android:fontFamily="@font/rubik_medium"
-            android:textColor="@color/nftNameGray"
-            android:textSize="@dimen/text_big"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/content"
-            tools:text="Intercom Dreamer" />
-
-        <it.mike5v.viewmoretextview.ViewMoreTextView
-            android:id="@+id/description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginEnd="@dimen/margin_normal"
-            android:layout_marginBottom="@dimen/margin_normal"
-            android:lineSpacingExtra="6sp"
-            android:textColor="@color/nftDescriptionGray"
-            app:duration="500"
-            app:ellipsizeText="@string/more_label"
-            app:isExpanded="false"
+            android:text="@string/send"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/name"
-            app:visibleLines="1"
-            tools:text="description" />
+            app:layout_constraintTop_toBottomOf="@id/nft_details" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

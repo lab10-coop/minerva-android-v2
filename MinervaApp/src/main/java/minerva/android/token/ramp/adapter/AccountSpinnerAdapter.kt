@@ -28,11 +28,11 @@ class AccountSpinnerAdapter(
 
     override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = createView(position, parent)
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = createView(position, parent, false)
 
-    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View = createView(position, parent)
+    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View = createView(position, parent, true)
 
-    private fun createView(position: Int, parent: ViewGroup): View =
+    private fun createView(position: Int, parent: ViewGroup, isDropDown: Boolean): View =
         LayoutInflater.from(context).inflate(layoutResource, parent, false).apply {
             accounts[position].let { account ->
                 SpinnerNetworkBinding.bind(this).row.apply {
@@ -47,7 +47,8 @@ class AccountSpinnerAdapter(
                             context.getString(R.string.create_new_account)
                         }
                         else -> {
-                            setCompoundDrawablesWithIntrinsicBounds(getNetworkIcon(context, account.chainId), null, null, null)
+                            val topDrawable = if(!isDropDown) ContextCompat.getDrawable(context,R.drawable.ic_dropdown_black) else null
+                            setCompoundDrawablesWithIntrinsicBounds(getNetworkIcon(context, account.chainId), null, topDrawable, null)
                             account.name
                         }
                     }

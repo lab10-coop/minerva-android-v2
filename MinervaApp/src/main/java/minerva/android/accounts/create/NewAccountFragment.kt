@@ -25,12 +25,12 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
         NetworkSpinnerAdapter(
             requireContext(),
             R.layout.spinner_network,
-            NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled && isNotRSK(it.chainId) }
+            NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled && isNotRSK(it.chainId)  }
         )
     }
 
-    // change connected to playstore release MNR-637
     private fun isNotRSK(chainId: Int) = chainId != ChainId.RSK_MAIN && chainId != ChainId.RSK_TEST
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

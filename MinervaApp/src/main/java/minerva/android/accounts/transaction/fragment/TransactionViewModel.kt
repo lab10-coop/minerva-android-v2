@@ -10,8 +10,14 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.extension.validator.Validator
-import minerva.android.kotlinUtils.*
+import minerva.android.kotlinUtils.DateUtils
+import minerva.android.kotlinUtils.Empty
+import minerva.android.kotlinUtils.EmptyBalance
+import minerva.android.kotlinUtils.InvalidIndex
+import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
+import minerva.android.services.dapps.model.Dapp
+import minerva.android.walletmanager.model.dapps.DappUIDetails
 import minerva.android.walletmanager.model.defs.TransferType
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.AMOUNT
 import minerva.android.walletmanager.model.defs.WalletActionFields.Companion.RECEIVER
@@ -20,6 +26,7 @@ import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.FAI
 import minerva.android.walletmanager.model.defs.WalletActionStatus.Companion.SENT
 import minerva.android.walletmanager.model.defs.WalletActionType
 import minerva.android.walletmanager.model.minervaprimitives.account.Account
+import minerva.android.walletmanager.model.token.AccountToken
 import minerva.android.walletmanager.model.token.NativeToken
 import minerva.android.walletmanager.model.token.NativeTokenWithBalances
 import minerva.android.walletmanager.model.token.TokenWithBalances
@@ -28,6 +35,7 @@ import minerva.android.walletmanager.model.transactions.Transaction
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.model.transactions.TxCostPayload
 import minerva.android.walletmanager.model.wallet.WalletAction
+import minerva.android.walletmanager.repository.dapps.DappsRepository
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
 import minerva.android.walletmanager.repository.transaction.TransactionRepository
 import minerva.android.walletmanager.utils.BalanceUtils
@@ -41,7 +49,8 @@ import java.math.BigInteger
 class TransactionViewModel(
     private val walletActionsRepository: WalletActionsRepository,
     private val safeAccountRepository: SafeAccountRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val dappsRepository: DappsRepository
 ) : BaseViewModel() {
     lateinit var transaction: Transaction
     val wssUri get() = account.network.wsRpc
@@ -87,6 +96,9 @@ class TransactionViewModel(
     private val _transactionCostLiveData = MutableLiveData<Event<TransactionCost>>()
     val transactionCostLiveData: LiveData<Event<TransactionCost>> get() = _transactionCostLiveData
 
+    private val _sponsoredDappLiveData = MutableLiveData<Event<Dapp>>()
+    val sponsoredDappLiveData: LiveData<Event<Dapp>> get() = _sponsoredDappLiveData
+
     val tokensList: List<TokenWithBalances>
         get() = mutableListOf<TokenWithBalances>().apply {
             with(account.network) {
@@ -115,21 +127,41 @@ class TransactionViewModel(
             account = it
             this.tokenAddress = tokenAddress
             coinFiatRate = account.coinRate
+            getSponsoredDapp()
         }
     }
 
     fun updateTokenAddress(index: Int) {
-        tokenAddress = if (index == Int.InvalidIndex) String.Empty
-        else account.accountTokens[index].token.address
+        tokenAddress = if (index == Int.InvalidIndex || index == INDEX_OF_NATIVE_COIN) String.Empty
+        else (tokensList[index] as? AccountToken)?.token?.address ?: String.Empty
     }
 
     fun loadRecipients() {
         recipients = transactionRepository.loadRecipients()
     }
 
+    private fun getSponsoredDapp() {
+        launchDisposable {
+            dappsRepository.getDappForChainId(network.chainId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map { it.mapToDapp() }
+                .subscribeBy { dapp ->
+                    _sponsoredDappLiveData.value = Event(dapp)
+                }
+        }
+    }
+
+    private fun DappUIDetails.mapToDapp(): Dapp =
+        Dapp(
+            shortName, longName, subtitle, buttonColor,
+            iconLink, connectLink, isSponsored, sponsoredOrder
+        )
+
     fun isAddressValid(address: String): Boolean = transactionRepository.isAddressValid(address, network.chainId)
 
-    fun toRecipientChecksum(address: String): String = transactionRepository.toRecipientChecksum(address, network.chainId)
+    fun toRecipientChecksum(address: String): String =
+        transactionRepository.toRecipientChecksum(address, network.chainId)
 
     fun getTransactionCosts(to: String, amount: BigDecimal) {
         launchDisposable {
@@ -291,7 +323,12 @@ class TransactionViewModel(
             )
         )
 
-    private fun sendMainTransaction(receiverKey: String, amount: BigDecimal, gasPrice: BigDecimal, gasLimit: BigInteger) {
+    private fun sendMainTransaction(
+        receiverKey: String,
+        amount: BigDecimal,
+        gasPrice: BigDecimal,
+        gasLimit: BigInteger
+    ) {
         launchDisposable {
             resolveENS(receiverKey, amount, gasPrice, gasLimit)
                 .flatMap {
@@ -397,7 +434,15 @@ class TransactionViewModel(
             .map { prepareTransaction(it, amount, gasPrice, gasLimit, contractAddress).apply { transaction = this } }
 
     private fun saveWalletAction(status: Int, transaction: Transaction): Completable =
-        walletActionsRepository.saveWalletActions(listOf(getAccountsWalletAction(transaction, prepareCurrency(), status)))
+        walletActionsRepository.saveWalletActions(
+            listOf(
+                getAccountsWalletAction(
+                    transaction,
+                    prepareCurrency(),
+                    status
+                )
+            )
+        )
 
     private fun prepareTransaction(
         receiverKey: String,
@@ -434,5 +479,6 @@ class TransactionViewModel(
 
     companion object {
         const val ONE_ELEMENT = 1
+        const val INDEX_OF_NATIVE_COIN = 0
     }
 }

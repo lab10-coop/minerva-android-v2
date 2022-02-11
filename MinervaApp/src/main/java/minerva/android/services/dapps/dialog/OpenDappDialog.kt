@@ -15,12 +15,12 @@ class OpenDappDialog(private val dapp: Dapp) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return requireContext().let {
-            with(dapp.openDappDialogData) {
+            with(dapp) {
                 AlertDialog.Builder(it).apply {
-                    setTitle(title)
-                    setMessage(instructions)
+                    setTitle(longName)
+                    setMessage(requireContext().getString(R.string.open_dapp_info))
                     setPositiveButton(R.string.open) { dialog, id ->
-                        listener.onConfirm(Listener.OnConfirmData(url))
+                        listener.onConfirm(Listener.OnConfirmData(dappUrl))
                     }
                     setNegativeButton(R.string.cancel) { dialog, id ->
                         listener.onCancel()

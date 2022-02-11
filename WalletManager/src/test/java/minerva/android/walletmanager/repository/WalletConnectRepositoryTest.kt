@@ -1,7 +1,11 @@
 package minerva.android.walletmanager.repository
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
@@ -35,7 +39,7 @@ class WalletConnectRepositoryTest {
 
     private val dappSessionDao: DappSessionDao = mock()
     private val database: MinervaDatabase = mock {
-        whenever(this.mock.dappDao()).thenReturn(dappSessionDao)
+        whenever(this.mock.dappSessionDao()).thenReturn(dappSessionDao)
     }
 
     private val dapps =

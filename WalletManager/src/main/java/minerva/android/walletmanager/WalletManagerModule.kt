@@ -33,6 +33,8 @@ import minerva.android.walletmanager.provider.UnsupportedNetworkRepository
 import minerva.android.walletmanager.provider.UnsupportedNetworkRepositoryImpl
 import minerva.android.walletmanager.repository.asset.AssetBalanceRepository
 import minerva.android.walletmanager.repository.asset.AssetBalanceRepositoryImpl
+import minerva.android.walletmanager.repository.dapps.DappsRepository
+import minerva.android.walletmanager.repository.dapps.DappsRepositoryImpl
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
 import minerva.android.walletmanager.repository.seed.MasterSeedRepositoryImpl
 import minerva.android.walletmanager.repository.smartContract.SafeAccountRepository
@@ -73,11 +75,11 @@ fun createWalletModules() = module {
     single<WalletConfigManager> { WalletConfigManagerImpl(get(), get(), get(), get(), get()) }
     factory<IdentityManager> { IdentityManagerImpl(get(), get(), get()) }
     factory<AccountManager> { AccountManagerImpl(get(), get(), get(), get(), get(), get(), get()) }
-    factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory<TokenManager> { TokenManagerImpl(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<ServiceManager> { ServiceManagerImpl(get(), get(), get()) }
     factory<MasterSeedRepository> { MasterSeedRepositoryImpl(get(), get()) }
     single<AssetBalanceRepository> {AssetBalanceRepositoryImpl()  }
-    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory<TransactionRepository> { TransactionRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<WalletActionsRepository> { WalletActionsRepositoryImpl(get(), get(), get()) }
     factory<SafeAccountRepository> { SafeAccountRepositoryImpl(get(), get(), get(), get(), get()) }
     factory<OrderManager> { OrderManagerImpl(get()) }
@@ -89,6 +91,9 @@ fun createWalletModules() = module {
             .fallbackToDestructiveMigration().build()
     }
     single<RateStorage> { RateStorageImpl() }
+    single { get<MinervaDatabase>().dappDao() }
+    single { get<MinervaDatabase>().favoriteDappDao() }
+    single<DappsRepository> { DappsRepositoryImpl(get(), get(), get(), get()) }
 }
 
 private const val MinervaStorage = "MinervaSharedPrefs"

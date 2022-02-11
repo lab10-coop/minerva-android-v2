@@ -24,6 +24,7 @@ import minerva.android.services.login.ServicesScannerViewModel
 import minerva.android.services.login.identity.ChooseIdentityViewModel
 import minerva.android.services.login.scanner.LoginScannerViewModel
 import minerva.android.settings.SettingsViewModel
+import minerva.android.settings.advanced.AdvancedViewModel
 import minerva.android.settings.authentication.AuthenticationViewModel
 import minerva.android.settings.backup.BackupViewModel
 import minerva.android.settings.fiat.FiatViewModel
@@ -68,9 +69,10 @@ private val appModules = module {
     viewModel { WalletConnectInteractionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { LaunchApplicationViewModel(get(), get()) }
     viewModel { BackupViewModel(get()) }
-    viewModel { SettingsViewModel(get(), get()) }
+    viewModel { SettingsViewModel(get(), get())}
+    viewModel { AdvancedViewModel(get()) }
     viewModel { MinervaPrimitivesViewModel(get(), get()) }
-    viewModel { AccountsViewModel(get(),get(), get(), get(), get(), get(), get()) }
+    viewModel { AccountsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { EditIdentityViewModel(get(), get()) }
     viewModel { RestoreWalletViewModel(get()) }
     viewModel { CreateWalletViewModel(get()) }
@@ -78,7 +80,7 @@ private val appModules = module {
     viewModel { LoginScannerViewModel(get(), get(), get()) }
     viewModel { AddressViewModel(get(), get()) }
     viewModel { SafeAccountSettingsViewModel(get(), get()) }
-    viewModel { TransactionViewModel(get(), get(), get()) }
+    viewModel { TransactionViewModel(get(), get(), get(), get()) }
     viewModel { NewAccountViewModel(get(), get()) }
     viewModel { ServicesViewModel(get(), get(), get()) }
     viewModel { WalletActionsViewModel(get()) }
@@ -90,9 +92,18 @@ private val appModules = module {
     viewModel { AddTokenViewModel(get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
     viewModel { RampViewModel(get(), get()) }
-    viewModel { DappsViewModel() }
+    viewModel { DappsViewModel(get()) }
     viewModel { FiatViewModel(get(), get(), get()) }
-    viewModel { (accountId: Int, collectionAddress: String) -> NftCollectionViewModel(get(), get(), accountId, collectionAddress) }
+    viewModel { (accountId: Int, collectionAddress: String) ->
+        NftCollectionViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            accountId,
+            collectionAddress
+        )
+    }
 }
 
 private const val MinervaCache = "MinervaCache"

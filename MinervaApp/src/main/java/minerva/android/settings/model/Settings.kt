@@ -10,7 +10,8 @@ import minerva.android.settings.SettingsFragment
 data class Settings(
     val sectionTitle: String = String.Empty,
     val rows: List<SettingRow> = listOf(),
-    val section: SettingsSection
+    val section: SettingsSection,
+    val shouldDisplaySeparator: Boolean = true
 )
 
 data class SettingRow(
@@ -40,7 +41,8 @@ enum class SettingsRowType(val iconRes: Int) {
     APP_VERSION(Int.EmptyResource),
     LICENCE(Int.EmptyResource),
     TERMS_OF_SERVICE(Int.EmptyResource),
-    PRIVACY_POLICY(Int.EmptyResource)
+    PRIVACY_POLICY(Int.EmptyResource),
+    ADVANCED(R.drawable.ic_setting_row)
 }
 
 fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
@@ -93,6 +95,13 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     isSwitchVisible = true,
                     isArrowVisible = false,
                     rowType = SettingsRowType.MAIN_NETWORKS
+                ),
+                SettingRow(
+                    getString(R.string.advanced),
+                    R.drawable.ic_setting_row,
+                    isSwitchVisible = false,
+                    isArrowVisible = true,
+                    rowType = SettingsRowType.ADVANCED
                 )
             ), SettingsSection.PREFERENCES
         ),
@@ -120,7 +129,7 @@ fun SettingsFragment.propagateSettings(currentFiat: String): List<Settings> =
                     rowType = SettingsRowType.PRIVACY_POLICY
                 )
 
-            ), SettingsSection.LEGAL
+            ), SettingsSection.LEGAL, false
         )
     )
 

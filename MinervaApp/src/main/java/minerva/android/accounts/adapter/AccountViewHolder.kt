@@ -149,9 +149,8 @@ class AccountViewHolder(
                 accountWidgetState.isWidgetOpen
             )
             tokensAndCollectibles.prepareTokenLists(account, fiatSymbol, tokens, accountWidgetState.isWidgetOpen)
-            // change connected to playstore release MNR-637 - added getting ERC20 tokens only
-            tokens.getERC20Tokens().isNotEmpty().let { visible ->
-                if (visible) setOnItemClickListener(account, fiatSymbol, tokens)
+            tokens.isNotEmpty().let { visible ->
+                if (visible) setOnItemClickListener(account, fiatSymbol, tokens) else setOnClickListener {}
                 dividerTop.visibleOrInvisible(visible)
                 dividerBottom.visibleOrInvisible(visible)
                 prepareArrow(visible)
