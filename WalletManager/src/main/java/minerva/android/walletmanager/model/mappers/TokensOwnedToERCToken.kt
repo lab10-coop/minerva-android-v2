@@ -28,7 +28,7 @@ object TokensOwnedToERCToken {
             token.tokenJson?.let {
                 handleNftContent(it)
             }
-            nftContent.tokenUri = token.tokenURI
+            nftContent.tokenUri = token.tokenURI.takeIf { it?.startsWith(ENCODED_TOKEN_URI_PREFIX) != true } ?: String.Empty
         }
     }
 
@@ -64,4 +64,5 @@ object TokensOwnedToERCToken {
     }
 
     private const val ENCODED_SVG_PREFIX = "data:image/svg+xml;base64,"
+    private const val ENCODED_TOKEN_URI_PREFIX = "data:application/json;base64,"
 }
