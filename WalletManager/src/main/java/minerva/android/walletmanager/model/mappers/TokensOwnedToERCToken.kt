@@ -1,5 +1,6 @@
 package minerva.android.walletmanager.model.mappers
 
+import android.util.Base64
 import minerva.android.apiProvider.model.TokensOwnedPayload
 import minerva.android.kotlinUtils.Empty
 import minerva.android.walletmanager.model.ContentType
@@ -43,6 +44,15 @@ object TokensOwnedToERCToken {
     private fun ERCToken.handleNftContent(tokenJson: TokensOwnedPayload.TokenOwned.TokenJson)  {
         val type = when {
             !tokenJson.animationUri.isNullOrBlank() -> ContentType.VIDEO
+            tokenJson.image?.startsWith(ENCODED_SVG_PREFIX) ?: false -> {
+                tokenJson.image?.let {
+                    val encodedString = it.removePrefix(ENCODED_SVG_PREFIX)
+                    val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
+                    val decodedString = String(decodedBytes)
+                    tokenJson.image = decodedString
+                }
+                ContentType.ENCODED_IMAGE
+            }
             else -> ContentType.IMAGE
         }
         nftContent = NftContent(
@@ -52,4 +62,6 @@ object TokensOwnedToERCToken {
         tokenJson.description?.let{description = it}
         tokenJson.name?.let{name = it}
     }
+
+    private const val ENCODED_SVG_PREFIX = "data:image/svg+xml;base64,"
 }

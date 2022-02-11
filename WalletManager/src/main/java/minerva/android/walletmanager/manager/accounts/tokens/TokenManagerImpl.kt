@@ -1198,7 +1198,7 @@ class TokenManagerImpl(
 
     companion object {
         private const val LAST_UPDATE_INDEX = 0
-        private const val TOKENS_OWNED_REQUEST = "%stokensowned/%s?fetchTokenJson=ERC-1155"
+        private const val TOKENS_OWNED_REQUEST = "%stokensowned/%s?fetchTokenJson=all"
         private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
         private const val TOKEN_TX_REQUEST = "%sapi?module=account&action=tokentx&address=%s"
         private const val ETHEREUM_TOKENTX_REQUEST =
