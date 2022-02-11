@@ -8,7 +8,7 @@ data class NftDetails(
     @SerializedName("image", alternate = ["image_url"])
     val imageUri: String,
     @SerializedName("animation_url")
-    val  animationUrl: String?,
+    val animationUrl: String?,
     @SerializedName("description")
     val description: String
 )

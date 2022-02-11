@@ -11,12 +11,43 @@ object HtmlGenerator {
         when (nftContent.contentType) {
             ContentType.VIDEO -> getUnencodedHtmlForVideo(nftContent)
             ContentType.IMAGE -> getUnencodedHtmlForImage(nftContent.imageUri)
+            ContentType.ENCODED_IMAGE -> getUnencodedHtmlForEncodedImage(nftContent.imageUri)
             else -> getInvalidHtml()
         }.let { unencodedHtml ->
             return Base64.encodeToString(unencodedHtml.toByteArray(), Base64.NO_PADDING)
         }
 
     private fun getInvalidHtml() = String.Empty
+
+    private fun getUnencodedHtmlForEncodedImage(content: String) = "<html lang=\"en\">\n<head>\n" +
+            "    <meta charset=\"utf-8\">\n" +
+            "    <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\n" +
+            "    <style>\n" +
+            "      body {\n" +
+            "        margin: 0px;\n" +
+            "        padding: 0px;\n" +
+            "      }\n" +
+            "      .nftImageContainer {\n" +
+            "        height: 100%;\n" +
+            "        display: flex;\n" +
+            "        justify-content: center;" +
+            "        margin: auto;\n" +
+            "      }" +
+            "      svg {\n" +
+            "        position: fixed;\n" +
+            "        top:0;\n" +
+            "        left:0;\n" +
+            "        height:100%;\n" +
+            "        width:100%;\n" +
+            "      }\n" +
+            "    </style>\n" +
+            "  </head>\n" +
+            "  <body>\n" +
+            "    <div class=\"nftImageContainer\">\n" +
+            "    $content\n" +
+            "    </div>\n" +
+            "  </body>\n" +
+            "</html>"
 
     private fun getUnencodedHtmlForImage(contentUrl: String) = "<html lang=\"en\">\n<head>\n" +
             "    <meta charset=\"utf-8\">\n" +
@@ -53,5 +84,4 @@ object HtmlGenerator {
             "    </video>\n" +
             "  </body>\n" +
             "</html>"
-
 }

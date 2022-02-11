@@ -29,7 +29,7 @@ data class ERCTokensList(
             )
         }
         .fold(BigDecimal.ZERO) { acc, e ->
-            acc + e.currentBalance
+            acc + BigDecimal.ONE
         }
 
     private fun Account.getTokenBalance(accountToken: AccountToken) = accountTokens

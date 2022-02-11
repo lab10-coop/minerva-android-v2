@@ -2,6 +2,7 @@ package minerva.android.walletmanager.model.token
 
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.model.ContentType
 import minerva.android.walletmanager.utils.BalanceUtils
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -44,7 +45,10 @@ data class AccountToken(
     fun mergeNftDetails(ercToken: ERCToken){
         token.logoURI = ercToken.logoURI
         token.description = ercToken.description
-        token.nftContent = ercToken.nftContent
+        if(token.nftContent.imageUri.isEmpty()) token.nftContent.imageUri = ercToken.nftContent.imageUri
+        if(token.nftContent.contentType == ContentType.INVALID) token.nftContent.contentType = ercToken.nftContent.contentType
+        if(token.nftContent.animationUri.isEmpty()) token.nftContent.animationUri = ercToken.nftContent.animationUri
+        if(token.nftContent.tokenUri.isEmpty()) token.nftContent.tokenUri = ercToken.nftContent.tokenUri
         token.name = ercToken.name
         token.collectionName = ercToken.collectionName
         token.symbol = ercToken.symbol

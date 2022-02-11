@@ -47,7 +47,10 @@ data class ERCToken(
 
     fun mergeNftDetails(ercToken: ERCToken){
         logoURI = ercToken.logoURI
-        nftContent = ercToken.nftContent
+        if(nftContent.imageUri.isEmpty()) nftContent.imageUri = ercToken.nftContent.imageUri
+        if(nftContent.contentType == ContentType.INVALID) nftContent.contentType = ercToken.nftContent.contentType
+        if(nftContent.animationUri.isEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
+        if(nftContent.tokenUri.isEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
         description = ercToken.description
         collectionName = ercToken.collectionName
         symbol = ercToken.symbol

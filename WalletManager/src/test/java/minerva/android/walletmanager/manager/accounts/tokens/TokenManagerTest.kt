@@ -1000,7 +1000,8 @@ class TokenManagerTest : RxTest() {
                             "Nam3",
                             "Symb0l",
                             "uri",
-                            listOf("ERC-20")
+                            listOf("ERC-20"),
+                            TokensOwnedPayload.TokenOwned.TokenJson.Empty
                         )
                     ),
                     ""
@@ -1011,7 +1012,8 @@ class TokenManagerTest : RxTest() {
         tokenManager.downloadTokensList(account)
             .test()
             .await()
-            .assertValue { result -> result.size == 3
+            .assertValue {
+                    result -> result.size == 3
                         && result.first().chainId == XDAI
                         && result.first().name == String.Empty
                         && result.first().collectionName == "Name"

@@ -439,7 +439,8 @@ class MapperTest {
             "Name",
             "Symbol",
             "uri",
-            listOf("ERC-1155")
+            listOf("ERC-1155"),
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi")
         )
         val tokenOwned02 = TokensOwnedPayload.TokenOwned(
             "10",
@@ -450,7 +451,8 @@ class MapperTest {
             "n4m8",
             "Symbol",
             "uri",
-            listOf("ERC-721")
+            listOf("ERC-721"),
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi")
         )
         val tokenOwned03 = TokensOwnedPayload.TokenOwned(
             "1000",
@@ -461,7 +463,8 @@ class MapperTest {
             "Nam3",
             "Symb0l",
             "uri",
-            listOf("ERC-20")
+            listOf("ERC-20"),
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, null, null, null)
         )
 
         val result01 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned01, "key")
@@ -469,16 +472,22 @@ class MapperTest {
         result01.collectionName shouldBeEqualTo "Name"
         result01.address shouldBeEqualTo "address01"
         result01.type shouldBeEqualTo TokenType.ERC1155
+        result01.nftContent.imageUri shouldBeEqualTo "imageUri"
+        result01.nftContent.animationUri shouldBeEqualTo "animURi"
         val result02 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned02, "key")
         result02.collectionName shouldBeEqualTo "n4m8"
         result02.name shouldBeEqualTo String.Empty
         result02.address shouldBeEqualTo "address02"
         result02.type shouldBeEqualTo TokenType.ERC721
+        result02.nftContent.imageUri shouldBeEqualTo "imageUri"
+        result02.nftContent.animationUri shouldBeEqualTo "animURi"
         val result03 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned03, "key")
         result03.name shouldBeEqualTo "Nam3"
         result03.collectionName shouldBeEqualTo null
         result03.address shouldBeEqualTo "address03"
         result03.type shouldBeEqualTo TokenType.ERC20
+        result03.nftContent.imageUri shouldBeEqualTo ""
+        result03.nftContent.animationUri shouldBeEqualTo ""
 
     }
 

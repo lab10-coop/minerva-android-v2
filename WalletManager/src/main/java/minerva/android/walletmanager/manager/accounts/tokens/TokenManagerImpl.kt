@@ -419,7 +419,11 @@ class TokenManagerImpl(
     private fun isSuperFluidToken(tag: String, account: Account) =
         tag == TokenTag.SUPER_TOKEN.tag && account.network.superfluid != null && account.network.wsRpc != String.Empty
 
-    private fun handleTokensBalances(token: Token, tokens: List<ERCToken>, account: Account): Asset =
+    private fun handleTokensBalances(
+        token: Token,
+        tokens: List<ERCToken>,
+        account: Account
+    ): Asset =
         when (token) {
             is TokenWithBalance -> {
                 getAssetBalance(tokens, token, account)
@@ -438,8 +442,10 @@ class TokenManagerImpl(
         tokenWithBalance: TokenWithBalance,
         account: Account
     ): AssetBalance =
-        tokens.find { token ->  token.address.equals(tokenWithBalance.address, true)
-                    && token.tokenId.isEqualOrBothAreNullOrBlank(tokenWithBalance.tokenId) }
+        tokens.find { token ->
+            token.address.equals(tokenWithBalance.address, true)
+                    && token.tokenId.isEqualOrBothAreNullOrBlank(tokenWithBalance.tokenId)
+        }
             ?.let { token ->
                 AssetBalance(
                     account.chainId,
@@ -463,20 +469,37 @@ class TokenManagerImpl(
             tokens.forEach { ercToken ->
                 if (ercToken.type.isERC721()) {
                     tokenBalanceFlowables.add(
-                        erc721TokenRepository.getTokenBalance(ercToken.tokenId ?: String.Empty, privateKey, chainId, ercToken.address, address)
+                        erc721TokenRepository.getTokenBalance(
+                            ercToken.tokenId ?: String.Empty,
+                            privateKey,
+                            chainId,
+                            ercToken.address,
+                            address
+                        )
                             .map { token -> Pair(token, ercToken.tag) }
                             .subscribeOn(Schedulers.io())
                     )
                 } else if (ercToken.type.isERC1155()) {
                     tokenBalanceFlowables.add(
-                        erc1155TokenRepository.getTokenBalance(ercToken.tokenId ?: String.Empty, privateKey, chainId, ercToken.address, address)
+                        erc1155TokenRepository.getTokenBalance(
+                            ercToken.tokenId ?: String.Empty,
+                            privateKey,
+                            chainId,
+                            ercToken.address,
+                            address
+                        )
                             .map { token -> Pair(token, ercToken.tag) }
                             .subscribeOn(Schedulers.io())
                     )
-                }  else {
+                } else {
                     if (ercToken.decimals.isNotBlank()) {
                         tokenBalanceFlowables.add(
-                            erc20TokenRepository.getTokenBalance(privateKey, chainId, ercToken.address, address)
+                            erc20TokenRepository.getTokenBalance(
+                                privateKey,
+                                chainId,
+                                ercToken.address,
+                                address
+                            )
                                 .map { token -> Pair(token, ercToken.tag) }
                                 .subscribeOn(Schedulers.io())
                         )
@@ -496,9 +519,17 @@ class TokenManagerImpl(
             .filter { token -> token.chainId == account.chainId }
 
     private fun getAccountToken(ercToken: ERCToken, balance: BigDecimal): AccountToken =
-        AccountToken(ercToken, balance, rateStorage.getRate(generateTokenHash(ercToken.chainId, ercToken.address)))
+        AccountToken(
+            ercToken,
+            balance,
+            rateStorage.getRate(generateTokenHash(ercToken.chainId, ercToken.address))
+        )
 
-    private fun fillActiveTokensWithTags(taggedTokens: List<ERCToken>, account: Account, tokens: List<ERCToken>) {
+    private fun fillActiveTokensWithTags(
+        taggedTokens: List<ERCToken>,
+        account: Account,
+        tokens: List<ERCToken>
+    ) {
         taggedTokens
             .filter { taggedToken -> taggedToken.chainId == account.chainId }
             .forEach { taggedToken ->
@@ -518,7 +549,9 @@ class TokenManagerImpl(
             }
     }
 
-    override fun getTaggedTokensUpdate(): Flowable<List<ERCToken>> = tokenDao.getTaggedTokensFlowable()
+    override fun getTaggedTokensUpdate(): Flowable<List<ERCToken>> =
+        tokenDao.getTaggedTokensFlowable()
+
     override fun getTaggedTokensSingle(): Single<List<ERCToken>> = tokenDao.getTaggedTokens()
     override fun getSingleTokenRate(tokenHash: String): Double = rateStorage.getRate(tokenHash)
 
@@ -578,7 +611,8 @@ class TokenManagerImpl(
                                         marketId,
                                         chainId,
                                         prepareContractAddresses(chunkedTokens),
-                                        chunkedTokens.map { it.address.toLowerCase(Locale.ROOT) }.toMutableList()
+                                        chunkedTokens.map { it.address.toLowerCase(Locale.ROOT) }
+                                            .toMutableList()
                                     )
                                 )
                             }
@@ -609,7 +643,7 @@ class TokenManagerImpl(
                 .map { tokenRateResponse ->
                     mutableListOf<Pair<String, Double>>().apply {
                         tokenRateResponse.forEach { (contractAddress, rate) ->
-                            (contractAddress.toLowerCase(Locale.ROOT)).let{ contractAddressLowered ->
+                            (contractAddress.toLowerCase(Locale.ROOT)).let { contractAddressLowered ->
                                 add(
                                     Pair(
                                         generateTokenHash(chainId, contractAddressLowered),
@@ -617,7 +651,11 @@ class TokenManagerImpl(
                                             ?: Double.InvalidValue
                                     )
                                 )
-                                contractAddressesList.remove(contractAddressLowered.toLowerCase(Locale.ROOT))
+                                contractAddressesList.remove(
+                                    contractAddressLowered.toLowerCase(
+                                        Locale.ROOT
+                                    )
+                                )
                             }
                         }
                         contractAddressesList.forEach { contractAddress ->
@@ -670,8 +708,14 @@ class TokenManagerImpl(
             .map { response ->
                 mutableListOf<ERCToken>().apply {
                     response.result
-                        .map { tokenData -> TokensOwnedToERCToken.map(account.chainId, tokenData, account.address) }
-                        .filter { token-> token.type != TokenType.INVALID }
+                        .map { tokenData ->
+                            TokensOwnedToERCToken.map(
+                                account.chainId,
+                                tokenData,
+                                account.address
+                            )
+                        }
+                        .filter { token -> token.type != TokenType.INVALID }
                         .forEach { token -> add(token) }
                 }
             }
@@ -686,7 +730,12 @@ class TokenManagerImpl(
                         if (token.type.isNft()) {
                             mutableListOf<ERCToken>().also { collectionTokens ->
                                 tokensTx
-                                    .filter { (tokenTx, isTokenOwner) -> tokenTx.address.equals(token.address, true) }
+                                    .filter { (tokenTx, isTokenOwner) ->
+                                        tokenTx.address.equals(
+                                            token.address,
+                                            true
+                                        )
+                                    }
                                     .distinctBy { (tokenTx, isTokenOwner) -> tokenTx.tokenId }
                                     .forEach { (tokenTx, isTokenOwner) ->
                                         if (isTokenOwner) {
@@ -718,17 +767,26 @@ class TokenManagerImpl(
             .map { response ->
                 mutableListOf<Pair<ERCToken, String>>().apply {
                     response.tokens
-                        .filter { tokenData-> tokenData.name != null }
-                        .map { tokenData -> TokenDataToERCToken.map(account.chainId, tokenData, account.address) to tokenData.balance }
+                        .filter { tokenData -> tokenData.name != null }
+                        .map { tokenData ->
+                            TokenDataToERCToken.map(
+                                account.chainId,
+                                tokenData,
+                                account.address
+                            ) to tokenData.balance
+                        }
                         .filter { (token, balance) -> token.type != TokenType.INVALID }
                         .forEach { (token, balance) -> add(token to balance) }
                 }
             }
 
     private fun getTokensFromTx(account: Account): Single<List<ERCToken>> =
-        Single.zip(getERC20TokensFromTx(account), getERC721TokensFromTx(account), BiFunction { erc20Tokens, erc721Tokens ->
-            erc20Tokens + erc721Tokens
-        })
+        Single.zip(
+            getERC20TokensFromTx(account),
+            getERC721TokensFromTx(account),
+            BiFunction { erc20Tokens, erc721Tokens ->
+                erc20Tokens + erc721Tokens
+            })
 
 
     private fun getERC20TokensFromTx(account: Account): Single<List<ERCToken>> =
@@ -866,7 +924,10 @@ class TokenManagerImpl(
             UpdateTokensResult(shouldUpdateLogosURI, allLocalTokensMap)
         }
 
-    private fun mergeNewTokensWithLocal(localChainTokens: List<ERCToken>, newTokens: List<ERCToken>) =
+    private fun mergeNewTokensWithLocal(
+        localChainTokens: List<ERCToken>,
+        newTokens: List<ERCToken>
+    ) =
         mutableListOf<ERCToken>().apply {
             addAll(localChainTokens.filter { it.type.isERC20() })
             newTokens.forEach { newToken ->
@@ -969,7 +1030,8 @@ class TokenManagerImpl(
     private fun accountsFilter(account: Account) =
         refreshBalanceFilter(account) && account.network.testNet == !localStorage.areMainNetworksEnabled
 
-    private fun refreshBalanceFilter(account: Account) = !account.isHide && !account.isDeleted && !account.isPending
+    private fun refreshBalanceFilter(account: Account) =
+        !account.isHide && !account.isDeleted && !account.isPending
 
     override fun fetchNFTsDetails(): Single<Boolean> =
         walletManager.getWalletConfig().erc20Tokens.let { allLocalTokens ->
@@ -1024,7 +1086,7 @@ class TokenManagerImpl(
                         val privateKey =
                             accounts.find { account -> account.chainId == token.chainId && account.address == token.accountAddress }?.privateKey
                         if (!privateKey.isNullOrBlank()) {
-                            token.tokenId?.let{ tokenId ->
+                            token.tokenId?.let { tokenId ->
                                 when (token.type) {
                                     TokenType.ERC1155 -> {
                                         add(
@@ -1032,7 +1094,8 @@ class TokenManagerImpl(
                                                 privateKey,
                                                 token.chainId,
                                                 token.address,
-                                                BigInteger(tokenId)
+                                                BigInteger(tokenId),
+                                                token.nftContent.tokenUri
                                             )
                                         )
                                     }
@@ -1042,7 +1105,8 @@ class TokenManagerImpl(
                                                 privateKey,
                                                 token.chainId,
                                                 token.address,
-                                                BigInteger(tokenId)
+                                                BigInteger(tokenId),
+                                                token.nftContent.tokenUri
                                             )
                                         )
                                     }
@@ -1064,30 +1128,43 @@ class TokenManagerImpl(
         privateKey: String,
         chainId: Int,
         tokenAddress: String,
-        tokenId: BigInteger
-    ): Single<ERCToken> =
+        tokenId: BigInteger,
+        tokenUri: String
+    ): Single<ERCToken> = if (tokenUri.isEmpty())
         erc721TokenRepository.getERC721DetailsUri(privateKey, chainId, tokenAddress, tokenId)
             .flatMap { url ->
-                cryptoApi.getERC721TokenDetails(parseIPFSContentUrl(url)).map { details ->
-                    handleContentType(details)
-                    this
-                }
+                getERC721TokenDetails(url)
             }
+    else getERC721TokenDetails(tokenUri)
+
+    private fun ERCToken.getERC721TokenDetails(url: String) =
+        cryptoApi.getERC721TokenDetails(parseIPFSContentUrl(url)).map { details ->
+            handleContentType(details)
+            this
+        }
 
     private fun ERCToken.updateMissingERC1155TokensDetails(
         privateKey: String,
         chainId: Int,
         tokenAddress: String,
-        tokenId: BigInteger
-    ): Single<ERCToken> = erc1155TokenRepository.getERC1155DetailsUri(privateKey, chainId, tokenAddress, tokenId)
-        .flatMap { url ->
-            cryptoApi.getERC1155TokenDetails(parseIPFSContentUrl(url)).map { details ->
-                handleContentType(details)
-                this
-            }
+        tokenId: BigInteger,
+        tokenUri: String
+    ): Single<ERCToken> =
+        if (tokenUri.isEmpty())
+            erc1155TokenRepository.getERC1155DetailsUri(privateKey, chainId, tokenAddress, tokenId)
+                .flatMap { url ->
+                    getERC1155TokenDetails(url)
+                }
+        else
+            getERC1155TokenDetails(tokenUri)
+
+    private fun ERCToken.getERC1155TokenDetails(url: String) =
+        cryptoApi.getERC1155TokenDetails(parseIPFSContentUrl(url)).map { details ->
+            handleContentType(details)
+            this
         }
 
-    private fun ERCToken.handleContentType(details: NftDetails)  {
+    private fun ERCToken.handleContentType(details: NftDetails) {
         val type = when {
             !details.animationUrl.isNullOrBlank() -> ContentType.VIDEO
             else -> ContentType.IMAGE
@@ -1121,7 +1198,7 @@ class TokenManagerImpl(
 
     companion object {
         private const val LAST_UPDATE_INDEX = 0
-        private const val TOKENS_OWNED_REQUEST = "%stokensowned/%s?fetchTokenJson=ERC-1155"
+        private const val TOKENS_OWNED_REQUEST = "%stokensowned/%s?fetchTokenJson=all"
         private const val TOKEN_BALANCE_REQUEST = "%sapi?module=account&action=tokenlist&address=%s"
         private const val TOKEN_TX_REQUEST = "%sapi?module=account&action=tokentx&address=%s"
         private const val ETHEREUM_TOKENTX_REQUEST =

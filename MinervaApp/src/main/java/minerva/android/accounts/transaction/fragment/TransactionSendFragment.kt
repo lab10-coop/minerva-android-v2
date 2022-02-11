@@ -287,7 +287,7 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send), Op
                             id: Long
                         ) {
                             viewModel.run {
-                                updateTokenAddress(position - ONE_ELEMENT)
+                                updateTokenAddress(position)
                                 updateFiatRate()
                             }
                             setupTexts()
