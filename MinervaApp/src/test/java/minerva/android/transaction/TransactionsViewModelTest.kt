@@ -457,7 +457,7 @@ class TransactionViewModelTest : BaseViewModelTest() {
         NetworkManager.initialize(listOf(Network(chainId = 1, httpRpc = "some")))
         viewModel.run {
             getAccount(0, String.Empty)
-            updateTokenAddress(0)
+            updateTokenAddress(1)
             updateFiatRate()
             recalculateFiatAmount(BigDecimal("1.01")) shouldBeEqualTo BigDecimal("5.05")
         }
