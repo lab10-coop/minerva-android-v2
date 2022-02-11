@@ -172,6 +172,7 @@ class DappsRepositoryImplTest {
     fun `get dapp data from db test`() {
         whenever(cryptoApi.getLastCommitFromDappsDetails()).thenReturn(Single.just(commitData))
         whenever(dappDao.getAllDapps()).thenReturn(Single.just(dappsDetailsEntity))
+        whenever(dappDao.getDappsCount()).thenReturn(Single.just(dappsDetailsEntity.size))
         whenever(localStorage.loadDappDetailsUpdateTimestamp()).thenReturn(1612950162222)
 
         repository.getAllDappsDetails().test()

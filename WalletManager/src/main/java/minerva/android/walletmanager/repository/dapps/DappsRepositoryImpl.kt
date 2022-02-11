@@ -52,10 +52,12 @@ class DappsRepositoryImpl(
         }
 
     private fun getDappList(commits: List<CommitElement>): Single<List<DappEntity>> =
-        if (isNewCommit(commits)) {
-            fetchDappList()
-        } else {
-            dappDao.getAllDapps()
+        dappDao.getDappsCount().flatMap { dappsCount ->
+            if (isNewCommit(commits) || dappsCount == 0) {
+                fetchDappList()
+            } else {
+                dappDao.getAllDapps()
+            }
         }
 
     private fun isNewCommit(list: List<CommitElement>): Boolean =
@@ -70,16 +72,18 @@ class DappsRepositoryImpl(
             dappDao.getAllDapps()
         }
 
-    private fun updateDetails(list: List<DappEntity>, version: String): Single<List<DappEntity>> {
-        if (isNewVersionBigger(localStorage.loadDappDetailsVersion(), version)) {
-            dappDao.deleteAll()
-            dappDao.insertAll(list)
-            favoriteDappDao.deleteNotMatchingDapps(list.map { it.shortName })
-            localStorage.saveDappDetailsUpdateTimestamp(currentTimeProvider.currentTimeMills())
-            localStorage.saveDappDetailsVersion(version)
+    private fun updateDetails(list: List<DappEntity>, version: String): Single<List<DappEntity>> =
+        dappDao.getDappsCount().flatMap { dappsCount ->
+            if (isNewVersionBigger(localStorage.loadDappDetailsVersion(), version) || dappsCount == 0) {
+                dappDao.deleteAll()
+                dappDao.insertAll(list)
+                favoriteDappDao.deleteNotMatchingDapps(list.map { it.shortName })
+                localStorage.saveDappDetailsUpdateTimestamp(currentTimeProvider.currentTimeMills())
+                localStorage.saveDappDetailsVersion(version)
+            }
+            dappDao.getAllDapps()
         }
-        return dappDao.getAllDapps()
-    }
+
 
     private fun DappDetails.mapToDappEntity(): DappEntity =
         DappEntity(
