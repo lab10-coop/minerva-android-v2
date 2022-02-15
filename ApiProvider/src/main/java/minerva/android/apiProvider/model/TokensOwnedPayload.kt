@@ -27,7 +27,7 @@ data class TokensOwnedPayload(
         @SerializedName("symbol")
         val _symbol: String?,
         @SerializedName("tokenURI")
-        val tokenURI: String,
+        val tokenURI: String?,
         @SerializedName("types")
         val types: List<String>,
         @SerializedName("tokenJson")

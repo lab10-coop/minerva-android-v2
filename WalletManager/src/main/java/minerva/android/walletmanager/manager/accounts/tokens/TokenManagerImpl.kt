@@ -948,7 +948,7 @@ class TokenManagerImpl(
                     true
                 ) && localToken.tokenId == newToken.tokenId && localToken.tokenId != null
             }?.apply {
-                newToken.mergeNftDetails(this)
+                newToken.mergeNftDetailsAfterTokenDiscovery(this)
             }
         }
     }
