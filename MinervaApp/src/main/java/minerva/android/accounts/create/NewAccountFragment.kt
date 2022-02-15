@@ -12,7 +12,6 @@ import minerva.android.extension.visibleOrGone
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.main.base.BaseFragment
 import minerva.android.walletmanager.manager.networks.NetworkManager
-import minerva.android.walletmanager.model.defs.ChainId
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
@@ -25,12 +24,9 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
         NetworkSpinnerAdapter(
             requireContext(),
             R.layout.spinner_network,
-            NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled && isNotRSK(it.chainId)  }
+            NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled }
         )
     }
-
-    private fun isNotRSK(chainId: Int) = chainId != ChainId.RSK_MAIN && chainId != ChainId.RSK_TEST
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
