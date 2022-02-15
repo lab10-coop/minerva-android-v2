@@ -277,6 +277,7 @@
     <string name="not_defined_warning_ethereum_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.\n\nYou don\'t have an account on Ethereum yet. Please click \'Add account\' button above.</string>
     <string name="not_defined_warning_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.</string>
     <string name="dapp_disconnected">%s session disconnected</string>
+    <string name="dapp_unnamed">Unnamed</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
     <string name="confirm">Confirm</string>
