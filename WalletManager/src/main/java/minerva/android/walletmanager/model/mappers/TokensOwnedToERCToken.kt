@@ -25,10 +25,7 @@ object TokensOwnedToERCToken {
             collectionName = if (tokenType.isNft()) token.name else null,
             tokenId = if (tokenType.isNft()) token.id else null
         ).apply {
-            token.tokenJson?.let {
-                handleNftContent(it)
-            }
-            nftContent.tokenUri = token.tokenURI.takeIf { it?.startsWith(ENCODED_TOKEN_URI_PREFIX) != true } ?: String.Empty
+            applyPayload(token)
         }
     }
 
@@ -39,9 +36,12 @@ object TokensOwnedToERCToken {
         else -> TokenType.INVALID
     }
 
+    private fun ERCToken.applyPayload(token: TokensOwnedPayload.TokenOwned) {
+        token.tokenJson?.let { handleTokenJson(it) }
+        nftContent.tokenUri = handleTokenUri(token)
+    }
 
-
-    private fun ERCToken.handleNftContent(tokenJson: TokensOwnedPayload.TokenOwned.TokenJson)  {
+    private fun ERCToken.handleTokenJson(tokenJson: TokensOwnedPayload.TokenOwned.TokenJson) {
         val type = when {
             !tokenJson.animationUri.isNullOrBlank() -> ContentType.VIDEO
             tokenJson.image?.startsWith(ENCODED_SVG_PREFIX) ?: false -> {
@@ -58,10 +58,13 @@ object TokensOwnedToERCToken {
         nftContent = NftContent(
             parseIPFSContentUrl(tokenJson.image ?: String.Empty),
             type,
-            parseIPFSContentUrl(tokenJson.animationUri ?: String.Empty))
-        tokenJson.description?.let{description = it}
-        tokenJson.name?.let{name = it}
+            parseIPFSContentUrl(tokenJson.animationUri ?: String.Empty)
+        )
+        tokenJson.description?.let { description = it }
+        tokenJson.name?.let { name = it }
     }
+
+    private fun handleTokenUri(token: TokensOwnedPayload.TokenOwned) =  token.tokenURI?.takeIf { !it.startsWith(ENCODED_TOKEN_URI_PREFIX) } ?: String.Empty
 
     private const val ENCODED_SVG_PREFIX = "data:image/svg+xml;base64,"
     private const val ENCODED_TOKEN_URI_PREFIX = "data:application/json;base64,"

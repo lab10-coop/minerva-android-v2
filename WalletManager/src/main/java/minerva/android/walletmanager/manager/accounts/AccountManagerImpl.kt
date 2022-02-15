@@ -1,13 +1,11 @@
 package minerva.android.walletmanager.manager.accounts
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import io.reactivex.Completable
 import io.reactivex.Single
-import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.units.UnitConverter
 import minerva.android.blockchainprovider.repository.validation.ValidationRepository
 import minerva.android.blockchainprovider.utils.CryptoUtils
@@ -91,7 +89,7 @@ class AccountManagerImpl(
                             ercToken.address.equals(accountToken.token.address, true)
                                     && ercToken.tokenId == accountToken.token.tokenId
                         }?.let { ercToken ->
-                            accountToken.mergeNftDetails(ercToken)
+                            accountToken.mergeNftDetailsAfterWalletConfigUpdate(ercToken)
                         }
                 }
             }

@@ -45,16 +45,24 @@ data class ERCToken(
         collectionName = if (tokenType.isNft()) tokenTx.tokenName else null
     )
 
-    fun mergeNftDetails(ercToken: ERCToken){
+    fun mergeNftDetailsAfterTokenDiscovery(ercToken: ERCToken){
+        mergePropertiesWithLocalFirstStrategy(ercToken)
+        mergePropertiesWithRemoteFirstStrategy(ercToken)
+    }
+
+    private fun mergePropertiesWithLocalFirstStrategy(ercToken: ERCToken){
         logoURI = ercToken.logoURI
+        collectionName = ercToken.collectionName
+        symbol = ercToken.symbol
+        name = ercToken.name
+    }
+
+    private fun mergePropertiesWithRemoteFirstStrategy(ercToken: ERCToken){
         if(nftContent.imageUri.isEmpty()) nftContent.imageUri = ercToken.nftContent.imageUri
         if(nftContent.contentType == ContentType.INVALID) nftContent.contentType = ercToken.nftContent.contentType
         if(nftContent.animationUri.isEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
         if(nftContent.tokenUri.isEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
-        description = ercToken.description
-        collectionName = ercToken.collectionName
-        symbol = ercToken.symbol
-        name = ercToken.name
+        if(description.isEmpty()) description = ercToken.description
     }
 }
 
