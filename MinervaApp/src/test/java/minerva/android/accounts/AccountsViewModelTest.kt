@@ -261,7 +261,7 @@ class AccountsViewModelTest : BaseViewModelTest() {
             .thenReturn(Flowable.just(listOf(DappSession(address = "address"))))
         whenever(transactionRepository.getTokenBalance())
             .thenReturn(Flowable.just(AssetBalance(1, "test", AccountToken(ERCToken(1, "name", type = TokenType.ERC20)))))
-
+        whenever( tokenManager.fetchNFTsDetails()).thenReturn(Single.just(true))
         viewModel.discoverNewTokens()
         viewModel.discoverNewTokens()
         viewModel.discoverNewTokens()

@@ -58,11 +58,12 @@ abstract class BaseWalletConnectScannerFragment : BaseScannerFragment() {
     }
 
     protected fun handleWalletConnectDisconnectState(sessionName: String) {
-        if (sessionName.isNotEmpty()) {
-            showToast(getString(R.string.dapp_disconnected, sessionName))
-        } else {
-            showAlertDialog(getString(R.string.session_connection_error))
-        }
+        showToast(
+            getString(
+                R.string.dapp_disconnected,
+                if (sessionName.isNotEmpty()) sessionName else getString(R.string.dapp_unnamed)
+            )
+        )
     }
 
     protected fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {

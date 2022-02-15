@@ -221,11 +221,13 @@ abstract class BaseWalletConnectInteractionsActivity : AppCompatActivity() {
     }
 
     private fun handleWalletConnectDisconnectState(sessionName: String) {
-        if (sessionName.isNotEmpty()) {
-            showFlashbar(String.empty, getString(R.string.dapp_disconnected, sessionName))
-        } else {
-            showAlertDialog(getString(R.string.session_connection_error))
-        }
+        showFlashbar(
+            String.empty,
+            getString(
+                R.string.dapp_disconnected,
+                if (sessionName.isNotEmpty()) sessionName else getString(R.string.dapp_unnamed)
+            )
+        )
     }
 
     private fun showConnectionDialog(meta: WalletConnectPeerMeta, network: BaseNetworkData, dialogType: WalletConnectAlertType) {
