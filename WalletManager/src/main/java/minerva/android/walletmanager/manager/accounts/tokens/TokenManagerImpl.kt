@@ -29,6 +29,7 @@ import minerva.android.walletmanager.BuildConfig.*
 import minerva.android.walletmanager.database.MinervaDatabase
 import minerva.android.walletmanager.database.dao.TokenDao
 import minerva.android.walletmanager.exception.NetworkNotFoundThrowable
+import minerva.android.walletmanager.exception.NotERC1155Throwable
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.ContentType
@@ -62,6 +63,7 @@ import minerva.android.walletmanager.storage.RateStorage
 import minerva.android.walletmanager.utils.MarketUtils
 import minerva.android.walletmanager.utils.TokenUtils.generateTokenHash
 import minerva.android.walletmanager.utils.parseIPFSContentUrl
+import java.lang.RuntimeException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -929,7 +931,7 @@ class TokenManagerImpl(
         newTokens: List<ERCToken>
     ) =
         mutableListOf<ERCToken>().apply {
-            addAll(localChainTokens.filter { it.type.isERC20() })
+            addAll(localChainTokens)
             newTokens.forEach { newToken ->
                 mergeNewTokenWithLocalNfts(localChainTokens, newToken)
                 if (isNewToken(newToken)) {
@@ -1124,6 +1126,24 @@ class TokenManagerImpl(
     private fun ERCToken.shouldNftDetailsBeUpdated() =
         type.isNft() && (nftContent.imageUri.isBlank() || collectionName.isNullOrBlank() || name.isBlank() || description.isBlank())
 
+    override fun updateMissingERC721TokensDetails(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        tokenId: BigInteger,
+        tokenUri: String,
+        token: ERCToken
+    ): Single<ERCToken> = token.updateMissingERC721TokensDetails(privateKey, chainId, tokenAddress, tokenId, tokenUri)
+
+    override fun updateMissingERC1155TokensDetails(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        tokenId: BigInteger,
+        tokenUri: String,
+        token: ERCToken
+    ): Single<ERCToken> = token.updateMissingERC1155TokensDetails(privateKey, chainId, tokenAddress, tokenId, tokenUri)
+
     private fun ERCToken.updateMissingERC721TokensDetails(
         privateKey: String,
         chainId: Int,
@@ -1195,6 +1215,74 @@ class TokenManagerImpl(
             }
         }
     }
+
+    override fun getERC721TokenDetails(privateKey: String, chainId: Int, tokenAddress: String): Single<ERCToken> =
+        erc721TokenRepository.run {
+            Observable.zip(
+                getERC721TokenName(privateKey, chainId, tokenAddress),
+                getERC721TokenSymbol(privateKey, chainId, tokenAddress),
+                BiFunction<String, String, ERCToken> { name, symbol ->
+                    ERCToken(
+                        chainId = chainId,
+                        collectionName = name,
+                        symbol = symbol,
+                        address = tokenAddress,
+                        type = TokenType.ERC721
+                    )
+                }
+            ).firstOrError()
+        }
+
+    override fun getERC1155TokenDetails(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String
+    ): Single<ERCToken> =
+        erc1155TokenRepository.isERC1155(privateKey, chainId, tokenAddress)
+            .map {
+                if (it) {
+                    ERCToken(
+                        chainId = chainId,
+                        address = tokenAddress,
+                        type = TokenType.ERC1155
+                    )
+                } else {
+                    throw NotERC1155Throwable()
+                }
+            }
+
+
+    override fun isNftOwner(
+        type: TokenType,
+        tokenId: String,
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        ownerAddress: String
+    ): Single<Boolean> = when (type) {
+        TokenType.ERC721 -> erc721TokenRepository.isTokenOwner(
+            tokenId,
+            privateKey,
+            chainId,
+            tokenAddress,
+            ownerAddress
+        )
+        TokenType.ERC1155 -> erc1155TokenRepository.getTokenBalance(
+            tokenId,
+            privateKey,
+            chainId,
+            tokenAddress,
+            ownerAddress
+        )
+            .firstOrError()
+            .flatMap {
+                if (it is TokenWithBalance) {
+                    Single.just(it.balance > BigDecimal.ZERO)
+                } else Single.just(false)
+            }
+        else -> Single.just(false)
+    }
+
 
     companion object {
         private const val LAST_UPDATE_INDEX = 0

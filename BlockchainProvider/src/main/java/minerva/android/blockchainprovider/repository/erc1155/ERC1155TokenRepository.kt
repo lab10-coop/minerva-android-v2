@@ -24,4 +24,10 @@ interface ERC1155TokenRepository {
     ): Flowable<Token>
 
     fun transferERC1155Token(chainId: Int, payload: TransactionPayload): Completable
+
+    fun isERC1155(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String
+    ) : Single<Boolean>
 }

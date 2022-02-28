@@ -2,7 +2,9 @@ package minerva.android.blockchainprovider.repository.erc1155
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Scheduler
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import minerva.android.blockchainprovider.defs.Operation
 import minerva.android.blockchainprovider.model.Token
 import minerva.android.blockchainprovider.model.TokenWithBalance
@@ -12,6 +14,7 @@ import minerva.android.blockchainprovider.provider.ContractGasProvider
 import minerva.android.blockchainprovider.smartContracts.ERC1155
 import minerva.android.blockchainprovider.smartContracts.ERC1155Metadata_URI
 import minerva.android.blockchainprovider.utils.CryptoUtils
+import minerva.android.kotlinUtils.crypto.hexStringToByteArray
 import minerva.android.kotlinUtils.map.value
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
@@ -110,7 +113,12 @@ class ERC1155TokenRepositoryImpl(
             .flowable()
             .ignoreElements()
 
+    override fun isERC1155(privateKey: String, chainId: Int, tokenAddress: String): Single<Boolean> =
+        loadERC1155(privateKey, chainId, tokenAddress).supportsInterface(INTERFACE_ID).flowable().firstOrError()
+
+
     companion object {
         val NO_ADDITIONAL_DATA = byteArrayOf()
+        val INTERFACE_ID = hexStringToByteArray("0xd9b67a26")
     }
 }
