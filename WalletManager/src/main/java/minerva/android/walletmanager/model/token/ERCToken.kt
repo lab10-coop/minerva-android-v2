@@ -51,18 +51,18 @@ data class ERCToken(
     }
 
     private fun mergePropertiesWithLocalFirstStrategy(ercToken: ERCToken){
-        logoURI = ercToken.logoURI
-        collectionName = ercToken.collectionName
-        symbol = ercToken.symbol
-        name = ercToken.name
+        if(logoURI.isNullOrEmpty()) logoURI = ercToken.logoURI
+        if(collectionName.isNullOrEmpty()) collectionName = ercToken.collectionName
+        if(symbol.isEmpty()) symbol = ercToken.symbol
+        if(name.isEmpty()) name = ercToken.name
     }
 
     private fun mergePropertiesWithRemoteFirstStrategy(ercToken: ERCToken){
-        if(nftContent.imageUri.isEmpty()) nftContent.imageUri = ercToken.nftContent.imageUri
-        if(nftContent.contentType == ContentType.INVALID) nftContent.contentType = ercToken.nftContent.contentType
-        if(nftContent.animationUri.isEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
-        if(nftContent.tokenUri.isEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
-        if(description.isEmpty()) description = ercToken.description
+        if(ercToken.nftContent.imageUri.isNotEmpty()) nftContent.imageUri = ercToken.nftContent.imageUri
+        if(ercToken.nftContent.contentType != ContentType.INVALID) nftContent.contentType = ercToken.nftContent.contentType
+        if(ercToken.nftContent.animationUri.isNotEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
+        if(ercToken.nftContent.tokenUri.isNotEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
+        if(ercToken.description.isNotEmpty()) description = ercToken.description
     }
 }
 
