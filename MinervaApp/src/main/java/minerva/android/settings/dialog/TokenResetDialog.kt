@@ -39,6 +39,7 @@ class TokenResetDialog(context: Context, onClear: () -> Unit) :
 
     override fun show() {
         binding.error.invisible()
+        handleProgress(false)
         super.show()
     }
 

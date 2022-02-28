@@ -50,15 +50,6 @@
                     tools:ignore="LabelFor" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <ProgressBar
-                android:id="@+id/loader"
-                android:layout_width="@dimen/progressbar_size_small"
-                android:layout_height="@dimen/progressbar_size_small"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/margin_normal"
-                android:foregroundGravity="center"
-                android:visibility="gone" />
-
             <TextView
                 android:id="@+id/support_text"
                 android:layout_width="match_parent"
@@ -100,7 +91,42 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_xsmall"
                 android:layout_marginTop="@dimen/margin_xxsmall"
+                android:visibility="gone" />
+
+            <minerva.android.widget.HorizontalLabeledTextView
+                android:id="@+id/type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_xsmall"
+                android:layout_marginTop="@dimen/margin_xxsmall"
+                android:visibility="gone" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/token_id_layout"
+                style="@style/FormTextInputLayoutStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin_normal"
+                android:layout_marginTop="@dimen/margin_xsmall"
+                android:hint="@string/token_id_hint"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/token_id"
+                    style="@style/EditTextInputLayoutStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    tools:ignore="LabelFor" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ProgressBar
+                android:id="@+id/loader"
+                android:layout_width="@dimen/progressbar_size_small"
+                android:layout_height="@dimen/progressbar_size_small"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/margin_normal"
+                android:foregroundGravity="center"
                 android:visibility="gone" />
         </LinearLayout>
     </ScrollView>

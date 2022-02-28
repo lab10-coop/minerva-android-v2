@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Extension</string>
     <string name="field_cannot_be_empty">Field cannot be empty</string>
+    <string name="field_must_be_a_number">Field must be a number</string>
     <string name="not_enough_funds_error">Error: Insufficient funds</string>
     <string name="amount_must_not_contain_decimal_digits">Error: This NFT doesn\'t handle digits after the decimal</string>
     <string name="too_many_digits_after_decimal">Error: Too many digits after the decimal for this NFT</string>
