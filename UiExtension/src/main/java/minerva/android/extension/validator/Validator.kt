@@ -1,6 +1,7 @@
 package minerva.android.extension.validator
 
 import minerva.android.extension.R
+import minerva.android.extension.isNumber
 import java.math.BigDecimal
 
 object Validator {
@@ -30,4 +31,11 @@ object Validator {
     }
 
     fun isEnsName(name: String) = !name.startsWith(HEX_PREFIX) && name.contains(DOT)
+
+    fun validateTokenId(tokenId: String?): ValidationResult =
+        when {
+            tokenId.isNullOrBlank() -> ValidationResult.error(R.string.field_cannot_be_empty)
+            !tokenId.isNumber() -> ValidationResult.error(R.string.field_must_be_a_number)
+            else -> ValidationResult(true)
+        }
 }

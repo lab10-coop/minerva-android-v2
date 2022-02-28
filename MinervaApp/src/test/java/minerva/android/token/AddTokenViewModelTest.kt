@@ -20,7 +20,10 @@ class AddTokenViewModelTest : BaseViewModelTest() {
     private val safeAccountRepository: SafeAccountRepository = mock()
     private val tokenManager: TokenManager = mock()
 
-    private val viewModel = AddTokenViewModel(mock(), safeAccountRepository, tokenManager)
+    private val viewModel = AddTokenViewModel(mock(), safeAccountRepository, tokenManager, mock())
+
+    private val errorObserver: Observer<Event<Throwable>> = mock()
+    private val errorCaptor: KArgumentCaptor<Event<Throwable>> = argumentCaptor()
 
     private val tokenObserver: Observer<ERCToken> = mock()
     private val tokenCaptor: KArgumentCaptor<ERCToken> = argumentCaptor()
@@ -33,7 +36,7 @@ class AddTokenViewModelTest : BaseViewModelTest() {
     )
 
     @Test
-    fun `Check getting Token details`() {
+    fun `Check getting ERC20 Token details`() {
         NetworkManager.initialize(networks)
 
         whenever(safeAccountRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(
@@ -41,15 +44,119 @@ class AddTokenViewModelTest : BaseViewModelTest() {
                 ERCToken(1, name = "Some Token", type = TokenType.ERC20)
             )
         )
+        whenever(tokenManager.getERC721TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
+        whenever(tokenManager.getERC1155TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
         whenever(tokenManager.getTokenIconURL(any(), any())).thenReturn(Single.just("Cookie URL"))
         viewModel.run {
-            addressDetailsLiveData.observeForever(tokenObserver)
+            tokenLiveData.observeForever(tokenObserver)
             getTokenDetails("0xS0m34ddr35")
         }
         tokenCaptor.run {
             verify(tokenObserver).onChanged(capture())
             firstValue.name shouldBeEqualTo "Some Token"
             firstValue.logoURI shouldBeEqualTo "Cookie URL"
+            firstValue.type shouldBeEqualTo TokenType.ERC20
+        }
+    }
+
+    @Test
+    fun `Check getting ERC721 Token details`() {
+        NetworkManager.initialize(networks)
+
+        whenever(safeAccountRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
+        whenever(tokenManager.getERC721TokenDetails(any(), any(), any())).thenReturn(
+            Single.just(
+                ERCToken(1, name = "Some Token", type = TokenType.ERC721)
+            )
+        )
+        whenever(tokenManager.getERC1155TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
+        whenever(tokenManager.getTokenIconURL(any(), any())).thenReturn(Single.just("Cookie URL"))
+        viewModel.run {
+            tokenLiveData.observeForever(tokenObserver)
+            getTokenDetails("0xS0m34ddr35")
+        }
+        tokenCaptor.run {
+            verify(tokenObserver).onChanged(capture())
+            firstValue.name shouldBeEqualTo "Some Token"
+            firstValue.type shouldBeEqualTo TokenType.ERC721
+        }
+    }
+
+    @Test
+    fun `Check getting ERC1155 Token details`() {
+        NetworkManager.initialize(networks)
+
+        whenever(safeAccountRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
+        whenever(tokenManager.getERC721TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
+        whenever(tokenManager.getERC1155TokenDetails(any(), any(), any())).thenReturn(
+            Single.just(
+                ERCToken(1, name = "Some Token", type = TokenType.ERC1155)
+            )
+        )
+        whenever(tokenManager.getTokenIconURL(any(), any())).thenReturn(Single.just("Cookie URL"))
+        viewModel.run {
+            tokenLiveData.observeForever(tokenObserver)
+            getTokenDetails("0xS0m34ddr35")
+        }
+        tokenCaptor.run {
+            verify(tokenObserver).onChanged(capture())
+            firstValue.name shouldBeEqualTo "Some Token"
+            firstValue.type shouldBeEqualTo TokenType.ERC1155
+        }
+    }
+
+    @Test
+    fun `Check unsupported address`() {
+        NetworkManager.initialize(networks)
+
+        whenever(safeAccountRepository.getERC20TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
+        whenever(tokenManager.getERC721TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
+        whenever(tokenManager.getERC1155TokenDetails(any(), any(), any())).thenReturn(
+            Single.error(
+                Throwable()
+            )
+        )
+        whenever(tokenManager.getTokenIconURL(any(), any())).thenReturn(Single.just("Cookie URL"))
+
+        viewModel.run {
+            errorLiveData.observeForever(errorObserver)
+            getTokenDetails("0xS0m34ddr35")
+        }
+        errorCaptor.run {
+            verify(errorObserver).onChanged(capture())
+            times(1)
         }
     }
 

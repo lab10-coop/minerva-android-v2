@@ -397,6 +397,10 @@
     <string name="clear_token_cache_description">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
     <string name="clear_token_cache_action_text">Clear</string>
     <string name="clear">Clear</string>
+    <string name="token_id_hint">Token ID</string>
+    <string name="error_invalid_token_id">Error: Invalid token id</string>
+    <string name="token_type">Type</string>
+    <string name="you_dont_own_this_token">You do not own this token</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>

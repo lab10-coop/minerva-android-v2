@@ -89,7 +89,7 @@ private val appModules = module {
     viewModel { WalletConnectViewModel(get(), get(), get(), get(), get()) }
     viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get(), get()) }
-    viewModel { AddTokenViewModel(get(), get(), get()) }
+    viewModel { AddTokenViewModel(get(), get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
     viewModel { RampViewModel(get(), get()) }
     viewModel { DappsViewModel(get()) }

@@ -2,6 +2,7 @@ package minerva.android.walletmanager.manager.wallet
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Observer
@@ -170,9 +171,15 @@ class WalletConfigManagerImpl(
             .toObservable()
             .onErrorReturn { Int.InvalidValue }
 
+    private fun logVersionToFirebase(version: Int) {
+        FirebaseCrashlytics.getInstance()
+            .recordException(Throwable("PublicKey: ${masterSeed.publicKey} shouldBlockBackup($version)"))
+    }
+
     private fun compareVersions(version: Int, payload: WalletConfigPayload): Observable<WalletConfig> =
         when {
             shouldBlockBackup(version) -> {
+                logVersionToFirebase(version)
                 localStorage.isBackupAllowed = false
                 completeKeys(masterSeed, payload)
             }
@@ -232,7 +239,9 @@ class WalletConfigManagerImpl(
                 }
                 .map { localStorage.isSynced = true }
                 .ignoreElement()
-                .handleAutomaticBackupFailedError(localStorage)
+                .handleAutomaticBackupFailedError(localStorage) {
+                    logVersionToFirebase(walletConfig.version)
+                }
         } else Completable.error(AutomaticBackupFailedThrowable())
 
     override fun removeAllTokens(): Completable =

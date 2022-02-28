@@ -7,7 +7,9 @@ import minerva.android.walletmanager.model.minervaprimitives.account.Account
 import minerva.android.walletmanager.model.minervaprimitives.account.Asset
 import minerva.android.walletmanager.model.token.ActiveSuperToken
 import minerva.android.walletmanager.model.token.ERCToken
+import minerva.android.walletmanager.model.token.TokenType
 import minerva.android.walletmanager.model.token.UpdateTokensResult
+import java.math.BigInteger
 
 interface TokenManager {
     fun checkMissingTokensDetails(): Completable
@@ -63,4 +65,42 @@ interface TokenManager {
     fun hasTokenExplorer(chainId: Int) : Boolean
 
     fun fetchNFTsDetails() : Single<Boolean>
+
+    fun getERC721TokenDetails(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String
+    ): Single<ERCToken>
+
+    fun updateMissingERC721TokensDetails(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        tokenId: BigInteger,
+        tokenUri: String,
+        token: ERCToken
+    ): Single<ERCToken>
+
+    fun getERC1155TokenDetails(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String
+    ): Single<ERCToken>
+
+    fun updateMissingERC1155TokensDetails(
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        tokenId: BigInteger,
+        tokenUri: String,
+        token: ERCToken
+    ): Single<ERCToken>
+
+    fun isNftOwner(
+        type: TokenType, tokenId: String,
+        privateKey: String,
+        chainId: Int,
+        tokenAddress: String,
+        ownerAddress: String
+    ): Single<Boolean>
 }
