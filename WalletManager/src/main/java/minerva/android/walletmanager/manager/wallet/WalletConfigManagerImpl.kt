@@ -46,6 +46,7 @@ import minerva.android.walletmanager.utils.DefaultWalletConfig
 import minerva.android.walletmanager.utils.handleAutomaticBackupFailedError
 import timber.log.Timber
 import java.math.BigDecimal
+import java.util.concurrent.Executors
 
 class WalletConfigManagerImpl(
     private val keystoreRepository: KeystoreRepository,
@@ -55,6 +56,7 @@ class WalletConfigManagerImpl(
     private val minervaApi: MinervaApiRepository
 ) : WalletConfigManager {
 
+    private var walletConfigExecutor = Executors.newSingleThreadExecutor()
     override lateinit var masterSeed: MasterSeed
     private var disposable: Disposable? = null
 
@@ -113,6 +115,8 @@ class WalletConfigManagerImpl(
                         }, onError = { Timber.e(it) }
                     )
             }
+            .subscribeOn(Schedulers.from(walletConfigExecutor))
+
 
 
     override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
@@ -216,6 +220,7 @@ class WalletConfigManagerImpl(
             }
 
             .onErrorResumeNext { _: Observer<in WalletConfig> -> completeKeysWhenError(masterSeed, payload) }
+            .subscribeOn(Schedulers.from(walletConfigExecutor))
 
     private fun completeKeysWhenError(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> {
         localStorage.isSynced = false
@@ -230,7 +235,7 @@ class WalletConfigManagerImpl(
                     _walletConfigLiveData.value = Event(walletConfig)
                     configPayload
                 }
-                .observeOn(Schedulers.io())
+                .observeOn(Schedulers.from(walletConfigExecutor))
                 .flatMap { walletConfigPayload ->
                     minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), walletConfigPayload)
                 }
@@ -244,9 +249,9 @@ class WalletConfigManagerImpl(
                 }
         } else Completable.error(AutomaticBackupFailedThrowable())
 
-    override fun removeAllTokens(): Completable =
-        updateWalletConfig(getWalletConfig().copy(erc20Tokens = emptyMap()))
-
+    override fun removeAllTokens(): Completable = getWalletConfig().run {
+        updateWalletConfig(copy(version = updateVersion, erc20Tokens = emptyMap()))
+    }
 
     private fun WalletConfigPayload.saveWalletConfigToLocalStorageIfVersionChanged(oldVersion: Int) =
         if (version > oldVersion) {
