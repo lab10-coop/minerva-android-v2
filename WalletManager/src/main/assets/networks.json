@@ -189,7 +189,7 @@
     "chainId": 99
   },
   {
-    "name": "Binance Smart Chain",
+    "name": "BNB Chain",
     "token": "BNB",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://bsc-dataseed.binance.org/",
@@ -202,7 +202,7 @@
     "chainId": 56
   },
   {
-    "name": "BSC Testnet",
+    "name": "BNB Testnet",
     "token": "tBNB",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://data-seed-prebsc-1-s1.binance.org:8545/",
