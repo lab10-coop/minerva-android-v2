@@ -139,7 +139,7 @@ class WalletConfigManagerTest {
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.just(WalletConfigPayload()))
         NetworkManager.initialize(listOf(Network(chainId = 0, httpRpc = "some")))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
-        test.assertComplete()
+        test.assertSubscribed().awaitCount(1).assertComplete()
     }
 
     @Test
@@ -147,7 +147,7 @@ class WalletConfigManagerTest {
         val throwable = Throwable()
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(throwable))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
-        test.assertError(throwable)
+        test.assertSubscribed().awaitCount(1).assertError(throwable)
     }
 
     @Test
@@ -193,6 +193,8 @@ class WalletConfigManagerTest {
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.just(WalletConfigPayload()))
         walletManager.saveService(Service())
             .test()
+            .assertSubscribed()
+            .awaitCount(1)
             .assertComplete()
             .assertNoErrors()
     }
@@ -203,7 +205,7 @@ class WalletConfigManagerTest {
         val error = Throwable()
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(error))
         walletManager.initWalletConfig()
-        walletManager.saveService(Service()).test().assertComplete()
+        walletManager.saveService(Service()).test().assertSubscribed().awaitCount(1).assertComplete()
     }
 
     @Test
@@ -244,6 +246,8 @@ class WalletConfigManagerTest {
             updateSafeAccountOwners(0, listOf("owner"))
                 .test()
                 .assertNoErrors()
+                .assertSubscribed()
+                .awaitCount(1)
                 .assertComplete()
                 .assertValue {
                     it[0] == "owner"
@@ -260,6 +264,8 @@ class WalletConfigManagerTest {
             initWalletConfig()
             updateSafeAccountOwners(0, listOf("owner"))
                 .test()
+                .assertSubscribed()
+                .awaitCount(1)
                 .assertComplete()
         }
     }
@@ -316,7 +322,7 @@ class WalletConfigManagerTest {
         NetworkManager.initialize(listOf(Network(chainId = 0, httpRpc = "some")))
         whenever(minervaApi.saveWalletConfig(any(), any())).thenReturn(Single.error(throwable))
         val test = walletManager.createWalletConfig(MasterSeed("1234", "5678")).test()
-        test.assertError(throwable)
+        test.assertSubscribed().awaitCount(1).assertError(throwable)
     }
 
     @Test
