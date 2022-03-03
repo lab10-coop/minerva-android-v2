@@ -54,7 +54,7 @@ data class TokensOwnedPayload(
             val name: String?,
             @SerializedName("symbol")
             val symbol: String?,
-            @SerializedName("image")
+            @SerializedName("image", alternate =  ["image_url"])
             var image: String?,
             @SerializedName("description")
             val description: String?,

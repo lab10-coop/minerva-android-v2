@@ -30,13 +30,18 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
         orientation = VERTICAL
     }
 
-    fun startStreamingAnimation(start: BigDecimal, end: BigDecimal, speed: BigInteger) {
+    fun startStreamingAnimation(start: BigDecimal, speed: BigInteger) {
         cryptoAmount.setTextColor(ContextCompat.getColor(context, R.color.bodyColor))
-        var netFlow = speed
+        var durationSeconds = 60
+        var end: BigDecimal = start.add(
+            speed
+                .toBigDecimal()
+                .divide(BigDecimal("10E17"))
+                .times(BigDecimal(durationSeconds))
+        );
         with(ValueAnimator.ofObject(BigDecimalEvaluator(), start, end)) {
             animator = this
-            if (speed.signum() == NEGATIVE) netFlow = netFlow.abs()
-            duration = netFlow.toLong()
+            duration = durationSeconds * 1000.toLong()
             addUpdateListener { animation ->
                 cryptoAmount.text =
                     BalanceUtils.getSuperTokenFormatBalance(animation.animatedValue as BigDecimal)

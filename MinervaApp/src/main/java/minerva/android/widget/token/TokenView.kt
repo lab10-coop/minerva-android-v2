@@ -34,11 +34,11 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
     ) {
         prepareView(accountToken, account)
         prepareListeners(callback, account, accountToken)
-        getTokensValues(account, accountToken).let { (currentBalance, fiatBalance, nextBalance) ->
+        getTokensValues(account, accountToken).let { (currentBalance, fiatBalance) ->
             with(binding.amountView) {
                 setCryptoBalance(getCryptoBalance(currentBalance))
                 if (accountToken != null) {
-                    updateTokenBalance(accountToken, currentBalance, nextBalance)
+                    updateTokenBalance(accountToken, currentBalance)
                 }
 
                 if (account.isError) {
@@ -58,13 +58,12 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
 
     private fun CryptoAmountView.updateTokenBalance(
         accountToken: AccountToken,
-        currentBalance: BigDecimal,
-        nextBalance: BigDecimal
+        currentBalance: BigDecimal
     ) {
         when {
             isInitStream(accountToken) -> initAnimation(accountToken, currentBalance)
             isStreamableToken(accountToken) ->
-                startStreamingAnimation(currentBalance, nextBalance, accountToken.token.consNetFlow)
+                startStreamingAnimation(currentBalance, accountToken.token.consNetFlow)
         }
     }
 
@@ -72,36 +71,8 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
         accountToken: AccountToken,
         currentBalance: BigDecimal
     ) {
-        /*Distinguish between Fraction and other tokens is needed because of the extended number of digits for that token to show the animation*/
-        if (accountToken.token.address == FRACTION_ADDRESS) {
-            startStreamingAnimation(
-                currentBalance,
-                getInitStreamNextBalance(
-                    accountToken.token.consNetFlow,
-                    currentBalance,
-                    NEXT_FRACTION_CRYPTO_BALANCE
-                ),
-                INIT_NET_FLOW
-            )
-        } else {
-            startStreamingAnimation(
-                currentBalance,
-                getInitStreamNextBalance(
-                    accountToken.token.consNetFlow, currentBalance,
-                    NEXT_CRYPTO_BALANCE
-                ),
-                INIT_NET_FLOW
-            )
-        }
+        startStreamingAnimation(currentBalance, accountToken.token.consNetFlow)
     }
-
-    private fun getInitStreamNextBalance(
-        netFlow: BigInteger,
-        currentBalance: BigDecimal,
-        nextCryptoBalance: BigDecimal
-    ): BigDecimal =
-        if (netFlow.signum() == NEGATIVE) currentBalance.minus(nextCryptoBalance)
-        else currentBalance.plus(nextCryptoBalance)
 
     private fun isStreamableToken(accountToken: AccountToken): Boolean =
         accountToken.token.isStreamActive && accountToken.token.consNetFlow != BigInteger.ZERO
@@ -112,13 +83,13 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
     private fun getTokensValues(
         account: Account,
         accountToken: AccountToken?
-    ): Triple<BigDecimal, BigDecimal, BigDecimal> =
+    ): Pair<BigDecimal, BigDecimal> =
         if (accountToken != null) {
             with(accountToken) {
-                Triple(currentBalance, fiatBalance, nextBalance)
+                Pair(currentBalance, fiatBalance)
             }
         } else {
-            Triple(account.cryptoBalance, prepareFiatBalance(account), BigDecimal.ZERO)
+            Pair(account.cryptoBalance, prepareFiatBalance(account))
         }
 
     private fun prepareFiatBalance(account: Account) =
@@ -170,12 +141,5 @@ class TokenView(context: Context, attributeSet: AttributeSet? = null) :
     interface TokenViewCallback {
         fun onSendTokenClicked(account: Account, tokenAddress: String, isTokenError: Boolean)
         fun onSendCoinClicked(account: Account)
-    }
-
-    companion object {
-        private val NEXT_CRYPTO_BALANCE = BigDecimal(0.0000001)
-        private val NEXT_FRACTION_CRYPTO_BALANCE = BigDecimal(0.00000000000001)
-        private val INIT_NET_FLOW: BigInteger = BigInteger.valueOf(11574074074)
-        private const val FRACTION_ADDRESS: String = "0x2bf2ba13735160624a0feae98f6ac8f70885ea61"
     }
 }
