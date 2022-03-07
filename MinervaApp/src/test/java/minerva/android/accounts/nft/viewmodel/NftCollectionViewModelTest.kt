@@ -132,6 +132,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
                     firstValue[0].nftContent.imageUri == token1.nftContent.imageUri &&
                     firstValue[0].nftContent.contentType == token1.nftContent.contentType &&
                     firstValue[0].nftContent.animationUri == token1.nftContent.animationUri &&
+                    firstValue[0].nftContent.background == token1.nftContent.background &&
                     firstValue[0].description == token1.description &&
                     firstValue[0].tokenAddress == token1.address &&
                     firstValue[1].name == token3.name &&
@@ -139,6 +140,7 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
                     firstValue[1].nftContent.imageUri == token3.nftContent.imageUri &&
                     firstValue[1].nftContent.contentType == token3.nftContent.contentType &&
                     firstValue[1].nftContent.animationUri == token3.nftContent.animationUri &&
+                    firstValue[1].nftContent.background == token3.nftContent.background &&
                     firstValue[1].description == token3.description &&
                     firstValue[1].tokenAddress == token3.address
         }
