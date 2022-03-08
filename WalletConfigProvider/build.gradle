@@ -31,6 +31,10 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':KotlinUtils')
+    implementation platform('com.google.firebase:firebase-bom:25.12.0')
+    implementation('com.google.firebase:firebase-crashlytics') {
+        transitive = true
+    }
     implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
     implementation coreDependencies.values()
     implementation koinDependencies.values()

@@ -2,6 +2,8 @@ package minerva.android.configProvider
 
 import minerva.android.configProvider.localProvider.LocalWalletConfigProvider
 import minerva.android.configProvider.localProvider.LocalWalletConfigProviderImpl
+import minerva.android.configProvider.logger.Logger
+import minerva.android.configProvider.logger.LoggerImpl
 import minerva.android.configProvider.repository.MinervaApiRepository
 import minerva.android.configProvider.repository.MinervaApiRepositoryImpl
 import minerva.android.configProvider.retrofit.RetrofitProvider
@@ -13,7 +15,8 @@ fun createWalletConfigProviderModule(isDebug: Boolean, baseUrl: String, token: S
     single { RetrofitProvider.provideMinervaApi(get()) }
     single { RetrofitProvider.providePrivateOkHttpClient(isDebug, get()) }
     single { RetrofitProvider.provideUserHeaderInterceptor(token) }
-    single<MinervaApiRepository> { MinervaApiRepositoryImpl(get()) }
+    single<Logger> { LoggerImpl() }
+    single<MinervaApiRepository> { MinervaApiRepositoryImpl(get(), get()) }
     factory<LocalWalletConfigProvider> { LocalWalletConfigProviderImpl(get(named(localSharedPrefs))) }
 }
 
