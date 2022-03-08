@@ -58,7 +58,8 @@ object TokensOwnedToERCToken {
         nftContent = NftContent(
             parseIPFSContentUrl(tokenJson.image ?: String.Empty),
             type,
-            parseIPFSContentUrl(tokenJson.animationUri ?: String.Empty)
+            parseIPFSContentUrl(tokenJson.animationUri ?: String.Empty),
+            background = tokenJson.backgroundColor ?: String.Empty
         )
         tokenJson.description?.let { description = it }
         tokenJson.name?.let { name = it }

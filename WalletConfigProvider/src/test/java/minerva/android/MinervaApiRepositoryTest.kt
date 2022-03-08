@@ -1,6 +1,7 @@
 package minerva.android
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.nhaarman.mockitokotlin2.*
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Completable
@@ -10,6 +11,7 @@ import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
+import minerva.android.configProvider.logger.Logger
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
@@ -30,7 +32,8 @@ import java.net.HttpURLConnection
 class MinervaApiRepositoryTest {
 
     private val api = mockk<MinervaApi>()
-    private val repository = MinervaApiRepositoryImpl(api)
+    private val logger = mockk<Logger>()
+    private val repository = MinervaApiRepositoryImpl(api, logger)
 
     @get:Rule
     val rule
@@ -153,7 +156,7 @@ class MinervaApiRepositoryTest {
     @Test
     fun `save wallet config success`() {
         every { api.saveWalletConfig(any(), any(), any()) } returns Completable.complete()
-        repository.saveWalletConfig("key", WalletConfigPayload())
+        repository.saveWalletConfig("key", WalletConfigPayload(_version = 0))
             .test()
             .assertComplete()
             .assertNoErrors()
@@ -163,7 +166,8 @@ class MinervaApiRepositoryTest {
     fun `save wallet config error`() {
         val error = Throwable()
         every { api.saveWalletConfig(any(), any(), any()) } returns Completable.error(error)
-        repository.saveWalletConfig("key", WalletConfigPayload())
+        every { logger.logVersion(any(), any()) } returns Unit
+        repository.saveWalletConfig("key", WalletConfigPayload(_version = 0))
             .test()
             .assertError(error)
     }
@@ -177,7 +181,8 @@ class MinervaApiRepositoryTest {
             )
         )
         every { api.saveWalletConfig(any(), any(), any()) } returns Completable.error(error)
-        repository.saveWalletConfig("key", WalletConfigPayload())
+        every { logger.logVersion(any(), any()) } returns Unit
+        repository.saveWalletConfig("key", WalletConfigPayload(_version = 0))
             .test()
             .assertError {
                 it is HttpBadRequestException

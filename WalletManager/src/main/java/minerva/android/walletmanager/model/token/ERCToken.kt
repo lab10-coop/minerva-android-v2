@@ -61,6 +61,7 @@ data class ERCToken(
         if(ercToken.nftContent.imageUri.isNotEmpty()) nftContent.imageUri = ercToken.nftContent.imageUri
         if(ercToken.nftContent.contentType != ContentType.INVALID) nftContent.contentType = ercToken.nftContent.contentType
         if(ercToken.nftContent.animationUri.isNotEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
+        if(ercToken.nftContent.background.isNotEmpty()) nftContent.background = ercToken.nftContent.background
         if(ercToken.nftContent.tokenUri.isNotEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
         if(ercToken.description.isNotEmpty()) description = ercToken.description
     }
