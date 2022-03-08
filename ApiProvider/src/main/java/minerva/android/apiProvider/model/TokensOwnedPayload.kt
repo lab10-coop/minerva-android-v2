@@ -59,11 +59,13 @@ data class TokensOwnedPayload(
             @SerializedName("description")
             val description: String?,
             @SerializedName("animation_url")
-            val animationUri: String?
+            val animationUri: String?,
+            @SerializedName("background_color")
+            val backgroundColor: String?
         ) {
             companion object {
                 val Empty = TokenJson(
-                    null, null, null, null, null, null
+                    null, null, null, null, null, null, null
                 )
             }
         }

@@ -58,6 +58,7 @@ data class AccountToken(
         if(token.nftContent.imageUri.isEmpty()) token.nftContent.imageUri = ercToken.nftContent.imageUri
         if(token.nftContent.contentType == ContentType.INVALID) token.nftContent.contentType = ercToken.nftContent.contentType
         if(token.nftContent.animationUri.isEmpty()) token.nftContent.animationUri = ercToken.nftContent.animationUri
+        if(token.nftContent.background.isEmpty()) token.nftContent.background = ercToken.nftContent.background
         if(token.nftContent.tokenUri.isEmpty()) token.nftContent.tokenUri = ercToken.nftContent.tokenUri
         if(token.description.isEmpty()) token.description = ercToken.description
     }
