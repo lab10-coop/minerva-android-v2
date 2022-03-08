@@ -13,6 +13,7 @@
         android:textColor="@color/bodyColor"
         android:textSize="@dimen/text_normal"
         android:typeface="monospace"
+        android:fontFamily="@font/roboto_regular"
         tools:text="51.351" />
 
     <TextView
@@ -22,5 +23,6 @@
         android:gravity="end"
         android:textColor="@color/titleColor"
         android:textSize="@dimen/text_xsmall"
+        android:fontFamily="@font/roboto_regular"
         tools:text="€ 3.14159" />
 </merge>
