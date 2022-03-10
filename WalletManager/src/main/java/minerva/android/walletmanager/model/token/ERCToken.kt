@@ -25,7 +25,6 @@ data class ERCToken(
     var isError: Boolean = false,
     var isStreamActive: Boolean = false,
     @Embedded var nftContent: NftContent = NftContent(),
-    var description: String = String.Empty,
     var consNetFlow: BigInteger = BigInteger.ZERO,
     var collectionName: String? = null
 ) : Token {
@@ -63,7 +62,7 @@ data class ERCToken(
         if(ercToken.nftContent.animationUri.isNotEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
         if(ercToken.nftContent.background.isNotEmpty()) nftContent.background = ercToken.nftContent.background
         if(ercToken.nftContent.tokenUri.isNotEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
-        if(ercToken.description.isNotEmpty()) description = ercToken.description
+        if(ercToken.nftContent.description.isNotEmpty()) nftContent.description = ercToken.nftContent.description
     }
 }
 

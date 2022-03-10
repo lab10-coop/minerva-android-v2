@@ -60,7 +60,7 @@ data class AccountToken(
         if(token.nftContent.animationUri.isEmpty()) token.nftContent.animationUri = ercToken.nftContent.animationUri
         if(token.nftContent.background.isEmpty()) token.nftContent.background = ercToken.nftContent.background
         if(token.nftContent.tokenUri.isEmpty()) token.nftContent.tokenUri = ercToken.nftContent.tokenUri
-        if(token.description.isEmpty()) token.description = ercToken.description
+        if(token.nftContent.description.isEmpty()) token.nftContent.description = ercToken.nftContent.description
     }
 
     companion object {

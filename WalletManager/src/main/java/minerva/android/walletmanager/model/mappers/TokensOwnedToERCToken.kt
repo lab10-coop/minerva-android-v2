@@ -59,9 +59,9 @@ object TokensOwnedToERCToken {
             parseIPFSContentUrl(tokenJson.image ?: String.Empty),
             type,
             parseIPFSContentUrl(tokenJson.animationUri ?: String.Empty),
-            background = tokenJson.backgroundColor ?: String.Empty
+            background = tokenJson.backgroundColor ?: String.Empty,
+            description = tokenJson.description ?: String.Empty
         )
-        tokenJson.description?.let { description = it }
         tokenJson.name?.let { name = it }
     }
 

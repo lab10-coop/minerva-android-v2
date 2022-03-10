@@ -140,7 +140,12 @@ class TokenManagerImpl(
                 tokenDetailsMap
             }
             .flatMapCompletable { tokenDetailsMap -> updateTokensIcons(tokenDetailsMap) }
+            .andThen(checkMissingNFTDetails())
             .doOnComplete { localStorage.saveTokenIconsUpdateTimestamp(currentTimeProvider.currentTimeMills()) }
+
+    private fun checkMissingNFTDetails(): Completable =
+        getNftCollectionDetails()
+            .flatMapCompletable { tokenDetailsMap -> updateNFTsIcons(tokenDetailsMap) }
 
     private fun filterTaggedTokens(tokenDetailsMap: Map<String, TokenDetails>): List<TokenDetails> =
         tokenDetailsMap.values.toList().filter { tokenDetails ->
@@ -167,6 +172,14 @@ class TokenManagerImpl(
                 tokenList.forEach { token ->
                     token.logoURI = tokens[generateTokenHash(id, token.address)]?.logoURI
                 }
+            }
+            walletManager.updateWalletConfig(copy(version = updateVersion))
+        }
+
+    private fun updateNFTsIcons(tokens: Map<String, NftCollectionDetailsResult>): Completable =
+        walletManager.getWalletConfig().run {
+            erc20Tokens.forEach { (id, tokenList) ->
+                mergeNFTDetails(tokenList, tokens)
             }
             walletManager.updateWalletConfig(copy(version = updateVersion))
         }
@@ -1009,21 +1022,25 @@ class TokenManagerImpl(
         getNftCollectionDetails().map { nftDetailsMap ->
             var shouldUpdate = shouldBeUpdated
             tokensPerChainIdMap.values.forEach { tokens ->
-                tokens.forEach { token ->
-                    token.apply {
-                        nftDetailsMap[generateTokenHash(chainId, address)]?.let { nftDetails ->
-                            logoURI = nftDetails.logoURI
-                            shouldUpdate = true
-                            if (nftDetails.override) {
-                                collectionName = nftDetails.name
-                                symbol = nftDetails.symbol
-                            }
-                        }
-                    }
-                }
+                mergeNFTDetails(tokens, nftDetailsMap) { shouldUpdate = true }
             }
             UpdateTokensResult(shouldUpdate, tokensPerChainIdMap)
         }
+
+    private fun mergeNFTDetails(tokens : List<ERCToken>, nftDetailsMap: Map<String, NftCollectionDetailsResult>, onEachMerge: () -> Unit = {}) {
+        tokens.forEach { token ->
+            token.apply {
+                nftDetailsMap[generateTokenHash(chainId, address)]?.let { nftDetails ->
+                    logoURI = nftDetails.logoURI
+                    if (nftDetails.override) {
+                        collectionName = nftDetails.name
+                        symbol = nftDetails.symbol
+                    }
+                    onEachMerge()
+                }
+            }
+        }
+    }
 
     private fun getActiveAccounts(): List<Account> =
         walletManager.getWalletConfig()
@@ -1065,7 +1082,6 @@ class TokenManagerImpl(
                                 true
                             ) && token.tokenId == it.tokenId
                         }?.forEach {
-                            it.description = token.description
                             it.nftContent = token.nftContent
                             it.name = token.name
                         }
@@ -1124,7 +1140,7 @@ class TokenManagerImpl(
         }
 
     private fun ERCToken.shouldNftDetailsBeUpdated() =
-        type.isNft() && (nftContent.imageUri.isBlank() || collectionName.isNullOrBlank() || name.isBlank() || description.isBlank())
+        type.isNft() && (nftContent.imageUri.isBlank() || collectionName.isNullOrBlank() || name.isBlank() || nftContent.description.isBlank())
 
     override fun updateMissingERC721TokensDetails(
         privateKey: String,
@@ -1192,9 +1208,10 @@ class TokenManagerImpl(
         nftContent = NftContent(
             parseIPFSContentUrl(details.imageUri),
             type,
-            parseIPFSContentUrl(details.animationUrl ?: String.Empty)
+            parseIPFSContentUrl(details.animationUrl ?: String.Empty),
+            background = details.background ?: String.Empty,
+            description = details.description
         )
-        description = details.description
         name = details.name
     }
 
