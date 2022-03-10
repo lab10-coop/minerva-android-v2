@@ -1,7 +1,9 @@
 package minerva.android.walletmanager.model.mappers
 
 import minerva.android.configProvider.model.walletConfig.ERC20TokenPayload
+import minerva.android.configProvider.model.walletConfig.NftContentPayload
 import minerva.android.kotlinUtils.Mapper
+import minerva.android.walletmanager.model.NftContent
 import minerva.android.walletmanager.model.token.ERCToken
 
 object ERCTokenToERC20TokenPayloadMapper : Mapper<ERCToken, ERC20TokenPayload> {
@@ -18,7 +20,20 @@ object ERCTokenToERC20TokenPayloadMapper : Mapper<ERCToken, ERC20TokenPayload> {
                 tag = tag,
                 type = type.name,
                 tokenId = tokenId,
-                collectionName = collectionName
+                collectionName = collectionName,
+                nftContentPayload = if(type.isNft()) parseNFTContent(nftContent) else null
+            )
+        }
+
+    private fun parseNFTContent(content: NftContent): NftContentPayload =
+        content.run {
+            NftContentPayload(
+                imageUri = imageUri,
+                contentType = contentType.name,
+                animationUri = animationUri,
+                tokenUri = tokenUri,
+                background = background,
+                description = description
             )
         }
 }

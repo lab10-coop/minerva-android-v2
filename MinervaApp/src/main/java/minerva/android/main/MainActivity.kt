@@ -60,6 +60,7 @@ class MainActivity : BaseWalletConnectInteractionsActivity(), FragmentInteractor
             with(viewModel) {
                 restorePendingTransactions()
                 checkMissingTokensDetails()
+                discoverNewTokens()
             }
         }
     }

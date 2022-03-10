@@ -511,6 +511,7 @@ class TokenManagerTest : RxTest() {
     fun `Check mapping last commit data to last commit timestamp`() {
         NetworkManager.initialize(MockDataProvider.networks)
         whenever(cryptoApi.getLastCommitFromTokenList(any())).thenReturn(Single.just(commitData))
+        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(Single.just(emptyList()))
         whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data))
         whenever(localStorage.loadTokenIconsUpdateTimestamp()).thenReturn(333L, 1611950162000, 1611950162333)
         whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
@@ -819,7 +820,8 @@ class TokenManagerTest : RxTest() {
                     "nftToken",
                     "contentUri",
                     "animationUrl",
-                    "description"
+                    "description",
+                    "background"
                 )
             )
         )
@@ -829,7 +831,7 @@ class TokenManagerTest : RxTest() {
             .await()
             .assertValue { result ->
                 val updatedToken = result.tokensPerChainIdMap[ATS_TAU]?.first()
-                result.shouldSafeNewTokens && updatedToken?.nftContent?.imageUri == "contentUri" && updatedToken.description == "description"
+                result.shouldSafeNewTokens && updatedToken?.nftContent?.imageUri == "contentUri" && updatedToken.nftContent.description == "description"
             }
     }
 

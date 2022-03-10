@@ -56,7 +56,7 @@ class NftViewHolder(val binding: ItemNftBinding, private val listener: Listener)
                 btSend.startAnimation(nextAnimation)
         }
         setOnClickListener { expand(nftItem) }
-        bind(nftItem.description, nftItem.isDescriptionExpanded)
+        bind(nftItem.nftContent.description, nftItem.isDescriptionExpanded)
     }
 
     interface Listener {

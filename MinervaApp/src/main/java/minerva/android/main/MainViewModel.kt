@@ -17,6 +17,7 @@ import minerva.android.services.login.uitls.LoginUtils.getService
 import minerva.android.services.login.uitls.LoginUtils.getValuesWalletAction
 import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
 import minerva.android.walletmanager.exception.NoBindedCredentialThrowable
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.CredentialQrCode
@@ -39,6 +40,7 @@ class MainViewModel(
     private val serviceManager: ServiceManager,
     private val walletActionsRepository: WalletActionsRepository,
     private val orderManager: OrderManager,
+    private val tokenManager: TokenManager,
     private val transactionRepository: TransactionRepository,
     private val appUIState: AppUIState
 ) : BaseViewModel() {
@@ -169,6 +171,33 @@ class MainViewModel(
                 .subscribeBy(
                     onComplete = { _updateTokensRateLiveData.value = Event(Unit) },
                     onError = { Timber.e(it) }
+                )
+        }
+    }
+
+    fun discoverNewTokens() =
+        launchDisposable {
+            transactionRepository.discoverNewTokens()
+                .filter { shouldRefreshTokensBalances -> shouldRefreshTokensBalances }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onSuccess = {
+                        fetchNFTData()
+                    },
+                    onError = { error -> Timber.e("Error while token auto-discovery: $error") }
+                )
+        }
+
+    private fun fetchNFTData() {
+        launchDisposable {
+            tokenManager.fetchNFTsDetails()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = {
+                        Timber.e(it)
+                    }
                 )
         }
     }

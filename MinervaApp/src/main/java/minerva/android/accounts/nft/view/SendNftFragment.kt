@@ -210,7 +210,7 @@ class SendNftFragment : Fragment(R.layout.fragment_send_nft) {
     private fun setupDescription(nftItem: NftItem) = binding.nftDetails.description.apply {
         listener = RecyclableViewMoreTextView.Listener.Inactive
         setOnClickListener { if (!isExpanded) toggle() }
-        bind(nftItem.description, false)
+        bind(nftItem.nftContent.description, false)
     }
 
 

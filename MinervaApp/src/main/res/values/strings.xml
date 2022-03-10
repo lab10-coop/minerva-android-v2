@@ -454,6 +454,13 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.7.1</item>
+        <item>* Support of Ethereum Name Service NFTs</item>
+        <item>* Support of Unstoppable Domains NFTs</item>
+        <item>* More NFT collections officially supported</item>
+        <item>* Rename Binance Smart Chain to BNB Chain</item>
+        <item>* Improved Super Token stream visualisation</item>
+        <item>* Various UI updates and bug fixes</item>
         <item>1.7.0</item>
         <item>* NFT support for all main networks (ERC-721 &amp; ERC-1155)</item>
         <item>* Support for all NFT media types (SVG, mp4, mp3, …)</item>
