@@ -193,7 +193,9 @@ abstract class BaseWalletConnectScannerViewModel(
         NetworkManager.networks.find { network -> network.chainId == chainId }?.name.orElse { String.Empty }
 
     protected fun isNetworkNotSupported(chainId: Int): Boolean =
-        NetworkManager.networks.find { network -> network.chainId == chainId && accountManager.areMainNetworksEnabled == !network.testNet } == null
+        NetworkManager.networks.find { network -> network.chainId == chainId && accountManager.areMainNetworksEnabled == !network.testNet && isNotRSK(chainId)} == null
+
+    private fun isNotRSK(chainId: Int) = chainId != ChainId.RSK_MAIN && chainId != ChainId.RSK_TEST
 
     fun fetchUnsupportedNetworkName(chainId: Int) {
         launchDisposable {
