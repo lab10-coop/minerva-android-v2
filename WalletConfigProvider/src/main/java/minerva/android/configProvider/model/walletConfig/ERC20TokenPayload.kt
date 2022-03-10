@@ -14,5 +14,6 @@ data class ERC20TokenPayload(
     val tag: String = String.Empty,
     val type: String = String.Empty,
     val tokenId: String? = null,
-    val collectionName: String? = null
+    val collectionName: String? = null,
+    val nftContentPayload: NftContentPayload? = null
 )

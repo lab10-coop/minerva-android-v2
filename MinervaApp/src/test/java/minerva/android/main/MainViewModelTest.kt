@@ -9,6 +9,7 @@ import minerva.android.BaseViewModelTest
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.main.error.*
 import minerva.android.services.login.uitls.LoginPayload
+import minerva.android.walletmanager.manager.accounts.tokens.TokenManager
 import minerva.android.walletmanager.manager.order.OrderManager
 import minerva.android.walletmanager.manager.services.ServiceManager
 import minerva.android.walletmanager.model.CredentialQrCode
@@ -32,6 +33,7 @@ class MainViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val masterSeedRepository: MasterSeedRepository = mock()
     private val orderManager: OrderManager = mock()
+    private val tokenManager: TokenManager = mock()
     private val transactionRepository: TransactionRepository = mock()
     private val appUIState: AppUIState = mock()
     private lateinit var viewModel: MainViewModel
@@ -57,6 +59,7 @@ class MainViewModelTest : BaseViewModelTest() {
             serviceManager,
             walletActionsRepository,
             orderManager,
+            tokenManager,
             transactionRepository,
             appUIState
         )
