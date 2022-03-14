@@ -12,7 +12,7 @@ import timber.log.Timber
 class LocalWalletConfigProviderImpl(private val sharedPreferences: SharedPreferences) : LocalWalletConfigProvider {
 
     override fun getWalletConfig(): Single<WalletConfigPayload> =
-        Single.just(sharedPreferences.getString(WALLET_CONFIG, String.NO_DATA))
+        Single.just(sharedPreferences.getString(WALLET_CONFIG, String.NO_DATA).also { Timber.tag("MIGRATION").e(it) })
             .map { makeWalletConfig(it) }
             .doOnError { Timber.e(it) }
 
