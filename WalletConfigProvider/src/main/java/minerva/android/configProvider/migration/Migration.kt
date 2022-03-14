@@ -1,10 +1,12 @@
 package minerva.android.configProvider.migration
 
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import minerva.android.configProvider.BuildConfig
 import minerva.android.configProvider.error.IncompatibleModelThrowable
 import minerva.android.configProvider.model.walletConfig.WalletConfigModelVersion
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
+import timber.log.Timber
 
 object Migration {
 
@@ -23,9 +25,17 @@ object Migration {
 
     fun migrateIfNeeded(rawResponse: String): WalletConfigPayload {
         val modelVersion = getModelVersion(rawResponse)
+        Timber.tag("MIGRATION").d("$rawResponse") // TODO: Remove logging
         return if (modelVersion == BuildConfig.MODEL_VERSION) {
-            Gson().fromJson(rawResponse, WalletConfigPayload::class.java).copy(modelVersion = modelVersion)
+            try {
+                Gson().fromJson(rawResponse, WalletConfigPayload::class.java)
+                    .copy(modelVersion = modelVersion)
+            } catch (e: JsonSyntaxException) {
+                Timber.tag("MIGRATION").d("JsonSyntaxException: ${e.message}") // TODO: Remove logging
+                throw IncompatibleModelThrowable()
+            }
         } else {
+            Timber.tag("MIGRATION").d("IncompatibleModelThrowable") // TODO: Remove logging
             throw IncompatibleModelThrowable()
         }
     }
