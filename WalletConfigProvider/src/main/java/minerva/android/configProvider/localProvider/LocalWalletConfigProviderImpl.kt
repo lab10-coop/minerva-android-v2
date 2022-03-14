@@ -6,6 +6,7 @@ import io.reactivex.Single
 import minerva.android.configProvider.migration.Migration
 import minerva.android.configProvider.model.walletConfig.WalletConfigPayload
 import minerva.android.kotlinUtils.NO_DATA
+import timber.log.Timber
 
 //TODO move saving WalletConfig to Room - MinervaDatabase
 class LocalWalletConfigProviderImpl(private val sharedPreferences: SharedPreferences) : LocalWalletConfigProvider {
@@ -13,6 +14,7 @@ class LocalWalletConfigProviderImpl(private val sharedPreferences: SharedPrefere
     override fun getWalletConfig(): Single<WalletConfigPayload> =
         Single.just(sharedPreferences.getString(WALLET_CONFIG, String.NO_DATA))
             .map { makeWalletConfig(it) }
+            .doOnError { Timber.e(it) }
 
     override fun saveWalletConfig(payload: WalletConfigPayload): Single<WalletConfigPayload> =
         sharedPreferences.edit().putString(WALLET_CONFIG, Gson().toJson(payload)).apply().let {
