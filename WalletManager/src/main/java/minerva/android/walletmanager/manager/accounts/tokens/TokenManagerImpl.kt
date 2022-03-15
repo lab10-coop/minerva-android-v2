@@ -338,7 +338,7 @@ class TokenManagerImpl(
         taggedTokens: List<ERCToken>
     ): List<ERCToken> =
         getTokensForAccount(tokensPerAccount, taggedTokens, this)
-            .filter { token -> token.tag == TokenTag.SUPER_TOKEN.tag }
+            .filter { token -> token.type.isSuperToken() }
 
     private fun getSuperTokenBalanceFlowables(
         tokens: List<ActiveSuperToken>,
@@ -368,9 +368,9 @@ class TokenManagerImpl(
                     fillActiveTokensWithTags(taggedTokens, this, tokensPerAccount)
                     val tokens = getTokensForAccount(tokensPerAccount, taggedTokens, this)
                     Flowable.mergeDelayError(getTokenBalanceFlowables(tokens, this))
-                        .flatMap { (token, tag) ->
+                        .flatMap { (token, type) ->
                             if (token is TokenWithBalance) {
-                                handleActiveSuperTokens(tag, account, token)
+                                handleActiveSuperTokens(type, account, token)
                             } else {
                                 Flowable.just(token)
                             }
@@ -380,8 +380,8 @@ class TokenManagerImpl(
         }
     }
 
-    private fun handleActiveSuperTokens(tag: String, account: Account, token: TokenWithBalance) =
-        if (isSuperFluidToken(tag, account)) {
+    private fun handleActiveSuperTokens(type: TokenType, account: Account, token: TokenWithBalance) =
+        if (isSuperFluidToken(type, account)) {
             getSuperTokenNetFlow(token, account)
                 .map { netFlow ->
                     if (netFlow != BigInteger.ZERO) {
@@ -431,8 +431,8 @@ class TokenManagerImpl(
         )
     }
 
-    private fun isSuperFluidToken(tag: String, account: Account) =
-        tag == TokenTag.SUPER_TOKEN.tag && account.network.superfluid != null && account.network.wsRpc != String.Empty
+    private fun isSuperFluidToken(type: TokenType, account: Account) =
+        type.isSuperToken() && account.network.superfluid != null && account.network.wsRpc != String.Empty
 
     private fun handleTokensBalances(
         token: Token,
@@ -478,9 +478,9 @@ class TokenManagerImpl(
     private fun getTokenBalanceFlowables(
         tokens: List<ERCToken>,
         account: Account
-    ): List<Flowable<Pair<Token, String>>> =
+    ): List<Flowable<Pair<Token, TokenType>>> =
         with(account) {
-            val tokenBalanceFlowables = mutableListOf<Flowable<Pair<Token, String>>>()
+            val tokenBalanceFlowables = mutableListOf<Flowable<Pair<Token, TokenType>>>()
             tokens.forEach { ercToken ->
                 if (ercToken.type.isERC721()) {
                     tokenBalanceFlowables.add(
@@ -491,7 +491,7 @@ class TokenManagerImpl(
                             ercToken.address,
                             address
                         )
-                            .map { token -> Pair(token, ercToken.tag) }
+                            .map { token -> Pair(token, ercToken.type) }
                             .subscribeOn(Schedulers.io())
                     )
                 } else if (ercToken.type.isERC1155()) {
@@ -503,7 +503,7 @@ class TokenManagerImpl(
                             ercToken.address,
                             address
                         )
-                            .map { token -> Pair(token, ercToken.tag) }
+                            .map { token -> Pair(token, ercToken.type) }
                             .subscribeOn(Schedulers.io())
                     )
                 } else {
@@ -515,7 +515,7 @@ class TokenManagerImpl(
                                 ercToken.address,
                                 address
                             )
-                                .map { token -> Pair(token, ercToken.tag) }
+                                .map { token -> Pair(token, ercToken.type) }
                                 .subscribeOn(Schedulers.io())
                         )
                     }
