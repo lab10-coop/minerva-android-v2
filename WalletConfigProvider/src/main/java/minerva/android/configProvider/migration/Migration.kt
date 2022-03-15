@@ -25,17 +25,14 @@ object Migration {
 
     fun migrateIfNeeded(rawResponse: String): WalletConfigPayload {
         val modelVersion = getModelVersion(rawResponse)
-        Timber.tag("MIGRATION").d("$rawResponse") // TODO: Remove logging
         return if (modelVersion == BuildConfig.MODEL_VERSION) {
             try {
                 Gson().fromJson(rawResponse, WalletConfigPayload::class.java)
                     .copy(modelVersion = modelVersion)
             } catch (e: JsonSyntaxException) {
-                Timber.tag("MIGRATION").d("JsonSyntaxException: ${e.message}") // TODO: Remove logging
                 throw IncompatibleModelThrowable()
             }
         } else {
-            Timber.tag("MIGRATION").d("IncompatibleModelThrowable") // TODO: Remove logging
             throw IncompatibleModelThrowable()
         }
     }
