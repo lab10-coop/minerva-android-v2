@@ -137,11 +137,9 @@ class WalletConfigManagerImpl(
 
     override fun initWalletConfig() {
         keystoreRepository.decryptMasterSeed()?.let { seed ->
-            Timber.tag("MIGRATION").d("initWalletConfig loadWalletConfig") // TODO: Remove logging
             masterSeed = seed
             loadWalletConfig(seed)
         }.orElse {
-            Timber.tag("MIGRATION").d("initWalletConfig Throwable") // TODO: Remove logging
             _walletConfigErrorLiveData.value = Event(Throwable())
         }
     }

@@ -24,16 +24,11 @@ abstract class BaseLaunchAppActivity : AppCompatActivity() {
 
     protected fun checkWalletConfig() {
         try {
-            Timber.tag("MIGRATION").e("checkWalletConfig 0")
             viewModel.getWalletConfig()
-            Timber.tag("MIGRATION").e("checkWalletConfig 1")
             showMainActivity()
-            Timber.tag("MIGRATION").e("checkWalletConfig 2")
         } catch (error: NotInitializedWalletConfigThrowable) {
             Timber.e(error)
-            Timber.tag("MIGRATION").e("checkWalletConfig 3")
             initiateWalletConfig()
-            Timber.tag("MIGRATION").e("checkWalletConfig 4")
             viewModel.walletConfigLiveData.observe(this@BaseLaunchAppActivity, EventObserver { showMainActivity() })
         }
         viewModel.walletConfigErrorLiveData.observe(this@BaseLaunchAppActivity, EventObserver { showOnBoardingActivity() })
