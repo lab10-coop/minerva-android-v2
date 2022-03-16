@@ -27,7 +27,7 @@ data class TokensOwnedPayload(
         @SerializedName("symbol")
         val _symbol: String?,
         @SerializedName("tokenURI")
-        val tokenURI: String,
+        val tokenURI: String?,
         @SerializedName("types")
         val types: List<String>,
         @SerializedName("tokenJson")
@@ -54,16 +54,18 @@ data class TokensOwnedPayload(
             val name: String?,
             @SerializedName("symbol")
             val symbol: String?,
-            @SerializedName("image")
+            @SerializedName("image", alternate =  ["image_url"])
             var image: String?,
             @SerializedName("description")
             val description: String?,
             @SerializedName("animation_url")
-            val animationUri: String?
+            val animationUri: String?,
+            @SerializedName("background_color")
+            val backgroundColor: String?
         ) {
             companion object {
                 val Empty = TokenJson(
-                    null, null, null, null, null, null
+                    null, null, null, null, null, null, null
                 )
             }
         }

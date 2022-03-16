@@ -25,7 +25,6 @@ data class ERCToken(
     var isError: Boolean = false,
     var isStreamActive: Boolean = false,
     @Embedded var nftContent: NftContent = NftContent(),
-    var description: String = String.Empty,
     var consNetFlow: BigInteger = BigInteger.ZERO,
     var collectionName: String? = null
 ) : Token {
@@ -45,16 +44,25 @@ data class ERCToken(
         collectionName = if (tokenType.isNft()) tokenTx.tokenName else null
     )
 
-    fun mergeNftDetails(ercToken: ERCToken){
-        logoURI = ercToken.logoURI
-        if(nftContent.imageUri.isEmpty()) nftContent.imageUri = ercToken.nftContent.imageUri
-        if(nftContent.contentType == ContentType.INVALID) nftContent.contentType = ercToken.nftContent.contentType
-        if(nftContent.animationUri.isEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
-        if(nftContent.tokenUri.isEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
-        description = ercToken.description
-        collectionName = ercToken.collectionName
-        symbol = ercToken.symbol
-        name = ercToken.name
+    fun mergeNftDetailsAfterTokenDiscovery(ercToken: ERCToken){
+        mergePropertiesWithLocalFirstStrategy(ercToken)
+        mergePropertiesWithRemoteFirstStrategy(ercToken)
+    }
+
+    private fun mergePropertiesWithLocalFirstStrategy(ercToken: ERCToken){
+        if(logoURI.isNullOrEmpty()) logoURI = ercToken.logoURI
+        if(collectionName.isNullOrEmpty()) collectionName = ercToken.collectionName
+        if(symbol.isEmpty()) symbol = ercToken.symbol
+        if(name.isEmpty()) name = ercToken.name
+    }
+
+    private fun mergePropertiesWithRemoteFirstStrategy(ercToken: ERCToken){
+        if(ercToken.nftContent.imageUri.isNotEmpty()) nftContent.imageUri = ercToken.nftContent.imageUri
+        if(ercToken.nftContent.contentType != ContentType.INVALID) nftContent.contentType = ercToken.nftContent.contentType
+        if(ercToken.nftContent.animationUri.isNotEmpty()) nftContent.animationUri = ercToken.nftContent.animationUri
+        if(ercToken.nftContent.background.isNotEmpty()) nftContent.background = ercToken.nftContent.background
+        if(ercToken.nftContent.tokenUri.isNotEmpty()) nftContent.tokenUri = ercToken.nftContent.tokenUri
+        if(ercToken.nftContent.description.isNotEmpty()) nftContent.description = ercToken.nftContent.description
     }
 }
 

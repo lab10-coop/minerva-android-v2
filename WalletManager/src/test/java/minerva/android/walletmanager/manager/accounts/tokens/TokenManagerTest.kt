@@ -414,11 +414,11 @@ class TokenManagerTest : RxTest() {
 
         mergedTokenMap01.tokensPerChainIdMap[2]?.get(3)?.name shouldBeEqualTo "tokenTwoTwo"
 
-        mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 4
+        mergedTokenMap01.tokensPerChainIdMap[3]?.size shouldBeEqualTo 5
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.name shouldBeEqualTo "tokenThreeThree"
         mergedTokenMap01.tokensPerChainIdMap[3]?.get(0)?.logoURI shouldBeEqualTo "bb1"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeOne"
-        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.logoURI shouldBeEqualTo null
+        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.name shouldBeEqualTo "tokenThreeThree2"
+        mergedTokenMap01.tokensPerChainIdMap[3]?.get(1)?.logoURI shouldBeEqualTo "bb"
 
         val mergedTokenMap02 = tokenManager.mergeWithLocalTokensList(tokenSetTwo)
         mergedTokenMap02.shouldSafeNewTokens shouldBeEqualTo true
@@ -511,6 +511,7 @@ class TokenManagerTest : RxTest() {
     fun `Check mapping last commit data to last commit timestamp`() {
         NetworkManager.initialize(MockDataProvider.networks)
         whenever(cryptoApi.getLastCommitFromTokenList(any())).thenReturn(Single.just(commitData))
+        whenever(cryptoApi.getNftCollectionDetails()).thenReturn(Single.just(emptyList()))
         whenever(cryptoApi.getTokenDetails(any())).thenReturn(Single.just(data))
         whenever(localStorage.loadTokenIconsUpdateTimestamp()).thenReturn(333L, 1611950162000, 1611950162333)
         whenever(walletManager.getWalletConfig()).thenReturn(MockDataProvider.walletConfig)
@@ -819,7 +820,8 @@ class TokenManagerTest : RxTest() {
                     "nftToken",
                     "contentUri",
                     "animationUrl",
-                    "description"
+                    "description",
+                    "background"
                 )
             )
         )
@@ -829,7 +831,7 @@ class TokenManagerTest : RxTest() {
             .await()
             .assertValue { result ->
                 val updatedToken = result.tokensPerChainIdMap[ATS_TAU]?.first()
-                result.shouldSafeNewTokens && updatedToken?.nftContent?.imageUri == "contentUri" && updatedToken.description == "description"
+                result.shouldSafeNewTokens && updatedToken?.nftContent?.imageUri == "contentUri" && updatedToken.nftContent.description == "description"
             }
     }
 

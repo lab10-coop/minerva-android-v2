@@ -1,10 +1,10 @@
-package minerva.android.walletmanager.model
+package minerva.android.configProvider.model.walletConfig
 
 import minerva.android.kotlinUtils.Empty
 
-data class NftContent(
+data class NftContentPayload(
     var imageUri: String = String.Empty,
-    var contentType: ContentType = ContentType.INVALID,
+    var contentType: String = String.Empty,
     var animationUri: String = String.Empty,
     var tokenUri: String = String.Empty,
     var background: String = String.Empty,

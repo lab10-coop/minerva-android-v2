@@ -54,6 +54,9 @@ class MasterSeedRepositoryImpl(
             else -> MasterSeedError((seedAndKeys as SeedError).error)
         }
 
+    override fun restoreWalletConfigWithSavedMasterSeed(): Completable =
+        walletConfigManager.restoreWalletConfigWithSavedMasterSeed()
+
     override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
         walletConfigManager.restoreWalletConfig(masterSeed)
 

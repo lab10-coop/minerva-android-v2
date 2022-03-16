@@ -31,6 +31,7 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
 
     private val viewModel: AddTokenViewModel by viewModel()
     private var addressValidatorDisposable: Disposable? = null
+    private var tokenIdValidatorDisposable: Disposable? = null
 
     private lateinit var binding: FragmentAddTokenBinding
     private lateinit var listener: AddressScannerListener
@@ -54,11 +55,13 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
     override fun onResume() {
         super.onResume()
         prepareAddressListener()
+        prepareTokenIdListener()
     }
 
     override fun onPause() {
         super.onPause()
         addressValidatorDisposable?.dispose()
+        tokenIdValidatorDisposable?.dispose()
         showFragmentListener.setActionBarTitle(getString(R.string.manage_token))
     }
 
@@ -73,7 +76,6 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
             if (tokenAddress.text.toString() == token.address) {
                 TransitionManager.beginDelayedTransition(root)
                 tokenImage.initView(token)
-                addTokenButton.isEnabled = true
                 supportText.gone()
                 address.apply {
                     setDataOrHide(getString(R.string.address), token.address)
@@ -82,10 +84,15 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
                 name.setDataOrHide(getString(R.string.name), token.name)
                 symbol.setDataOrHide(getString(R.string.symbol), token.symbol)
                 decimals.setDataOrHide(getString(R.string.decimals), token.decimals)
-                addTokenButton.setOnClickListener {
-                    addTokenButton.invisible()
-                    addTokenLoader.visible()
-                    viewModel.addToken(token)
+                type.setDataOrHide(getString(R.string.token_type), token.type.toString())
+                token.type.isNft().let { isNft ->
+                    tokenIdLayout.visibleOrGone(isNft)
+                    if (!isNft) addTokenButton.isEnabled = true
+                    addTokenButton.setOnClickListener {
+                        addTokenButton.invisible()
+                        addTokenLoader.visible()
+                        viewModel.addToken(token)
+                    }
                 }
             }
         }
@@ -93,6 +100,29 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
 
     private fun onLoading(isLoading: Boolean) {
         binding.loader.visibleOrGone(isLoading)
+    }
+
+    private fun setAddTokenButtonIsEnabled(isEnabled: Boolean) {
+        with(binding) {
+            addTokenButton.isEnabled = isEnabled
+            addTokenButton.hideKeyboard()
+        }
+    }
+
+    private fun prepareTokenIdListener() {
+        binding.apply {
+            tokenIdValidatorDisposable = tokenId.getValidationObservable(tokenIdLayout) {
+                Validator.validateTokenId(it)
+            }.subscribeBy(
+                onNext = {
+                    if (it) {
+                        setAddTokenButtonIsEnabled(false)
+                        viewModel.setTokenId(tokenId.text.toString())
+                        viewModel.isOwner(tokenId.text.toString())
+                    }
+                }
+            )
+        }
     }
 
     private fun prepareAddressListener() {
@@ -112,8 +142,34 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
 
     private fun prepareLiveData() {
         viewModel.apply {
-            addressDetailsLiveData.observe(viewLifecycleOwner, Observer { token -> showTokenData(token) })
+            tokenLiveData.observe(viewLifecycleOwner, Observer { token -> showTokenData(token) })
             loadingLiveData.observe(viewLifecycleOwner, EventObserver { isLoading -> onLoading(isLoading) })
+            isOwnerLiveData.observe(viewLifecycleOwner, EventObserver { result ->
+                when {
+                    result.isSuccess -> {
+                        if (result.getOrDefault(false)) {
+                            setAddTokenButtonIsEnabled(true)
+
+                        } else {
+                            MinervaFlashbar.showError(
+                                requireActivity(),
+                                Throwable(getString(R.string.you_dont_own_this_token))
+                            )
+                        }
+                    }
+                    result.isFailure -> {
+                        result.exceptionOrNull()?.let { MinervaFlashbar.showError(requireActivity(), it) }
+                        with(binding){
+                            setAddTokenButtonIsEnabled(false)
+                            with(tokenIdLayout){
+                                error = context.getString(R.string.error_invalid_token_id)
+                                setErrorIconDrawable(NO_ICON)
+                            }
+                        }
+                    }
+                }
+
+            })
             tokenAddedLiveData.observe(viewLifecycleOwner, EventObserver { onBackListener.onBack() })
             errorLiveData.observe(viewLifecycleOwner, EventObserver {
                 MinervaFlashbar.showError(requireActivity(), it)
@@ -135,6 +191,8 @@ class AddTokenFragment : BaseFragment(R.layout.fragment_add_token) {
             address.gone()
             symbol.gone()
             decimals.gone()
+            type.gone()
+            tokenIdLayout.gone()
         }
     }
 

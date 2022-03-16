@@ -6,7 +6,7 @@
         <item name="colorSecondary">@color/colorSecondary</item>
         <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
         <item name="android:statusBarColor">@color/lightGray</item>
-        <item name="android:fontFamily">@font/font_family</item>
+        <item name="android:fontFamily">@font/rubik_font_family</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="popupMenuStyle">@style/ValuePopupMenu</item>
         <item name="tabStyle">@style/TabLayoutStyle</item>

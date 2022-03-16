@@ -127,12 +127,11 @@ class AccountsViewModel(
         tokenVisibilitySettings = accountManager.getTokenVisibilitySettings
         refreshCoinBalances()
         refreshTokensBalances()
-        fetchNFTData()
         discoverNewTokens()
         getSessions(accountManager.getAllAccounts())
     }
 
-    fun fetchNFTData(){
+    private fun fetchNFTData(){
         launchDisposable {
             tokenManager.fetchNFTsDetails()
                 .subscribeOn(Schedulers.io())
@@ -708,7 +707,10 @@ class AccountsViewModel(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                    onSuccess = { refreshTokensBalances(true) },
+                    onSuccess = {
+                        fetchNFTData()
+                        refreshTokensBalances(true)
+                    },
                     onError = { error -> logError("Error while token auto-discovery: $error") }
                 )
         }

@@ -42,16 +42,25 @@ data class AccountToken(
         if (rawBalance == Double.InvalidValue.toBigDecimal()) rawBalance
         else BalanceUtils.convertFromWei(rawBalance, token.decimals.toInt())
 
-    fun mergeNftDetails(ercToken: ERCToken){
+    fun mergeNftDetailsAfterWalletConfigUpdate(ercToken: ERCToken){
+        mergePropertiesWithLocalFirstStrategy(ercToken)
+        mergePropertiesWithRemoteFirstStrategy(ercToken)
+    }
+
+    private fun mergePropertiesWithLocalFirstStrategy(ercToken: ERCToken){
         token.logoURI = ercToken.logoURI
-        token.description = ercToken.description
+        token.collectionName = ercToken.collectionName
+        token.symbol = ercToken.symbol
+        token.name = ercToken.name
+    }
+
+    private fun mergePropertiesWithRemoteFirstStrategy(ercToken: ERCToken){
         if(token.nftContent.imageUri.isEmpty()) token.nftContent.imageUri = ercToken.nftContent.imageUri
         if(token.nftContent.contentType == ContentType.INVALID) token.nftContent.contentType = ercToken.nftContent.contentType
         if(token.nftContent.animationUri.isEmpty()) token.nftContent.animationUri = ercToken.nftContent.animationUri
+        if(token.nftContent.background.isEmpty()) token.nftContent.background = ercToken.nftContent.background
         if(token.nftContent.tokenUri.isEmpty()) token.nftContent.tokenUri = ercToken.nftContent.tokenUri
-        token.name = ercToken.name
-        token.collectionName = ercToken.collectionName
-        token.symbol = ercToken.symbol
+        if(token.nftContent.description.isEmpty()) token.nftContent.description = ercToken.nftContent.description
     }
 
     companion object {

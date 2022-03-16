@@ -440,7 +440,7 @@ class MapperTest {
             "Symbol",
             "uri",
             listOf("ERC-1155"),
-            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi")
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi", null)
         )
         val tokenOwned02 = TokensOwnedPayload.TokenOwned(
             "10",
@@ -452,7 +452,7 @@ class MapperTest {
             "Symbol",
             "uri",
             listOf("ERC-721"),
-            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi")
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, "imageUri", null, "animURi", "123456")
         )
         val tokenOwned03 = TokensOwnedPayload.TokenOwned(
             "1000",
@@ -464,7 +464,7 @@ class MapperTest {
             "Symb0l",
             "uri",
             listOf("ERC-20"),
-            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, null, null, null)
+            tokenJson = TokensOwnedPayload.TokenOwned.TokenJson(null, null, null, null, null, null, null)
         )
 
         val result01 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned01, "key")
@@ -474,6 +474,7 @@ class MapperTest {
         result01.type shouldBeEqualTo TokenType.ERC1155
         result01.nftContent.imageUri shouldBeEqualTo "imageUri"
         result01.nftContent.animationUri shouldBeEqualTo "animURi"
+        result01.nftContent.background shouldBeEqualTo ""
         val result02 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned02, "key")
         result02.collectionName shouldBeEqualTo "n4m8"
         result02.name shouldBeEqualTo String.Empty
@@ -481,6 +482,7 @@ class MapperTest {
         result02.type shouldBeEqualTo TokenType.ERC721
         result02.nftContent.imageUri shouldBeEqualTo "imageUri"
         result02.nftContent.animationUri shouldBeEqualTo "animURi"
+        result02.nftContent.background shouldBeEqualTo "123456"
         val result03 = TokensOwnedToERCToken.map(ATS_TAU, tokenOwned03, "key")
         result03.name shouldBeEqualTo "Nam3"
         result03.collectionName shouldBeEqualTo null
@@ -488,6 +490,7 @@ class MapperTest {
         result03.type shouldBeEqualTo TokenType.ERC20
         result03.nftContent.imageUri shouldBeEqualTo ""
         result03.nftContent.animationUri shouldBeEqualTo ""
+        result03.nftContent.background shouldBeEqualTo ""
 
     }
 

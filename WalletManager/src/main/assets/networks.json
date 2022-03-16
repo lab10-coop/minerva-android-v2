@@ -117,7 +117,11 @@
     "tokens": [],
     "color": "#8247e5",
     "testNet": true,
-    "chainId": 80001
+    "chainId": 80001,
+    "superfluid": {
+      "host": "0xEB796bdb90fFA0f28255275e16936D25d3418603",
+      "cfav1": "0x49e565Ed1bdc17F3d220f72DF0857C26FA83F873"
+    }
   },
   {
     "name": "Ethereum",
@@ -154,13 +158,17 @@
     "token": "MATIC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://matic-rpc.lab10.io",
-    "wsRpc": "",
+    "wsRpc": "wss://rpc-mainnet.matic.network",
     "gasPriceOracle": "https://gasstation-mainnet.matic.network",
     "gasPrice": "10000000000",
     "tokens": [],
     "color": "#8247e5",
     "testNet": false,
-    "chainId": 137
+    "chainId": 137,
+    "superfluid": {
+      "host": "0x3E14dC1b13c488a8d5D310918780c983bD5982E7",
+      "cfav1": "0x6EeE6060f715257b970700bc2656De21dEdF074C"
+    }
   },
   {
     "name": "ARTIS Σ1",
@@ -189,7 +197,7 @@
     "chainId": 99
   },
   {
-    "name": "Binance Smart Chain",
+    "name": "BNB Chain",
     "token": "BNB",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://bsc-dataseed.binance.org/",
@@ -202,7 +210,7 @@
     "chainId": 56
   },
   {
-    "name": "BSC Testnet",
+    "name": "BNB Testnet",
     "token": "tBNB",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://data-seed-prebsc-1-s1.binance.org:8545/",

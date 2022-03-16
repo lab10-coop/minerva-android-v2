@@ -277,6 +277,7 @@
     <string name="not_defined_warning_ethereum_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.\n\nYou don\'t have an account on Ethereum yet. Please click \'Add account\' button above.</string>
     <string name="not_defined_warning_message">This DApp doesn\'t specify the network and you have to select the correct network for the connection.</string>
     <string name="dapp_disconnected">%s session disconnected</string>
+    <string name="dapp_unnamed">Unnamed</string>
     <string name="invalid_account_message">Invalid Account, try again</string>
     <string name="dapp_deleted">Dapp deleted</string>
     <string name="confirm">Confirm</string>
@@ -396,6 +397,10 @@
     <string name="clear_token_cache_description">This will delete the token data stored on your phone. All token data (e.g. balances or icons) are fetched anew from your accounts.</string>
     <string name="clear_token_cache_action_text">Clear</string>
     <string name="clear">Clear</string>
+    <string name="token_id_hint">Token ID</string>
+    <string name="error_invalid_token_id">Error: Invalid token id</string>
+    <string name="token_type">Type</string>
+    <string name="you_dont_own_this_token">You do not own this token</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
@@ -449,6 +454,13 @@
     <!--  TODO Add real release notes  -->
     <!--  TIP: Use * to show note with bullet -->
     <string-array name="release_notes">
+        <item>1.7.1</item>
+        <item>* Support of Ethereum Name Service NFTs</item>
+        <item>* Support of Unstoppable Domains NFTs</item>
+        <item>* More NFT collections officially supported</item>
+        <item>* Rename Binance Smart Chain to BNB Chain</item>
+        <item>* Improved Super Token stream visualisation</item>
+        <item>* Various UI updates and bug fixes</item>
         <item>1.7.0</item>
         <item>* NFT support for all main networks (ERC-721 &amp; ERC-1155)</item>
         <item>* Support for all NFT media types (SVG, mp4, mp3, …)</item>

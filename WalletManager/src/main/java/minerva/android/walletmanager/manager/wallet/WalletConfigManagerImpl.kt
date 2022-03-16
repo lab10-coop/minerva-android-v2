@@ -2,6 +2,7 @@ package minerva.android.walletmanager.manager.wallet
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Observer
@@ -30,9 +31,7 @@ import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.mapper.BitmapMapper
-import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
-import minerva.android.walletmanager.exception.WalletConfigNotFoundThrowable
+import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.Identity
@@ -45,6 +44,7 @@ import minerva.android.walletmanager.utils.DefaultWalletConfig
 import minerva.android.walletmanager.utils.handleAutomaticBackupFailedError
 import timber.log.Timber
 import java.math.BigDecimal
+import java.util.concurrent.Executors
 
 class WalletConfigManagerImpl(
     private val keystoreRepository: KeystoreRepository,
@@ -54,6 +54,7 @@ class WalletConfigManagerImpl(
     private val minervaApi: MinervaApiRepository
 ) : WalletConfigManager {
 
+    private var walletConfigExecutor = Executors.newSingleThreadExecutor()
     override lateinit var masterSeed: MasterSeed
     private var disposable: Disposable? = null
 
@@ -112,7 +113,15 @@ class WalletConfigManagerImpl(
                         }, onError = { Timber.e(it) }
                     )
             }
+            .subscribeOn(Schedulers.from(walletConfigExecutor))
 
+    override fun restoreWalletConfigWithSavedMasterSeed(): Completable =
+        minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
+            .map { walletConfigPayload ->
+                localWalletProvider.saveWalletConfig(walletConfigPayload)
+            }
+            .ignoreElement()
+            .onErrorResumeNext { error -> Completable.error(getThrowableWhenRestoringWalletConfig(error)) }
 
     override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
         minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
@@ -135,7 +144,7 @@ class WalletConfigManagerImpl(
             masterSeed = seed
             loadWalletConfig(seed)
         }.orElse {
-            _walletConfigErrorLiveData.value = Event(Throwable())
+            _walletConfigErrorLiveData.value = Event(UnableToDecryptMasterSeedThrowable())
         }
     }
 
@@ -145,7 +154,11 @@ class WalletConfigManagerImpl(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = { _walletConfigLiveData.value = Event(it) },
-                onError = { Timber.e("Loading WalletConfig error: $it") }
+                onError = {
+                    _walletConfigErrorLiveData.value = Event(UnableToInitializeWalletConfigThrowable(it.message))
+                    logWalletConfigErrorToFirebase(it)
+                    Timber.e("Loading WalletConfig error: $it")
+                }
             )
     }
 
@@ -170,9 +183,20 @@ class WalletConfigManagerImpl(
             .toObservable()
             .onErrorReturn { Int.InvalidValue }
 
+    private fun logVersionToFirebase(version: Int) {
+        FirebaseCrashlytics.getInstance()
+            .recordException(Throwable("PublicKey: ${masterSeed.publicKey} shouldBlockBackup($version)"))
+    }
+
+    private fun logWalletConfigErrorToFirebase(throwable: Throwable) {
+        FirebaseCrashlytics.getInstance()
+            .recordException(Throwable("PublicKey: ${masterSeed.publicKey} wallet config loading failed: ${throwable.message}"))
+    }
+
     private fun compareVersions(version: Int, payload: WalletConfigPayload): Observable<WalletConfig> =
         when {
             shouldBlockBackup(version) -> {
+                logVersionToFirebase(version)
                 localStorage.isBackupAllowed = false
                 completeKeys(masterSeed, payload)
             }
@@ -209,6 +233,7 @@ class WalletConfigManagerImpl(
             }
 
             .onErrorResumeNext { _: Observer<in WalletConfig> -> completeKeysWhenError(masterSeed, payload) }
+            .subscribeOn(Schedulers.from(walletConfigExecutor))
 
     private fun completeKeysWhenError(masterSeed: MasterSeed, payload: WalletConfigPayload): Observable<WalletConfig> {
         localStorage.isSynced = false
@@ -223,7 +248,7 @@ class WalletConfigManagerImpl(
                     _walletConfigLiveData.value = Event(walletConfig)
                     configPayload
                 }
-                .observeOn(Schedulers.io())
+                .observeOn(Schedulers.from(walletConfigExecutor))
                 .flatMap { walletConfigPayload ->
                     minervaApi.saveWalletConfig(encodePublicKey(masterSeed.publicKey), walletConfigPayload)
                 }
@@ -232,12 +257,14 @@ class WalletConfigManagerImpl(
                 }
                 .map { localStorage.isSynced = true }
                 .ignoreElement()
-                .handleAutomaticBackupFailedError(localStorage)
+                .handleAutomaticBackupFailedError(localStorage) {
+                    logVersionToFirebase(walletConfig.version)
+                }
         } else Completable.error(AutomaticBackupFailedThrowable())
 
-    override fun removeAllTokens(): Completable =
-        updateWalletConfig(getWalletConfig().copy(erc20Tokens = emptyMap()))
-
+    override fun removeAllTokens(): Completable = getWalletConfig().run {
+        updateWalletConfig(copy(version = updateVersion, erc20Tokens = emptyMap()))
+    }
 
     private fun WalletConfigPayload.saveWalletConfigToLocalStorageIfVersionChanged(oldVersion: Int) =
         if (version > oldVersion) {

@@ -25,7 +25,7 @@ class NewAccountFragment : BaseFragment(R.layout.fragment_new_account) {
         NetworkSpinnerAdapter(
             requireContext(),
             R.layout.spinner_network,
-            NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled && isNotRSK(it.chainId)  }
+            NetworkManager.networks.filter { it.testNet == !viewModel.areMainNetsEnabled  && isNotRSK(it.chainId)  }
         )
     }
 

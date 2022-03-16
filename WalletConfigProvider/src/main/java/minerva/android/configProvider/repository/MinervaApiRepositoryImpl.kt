@@ -3,8 +3,8 @@ package minerva.android.configProvider.repository
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import minerva.android.configProvider.api.MinervaApi
+import minerva.android.configProvider.logger.Logger
 import minerva.android.configProvider.migration.Migration
 import minerva.android.configProvider.model.walletActions.WalletActionsConfigPayload
 import minerva.android.configProvider.model.walletActions.WalletActionsResponse
@@ -14,7 +14,7 @@ import minerva.android.kotlinUtils.InvalidValue
 import retrofit2.HttpException
 import java.net.HttpURLConnection
 
-class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiRepository {
+class MinervaApiRepositoryImpl(private val api: MinervaApi, private val logger: Logger) : MinervaApiRepository {
 
     private var updateWalletConfigInfo: UpdateWalletConfigInfo = UpdateWalletConfigInfo()
 
@@ -34,13 +34,20 @@ class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiReposito
         api.getWalletConfigVersion(publicKey = publicKey)
             .map { it.version }
 
+    private fun logVersionToFirebase(publicKey: String, version: Int) =
+        logger.logVersion(publicKey, version)
+
     override fun saveWalletConfig(
         publicKey: String,
         walletConfigPayload: WalletConfigPayload
     ): Single<WalletConfigPayload> {
         val payload =
             if (isCorrectVersion(walletConfigPayload.version)) {
-                walletConfigPayload.copy(_version = updateWalletConfigInfo.syncVersion.inc())
+                walletConfigPayload
+                    .copy(_version = updateWalletConfigInfo.syncVersion.inc())
+                    .also {
+                        logVersionToFirebase(publicKey, it.version)
+                    }
             } else walletConfigPayload
         updateWalletConfigInfo = UpdateWalletConfigInfo(updateWalletConfigInfo.pendingUpdates.inc(), payload.version)
         return saveWalletConfigCall(publicKey, payload)
@@ -60,9 +67,9 @@ class MinervaApiRepositoryImpl(private val api: MinervaApi) : MinervaApiReposito
             }
             .onErrorResumeNext { error ->
                 stopUpdateWalletConfigInfo()
+                logVersionToFirebase(publicKey, walletConfigPayload.version)
                 Single.error(getThrowableWhenSavingWalletConfig(error))
             }
-            .subscribeOn(Schedulers.io())
 
     private fun stopUpdateWalletConfigInfo() {
         updateWalletConfigInfo = updateWalletConfigInfo.copy(pendingUpdates = updateWalletConfigInfo.pendingUpdates.dec())

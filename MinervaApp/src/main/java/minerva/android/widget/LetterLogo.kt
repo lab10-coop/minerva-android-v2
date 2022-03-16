@@ -43,7 +43,7 @@ object LetterLogo {
         isAntiAlias = true
         textSize = HALF_SIZE
         color = ContextCompat.getColor(context, generateColor(value))
-        typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.font_family), Typeface.BOLD)
+        typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.rubik_font_family), Typeface.BOLD)
     }
 
     private fun prepareBackgroundPaint(context: Context, value: String): Paint = Paint().apply {

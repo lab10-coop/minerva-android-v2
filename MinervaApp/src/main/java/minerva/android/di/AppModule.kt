@@ -65,9 +65,9 @@ private val appModules = module {
     single<Logger> { LoggerImpl(get()) }
     viewModel { AppViewModel(get(), get()) }
     viewModel { ClubCardViewModel(get()) }
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { WalletConnectInteractionsViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { LaunchApplicationViewModel(get(), get()) }
+    viewModel { LaunchApplicationViewModel(get(), get(), get()) }
     viewModel { BackupViewModel(get()) }
     viewModel { SettingsViewModel(get(), get())}
     viewModel { AdvancedViewModel(get()) }
@@ -89,7 +89,7 @@ private val appModules = module {
     viewModel { WalletConnectViewModel(get(), get(), get(), get(), get()) }
     viewModel { ServicesScannerViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ManageTokensViewModel(get(), get(), get(), get()) }
-    viewModel { AddTokenViewModel(get(), get(), get()) }
+    viewModel { AddTokenViewModel(get(), get(), get(), get()) }
     viewModel { AuthenticationViewModel(get()) }
     viewModel { RampViewModel(get(), get()) }
     viewModel { DappsViewModel(get()) }

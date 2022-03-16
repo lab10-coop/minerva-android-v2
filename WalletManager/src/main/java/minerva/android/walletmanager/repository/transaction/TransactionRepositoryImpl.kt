@@ -346,7 +346,10 @@ class TransactionRepositoryImpl(
         Observable.fromIterable(accounts)
             .flatMapSingle { account ->
                 tokenManager.downloadTokensList(account)
-                    .onErrorReturn { emptyList() }
+                    .onErrorReturn {
+                        Timber.e(it, "Error while downloading token list")
+                        emptyList()
+                    }
             }
             .toList()
             .map { tokens -> mergeLists(tokens) }

@@ -10,5 +10,7 @@ data class NftDetails(
     @SerializedName("animation_url")
     val animationUrl: String?,
     @SerializedName("description")
-    val description: String
+    val description: String,
+    @SerializedName("background_color")
+    val background: String?
 )

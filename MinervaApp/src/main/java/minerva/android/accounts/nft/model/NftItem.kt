@@ -10,7 +10,6 @@ import java.math.BigDecimal
 data class NftItem(
     val tokenAddress: String = String.Empty,
     val tokenId: String = String.Empty,
-    val description: String = String.Empty,
     val nftContent: NftContent = NftContent(),
     val name: String = String.Empty,
     val isERC1155: Boolean = false,

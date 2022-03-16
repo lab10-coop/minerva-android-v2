@@ -26,7 +26,7 @@ class HighlightedTextChain(context: Context, attrs: AttributeSet? = null) : Flex
         TextView(context).apply {
             text = cellText.capitalize()
             background = context.getDrawable(R.drawable.rounded_purple_background)
-            typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.font_family), Typeface.NORMAL)
+            typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.rubik_font_family), Typeface.NORMAL)
             setTextColor(ContextCompat.getColor(context, R.color.white))
             setPadding(
                 getDimen(R.dimen.margin_xsmall),

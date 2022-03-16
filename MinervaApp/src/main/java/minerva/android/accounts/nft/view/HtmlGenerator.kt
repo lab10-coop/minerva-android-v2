@@ -2,6 +2,7 @@ package minerva.android.accounts.nft.view
 
 import android.util.Base64
 import minerva.android.kotlinUtils.Empty
+import minerva.android.utils.ensureHexColorPrefix
 import minerva.android.walletmanager.model.ContentType
 import minerva.android.walletmanager.model.NftContent
 
@@ -10,7 +11,7 @@ object HtmlGenerator {
     fun getNftContentEncodedHtmlFromUrl(nftContent: NftContent): String =
         when (nftContent.contentType) {
             ContentType.VIDEO -> getUnencodedHtmlForVideo(nftContent)
-            ContentType.IMAGE -> getUnencodedHtmlForImage(nftContent.imageUri)
+            ContentType.IMAGE -> getUnencodedHtmlForImage(nftContent.imageUri, ensureHexColorPrefix(nftContent.background))
             ContentType.ENCODED_IMAGE -> getUnencodedHtmlForEncodedImage(nftContent.imageUri)
             else -> getInvalidHtml()
         }.let { unencodedHtml ->
@@ -49,13 +50,14 @@ object HtmlGenerator {
             "  </body>\n" +
             "</html>"
 
-    private fun getUnencodedHtmlForImage(contentUrl: String) = "<html lang=\"en\">\n<head>\n" +
+    private fun getUnencodedHtmlForImage(contentUrl: String, backgroundColor: String) = "<html lang=\"en\">\n<head>\n" +
             "    <meta charset=\"utf-8\">\n" +
             "    <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\n" +
             "    <style>\n" +
             "      body {\n" +
             "        margin: 0px;\n" +
             "        padding: 0px;\n" +
+            "        background-color: $backgroundColor;\n" +
             "      }\n" +
             "      .nftImageContainer {\n" +
             "        display: block;\n" +
