@@ -32,7 +32,7 @@ class CryptoAmountView(context: Context, attributeSet: AttributeSet) :
 
     fun startStreamingAnimation(start: BigDecimal, speed: BigInteger) {
         cryptoAmount.setTextColor(ContextCompat.getColor(context, R.color.bodyColor))
-        var durationSeconds = 60
+        var durationSeconds = 600
         var end: BigDecimal = start.add(
             speed
                 .toBigDecimal()
