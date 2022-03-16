@@ -22,6 +22,7 @@ interface MasterSeedRepository {
     fun createWalletConfig(masterSeed: MasterSeed? = null): Completable
     fun restoreMasterSeed(mnemonic: String): MasterKeys
     fun restoreWalletConfig(masterSeed: MasterSeed): Completable
+    fun restoreWalletConfigWithSavedMasterSeed(): Completable
     fun initWalletConfig()
     fun dispose()
     fun getAccountIterator(): Int

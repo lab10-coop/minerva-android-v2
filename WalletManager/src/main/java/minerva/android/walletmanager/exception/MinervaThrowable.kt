@@ -24,3 +24,5 @@ class CoinGeckoMarketIdNotFoundThrowable : Throwable("CoinGecko market id not fo
 class WalletConfigNotFoundThrowable: Throwable("WalletConfig not found")
 class ContractAddressIsNotSupportedThrowable: Throwable("Provided address is not supported by any known standard: ERC-20, ERC-1155, ERC-721")
 class NotERC1155Throwable: Throwable("Contract is not ERC-1155")
+class UnableToInitializeWalletConfigThrowable(message: String?): Throwable("Wallet Config can't be initialized. $message")
+class UnableToDecryptMasterSeedThrowable: Throwable("Cannot decrypt master seed")
