@@ -31,9 +31,7 @@ import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.kotlinUtils.function.orElse
 import minerva.android.kotlinUtils.mapper.BitmapMapper
-import minerva.android.walletmanager.exception.AutomaticBackupFailedThrowable
-import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
-import minerva.android.walletmanager.exception.WalletConfigNotFoundThrowable
+import minerva.android.walletmanager.exception.*
 import minerva.android.walletmanager.keystore.KeystoreRepository
 import minerva.android.walletmanager.model.mappers.*
 import minerva.android.walletmanager.model.minervaprimitives.Identity
@@ -117,7 +115,13 @@ class WalletConfigManagerImpl(
             }
             .subscribeOn(Schedulers.from(walletConfigExecutor))
 
-
+    override fun restoreWalletConfigWithSavedMasterSeed(): Completable =
+        minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
+            .map { walletConfigPayload ->
+                localWalletProvider.saveWalletConfig(walletConfigPayload)
+            }
+            .ignoreElement()
+            .onErrorResumeNext { error -> Completable.error(getThrowableWhenRestoringWalletConfig(error)) }
 
     override fun restoreWalletConfig(masterSeed: MasterSeed): Completable =
         minervaApi.getWalletConfig(publicKey = encodePublicKey(masterSeed.publicKey))
@@ -140,7 +144,7 @@ class WalletConfigManagerImpl(
             masterSeed = seed
             loadWalletConfig(seed)
         }.orElse {
-            _walletConfigErrorLiveData.value = Event(Throwable())
+            _walletConfigErrorLiveData.value = Event(UnableToDecryptMasterSeedThrowable())
         }
     }
 
@@ -150,7 +154,11 @@ class WalletConfigManagerImpl(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = { _walletConfigLiveData.value = Event(it) },
-                onError = { Timber.e("Loading WalletConfig error: $it") }
+                onError = {
+                    _walletConfigErrorLiveData.value = Event(UnableToInitializeWalletConfigThrowable(it.message))
+                    logWalletConfigErrorToFirebase(it)
+                    Timber.e("Loading WalletConfig error: $it")
+                }
             )
     }
 
@@ -178,6 +186,11 @@ class WalletConfigManagerImpl(
     private fun logVersionToFirebase(version: Int) {
         FirebaseCrashlytics.getInstance()
             .recordException(Throwable("PublicKey: ${masterSeed.publicKey} shouldBlockBackup($version)"))
+    }
+
+    private fun logWalletConfigErrorToFirebase(throwable: Throwable) {
+        FirebaseCrashlytics.getInstance()
+            .recordException(Throwable("PublicKey: ${masterSeed.publicKey} wallet config loading failed: ${throwable.message}"))
     }
 
     private fun compareVersions(version: Int, payload: WalletConfigPayload): Observable<WalletConfig> =
