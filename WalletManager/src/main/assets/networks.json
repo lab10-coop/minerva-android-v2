@@ -158,7 +158,7 @@
     "token": "MATIC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://matic-rpc.lab10.io",
-    "wsRpc": "",
+    "wsRpc": "wss://rpc-mainnet.matic.network",
     "gasPriceOracle": "https://gasstation-mainnet.matic.network",
     "gasPrice": "10000000000",
     "tokens": [],

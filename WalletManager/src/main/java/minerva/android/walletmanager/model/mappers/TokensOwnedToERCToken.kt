@@ -32,7 +32,6 @@ object TokensOwnedToERCToken {
     private fun mapToTokenType(types: List<String>): TokenType = when {
         types.contains(Tokens.ERC_1155.type) -> TokenType.ERC1155
         types.contains(Tokens.ERC_721.type) -> TokenType.ERC721
-        types.contains(Tokens.SUPER_TOKEN.type) -> TokenType.SUPER_TOKEN
         types.contains(Tokens.ERC_20.type) -> TokenType.ERC20
         else -> TokenType.INVALID
     }

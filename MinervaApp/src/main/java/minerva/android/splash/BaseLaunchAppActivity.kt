@@ -6,6 +6,8 @@ import minerva.android.extension.launchActivity
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.onboarding.OnBoardingActivity
 import minerva.android.walletmanager.exception.NotInitializedWalletConfigThrowable
+import minerva.android.walletmanager.exception.UnableToDecryptMasterSeedThrowable
+import minerva.android.walletmanager.exception.UnableToInitializeWalletConfigThrowable
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -22,6 +24,17 @@ abstract class BaseLaunchAppActivity : AppCompatActivity() {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
+    private fun handleError(e: Throwable){
+        when(e){
+            is UnableToInitializeWalletConfigThrowable -> {
+                viewModel.restoreWalletConfigWithSavedMasterSeed()
+            }
+            is UnableToDecryptMasterSeedThrowable -> {
+                showOnBoardingActivity()
+            }
+        }
+    }
+
     protected fun checkWalletConfig() {
         try {
             viewModel.getWalletConfig()
@@ -31,7 +44,7 @@ abstract class BaseLaunchAppActivity : AppCompatActivity() {
             initiateWalletConfig()
             viewModel.walletConfigLiveData.observe(this@BaseLaunchAppActivity, EventObserver { showMainActivity() })
         }
-        viewModel.walletConfigErrorLiveData.observe(this@BaseLaunchAppActivity, EventObserver { showOnBoardingActivity() })
+        viewModel.walletConfigErrorLiveData.observe(this@BaseLaunchAppActivity, EventObserver { handleError(it) })
     }
 
     protected fun initiateWalletConfig() {

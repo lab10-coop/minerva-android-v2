@@ -730,9 +730,9 @@ class TokenManagerTest : RxTest() {
                 address = "address1",
                 tag = "SuperToken",
                 accountAddress = "address4455",
-                type = TokenType.SUPER_TOKEN
+                type = TokenType.ERC20
             ),
-            ERCToken(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test", type = TokenType.SUPER_TOKEN)
+            ERCToken(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test", type = TokenType.ERC20)
         )
         val account = Account(1, chainId = ATS_TAU, address = "address4455")
         whenever(tokenDao.getTaggedTokens()).thenReturn(Single.just(taggedTokens))
@@ -768,9 +768,9 @@ class TokenManagerTest : RxTest() {
                 address = "address1",
                 tag = "SuperToken",
                 accountAddress = "address4455",
-                type = TokenType.SUPER_TOKEN
+                type = TokenType.ERC20
             ),
-            ERCToken(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test", type = TokenType.SUPER_TOKEN)
+            ERCToken(1, "name2", address = "address2", tag = "SuperToken", accountAddress = "test", type = TokenType.ERC20)
         )
         val account = Account(1, chainId = ATS_TAU, address = "address4455")
         whenever(tokenDao.getTaggedTokens()).thenReturn(Single.just(taggedTokens))

@@ -1,16 +1,22 @@
 package minerva.android.splash
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
+import minerva.android.base.BaseViewModel
 import minerva.android.kotlinUtils.event.Event
 import minerva.android.walletmanager.model.wallet.WalletConfig
 import minerva.android.walletmanager.repository.seed.MasterSeedRepository
+import minerva.android.walletmanager.utils.logger.Logger
 import minerva.android.widget.state.AppUIState
+import timber.log.Timber
 
 class LaunchApplicationViewModel(
     private val masterSeedRepository: MasterSeedRepository,
+    private val logger: Logger,
     appUIState: AppUIState
-) : ViewModel() {
+) : BaseViewModel() {
 
     init {
         appUIState.shouldShowSplashScreen = false
@@ -24,4 +30,22 @@ class LaunchApplicationViewModel(
     }
 
     fun getWalletConfig() = masterSeedRepository.getWalletConfig()
+
+    fun restoreWalletConfigWithSavedMasterSeed() {
+        launchDisposable {
+            masterSeedRepository.restoreWalletConfigWithSavedMasterSeed()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onComplete = {
+                        initWalletConfig()
+                        masterSeedRepository.saveIsMnemonicRemembered()
+                    },
+                    onError = { error ->
+                        Timber.e(error)
+                        logger.logToFirebase(error.message ?: "RestoreWalletConfigWithSavedMasterSeed failed")
+                    }
+                )
+        }
+    }
 }

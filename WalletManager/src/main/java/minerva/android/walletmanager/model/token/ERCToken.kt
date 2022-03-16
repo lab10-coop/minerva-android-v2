@@ -75,7 +75,6 @@ enum class TokenType {
         ERC721, ERC1155 -> false
         else -> true
     }
-    fun isSuperToken() = this == SUPER_TOKEN
 
     fun isNft() = isERC1155() || isERC721()
 }
