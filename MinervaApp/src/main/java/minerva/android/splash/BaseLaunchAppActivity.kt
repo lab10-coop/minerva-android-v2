@@ -47,6 +47,18 @@ abstract class BaseLaunchAppActivity : AppCompatActivity() {
         viewModel.walletConfigErrorLiveData.observe(this@BaseLaunchAppActivity, EventObserver { handleError(it) })
     }
 
+    protected fun checkWalletConfigWithOnlyObservers() {
+        try {
+            viewModel.getWalletConfig()
+            showMainActivity()
+        } catch (error: NotInitializedWalletConfigThrowable) {
+            viewModel.walletConfigLiveData.observe(this@BaseLaunchAppActivity, EventObserver {
+                showMainActivity()
+            })
+        }
+        viewModel.walletConfigErrorLiveData.observe(this@BaseLaunchAppActivity, EventObserver { handleError(it) })
+    }
+
     protected fun initiateWalletConfig() {
         viewModel.initWalletConfig()
     }

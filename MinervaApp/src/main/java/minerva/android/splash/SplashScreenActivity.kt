@@ -51,7 +51,7 @@ class SplashScreenActivity : BaseLaunchAppActivity(), PassiveVideoToActivityInte
     }
 
     override fun onAnimationEnd() {
-        checkWalletConfig()
+        checkWalletConfigWithOnlyObservers()
     }
 
     override fun initWalletConfig() {
