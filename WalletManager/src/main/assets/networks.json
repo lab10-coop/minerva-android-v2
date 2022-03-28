@@ -1,6 +1,7 @@
 [
   {
     "name": "ARTIS (τ1)",
+    "isActive": true,
     "token": "tATS",
     "isSafeAccountAvailable": "true",
     "httpRpc": "https://rpc.tau1.artis.network",
@@ -14,6 +15,7 @@
   },
   {
     "name": "Rinkeby",
+    "isActive": true,
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rinkeby.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -31,6 +33,7 @@
   },
   {
     "name": "POA Sokol",
+    "isActive": true,
     "token": "tPOA",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://sokol.poa.network",
@@ -44,6 +47,7 @@
   },
   {
     "name": "LUKSO (L14 Testnet)",
+    "isActive": true,
     "token": "tLYX",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.l14.lukso.network",
@@ -57,6 +61,7 @@
   },
   {
     "name": "Kovan",
+    "isActive": true,
     "token": "kETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://kovan.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -74,6 +79,7 @@
   },
   {
     "name": "Görli",
+    "isActive": true,
     "token": "gETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://goerli.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -91,6 +97,7 @@
   },
   {
     "name": "Ropsten",
+    "isActive": true,
     "token": "tETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://ropsten.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -108,6 +115,7 @@
   },
   {
     "name": "Mumbai",
+    "isActive": true,
     "token": "tMATIC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://matic-mumbai.chainstacklabs.com",
@@ -125,6 +133,7 @@
   },
   {
     "name": "Ethereum",
+    "isActive": true,
     "token": "ETH",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
@@ -138,6 +147,7 @@
   },
   {
     "name": "Gnosis Chain",
+    "isActive": true,
     "token": "xDAI",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://xdai-rpc.lab10.io",
@@ -155,6 +165,7 @@
   },
   {
     "name": "Polygon",
+    "isActive": true,
     "token": "MATIC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://matic-rpc.lab10.io",
@@ -172,6 +183,7 @@
   },
   {
     "name": "ARTIS Σ1",
+    "isActive": true,
     "token": "ATS",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://rpc.sigma1.artis.network",
@@ -185,6 +197,7 @@
   },
   {
     "name": "POA Core",
+    "isActive": true,
     "token": "POA",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://core.poanetwork.dev",
@@ -198,6 +211,7 @@
   },
   {
     "name": "BNB Chain",
+    "isActive": true,
     "token": "BNB",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://bsc-dataseed.binance.org/",
@@ -211,6 +225,7 @@
   },
   {
     "name": "BNB Testnet",
+    "isActive": true,
     "token": "tBNB",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://data-seed-prebsc-1-s1.binance.org:8545/",
@@ -224,6 +239,7 @@
   },
   {
     "name": "RSK Mainnet",
+    "isActive": true,
     "token": "RBTC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://public-node.rsk.co",
@@ -237,6 +253,7 @@
   },
   {
     "name": "RSK Testnet",
+    "isActive": true,
     "token": "tRBTC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://public-node.testnet.rsk.co",
