@@ -1,6 +1,7 @@
 package minerva.android.apiProvider.api
 
 import io.reactivex.Single
+import minerva.android.apiProvider.BuildConfig
 import minerva.android.apiProvider.api.ServicesApi.Companion.APPLICATION_JSON
 import minerva.android.apiProvider.api.ServicesApi.Companion.CONTENT_TYPE
 import minerva.android.apiProvider.model.ChainDetails
@@ -82,7 +83,7 @@ interface CryptoApi {
     @GET
     fun getERC1155TokenDetails(@Url url: String): Single<NftDetails>
 
-    @GET(DAPPS_DETAILS_URL)
+    @GET(BuildConfig.DAPPS_DETAILS_URL)
     fun getDappsDetails(): Single<DappDetailsList>
 
     @GET(DAPPS_DETAILS_LAST_COMMIT)
@@ -96,8 +97,6 @@ interface CryptoApi {
         private const val CHAIN_DETAILS_URL = "https://chainlist.org/chains.json"
         private const val NFT_COLLECTION_DETAILS_URL =
             "https://raw.githubusercontent.com/lab10-coop/minerva-nft-list/main/all.json"
-        private const val DAPPS_DETAILS_URL =
-            "https://raw.githubusercontent.com/lab10-coop/minerva-dapplist/main/dapplist_staging.json"
         private const val DAPPS_DETAILS_LAST_COMMIT =
             "https://api.github.com/repos/lab10-coop/minerva-dapplist/commits?path=dapplist.json&page=1&per_page=1"
     }

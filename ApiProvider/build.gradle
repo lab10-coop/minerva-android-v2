@@ -25,6 +25,23 @@ android {
         }
     }
 
+    flavorDimensions 'enviroment'
+
+    productFlavors {
+        flavorDimensions 'enviroment'
+        staging {
+            dimension 'enviroment'
+            matchingFallbacks = ["staging"]
+            buildConfigField "String", "DAPPS_DETAILS_URL", '"https://raw.githubusercontent.com/lab10-coop/minerva-dapplist/main/dapplist_staging.json"'
+        }
+
+        production {
+            dimension 'enviroment'
+            matchingFallbacks = ["production"]
+            buildConfigField "String", "DAPPS_DETAILS_URL", '"https://raw.githubusercontent.com/lab10-coop/minerva-dapplist/main/dapplist.json"'
+        }
+    }
+
 }
 
 dependencies {
