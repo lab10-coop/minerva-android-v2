@@ -7,6 +7,7 @@ import java.math.BigInteger
 
 data class Network(
     val name: String = String.Empty,
+    val isActive: Boolean = true,
     val token: String = String.Empty,
     val httpRpc: String = String.Empty,
     val wsRpc: String = String.Empty,
