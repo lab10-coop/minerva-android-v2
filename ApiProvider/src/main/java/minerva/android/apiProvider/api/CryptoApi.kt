@@ -86,7 +86,7 @@ interface CryptoApi {
     @GET(BuildConfig.DAPPS_DETAILS_URL)
     fun getDappsDetails(): Single<DappDetailsList>
 
-    @GET(DAPPS_DETAILS_LAST_COMMIT)
+    @GET(BuildConfig.DAPPS_DETAILS_LAST_COMMIT)
     fun getLastCommitFromDappsDetails(): Single<List<CommitElement>>
 
     companion object {
@@ -97,7 +97,5 @@ interface CryptoApi {
         private const val CHAIN_DETAILS_URL = "https://chainlist.org/chains.json"
         private const val NFT_COLLECTION_DETAILS_URL =
             "https://raw.githubusercontent.com/lab10-coop/minerva-nft-list/main/all.json"
-        private const val DAPPS_DETAILS_LAST_COMMIT =
-            "https://api.github.com/repos/lab10-coop/minerva-dapplist/commits?path=dapplist.json&page=1&per_page=1"
     }
 }
