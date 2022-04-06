@@ -7,9 +7,8 @@ import io.reactivex.Single
 import minerva.android.apiProvider.api.CryptoApi
 import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.apiProvider.model.GasPricesFromRpcOverHttp
-import minerva.android.apiProvider.model.GasPricesMatic
+import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.gaswatch.GasPrices
 import minerva.android.apiProvider.model.gaswatch.TransactionSpeedStats
 import minerva.android.blockchainprovider.model.*
 import minerva.android.blockchainprovider.repository.ens.ENSRepository
@@ -627,7 +626,7 @@ class TransactionRepositoryTest : RxTest() {
         )
         whenever(cryptoApi.getGasPriceForMatic(any())).thenReturn(
             Single.just(
-                GasPricesMatic(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN)
+                GasPrices(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN)
             )
         )
         whenever(

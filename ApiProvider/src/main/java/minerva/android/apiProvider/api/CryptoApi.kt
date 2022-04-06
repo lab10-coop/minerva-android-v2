@@ -9,7 +9,7 @@ import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.DappDetailsList
 import minerva.android.apiProvider.model.NftDetails
 import minerva.android.apiProvider.model.GasPricesFromRpcOverHttp
-import minerva.android.apiProvider.model.GasPricesMatic
+import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.NftCollectionDetails
 import minerva.android.apiProvider.model.RpcOverHttpPayload
@@ -17,7 +17,6 @@ import minerva.android.apiProvider.model.TokenBalanceResponse
 import minerva.android.apiProvider.model.TokenDetails
 import minerva.android.apiProvider.model.TokenTxResponse
 import minerva.android.apiProvider.model.TokensOwnedPayload
-import minerva.android.apiProvider.model.gaswatch.GasPrices
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -43,11 +42,6 @@ interface CryptoApi {
         @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
         @Url url: String
     ): Single<GasPrices>
-
-    @GET
-    fun getGasPriceForMatic(
-        @Url url: String
-    ): Single<GasPricesMatic>
 
     @POST
     fun getGasPriceFromRpcOverHttp(

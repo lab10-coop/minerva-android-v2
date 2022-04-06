@@ -10,11 +10,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPricesMatic
+import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.MarketIds
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.TransactionSpeed
-import minerva.android.apiProvider.model.gaswatch.GasPrices
 import minerva.android.blockchainprovider.model.ExecutedTransaction
 import minerva.android.blockchainprovider.model.TokenWithBalance
 import minerva.android.blockchainprovider.model.TokenWithError
@@ -414,12 +413,12 @@ class TransactionRepositoryImpl(
                     }
             }
             shouldGetGasPriceFromApi(chainId) && isMaticNetwork(chainId) -> {
-                cryptoApi.getGasPriceForMatic(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
-                    .flatMap { gasPricesMatic ->
+                cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
+                    .flatMap { gasPrice ->
                         getTxCosts(
                             txCostPayload,
-                            gasPricesMatic.toTransactionSpeed(),
-                            gasPricesMatic.toTransactionSpeed().standard
+                            gasPrice.toTransactionSpeed(),
+                            gasPrice.toTransactionSpeed().standard
                         )
                     }
                     .onErrorResumeNext { getTxCosts(txCostPayload, null, null) }
@@ -525,19 +524,11 @@ class TransactionRepositoryImpl(
                 }
             }
 
-    private fun GasPricesMatic.toTransactionSpeed() = TransactionSpeed(
+    private fun GasPrices.toTransactionSpeed() = TransactionSpeed(
         rapid = unitConverter.toGwei(rapid),
         fast = unitConverter.toGwei(fast),
         standard = unitConverter.toGwei(standard),
         slow = unitConverter.toGwei(slow)
-    )
-
-    private fun GasPrices.toTransactionSpeed() = TransactionSpeed(
-        rapid = unitConverter.toGwei(instant.gwei),
-        fast = unitConverter.toGwei(fast.gwei),
-        standard = unitConverter.toGwei(normal.gwei),
-        slow = unitConverter.toGwei(slow.gwei),
-        timestamp = lastUpdated
     )
 
     private fun getPendingAccountsWithBlockHashes(pendingTxList: List<Pair<String, String?>>): MutableList<PendingAccount> {

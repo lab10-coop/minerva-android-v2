@@ -3,7 +3,7 @@ package minerva.android.apiProvider.model
 import com.google.gson.annotations.SerializedName
 import java.math.BigDecimal
 
-data class GasPricesMatic(
+data class GasPrices(
     @SerializedName("fastest")
     val rapid: BigDecimal = BigDecimal.ZERO,
     @SerializedName("fast")

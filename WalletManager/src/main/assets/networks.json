@@ -138,7 +138,7 @@
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://mainnet.infura.io/v3/c7ec643b8c764cb5930bca18fb763469",
     "wsRpc": "wss://mainnet.infura.io/ws/v3/c7ec643b8c764cb5930bca18fb763469",
-    "gasPriceOracle": "https://ethgas.watch/api/gas",
+    "gasPriceOracle": "https://gas.mycryptoapi.com",
     "gasPrice": "20000000000",
     "tokens": [],
     "color": "#393939",
