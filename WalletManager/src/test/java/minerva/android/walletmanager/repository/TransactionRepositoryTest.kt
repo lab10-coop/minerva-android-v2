@@ -9,7 +9,6 @@ import minerva.android.apiProvider.model.FiatPrice
 import minerva.android.apiProvider.model.GasPricesFromRpcOverHttp
 import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
-import minerva.android.apiProvider.model.gaswatch.TransactionSpeedStats
 import minerva.android.blockchainprovider.model.*
 import minerva.android.blockchainprovider.repository.ens.ENSRepository
 import minerva.android.blockchainprovider.repository.erc1155.ERC1155TokenRepository
@@ -592,11 +591,10 @@ class TransactionRepositoryTest : RxTest() {
                 )
             )
         )
-        val transactionSpeedStats = TransactionSpeedStats(BigDecimal.TEN)
 
         whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(
             Single.just(
-                GasPrices(transactionSpeedStats, transactionSpeedStats, transactionSpeedStats, transactionSpeedStats)
+                GasPrices(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN)
             )
         )
         whenever(
@@ -624,7 +622,7 @@ class TransactionRepositoryTest : RxTest() {
                 )
             )
         )
-        whenever(cryptoApi.getGasPriceForMatic(any())).thenReturn(
+        whenever(cryptoApi.getGasPrice(any(), any())).thenReturn(
             Single.just(
                 GasPrices(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN)
             )
