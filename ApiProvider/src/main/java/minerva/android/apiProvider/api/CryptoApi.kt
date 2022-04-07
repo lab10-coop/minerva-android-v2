@@ -9,7 +9,6 @@ import minerva.android.apiProvider.model.CommitElement
 import minerva.android.apiProvider.model.DappDetailsList
 import minerva.android.apiProvider.model.NftDetails
 import minerva.android.apiProvider.model.GasPricesFromRpcOverHttp
-import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.NftCollectionDetails
 import minerva.android.apiProvider.model.RpcOverHttpPayload
@@ -36,12 +35,6 @@ interface CryptoApi {
         @Query(CONTRACT_ADDRESSES) contractAddress: String,
         @Query(VS_CURRENCIES) currency: String
     ): Single<Map<String, Map<String, String>>>
-
-    @GET
-    fun getGasPrice(
-        @Header(CONTENT_TYPE) content: String = APPLICATION_JSON,
-        @Url url: String
-    ): Single<GasPrices>
 
     @POST
     fun getGasPriceFromRpcOverHttp(

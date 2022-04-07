@@ -10,7 +10,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.zipWith
 import io.reactivex.schedulers.Schedulers
 import minerva.android.apiProvider.api.CryptoApi
-import minerva.android.apiProvider.model.GasPrices
 import minerva.android.apiProvider.model.MarketIds
 import minerva.android.apiProvider.model.Markets
 import minerva.android.apiProvider.model.TransactionSpeed
@@ -403,7 +402,7 @@ class TransactionRepositoryImpl(
 
     override fun getTransactionCosts(txCostPayload: TxCostPayload): Single<TransactionCost> = with(txCostPayload) {
         when {
-            isBscNetwork(chainId) || isRskNetwork(chainId) -> {
+            shouldGetGasPriceFromApi(chainId) -> {
                 cryptoApi.getGasPriceFromRpcOverHttp(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
                     .flatMap { gasPrice ->
                         getTxCosts(txCostPayload, null, gasPrice.result)
@@ -411,28 +410,6 @@ class TransactionRepositoryImpl(
                     .onErrorResumeNext {
                         getTxCosts(txCostPayload, null, null)
                     }
-            }
-            shouldGetGasPriceFromApi(chainId) && isMaticNetwork(chainId) -> {
-                cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
-                    .flatMap { gasPrice ->
-                        getTxCosts(
-                            txCostPayload,
-                            gasPrice.toTransactionSpeed(),
-                            gasPrice.toTransactionSpeed().standard
-                        )
-                    }
-                    .onErrorResumeNext { getTxCosts(txCostPayload, null, null) }
-            }
-            shouldGetGasPriceFromApi(chainId) -> {
-                cryptoApi.getGasPrice(url = NetworkManager.getNetwork(chainId).gasPriceOracle)
-                    .flatMap { gasPrice ->
-                        getTxCosts(
-                            txCostPayload,
-                            gasPrice.toTransactionSpeed(),
-                            gasPrice.toTransactionSpeed().fast
-                        )
-                    }
-                    .onErrorResumeNext { getTxCosts(txCostPayload, null, null) }
             }
             else -> getTxCosts(txCostPayload, null, null)
         }
@@ -523,13 +500,6 @@ class TransactionRepositoryImpl(
                     unitConverter.fromWei(it).setScale(SCALE, RoundingMode.HALF_EVEN)
                 }
             }
-
-    private fun GasPrices.toTransactionSpeed() = TransactionSpeed(
-        rapid = unitConverter.toGwei(rapid),
-        fast = unitConverter.toGwei(fast),
-        standard = unitConverter.toGwei(standard),
-        slow = unitConverter.toGwei(slow)
-    )
 
     private fun getPendingAccountsWithBlockHashes(pendingTxList: List<Pair<String, String?>>): MutableList<PendingAccount> {
         val pendingList = mutableListOf<PendingAccount>()
