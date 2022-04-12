@@ -239,7 +239,7 @@
   },
   {
     "name": "RSK Mainnet",
-    "isActive": true,
+    "isActive": false,
     "token": "RBTC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://public-node.rsk.co",
@@ -253,7 +253,7 @@
   },
   {
     "name": "RSK Testnet",
-    "isActive": true,
+    "isActive": false,
     "token": "tRBTC",
     "isSafeAccountAvailable": "false",
     "httpRpc": "https://public-node.testnet.rsk.co",
