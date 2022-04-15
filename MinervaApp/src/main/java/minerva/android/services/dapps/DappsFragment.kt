@@ -11,16 +11,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import minerva.android.R
 import minerva.android.databinding.RecyclerViewLayoutBinding
 import minerva.android.services.dapps.adapter.DappsAdapter
+import minerva.android.services.dapps.adapter.NetworksFilterAdapter
 import minerva.android.services.dapps.adapter.SeparatorAdapter
 import minerva.android.services.dapps.adapter.TitleAdapter
 import minerva.android.services.dapps.dialog.OpenDappDialog
 import minerva.android.services.dapps.model.DappsWithCategories
+import minerva.android.utils.MyHelper.l
 import minerva.android.utils.VerticalMarginItemDecoration
+import minerva.android.walletmanager.model.network.Network
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-
 class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.Listener,
-    OpenDappDialog.Listener {
+    OpenDappDialog.Listener, NetworksFilterAdapter.Listener {
 
     private val viewModel: DappsViewModel by sharedViewModel()
     private lateinit var binding: RecyclerViewLayoutBinding
@@ -32,6 +34,8 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
     private val favoriteDappAdapter = DappsAdapter(this)
     private val favoriteTitleAdapter = TitleAdapter(R.string.favorite_label)
     private val favoriteSeparatorAdapter = SeparatorAdapter()
+    //networks from networks.json file; uses for filtering dapps by specified network (id)
+    private val networksFilterAdapter = NetworksFilterAdapter(this)
 
     private val concatAdapter = ConcatAdapter(
         favoriteTitleAdapter,
@@ -75,10 +79,20 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
     }
 
     private fun setupRecycleView() {
-        binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = concatAdapter
-            addItemDecoration(getRecyclerViewItemDecorator())
+        binding.apply {
+            //networks filter recyclerview
+            servicesFilterNetworkRecyclerView.apply {
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                adapter = networksFilterAdapter
+                setHasFixedSize(true)
+            }
+            networksFilterAdapter.submitList(viewModel.filteredNetworks())
+            //dapps  recyclerview
+            recyclerView.apply {
+                layoutManager = LinearLayoutManager(context)
+                adapter = concatAdapter
+                addItemDecoration(getRecyclerViewItemDecorator())
+            }
         }
     }
 
@@ -109,5 +123,9 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
 
     override fun onCancel() {
         dialogOpen.dismiss()
+    }
+
+    override fun onNetworkSelected(network: Network) {
+        viewModel.filterByNetworkId(network.chainId)
     }
 }

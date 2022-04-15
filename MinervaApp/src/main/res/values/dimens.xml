@@ -84,4 +84,5 @@
     <dimen name="token_view_margin_end">22dp</dimen>
     <dimen name="accounts_srl_margin_top">6dp</dimen>
     <dimen name="sponsored_label_height">12dp</dimen>
+    <dimen name="services_network_filter_border">12dp</dimen>
 </resources>

@@ -110,7 +110,8 @@ class DappsRepositoryImpl(
             buttonColor,
             iconLink,
             sponsored != NOT_SPONSORED_ID,
-            sponsored
+            sponsored,
+            chainIds
         )
 
     companion object {

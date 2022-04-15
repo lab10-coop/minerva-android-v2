@@ -13,7 +13,8 @@ data class Dapp(
     val dappUrl: String = String.empty,
     val isSponsored: Boolean = false,
     val sponsoredOrder: Int = NOT_SPONSORED_ORDER_ID,
-    var isFavorite: Boolean = false
+    var isFavorite: Boolean = false,
+    val chainIds: List<Int> = emptyList()
 ) {
     companion object {
         private const val NOT_SPONSORED_ORDER_ID = 0

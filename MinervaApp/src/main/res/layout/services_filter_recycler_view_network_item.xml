@@ -1,0 +1,17 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="@dimen/margin_xsmall"
+    android:background="@drawable/services_filter_network_main_background">
+
+    <TextView
+        android:gravity="center_vertical"
+        android:id="@+id/network_name_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/default_placeholder"
+        android:textStyle="bold"
+        android:textColor="@color/servicesFilterNetworkMainBackground"
+        android:textSize="@dimen/margin_normal"/>
+
+</LinearLayout>

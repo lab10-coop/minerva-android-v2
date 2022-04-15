@@ -401,6 +401,8 @@
     <string name="error_invalid_token_id">Error: Invalid token id</string>
     <string name="token_type">Type</string>
     <string name="you_dont_own_this_token">You do not own this token</string>
+    <string name="default_placeholder">default</string>
+    <string name="services_network_filter_main_color">#6442d1</string>
 
     <string-array name="currencies">
         <item>EUR|Euro</item>
