@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <stroke android:width="@dimen/margin_xxxsmall"
-        android:color="@color/servicesFilterNetworkMainBackground" />
-    <corners android:radius="@dimen/services_network_filter_border"/>
-    <padding android:left="@dimen/margin_normal" android:top="@dimen/no_elevation"
-        android:right="@dimen/margin_normal" android:bottom="@dimen/no_elevation" />
-</shape>

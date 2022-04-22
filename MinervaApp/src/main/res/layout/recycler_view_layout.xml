@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".identities.IdentitiesFragment">
 
     <TextView
@@ -19,20 +20,29 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_marginTop="@dimen/margin_normal"
+        <HorizontalScrollView
+            android:layout_marginLeft="@dimen/margin_small"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/margin_large">
+            android:layout_height="@dimen/margin_xxxlarge"
+            android:scrollbars="none">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_gravity="center_vertical"
-                android:id="@+id/services_filter_network_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:listitem="@layout/services_filter_recycler_view_network_item"
-                android:orientation="horizontal"/>
+            <com.google.android.material.chip.ChipGroup
+                android:layout_marginTop="@dimen/margin_normal"
+                android:id="@+id/services_filter_chip_group"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/services_filter_ch_gr_layout_height"
+                app:chipSpacingHorizontal="@dimen/margin_xsmall">
 
-        </LinearLayout>
+<!--                <com.google.android.material.chip.Chip-->
+<!--                    style="@style/ServicesNetworkFilterChipItemMainStyle"-->
+<!--                    android:text="Test Chip"/>-->
+<!--                <com.google.android.material.chip.Chip-->
+<!--                    style="@style/ServicesNetworkFilterChipItemMainStyle"-->
+<!--                    android:text="Test Chip"/>-->
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </HorizontalScrollView>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"

@@ -9,6 +9,7 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.services.dapps.model.Dapp
 import minerva.android.services.dapps.model.DappsWithCategories
+import minerva.android.utils.MyHelper.l
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.dapps.DappUIDetails
 import minerva.android.walletmanager.model.network.Network
@@ -23,23 +24,52 @@ class DappsViewModel(
     val dappsLiveData: LiveData<DappsWithCategories> get() = _dappsLiveData
 
     private var dapps: List<Dapp> = emptyList()
+    //property for store previous filter value
+    private var prevFilterValue: Int = DappsFragment.allDappItemChainId
 
     /**
-     * Filtered Networks - method which get list of filtered networks
+     * Get Filtered Networks - method which get list of filtered networks
      * @return List<Network> - instance of minerva.android.walletmanager.model.network.Network
      */
-    fun filteredNetworks(): List<Network> =
-        if (localStorage.areMainNetworksEnabled)
-            NetworkManager.networks.filter { it.isActive }
-        else
-            NetworkManager.networks.filter { it.isActive && it.testNet }
+    fun getFilteredNetworks(): List<Network> {
+        //get network chains of active dapps, for prevent showing network which dapps not use
+        val idsOfActiveChains: MutableList<Int> = mutableListOf()
+        //choosing unique network chain id
+        dapps.forEach { dapp ->
+            dapp.chainIds.forEach { chainId ->
+                if (!idsOfActiveChains.contains(chainId)) idsOfActiveChains.add(chainId)
+            }
+        }
+
+        val networks: MutableList<Network> = mutableListOf(
+            //add default "All" filter item
+            Network(
+                name = DappsFragment.allDappItemName,
+                chainId = DappsFragment.allDappItemChainId,
+                isActive = true,
+                testNet = true)
+        )
+        //sort by "test" network
+        if (localStorage.areMainNetworksEnabled) NetworkManager.networks
+            .filter { it.isActive && idsOfActiveChains.contains(it.chainId) }
+            .forEach { networks.add(it) }
+        else NetworkManager.networks
+            .filter { it.isActive && it.testNet && idsOfActiveChains.contains(it.chainId) }
+            .forEach { networks.add(it) }
+        return networks
+    }
 
     /**
      * Filter By Network Id - method which filters dapps by network id
      * @param chainId - Int - id of Network
      */
     fun filterByNetworkId(chainId: Int) {
-        val filteredDapps: List<Dapp> = this.dapps.filter { it.chainIds.contains(chainId) }
+        var filteredDapps: List<Dapp>
+        if (chainId == DappsFragment.allDappItemChainId)
+            filteredDapps = dapps
+        else
+            filteredDapps = dapps.filter { it.chainIds.contains(chainId) }
+
         _dappsLiveData.value = DappsWithCategories(
             favorite = filteredDapps.filter { it.isFavorite }.sortedBy { it.shortName.toUpperCase() },
             sponsored = filteredDapps.filter { !it.isFavorite && it.isSponsored }.sortedBy { it.sponsoredOrder },

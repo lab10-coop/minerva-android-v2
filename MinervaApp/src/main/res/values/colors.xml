@@ -79,5 +79,5 @@
     <color name="advancedDescriptionColor">#737285</color>
     <color name="advancedTitleColor">#5C5D6D</color>
     <color name="advancedActionColor">#908F9D</color>
-    <color name="servicesFilterNetworkMainBackground">#6442d1</color>
+    <color name="servicesFilterNetworkMainColor">#5858ED</color>
 </resources>
