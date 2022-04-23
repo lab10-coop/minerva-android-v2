@@ -34,10 +34,17 @@ import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.manager.wallet.WalletConfigManager
 import minerva.android.walletmanager.model.ContentType
 import minerva.android.walletmanager.model.NftContent
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_ONE
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_TAU
+import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_C
+import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_FUJ
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC_TESTNET
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_ALF
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO_BAK
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_GOR
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
@@ -46,6 +53,8 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_SKL
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
@@ -598,8 +607,9 @@ class TokenManagerImpl(
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
             ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, BSC_TESTNET -> getTokensFromTx(account)
-            MUMBAI, RSK_TEST, RSK_MAIN -> Single.just(emptyList()) // Networks without token explorer urls
+            MUMBAI, RSK_TEST, RSK_MAIN, ARB_ONE, ARB_RIN, OPT, OPT_KOV, CELO, CELO_BAK, CELO_ALF, AVA_C, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
             XDAI, MATIC, ATS_SIGMA, BSC, ETH_MAIN -> getTokensOwned(account)
+            // todo: tokensowned-api for: Arbitrum, Optimism, Celo, Avalanche
             else -> getTokensForAccount(account)
         }
 

@@ -98,6 +98,11 @@ class RampViewModel(
         private const val MATIC_USDC_RAMP_SYMBOL = "MATIC_USDC"
         private const val MATIC_DAI_RAMP_SYMBOL = "MATIC_DAI"
         private const val BSC_RAMP_SYMBOL = "BSC_BNB"
+        private const val ARB_ONE_ETH_RAMP_SYMBOL = "AETH"
+        private const val CELO_RAMP_SYMBOL = "CELO"
+        private const val CELO_CEUR_RAMP_SYMBOL = "CEUR"
+        private const val CELO_CUSD_RAMP_SYMBOL = "CUSD"
+        private const val AVAX_RAMP_SYMBOL = "AVAX"
         private fun getNetworkName(chainId: Int): String = NetworkManager.getNetwork(chainId).name
 
         val rampCrypto
@@ -121,7 +126,12 @@ class RampViewModel(
                     R.drawable.ic_gnosis_chain_token,
                     getNetworkName(ChainId.XDAI)
                 ),
-                RampCrypto(ChainId.BSC, BSC_RAMP_SYMBOL, R.drawable.ic_bsc_token, getNetworkName(ChainId.BSC)),
+                RampCrypto(
+                    ChainId.BSC,
+                    BSC_RAMP_SYMBOL,
+                    R.drawable.ic_bsc_token,
+                    getNetworkName(ChainId.BSC)
+                ),
 
                 RampCrypto(
                     ChainId.ETH_MAIN,
@@ -141,7 +151,12 @@ class RampViewModel(
                     R.drawable.ic_usdt_token,
                     getNetworkName(ChainId.ETH_MAIN)
                 ),
-                RampCrypto(ChainId.MATIC, ETH_RAMP_SYMBOL, R.drawable.ic_ethereum_token, getNetworkName(ChainId.MATIC)),
+                RampCrypto(
+                    ChainId.MATIC,
+                    ETH_RAMP_SYMBOL,
+                    R.drawable.ic_ethereum_token,
+                    getNetworkName(ChainId.MATIC)
+                ),
 
                 RampCrypto(
                     ChainId.MATIC,
@@ -154,7 +169,39 @@ class RampViewModel(
                     MATIC_USDC_RAMP_SYMBOL,
                     R.drawable.ic_usdc_token,
                     getNetworkName(ChainId.MATIC)
+                ),
+                RampCrypto(
+                    ChainId.ARB_ONE,
+                    ARB_ONE_ETH_RAMP_SYMBOL,
+                    R.drawable.ic_ethereum_l2,
+                    getNetworkName(ChainId.ARB_ONE)
+                ),
+                RampCrypto(
+                    ChainId.CELO,
+                    CELO_RAMP_SYMBOL,
+                    R.drawable.ic_celo,
+                    getNetworkName(ChainId.CELO)
+                ),
+
+                RampCrypto(
+                    ChainId.AVA_C,
+                    AVAX_RAMP_SYMBOL,
+                    R.drawable.ic_avalanche,
+                    getNetworkName(ChainId.AVA_C)
+                ),
+                RampCrypto(
+                    ChainId.CELO,
+                    CELO_CEUR_RAMP_SYMBOL,
+                    R.drawable.ic_celo, // todo: ceur
+                    getNetworkName(ChainId.CELO)
+                ),
+                RampCrypto(
+                    ChainId.CELO,
+                    CELO_CUSD_RAMP_SYMBOL,
+                    R.drawable.ic_celo, // todo: cusd
+                    getNetworkName(ChainId.CELO)
                 )
+
             )
     }
 }
