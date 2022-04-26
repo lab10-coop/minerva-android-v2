@@ -51,7 +51,7 @@ class DappsViewModel(
         )
         //sort by "test" network
         if (localStorage.areMainNetworksEnabled) NetworkManager.networks
-            .filter { it.isActive && idsOfActiveChains.contains(it.chainId) }
+            .filter { it.isActive && !it.testNet && idsOfActiveChains.contains(it.chainId)}
             .forEach { networks.add(it) }
         else NetworkManager.networks
             .filter { it.isActive && it.testNet && idsOfActiveChains.contains(it.chainId) }
