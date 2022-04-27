@@ -32,20 +32,7 @@
                 android:id="@+id/services_filter_chip_group"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/services_filter_ch_gr_layout_height"
-                app:chipSpacingHorizontal="@dimen/margin_xsmall">
-
-                    <!-- for test-->
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/ServicesNetworkFilterChipItemMainStyle"-->
-<!--                    android:text="All"/>-->
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/ServicesNetworkFilterChipItemMainStyle"-->
-<!--                    android:text="Test Chip"/>-->
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/ServicesNetworkFilterChipItemMainStyle"-->
-<!--                    android:text="Test Chip"/>-->
-
-            </com.google.android.material.chip.ChipGroup>
+                app:chipSpacingHorizontal="@dimen/margin_xsmall"/>
 
         </HorizontalScrollView>
 

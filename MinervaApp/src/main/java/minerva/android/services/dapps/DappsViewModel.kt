@@ -9,7 +9,6 @@ import io.reactivex.schedulers.Schedulers
 import minerva.android.base.BaseViewModel
 import minerva.android.services.dapps.model.Dapp
 import minerva.android.services.dapps.model.DappsWithCategories
-import minerva.android.utils.MyHelper.l
 import minerva.android.walletmanager.manager.networks.NetworkManager
 import minerva.android.walletmanager.model.dapps.DappUIDetails
 import minerva.android.walletmanager.model.network.Network

@@ -19,7 +19,6 @@ import minerva.android.services.dapps.adapter.SeparatorAdapter
 import minerva.android.services.dapps.adapter.TitleAdapter
 import minerva.android.services.dapps.dialog.OpenDappDialog
 import minerva.android.services.dapps.model.DappsWithCategories
-import minerva.android.utils.MyHelper.l
 import minerva.android.utils.VerticalMarginItemDecoration
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
@@ -122,7 +121,7 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
      * @param status: Boolean - if "true" set item to "enabled" style; if "false" set item to "disabled"
      */
     private fun updateNetworkItemStyle(chip: Chip, status: Boolean) {
-        if (status == true) {
+        if (status) {
             chip.setChipBackgroundColorResource(R.color.servicesFilterNetworkMainColor)
             chip.setTextColor(Color.WHITE)
         } else {
