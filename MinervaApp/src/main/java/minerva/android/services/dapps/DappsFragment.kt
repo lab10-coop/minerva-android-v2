@@ -74,7 +74,7 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
         }
     }
 
-    private fun updateDapps(dapps: DappsWithCategories) { l("updateDapps")
+    private fun updateDapps(dapps: DappsWithCategories) {
         favoriteDappAdapter.submitList(dapps.favorite)
         favoriteTitleAdapter.setVisibility(dapps.isFavoriteVisible)
         favoriteSeparatorAdapter.setVisibility(dapps.isFavoriteVisible)
@@ -113,7 +113,6 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
             }
             //resort dapps cache by specified network chainId
             viewModel.filterByNetworkId(prevChipId)
-            l("v8")
         }
     }
 

@@ -42,12 +42,8 @@ class DappsViewModel(
         }
 
         val networks: MutableList<Network> = mutableListOf(
-            //add default "All" filter item
-            Network(
-                name = DappsFragment.allDappItemName,
-                chainId = DappsFragment.allDappItemChainId,
-                isActive = true,
-                testNet = true)
+            //add default filter item
+            Network(DappsFragment.allDappItemName, chainId = DappsFragment.allDappItemChainId)
         )
         //sort by "test" network
         if (localStorage.areMainNetworksEnabled) NetworkManager.networks
