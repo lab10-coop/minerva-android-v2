@@ -80,4 +80,5 @@
     <color name="advancedTitleColor">#5C5D6D</color>
     <color name="advancedActionColor">#908F9D</color>
     <color name="servicesFilterNetworkMainColor">#5858ED</color>
+    <color name="warningOrangeLight">#FFE4B9</color>
 </resources>

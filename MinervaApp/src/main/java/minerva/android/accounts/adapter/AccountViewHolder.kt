@@ -76,6 +76,9 @@ class AccountViewHolder(
     private fun View.bindData(account: Account, fiatSymbol: String) {
         with(account) {
             binding.apply {
+                //show "unmaintained network" flag
+                if (!account.isActiveNetwork) unmaintainedNetworkFlag.visibility = View.VISIBLE
+
                 card.setCardBackgroundColor(Color.parseColor(NetworkManager.getStringColor(network, isPending)))
                 progress.apply {
                     visibleOrGone(isPending)

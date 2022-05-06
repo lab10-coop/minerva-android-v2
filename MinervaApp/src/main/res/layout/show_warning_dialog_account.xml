@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/rounded_white_background"
+    android:padding="@dimen/margin_normal">
+
+    <LinearLayout
+        android:layout_gravity="center_horizontal"
+        android:layout_width="@dimen/margin_large"
+        android:layout_height="@dimen/margin_large"
+        android:orientation="vertical"
+        android:background="@drawable/unmaintained_network_exclamation_mark_bg">
+
+        <TextView
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/exclamation_mark"
+            android:fontFamily="@font/roboto_bold"
+            android:textSize="@dimen/text_large"
+            android:textColor="@color/white"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/margin_xbig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/unmaintained_network_message_1"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center"
+        android:textColor="@color/colorSetOne"
+        android:textSize="@dimen/text_normal"/>
+
+    <TextView
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/margin_xbig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/rubik_regular"
+        android:gravity="center"
+        android:text="@string/unmaintained_network_message_2"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_normal"/>
+
+    <LinearLayout
+
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/show_warning_container"
+        android:layout_marginTop="@dimen/margin_xbig"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/show_warning_state"
+            android:layout_width="@dimen/margin_xbig"
+            android:layout_height="@dimen/margin_xbig"/>
+
+        <TextView
+            android:layout_marginLeft="@dimen/margin_normal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_regular"
+            android:gravity="center"
+            android:text="@string/unmaintained_network_message_3"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_normal"/>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_marginTop="@dimen/margin_xbig"
+        android:id="@+id/ok_button"
+        style="@style/PurpleButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ok"/>
+</LinearLayout>

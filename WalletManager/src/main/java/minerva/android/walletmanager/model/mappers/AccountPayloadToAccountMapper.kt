@@ -23,6 +23,7 @@ object AccountPayloadToAccountMapper {
             contractAddress = response.contractAddress,
             bindedOwner = response.bindedOwner,
             _isTestNetwork = response.isTestNetwork,
-            isHide = response.isHide
+            isHide = response.isHide,
+            showWarning = response.showWarning
         )
 }

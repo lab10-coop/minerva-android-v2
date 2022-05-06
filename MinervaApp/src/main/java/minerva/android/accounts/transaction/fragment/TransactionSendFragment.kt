@@ -35,11 +35,15 @@ import minerva.android.kotlinUtils.OneElement
 import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.dapps.dialog.OpenDappDialog
 import minerva.android.services.dapps.model.Dapp
+import minerva.android.utils.AlertDialogHandler
+import minerva.android.utils.MinervaLogger
+import minerva.android.utils.MinervaLogger.l
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.TransactionCost
 import minerva.android.walletmanager.utils.BalanceUtils
 import minerva.android.widget.MinervaFlashbar
+import minerva.android.widget.dialog.ShowWarningDialog
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -60,7 +64,11 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send), Op
     private var txCostObservable: BigDecimal by Delegates.observable(BigDecimal.ZERO) { _, oldValue: BigDecimal, newValue: BigDecimal ->
         binding.apply {
             transactionCostAmount.text =
-                getString(R.string.transaction_cost_amount, newValue.toPlainString(), viewModel.token)
+                getString(
+                    R.string.transaction_cost_amount,
+                    newValue.toPlainString(),
+                    viewModel.token
+                )
             if (allPressed && oldValue != newValue) {
                 if (viewModel.recalculateAmount <= BigDecimal.ZERO) amount.setText(BigDecimal.ZERO.toPlainString())
                 else amount.setText(viewModel.recalculateAmount.toPlainString())
@@ -79,6 +87,22 @@ class TransactionSendFragment : Fragment(R.layout.fragment_transaction_send), Op
         prepareRecipients()
         prepareObservers()
         showBalanceError()
+        setupUnmaintainedNetworkContainer()
+    }
+
+    /**
+     * Setup Unmaintained Network Container - setup container
+     */
+    private fun setupUnmaintainedNetworkContainer() {
+        if (!viewModel.account.isActiveNetwork) {
+            binding.apply {
+                unmaintainedNetworkContainer.visibility = View.VISIBLE
+
+                unmaintainedNetworkShowDialog.setOnClickListener {
+                    ShowWarningDialog(requireContext(), false).show()
+                }
+            }
+        }
     }
 
     private fun showBalanceError() {

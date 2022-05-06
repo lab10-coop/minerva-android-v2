@@ -38,6 +38,21 @@
             tools:src="@drawable/ic_artis" />
 
         <TextView
+            android:id="@+id/unmaintained_network_flag"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:gravity="center_horizontal"
+            android:background="@drawable/unmaintained_network_flag_bg"
+            android:textColor="@color/black"
+            android:textSize="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/main_icon"
+            android:layout_marginRight="24dp"
+            android:text="@string/unmaintained_network"
+            android:layout_width="192dp"
+            android:layout_height="20dp"/>
+
+        <TextView
             android:id="@+id/account_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

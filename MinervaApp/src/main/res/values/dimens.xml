@@ -7,6 +7,8 @@
     <dimen name="margin_xlarge">40dp</dimen>
     <dimen name="margin_xxlarge">48dp</dimen>
     <dimen name="margin_xxxlarge">64dp</dimen>
+    <dimen name="margin_xxxxlarge">56dp</dimen>
+    <dimen name="margin_xxxxxxxlarge">96dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="margin_small">12dp</dimen>
     <dimen name="margin_xsmall">8dp</dimen>
@@ -90,4 +92,5 @@
     <dimen name="services_filter_text_font">800</dimen>
     <dimen name="servicesFilterStrokeWidth">2dp</dimen>
     <dimen name="services_filter_ch_gr_layout_height">44dp</dimen>
+    <dimen name="unmaintained_network_exclamation_bark_bg_radios">320dp</dimen>
 </resources>

@@ -846,6 +846,26 @@ class AccountsViewModel(
             hashMapOf(Pair(WalletActionFields.ACCOUNT_NAME, name))
         )
 
+    /**
+     * Change Show Warning - change value for "showWarning" property (Account::showWarning)
+     * @param existedAccount - instance of minerva.android.walletmanager.model.minervaprimitives.account.Accont
+     *     item which value will be changed
+     * @param state - new state for Account::showWarning
+     */
+    fun changeShowWarning(account: Account, state: Boolean) {
+        launchDisposable {
+            accountManager.changeShowWarning(account, state)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                    onError = {
+                        Timber.e(it)
+                        _errorLiveData.value = Event(BaseError)
+                    }
+                )
+        }
+    }
+
     fun changeAccountName(account: Account, newName: String) {
         launchDisposable {
             accountManager.changeAccountName(account, newName)
