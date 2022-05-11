@@ -403,7 +403,7 @@
     <string name="you_dont_own_this_token">You do not own this token</string>
     <string name="default_placeholder">default</string>
     <string name="services_network_filter_main_color">#6442d1</string>
-    <string name="unmaintained_network">unmaintained network</string>
+    <string name="unmaintained_network">UNMAINTAINED NETWORK</string>
     <string name="unmaintained_network_warning">WARNING: Unmaintained Network</string>
     <string name="unmaintained_network_learn_dialog">Learn more</string>
     <string name="unmaintained_network_message_1">This network is not maintained \nanymore and over time transfers from \naccounts might be not possible any \nmore.</string>

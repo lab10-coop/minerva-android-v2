@@ -21,6 +21,7 @@
     <dimen name="text_normal">16sp</dimen>
     <dimen name="text_small">14sp</dimen>
     <dimen name="text_xsmall">12sp</dimen>
+    <dimen name="text_xxxsmall">10sp</dimen>
     <dimen name="text_xxsmall">9sp</dimen>
 
     <dimen name="large_letter_logo_size">128dp</dimen>
@@ -93,4 +94,7 @@
     <dimen name="servicesFilterStrokeWidth">2dp</dimen>
     <dimen name="services_filter_ch_gr_layout_height">44dp</dimen>
     <dimen name="unmaintained_network_exclamation_bark_bg_radios">320dp</dimen>
+    <dimen name="unmaintained_network_flag_container_width">156dp</dimen>
+    <dimen name="unmaintained_network_flag_container_margin_left">156dp</dimen>
+    <dimen name="unmaintained_network_flag_letter_spacing">0.05</dimen>
 </resources>

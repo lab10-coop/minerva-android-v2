@@ -265,8 +265,8 @@ class AccountsFragment : BaseFragment(R.layout.refreshable_recycler_view_layout)
     }
 
     private fun getRecyclerViewItemDecorator(): VerticalMarginItemDecoration {
-        val margin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
-        val bottomMargin = requireContext().resources.getDimension(R.dimen.margin_xbig).toInt()
+        val margin = requireContext().resources.getDimension(R.dimen.margin_xxsmall).toInt()
+        val bottomMargin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
         return VerticalMarginItemDecoration(margin, Int.NO_MARGIN, bottomMargin)
     }
 
