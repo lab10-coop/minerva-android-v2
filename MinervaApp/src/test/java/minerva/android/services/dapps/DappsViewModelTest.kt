@@ -12,6 +12,7 @@ import minerva.android.services.dapps.model.Dapp
 import minerva.android.services.dapps.model.DappsWithCategories
 import minerva.android.walletmanager.model.dapps.DappUIDetails
 import minerva.android.walletmanager.repository.dapps.DappsRepository
+import minerva.android.walletmanager.storage.LocalStorage
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -19,13 +20,14 @@ import kotlin.test.assertEquals
 class DappsViewModelTest : BaseViewModelTest() {
     private lateinit var viewModel: DappsViewModel
     private val dappRepository: DappsRepository = mock()
+    private val localStorage: LocalStorage = mock()
 
     private val dappsObserver: Observer<DappsWithCategories> = mock()
     private val dappsCaptor: KArgumentCaptor<DappsWithCategories> = argumentCaptor()
 
     @Before
     fun setup() {
-        viewModel = DappsViewModel(dappRepository)
+        viewModel = DappsViewModel(dappRepository, localStorage)
     }
 
     @Test

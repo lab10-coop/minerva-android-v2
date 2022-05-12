@@ -52,5 +52,12 @@ interface AccountManager : Manager {
     fun insertTokenBalance(coinBalance: CoinBalance, accountAddress: String): Completable
     fun getCachedCoinBalance(address: String, chainId: Int): Single<CoinBalance>
     fun getCachedTokenBalance(address: String, accountAddress: String): Single<CoinBalance>
+    /**
+    * Change Show Warning - change value for "showWarning" property (Account::showWarning)
+    * @param existedAccount - instance of minerva.android.walletmanager.model.minervaprimitives.account.Accont
+     * item which value will be changed
+    * @param state - new state for Account::showWarning
+    */
+    fun changeShowWarning(existedAccount: Account, state: Boolean): Completable
     val balancesInsertLiveData: LiveData<Event<Unit>>
 }

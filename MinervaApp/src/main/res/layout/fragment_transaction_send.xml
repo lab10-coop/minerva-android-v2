@@ -18,6 +18,47 @@
         android:elevation="@dimen/cardview_default_elevation"
         android:spinnerMode="dropdown" />
 
+    <LinearLayout
+        android:gravity="center"
+        android:id="@+id/unmaintained_network_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/margin_xxxxlarge"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:orientation="horizontal"
+        android:background="@drawable/unmaintained_network_item_bg">
+
+        <TextView
+            android:layout_marginRight="@dimen/margin_xbig"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/margin_xbig"
+            android:textColor="@color/warningMessageOrange"
+            android:textSize="@dimen/text_small"
+            android:fontFamily="@font/roboto_bold"
+            android:text="@string/unmaintained_network_warning"/>
+
+        <LinearLayout
+            android:gravity="center"
+            android:id="@+id/unmaintained_network_show_dialog"
+            android:layout_width="@dimen/margin_xxxxxxxlarge"
+            android:layout_height="@dimen/margin_large"
+            android:background="@drawable/unmaintained_network_item_learn_more_bg">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_small"
+                android:fontFamily="@font/roboto_bold"
+                android:textColor="@color/warningMessageOrange"
+                android:text="@string/unmaintained_network_learn_dialog"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
     <include
         android:id="@+id/sponsored_dapp"
         layout="@layout/item_dapp_send_screen" />
