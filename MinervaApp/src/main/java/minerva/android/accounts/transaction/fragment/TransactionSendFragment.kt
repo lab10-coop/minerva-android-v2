@@ -36,8 +36,6 @@ import minerva.android.kotlinUtils.event.EventObserver
 import minerva.android.services.dapps.dialog.OpenDappDialog
 import minerva.android.services.dapps.model.Dapp
 import minerva.android.utils.AlertDialogHandler
-import minerva.android.utils.MinervaLogger
-import minerva.android.utils.MinervaLogger.l
 import minerva.android.walletmanager.model.defs.WalletActionStatus
 import minerva.android.walletmanager.model.transactions.Recipient
 import minerva.android.walletmanager.model.transactions.TransactionCost
