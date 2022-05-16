@@ -170,7 +170,7 @@ class DappsFragment : Fragment(R.layout.recycler_view_layout), DappsAdapter.List
 
     private fun getRecyclerViewItemDecorator(): VerticalMarginItemDecoration {
         val margin = requireContext().resources.getDimension(R.dimen.margin_small).toInt()
-        val topMargin = requireContext().resources.getDimension(R.dimen.margin_xbig).toInt()
+        val topMargin = requireContext().resources.getDimension(R.dimen.margin_xsmall).toInt()
         return VerticalMarginItemDecoration(margin, topMargin, margin)
     }
 
