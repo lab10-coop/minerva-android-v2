@@ -16,6 +16,8 @@
     <dimen name="margin_xxxsmall">2dp</dimen>
     <dimen name="margin_xxxxsmall">1dp</dimen>
 
+    <dimen name="ONE">1</dimen>
+
     <dimen name="text_large">24sp</dimen>
     <dimen name="text_big">20sp</dimen>
     <dimen name="text_normal">16sp</dimen>

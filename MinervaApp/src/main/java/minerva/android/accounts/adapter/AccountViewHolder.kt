@@ -78,6 +78,7 @@ class AccountViewHolder(
             binding.apply {
                 //show "unmaintained network" flag
                 if (!account.isActiveNetwork) unmaintainedNetworkFlag.visibility = View.VISIBLE
+                else unmaintainedNetworkFlag.visibility = View.GONE
 
                 card.setCardBackgroundColor(Color.parseColor(
                     if (!account.isActiveNetwork) UNMAINTAINED_NETWORK_BG_COLOR
