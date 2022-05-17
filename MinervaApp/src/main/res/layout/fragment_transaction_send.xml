@@ -31,16 +31,25 @@
         android:orientation="horizontal"
         android:background="@drawable/unmaintained_network_item_bg">
 
-        <TextView
-            android:layout_marginRight="@dimen/margin_xbig"
+        <LinearLayout
+            android:gravity="center"
+            android:layout_weight="@dimen/ONE"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/margin_xbig"
-            android:textColor="@color/warningMessageOrange"
-            android:textSize="@dimen/text_small"
-            android:fontFamily="@font/roboto_bold"
-            android:text="@string/unmaintained_network_warning"/>
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/margin_xbig"
+                android:textColor="@color/warningMessageOrange"
+                android:textSize="@dimen/text_xsmall"
+                android:fontFamily="@font/roboto_bold"
+                android:text="@string/unmaintained_network_warning"/>
+
+        </LinearLayout>
 
         <LinearLayout
+            android:layout_marginRight="16dp"
             android:gravity="center"
             android:id="@+id/unmaintained_network_show_dialog"
             android:layout_width="@dimen/margin_xxxxxxxlarge"
