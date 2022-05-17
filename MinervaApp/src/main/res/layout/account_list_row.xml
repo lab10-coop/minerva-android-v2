@@ -181,8 +181,9 @@
         tools:visibility="visible"
         android:layout_width="@dimen/unmaintained_network_flag_container_width"
         android:layout_height="@dimen/margin_big"
-        android:layout_marginLeft="@dimen/unmaintained_network_flag_container_margin_left"
-        app:cardCornerRadius="@dimen/margin_large">
+        app:cardCornerRadius="@dimen/margin_small"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/margin_large">
 
         <TextView
             android:letterSpacing="@dimen/unmaintained_network_flag_letter_spacing"
@@ -193,7 +194,6 @@
             android:fontFamily="@font/roboto_bold"
             android:textSize="@dimen/text_xxxsmall"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent"/>
     </androidx.cardview.widget.CardView>
 </RelativeLayout>
