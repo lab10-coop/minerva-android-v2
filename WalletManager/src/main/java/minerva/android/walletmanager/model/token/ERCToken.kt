@@ -26,7 +26,8 @@ data class ERCToken(
     var isStreamActive: Boolean = false,
     @Embedded var nftContent: NftContent = NftContent(),
     var consNetFlow: BigInteger = BigInteger.ZERO,
-    var collectionName: String? = null
+    var collectionName: String? = null,
+    var isFavorite: Boolean = false //isFavorite - used for nft status
 ) : Token {
 
     override fun equals(other: Any?): Boolean =

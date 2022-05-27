@@ -4,7 +4,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleSource
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -261,10 +260,14 @@ class NftCollectionViewModel(
         _loadingLiveData.value = true
         accountManager.loadAccount(accountId).let { account ->
             val visibleTokens = account.getVisibleTokens()
+            //clear previous data which is the same as current
+            if (!visibleTokens.isEmpty()) nftList.clear()
+
             tokenManager.getNftsPerAccount(account.chainId, account.address, collectionAddress).forEach { token ->
                 with(token) {
                     visibleTokens.find { accountToken -> tokenId == accountToken.token.tokenId }?.let {
-                        nftList.add(NftItem(address, tokenId ?: String.Empty, nftContent, name, type.isERC1155(), decimals, it.currentBalance))
+                        nftList.add(NftItem(address, tokenId ?: String.Empty, nftContent, name, type.isERC1155(), decimals, it.currentBalance
+                            , isFavorite = it.token.isFavorite))
                     }
                 }
             }
@@ -351,6 +354,19 @@ class NftCollectionViewModel(
 
     fun isAddressValid(address: String): Boolean =
         transactionRepository.isAddressValid(address, account.chainId)
+
+    /**
+     * Change Favorite State - change favorite state of selected nft
+     * @param nftItem - item which value will be changed
+     */
+    fun changeFavoriteState(nftItem: NftItem) = launchDisposable {
+            accountManager.changeFavoriteState(account, nftItem.tokenId, !nftItem.isFavorite)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    getNftForCollection()
+                }
+        }
 
     fun isAmountAvailable() = selectedItem.isERC1155 && selectedItem.balance > BigDecimal.ONE
     fun isTransactionAvailable(isValidated: Boolean) = isValidated && isAccountBalanceEnough()

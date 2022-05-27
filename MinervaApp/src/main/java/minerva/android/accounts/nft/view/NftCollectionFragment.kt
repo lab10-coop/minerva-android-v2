@@ -25,6 +25,8 @@ class NftCollectionFragment : Fragment(R.layout.fragment_nft_collection) {
                 override fun onSendClicked(nftItem: NftItem) {
                     viewModel.selectItem(nftItem)
                 }
+
+                override fun changeFavoriteState(nftItem: NftItem) = viewModel.changeFavoriteState(nftItem)
             }
         }
     }

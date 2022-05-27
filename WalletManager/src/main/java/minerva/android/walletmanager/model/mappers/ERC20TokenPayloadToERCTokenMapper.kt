@@ -25,7 +25,8 @@ object ERC20TokenPayloadToERCTokenMapper : Mapper<ERC20TokenPayload, ERCToken> {
                 type = parseERCTokenType(input.tag, type),
                 tokenId = tokenId,
                 collectionName = collectionName,
-                nftContent = parseNFTTokenPayload(nftContentPayload)
+                nftContent = parseNFTTokenPayload(nftContentPayload),
+                isFavorite = input.isFavorite //isFavorite - used for nft status
             )
         }
 
