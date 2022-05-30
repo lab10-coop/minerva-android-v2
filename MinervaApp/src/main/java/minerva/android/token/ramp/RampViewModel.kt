@@ -134,9 +134,34 @@ class RampViewModel(
                 ),
 
                 RampCrypto(
+                    ChainId.AVA_C,
+                    AVAX_RAMP_SYMBOL,
+                    R.drawable.ic_avalanche,
+                    getNetworkName(ChainId.AVA_C)
+                ),
+                RampCrypto(
+                    ChainId.CELO,
+                    CELO_RAMP_SYMBOL,
+                    R.drawable.ic_celo,
+                    getNetworkName(ChainId.CELO)
+                ),
+                RampCrypto(
+                    ChainId.ARB_ONE,
+                    ARB_ONE_ETH_RAMP_SYMBOL,
+                    R.drawable.ic_ethereum_l2,
+                    getNetworkName(ChainId.ARB_ONE)
+                ),
+                RampCrypto(
                     ChainId.ETH_MAIN,
                     DAI_RAMP_SYMBOL,
                     R.drawable.ic_dai_token,
+                    getNetworkName(ChainId.ETH_MAIN)
+                ),
+
+                RampCrypto(
+                    ChainId.ETH_MAIN,
+                    USDT_RAMP_SYMBOL,
+                    R.drawable.ic_usdt_token,
                     getNetworkName(ChainId.ETH_MAIN)
                 ),
                 RampCrypto(
@@ -145,19 +170,6 @@ class RampViewModel(
                     R.drawable.ic_usdc_token,
                     getNetworkName(ChainId.ETH_MAIN)
                 ),
-                RampCrypto(
-                    ChainId.ETH_MAIN,
-                    USDT_RAMP_SYMBOL,
-                    R.drawable.ic_usdt_token,
-                    getNetworkName(ChainId.ETH_MAIN)
-                ),
-                RampCrypto(
-                    ChainId.MATIC,
-                    ETH_RAMP_SYMBOL,
-                    R.drawable.ic_ethereum_token,
-                    getNetworkName(ChainId.MATIC)
-                ),
-
                 RampCrypto(
                     ChainId.MATIC,
                     MATIC_DAI_RAMP_SYMBOL,
@@ -170,35 +182,23 @@ class RampViewModel(
                     R.drawable.ic_usdc_token,
                     getNetworkName(ChainId.MATIC)
                 ),
-                RampCrypto(
-                    ChainId.ARB_ONE,
-                    ARB_ONE_ETH_RAMP_SYMBOL,
-                    R.drawable.ic_ethereum_l2,
-                    getNetworkName(ChainId.ARB_ONE)
-                ),
-                RampCrypto(
-                    ChainId.CELO,
-                    CELO_RAMP_SYMBOL,
-                    R.drawable.ic_celo,
-                    getNetworkName(ChainId.CELO)
-                ),
 
                 RampCrypto(
-                    ChainId.AVA_C,
-                    AVAX_RAMP_SYMBOL,
-                    R.drawable.ic_avalanche,
-                    getNetworkName(ChainId.AVA_C)
-                ),
-                RampCrypto(
-                    ChainId.CELO,
-                    CELO_CEUR_RAMP_SYMBOL,
-                    R.drawable.ic_celo, // todo: ceur
-                    getNetworkName(ChainId.CELO)
+                    ChainId.MATIC,
+                    ETH_RAMP_SYMBOL,
+                    R.drawable.ic_ethereum_token,
+                    getNetworkName(ChainId.MATIC)
                 ),
                 RampCrypto(
                     ChainId.CELO,
                     CELO_CUSD_RAMP_SYMBOL,
                     R.drawable.ic_celo, // todo: cusd
+                    getNetworkName(ChainId.CELO)
+                ),
+                RampCrypto(
+                    ChainId.CELO,
+                    CELO_CEUR_RAMP_SYMBOL,
+                    R.drawable.ic_celo, // todo: ceur
                     getNetworkName(ChainId.CELO)
                 )
 
