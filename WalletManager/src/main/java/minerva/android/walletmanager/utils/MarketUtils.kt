@@ -5,10 +5,14 @@ import minerva.android.apiProvider.model.Markets
 import minerva.android.kotlinUtils.Empty
 import minerva.android.kotlinUtils.InvalidValue
 import minerva.android.kotlinUtils.function.orElse
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ARB_ONE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ATS_SIGMA
+import minerva.android.walletmanager.model.defs.ChainId.Companion.AVA_C
 import minerva.android.walletmanager.model.defs.ChainId.Companion.BSC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.CELO
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
+import minerva.android.walletmanager.model.defs.ChainId.Companion.OPT
 import minerva.android.walletmanager.model.defs.ChainId.Companion.POA_CORE
 import minerva.android.walletmanager.model.defs.ChainId.Companion.RSK_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.XDAI
@@ -50,24 +54,33 @@ object MarketUtils {
             ATS_SIGMA -> ATS_EURO
             POA_CORE -> markets.poaFiatPrice?.getRate(currentFiatCurrency)
             ETH_MAIN -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
+            ARB_ONE -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
+            OPT -> markets.ethFiatPrice?.getRate(currentFiatCurrency)
             XDAI -> markets.daiFiatPrice?.getRate(currentFiatCurrency)
             MATIC -> markets.maticFiatPrice?.getRate(currentFiatCurrency)
             BSC -> markets.bscFiatPrice?.getRate(currentFiatCurrency)
             RSK_MAIN -> markets.rskFiatPrice?.getRate(currentFiatCurrency)
+            CELO -> markets.celoFiatPrice?.getRate(currentFiatCurrency)
+            AVA_C -> markets.avaxFiatPrice?.getRate(currentFiatCurrency)
             else -> null
         }
 
+    // coingecko asset_platforms
     fun getTokenGeckoMarketId(chainId: Int): String =
         when (chainId) {
             ETH_MAIN -> MarketIds.ETHEREUM
-            POA_CORE -> MarketIds.POA_NETWORK
             XDAI -> MarketIds.XDAI
             MATIC -> MarketIds.POLYGON
             BSC -> MarketIds.BSC_TOKEN
             RSK_MAIN -> MarketIds.RSK
+            ARB_ONE -> MarketIds.ARB_ONE
+            OPT -> MarketIds.OPT
+            CELO -> MarketIds.CELO
+            AVA_C -> MarketIds.AVA_C
             else -> String.Empty
         }
 
+    // coingecko coins
     fun getCoinGeckoMarketId(chainId: Int): String =
         when (chainId) {
             ETH_MAIN -> MarketIds.ETHEREUM
@@ -76,6 +89,10 @@ object MarketUtils {
             MATIC -> MarketIds.MATIC
             BSC -> MarketIds.BSC_COIN
             RSK_MAIN -> MarketIds.RSK
+            ARB_ONE -> MarketIds.ETHEREUM
+            OPT -> MarketIds.ETHEREUM
+            CELO -> MarketIds.CELO
+            AVA_C -> MarketIds.AVAX
             else -> String.Empty
         }
 }

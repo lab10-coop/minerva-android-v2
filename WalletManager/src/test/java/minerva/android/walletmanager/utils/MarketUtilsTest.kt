@@ -77,14 +77,14 @@ class MarketUtilsTest {
         NetworkManager.initialize(
             listOf(
                 Network(chainId = 1, httpRpc = "some"),
-                Network(chainId = 99, httpRpc = "some"),
+                Network(chainId = 42220, httpRpc = "some"),
                 Network(chainId = 100, httpRpc = "some")
             )
         )
         val accounts =
             listOf(
                 Account(1, chainId = 1),
-                Account(2, chainId = 99),
+                Account(2, chainId = 42220),
                 Account(3, chainId = 137)
             )
         val result1 = MarketUtils.getTokenGeckoMarketId(accounts[0].chainId)
@@ -92,7 +92,7 @@ class MarketUtilsTest {
         val result3 = MarketUtils.getTokenGeckoMarketId(accounts[2].chainId)
 
         result1 shouldBeEqualTo "ethereum"
-        result2 shouldBeEqualTo "poa-network"
+        result2 shouldBeEqualTo "celo"
         result3 shouldBeEqualTo "polygon-pos"
     }
 

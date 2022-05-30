@@ -14,5 +14,9 @@ data class Markets(
     @SerializedName(MarketIds.BSC_COIN)
     val bscFiatPrice: FiatPrice? = null,
     @SerializedName(MarketIds.RSK)
-    val rskFiatPrice: FiatPrice? = null
+    val rskFiatPrice: FiatPrice? = null,
+    @SerializedName(MarketIds.CELO)
+    val celoFiatPrice: FiatPrice? = null,
+    @SerializedName(MarketIds.AVAX)
+    val avaxFiatPrice: FiatPrice? = null
 )
