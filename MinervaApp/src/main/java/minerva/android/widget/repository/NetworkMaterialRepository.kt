@@ -82,9 +82,9 @@ fun getMainTokenIconRes(chainId: Int): Int =
         ARB_RIN -> R.drawable.ic_ethereum_l2
         OPT -> R.drawable.ic_ethereum_l2
         OPT_KOV -> R.drawable.ic_ethereum_l2
-        CELO -> R.drawable.ic_celo
-        CELO_ALF -> R.drawable.ic_celo
-        CELO_BAK -> R.drawable.ic_celo
+        CELO -> R.drawable.ic_celo_coin
+        CELO_ALF -> R.drawable.ic_celo_coin
+        CELO_BAK -> R.drawable.ic_celo_coin
         AVA_C -> R.drawable.ic_avalanche
         AVA_FUJ -> R.drawable.ic_avalanche
         else -> R.drawable.ic_default_token

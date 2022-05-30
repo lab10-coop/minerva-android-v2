@@ -142,7 +142,7 @@ class RampViewModel(
                 RampCrypto(
                     ChainId.CELO,
                     CELO_RAMP_SYMBOL,
-                    R.drawable.ic_celo,
+                    R.drawable.ic_celo_coin,
                     getNetworkName(ChainId.CELO)
                 ),
                 RampCrypto(
@@ -192,13 +192,13 @@ class RampViewModel(
                 RampCrypto(
                     ChainId.CELO,
                     CELO_CUSD_RAMP_SYMBOL,
-                    R.drawable.ic_celo, // todo: cusd
+                    R.drawable.ic_celo_dollar,
                     getNetworkName(ChainId.CELO)
                 ),
                 RampCrypto(
                     ChainId.CELO,
                     CELO_CEUR_RAMP_SYMBOL,
-                    R.drawable.ic_celo, // todo: ceur
+                    R.drawable.ic_celo_dollar,
                     getNetworkName(ChainId.CELO)
                 )
 
