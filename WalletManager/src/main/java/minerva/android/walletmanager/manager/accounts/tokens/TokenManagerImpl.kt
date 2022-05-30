@@ -50,6 +50,7 @@ import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_KOV
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_MAIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_RIN
 import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_ROP
+import minerva.android.walletmanager.model.defs.ChainId.Companion.ETH_SEP
 import minerva.android.walletmanager.model.defs.ChainId.Companion.LUKSO_14
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MATIC
 import minerva.android.walletmanager.model.defs.ChainId.Companion.MUMBAI
@@ -606,7 +607,7 @@ class TokenManagerImpl(
 
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
-            ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, BSC_TESTNET -> getTokensFromTx(account)
+            ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, BSC_TESTNET -> getTokensFromTx(account)
             MUMBAI, RSK_TEST, RSK_MAIN, ARB_ONE, ARB_RIN, OPT, OPT_KOV, CELO, CELO_BAK, CELO_ALF, AVA_C, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
             XDAI, MATIC, ATS_SIGMA, BSC, ETH_MAIN -> getTokensOwned(account)
             // todo: tokensowned-api for: Arbitrum, Optimism, Celo, Avalanche
@@ -865,7 +866,7 @@ class TokenManagerImpl(
 
     private fun getAPIKey(chainId: Int) =
         when (chainId) {
-            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR -> ETHERSCAN_KEY
+            ETH_MAIN, ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP -> ETHERSCAN_KEY
             MATIC -> POLYGONSCAN_KEY
             BSC, BSC_TESTNET -> BSCSCAN_KEY
             else -> throw NetworkNotFoundThrowable()
@@ -886,6 +887,7 @@ class TokenManagerImpl(
             ETH_ROP -> ETHEREUM_ROPSTEN_TOKEN_BALANCE_URL
             ETH_KOV -> ETHEREUM_KOVAN_TOKEN_BALANCE_URL
             ETH_GOR -> ETHEREUM_GOERLI_TOKEN_BALANCE_URL
+            ETH_SEP -> ETHEREUM_SEPOLIA_TOKEN_BALANCE_URL
             ATS_TAU -> ARTIS_TAU_TOKEN_BALANCE_URL
             ATS_SIGMA -> ARTIS_SIGMA_TOKEN_BALANCE_URL
             POA_SKL -> POA_SOKOL_TOKEN_BALANCE_URL

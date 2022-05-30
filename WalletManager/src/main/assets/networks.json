@@ -390,5 +390,19 @@
     "color": "#ff0420",
     "testNet": true,
     "chainId": 43113
+  },
+  {
+    "name": "Sepolia Test Network",
+    "isActive": true,
+    "token": "SEP",
+    "isSafeAccountAvailable": "false",
+    "httpRpc": "https://nunki.htznr.fault.dev/rpc",
+    "wsRpc": "wss://nunki.htznr.fault.dev/ws",
+    "gasPriceOracle": "https://nunki.htznr.fault.dev/rpc",
+    "gasPrice": "10000000000",
+    "tokens": [],
+    "color": "#b6c6ff",
+    "testNet": true,
+    "chainId": 11155111
   }
 ]

@@ -26,6 +26,7 @@ android {
         buildConfigField "String", "ETHEREUM_ROPSTEN_TOKEN_BALANCE_URL", '"https://api-ropsten.etherscan.io/"'
         buildConfigField "String", "ETHEREUM_KOVAN_TOKEN_BALANCE_URL", '"https://api-kovan.etherscan.io/"'
         buildConfigField "String", "ETHEREUM_GOERLI_TOKEN_BALANCE_URL", '"https://api-goerli.etherscan.io/"'
+        buildConfigField "String", "ETHEREUM_SEPOLIA_TOKEN_BALANCE_URL", '"https://api-sepolia.etherscan.io/"'
         buildConfigField "String", "ARTIS_TAU_TOKEN_BALANCE_URL", '"https://explorer.tau1.artis.network/"'
         buildConfigField "String", "ARTIS_SIGMA_TOKEN_BALANCE_URL", '"https://explorer.sigma1.artis.network/"'
         buildConfigField "String", "POA_SOKOL_TOKEN_BALANCE_URL", '"https://blockscout.com/poa/sokol/"'
