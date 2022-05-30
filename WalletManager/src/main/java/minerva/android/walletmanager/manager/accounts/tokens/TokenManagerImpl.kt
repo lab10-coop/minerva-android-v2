@@ -608,9 +608,8 @@ class TokenManagerImpl(
     override fun downloadTokensList(account: Account): Single<List<ERCToken>> =
         when (account.chainId) {
             ETH_RIN, ETH_ROP, ETH_KOV, ETH_GOR, ETH_SEP, BSC_TESTNET -> getTokensFromTx(account)
-            MUMBAI, RSK_TEST, RSK_MAIN, ARB_ONE, ARB_RIN, OPT, OPT_KOV, CELO, CELO_BAK, CELO_ALF, AVA_C, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
-            XDAI, MATIC, ATS_SIGMA, BSC, ETH_MAIN -> getTokensOwned(account)
-            // todo: tokensowned-api for: Arbitrum, Optimism, Celo, Avalanche
+            MUMBAI, RSK_TEST, RSK_MAIN, ARB_RIN, OPT_KOV, CELO_BAK, CELO_ALF, AVA_FUJ -> Single.just(emptyList()) // Networks without token explorer urls
+            XDAI, MATIC, ATS_SIGMA, BSC, ETH_MAIN, ARB_ONE, OPT, CELO, AVA_C -> getTokensOwned(account)
             else -> getTokensForAccount(account)
         }
 
