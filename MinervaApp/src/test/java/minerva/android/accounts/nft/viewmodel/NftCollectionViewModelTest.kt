@@ -36,8 +36,9 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val accountId = 1
     private val collectionAddress = "collectionAddress"
+    private val isGroup = false
     private val viewModel: NftCollectionViewModel =
-        NftCollectionViewModel(accountManager, tokenManager, transactionRepository, walletActionsRepository, accountId, collectionAddress).apply {
+        NftCollectionViewModel(accountManager, tokenManager, transactionRepository, walletActionsRepository, accountId, collectionAddress, isGroup).apply {
             transaction = Transaction()
         }
 
