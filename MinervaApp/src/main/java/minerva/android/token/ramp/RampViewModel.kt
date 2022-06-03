@@ -98,7 +98,7 @@ class RampViewModel(
         private const val MATIC_USDC_RAMP_SYMBOL = "MATIC_USDC"
         private const val MATIC_DAI_RAMP_SYMBOL = "MATIC_DAI"
         private const val BSC_RAMP_SYMBOL = "BSC_BNB"
-        private const val ARB_ONE_ETH_RAMP_SYMBOL = "AETH"
+        private const val ARB_ONE_ETH_RAMP_SYMBOL = "ARBITRUM_ETH"
         private const val CELO_RAMP_SYMBOL = "CELO"
         private const val CELO_CEUR_RAMP_SYMBOL = "CEUR"
         private const val CELO_CUSD_RAMP_SYMBOL = "CUSD"
