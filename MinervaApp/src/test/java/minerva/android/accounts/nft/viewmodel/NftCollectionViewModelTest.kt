@@ -1,6 +1,7 @@
 package minerva.android.accounts.nft.viewmodel
 
 import androidx.lifecycle.Observer
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -35,10 +36,11 @@ class NftCollectionViewModelTest : BaseViewModelTest() {
     private val transactionRepository: TransactionRepository = mock()
     private val walletActionsRepository: WalletActionsRepository = mock()
     private val accountId = 1
+    private val collectionAddressToJson = Gson().toJson(listOf("collectionAddress"))
     private val collectionAddress = "collectionAddress"
     private val isGroup = false
     private val viewModel: NftCollectionViewModel =
-        NftCollectionViewModel(accountManager, tokenManager, transactionRepository, walletActionsRepository, accountId, collectionAddress, isGroup).apply {
+        NftCollectionViewModel(accountManager, tokenManager, transactionRepository, walletActionsRepository, accountId, collectionAddressToJson, isGroup).apply {
             transaction = Transaction()
         }
 
